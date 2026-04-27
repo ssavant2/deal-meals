@@ -870,6 +870,8 @@ async def toggle_recipe_scraper_star(scraper_id: str):
     db_name = scraper_info.db_source_name or scraper_info.name
 
     try:
+        scraper_manager.ensure_scraper_registered(scraper_id, enabled=scraper_info.enabled)
+
         with get_db_session() as db:
             # Get current starred status
             result = db.execute(text("""

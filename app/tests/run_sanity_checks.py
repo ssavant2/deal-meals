@@ -259,9 +259,47 @@ def _run_store_registry_sanity_checks() -> None:
     test("clean discovery commits cleanup", clean.committed, True)
 
 
+def _run_recipe_source_registry_sanity_checks() -> None:
+    print("\n--- recipe source registry ---", flush=True)
+    import recipe_scraper_manager as rsm  # noqa: E402
+
+    class FakeRegistrySession:
+        def __init__(self):
+            self.executed = []
+            self.committed = False
+
+        def execute(self, statement, params=None):
+            self.executed.append((str(statement), params))
+            return SimpleNamespace(rowcount=1)
+
+        def commit(self):
+            self.committed = True
+
+    session = FakeRegistrySession()
+
+    @contextmanager
+    def fake_db_session():
+        yield session
+
+    original_get_db_session = rsm.get_db_session
+    rsm.get_db_session = fake_db_session
+    try:
+        registered = rsm.scraper_manager.ensure_scraper_registered("myrecipes")
+    finally:
+        rsm.get_db_session = original_get_db_session
+
+    insert_params = session.executed[0][1] if session.executed else {}
+    test("myrecipes source can self-register", registered, True)
+    test("myrecipes registry name", insert_params.get("name"), "My Recipes")
+    test("myrecipes registry fallback URL", insert_params.get("url"), "https://my-recipes")
+    test("myrecipes registry default enabled", insert_params.get("enabled"), True)
+    test("myrecipes registry commits insert", session.committed, True)
+
+
 _run_matching_sanity_checks()
 _run_store_discovery_sanity_checks()
 _run_store_registry_sanity_checks()
+_run_recipe_source_registry_sanity_checks()
 
 print("\n========================================", flush=True)
 print(f"TOTAL: {passed}/{passed + failed} checks passed", flush=True)

@@ -19,6 +19,18 @@ from database import get_db_session
 DEFAULT_ENABLED_SCRAPERS = {'koket', 'myrecipes'}
 
 
+def fallback_recipe_source_url(source_name: str) -> str:
+    """Build a stable placeholder URL for scraper sources without a website."""
+    slug = (source_name or "recipe-source").strip().lower().replace(" ", "-")
+    return f"https://{slug or 'recipe-source'}"
+
+
+def recipe_source_registry_url(source_name: str, source_url: str = "") -> str:
+    """Return the URL value used for recipe_sources registration."""
+    source_url = (source_url or "").strip()
+    return source_url or fallback_recipe_source_url(source_name)
+
+
 @dataclass
 class ScraperInfo:
     """Information about a recipe scraper."""
@@ -209,6 +221,42 @@ class RecipeScraperManager:
         self._populate_stats(scrapers)
         return scrapers
 
+    def get_registry_sources(self) -> List[Dict[str, Any]]:
+        """Return discovered scrapers in recipe_sources registry shape."""
+        sources = []
+        for scraper in self._scrapers.values():
+            db_name = scraper.db_source_name or scraper.name
+            sources.append({
+                "id": scraper.id,
+                "name": db_name,
+                "url": recipe_source_registry_url(db_name, scraper.source_url),
+                "default_enabled": scraper.id in DEFAULT_ENABLED_SCRAPERS,
+            })
+        return sources
+
+    def ensure_scraper_registered(self, scraper_id: str, *, enabled: Optional[bool] = None) -> bool:
+        """Ensure a discovered scraper has a row in recipe_sources."""
+        scraper = self._scrapers.get(scraper_id)
+        if not scraper:
+            return False
+
+        db_name = scraper.db_source_name or scraper.name
+        source_url = recipe_source_registry_url(db_name, scraper.source_url)
+        insert_enabled = scraper.id in DEFAULT_ENABLED_SCRAPERS if enabled is None else enabled
+
+        with get_db_session() as db:
+            db.execute(
+                text("""
+                    INSERT INTO recipe_sources (name, url, enabled)
+                    VALUES (:name, :url, :enabled)
+                    ON CONFLICT (name) DO NOTHING
+                """),
+                {"name": db_name, "url": source_url, "enabled": insert_enabled}
+            )
+            db.commit()
+
+        return True
+
     def _populate_stats(self, scrapers: List[ScraperInfo]):
         """Populate runtime statistics from database."""
         if not scrapers:
@@ -303,7 +351,11 @@ class RecipeScraperManager:
                         INSERT INTO recipe_sources (name, url, enabled)
                         VALUES (:name, :url, :enabled)
                     """),
-                    {"name": db_name, "url": scraper.source_url, "enabled": enabled}
+                    {
+                        "name": db_name,
+                        "url": recipe_source_registry_url(db_name, scraper.source_url),
+                        "enabled": enabled,
+                    }
                 )
                 db.commit()
 

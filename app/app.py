@@ -252,25 +252,26 @@ def _sync_store_registry(discovered_stores, discovery_errors=None) -> None:
 
 def _fallback_recipe_source_url(source_name: str) -> str:
     slug = (source_name or "recipe-source").strip().lower().replace(" ", "-")
-    return f"https://{slug}"
+    return f"https://{slug or 'recipe-source'}"
 
 
-def _recipe_source_url_map() -> dict[str, str]:
+def _recipe_source_registry_rows() -> list[dict]:
     try:
         from recipe_scraper_manager import scraper_manager
-        return {
-            scraper.db_source_name or scraper.name: scraper.source_url.strip()
-            for scraper in scraper_manager.get_all_scrapers()
-            if scraper.source_url and scraper.source_url.strip()
-        }
+        return scraper_manager.get_registry_sources()
     except Exception as e:
-        logger.debug(f"Could not load canonical recipe source URLs: {e}")
-        return {}
+        logger.debug(f"Could not load recipe source registry rows: {e}")
+        return []
 
 
 def _sync_recipe_sources() -> None:
     """Register recipe sources and collapse legacy duplicate rows by name."""
-    canonical_urls = _recipe_source_url_map()
+    registry_sources = _recipe_source_registry_rows()
+    canonical_urls = {
+        source["name"]: source["url"]
+        for source in registry_sources
+        if source.get("name") and source.get("url")
+    }
     inserted = 0
     deduped = 0
     url_updates = 0
@@ -281,6 +282,22 @@ def _sync_recipe_sources() -> None:
             FROM found_recipes
             WHERE source_name IS NOT NULL AND source_name <> ''
         """)).fetchall()
+        actual_source_names = {row.source_name for row in actual_sources}
+
+        for source in registry_sources:
+            result = db.execute(text("""
+                INSERT INTO recipe_sources (name, url, enabled)
+                VALUES (:name, :url, :enabled)
+                ON CONFLICT (name) DO NOTHING
+            """), {
+                "name": source["name"],
+                "url": source["url"],
+                "enabled": (
+                    source["name"] in actual_source_names
+                    or bool(source.get("default_enabled", False))
+                ),
+            })
+            inserted += result.rowcount or 0
 
         for row in actual_sources:
             source_name = row.source_name
