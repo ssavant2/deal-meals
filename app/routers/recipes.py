@@ -1203,9 +1203,16 @@ async def get_recipe_scraper_queue():
     return JSONResponse({"success": True, "active": False})
 
 
+def _coerce_nonnegative_int(value) -> int:
+    try:
+        return max(0, int(value or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
 @router.post("/recipe-scrapers/queue")
 async def manage_recipe_scraper_queue(request: Request):
-    """Manage the run-all queue. Actions: start, advance, cancel."""
+    """Manage the run-all queue. Actions: start, advance, finish, cancel."""
     try:
         body = await request.json()
     except (json.JSONDecodeError, ValueError):
@@ -1231,11 +1238,48 @@ async def manage_recipe_scraper_queue(request: Request):
 
     elif action == "advance":
         index = body.get("index")
-        total_new = body.get("total_new", 0)
+        total_new = _coerce_nonnegative_int(body.get("total_new", 0))
         if index is None:
             return JSONResponse({"success": False, "message": "index required"}, status_code=400)
         await update_run_all_queue(index=index, total_new=total_new)
         return JSONResponse({"success": True})
+
+    elif action == "finish":
+        total_new = _coerce_nonnegative_int(body.get("total_new", 0))
+        await clear_run_all_queue()
+
+        cache_rebuild_started = False
+        if total_new > 0:
+            try:
+                from cache_manager import compute_cache_async
+
+                with get_db_session() as db:
+                    db.execute(text("""
+                        UPDATE cache_metadata SET status = 'computing'
+                        WHERE cache_name = 'recipe_offer_matches'
+                    """))
+                    db.commit()
+
+                create_background_task(
+                    compute_cache_async(skip_if_busy=False),
+                    name="cache-rebuild-run-all-recipes",
+                )
+                event_bus.publish({
+                    "type": "cache_invalidated",
+                    "source": "recipes-run-all",
+                })
+                cache_rebuild_started = True
+                logger.info(
+                    "Started final cache rebuild after run-all recipe scrape "
+                    f"({total_new} new recipes)"
+                )
+            except Exception as e:
+                logger.warning(f"Could not start final run-all cache rebuild: {e}")
+
+        return JSONResponse({
+            "success": True,
+            "cache_rebuild_started": cache_rebuild_started,
+        })
 
     elif action == "cancel":
         await clear_run_all_queue()
@@ -1530,14 +1574,23 @@ async def _run_scraper_task(scraper_id: str, mode: str):
         duration = int(time.time() - start_time)
         save_run_history(scraper_id, mode, duration, recipes_found, success=True, update_schedule=True)
 
-        # Trigger cache rebuild + image auto-download (only for non-test modes with new recipes)
+        # Trigger cache rebuild + image auto-download (only for non-test modes with new recipes).
+        # During "run all", defer cache rebuild until the queue is finished so
+        # the cache is built once from the complete refreshed recipe set.
         if mode != "test" and recipes_found > 0:
-            try:
-                from cache_manager import compute_cache_async
-                create_background_task(compute_cache_async(), name=f"cache-rebuild-scraper-{scraper_id}")
-                logger.info(f"Started cache rebuild after {scraper_id} scrape ({recipes_found} new recipes)")
-            except Exception as e:
-                logger.warning(f"Could not start cache rebuild: {e}")
+            queue_state = await get_run_all_queue()
+            if queue_state.get("active"):
+                logger.info(
+                    f"Deferred cache rebuild after {scraper_id} scrape because "
+                    f"run-all queue is active ({recipes_found} new recipes)"
+                )
+            else:
+                try:
+                    from cache_manager import compute_cache_async
+                    create_background_task(compute_cache_async(), name=f"cache-rebuild-scraper-{scraper_id}")
+                    logger.info(f"Started cache rebuild after {scraper_id} scrape ({recipes_found} new recipes)")
+                except Exception as e:
+                    logger.warning(f"Could not start cache rebuild: {e}")
 
             from utils.image_auto_download import trigger_auto_download_if_enabled
             await trigger_auto_download_if_enabled()

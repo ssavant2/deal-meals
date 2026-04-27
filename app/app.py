@@ -287,8 +287,12 @@ def _sync_recipe_sources() -> None:
         for source in registry_sources:
             result = db.execute(text("""
                 INSERT INTO recipe_sources (name, url, enabled)
-                VALUES (:name, :url, :enabled)
-                ON CONFLICT (name) DO NOTHING
+                SELECT :name, :url, :enabled
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM recipe_sources
+                    WHERE name = :name OR url = :url
+                )
+                ON CONFLICT (url) DO NOTHING
             """), {
                 "name": source["name"],
                 "url": source["url"],

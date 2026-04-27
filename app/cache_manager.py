@@ -2432,15 +2432,23 @@ def refresh_cache_locked(
     )
 
 
-async def compute_cache_async(preferences: Optional[Dict] = None) -> Dict:
+async def compute_cache_async(
+    preferences: Optional[Dict] = None,
+    *,
+    skip_if_busy: bool = True,
+) -> Dict:
     """
     Async wrapper for cache computation.
 
     Use this after offers are updated to refresh the cache.
-    Only one cache operation can run at a time - concurrent calls are skipped.
+    Only one cache operation can run at a time. Concurrent calls are skipped by
+    default, but callers can opt to wait for the active operation to finish.
     """
     loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, lambda: refresh_cache_locked(preferences))
+    return await loop.run_in_executor(
+        None,
+        lambda: refresh_cache_locked(preferences, skip_if_busy=skip_if_busy),
+    )
 
 
 # Global instance for convenience

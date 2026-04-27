@@ -248,8 +248,12 @@ class RecipeScraperManager:
             db.execute(
                 text("""
                     INSERT INTO recipe_sources (name, url, enabled)
-                    VALUES (:name, :url, :enabled)
-                    ON CONFLICT (name) DO NOTHING
+                    SELECT :name, :url, :enabled
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM recipe_sources
+                        WHERE name = :name OR url = :url
+                    )
+                    ON CONFLICT (url) DO NOTHING
                 """),
                 {"name": db_name, "url": source_url, "enabled": insert_enabled}
             )
@@ -349,7 +353,12 @@ class RecipeScraperManager:
                 db.execute(
                     text("""
                         INSERT INTO recipe_sources (name, url, enabled)
-                        VALUES (:name, :url, :enabled)
+                        SELECT :name, :url, :enabled
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM recipe_sources
+                            WHERE name = :name OR url = :url
+                        )
+                        ON CONFLICT (url) DO NOTHING
                     """),
                     {
                         "name": db_name,

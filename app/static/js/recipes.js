@@ -150,7 +150,7 @@ async function checkRunningScrapers() {
 
 // Returns a callback for startPolling that advances the server-side queue and moves to next scraper.
 function _makeQueueCallback() {
-    return (result) => {
+    return async (result) => {
         if (!runAllQueue) {
             document.getElementById('progress-container').classList.remove('active');
             document.getElementById('run-scraper-btn').disabled = false;
@@ -166,11 +166,15 @@ function _makeQueueCallback() {
         runAllQueue.index++;
 
         // Sync updated index + totalNew to server before starting next
-        fetch('/api/recipe-scrapers/queue', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'advance', index: runAllQueue.index, total_new: runAllQueue.totalNew })
-        }).catch(() => {});
+        try {
+            await fetch('/api/recipe-scrapers/queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'advance', index: runAllQueue.index, total_new: runAllQueue.totalNew })
+            });
+        } catch (error) {
+            console.error('Failed to advance queue on server:', error);
+        }
 
         runNextInQueue();
     };
@@ -965,7 +969,7 @@ function startPolling(scraperId, onComplete) {
 
                     // If a custom onComplete callback is provided, use it instead of default behavior
                     if (onComplete) {
-                        onComplete(data);
+                        await onComplete(data);
                         return;
                     }
 
@@ -1172,19 +1176,59 @@ async function runNextInQueue() {
     }
 }
 
-function finishRunAll() {
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function waitForCacheReady(timeoutMs = 10 * 60 * 1000) {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+        try {
+            const response = await fetch('/api/cache/status');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.status === 'ready') return true;
+                if (data.status === 'error') return false;
+            }
+        } catch (error) {
+            console.error('Failed to poll cache status:', error);
+        }
+        await wait(2000);
+    }
+    return false;
+}
+
+async function finishRunAll() {
     const queue = runAllQueue;
     runAllQueue = null;
 
+    const totalNew = queue ? queue.totalNew : 0;
+    let cacheRebuildStarted = false;
+    let cacheReady = false;
+
+    // Finish server-side queue and trigger one final cache rebuild for the whole batch.
+    try {
+        const response = await fetch('/api/recipe-scrapers/queue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'finish', total_new: totalNew })
+        });
+        const data = await response.json();
+        cacheRebuildStarted = Boolean(data.cache_rebuild_started);
+    } catch (error) {
+        console.error('Failed to finish queue on server:', error);
+    }
+
+    if (cacheRebuildStarted) {
+        sessionStorage.setItem('suggestionsNeedRefresh', 'true');
+        document.getElementById('progress-container').classList.add('active');
+        document.getElementById('progress-title').textContent = t('recipes.cache_rebuild_started');
+        document.getElementById('progress-message').textContent = i18n.waiting_server;
+        cacheReady = await waitForCacheReady();
+    }
+
     document.getElementById('progress-container').classList.remove('active');
     document.getElementById('run-scraper-btn').disabled = false;
-
-    // Clear server-side queue
-    fetch('/api/recipe-scrapers/queue', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'cancel' })
-    }).catch(() => {});
 
     // Track completed scrapes (once for the whole batch)
     completedScrapes++;
@@ -1195,13 +1239,16 @@ function finishRunAll() {
     }).catch(() => {});
 
     const count = queue ? queue.scrapers.length : 0;
-    const totalNew = queue ? queue.totalNew : 0;
     const autoClose = completedScrapes > 3;
+    let summaryHtml = escapeHtml(t('all_complete_summary', { total: totalNew.toLocaleString(RECIPE_LOCALE) }));
+    if (cacheRebuildStarted && !cacheReady) {
+        summaryHtml += `<br><span class="text-muted">${escapeHtml(t('recipes.cache_rebuild_started'))}</span>`;
+    }
 
     Swal.fire({
         icon: 'success',
         title: t('all_complete', { count: count }),
-        text: t('all_complete_summary', { total: totalNew.toLocaleString(RECIPE_LOCALE) }),
+        html: summaryHtml,
         confirmButtonText: i18n.ok,
         timer: autoClose ? 8000 : undefined,
         timerProgressBar: autoClose
