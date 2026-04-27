@@ -76,5 +76,3 @@ PostgreSQL port.
   does not pin the final TCP connection to a previously resolved IP.
 - The Playwright fallback for "My Recipes" is treated as an accepted residual
   risk in the current LAN-only model.
-- Dependency and image scans should be repeated periodically as upstream Debian,
-  Python, Playwright and PostgreSQL images are updated.

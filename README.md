@@ -84,8 +84,7 @@ There are two warm-up levels:
 2. **Fast-path warm-up:** the optimized delta/hint-first path is deliberately
    probation-gated. With the default settings, the fully optimized path opens
    after **3 consecutive clean verified cache refreshes** for the current
-   matcher/compiler setup. This used to be 10 during rollout testing, but 3 is
-   the normal release default.
+   matcher/compiler setup.
 
 Until warm-up finishes, the app still works. It may show fewer suggestions, old
 suggestions, or no suggestions before the first rebuild completes; later, during
