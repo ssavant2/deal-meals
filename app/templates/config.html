@@ -1,0 +1,998 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('config.title') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Subtheme colors - consistent +9% lightness steps from MAIN */
+:root, [data-bs-theme="light"] {
+    --subtheme-bg: #607385;  /* SUB 44% - lighter than MAIN #4a5d6e (35%) */
+    --subtheme-text: white;
+}
+[data-bs-theme="dark"] {
+    --subtheme-bg: #50677c;  /* SUB 40% - lighter than MAIN #3d4f5f (31%) */
+    --subtheme-text: white;
+}
+
+/* Section headers - subtheme (lighter than main header) */
+.config-section {
+    background-color: var(--subtheme-bg);
+    margin: 1.5rem -1rem 1rem -1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+}
+.config-section:first-child {
+    margin-top: 0;
+}
+.config-section h6 {
+    margin-bottom: 0;
+    color: var(--subtheme-text);
+    font-weight: 500;
+}
+
+/* For sections with button on the right */
+.config-section-flex {
+    background-color: var(--subtheme-bg);
+    margin: 1.5rem -1rem 1rem -1rem;
+    padding: 0.35rem 1rem;
+    border-radius: 0.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.config-section-flex h6 {
+    margin-bottom: 0;
+    color: var(--subtheme-text);
+    font-weight: 500;
+}
+.config-section-flex .btn,
+.config-section .btn {
+    background-color: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.4);
+    color: white;
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+}
+.config-section-flex .btn:hover,
+.config-section .btn:hover {
+    background-color: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.6);
+}
+
+/* Action buttons with theme styling */
+.btn-config-action {
+    border-color: var(--header-bg) !important;
+    color: var(--header-bg) !important;
+    background-color: transparent;
+}
+.btn-config-action:hover {
+    background-color: var(--header-bg) !important;
+    border-color: var(--header-bg) !important;
+    color: white !important;
+}
+
+/* Preview card with subtle theme styling */
+.card-preview {
+    border-color: var(--subtheme-bg) !important;
+}
+.card-preview .card-header {
+    background-color: rgba(96, 115, 133, 0.15) !important;
+    border-bottom-color: var(--subtheme-bg) !important;
+}
+[data-bs-theme="dark"] .card-preview .card-header {
+    background-color: rgba(80, 103, 124, 0.2) !important;
+}
+
+/* Image status button - darker text */
+#images-failed-btn {
+    color: var(--bs-body-color) !important;
+}
+
+/* Darker checkboxes */
+.form-check-input {
+    border-color: #6c757d !important;
+}
+.form-check-input:checked {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+}
+
+/* Offset anchor scroll for fixed navbar */
+#ingrediensfilter, #kategoribalans {
+    scroll-margin-top: 70px;
+}
+
+/* Hide slider thumb when disabled */
+input[type="range"]:disabled::-webkit-slider-thumb { opacity: 0; }
+input[type="range"]:disabled::-moz-range-thumb { opacity: 0; }
+
+/* Auto-resizing textareas */
+.auto-resize {
+    overflow: hidden;
+    resize: none;
+    min-height: 38px;
+}
+
+/* Balance button group */
+.balance-btn-group .btn {
+    min-width: 2.5rem;
+    padding: 0.25rem 0.5rem;
+}
+.balance-btn-group .btn.active {
+    font-weight: bold;
+}
+@keyframes spellPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+.spell-pulse {
+    animation: spellPulse 2s ease-in-out infinite;
+}
+.ssl-file-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+.ssl-file-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+@media (max-width: 575.98px) {
+    .ssl-file-picker {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .ssl-file-name {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Configuration -->
+        <div class="card mb-4" data-i18n-component="delivery-address">
+            <div class="card-body pt-0">
+                <!-- Color theme -->
+                <div class="config-section">
+                    <h6><i class="bi bi-moon-stars"></i> {{ t('config.theme') }}</h6>
+                </div>
+                <div class="row align-items-center mb-2">
+                    <div class="col-md-6">
+                        <p class="text-muted small mb-0">{{ t('config.theme_desc') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="btn-group w-100" role="group" aria-label="Theme">
+                            <input type="radio" class="btn-check" name="theme-radio" id="theme-light" autocomplete="off" data-change="setTheme" data-value="light" {{ 'checked' if theme != 'dark' else '' }}>
+                            <label class="btn btn-outline-secondary" for="theme-light">
+                                <i class="bi bi-sun"></i> {{ t('config.theme_light') }}
+                            </label>
+
+                            <input type="radio" class="btn-check" name="theme-radio" id="theme-dark" autocomplete="off" data-change="setTheme" data-value="dark" {{ 'checked' if theme == 'dark' else '' }}>
+                            <label class="btn btn-outline-secondary" for="theme-dark">
+                                <i class="bi bi-moon"></i> {{ t('config.theme_dark') }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <!-- Font size -->
+                <div class="row align-items-center mb-2 mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label mb-0">
+                            <i class="bi bi-fonts"></i> {{ t('config.font_size') }}
+                        </label>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small text-muted" style="font-size: 0.75rem">{{ t('config.font_size_small') }}</span>
+                            <input type="range" class="form-range flex-grow-1" id="font-size-slider"
+                                   min="12" max="24" step="1" value="{{ font_size or 16 }}"
+                                   data-input="setFontSize">
+                            <span class="text-muted" style="font-size: 1.25rem">{{ t('config.font_size_large') }}</span>
+                            <span id="font-size-label" class="badge bg-secondary" style="min-width: 45px;">{{ font_size or 16 }}px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- High contrast -->
+                <div class="row align-items-center mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label mb-0">
+                            <i class="bi bi-circle-half"></i> {{ t('config.high_contrast') }}
+                        </label>
+                        <div class="form-text small mt-0">{{ t('config.high_contrast_desc') }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="high-contrast-toggle"
+                                   data-change="setHighContrast"
+                                   {{ 'checked' if high_contrast else '' }}>
+                        </div>
+                    </div>
+                </div>
+
+                <small class="text-muted"><i class="bi bi-info-circle"></i> {{ t('config.theme_saved') }}</small>
+
+                <!-- Ranking mode -->
+                <div class="config-section">
+                    <h6><i class="bi bi-sort-down"></i> {{ t('config.ranking_mode') }}</h6>
+                </div>
+                <div class="row align-items-center mb-2">
+                    <div class="col-md-6">
+                        <p class="text-muted small mb-0">{{ t('config.ranking_mode_desc') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="ranking-mode" id="ranking-absolute" value="absolute" autocomplete="off" data-change="saveMatchingPreferences" checked>
+                            <label class="btn btn-outline-secondary" for="ranking-absolute">
+                                <i class="bi bi-cash-stack"></i> {{ t('config.ranking_absolute') }}
+                            </label>
+                            <input type="radio" class="btn-check" name="ranking-mode" id="ranking-percentage" value="percentage" autocomplete="off" data-change="saveMatchingPreferences">
+                            <label class="btn btn-outline-secondary" for="ranking-percentage">
+                                <i class="bi bi-percent"></i> {{ t('config.ranking_percentage') }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery address -->
+                <div class="config-section">
+                    <h6><i class="bi bi-house"></i> {{ t('config.delivery_address') }}</h6>
+                </div>
+                <p class="text-muted small mb-3">
+                    <strong>💡 {{ t('config.delivery_important') }}</strong> {{ t('config.delivery_desc') }}
+                </p>
+
+                <!-- Address autocomplete - country follows selected language profile -->
+                <div class="row" data-i18n-locale="{{ current_language }}" data-i18n-feature="address-autocomplete">
+                    <div class="col-md-12 mb-3">
+                        <label for="delivery-search-input" class="form-label">
+                            <strong>{{ t('config.delivery_search') }}</strong>
+                        </label>
+                        <div class="input-group">
+                            <input type="text"
+                                   class="form-control"
+                                   id="delivery-search-input"
+                                   placeholder="{{ t('config.delivery_search_placeholder') }}"
+                                   data-input="searchAddress">
+                            <button class="btn btn-outline-secondary" type="button" data-action="clearAddressSearch">
+                                ✕
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">{{ t('config.delivery_search_hint') }} <strong>{{ t('config.delivery_verify_postal') }}</strong></small>
+
+                        <!-- Suggestions list -->
+                        <div id="address-suggestions" class="list-group mt-2" style="display: none; max-height: 300px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="delivery-street-input" class="form-label">
+                            <strong>{{ t('config.delivery_street') }}</strong>
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="delivery-street-input"
+                               placeholder="{{ t('config.delivery_street_placeholder') }}"
+                               data-input="debouncedSaveAddress"
+                               value="">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="delivery-postal-input" class="form-label">
+                            <strong>{{ t('config.delivery_postal') }}</strong>
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="delivery-postal-input"
+                               placeholder="{{ t('config.delivery_postal_placeholder') }}"
+                               maxlength="{{ 8 if current_language == 'en_gb' else 5 }}"
+                               data-input="debouncedSaveAddress"
+                               value="">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="delivery-city-input" class="form-label">
+                            <strong>{{ t('config.delivery_city') }}</strong>
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="delivery-city-input"
+                               placeholder="{{ t('config.delivery_city_placeholder') }}"
+                               data-input="debouncedSaveAddress"
+                               value="">
+                    </div>
+                </div>
+
+                <div id="delivery-address-message" class="mt-3" style="display: none;"></div>
+
+                <!-- Recipe matching -->
+                <div class="config-section d-flex justify-content-between align-items-center" id="ingrediensfilter">
+                    <h6 class="mb-0"><i class="bi bi-sliders"></i> {{ t('config.matching') }}</h6>
+                </div>
+
+                <!-- Ingredient count filter -->
+                <h6 class="mt-0 mb-1"><i class="bi bi-list-ol"></i> {{ t('config.ingredient_count') }}</h6>
+                <p class="text-muted small mb-2">{{ t('config.ingredient_count_desc') }}</p>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label mb-0 text-nowrap small fw-bold" style="min-width: 45px;">{{ t('config.ingredient_min') }}</label>
+                            <input type="range" class="form-range flex-grow-1" id="min-ingredients-slider"
+                                   min="1" max="30" step="1" value="1"
+                                   data-input="updateIngredientLabel,saveMatchingPreferencesDebounced">
+                            <span id="min-ingredients-label" class="badge bg-secondary" style="min-width: 30px;">1</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label mb-0 text-nowrap small fw-bold" style="min-width: 45px;">{{ t('config.ingredient_max') }}</label>
+                            <input type="range" class="form-range flex-grow-1" id="max-ingredients-slider"
+                                   min="1" max="30" step="1" value="30"
+                                   data-input="updateIngredientLabel,saveMatchingPreferencesDebounced">
+                            <span id="max-ingredients-label" class="badge bg-secondary" style="min-width: 30px;">30</span>
+                            <div class="form-check mb-0 ms-1">
+                                <input class="form-check-input" type="checkbox" id="max-ingredients-nolimit"
+                                       data-change="updateIngredientLabel,saveMatchingPreferencesDebounced" checked>
+                                <label class="form-check-label small text-muted text-nowrap" for="max-ingredients-nolimit">{{ t('config.ingredient_no_limit') }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-3">
+
+                <!-- Exclusions (two columns) -->
+                <div class="row mb-4 align-items-start">
+                    <div class="col-md-6">
+                        <h6 class="mt-0 mb-1"><i class="bi bi-funnel"></i> {{ t('config.exclude_categories') }}</h6>
+                        <small class="text-muted d-block mb-2">{{ t('config.exclude_categories_hint_pre') }} <strong>{{ t('config.exclude_categories_hint_action') }}</strong> {{ t('config.exclude_categories_hint_post') }}</small>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="exclude-meat" data-change="saveMatchingPreferences">
+                            <label class="form-check-label" for="exclude-meat">
+                                <i class="bi bi-x-circle text-danger"></i> {{ t('config.exclude_meat') }}
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="exclude-fish" data-change="saveMatchingPreferences">
+                            <label class="form-check-label" for="exclude-fish">
+                                <i class="bi bi-x-circle text-danger"></i> {{ t('config.exclude_fish') }}
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="exclude-dairy" data-change="saveMatchingPreferences">
+                            <label class="form-check-label" for="exclude-dairy">
+                                <i class="bi bi-x-circle text-danger"></i> {{ t('config.exclude_dairy') }}
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="local-meat-only" checked data-change="saveMatchingPreferences">
+                            <label class="form-check-label" for="local-meat-only">
+                                <i class="bi bi-flag text-primary"></i> {{ t('config.local_meat_only') }}
+                            </label>
+                        </div>
+
+                        <h6 class="mt-0 mb-2"><i class="bi bi-bag-x"></i> {{ t('config.excluded_brands') }}</h6>
+                        <textarea class="form-control auto-resize"
+                                  id="excluded-brands"
+                                  rows="1"
+                                  placeholder="{{ t('config.excluded_brands_placeholder') }}"
+                                  data-input="autoResize,saveMatchingPreferences"
+                                  data-change="saveMatchingPreferences"></textarea>
+                        <small class="form-text text-muted">{{ t('config.excluded_brands_hint') }}</small>
+                    </div>
+
+                    <div class="col-md-6 pt-0">
+                        <h6 class="mt-0 mb-2"><i class="bi bi-dash-circle"></i> {{ t('config.exclude_ingredients') }}</h6>
+                        <textarea class="form-control mb-2 auto-resize"
+                                  id="exclude-keywords"
+                                  rows="1"
+                                  placeholder="{{ t('config.exclude_ingredients_placeholder') }}"
+                                  data-input="autoResize,saveMatchingPreferences"
+                                  data-change="saveMatchingPreferences"></textarea>
+                        <small class="form-text text-muted">{{ t('config.exclude_comma_separated') }}</small>
+
+                        <h6 class="mt-3"><i class="bi bi-basket-fill"></i> {{ t('config.filtered_products') }}</h6>
+                        <textarea class="form-control auto-resize"
+                                  id="filtered-products"
+                                  rows="1"
+                                  placeholder="{{ t('config.filtered_products_placeholder') }}"
+                                  data-input="autoResize,saveMatchingPreferences"
+                                  data-change="saveMatchingPreferences"></textarea>
+                        <small class="form-text text-muted">{{ t('config.filtered_products_hint') }}</small>
+                    </div>
+                </div>
+
+                <!-- Unmatched offers modal -->
+                <div class="modal fade" id="unmatchedOffersModal" tabindex="-1" aria-labelledby="unmatchedOffersModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="unmatchedOffersModalLabel">
+                                    <i class="bi bi-search me-2"></i>
+                                    {{ t('config.unmatched_title') }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="unmatched-offers-body">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="mt-2">{{ t('common.loading') }}</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category balance -->
+                <div class="config-section" id="kategoribalans">
+                    <h6><i class="bi bi-pie-chart"></i> {{ t('config.category_balance') }}</h6>
+                </div>
+                <p class="text-muted small mb-2">
+                    {{ t('config.balance_desc') }} {{ t('config.balance_refresh_hint_pre') }} <strong>{{ t('config.balance_refresh_hint_action') }}</strong> {{ t('config.balance_refresh_hint_post') }}
+                </p>
+
+
+                <div class="row mb-1">
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <label class="form-label small d-block mb-2">
+                            <span class="badge bg-danger"><i class="bi bi-egg-fried"></i></span> {{ t('category.meat') }}
+                        </label>
+                        <div class="btn-group balance-btn-group" role="group" id="balance-meat-group">
+                            <button type="button" class="btn btn-outline-danger" data-action="setBalance" data-category="meat" data-value="0">0</button>
+                            <button type="button" class="btn btn-outline-danger" data-action="setBalance" data-category="meat" data-value="1">1</button>
+                            <button type="button" class="btn btn-outline-danger" data-action="setBalance" data-category="meat" data-value="2">2</button>
+                            <button type="button" class="btn btn-outline-danger active" data-action="setBalance" data-category="meat" data-value="3">3</button>
+                            <button type="button" class="btn btn-outline-danger" data-action="setBalance" data-category="meat" data-value="4">4</button>
+                        </div>
+                        <input type="hidden" id="balance-meat" value="3">
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <label class="form-label small d-block mb-2">
+                            <span class="badge bg-primary"><i class="bi bi-water"></i></span> {{ t('category.fish') }}
+                        </label>
+                        <div class="btn-group balance-btn-group" role="group" id="balance-fish-group">
+                            <button type="button" class="btn btn-outline-primary" data-action="setBalance" data-category="fish" data-value="0">0</button>
+                            <button type="button" class="btn btn-outline-primary" data-action="setBalance" data-category="fish" data-value="1">1</button>
+                            <button type="button" class="btn btn-outline-primary" data-action="setBalance" data-category="fish" data-value="2">2</button>
+                            <button type="button" class="btn btn-outline-primary active" data-action="setBalance" data-category="fish" data-value="3">3</button>
+                            <button type="button" class="btn btn-outline-primary" data-action="setBalance" data-category="fish" data-value="4">4</button>
+                        </div>
+                        <input type="hidden" id="balance-fish" value="3">
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <label class="form-label small d-block mb-2">
+                            <span class="badge bg-success"><i class="bi bi-tree"></i></span> {{ t('category.vegetarian') }}
+                        </label>
+                        <div class="btn-group balance-btn-group" role="group" id="balance-veg-group">
+                            <button type="button" class="btn btn-outline-success" data-action="setBalance" data-category="veg" data-value="0">0</button>
+                            <button type="button" class="btn btn-outline-success" data-action="setBalance" data-category="veg" data-value="1">1</button>
+                            <button type="button" class="btn btn-outline-success" data-action="setBalance" data-category="veg" data-value="2">2</button>
+                            <button type="button" class="btn btn-outline-success active" data-action="setBalance" data-category="veg" data-value="3">3</button>
+                            <button type="button" class="btn btn-outline-success" data-action="setBalance" data-category="veg" data-value="4">4</button>
+                        </div>
+                        <input type="hidden" id="balance-veg" value="3">
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <label class="form-label small d-block mb-2">
+                            <span class="badge bg-warning"><i class="bi bi-piggy-bank"></i></span> {{ t('category.smart_buy') }}
+                        </label>
+                        <div class="btn-group balance-btn-group" role="group" id="balance-budget-group">
+                            <button type="button" class="btn btn-outline-warning" data-action="setBalance" data-category="budget" data-value="0">0</button>
+                            <button type="button" class="btn btn-outline-warning" data-action="setBalance" data-category="budget" data-value="1">1</button>
+                            <button type="button" class="btn btn-outline-warning" data-action="setBalance" data-category="budget" data-value="2">2</button>
+                            <button type="button" class="btn btn-outline-warning active" data-action="setBalance" data-category="budget" data-value="3">3</button>
+                            <button type="button" class="btn btn-outline-warning" data-action="setBalance" data-category="budget" data-value="4">4</button>
+                        </div>
+                        <input type="hidden" id="balance-budget" value="3">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm mb-3" style="color: var(--bs-body-color) !important;" data-action="resetBalance" title="{{ t('config.balance_reset') }}">
+                    <i class="bi bi-arrow-counterclockwise"></i> {{ t('config.balance_reset') }}
+                </button>
+
+                <!-- Balance preview card -->
+                <div class="card card-preview">
+                    <div class="card-header py-2">
+                        <small class="fw-bold"><i class="bi bi-eye"></i> {{ t('config.balance_preview') }}</small>
+                    </div>
+                    <div class="card-body py-2">
+                        <div id="balance-preview" class="d-flex flex-wrap gap-1">
+                            <!-- Populated via JavaScript -->
+                        </div>
+                        <small class="text-muted mt-2 d-block">{{ t('config.balance_preview_desc') }}</small>
+                    </div>
+                </div>
+
+                <div id="matching-message" class="mt-3" style="display: none;"></div>
+
+                <!-- Advanced settings -->
+                <div class="config-section">
+                    <h6><i class="bi bi-gear"></i> {{ t('config.advanced_settings') }}</h6>
+                </div>
+
+                <!-- Recipe management (deduplication & exclusions) -->
+                <h6 class="mt-3 mb-2"><i class="bi bi-copy text-muted"></i> {{ t('config.recipe_management') }}</h6>
+                <p class="text-muted small mb-3">{{ t('config.recipe_management_desc') }}</p>
+                <div class="d-flex justify-content-between flex-wrap mb-3">
+                    <button class="btn btn-outline-secondary btn-sm text-body" data-action="showDuplicatesModal">
+                        <i class="bi bi-search"></i> <span id="duplicates-btn-text">{{ t('config.find_duplicates') }}</span>
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm text-body" data-action="showExcludedUrlsModal">
+                        <i class="bi bi-x-circle"></i> <span id="excluded-urls-btn-text">{{ t('config.excluded_urls') }}</span>
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm text-body" data-action="showSpellCheckModal" id="spellcheck-btn">
+                        <i class="bi bi-spellcheck"></i> <span id="spellcheck-btn-text">{{ t('config.spellcheck') }}</span>
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm text-body" data-action="showUnmatchedOffers">
+                        <i class="bi bi-basket"></i> <span id="unmatched-btn-text">{{ t('config.show_unmatched') }}</span>
+                    </button>
+                </div>
+
+                <!-- Duplicates modal -->
+                <div class="modal fade" id="duplicatesModal" tabindex="-1" aria-labelledby="duplicatesModalLabel">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="duplicatesModalLabel">
+                                    <i class="bi bi-copy"></i> {{ t('config.duplicates_title') }}
+                                </h5>
+                                <div class="d-flex align-items-center gap-2 ms-3">
+                                    <button class="btn btn-outline-secondary btn-sm" id="dup-prev" data-action="showDuplicatePair" data-dir="-1" disabled>
+                                        <i class="bi bi-chevron-left"></i>
+                                    </button>
+                                    <span id="dup-counter" class="small text-muted"></span>
+                                    <button class="btn btn-outline-secondary btn-sm" id="dup-next" data-action="showDuplicatePair" data-dir="1" disabled>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body" id="duplicatesBody">
+                                <!-- Filled by JS -->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Excluded URLs modal -->
+                <div class="modal fade" id="excludedUrlsModal" tabindex="-1" aria-labelledby="excludedUrlsModalLabel">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="excludedUrlsModalLabel">
+                                    <i class="bi bi-x-circle"></i> {{ t('config.excluded_urls') }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted small mb-3">{{ t('config.excluded_urls_desc') }}</p>
+                                <div id="excludedUrlsBody">
+                                    <!-- Filled by JS -->
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger btn-sm" id="remove-all-exclusions-btn" data-action="removeAllExclusions" style="display: none;">
+                                    <i class="bi bi-trash"></i> {{ t('config.remove_all_exclusions') }}
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spell check modal -->
+                <div class="modal fade" id="spellCheckModal" tabindex="-1" aria-labelledby="spellCheckModalLabel">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="spellCheckModalLabel">
+                                    <i class="bi bi-spellcheck"></i> {{ t('config.spellcheck_title') }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <div id="spellCheckBody">
+                                    <!-- Filled by JS -->
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="spellcheck-toggle-excluded" data-action="toggleExcludedCorrections" style="display: none;">
+                                    <i class="bi bi-eye"></i> {{ t('config.spellcheck_show_excluded') }}
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-3">
+
+                <!-- Recipe images -->
+                <h6 class="mb-2"><i class="bi bi-image text-muted"></i> {{ t('config.images') }}</h6>
+                <p class="text-muted small mb-3">{{ t('config.images_desc') }}</p>
+
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="images-save-local" data-change="saveImagePreferences">
+                            <label class="form-check-label" for="images-save-local">
+                                <i class="bi bi-download text-primary"></i> {{ t('config.images_save_local') }}
+                            </label>
+                            <div class="form-text small">{{ t('config.images_save_local_desc') }}</div>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="images-auto-download" data-change="saveImagePreferences">
+                            <label class="form-check-label" for="images-auto-download">
+                                <i class="bi bi-arrow-repeat text-success"></i> {{ t('config.images_auto_download') }}
+                            </label>
+                            <div class="form-text small">{{ t('config.images_auto_download_desc') }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex flex-column gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm text-body" data-action="downloadMissingImages" id="btn-download-images">
+                                <i class="bi bi-cloud-download"></i> {{ t('config.images_download_missing') }}
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm text-body" data-action="confirmClearImages">
+                                <i class="bi bi-trash"></i> {{ t('config.images_clear_all') }}
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center gap-1"
+                                    data-action="showFailedImagesModal" id="images-failed-btn"
+                                    title="{{ t('common.info') }}">
+                                <i id="images-failed-icon" class="bi bi-check-circle text-success"></i>
+                                <span id="images-failed-text">{{ t('config.images_failed_ok') }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-hdd text-muted"></i>
+                    <span id="images-status" class="text-muted small">{{ t('config.images_status_none') }}</span>
+                </div>
+
+                <!-- Failed images modal -->
+                <div class="modal fade" id="failedImagesModal" tabindex="-1" aria-labelledby="failedImagesModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="failedImagesModalLabel">
+                                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                                    {{ t('config.images_failed_title') }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ t('config.images_failed_col_recipe') }}</th>
+                                            <th>{{ t('config.images_failed_col_source') }}</th>
+                                            <th>{{ t('config.images_failed_col_error') }}</th>
+                                            <th>{{ t('config.images_failed_col_attempts') }}</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="images-failed-list">
+                                        <!-- Filled by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-danger" data-action="deleteAllFailedRecipes">
+                                    <i class="bi bi-trash"></i> {{ t('config.images_failed_delete_all') }}
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="images-message" class="mt-2" style="display: none;"></div>
+
+                <!-- Advanced / Cache Settings -->
+                <hr class="my-3">
+                <h6 class="mb-2"><i class="bi bi-gear text-muted"></i> {{ t('config.advanced') }}</h6>
+                <p class="text-muted small mb-3">{{ t('config.advanced_desc') }}</p>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="cache-use-memory" data-change="saveCacheSettings">
+                    <label class="form-check-label" for="cache-use-memory">
+                        {{ t('config.cache_use_memory') }}
+                    </label>
+                    <small class="text-muted d-block">{{ t('config.cache_use_memory_desc') }}</small>
+                </div>
+
+                <div id="cache-memory-settings" style="display: none;">
+                    <label class="form-label small mb-1">{{ t('config.cache_max_memory') }}</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="range" class="form-range flex-grow-1" id="cache-max-memory" min="50" max="500" step="25" value="150" data-input="updateMemoryLabel" data-change="saveCacheSettings">
+                        <span id="cache-memory-label" class="badge bg-secondary" style="min-width: 60px;">150 MB</span>
+                    </div>
+                </div>
+
+                <div id="cache-mode-status" class="small text-muted mt-2">
+                    <i class="bi bi-database"></i> <span id="cache-mode-text">{{ t('config.cache_mode_db') }}</span>
+                </div>
+
+                <!-- SSL/HTTPS -->
+                <hr class="my-3">
+                <h6 class="mb-2"><i class="bi bi-shield-lock text-muted"></i> {{ t('config.ssl') }}</h6>
+                <p class="text-muted small mb-3">{{ t('config.ssl_desc') }}</p>
+
+                <!-- SSL Status -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span id="ssl-status-icon" class="badge bg-secondary">
+                                <i class="bi bi-shield-x"></i>
+                            </span>
+                            <span id="ssl-status-text" class="small">{{ t('config.ssl_status_loading') }}</span>
+                        </div>
+                        <div id="ssl-cert-info" class="small text-muted" style="display: none;">
+                            <!-- Certificate details filled by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="ssl-enabled" data-change="toggleSSL" disabled>
+                            <label class="form-check-label" for="ssl-enabled">
+                                {{ t('config.ssl_enable') }}
+                            </label>
+                        </div>
+                        <small class="text-muted d-block">{{ t('config.ssl_restart_hint') }}</small>
+                    </div>
+                </div>
+
+                <!-- Certificate upload -->
+                <div class="card mb-3">
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-2"><i class="bi bi-upload"></i> {{ t('config.ssl_upload_title') }}</h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label small mb-1" for="ssl-cert-file">{{ t('config.ssl_cert_file') }}</label>
+                                <div class="ssl-file-picker">
+                                    <input type="file" class="visually-hidden" id="ssl-cert-file" accept=".pem,.crt,.cer" data-change="updateSSLFileLabel">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm text-body" data-action="pickSSLFile" data-target="ssl-cert-file">
+                                        <i class="bi bi-file-earmark-arrow-up"></i> {{ t('config.ssl_choose_file') }}
+                                    </button>
+                                    <span class="ssl-file-name small text-muted" id="ssl-cert-file-name">{{ t('config.ssl_no_file_chosen') }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small mb-1" for="ssl-key-file">{{ t('config.ssl_key_file') }}</label>
+                                <div class="ssl-file-picker">
+                                    <input type="file" class="visually-hidden" id="ssl-key-file" accept=".pem,.key" data-change="updateSSLFileLabel">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm text-body" data-action="pickSSLFile" data-target="ssl-key-file">
+                                        <i class="bi bi-file-earmark-lock"></i> {{ t('config.ssl_choose_file') }}
+                                    </button>
+                                    <span class="ssl-file-name small text-muted" id="ssl-key-file-name">{{ t('config.ssl_no_file_chosen') }}</span>
+                                </div>
+                                <small class="form-text text-muted">{{ t('config.ssl_key_no_password') }}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 mt-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm text-body" data-action="uploadSSLCertificates">
+                                <i class="bi bi-cloud-upload"></i> {{ t('config.ssl_upload') }}
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" data-action="deleteSSLCertificates" id="ssl-delete-btn" disabled>
+                                <i class="bi bi-trash"></i> {{ t('config.ssl_delete') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ssl-message" class="mt-2" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ csp_nonce }}">
+// i18n translations for JavaScript
+window.DealMealsConfigI18n = {
+    // Delivery address
+    delivery_no_results: {{ t('config.delivery_no_results')|tojson }},
+    delivery_search_error: {{ t('config.delivery_search_error')|tojson }},
+    delivery_all_required: {{ t('config.delivery_all_required')|tojson }},
+    delivery_postal_invalid: {{ t('config.delivery_postal_invalid')|tojson }},
+    delivery_saved: {{ t('config.delivery_saved')|tojson }},
+    // Category names
+    category_meat: {{ t('category.meat')|tojson }},
+    category_fish: {{ t('category.fish')|tojson }},
+    category_vegetarian: {{ t('category.vegetarian')|tojson }},
+    category_budget: {{ t('category.smart_buy')|tojson }},
+    // Balance preview
+    balance_set_one: {{ t('config.balance_set_one')|tojson }},
+    // Settings
+    settings_saved: {{ t('config.settings_saved')|tojson }},
+    settings_save_error: {{ t('config.settings_save_error')|tojson }},
+    // Common
+    error: {{ t('common.error')|tojson }},
+    common_delete: {{ t('common.delete')|tojson }},
+    common_cancel: {{ t('common.cancel')|tojson }},
+    common_ok: {{ t('common.ok')|tojson }},
+    // Recipe images
+    images_status: {{ t('config.images_status')|tojson }},
+    images_status_none: {{ t('config.images_status_none')|tojson }},
+    images_downloading: {{ t('config.images_downloading')|tojson }},
+    images_download_complete: {{ t('config.images_download_complete')|tojson }},
+    images_download_error: {{ t('config.images_download_error')|tojson }},
+    images_download_missing: {{ t('config.images_download_missing')|tojson }},
+    images_cancelling: {{ t('config.images_cancelling')|tojson }},
+    images_cancelled: {{ t('config.images_cancelled')|tojson }},
+    images_cleared: {{ t('config.images_cleared')|tojson }},
+    images_clear_title: {{ t('config.images_clear_title')|tojson }},
+    images_clear_confirm: {{ t('config.images_clear_confirm')|tojson }},
+    // Image failures - three states
+    images_failed_ok: {{ t('config.images_failed_ok')|tojson }},
+    images_failed_retrying: {{ t('config.images_failed_retrying')|tojson }},
+    images_failed_permanent: {{ t('config.images_failed_permanent')|tojson }},
+    images_failed_title: {{ t('config.images_failed_title')|tojson }},
+    images_failed_none: {{ t('config.images_failed_none')|tojson }},
+    images_failed_delete_all: {{ t('config.images_failed_delete_all')|tojson }},
+    images_failed_delete_all_title: {{ t('config.images_failed_delete_all_title')|tojson }},
+    images_failed_delete_all_text: {{ t('config.images_failed_delete_all_text')|tojson }},
+    images_failed_deleted: {{ t('config.images_failed_deleted')|tojson }},
+    images_failed_reset_title: {{ t('config.images_failed_reset_title')|tojson }},
+    images_failed_delete_title: {{ t('config.images_failed_delete_title')|tojson }},
+    images_failed_delete_confirm: {{ t('config.images_failed_delete_confirm')|tojson }},
+    images_failed_col_recipe: {{ t('config.images_failed_col_recipe')|tojson }},
+    images_failed_col_source: {{ t('config.images_failed_col_source')|tojson }},
+    images_failed_col_error: {{ t('config.images_failed_col_error')|tojson }},
+    images_failed_col_attempts: {{ t('config.images_failed_col_attempts')|tojson }},
+    loading: {{ t('common.loading')|tojson }},
+    images_cancel_error: {{ t('config.images_cancel_error')|tojson }},
+    // Image download progress (from backend)
+    'config.images_progress_analyzing': {{ t('config.images_progress_analyzing')|tojson }},
+    'config.images_progress_downloading': {{ t('config.images_progress_downloading')|tojson }},
+    'config.images_progress_current': {{ t('config.images_progress_current')|tojson }},
+    'config.images_progress_batch_pause': {{ t('config.images_progress_batch_pause')|tojson }},
+    'config.images_progress_rate_limited': {{ t('config.images_progress_rate_limited')|tojson }},
+    'config.images_progress_complete': {{ t('config.images_progress_complete')|tojson }},
+    'config.images_progress_complete_errors': {{ t('config.images_progress_complete_errors')|tojson }},
+    'config.images_progress_complete_blocked': {{ t('config.images_progress_complete_blocked')|tojson }},
+    'config.images_progress_cancelled': {{ t('config.images_progress_cancelled')|tojson }},
+    'config.images_progress_all_done': {{ t('config.images_progress_all_done')|tojson }},
+    'config.images_progress_all_done_failed': {{ t('config.images_progress_all_done_failed')|tojson }},
+    // SSL
+    ssl_status_disabled: {{ t('config.ssl_status_disabled')|tojson }},
+    ssl_status_enabled: {{ t('config.ssl_status_enabled')|tojson }},
+    ssl_status_no_cert: {{ t('config.ssl_status_no_cert')|tojson }},
+    ssl_status_force_http: {{ t('config.ssl_status_force_http')|tojson }},
+    ssl_cert_expires: {{ t('config.ssl_cert_expires')|tojson }},
+    ssl_cert_expired: {{ t('config.ssl_cert_expired')|tojson }},
+    ssl_upload_success: {{ t('config.ssl_upload_success')|tojson }},
+    ssl_upload_error: {{ t('config.ssl_upload_error')|tojson }},
+    ssl_delete_title: {{ t('config.ssl_delete_title')|tojson }},
+    ssl_delete_confirm: {{ t('config.ssl_delete_confirm')|tojson }},
+    ssl_deleted: {{ t('config.ssl_deleted')|tojson }},
+    ssl_enabled_msg: {{ t('config.ssl_enabled_msg')|tojson }},
+    ssl_disabled_msg: {{ t('config.ssl_disabled_msg')|tojson }},
+    ssl_no_file_chosen: {{ t('config.ssl_no_file_chosen')|tojson }},
+    ssl_select_files: {{ t('config.ssl_select_files')|tojson }},
+    // Unmatched offers
+    unmatched_title: {{ t('config.unmatched_title')|tojson }},
+    unmatched_filtered: {{ t('config.unmatched_filtered')|tojson }},
+    unmatched_no_recipe: {{ t('config.unmatched_no_recipe')|tojson }},
+    unmatched_reason: {{ t('config.unmatched_reason')|tojson }},
+    unmatched_detail: {{ t('config.unmatched_detail')|tojson }},
+    unmatched_product: {{ t('config.unmatched_product')|tojson }},
+    unmatched_price: {{ t('config.unmatched_price')|tojson }},
+    unmatched_total: {{ t('config.unmatched_total')|tojson }},
+    unmatched_matched: {{ t('config.unmatched_matched')|tojson }},
+    unmatched_filtered_count: {{ t('config.unmatched_filtered_count')|tojson }},
+    unmatched_unmatched_count: {{ t('config.unmatched_unmatched_count')|tojson }},
+    unmatched_no_offers: {{ t('config.unmatched_no_offers')|tojson }},
+    unmatched_reason_category_excluded: {{ t('config.unmatched_reason_category_excluded')|tojson }},
+    unmatched_reason_local_meat: {{ t('config.unmatched_reason_local_meat')|tojson }},
+    unmatched_reason_keyword_excluded: {{ t('config.unmatched_reason_keyword_excluded')|tojson }},
+    unmatched_reason_filtered_product: {{ t('config.unmatched_reason_filtered_product')|tojson }},
+    unmatched_reason_brand_excluded: {{ t('config.unmatched_reason_brand_excluded')|tojson }},
+    unmatched_reason_processed: {{ t('config.unmatched_reason_processed')|tojson }},
+    unmatched_reason_junk_food: {{ t('config.unmatched_reason_junk_food')|tojson }},
+    unmatched_reason_non_food: {{ t('config.unmatched_reason_non_food')|tojson }},
+    unmatched_reason_no_keywords: {{ t('config.unmatched_reason_no_keywords')|tojson }},
+    unmatched_reason_no_recipe_match: {{ t('config.unmatched_reason_no_recipe_match')|tojson }},
+    // Recipe deduplication & exclusion
+    find_duplicates: {{ t('config.find_duplicates')|tojson }},
+    show_unmatched: {{ t('config.show_unmatched')|tojson }},
+    find_duplicates_searching: {{ t('config.find_duplicates_searching')|tojson }},
+    count_unavailable: {{ t('config.count_unavailable')|tojson }},
+    duplicates_found: {{ t('config.duplicates_found')|tojson }},
+    no_duplicates: {{ t('config.no_duplicates')|tojson }},
+    hide_recipe: {{ t('config.hide_recipe')|tojson }},
+    delete_permanent: {{ t('config.delete_permanent')|tojson }},
+    delete_permanent_confirm: {{ t('config.delete_permanent_confirm')|tojson }},
+    recipe_deleted_permanent: {{ t('config.recipe_deleted_permanent')|tojson }},
+    remove_exclusion: {{ t('config.remove_exclusion')|tojson }},
+    remove_all_exclusions: {{ t('config.remove_all_exclusions')|tojson }},
+    remove_all_confirm: {{ t('config.remove_all_confirm')|tojson }},
+    exclusions_cleared: {{ t('config.exclusions_cleared')|tojson }},
+    exclusion_removed: {{ t('config.exclusion_removed')|tojson }},
+    no_exclusions: {{ t('config.no_exclusions')|tojson }},
+    excluded_urls: {{ t('config.excluded_urls')|tojson }},
+    excluded_urls_count: {{ t('config.excluded_urls_count')|tojson }},
+    col_recipe: {{ t('config.excluded_col_recipe')|tojson }},
+    col_source: {{ t('config.excluded_col_source')|tojson }},
+    col_url: {{ t('config.excluded_col_url')|tojson }},
+    col_date: {{ t('config.excluded_col_date')|tojson }},
+    ingredients: {{ t('config.ingredients')|tojson }},
+    // Cache settings
+    cache_mode_db: {{ t('config.cache_mode_db')|tojson }},
+    cache_mode_memory: {{ t('config.cache_mode_memory')|tojson }},
+
+    // API message keys (for resolveMsg)
+    'preferences.street_required': {{ t('preferences.street_required')|tojson }},
+    'preferences.postal_required': {{ t('preferences.postal_required')|tojson }},
+    'preferences.city_required': {{ t('preferences.city_required')|tojson }},
+    'preferences.address_saved': {{ t('preferences.address_saved')|tojson }},
+    'preferences.saved': {{ t('preferences.saved')|tojson }},
+    'preferences.save_error': {{ t('preferences.save_error')|tojson }},
+    'images.preferences_saved': {{ t('images.preferences_saved')|tojson }},
+    'images.download_already_running': {{ t('images.download_already_running')|tojson }},
+    'images.download_started': {{ t('images.download_started')|tojson }},
+    'images.no_download_running': {{ t('images.no_download_running')|tojson }},
+    'images.download_cancelling': {{ t('images.download_cancelling')|tojson }},
+    'images.deleted_count': {{ t('images.deleted_count')|tojson }},
+    'images.recipe_not_found': {{ t('images.recipe_not_found')|tojson }},
+    'images.recipe_deleted': {{ t('images.recipe_deleted')|tojson }},
+    'images.no_failed_to_delete': {{ t('images.no_failed_to_delete')|tojson }},
+    'images.deleted_failed_count': {{ t('images.deleted_failed_count')|tojson }},
+    'images.no_failure_record': {{ t('images.no_failure_record')|tojson }},
+    'images.failure_reset': {{ t('images.failure_reset')|tojson }},
+    'ssl.not_available': {{ t('ssl.not_available')|tojson }},
+    'ssl.cert_and_key_required': {{ t('ssl.cert_and_key_required')|tojson }},
+    'ssl.cert_invalid_format': {{ t('ssl.cert_invalid_format')|tojson }},
+    'ssl.key_invalid_format': {{ t('ssl.key_invalid_format')|tojson }},
+    'ssl.cert_key_ok': {{ t('ssl.cert_key_ok')|tojson }},
+    'ssl.cert_key_valid': {{ t('ssl.cert_key_valid')|tojson }},
+    'ssl.cert_key_mismatch': {{ t('ssl.cert_key_mismatch')|tojson }},
+    'ssl.cert_saved': {{ t('ssl.cert_saved')|tojson }},
+    'ssl.cert_deleted': {{ t('ssl.cert_deleted')|tojson }},
+    'ssl.no_cert': {{ t('ssl.no_cert')|tojson }},
+    'ssl.enabled': {{ t('ssl.enabled')|tojson }},
+    'ssl.disabled': {{ t('ssl.disabled')|tojson }},
+    'error.generic': {{ t('error.generic')|tojson }},
+    'error.connection': {{ t('error.connection')|tojson }},
+    'error.timeout': {{ t('error.timeout')|tojson }},
+    'error.database': {{ t('error.database')|tojson }},
+    'error.not_found': {{ t('error.not_found')|tojson }},
+    'error.invalid_data': {{ t('error.invalid_data')|tojson }},
+    'error.not_available': {{ t('error.not_available')|tojson }},
+    // Spell check
+    spellcheck: {{ t('config.spellcheck')|tojson }},
+    spellcheck_title: {{ t('config.spellcheck_title')|tojson }},
+    spellcheck_revert: {{ t('config.spellcheck_revert')|tojson }},
+    spellcheck_revert_tooltip: {{ t('config.spellcheck_revert_tooltip')|tojson }},
+    spellcheck_exclude_word: {{ t('config.spellcheck_exclude_word')|tojson }},
+    spellcheck_exclude_word_tooltip: {{ t('config.spellcheck_exclude_word_tooltip')|tojson }},
+    spellcheck_allow_again: {{ t('config.spellcheck_allow_again')|tojson }},
+    spellcheck_no_corrections: {{ t('config.spellcheck_no_corrections')|tojson }},
+    spellcheck_show_excluded: {{ t('config.spellcheck_show_excluded')|tojson }},
+    spellcheck_hide_excluded: {{ t('config.spellcheck_hide_excluded')|tojson }},
+    spellcheck_recipes_count: {{ t('config.spellcheck_recipes_count')|tojson }},
+    new_badge: {{ t('common.new')|tojson }}
+};
+window.DealMealsConfigPage = {
+    appLanguage: {{ current_language|tojson }}
+};
+window.DealMealsI18n = window.DealMealsConfigI18n;
+</script>
+<script nonce="{{ csp_nonce }}" src="/static/js/config.js"></script>
+{% endblock %}

@@ -1,0 +1,126 @@
+services:
+  db:
+    container_name: deal-meals-db
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    image: ghcr.io/ssavant2/deal-meals-db:latest
+    mem_limit: 512m
+    pids_limit: 100
+    cpu_shares: 512
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID   # Required for gosu (entrypoint drops root → postgres)
+      - SETGID
+      - CHOWN    # Required for chmod/chown on data directory
+      - FOWNER   # Required for file permission checks on data directory
+      - DAC_OVERRIDE  # Required for initdb to access data files
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      POSTGRES_DB: ${DB_NAME:-db_deal_meals}
+      POSTGRES_USER: ${DB_USER:-deal_meals_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Database password required}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD:?DB_APP_PASSWORD required in .env}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    # PostgreSQL tuning for 512MB container
+    # Override via PG_SHARED_BUFFERS etc in .env if needed
+    command: >
+      postgres
+      -c shared_buffers=${PG_SHARED_BUFFERS:-128MB}
+      -c work_mem=4MB
+      -c effective_cache_size=256MB
+      -c maintenance_work_mem=64MB
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c deal_meals.recipe_fts_config=${RECIPE_FTS_CONFIG:-swedish}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-deal_meals_user} -d ${DB_NAME:-db_deal_meals}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  adminer:
+    container_name: deal-meals-adminer
+    profiles: ["dev"]
+    image: adminer:latest
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    ports:
+      - "${ADMINER_PORT:-8081}:8080"
+    depends_on:
+      - db
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    restart: unless-stopped
+
+  web:
+    container_name: deal-meals-web
+    image: ghcr.io/ssavant2/deal-meals:latest
+    mem_limit: 1536m
+    pids_limit: 200    # Playwright/Chromium spawns subprocesses
+    cpu_shares: 1024
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID   # Required for gosu (entrypoint drops root → appuser)
+      - SETGID
+      - CHOWN    # Required for entrypoint to fix /certs ownership (cert upload)
+      - KILL     # Required for tini to forward signals to multiprocessing workers
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${DB_APP_USER:-deal_meals_app}:${DB_APP_PASSWORD:?DB_APP_PASSWORD required}@db:5432/${DB_NAME:-db_deal_meals}
+      APP_PORT: ${APP_PORT:-20080}
+      UVICORN_RELOAD: "false"
+      PYTHONDONTWRITEBYTECODE: "1"
+      # Emergency override: set to "true" if bad SSL cert prevents startup
+      # FORCE_HTTP: "true"
+    ports:
+      - "${APP_PORT:-20080}:${APP_PORT:-20080}"  # HTTP/HTTPS
+    volumes:
+      - ./app:/app:ro
+      - ./data:/app/data
+      - ./app/logs:/app/logs
+      - ./app/static/recipe_images:/app/static/recipe_images
+      - ./certs:/certs  # SSL certificates (cert.pem, key.pem)
+    working_dir: /app
+    command: python app.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "/app/healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    external: true
+    name: deal-meals_postgres_data

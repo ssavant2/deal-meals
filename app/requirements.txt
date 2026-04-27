@@ -1,0 +1,39 @@
+# Databas
+psycopg2-binary==2.9.11
+SQLAlchemy==2.0.49
+
+# HTTP och API
+httpx==0.28.1
+# NOTE: Use httpx (async) instead of requests. See docs/ASYNC_HTTP.md
+
+# Web scraping
+playwright>=1.58.0
+
+# Image processing
+Pillow>=12.1.1
+
+# Utility
+python-dotenv==1.2.2
+pydantic==2.13.2
+pydantic-settings==2.13.1
+zstandard==0.25.0
+
+# CLI och logging
+rich==14.3.3
+loguru==0.7.3
+
+# Web Framework
+fastapi==0.136.0
+starlette>=0.46.0,<1.0.0  # starlette 1.0 breaks Jinja2 template caching
+uvicorn[standard]==0.44.0
+jinja2>=3.1.6  # minimum: CVE-2025-27516 fix
+python-multipart==0.0.26
+
+# Security & Encryption
+cryptography>=46.0.5  # minimum: CVE-2026-26007 fix
+
+# Rate Limiting
+slowapi==0.1.9
+
+# Scheduling
+APScheduler==3.11.2

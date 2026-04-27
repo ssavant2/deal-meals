@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="{{ current_locale or current_language or 'und' }}" data-bs-theme="{{ theme or 'light' }}"{% if high_contrast %} data-contrast="high"{% endif %}{% if font_size and font_size != 16 %} style="font-size: {{ font_size }}px"{% endif %}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Deal Meals{% endblock %}</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+
+    <!-- Bootstrap CSS -->
+    <link href="/static/vendor/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="/static/vendor/bootstrap-icons/font/bootstrap-icons.css">
+
+    <!-- Flag Icons (SVG flags) -->
+    <link rel="stylesheet" href="/static/vendor/flag-icons/css/flag-icons.min.css">
+
+    <!-- SweetAlert2 for nice popups -->
+    <script nonce="{{ csp_nonce }}" src="/static/vendor/sweetalert2.all.min.js"></script>
+    <style>
+        /* Always show scrollbar — prevents layout shift between pages and when modals open. */
+        html {
+            overflow-y: scroll !important;
+        }
+        body {
+            padding-right: 0 !important;
+        }
+        /* Prevent scroll from leaking through modals to background page */
+        .modal {
+            overscroll-behavior: contain;
+        }
+        /* Prevent navbar shift: use 100% of body width, not viewport */
+        .navbar.fixed-top {
+            right: auto !important;
+            width: 100% !important;
+            padding-right: 0 !important;
+        }
+
+        /* Theme-aware CSS variables
+           Color tiers: MAIN → SUB → SUB2 (consistent +9% lightness steps)
+           All tiers use same hue (~208° blue-gray), white text throughout */
+        :root, [data-bs-theme="light"] {
+            --header-bg: #4a5d6e;       /* MAIN 35% - navbar, primary (6.8:1) */
+            --header-text: #ffffff;
+            --navbar-bg: #e9ecef;
+            --brand-color: #d32f2f;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --sticky-bg: #ffffff;
+            --subtheme-bg: #607385;     /* SUB 44% - section headers (4.9:1) */
+            --subtheme-text: white;
+            --subtheme2-bg: #788c9c;    /* SUB2 53% - variation headers (3.5:1) */
+            --subtheme2-text: white;
+        }
+
+        [data-bs-theme="dark"] {
+            --header-bg: #3d4f5f;       /* MAIN 31% - navbar, primary (8.0:1) */
+            --header-text: #ffffff;
+            --navbar-bg: #212529;
+            --brand-color: #ef5350;
+            --card-shadow: rgba(0, 0, 0, 0.3);
+            --sticky-bg: #212529;
+            --subtheme-bg: #50677c;     /* SUB 40% - section headers (5.3:1) */
+            --subtheme-text: white;
+            --subtheme2-bg: #617f98;    /* SUB2 49% - variation headers (4.2:1) */
+            --subtheme2-text: white;
+        }
+
+        /* High contrast overrides (WCAG AAA: 7:1+ for all text) */
+        [data-contrast="high"] {
+            --header-bg: #1a2a3a;
+            --header-text: #ffffff;
+            --subtheme-bg: #2a3d50;
+            --subtheme-text: #ffffff;
+            --subtheme2-bg: #3a5068;
+            --subtheme2-text: #ffffff;
+            --card-shadow: rgba(0, 0, 0, 0.25);
+        }
+        [data-contrast="high"][data-bs-theme="light"] {
+            --bs-body-color: #000000;
+            --bs-body-bg: #ffffff;
+        }
+        [data-contrast="high"][data-bs-theme="dark"] {
+            --header-bg: #0d1a26;
+            --subtheme-bg: #1a2d40;
+            --subtheme2-bg: #264059;
+            --bs-body-color: #f0f0f0;
+        }
+        [data-contrast="high"] .text-muted {
+            color: var(--bs-body-color) !important;
+            opacity: 0.8;
+        }
+        [data-contrast="high"] .form-text {
+            color: var(--bs-body-color) !important;
+            opacity: 0.75;
+        }
+
+        body {
+            padding-top: 60px;
+        }
+        .navbar {
+            background-color: var(--header-bg) !important;
+        }
+        .navbar-brand {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.45rem;
+            font-weight: bold;
+            color: white !important;
+        }
+        .navbar-version {
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 0.72rem;
+            font-weight: 500;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        @media (max-width: 360px) {
+            .navbar-version {
+                display: none;
+            }
+        }
+        .navbar .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        .navbar .nav-link:hover {
+            color: white !important;
+        }
+        .navbar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            border-radius: 4px;
+        }
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* Theme-aware utility classes */
+        .bg-header {
+            background-color: var(--header-bg) !important;
+        }
+        .text-header {
+            color: var(--header-text) !important;
+        }
+
+        /* Slate blue-gray color for card headers (theme-aware) */
+        .bg-slate {
+            background-color: var(--header-bg) !important;
+        }
+        .bg-subtheme {
+            background-color: var(--subtheme-bg) !important;
+        }
+        .bg-subtheme2 {
+            background-color: var(--subtheme2-bg) !important;
+        }
+        .border-slate {
+            border-color: var(--header-bg) !important;
+        }
+        .text-slate {
+            color: var(--header-bg) !important;
+        }
+
+        /* Dark mode: Neutral alerts in offcanvas (stores settings) */
+        /* Icons show status (✅/❌), colors not needed in dark mode */
+        /* To revert: remove this block */
+        [data-bs-theme="dark"] .offcanvas .alert-success,
+        [data-bs-theme="dark"] .offcanvas .alert-warning {
+            background-color: var(--bs-tertiary-bg);
+            border-color: var(--bs-border-color);
+            color: var(--bs-body-color);
+        }
+
+        /* Dark mode: SweetAlert2 popups */
+        [data-bs-theme="dark"] .swal2-popup {
+            background-color: #2d3238;
+            color: #e9ecef;
+        }
+        [data-bs-theme="dark"] .swal2-title {
+            color: #f8f9fa;
+        }
+        [data-bs-theme="dark"] .swal2-html-container {
+            color: #dee2e6;
+        }
+        [data-bs-theme="dark"] .swal2-confirm {
+            background-color: #0d6efd !important;
+        }
+        [data-bs-theme="dark"] .swal2-cancel {
+            background-color: #6c757d !important;
+        }
+        [data-bs-theme="dark"] .swal2-icon.swal2-success {
+            border-color: #198754;
+            color: #198754;
+        }
+        [data-bs-theme="dark"] .swal2-icon.swal2-success .swal2-success-line-tip,
+        [data-bs-theme="dark"] .swal2-icon.swal2-success .swal2-success-line-long {
+            background-color: #198754;
+        }
+        [data-bs-theme="dark"] .swal2-icon.swal2-success .swal2-success-ring {
+            border-color: rgba(25, 135, 84, 0.3);
+        }
+        [data-bs-theme="dark"] .swal2-icon.swal2-error {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        [data-bs-theme="dark"] .swal2-icon.swal2-warning {
+            border-color: #ffc107;
+            color: #ffc107;
+        }
+        [data-bs-theme="dark"] .swal2-icon.swal2-info {
+            border-color: #0dcaf0;
+            color: #0dcaf0;
+        }
+
+        /* Radio buttons - more visible in both light and dark mode */
+        .form-check-input[type="radio"] {
+            border-width: 2px;
+            border-color: #6c757d;
+        }
+        .form-check-input[type="radio"]:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        [data-bs-theme="dark"] .form-check-input[type="radio"] {
+            border-color: #adb5bd;
+            background-color: transparent;
+        }
+        [data-bs-theme="dark"] .form-check-input[type="radio"]:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <a href="#main-content" class="visually-hidden-focusable position-absolute top-0 start-0 p-2 bg-primary text-white z-3">{{ t('nav.skip_to_content') }}</a>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">🛒 {{ t('nav.brand') }} <span class="navbar-version" title="{{ app_version_title }}">{{ app_version_label }}</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="{{ t('nav.toggle_menu') }}">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">{{ t('nav.home') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/stores">{{ t('nav.stores') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/recipes">{{ t('nav.recipes') }}</a>
+                    </li>
+                    <li class="nav-item position-relative">
+                        <a class="nav-link" href="/config">{{ t('nav.config') }}</a>
+                        <span id="spell-badge" class="position-absolute badge rounded-pill" style="display: none; font-size: 0.6rem; background-color: #adb5bd; color: #212529; border: 1px solid #343a40; top: -4px; left: 50%; transform: translateX(-50%);"></span>
+                    </li>
+                    <!-- Language selector -->
+                    <li class="nav-item dropdown ms-2">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% for lang in available_languages() %}{% if lang.code == current_language %}<span class="fi fi-{{ lang.flag }}"></span>{% endif %}{% endfor %} {{ current_language_display or current_language|upper }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            {% for lang in available_languages() %}
+                            <li>
+                                <a class="dropdown-item{% if lang.code == current_language %} active{% endif %}"
+                                   href="#" data-action="setLanguage" data-arg="{{ lang.code }}">
+                                    <span class="fi fi-{{ lang.flag }}"></span> {{ lang.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <main id="main-content" class="container mt-4">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Bootstrap JS -->
+    <script nonce="{{ csp_nonce }}" src="/static/vendor/bootstrap.bundle.min.js"></script>
+    <script nonce="{{ csp_nonce }}" src="/static/js/dealmeals-core.js"></script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,27 @@
+# Development overrides — loaded automatically via COMPOSE_FILE in .env
+# Writable volumes for hot-reload, dev container names, dev postgres volume
+
+services:
+  db:
+    container_name: deal-meals-dev-db
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+
+  adminer:
+    container_name: deal-meals-dev-adminer
+
+  web:
+    container_name: deal-meals-dev-web
+    build: .
+    environment:
+      DEAL_MEALS_VERSION: ${DEAL_MEALS_VERSION:-dev}
+      PYTHONDONTWRITEBYTECODE: "0"
+    volumes:
+      - ./app:/app
+      - ./certs:/certs
+
+volumes:
+  postgres_data:
+    external: true
+    name: deal-meals-dev_postgres_data

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#e0dbd6" rx="4"/>
+
+  <g transform="translate(200, 140)">
+    <!-- Camera body -->
+    <rect x="-48" y="-24" width="96" height="60" rx="8" fill="#c8c0b8" stroke="#a89888" stroke-width="2.5"/>
+
+    <!-- Flash bump -->
+    <rect x="-18" y="-34" width="36" height="14" rx="4" fill="#c8c0b8" stroke="#a89888" stroke-width="2.5"/>
+
+    <!-- Lens outer -->
+    <circle cx="0" cy="8" r="20" fill="none" stroke="#a89888" stroke-width="2.5"/>
+
+    <!-- Lens inner -->
+    <circle cx="0" cy="8" r="12" fill="#b8b0a6" stroke="#a89888" stroke-width="1.5"/>
+
+    <!-- Lens glare -->
+    <circle cx="-4" cy="4" r="4" fill="#d0c8c0" opacity="0.6"/>
+
+    <!-- Prohibition circle -->
+    <circle cx="0" cy="5" r="65" fill="none" stroke="#a09080" stroke-width="4" opacity="0.8"/>
+
+    <!-- Diagonal strike -->
+    <line x1="-46" y1="51" x2="46" y2="-41" stroke="#a09080" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  </g>
+</svg>

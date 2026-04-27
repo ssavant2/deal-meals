@@ -1,0 +1,21 @@
+# Ruff linter configuration for Deal Meals
+# Run: docker compose exec web ruff check /app/ --config /app/tests/ruff.toml --no-cache
+# Or install locally: pip install ruff && ruff check app/ --config app/tests/ruff.toml
+
+target-version = "py314"
+
+[lint]
+# Only enable rules that catch real bugs and important issues
+select = [
+    "F601",   # duplicate dict keys (IMPORTANT - causes silent data loss)
+    "F811",   # redefined unused variable
+    "F841",   # unused variable
+    "F541",   # f-string without placeholders
+    "E711",   # comparison to None (use 'is')
+    "E712",   # comparison to True/False (use 'is')
+]
+
+# Rules we considered but skip:
+# F401 (unused imports) - too noisy, many are re-exports or used dynamically
+# E402 (import order) - legitimate reasons (sys.path, app setup)
+# E701 (multiple statements) - stylistic, not bugs

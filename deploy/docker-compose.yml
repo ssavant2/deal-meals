@@ -1,0 +1,114 @@
+# Deal Meals — Production Docker Compose (standalone)
+# Download: wget -O docker-compose.yml https://github.com/ssavant2/deal-meals/releases/latest/download/docker-compose.yml
+# Docs: https://github.com/ssavant2/deal-meals
+
+services:
+  db:
+    container_name: deal-meals-db
+    image: ghcr.io/ssavant2/deal-meals-db:${DEAL_MEALS_VERSION:-latest}
+    mem_limit: 512m
+    pids_limit: 100
+    cpu_shares: 512
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      POSTGRES_DB: ${DB_NAME:-db_deal_meals}
+      POSTGRES_USER: ${DB_USER:-deal_meals_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD:?Set DB_APP_PASSWORD in .env}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    command: >
+      postgres
+      -c shared_buffers=${PG_SHARED_BUFFERS:-128MB}
+      -c work_mem=4MB
+      -c effective_cache_size=256MB
+      -c maintenance_work_mem=64MB
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c deal_meals.recipe_fts_config=${RECIPE_FTS_CONFIG:-swedish}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-deal_meals_user} -d ${DB_NAME:-db_deal_meals}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  web:
+    container_name: deal-meals-web
+    image: ghcr.io/ssavant2/deal-meals:${DEAL_MEALS_VERSION:-latest}
+    mem_limit: 1536m
+    pids_limit: 200
+    cpu_shares: 1024
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - CHOWN
+      - KILL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${DB_APP_USER:-deal_meals_app}:${DB_APP_PASSWORD:?Set DB_APP_PASSWORD in .env}@db:5432/${DB_NAME:-db_deal_meals}
+      APP_PORT: ${APP_PORT:-20080}
+      UVICORN_RELOAD: "false"
+      PYTHONDONTWRITEBYTECODE: "1"
+      SKIP_VENDOR_SYNC: "true"
+    ports:
+      - "${APP_PORT:-20080}:${APP_PORT:-20080}"
+    volumes:
+      - recipe_images:/app/static/recipe_images
+      - logs:/app/logs
+      - data:/app/data
+      - ./certs:/certs
+    working_dir: /app
+    command: python app.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "/app/healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+  recipe_images:
+  logs:
+  data:
+
+networks:
+  backend:

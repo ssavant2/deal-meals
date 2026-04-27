@@ -1,0 +1,82 @@
+# Secrets - NEVER commit!
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+certs/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Logs (runtime data, not code)
+logs/*.log
+*.log
+app/logs/
+
+# Cached images (can be re-downloaded)
+app/static/recipe_images/
+
+# Vendor assets (downloaded at Docker build time, copied at startup)
+app/static/vendor/
+
+# IDE folders
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code internal files
+.claude/
+
+# Codex / private batch-review working files (keep local only)
+CODEX.md
+app/tests/batch_review_*
+app/tests/recipe_matching_review_template.md
+app/tests/test_*.py
+app/tests/scrape_*_full_sortiment.py
+
+# Local cache rollout / benchmark harnesses (keep off GitHub)
+app/tests/fixtures/cache_rebuild_benchmark/
+app/tests/cache_rebuild_fixture.py
+app/tests/cache_rebuild_parity.py
+app/tests/candidate_term_index_parity.py
+app/tests/delta_cache_materialization.py
+app/tests/delta_cache_shadow_table.py
+app/tests/delta_probation.py
+app/tests/export_cache_rebuild_benchmark.py
+app/tests/load_cache_rebuild_benchmark.py
+app/tests/offer_delta_fixture_mutations.py
+app/tests/phase2_ingredient_routing_baseline.py
+app/tests/run_delta_cache_*.py
+app/tests/run_delta_probation.py
+
+# AI instructions (dev-only)
+CLAUDE.md
+.github/copilot-instructions.md
+
+# Dev-only tools and scripts
+/utils/
+app/scripts/
+
+# Dev documentation (not needed in prod)
+docs/code-review.md
+docs/context.md
+docs/v1_todo.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker volumes (if mounted locally)
+postgres_data/
+
+# Scraped data files (large, can be regenerated)
+data/
+
+# Temporary files
+*.tmp
+*.bak

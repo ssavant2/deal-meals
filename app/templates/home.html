@@ -1,0 +1,912 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('home.title') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Sticky Header Block - Contains everything that freezes */
+.sticky-header-block {
+    position: sticky;
+    top: 56px; /* Below fixed navbar */
+    z-index: 100;
+    background: var(--bs-body-bg);
+    padding-bottom: 0.5rem;
+}
+
+.sticky-header-block.has-shadow {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Category Column Headers - dynamic grid via CSS variable */
+.category-headers {
+    display: grid;
+    grid-template-columns: var(--category-grid, repeat(4, 1fr));
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    background: var(--bs-body-bg);
+}
+
+.category-header {
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: white;
+}
+
+/* Wide headers - keep text on same line */
+.category-header.wide {
+    /* No special styling needed - same as regular header */
+}
+
+.category-header.meat { background: #dc3545; }
+.category-header.fish { background: #0d6efd; }
+.category-header.vegetarian { background: #198754; }
+.category-header.smart_buy { background: #ffc107; color: #212529; }
+
+/* Category Columns Layout - each category is a column that fills top-to-bottom */
+.category-columns {
+    display: grid;
+    grid-template-columns: var(--category-grid, repeat(4, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+}
+
+.category-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Wide columns show 2 recipes per row */
+.category-column.wide {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+/* Single category fills full width with 4 columns */
+.category-column.full-width {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+/* Recipe Card - Dynamic height */
+.recipe-card {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--card-shadow);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.recipe-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.recipe-card-image {
+    height: 100px;
+    overflow: hidden;
+    background: var(--bs-secondary-bg);
+    flex-shrink: 0;
+}
+
+.recipe-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recipe-card-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-secondary-color);
+    font-size: 2rem;
+}
+
+.recipe-card-body {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.recipe-card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+    /* Clamp to 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.4em;
+}
+
+.recipe-card-source {
+    color: var(--bs-secondary-color);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.recipe-card-meta {
+    margin-top: auto;
+    font-size: 0.75rem;
+}
+
+.recipe-card-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+/* Pantry: truncate long "Saknas:" badge, keep coverage badge visible */
+.recipe-card-info-row .badge.bg-warning,
+.recipe-card-info-row .badge.bg-success {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex-shrink: 1;
+}
+.recipe-card-info-row .badge.bg-light {
+    flex-shrink: 0;
+}
+
+.recipe-card-savings {
+    color: #198754;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.recipe-card-time {
+    color: var(--bs-secondary-color);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.recipe-card-meta .show-offers-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.3rem 0.5rem;
+}
+
+/* Quick Actions Row */
+.quick-actions-row {
+    padding: 0.5rem 0;
+    background: var(--bs-body-bg);
+}
+
+.action-description {
+    display: none;
+}
+
+.btn-outline-slate {
+    color: var(--header-bg);
+    border-color: var(--header-bg);
+}
+.btn-outline-slate:hover {
+    background-color: var(--header-bg);
+    color: white;
+}
+
+/* Dark mode: lighter outline buttons for better visibility */
+[data-bs-theme="dark"] .btn-outline-slate {
+    color: var(--bs-body-color);
+    border-color: var(--bs-border-color);
+}
+[data-bs-theme="dark"] .btn-outline-slate:hover {
+    background-color: var(--header-bg);
+    border-color: var(--header-bg);
+    color: white;
+}
+
+/* Dark mode: lighter text on secondary outline buttons */
+[data-bs-theme="dark"] .btn-outline-secondary {
+    color: var(--bs-body-color);
+    border-color: var(--bs-body-color);
+}
+[data-bs-theme="dark"] .btn-outline-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    border-color: white;
+}
+
+/* Active state for main nav buttons */
+.btn-outline-secondary.main-nav-active {
+    background-color: rgba(108, 117, 125, 0.15);
+    border-bottom: 3px solid #6c757d;
+    color: #495057;
+    pointer-events: none;
+    cursor: default;
+}
+[data-bs-theme="dark"] .btn-outline-secondary.main-nav-active {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-bottom: 3px solid rgba(255, 255, 255, 0.6);
+    color: white;
+    pointer-events: none;
+    cursor: default;
+}
+
+/* Dark mode: tone down the refresh button in suggestions header */
+[data-bs-theme="dark"] .suggestions-header .btn-light {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: transparent;
+    color: white;
+}
+[data-bs-theme="dark"] .suggestions-header .btn-light:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Dark mode: use neutral colors for success alert (green in light mode) */
+[data-bs-theme="dark"] .alert-success {
+    background-color: var(--bs-secondary-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+}
+
+/* Dark mode: disable colored table rows in modal (multi-buy, alternatives) */
+[data-bs-theme="dark"] .table-warning,
+[data-bs-theme="dark"] .table-info {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--bs-body-color);
+    --bs-table-border-color: var(--bs-border-color);
+}
+
+/* Suggestions header bar */
+.suggestions-header {
+    background: var(--subtheme2-bg);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.suggestions-header h5 {
+    color: white;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Suggestions content area */
+.suggestions-content {
+    padding: 0.5rem 0;
+}
+
+/* Recipe cards within columns */
+.category-column .recipe-card {
+    width: 100%;
+}
+
+/* Responsive: tablet - smaller cards */
+@media (max-width: 992px) {
+    .recipe-card-image {
+        height: 90px;
+    }
+
+    /* Wide/full-width columns on tablet: tighter gap */
+    .category-column.wide,
+    .category-column.full-width {
+        gap: 0.5rem;
+    }
+
+    .category-column.full-width {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Responsive: mobile - single column list */
+@media (max-width: 768px) {
+    .category-headers {
+        display: none !important;
+    }
+
+    .category-columns {
+        grid-template-columns: 1fr !important;
+        gap: 0.5rem;
+    }
+
+    /* Wide and full-width columns become single column on mobile */
+    .category-column.wide,
+    .category-column.full-width {
+        grid-template-columns: 1fr;
+    }
+
+    .recipe-card-image {
+        height: 100px;
+    }
+}
+
+/* Offer list in popup */
+.offer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.offer-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    background: var(--bs-secondary-bg);
+}
+
+.offer-row-matched {
+    background: var(--bs-success-bg-subtle);
+}
+
+.offer-ingredient {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.offer-ingredient i {
+    flex-shrink: 0;
+}
+
+.offer-savings {
+    color: #198754;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.offer-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.offer-actions .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Spin animation for refresh button */
+.spin-animation {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Setup guide */
+#setup-steps .step-done a,
+#setup-steps .step-done span {
+    text-decoration: line-through;
+    color: var(--bs-secondary);
+}
+
+/* Hide redundant empty states while setup guide is visible */
+body.setup-guide-active #suggestions-empty,
+body.setup-guide-active .no-offers-hint {
+    display: none !important;
+}
+</style>
+{% endblock extra_head %}
+
+{% block content %}
+<!-- Setup Guide (hidden by default, shown via JS if setup incomplete) -->
+<div id="setup-guide" class="card border-slate mb-4" style="display: none;">
+    <div class="card-header bg-subtheme text-white">
+        <h5 class="mb-0"><i class="bi bi-rocket-takeoff"></i> {{ t('setup.title') }}</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-3">{{ t('setup.description') }}</p>
+        <ol class="list-unstyled mb-0" id="setup-steps">
+            <li class="mb-2" id="step-hosts">
+                <i class="bi bi-circle text-muted"></i>
+                <span>{{ t('setup.step_hosts') }}</span>
+                <div id="step-hosts-hint" class="small text-warning ms-4 mt-1" style="display: none;"></div>
+            </li>
+            <li class="mb-2" id="step-address">
+                <i class="bi bi-circle text-muted"></i>
+                <a href="/config#delivery">{{ t('setup.step_address') }}</a>
+            </li>
+            <li class="mb-2" id="step-recipes">
+                <i class="bi bi-circle text-muted"></i>
+                <a href="/recipes">{{ t('setup.step_recipes') }}</a>
+            </li>
+            <li class="mb-2" id="step-offers">
+                <i class="bi bi-circle text-muted"></i>
+                <a href="/stores">{{ t('setup.step_offers') }}</a>
+            </li>
+            <li class="mb-2 text-muted" id="step-theme">
+                <i class="bi bi-circle text-muted"></i>
+                <a href="/config#theme" class="text-muted">{{ t('setup.step_theme') }}</a>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<!-- Status Cards Row -->
+<div class="row mb-2">
+    <!-- Offers Status Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 border-slate">
+            <div class="card-header bg-subtheme text-white">
+                <h5 class="mb-0"><i class="bi bi-basket2-fill"></i> {{ t('home.latest_offers') }}</h5>
+            </div>
+            <div class="card-body" id="offers-status">
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm text-slate" role="status">
+                        <span class="visually-hidden">{{ t('common.loading') }}</span>
+                    </div>
+                    <span class="ms-2">{{ t('home.loading_status') }}</span>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="/stores" class="btn btn-outline-slate btn-sm">
+                    <i class="bi bi-shop"></i> {{ t('home.manage_stores') }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipes Status Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 border-slate">
+            <div class="card-header bg-subtheme text-white">
+                <h5 class="mb-0"><i class="bi bi-book-fill"></i> {{ t('home.recipe_sources') }}</h5>
+            </div>
+            <div class="card-body" id="recipes-status">
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm text-slate" role="status">
+                        <span class="visually-hidden">{{ t('common.loading') }}</span>
+                    </div>
+                    <span class="ms-2">{{ t('home.loading_status') }}</span>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="/recipes" class="btn btn-outline-slate btn-sm">
+                    <i class="bi bi-gear"></i> {{ t('home.manage_sources') }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sticky Header Block - Contains everything that freezes at top -->
+<div class="sticky-header-block" id="sticky-header-block">
+    <!-- Quick Actions Row -->
+    <div class="quick-actions-row">
+        <div class="row" id="quick-actions-row">
+            <div class="col-md-4 col-sm-6 mb-2 mb-md-0 main-btn-col" id="btn-suggestions-col">
+                <button class="btn btn-lg btn-outline-secondary w-100" id="btn-suggestions"
+                        data-action="toggleSuggestions">
+                    🔖 {{ t('home.weekly_deals') }}
+                </button>
+            </div>
+            <div class="col-md-4 col-sm-6 mb-2 mb-md-0 main-btn-col" id="btn-search-col">
+                <button class="btn btn-lg btn-outline-secondary w-100 position-relative" id="btn-search"
+                        data-action="toggleSearch">
+                    🔍 {{ t('home.search_recipes') }}
+                    <span class="badge bg-secondary position-absolute" id="hidden-recipes-badge"
+                          style="display: none; font-size: 0.65rem; right: 8px; top: 50%; transform: translateY(-50%);">
+                        <span id="hidden-recipes-count"></span> {{ t('home.hidden_short') }}
+                    </span>
+                </button>
+            </div>
+            <div class="col-md-4 col-sm-6 mb-2 mb-md-0 main-btn-col" id="btn-pantry-col">
+                <button class="btn btn-lg btn-outline-secondary w-100" id="btn-pantry"
+                        data-action="togglePantry">
+                    🍳 {{ t('home.what_can_i_cook') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suggestions Header - shown when suggestions section is open -->
+    <div class="suggestions-header" id="suggestions-header-sticky" style="display: none;">
+        <h5 class="mb-0"><i class="bi bi-tag"></i> {{ t('home.weekly_deals') }}</h5>
+        <div class="d-flex gap-2 align-items-center">
+            <a href="/config#ingrediensfilter" class="btn btn-sm btn-light" title="{{ t('home.ingredients') }}">
+                <i class="bi bi-list-ol"></i> <span class="d-none d-md-inline">{{ t('home.ingredients') }}</span>
+            </a>
+            <a href="/config#kategoribalans" class="btn btn-sm btn-light" title="{{ t('home.balance') }}">
+                <i class="bi bi-sliders"></i> <span class="d-none d-md-inline">{{ t('home.balance') }}</span>
+            </a>
+            <button class="btn btn-sm btn-light" data-action="refreshRecipeSuggestions" id="refresh-suggestions-btn" title="{{ t('common.refresh') }}">
+                <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-md-inline">{{ t('common.refresh') }}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Category Headers - shown when recipes are loaded -->
+    <div class="category-headers" id="category-headers-sticky" style="display: none;"></div>
+</div>
+
+<!-- Recipe Suggestions Content (scrollable) -->
+<div class="collapse mb-4" id="recipe-suggestions-section">
+    <div class="suggestions-content">
+        <!-- Loading -->
+        <div id="suggestions-loading" class="text-center py-4">
+            <div class="spinner-border text-slate" role="status">
+                <span class="visually-hidden">{{ t('common.loading') }}</span>
+            </div>
+            <p class="mt-2 text-muted">{{ t('home.matching_recipes') }}</p>
+        </div>
+
+        <!-- Empty state -->
+        <div id="suggestions-empty" style="display: none;" class="text-center py-4 text-muted">
+            <i class="bi bi-emoji-frown" style="font-size: 3rem;"></i>
+            <p class="mt-2">{{ t('home.no_matches') }}</p>
+            <p class="text-muted">{{ t('home.try_fetch') }} <a href="/stores">{{ t('nav.stores') }}</a>.</p>
+        </div>
+
+        <!-- Recipe rows only -->
+        <div id="suggestions-results" style="display: none;"></div>
+
+        <!-- Load more button -->
+        <div id="suggestions-load-more" class="text-center mt-4" style="display: none;">
+            <button class="btn btn-outline-secondary" data-action="loadMoreSuggestions" id="load-more-suggestions-btn">
+                <i class="bi bi-plus-circle"></i> {{ t('home.load_more') }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Recipe Search Section (Collapsible) -->
+<div class="collapse mb-4" id="search-section">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-subtheme2">
+            <h5 class="mb-0 text-white"><i class="bi bi-journal-text"></i> {{ t('home.search_recipes') }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="search-input" class="form-label">
+                    {{ t('home.search_recipes') }}:
+                </label>
+                <input type="text"
+                       class="form-control"
+                       id="search-input"
+                       placeholder="{{ t('home.search_placeholder') }}"
+                       data-enter-action="searchRecipes">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> {{ t('home.search_hint') }}
+                </small>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex gap-2 align-items-center">
+                    <button class="btn btn-primary" data-action="searchRecipes">
+                        <i class="bi bi-search"></i> {{ t('common.search') }}
+                    </button>
+                    <select class="form-select" id="search-source-filter" style="width: auto;">
+                        <option value="">{{ t('home.all_recipe_sources') }}</option>
+                        {% for source in recipe_sources %}
+                        <option value="{{ source }}">{{ t('myrecipes.scraper_name') if source == 'My Recipes' else source }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="btn btn-outline-secondary" data-action="toggleHiddenRecipes" id="show-hidden-btn" style="display: none;">
+                    <i class="bi bi-eye-slash"></i> {{ t('home.show_hidden_recipes') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Hidden recipes area (inline, not modal) -->
+        <div id="hidden-recipes-section" class="card-body border-top" style="display: none;">
+            <h6 class="mb-3"><i class="bi bi-eye-slash"></i> {{ t('home.hidden_recipes_title') }}</h6>
+            <div id="hidden-recipes-loading" class="text-center py-3" style="display: none;">
+                <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                <span class="ms-2 text-muted">{{ t('common.loading') }}</span>
+            </div>
+            <div id="hidden-recipes-list"></div>
+            <div id="hidden-recipes-empty" class="text-muted" style="display: none;">
+                <i class="bi bi-check-circle"></i> {{ t('home.no_hidden_recipes') }}
+            </div>
+        </div>
+
+        <!-- Results area -->
+        <div id="search-results" style="display: none;">
+            <div class="card-body border-top">
+                <div id="search-loading" class="text-center py-3" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{{ t('home.searching') }}</span>
+                    </div>
+                    <p class="mt-2 text-muted">{{ t('home.searching_recipes') }}</p>
+                </div>
+
+                <div id="search-empty" class="text-center py-4 text-muted" style="display: none;">
+                    <i class="bi bi-emoji-frown" style="font-size: 3rem;"></i>
+                    <p class="mt-2">{{ t('home.no_results') }}</p>
+                </div>
+
+                <div id="search-results-grid"></div>
+
+                <!-- Load more button -->
+                <div id="search-load-more" class="text-center mt-4" style="display: none;">
+                    <button type="button" class="btn btn-outline-secondary" data-action="loadMoreSearchResults" id="load-more-search-btn">
+                        <i class="bi bi-plus-circle"></i> {{ t('home.load_more') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pantry Match Section (Collapsible) -->
+<div class="collapse mb-4" id="pantry-section">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-subtheme2">
+            <h5 class="mb-0 text-white"><i class="bi bi-basket3"></i> {{ t('home.pantry_title') }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="pantry-input" class="form-label">
+                    {{ t('home.pantry_label') }}
+                </label>
+                <input type="text"
+                       class="form-control"
+                       id="pantry-input"
+                       placeholder="{{ t('home.pantry_placeholder') }}"
+                       data-enter-action="searchPantryRecipes">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> {{ t('home.pantry_hint') }}
+                </small>
+            </div>
+            <button class="btn btn-primary" data-action="searchPantryRecipes">
+                <i class="bi bi-search"></i> {{ t('common.search') }}
+            </button>
+        </div>
+
+        <!-- Results area -->
+        <div id="pantry-results" style="display: none;">
+            <div class="card-body border-top">
+                <div id="pantry-loading" class="text-center py-3" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{{ t('home.searching') }}</span>
+                    </div>
+                    <p class="mt-2 text-muted">{{ t('home.searching_recipes') }}</p>
+                </div>
+
+                <div id="pantry-full-match"></div>
+                <div id="pantry-partial-match"></div>
+
+                <!-- Load more button -->
+                <div id="pantry-load-more" class="text-center mt-4" style="display: none;">
+                    <button type="button" class="btn btn-outline-secondary" data-action="loadMorePantryRecipes" id="load-more-pantry-btn">
+                        <i class="bi bi-plus-circle"></i> {{ t('home.load_more') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recipe Offers Modal -->
+<div class="modal fade" id="matchedOffersModal" tabindex="-1" aria-labelledby="matchedOffersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-slate text-white">
+                <h5 class="modal-title" id="matchedOffersModalLabel">
+                    <i class="bi bi-basket-fill"></i>
+                    <span id="modalRecipeName"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ t('common.close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Detailed Offers Table -->
+                <h6><i class="bi bi-list-ul"></i> {{ t('home.modal_matched_offers') }}</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="bg-slate text-white">
+                            <tr>
+                                <th>{{ t('home.modal_product') }}</th>
+                                <th class="text-center">{{ t('home.modal_store') }}</th>
+                                <th class="text-center" style="white-space:nowrap">{{ t('home.modal_price') }}</th>
+                                <th class="text-center">{{ t('home.modal_discount') }}</th>
+                                <th class="text-center">{{ t('home.modal_info') }}</th>
+                                <th class="text-center">{{ t('home.modal_link') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="offersTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Summary -->
+                <div class="alert alert-success mb-3" id="offersSummary"></div>
+
+                <!-- Full Ingredient List -->
+                <div class="card">
+                    <div class="card-header bg-slate text-white py-2 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0" id="ingredientListHeader"><i class="bi bi-list-check"></i> {{ t('home.modal_full_recipe') }}</h6>
+                        <button type="button" class="btn btn-sm btn-outline-light" id="copyIngredientsBtn" title="{{ t('home.modal_copy') }}" style="padding: 0.25rem 0.5rem; line-height: 1;">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                    <div class="card-body p-2">
+                        <pre id="ingredientList" class="mb-0 bg-body-secondary" style="white-space: pre-wrap; font-family: inherit; font-size: 0.9rem; padding: 0.75rem; border-radius: 4px; cursor: text;"></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" id="excludeRecipeBtn" style="display: none;" data-action="excludeCurrentRecipe">
+                    <i class="bi bi-eye-slash"></i> {{ t('home.exclude_recipe') }}
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ csp_nonce }}">
+// ============================================
+// Internationalization (i18n) - Injected translations
+// ============================================
+window.DealMealsHomeI18n = {
+    // Status table headers
+    'table.store': {{ t("table.store")|tojson }},
+    'table.type': {{ t("table.type")|tojson }},
+    'table.items': {{ t("table.items")|tojson }},
+    'table.last_scraped': {{ t("table.last_scraped")|tojson }},
+
+    // Status
+    'status.ecommerce': {{ t("status.ecommerce")|tojson }},
+    'status.local_store': {{ t("status.local_store")|tojson }},
+    'common.never': {{ t("common.never")|tojson }},
+
+    // Setup guide
+    'setup.step_hosts_detected': {{ t("setup.step_hosts_detected")|tojson }},
+
+    // Home
+    'home.no_offers': {{ t("home.no_offers")|tojson }},
+    'home.fetch_from_stores': {{ t("home.fetch_from_stores")|tojson }},
+    'home.stale_data_warning': {{ t("home.stale_data_warning")|tojson }},
+    'home.could_not_load': {{ t("home.could_not_load")|tojson }},
+    'home.active_sources': {{ t("home.active_sources")|tojson }},
+    'home.recipes_active': {{ t("home.recipes_active")|tojson }},
+    'home.synced_last_month': {{ t("home.synced_last_month")|tojson }},
+    'home.no_sources': {{ t("home.no_sources")|tojson }},
+
+    // Pantry
+    'home.pantry_enter': {{ t("home.pantry_enter")|tojson }},
+    'home.pantry_min': {{ t("home.pantry_min")|tojson }},
+    'home.pantry_full_match': {{ t("home.pantry_full_match")|tojson }},
+    'home.pantry_partial_match': {{ t("home.pantry_partial_match")|tojson }},
+    'home.pantry_no_full': {{ t("home.pantry_no_full")|tojson }},
+    'home.pantry_searched': {{ t("home.pantry_searched")|tojson }},
+    'home.pantry_missing': {{ t("home.pantry_missing")|tojson }},
+    'home.pantry_complete': {{ t("home.pantry_complete")|tojson }},
+    'home.pantry_coverage': {{ t("home.pantry_coverage")|tojson }},
+
+    // Search
+    'home.search_min_chars': {{ t("home.search_min_chars")|tojson }},
+    'home.search_title': {{ t("home.search_title")|tojson }},
+    'home.no_results': {{ t("home.no_results")|tojson }},
+    'home.showing_results': {{ t("home.showing_results")|tojson }},
+    'common.search': {{ t("common.search")|tojson }},
+
+    // Recipe card
+    'home.ranking_mode': {{ ranking_mode|tojson }},
+    'home.save_approx': {{ t("home.save_approx")|tojson }},
+    'home.save_pct_items': {{ t("home.save_pct_items")|tojson }},
+    'home.save_pct_item': {{ t("home.save_pct_item")|tojson }},
+    'home.offers_show': {{ t("home.offers_show")|tojson }},
+    'home.no_offers_show_recipe': {{ t("home.no_offers_show_recipe")|tojson }},
+    'home.time_hours': {{ t("home.time_hours")|tojson }},
+    'home.time_minutes': {{ t("home.time_minutes")|tojson }},
+    'home.time_hours_minutes': {{ t("home.time_hours_minutes")|tojson }},
+    'home.servings': {{ t("home.servings")|tojson }},
+    'home.load_more': {{ t("home.load_more")|tojson }},
+    'home.no_more': {{ t("home.no_more")|tojson }},
+
+    // Hide recipe dialog
+    'home.hide_title': {{ t("home.hide_title")|tojson }},
+    'home.hide_text': {{ t("home.hide_text")|tojson }},
+    'home.hide_confirm': {{ t("home.hide_confirm")|tojson }},
+    'home.hide_cancel': {{ t("home.hide_cancel")|tojson }},
+
+    // Cache rebuild
+    'home.rebuild_title': {{ t("home.rebuild_title")|tojson }},
+    'home.rebuild_text': {{ t("home.rebuild_text")|tojson }},
+    'home.rebuild_wait': {{ t("home.rebuild_wait")|tojson }},
+    'home.cache_error_title': {{ t("home.cache_error_title")|tojson }},
+    'home.cache_error_text': {{ t("home.cache_error_text")|tojson }},
+
+    // Modal
+    'home.modal_alternatives': {{ t("home.modal_alternatives")|tojson }},
+    'home.modal_open_product': {{ t("home.modal_open_product")|tojson }},
+    'home.modal_multi_buy': {{ t("home.modal_multi_buy")|tojson }},
+    'home.modal_some_multi': {{ t("home.modal_some_multi")|tojson }},
+    'home.modal_ingredients_matched': {{ t("home.modal_ingredients_matched")|tojson }},
+    'home.modal_save_up_to': {{ t("home.modal_save_up_to")|tojson }},
+    'home.modal_save_avg_pct': {{ t("home.modal_save_avg_pct")|tojson }},
+    'home.modal_full_recipe_servings': {{ t("home.modal_full_recipe_servings")|tojson }},
+    'home.modal_full_recipe': {{ t("home.modal_full_recipe")|tojson }},
+    'home.modal_multiple_stores': {{ t("home.modal_multiple_stores")|tojson }},
+    'home.modal_and_more': {{ t("home.modal_and_more")|tojson }},
+    'home.modal_offer_tooltip': {{ t("home.modal_offer_tooltip")|tojson }},
+    'home.modal_multi_buy_short': {{ t("home.modal_multi_buy_short")|tojson }},
+    'common.retry': {{ t("common.retry")|tojson }},
+    'common.unknown': {{ t("common.unknown")|tojson }},
+    'myrecipes.scraper_name': {{ t("myrecipes.scraper_name")|tojson }},
+    'home.modal_quantity_note': {{ t("home.modal_quantity_note")|tojson }},
+    'home.modal_quantity_note2': {{ t("home.modal_quantity_note2")|tojson }},
+    'home.modal_quantity_note3': {{ t("home.modal_quantity_note3")|tojson }},
+    'home.modal_savings_capped': {{ t("home.modal_savings_capped")|tojson }},
+    'home.modal_quantity_warning': {{ t("home.modal_quantity_warning")|tojson }},
+
+    // Categories
+    'category.meat': {{ t("category.meat")|tojson }},
+    'category.fish': {{ t("category.fish")|tojson }},
+    'category.vegetarian': {{ t("category.vegetarian")|tojson }},
+    'category.smart_buy': {{ t("category.smart_buy")|tojson }},
+
+    // Recipe exclusion
+    'home.exclude_recipe': {{ t("home.exclude_recipe")|tojson }},
+    'home.exclude_recipe_title': {{ t("home.exclude_recipe_title")|tojson }},
+    'home.exclude_recipe_confirm': {{ t("home.exclude_recipe_confirm")|tojson }},
+    'home.exclude_recipe_btn': {{ t("home.exclude_recipe_btn")|tojson }},
+    'home.recipe_hidden': {{ t("home.recipe_hidden")|tojson }},
+    'home.recipe_hidden_msg': {{ t("home.recipe_hidden_msg")|tojson }},
+    'home.show_hidden_recipes': {{ t("home.show_hidden_recipes")|tojson }},
+    'home.hide_hidden_recipes': {{ t("home.hide_hidden_recipes")|tojson }},
+    'home.restore_recipe': {{ t("home.restore_recipe")|tojson }},
+    'home.restore_recipe_confirm': {{ t("home.restore_recipe_confirm")|tojson }},
+    'home.recipe_restored': {{ t("home.recipe_restored")|tojson }},
+    'home.recipe_restored_msg': {{ t("home.recipe_restored_msg")|tojson }},
+    'home.no_hidden_recipes': {{ t("home.no_hidden_recipes")|tojson }},
+    'common.cancel': {{ t("common.cancel")|tojson }},
+    'common.error': {{ t("common.error")|tojson }},
+
+    // Suggestions
+    'home.creating_cache': {{ t("home.creating_cache")|tojson }},
+    'home.calculating_matches': {{ t("home.calculating_matches")|tojson }},
+    'home.takes_seconds': {{ t("home.takes_seconds")|tojson }},
+    'home.showing_recipes': {{ t("home.showing_recipes")|tojson }},
+
+    // Common
+    'common.loading': {{ t("common.loading")|tojson }},
+    'home.showing_results': {{ t("home.showing_results")|tojson }},
+
+    // Nav (for links)
+    'nav.stores': {{ t("nav.stores")|tojson }},
+    'home.store': {{ t("home.store")|tojson }},
+    'home.new_offers_available': {{ t("home.new_offers_available")|tojson }},
+    'home.background_scraper_complete': {{ t("home.background_scraper_complete")|tojson }},
+
+    // API error/message keys
+    'pantry.no_ingredients': {{ t("pantry.no_ingredients")|tojson }},
+    'pantry.extract_failed': {{ t("pantry.extract_failed")|tojson }},
+    'error.generic': {{ t("error.generic")|tojson }},
+    'error.connection': {{ t("error.connection")|tojson }},
+    'error.timeout': {{ t("error.timeout")|tojson }},
+    'error.database': {{ t("error.database")|tojson }},
+    'error.not_found': {{ t("error.not_found")|tojson }},
+    'error.invalid_data': {{ t("error.invalid_data")|tojson }},
+    'preferences.saved': {{ t("preferences.saved")|tojson }},
+    'recipes.not_available': {{ t("recipes.not_available")|tojson }},
+    'recipes.cache_rebuild_started': {{ t("recipes.cache_rebuild_started")|tojson }}
+};
+window.DealMealsHomePage = {
+    locale: {{ current_locale|tojson }},
+    cacheGeneration: {{ cache_generation|tojson }}
+};
+window.DealMealsI18n = window.DealMealsHomeI18n;
+</script>
+<script nonce="{{ csp_nonce }}" src="/static/js/home.js"></script>
+{% endblock %}

@@ -1,0 +1,8 @@
+FROM postgres:18.3-alpine3.22
+
+# Bake first-run schema + security setup into the Postgres image.
+# PostgreSQL only executes these scripts when PGDATA is empty.
+COPY database/init.sql /docker-entrypoint-initdb.d/01-schema.sql
+COPY database/02-security.sh /docker-entrypoint-initdb.d/02-security.sh
+
+RUN chmod 755 /docker-entrypoint-initdb.d/02-security.sh

@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('stores.title') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.schedule-table thead th {
+    background-color: var(--subtheme2-bg) !important;
+    color: var(--subtheme2-text) !important;
+}
+/* Stack dependent fields using CSS grid - both occupy same cell */
+.store-field-stack {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+.store-field-stack > div {
+    display: block !important;  /* Override inline display:none to keep in layout */
+    grid-row: 1;
+    grid-column: 1;
+    transition: opacity 0.15s ease;
+}
+.store-field-stack > div[style*="display: none"] {
+    visibility: hidden;
+    pointer-events: none;
+}
+/* Store search dropdown - float above card instead of expanding it */
+.store-search-wrapper {
+    position: relative;
+}
+.store-location-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    max-height: 156px;  /* ~3 items visible (52px each) */
+    overflow-y: auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Store Cards - Dynamic from plugin system -->
+        {% if plugin_system and stores %}
+        <div class="row">
+            {% for store in stores %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center d-flex flex-column">
+                        <!-- Logo container - fixed height so content below aligns across cards -->
+                        <div class="d-flex align-items-center justify-content-center" style="height: 80px;">
+                            <img src="{{ store.config.logo }}"
+                                 alt="{{ store.config.name }}"
+                                 class="img-fluid"
+                                 loading="lazy"
+                                 style="max-height: 80px;"
+                                >
+                        </div>
+
+                        <h5 class="card-title mt-3">{{ store.config.name }}</h5>
+
+                        {% if store.config.description %}
+                        <p class="text-muted small mb-2">{{ store.config.description }}</p>
+                        {% endif %}
+
+                        <!-- Dynamic config container - populated by JavaScript based on plugin's get_config_fields() -->
+                        <div id="{{ store.config.id }}-config-container" class="mb-3 text-start">
+                            <!-- Config fields will be rendered here by loadStoreConfig() -->
+                        </div>
+
+                        <!-- Flex spacer pushes button to bottom of card -->
+                        <div class="flex-grow-1"></div>
+
+                        <!-- Progress bar container - fixed height to prevent resize -->
+                        <div style="min-height: 52px;" class="w-100 mb-2">
+                            <div id="{{ store.config.id }}-progress" style="visibility: hidden;">
+                                <div class="progress mb-1">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                         role="progressbar"
+                                         style="width: 0%;"
+                                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                                         id="{{ store.config.id }}-progress-bar"></div>
+                                </div>
+                                <small class="text-muted" id="{{ store.config.id }}-progress-text">{{ t('stores.starting') }}</small>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-success w-100"
+                                id="{{ store.config.id }}-scrape-btn"
+                                data-action="scrapeStore" data-arg="{{ store.config.id }}">
+                            {{ t('stores.fetch_offers') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- FALLBACK: Plugin system not available -->
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ t('stores.plugin_error') }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Scheduling Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-subtheme text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-event me-2"></i>{{ t('stores.scheduling') }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-end">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <label for="store-schedule-select" class="form-label">{{ t('stores.store') }}</label>
+                        <select class="form-select" id="store-schedule-select" data-change="loadStoreSchedule" data-focus="loadLoggedInStores">
+                            <option value="">{{ t('stores.select_store') }}</option>
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0">
+                        <label for="store-schedule-frequency" class="form-label">{{ t('stores.frequency') }}</label>
+                        <select class="form-select" id="store-schedule-frequency" data-change="updateStoreScheduleFields">
+                            <option value="">{{ t('stores.off') }}</option>
+                            <option value="daily">{{ t('stores.daily') }}</option>
+                            <option value="weekly">{{ t('stores.weekly') }}</option>
+                            <option value="monthly">{{ t('stores.monthly') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0" id="store-day-of-week-container" style="display: none;">
+                        <label for="store-schedule-day-of-week" class="form-label">{{ t('stores.day_of_week') }}</label>
+                        <select class="form-select" id="store-schedule-day-of-week">
+                            <option value="0">{{ t('stores.monday') }}</option>
+                            <option value="1">{{ t('stores.tuesday') }}</option>
+                            <option value="2">{{ t('stores.wednesday') }}</option>
+                            <option value="3">{{ t('stores.thursday') }}</option>
+                            <option value="4">{{ t('stores.friday') }}</option>
+                            <option value="5">{{ t('stores.saturday') }}</option>
+                            <option value="6">{{ t('stores.sunday') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0" id="store-day-of-month-container" style="display: none;">
+                        <label for="store-schedule-day-of-month" class="form-label">{{ t('stores.day_of_month') }}</label>
+                        <select class="form-select" id="store-schedule-day-of-month">
+                            <!-- 1-28 populated by JS -->
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0" id="store-hour-container" style="display: none;">
+                        <label for="store-schedule-hour" class="form-label">{{ t('stores.hour') }}</label>
+                        <select class="form-select" id="store-schedule-hour">
+                            <!-- 0-23 populated by JS -->
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" id="save-store-schedule-btn" data-action="saveStoreSchedule" disabled>
+                            <i class="bi bi-save me-1"></i> {{ t('common.save') }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Current schedule info -->
+                <div id="store-schedule-info" class="mt-3" style="display: none;">
+                    <div class="alert alert-light border mb-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">{{ t('stores.selected_store') }}</span>
+                                <strong id="store-schedule-description"></strong>
+                                <br>
+                                <small class="text-muted">
+                                    <span id="store-schedule-run-info"></span>
+                                </small>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm" data-action="deleteStoreSchedule">
+                                <i class="bi bi-trash"></i> {{ t('common.delete') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All schedules overview -->
+                <div class="mt-4">
+                    <h6 class="text-muted mb-2"><i class="bi bi-list-check me-1"></i> {{ t('stores.all_schedules') }}</h6>
+                    <p class="text-muted small mb-3">{{ t('stores.schedule_offer_scope_hint') }}</p>
+                    <div id="store-all-schedules-list">
+                        <p class="text-muted small">{{ t('common.loading') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ csp_nonce }}">
+// ============================================
+// i18n - Translation strings from server
+// ============================================
+window.DealMealsStoresI18n = {
+    // Common
+    loading: {{ t('common.loading')|tojson }},
+    save: {{ t('common.save')|tojson }},
+    delete: {{ t('common.delete')|tojson }},
+    error: {{ t('common.error')|tojson }},
+    success: {{ t('common.success')|tojson }},
+    ok: {{ t('common.ok')|tojson }},
+    never: {{ t('common.never')|tojson }},
+
+    // Stores
+    starting: {{ t('stores.starting')|tojson }},
+    select_store: {{ t('stores.select_store')|tojson }},
+    select_placeholder: {{ t('common.select_placeholder')|tojson }},
+    no_store_available: {{ t('stores.no_store_available')|tojson }},
+    no_stores_found: {{ t('stores.no_stores_found')|tojson }},
+    ecommerce: {{ t('stores.ecommerce')|tojson }},
+    store_type_butik: {{ t('stores.store_type_butik')|tojson }},
+    home_delivery: {{ t('stores.home_delivery')|tojson }},
+    store_selected: {{ t('stores.store_selected')|tojson }},
+    working: {{ t('stores.working')|tojson }},
+    checking_status: {{ t('stores.checking_status')|tojson }},
+    could_not_get_status: {{ t('stores.could_not_get_status')|tojson }},
+    could_not_connect: {{ t('stores.could_not_connect')|tojson }},
+    reset: {{ t('stores.reset')|tojson }},
+    scrape_in_progress: {{ t('stores.scrape_in_progress')|tojson }},
+    scrape_wait: {{ t('stores.scrape_wait')|tojson }},
+    ui_missing: {{ t('stores.ui_missing')|tojson }},
+    fetched_products: {{ t('stores.fetched_products')|tojson }},
+    fetched_products_with_variants: {{ t('stores.fetched_products_with_variants')|tojson }},
+    scrape_complete: {{ t('stores.scrape_complete')|tojson }},
+    error_occurred: {{ t('stores.error_occurred')|tojson }},
+    schedule_saved: {{ t('stores.schedule_saved')|tojson }},
+    schedule_removed: {{ t('stores.schedule_removed')|tojson }},
+    remove_schedule: {{ t('stores.remove_schedule')|tojson }},
+    select_store_first: {{ t('stores.select_store_first')|tojson }},
+    could_not_save: {{ t('stores.could_not_save')|tojson }},
+    could_not_delete: {{ t('stores.could_not_delete')|tojson }},
+    could_not_load: {{ t('stores.could_not_load')|tojson }},
+    could_not_load_stores: {{ t('stores.could_not_load_stores')|tojson }},
+    select_store_placeholder: {{ t('stores.select_store_placeholder')|tojson }},
+    no_schedules: {{ t('stores.no_schedules')|tojson }},
+    every_day_at: {{ t('stores.every_day_at')|tojson }},
+    every_weekday_at: {{ t('stores.every_weekday_at')|tojson }},
+    monthly_at: {{ t('stores.monthly_at')|tojson }},
+    unknown_frequency: {{ t('stores.unknown_frequency')|tojson }},
+    store: {{ t('stores.store')|tojson }},
+    schedule: {{ t('stores.schedule')|tojson }},
+    next_run: {{ t('stores.next_run')|tojson }},
+    last_completed: {{ t('stores.last_completed')|tojson }},
+    last_run_failed: {{ t('scheduler.last_run_failed')|tojson }},
+
+    // WebSocket progress messages (message_key translations)
+    'ws.store_busy': {{ t('ws.store_busy')|tojson }},
+    'ws.fetching_offers': {{ t('ws.fetching_offers')|tojson }},
+    'ws.fetching_products': {{ t('ws.fetching_products')|tojson }},
+    'ws.saving_products': {{ t('ws.saving_products')|tojson }},
+    'ws.saving_products_with_variants': {{ t('ws.saving_products_with_variants')|tojson }},
+    'ws.clearing_empty_offers': {{ t('ws.clearing_empty_offers')|tojson }},
+    'ws.fetch_complete': {{ t('ws.fetch_complete')|tojson }},
+    'ws.fetch_no_products_stale': {{ t('ws.fetch_no_products_stale')|tojson }},
+    'ws.fetch_empty_success': {{ t('ws.fetch_empty_success')|tojson }},
+    'ws.fetch_done': {{ t('ws.fetch_done')|tojson }},
+    'stores.fetching_offers': {{ t('stores.fetching_offers')|tojson }},
+
+    // Days of week (array for schedule formatting)
+    days: [
+        {{ t('stores.monday')|tojson }},
+        {{ t('stores.tuesday')|tojson }},
+        {{ t('stores.wednesday')|tojson }},
+        {{ t('stores.thursday')|tojson }},
+        {{ t('stores.friday')|tojson }},
+        {{ t('stores.saturday')|tojson }},
+        {{ t('stores.sunday')|tojson }}
+    ],
+
+    // API message keys
+    'scheduler.not_available': {{ t('scheduler.not_available')|tojson }},
+    'scheduler.saved': {{ t('scheduler.saved')|tojson }},
+    'scheduler.save_failed': {{ t('scheduler.save_failed')|tojson }},
+    'scheduler.deleted': {{ t('scheduler.deleted')|tojson }},
+    'scheduler.delete_failed': {{ t('scheduler.delete_failed')|tojson }},
+    'scheduler.invalid_json': {{ t('scheduler.invalid_json')|tojson }},
+    'scheduler.invalid_frequency': {{ t('scheduler.invalid_frequency')|tojson }},
+    'scheduler.invalid_hour': {{ t('scheduler.invalid_hour')|tojson }},
+    'scheduler.invalid_day_of_week': {{ t('scheduler.invalid_day_of_week')|tojson }},
+    'scheduler.invalid_day_of_month': {{ t('scheduler.invalid_day_of_month')|tojson }},
+    'scheduler.store_hour_conflict_title': {{ t('scheduler.store_hour_conflict_title')|tojson }},
+    'scheduler.store_hour_conflict': {{ t('scheduler.store_hour_conflict')|tojson }},
+    'stores.not_found': {{ t('stores.not_found')|tojson }},
+    'stores.plugin_not_available': {{ t('stores.plugin_not_available')|tojson }},
+    'stores.ehandel_not_supported': {{ t('stores.ehandel_not_supported')|tojson }},
+    'stores.store_config_incomplete_title': {{ t('stores.store_config_incomplete_title')|tojson }},
+    'stores.missing_delivery_address': {{ t('stores.missing_delivery_address')|tojson }},
+    'stores.missing_ehandel_store': {{ t('stores.missing_ehandel_store')|tojson }},
+    'stores.missing_store_location': {{ t('stores.missing_store_location')|tojson }},
+    'stores.invalid_store_config': {{ t('stores.invalid_store_config')|tojson }},
+    'ws.plugin_not_found': {{ t('ws.plugin_not_found')|tojson }},
+    'ws.plugin_not_available': {{ t('ws.plugin_not_available')|tojson }},
+    'ws.missing_delivery_address': {{ t('ws.missing_delivery_address')|tojson }},
+    'error.generic': {{ t('error.generic')|tojson }},
+    'error.connection': {{ t('error.connection')|tojson }},
+    'error.timeout': {{ t('error.timeout')|tojson }},
+    'error.database': {{ t('error.database')|tojson }},
+    'error.not_found': {{ t('error.not_found')|tojson }},
+    'error.invalid_data': {{ t('error.invalid_data')|tojson }},
+    'error.not_available': {{ t('error.not_available')|tojson }},
+    'stores.cancel_scrape': {{ t('stores.cancel_scrape')|tojson }},
+    'stores.scrape_cancelled': {{ t('stores.scrape_cancelled')|tojson }},
+    'stores.scrape_cancelling': {{ t('stores.scrape_cancelling')|tojson }},
+    fetch_offers: {{ t('stores.fetch_offers')|tojson }}
+};
+window.DealMealsStoresPage = {
+    locale: {{ current_locale|tojson }}
+};
+window.DealMealsI18n = window.DealMealsStoresI18n;
+
+</script>
+<script nonce="{{ csp_nonce }}" src="/static/js/stores.js"></script>
+{% endblock %}

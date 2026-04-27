@@ -1,0 +1,564 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('recipes.title') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .scraper-card {
+        transition: all 0.3s ease;
+        cursor: default;
+    }
+    .scraper-card .card-body {
+        padding: 0.75rem;
+    }
+    .scraper-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .scraper-card.disabled-scraper {
+        opacity: 0.75;
+    }
+    [data-bs-theme="dark"] .scraper-card.disabled-scraper {
+        opacity: 0.9;
+    }
+    .scraper-box {
+        min-height: 300px;
+        border: 2px dashed var(--bs-border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        background-color: var(--bs-tertiary-bg);
+    }
+    .scraper-box.active-box {
+        border-color: var(--bs-success);
+    }
+    .scraper-box.inactive-box {
+        border-color: var(--bs-secondary);
+    }
+    .move-btn {
+        opacity: 0.85;
+        transition: opacity 0.2s;
+    }
+    .move-btn:hover {
+        opacity: 1;
+    }
+    /* Dark mode: brighter move buttons - target each button type specifically */
+    [data-bs-theme="dark"] .move-btn.btn-outline-secondary,
+    [data-bs-theme="dark"] .move-btn.btn-outline-success {
+        opacity: 1;
+        border-color: var(--bs-body-color) !important;
+        color: var(--bs-body-color) !important;
+    }
+    [data-bs-theme="dark"] .move-btn.btn-outline-secondary:hover,
+    [data-bs-theme="dark"] .move-btn.btn-outline-success:hover {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: white !important;
+        border-color: white !important;
+    }
+    [data-bs-theme="dark"] .move-btn.btn-outline-danger {
+        color: #ff6b6b !important;
+        border-color: #ff6b6b !important;
+    }
+    [data-bs-theme="dark"] .move-btn.btn-outline-danger:hover {
+        background-color: rgba(255, 107, 107, 0.2) !important;
+        color: #ff8a8a !important;
+        border-color: #ff8a8a !important;
+    }
+    .stats-row {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    .running-indicator {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .spin-animation {
+        animation: spin 1s linear infinite;
+    }
+    .progress-container {
+        display: none;
+    }
+    .progress-container.active {
+        display: block;
+    }
+    .schedule-table thead th {
+        background-color: var(--subtheme2-bg) !important;
+        color: var(--subtheme2-text) !important;
+    }
+    /* Star/favorite button - same size as move button but borderless */
+    .star-btn {
+        /* Match btn-sm outer dimensions (including border) */
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: none !important;
+        background: transparent !important;
+        opacity: 0.7;
+        transition: opacity 0.2s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .star-btn i {
+        font-size: 1.35rem;  /* Fill the button area */
+    }
+    .star-btn:hover {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+    .star-btn .text-warning {
+        color: #ffc107 !important;
+    }
+    .star-btn:hover .text-muted {
+        color: #ffc107 !important;
+    }
+    /* Smooth fade-in for all modals (no bounce) */
+    .swal2-popup.swal2-show {
+        animation: swal2FadeIn 0.25s ease-out !important;
+    }
+    @keyframes swal2FadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    /* Highlight gear button when config is set (non-default) */
+    .config-active {
+        border-color: var(--bs-info) !important;
+        color: var(--bs-info) !important;
+    }
+    @keyframes attention-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        50% { box-shadow: 0 0 0 6px rgba(220, 53, 69, 0.7); }
+    }
+    .attention-pulse {
+        animation: attention-pulse 1s ease-in-out 3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Mina Recept URL Management Modal -->
+<div class="modal fade" id="myRecipesModal" tabindex="-1" aria-labelledby="myRecipesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="max-height: 80vh;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myRecipesModalLabel">{{ t('myrecipes.manage_urls') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto;">
+                <div class="input-group mb-3">
+                    <input type="url" id="newRecipeUrl" class="form-control form-control-sm"
+                           placeholder="{{ t('myrecipes.url_placeholder') }}">
+                    <button class="btn btn-primary btn-sm" data-action="addMyRecipeUrl">
+                        <i class="bi bi-plus-lg"></i> {{ t('myrecipes.add_url') }}
+                    </button>
+                </div>
+                <div id="myrecipes-url-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <p class="text-muted mb-4">
+            {{ t('recipes.page_desc') }}
+            <br>
+            {{ t('recipes.page_desc2') }}
+        </p>
+    </div>
+</div>
+
+<!-- Banner for unscraped sources (hidden by default, shown by JS) -->
+<div id="unscraped-banner" class="alert alert-info d-flex align-items-center mb-4 d-none">
+    <i class="bi bi-info-circle me-2"></i>
+    <span id="unscraped-banner-text"></span>
+</div>
+
+<div class="row">
+    <!-- Active scrapers -->
+    <div class="col-md-6 mb-4">
+        <h5 class="mb-3">
+            <span class="badge bg-success me-2">{{ t('recipes.active') }}</span>
+            {{ t('recipes.sources_used') }}
+        </h5>
+        <div class="scraper-box active-box" id="active-scrapers">
+            <div class="text-center text-muted py-5" id="active-empty">
+                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                <p class="mt-2">{{ t('recipes.no_active') }}</p>
+            </div>
+            <!-- Scrapers will be added here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Inactive scrapers -->
+    <div class="col-md-6 mb-4">
+        <h5 class="mb-3">
+            <span class="badge bg-secondary me-2">{{ t('recipes.inactive') }}</span>
+            {{ t('recipes.sources_not_used') }}
+        </h5>
+        <div class="scraper-box inactive-box" id="inactive-scrapers">
+            <div class="text-center text-muted py-5" id="inactive-empty">
+                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                <p class="mt-2">{{ t('recipes.no_inactive') }}</p>
+            </div>
+            <!-- Scrapers will be added here by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Run controls -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card" id="fetch-section">
+            <div class="card-header bg-subtheme text-white">
+                <h5 class="mb-0">{{ t('recipes.fetch_recipes') }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="scraper-select" class="form-label">{{ t('recipes.select_source') }}</label>
+                        <select class="form-select" id="scraper-select" data-change="updateTimeEstimates">
+                            <option value="">{{ t('recipes.select_source_placeholder') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="mode-select" class="form-label">{{ t('recipes.run_mode') }}</label>
+                        <select class="form-select" id="mode-select">
+                            <option value="full">{{ t('recipes.mode_full') }}</option>
+                            <option value="incremental" selected>{{ t('recipes.mode_incremental') }}</option>
+                            <option value="test">{{ t('recipes.mode_test') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div>
+                            <button class="btn btn-primary" id="run-scraper-btn" data-action="runScraper">
+                                <i class="bi bi-play-fill"></i> {{ t('recipes.fetch_recipes') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time estimates -->
+                <div id="time-estimates-container" class="mt-3" style="display: none;">
+                    <div class="alert alert-light border py-2 mb-0">
+                        <small>
+                            <i class="bi bi-clock me-1"></i>
+                            <strong>{{ t('recipes.approx_time') }}</strong>
+                            <span class="text-muted ms-2" id="time-estimates-text"></span>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Scraper warning -->
+                <div id="scraper-warning-container" class="mt-3" style="display: none;">
+                    <div class="alert alert-warning py-2 mb-0">
+                        <small id="scraper-warning-text"></small>
+                    </div>
+                </div>
+
+                <!-- Progress area -->
+                <div class="progress-container mt-4" id="progress-container">
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-border spinner-border-sm me-3 running-indicator" role="status">
+                                    <span class="visually-hidden">{{ t('common.loading') }}</span>
+                                </div>
+                                <div>
+                                    <strong id="progress-title">{{ t('recipes.fetching') }}</strong>
+                                    <p class="mb-0 small" id="progress-message">{{ t('stores.starting') }}</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm" id="cancel-scraper-btn" data-action="cancelScraper">
+                                <i class="bi bi-x-circle me-1"></i>{{ t('recipes.cancel') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result area -->
+                <div id="result-container" class="mt-4" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scheduling -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-subtheme text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-event me-2"></i>{{ t('stores.scheduling') }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-end">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <label for="schedule-scraper-select" class="form-label">{{ t('recipes.select_source') }}</label>
+                        <select class="form-select" id="schedule-scraper-select" data-change="loadSchedule">
+                            <option value="">{{ t('recipes.select_source_placeholder') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0">
+                        <label for="schedule-frequency" class="form-label">{{ t('stores.frequency') }}</label>
+                        <select class="form-select" id="schedule-frequency" data-change="updateScheduleFields">
+                            <option value="">{{ t('stores.off') }}</option>
+                            <option value="daily">{{ t('stores.daily') }}</option>
+                            <option value="weekly">{{ t('stores.weekly') }}</option>
+                            <option value="monthly">{{ t('stores.monthly') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0" id="day-of-week-container" style="display: none;">
+                        <label for="schedule-day-of-week" class="form-label">{{ t('stores.day_of_week') }}</label>
+                        <select class="form-select" id="schedule-day-of-week">
+                            <option value="0">{{ t('stores.monday') }}</option>
+                            <option value="1">{{ t('stores.tuesday') }}</option>
+                            <option value="2">{{ t('stores.wednesday') }}</option>
+                            <option value="3">{{ t('stores.thursday') }}</option>
+                            <option value="4">{{ t('stores.friday') }}</option>
+                            <option value="5">{{ t('stores.saturday') }}</option>
+                            <option value="6">{{ t('stores.sunday') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0" id="day-of-month-container" style="display: none;">
+                        <label for="schedule-day-of-month" class="form-label">{{ t('stores.day_of_month') }}</label>
+                        <select class="form-select" id="schedule-day-of-month">
+                            <!-- 1-28 to avoid issues with short months -->
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0" id="hour-container" style="display: none;">
+                        <label for="schedule-hour" class="form-label">{{ t('stores.hour') }}</label>
+                        <select class="form-select" id="schedule-hour">
+                            <!-- 0-23, populated by JS -->
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" id="save-schedule-btn" data-action="saveSchedule" disabled>
+                            <i class="bi bi-save me-1"></i> {{ t('common.save') }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Current schedule info (for selected scraper) -->
+                <div id="schedule-info" class="mt-3" style="display: none;">
+                    <div class="alert alert-light border mb-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">{{ t('recipes.selected_source') }}</span>
+                                <strong id="schedule-description"></strong>
+                                <br>
+                                <small class="text-muted">
+                                    <span id="schedule-last-run"></span>
+                                    <span id="schedule-next-run"></span>
+                                </small>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm" data-action="deleteSchedule">
+                                <i class="bi bi-trash"></i> {{ t('common.delete') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All schedules overview -->
+                <div class="mt-4">
+                    <h6 class="text-muted mb-3"><i class="bi bi-list-check me-1"></i> {{ t('stores.all_schedules') }}</h6>
+                    <div id="all-schedules-list">
+                        <p class="text-muted small">{{ t('common.loading') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ csp_nonce }}">
+// ============================================
+// i18n - Translation strings from server
+// ============================================
+window.DealMealsRecipesI18n = {
+    // Common
+    loading: {{ t('common.loading')|tojson }},
+    save: {{ t('common.save')|tojson }},
+    delete: {{ t('common.delete')|tojson }},
+    error: {{ t('common.error')|tojson }},
+    success: {{ t('common.success')|tojson }},
+    ok: {{ t('common.ok')|tojson }},
+    cancel: {{ t('common.cancel')|tojson }},
+    never: {{ t('common.never')|tojson }},
+    close: {{ t('common.close')|tojson }},
+
+    // Recipes
+    recipes: {{ t('recipes.recipes')|tojson }},
+    recipes_fetched: {{ t('recipes.recipes_fetched')|tojson }},
+    never_run: {{ t('recipes.never_run')|tojson }},
+    fetch_this: {{ t('recipes.fetch_this')|tojson }},
+    unscraped_banner: {{ t('recipes.unscraped_banner')|tojson }},
+    unscraped_banner_action: {{ t('recipes.unscraped_banner_action')|tojson }},
+    select_source_placeholder: {{ t('recipes.select_source_placeholder')|tojson }},
+    all_active_sources: {{ t('recipes.all_active_sources')|tojson }},
+    running_all_progress: {{ t('recipes.running_all_progress')|tojson }},
+    all_complete: {{ t('recipes.all_complete')|tojson }},
+    all_complete_summary: {{ t('recipes.all_complete_summary')|tojson }},
+    run_all_confirm_title: {{ t('recipes.run_all_confirm_title')|tojson }},
+    run_all_confirm_desc: {{ t('recipes.run_all_confirm_desc')|tojson }},
+    run_all_confirm_yes: {{ t('recipes.run_all_confirm_yes')|tojson }},
+    time_unknown: {{ t('recipes.time_unknown')|tojson }},
+    fetching: {{ t('recipes.fetching')|tojson }},
+    waiting_server: {{ t('recipes.waiting_server')|tojson }},
+    cancelling: {{ t('recipes.cancelling')|tojson }},
+    recipes_found: {{ t('recipes.recipes_found')|tojson }},
+    fetch_complete: {{ t('recipes.fetch_complete')|tojson }},
+    new_recipes_found: {{ t('recipes.new_recipes_found')|tojson }},
+    total_in_db: {{ t('recipes.total_in_db')|tojson }},
+    spell_corrections_made: {{ t('config.spellcheck_scraper_message')|tojson }},
+    test_not_saved: {{ t('recipes.test_not_saved')|tojson }},
+    test_empty_not_saved: {{ t('recipes.test_empty_not_saved')|tojson }},
+    no_new_recipes: {{ t('recipes.no_new_recipes')|tojson }},
+    full_empty_kept: {{ t('recipes.full_empty_kept')|tojson }},
+    no_saveable_recipes_found: {{ t('recipes.no_saveable_recipes_found')|tojson }},
+    no_recipes_found: {{ t('recipes.no_recipes_found')|tojson }},
+    partial_result: {{ t('recipes.partial_result')|tojson }},
+    cancelled: {{ t('recipes.cancelled')|tojson }},
+    fetch_cancelled: {{ t('recipes.fetch_cancelled')|tojson }},
+    clear_db_title: {{ t('recipes.clear_db_title')|tojson }},
+    clear_db_confirm: {{ t('recipes.clear_db_confirm')|tojson }},
+    clear_db_yes: {{ t('recipes.clear_db_yes')|tojson }},
+    cleared: {{ t('recipes.cleared')|tojson }},
+    select_source_first: {{ t('recipes.select_source_first')|tojson }},
+    already_running: {{ t('recipes.already_running')|tojson }},
+    already_running_desc: {{ t('recipes.already_running_desc')|tojson }},
+    full_confirm_title: {{ t('recipes.full_confirm_title')|tojson }},
+    full_confirm_desc: {{ t('recipes.full_confirm_desc')|tojson }},
+    yes_run: {{ t('recipes.yes_run')|tojson }},
+    could_not_load: {{ t('recipes.could_not_load')|tojson }},
+    could_not_change: {{ t('recipes.could_not_change')|tojson }},
+    error_loading: {{ t('recipes.error_loading')|tojson }},
+    error_cancel: {{ t('recipes.error_cancel')|tojson }},
+    scraper_started: {{ t('recipes.scraper_started')|tojson }},
+
+    // Favorites
+    star_added: {{ t('recipes.star_added')|tojson }},
+    star_removed: {{ t('recipes.star_removed')|tojson }},
+
+    // Schedule (reuse stores)
+    schedule_saved: {{ t('stores.schedule_saved')|tojson }},
+    schedule_removed: {{ t('stores.schedule_removed')|tojson }},
+    remove_schedule: {{ t('stores.remove_schedule')|tojson }},
+    no_schedules: {{ t('stores.no_schedules')|tojson }},
+    every_day_at: {{ t('stores.every_day_at')|tojson }},
+    every_weekday_at: {{ t('stores.every_weekday_at')|tojson }},
+    monthly_at: {{ t('stores.monthly_at')|tojson }},
+    unknown_frequency: {{ t('stores.unknown_frequency')|tojson }},
+    could_not_load_schedules: {{ t('stores.could_not_load')|tojson }},
+    select_source: {{ t('recipes.select_source')|tojson }},
+    schedule: {{ t('stores.schedule')|tojson }},
+    next_run: {{ t('stores.next_run')|tojson }},
+    last_completed: {{ t('stores.last_completed')|tojson }},
+    last_run_failed: {{ t('scheduler.last_run_failed')|tojson }},
+    last_run_recipes: {{ t('recipes.last_run_recipes')|tojson }},
+
+    // Mode labels
+    mode_full: {{ t('recipes.mode_full_name')|tojson }},
+    mode_incremental: {{ t('recipes.mode_incremental_name')|tojson }},
+    mode_test: {{ t('recipes.mode_test_name')|tojson }},
+
+    // Card labels
+    remove_favorite: {{ t('recipes.remove_favorite')|tojson }},
+    mark_favorite: {{ t('recipes.mark_favorite')|tojson }},
+    deactivate: {{ t('recipes.deactivate')|tojson }},
+    activate: {{ t('recipes.activate')|tojson }},
+    clear_database: {{ t('recipes.clear_database')|tojson }},
+    config_title: {{ t('recipes.config_title')|tojson }},
+    config_full_label: {{ t('recipes.config_full_label')|tojson }},
+    config_incremental_label: {{ t('recipes.config_incremental_label')|tojson }},
+    config_all_full: {{ t('recipes.config_all_full')|tojson }},
+    config_all_incremental: {{ t('recipes.config_all_incremental')|tojson }},
+    config_max: {{ t('recipes.config_max')|tojson }},
+    config_saved: {{ t('recipes.config_saved')|tojson }},
+    config_settings: {{ t('recipes.config_settings')|tojson }},
+
+    // Mina Recept (custom URL scraper)
+    description_prefix: {{ t('recipes.description_prefix')|tojson }},
+    myrecipes_scraper_name: {{ t('myrecipes.scraper_name')|tojson }},
+    myrecipes_source_label: {{ t('myrecipes.source_label')|tojson }},
+    myrecipes_manage_urls: {{ t('myrecipes.manage_urls')|tojson }},
+    myrecipes_add_url: {{ t('myrecipes.add_url')|tojson }},
+    myrecipes_url_placeholder: {{ t('myrecipes.url_placeholder')|tojson }},
+    myrecipes_no_urls: {{ t('myrecipes.no_urls')|tojson }},
+    myrecipes_url_added: {{ t('myrecipes.url_added')|tojson }},
+    myrecipes_url_deleted: {{ t('myrecipes.url_deleted')|tojson }},
+    myrecipes_status_pending: {{ t('myrecipes.status_pending')|tojson }},
+    myrecipes_status_ok: {{ t('myrecipes.status_ok')|tojson }},
+    myrecipes_status_error: {{ t('myrecipes.status_error')|tojson }},
+    myrecipes_status_no_recipe: {{ t('myrecipes.status_no_recipe')|tojson }},
+    myrecipes_status_gave_up: {{ t('myrecipes.status_gave_up')|tojson }},
+    myrecipes_confirm_delete: {{ t('myrecipes.confirm_delete')|tojson }},
+
+    database_size: {{ t('recipes.database_size')|tojson }},
+    last_run: {{ t('recipes.last_run')|tojson }},
+    approx: {{ t('common.approx')|tojson }},
+    unknown: {{ t('common.unknown')|tojson }},
+
+    // Days of week (array for schedule formatting)
+    days: [
+        {{ t('stores.monday')|tojson }},
+        {{ t('stores.tuesday')|tojson }},
+        {{ t('stores.wednesday')|tojson }},
+        {{ t('stores.thursday')|tojson }},
+        {{ t('stores.friday')|tojson }},
+        {{ t('stores.saturday')|tojson }},
+        {{ t('stores.sunday')|tojson }}
+    ],
+
+    // API message keys
+    'scheduler.not_available': {{ t('scheduler.not_available')|tojson }},
+    'scheduler.saved': {{ t('scheduler.saved')|tojson }},
+    'scheduler.save_failed': {{ t('scheduler.save_failed')|tojson }},
+    'scheduler.deleted': {{ t('scheduler.deleted')|tojson }},
+    'scheduler.delete_failed': {{ t('scheduler.delete_failed')|tojson }},
+    'scheduler.invalid_json': {{ t('scheduler.invalid_json')|tojson }},
+    'scheduler.invalid_frequency': {{ t('scheduler.invalid_frequency')|tojson }},
+    'recipes.not_available': {{ t('recipes.not_available')|tojson }},
+    'recipes.cache_rebuild_started': {{ t('recipes.cache_rebuild_started')|tojson }},
+    'recipes.invalid_mode': {{ t('recipes.invalid_mode')|tojson }},
+    'recipes.fetching_progress': {{ t('recipes.fetching_progress')|tojson }},
+    'recipes.fetching_recipes': {{ t('recipes.fetching_recipes')|tojson }},
+    'recipes.fetching_all': {{ t('recipes.fetching_all')|tojson }},
+    'recipes.test_not_saved': {{ t('recipes.test_not_saved')|tojson }},
+    'recipes.test_empty_not_saved': {{ t('recipes.test_empty_not_saved')|tojson }},
+    'recipes.no_new_recipes': {{ t('recipes.no_new_recipes')|tojson }},
+    'recipes.full_empty_kept': {{ t('recipes.full_empty_kept')|tojson }},
+    'recipes.no_saveable_recipes_found': {{ t('recipes.no_saveable_recipes_found')|tojson }},
+    'recipes.no_recipes_found': {{ t('recipes.no_recipes_found')|tojson }},
+    'recipes.partial_result': {{ t('recipes.partial_result')|tojson }},
+    'recipes.fetch_failed': {{ t('recipes.fetch_failed')|tojson }},
+    'recipes.starting_fetch': {{ t('recipes.starting_fetch')|tojson }},
+    'recipes.ready_to_run': {{ t('recipes.ready_to_run')|tojson }},
+    'recipes.error_prefix': {{ t('recipes.error_prefix')|tojson }},
+    'recipes.scraper_started': {{ t('recipes.scraper_started')|tojson }},
+    'recipes.scraper_already_running': {{ t('recipes.scraper_already_running')|tojson }},
+    'recipes.scraper_not_found': {{ t('recipes.scraper_not_found')|tojson }},
+    'recipes.clear_inactive_only': {{ t('recipes.clear_inactive_only')|tojson }},
+    'recipes.deleted_count': {{ t('recipes.deleted_count')|tojson }},
+    'recipes.no_active_fetch': {{ t('recipes.no_active_fetch')|tojson }},
+    'preferences.saved': {{ t('preferences.saved')|tojson }},
+    'error.generic': {{ t('error.generic')|tojson }},
+    'error.connection': {{ t('error.connection')|tojson }},
+    'error.timeout': {{ t('error.timeout')|tojson }},
+    'error.database': {{ t('error.database')|tojson }},
+    'error.not_found': {{ t('error.not_found')|tojson }},
+    'error.invalid_data': {{ t('error.invalid_data')|tojson }},
+    'error.not_available': {{ t('error.not_available')|tojson }}
+};
+window.DealMealsRecipesPage = {
+    locale: {{ current_locale|tojson }}
+};
+window.DealMealsI18n = window.DealMealsRecipesI18n;
+</script>
+<script nonce="{{ csp_nonce }}" src="/static/js/recipes.js"></script>
+{% endblock %}
