@@ -792,10 +792,9 @@ async function downloadMissingImages() {
     // Start the download
     try {
         const response = await fetch('/api/images/download', { method: 'POST' });
-        if (!response.ok) throw new Error(i18n.error);
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
-        if (!data.success) {
+        if (!response.ok || !data.success) {
             throw new Error(resolveMsg(data) || i18n.error);
         }
 

@@ -32,7 +32,15 @@ from utils.recipe_image_cleanup import (
     prune_orphan_recipe_images,
 )
 from utils.security import is_safe_url, ssrf_safe_event_hook
-from state import image_download_state, get_image_state, update_image_state, try_start_image_download
+from state import (
+    image_download_state,
+    get_image_state,
+    update_image_state,
+    try_start_image_download,
+    running_scrapers,
+    get_running_scraper,
+    get_run_all_queue,
+)
 from constants_timeouts import HTTP_TIMEOUT
 
 router = APIRouter(prefix="/api/images", tags=["images"])
@@ -50,6 +58,20 @@ IMAGE_BATCH_PAUSE_AUTO = 20           # 20 seconds pause for auto-download
 
 # Reference to active download task (prevents GC before task starts)
 _active_download_task: asyncio.Task | None = None
+
+
+async def _recipe_scrape_is_active() -> bool:
+    """Return True while recipe scraping or the run-all queue is active."""
+    queue_state = await get_run_all_queue()
+    if queue_state.get("active"):
+        return True
+
+    for scraper_id in list(running_scrapers.keys()):
+        state = await get_running_scraper(scraper_id)
+        if state and state.get("running"):
+            return True
+
+    return False
 
 
 def _prune_recipe_image_orphans_after_download() -> None:
@@ -676,6 +698,12 @@ async def start_image_download(request: Request):
         batch_pause = IMAGE_BATCH_PAUSE_AUTO  # 20 min - extra safe after scraping
     else:
         batch_pause = IMAGE_BATCH_PAUSE_MANUAL  # 15 min - safe manual download
+
+    if await _recipe_scrape_is_active():
+        return JSONResponse({
+            "success": False,
+            "message_key": "images.download_wait_for_recipe_scraper"
+        }, status_code=409)
 
     # Atomically check if idle and start — prevents duplicate tasks on double-click
     started = await try_start_image_download({

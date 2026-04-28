@@ -231,6 +231,7 @@ class ScraperScheduler:
         import time
         start_time = time.time()
         recipes_found = 0
+        attempted_count = 0
 
         logger.info(f"Running scheduled scraper: {scraper_id}")
 
@@ -244,6 +245,30 @@ class ScraperScheduler:
 
             # Run incremental scrape
             scraper = scraper_class()
+            async def progress_callback(data: dict):
+                nonlocal attempted_count
+                if data.get("activity_only"):
+                    return
+                try:
+                    current = int(data.get("current") or 0)
+                except (TypeError, ValueError):
+                    current = 0
+                attempted_count = max(attempted_count, current)
+
+            if hasattr(scraper, 'set_progress_callback'):
+                scraper.set_progress_callback(progress_callback)
+
+            def get_final_attempted_count() -> int | None:
+                progress = getattr(scraper, "_progress", None)
+                current = 0
+                if isinstance(progress, dict):
+                    try:
+                        current = int(progress.get("current") or 0)
+                    except (TypeError, ValueError):
+                        current = 0
+                final_count = max(attempted_count, current)
+                return final_count if final_count > 0 else None
+
             scraper_info = scraper_manager.get_scraper(scraper_id)
             db_source_name = (scraper_info.db_source_name or scraper_info.name) if scraper_info else None
             if hasattr(scraper, 'scrape_incremental'):
@@ -293,7 +318,14 @@ class ScraperScheduler:
 
             # Save to run history for time estimates
             duration = int(time.time() - start_time)
-            save_run_history(scraper_id, "incremental", duration, recipes_found, success=True)
+            save_run_history(
+                scraper_id,
+                "incremental",
+                duration,
+                recipes_found,
+                attempted_count=get_final_attempted_count(),
+                success=True,
+            )
 
             # Flag for batch download (checked after lock release grace period)
             if recipes_found > 0:
@@ -302,7 +334,15 @@ class ScraperScheduler:
         except Exception as e:
             logger.exception(f"Scheduled scraper {scraper_id} failed")
             duration = int(time.time() - start_time)
-            save_run_history(scraper_id, "incremental", duration, recipes_found, success=False, error_message=str(e))
+            save_run_history(
+                scraper_id,
+                "incremental",
+                duration,
+                recipes_found,
+                attempted_count=attempted_count if attempted_count > 0 else None,
+                success=False,
+                error_message=str(e),
+            )
 
     def _update_last_run(self, scraper_id: str):
         """Update last_run_at in database."""

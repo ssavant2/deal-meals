@@ -76,6 +76,19 @@ Go to the **Stores** page. Pick a store (Willys, ICA, Coop, etc.), choose your l
 
 Go back to the **Home** page. Your personalized recipe suggestions based on current deals will be ready!
 
+### First-run warm-up
+
+After you have recipes and store offers, Deal Meals needs one successful recipe
+matching rebuild before the Home page can show the full current suggestion set.
+Right after a first setup, recipe fetch, or offer fetch, the Home page may
+briefly show fewer suggestions, old suggestions, or no suggestions while the
+matching cache is rebuilt.
+
+There is also a small performance warm-up: the fastest optimized cache path is
+enabled after 3 consecutive clean verified cache refreshes. Until then the app
+still works, but it does extra safety verification and can feel slower.
+Scheduling recipe and store fetches lets this happen in the background.
+
 The start guide disappears automatically once all steps are complete.
 
 ---

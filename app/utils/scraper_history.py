@@ -8,11 +8,24 @@ from database import get_db_session
 from loguru import logger
 
 
+def _has_attempted_count_column(db) -> bool:
+    """Return True when this database has the newer scalable estimate column."""
+    return bool(db.execute(text("""
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'scraper_run_history'
+              AND column_name = 'attempted_count'
+        )
+    """)).scalar())
+
+
 def save_run_history(
     scraper_id: str,
     mode: str,
     duration_seconds: int,
     recipes_found: int = 0,
+    attempted_count: int = None,
     success: bool = True,
     error_message: str = None,
     update_schedule: bool = False
@@ -26,20 +39,43 @@ def save_run_history(
     """
     try:
         with get_db_session() as db:
-            db.execute(
-                text("""
-                    INSERT INTO scraper_run_history (scraper_id, mode, duration_seconds, recipes_found, success, error_message)
-                    VALUES (:scraper_id, :mode, :duration_seconds, :recipes_found, :success, :error_message)
-                """),
-                {
-                    "scraper_id": scraper_id,
-                    "mode": mode,
-                    "duration_seconds": duration_seconds,
-                    "recipes_found": recipes_found,
-                    "success": success,
-                    "error_message": error_message
-                }
-            )
+            params = {
+                "scraper_id": scraper_id,
+                "mode": mode,
+                "duration_seconds": duration_seconds,
+                "recipes_found": recipes_found,
+                "success": success,
+                "error_message": error_message
+            }
+            if _has_attempted_count_column(db):
+                params["attempted_count"] = attempted_count
+                db.execute(
+                    text("""
+                        INSERT INTO scraper_run_history (
+                            scraper_id, mode, duration_seconds, recipes_found,
+                            attempted_count, success, error_message
+                        )
+                        VALUES (
+                            :scraper_id, :mode, :duration_seconds, :recipes_found,
+                            :attempted_count, :success, :error_message
+                        )
+                    """),
+                    params,
+                )
+            else:
+                db.execute(
+                    text("""
+                        INSERT INTO scraper_run_history (
+                            scraper_id, mode, duration_seconds, recipes_found,
+                            success, error_message
+                        )
+                        VALUES (
+                            :scraper_id, :mode, :duration_seconds, :recipes_found,
+                            :success, :error_message
+                        )
+                    """),
+                    params,
+                )
             db.commit()
 
             if update_schedule and success:

@@ -57,7 +57,10 @@ sys.path.insert(0, app_dir)
 
 from database import get_db_session
 from models import FoundRecipe
-from scrapers.recipes._common import _is_type, RecipeScrapeResult, make_recipe_scrape_result, parse_iso8601_duration
+from scrapers.recipes._common import (
+    _is_type, RecipeScrapeResult, make_recipe_scrape_result,
+    parse_iso8601_duration, StreamingRecipeSaver
+)
 
 # GUI Metadata
 SCRAPER_NAME = "Mathem.se"
@@ -112,6 +115,14 @@ class MathemScraper:
                 "total": total,
                 "success": success
             })
+
+    async def _report_activity(self):
+        """Report scraper activity without changing visible progress."""
+        if self._progress_callback:
+            try:
+                await self._progress_callback({"activity_only": True})
+            except Exception:
+                pass
 
     async def discover_sitemap_urls(self, client: httpx.AsyncClient) -> List[str]:
         """
@@ -346,7 +357,8 @@ class MathemScraper:
     async def scrape_recipes_concurrent(
         self,
         urls: List[str],
-        max_concurrent: int = 5
+        max_concurrent: int = 5,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> List[Dict]:
         """
         Scrape multiple recipes concurrently with httpx.
@@ -361,6 +373,7 @@ class MathemScraper:
                 result = await self.scrape_recipe_httpx(client, url)
                 if result is None:
                     failed_count += 1
+                await self._report_activity()
                 return result
 
         async with httpx.AsyncClient(
@@ -383,11 +396,15 @@ class MathemScraper:
 
                 for recipe in results:
                     if recipe:
-                        recipes.append(recipe)
+                        if stream_saver:
+                            await stream_saver.add(recipe)
+                        else:
+                            recipes.append(recipe)
 
                 # Report progress for GUI
                 progress = min(i + batch_size, len(urls))
-                await self._report_progress(progress, len(urls), len(recipes))
+                found_count = stream_saver.seen_count if stream_saver else len(recipes)
+                await self._report_progress(progress, len(urls), found_count)
 
                 # Delay between batches to be nice
                 if i + batch_size < len(urls):
@@ -406,7 +423,8 @@ class MathemScraper:
     async def scrape_all_recipes(
         self,
         max_recipes: Optional[int] = None,
-        force_all: bool = False
+        force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         """
         Main scraping method (matches interface expected by GUI).
@@ -461,8 +479,12 @@ class MathemScraper:
                     reason="no_new_recipes",
                 )
 
-        recipes = await self.scrape_recipes_concurrent(urls_to_scrape)
-        logger.info(f"\nScraped {len(recipes)} recipes successfully")
+        recipes = await self.scrape_recipes_concurrent(
+            urls_to_scrape,
+            stream_saver=stream_saver,
+        )
+        found_count = stream_saver.seen_count if stream_saver else len(recipes)
+        logger.info(f"\nScraped {found_count} recipes successfully")
 
         return make_recipe_scrape_result(
             recipes,
@@ -485,11 +507,26 @@ class MathemScraper:
         Returns:
             Stats dict with created/updated counts
         """
-        recipes = await self.scrape_all_recipes(
-            force_all=overwrite,
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
             max_recipes=max_recipes,
         )
-        return self.save_recipes(recipes, overwrite=overwrite)
+        result = await self.scrape_all_recipes(
+            force_all=overwrite,
+            max_recipes=max_recipes,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
 
     async def run(self, mode: str = "incremental", test_limit: int = 20) -> Dict:
         """

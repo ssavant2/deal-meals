@@ -476,6 +476,7 @@ CREATE TABLE scraper_run_history (
     mode VARCHAR(20) NOT NULL CHECK (mode IN ('test', 'incremental', 'full')),
     duration_seconds INTEGER NOT NULL,
     recipes_found INTEGER DEFAULT 0,
+    attempted_count INTEGER,
     success BOOLEAN DEFAULT true,
     error_message TEXT,
     run_at TIMESTAMPTZ DEFAULT NOW()
@@ -485,6 +486,7 @@ CREATE INDEX idx_scraper_run_history_scraper_mode ON scraper_run_history(scraper
 CREATE INDEX idx_scraper_run_history_run_at ON scraper_run_history(run_at);
 
 COMMENT ON TABLE scraper_run_history IS 'Run time history for estimating future scraper durations';
+COMMENT ON COLUMN scraper_run_history.attempted_count IS 'Number of recipe URLs/items attempted during the run; used for scalable time estimates';
 
 -- ============================================================================
 -- SCRAPER_CONFIG - Per-scraper recipe fetch limits (configurable via UI)

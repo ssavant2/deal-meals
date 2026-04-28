@@ -36,8 +36,8 @@ How scraper code changes are deployed depends on the install style:
    - [1.1 Folder Structure](#11-folder-structure) · [1.2 Minimal Plugin](#12-minimal-store-plugin) · [1.3 Product Format](#13-product-format) · [1.4 Config UI](#14-optional-store-configuration-ui) · [1.5 Other Overrides](#15-optional-other-overrides) · [1.6 Food Filtering](#16-food-filtering) · [1.7 Mathem Example](#17-real-example-mathem-simplest-store)
    - [1.8 Login Stores](#18-stores-that-require-login) · [1.9 Strategy Decision Tree](#19-choosing-a-scraping-strategy) · [1.10 Multi-Buy Offers](#110-multi-buy-offers) · [1.11 Error Handling](#111-error-handling-in-scrape_offers)
 2. [Adding a Recipe Scraper](#2-adding-a-recipe-scraper)
-   - [2.1 File Structure](#21-file-structure) · [2.2 Discovery](#22-discovery) · [2.3 Constants](#23-required-module-constants) · [2.4 Interface](#24-required-class-interface) · [2.5 Recipe Format](#25-required-recipe-format) · [2.6 Saving](#26-required-save_to_database-function)
-   - [2.7 Result Contract](#27-recipe-scrape-result-contract) · [2.8 scrape_and_save()](#28-alternative-scrape_and_save-method) · [2.9 Progress Callbacks](#29-progress-callbacks-recommended) · [2.10 Examples](#210-real-examples) · [2.11 Strategies](#211-common-scraping-strategies)
+   - [2.1 File Structure](#21-file-structure) · [2.2 Discovery](#22-discovery) · [2.3 Constants](#23-required-module-constants) · [2.4 Interface](#24-required-class-interface) · [2.5 Recipe Format](#25-required-recipe-format) · [2.6 Saving](#26-saving-streaming-and-legacy)
+   - [2.7 Result Contract](#27-recipe-scrape-result-contract) · [2.8 scrape_and_save()](#28-recommended-scrape_and_save-method) · [2.9 Progress Callbacks](#29-progress-callbacks-recommended) · [2.10 Examples](#210-real-examples) · [2.11 Strategies](#211-common-scraping-strategies)
 3. [Shared Utilities](#3-shared-utilities)
 4. [Testing](#4-testing)
 5. [Troubleshooting](#5-troubleshooting)
@@ -476,7 +476,11 @@ SCRAPER_WARNING = "Large scraper — full mode takes ~30 minutes"
 ### 2.4 Required Class Interface
 
 ```python
-from scrapers.recipes._common import RecipeScrapeResult, make_recipe_scrape_result
+from scrapers.recipes._common import (
+    RecipeScrapeResult,
+    StreamingRecipeSaver,
+    make_recipe_scrape_result,
+)
 
 class YourSiteScraper:
     """Scraper for YourSite.se."""
@@ -496,7 +500,8 @@ class YourSiteScraper:
     async def scrape_all_recipes(
         self,
         max_recipes: int = None,
-        force_all: bool = False
+        force_all: bool = False,
+        stream_saver: StreamingRecipeSaver = None,
     ) -> RecipeScrapeResult:
         """
         Main entry point. Called by the GUI for all three modes:
@@ -523,19 +528,26 @@ class YourSiteScraper:
             urls = urls[:max_recipes]
 
         recipes = []
+        processed = 0
+        success = 0
         for url in urls:
             if self._cancel_flag:
                 break
             recipe = await self._scrape_recipe(url)
+            processed += 1
             if recipe:
-                recipes.append(recipe)
+                if stream_saver:
+                    await stream_saver.add(recipe)
+                else:
+                    recipes.append(recipe)
+                success += 1
             # Send progress updates
             if self._progress_callback:
                 await self._progress_callback({
                     "type": "progress",
-                    "current": len(recipes),
+                    "current": processed,
                     "total": len(urls),
-                    "success": len(recipes)
+                    "success": success
                 })
 
         return make_recipe_scrape_result(
@@ -565,9 +577,15 @@ Each recipe dict must have:
 
 **Important:** Skip recipes with fewer than `MIN_INGREDIENTS` (3) ingredients. These are typically ingredient pages, not real recipes.
 
-### 2.6 Required: `save_to_database()` Function
+### 2.6 Saving: Streaming and Legacy
 
-Each scraper module must define a module-level function for saving. Use the shared helper from `_common.py`:
+For production GUI/scheduled runs, prefer streaming saves with
+`scrape_and_save()` and `StreamingRecipeSaver` (see section 2.8). This keeps
+large recipe imports memory-flat and saves progress every 50 recipes by default.
+
+Keep a module-level `save_to_database()` function for developer CLI helpers,
+older integrations, and simple scrapers that still return all recipes at the
+end. Use the shared helper from `_common.py`:
 
 ```python
 from scrapers.recipes._common import save_recipes_to_database
@@ -578,6 +596,10 @@ def save_to_database(recipes, clear_old=False):
 ```
 
 `recipes` may be either a plain `list[dict]` or a `RecipeScrapeResult`. The shared function handles deduplication, upsert (update existing / insert new), permanently excluded URLs, spell checking, per-recipe commits, and error handling. Returns `{"cleared": N, "created": N, "updated": N, "skipped": N, "errors": N, "spell_corrections": N}` plus scrape status metadata.
+
+When using `StreamingRecipeSaver`, do **not** call `save_to_database()` for each
+batch yourself. Add recipes to the saver and call `finish()` once after the
+scrape completes.
 
 ### 2.7 Recipe Scrape Result Contract
 
@@ -621,18 +643,57 @@ If you write custom save logic, you must handle excluded URLs and spell checking
 
 > **Strongly recommended:** While technically you could write your own save logic, the built-in recipe scrapers use this shared helper. It handles edge cases (duplicate URLs, preserving user-excluded recipes, permanently excluded URLs, per-recipe commits to avoid cascading rollbacks) that are easy to get wrong. Use it unless you have a specific reason not to.
 
-### 2.8 Alternative: `scrape_and_save()` Method
+### 2.8 Recommended: `scrape_and_save()` Method
 
-Instead of a separate `save_to_database()` function, your scraper class can define:
+The web route prefers `scrape_and_save()` for full and incremental modes when
+the method exists. Implement it with `StreamingRecipeSaver` for any scraper that
+can return hundreds or thousands of recipes.
 
 ```python
-async def scrape_and_save(self, overwrite: bool = False, max_recipes: int = None) -> Dict[str, int]:
-    """Combined scrape + save. The GUI checks for this method first."""
-    recipes = await self.scrape_all_recipes(force_all=overwrite, max_recipes=max_recipes)
-    return save_to_database(recipes, clear_old=overwrite)
+from scrapers.recipes._common import StreamingRecipeSaver
+
+async def scrape_and_save(
+    self,
+    overwrite: bool = False,
+    max_recipes: int = None,
+) -> Dict[str, int]:
+    """Scrape and save in small batches."""
+    saver = StreamingRecipeSaver(
+        DB_SOURCE_NAME,
+        overwrite=overwrite,
+        max_recipes=max_recipes,
+    )
+    result = await self.scrape_all_recipes(
+        max_recipes=max_recipes,
+        force_all=overwrite,
+        stream_saver=saver,
+    )
+    if result.status == "failed":
+        stats = saver.stats.copy()
+        stats["scrape_status"] = "failed"
+        stats["scrape_reason"] = result.reason
+        return stats
+
+    stats = await saver.finish(cancelled=result.status == "cancelled")
+    if result.status == "no_new_recipes":
+        stats["scrape_status"] = "no_new_recipes"
+        stats["scrape_reason"] = result.reason
+    return stats
 ```
 
-The built-in web route uses `scrape_all_recipes()` + module-level `save_to_database()` so central result handling is consistent. `scrape_and_save()` is still useful for CLI helpers or special plugins.
+Your `scrape_all_recipes()` should accept `stream_saver=None`. When a recipe is
+successfully parsed, call `await stream_saver.add(recipe)` instead of appending
+it to the in-memory list. Test mode still calls `scrape_all_recipes(max_recipes=20)`
+without a saver, so keep returning a normal `RecipeScrapeResult` there.
+
+Streaming full-mode semantics differ slightly from the legacy clear-then-save
+path: batches are upserted during the run, and stale source recipes are deleted
+only after `finish()` succeeds. If a full scrape fails or is cancelled, old
+recipes are kept. `finish(cancelled=True)` drops unsaved pending recipes instead
+of flushing them.
+
+Cache rebuilds and automatic image downloads are triggered by the router after
+the whole scraper (or run-all queue) completes, not after each streaming batch.
 
 ### 2.9 Progress Callbacks (Recommended)
 
@@ -695,6 +756,20 @@ class YourSiteScraper:
 ---
 
 ## 3. Shared Utilities
+
+### Recipe Save Helpers
+
+```python
+from scrapers.recipes._common import (
+    make_recipe_scrape_result,
+    save_recipes_to_database,
+    StreamingRecipeSaver,
+)
+```
+
+Use `make_recipe_scrape_result()` for public scrape method returns,
+`StreamingRecipeSaver` for GUI/scheduled production saves, and
+`save_recipes_to_database()` for CLI helpers or simple legacy save paths.
 
 ### Category Detection
 
@@ -779,8 +854,9 @@ with get_db_session() as db:
     existing_urls = {row.url for row in existing}
 ```
 
-Use `save_recipes_to_database()` via your module-level `save_to_database()`
-function for writes. Do not insert `FoundRecipe` rows directly unless you are
+Use `StreamingRecipeSaver` from `scrape_and_save()` for production writes, or
+`save_recipes_to_database()` via your module-level `save_to_database()` function
+for CLI/legacy writes. Do not insert `FoundRecipe` rows directly unless you are
 also intentionally reimplementing the shared excluded-URL, spell-check, upsert,
 and result-status behavior.
 
@@ -808,7 +884,7 @@ The two tables your scrapers populate:
 - `location_type` ("ehandel" or "butik"), `location_name`
 - Constraints: `price > 0`, unit ∈ {st, kg, l, förp}, category from standard list
 
-**`found_recipes`** (populated by recipe scrapers via `save_to_database()`):
+**`found_recipes`** (populated by recipe scrapers via `StreamingRecipeSaver` or `save_recipes_to_database()`):
 - `name`, `url` (unique), `source_name`, `ingredients` (JSONB array), `image_url`
 - `prep_time_minutes`, `servings`
 - `excluded` (user can hide recipes)

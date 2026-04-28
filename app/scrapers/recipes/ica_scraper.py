@@ -66,7 +66,7 @@ sys.path.insert(0, app_dir)
 from database import get_db_session
 from scrapers.recipes._common import (
     _is_type, RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, split_serving_lists
+    parse_iso8601_duration, split_serving_lists, StreamingRecipeSaver
 )
 
 # GUI Metadata
@@ -121,6 +121,14 @@ class IcaScraper:
                 "current": current,
                 "total": total
             })
+
+    async def _report_activity(self):
+        """Report scraper activity without changing visible progress."""
+        if self._progress_callback:
+            try:
+                await self._progress_callback({"activity_only": True})
+            except Exception:
+                pass
 
     # ========== SITEMAP PARSING ==========
 
@@ -308,7 +316,8 @@ class IcaScraper:
         self,
         client: httpx.AsyncClient,
         urls: List[str],
-        test_mode: bool = False
+        test_mode: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> List[Dict]:
         """
         Scrape multiple recipes with rate limiting.
@@ -334,13 +343,18 @@ class IcaScraper:
 
             recipe = await self.scrape_recipe(client, url)
             if recipe:
-                recipes.append(recipe)
+                if stream_saver:
+                    await stream_saver.add(recipe)
+                else:
+                    recipes.append(recipe)
+            await self._report_activity()
 
             # Progress logging
             if (i + 1) % 10 == 0 or (i + 1) == total:
-                logger.info(f"   Progress: {i + 1}/{total} ({len(recipes)} recipes found)")
+                found_count = stream_saver.seen_count if stream_saver else len(recipes)
+                logger.info(f"   Progress: {i + 1}/{total} ({found_count} recipes found)")
                 await self._report_progress(
-                    f"Fetched {len(recipes)} recipes...",
+                    f"Fetched {found_count} recipes...",
                     i + 1, total
                 )
 
@@ -353,7 +367,8 @@ class IcaScraper:
         self,
         max_recipes: Optional[int] = None,
         batch_size: int = 10,
-        force_all: bool = False
+        force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         """
         Main scraping method (matches interface expected by GUI).
@@ -396,13 +411,17 @@ class IcaScraper:
             else:
                 # Incremental: only new URLs not in database
                 existing_urls = self._get_existing_urls()
-                candidate_urls = [url for url, _ in all_urls[:MAX_RECIPES]]
+                all_candidate_urls = [url for url, _ in all_urls]
+                candidate_urls = all_candidate_urls if max_recipes else all_candidate_urls[:MAX_RECIPES]
                 urls_to_scrape = [url for url in candidate_urls if url not in existing_urls]
 
                 if max_recipes and len(urls_to_scrape) > max_recipes:
                     urls_to_scrape = urls_to_scrape[:max_recipes]
 
-                logger.info(f"📥 INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape")
+                logger.info(
+                    f"📥 INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape "
+                    f"(from {len(candidate_urls)} sitemap candidates)"
+                )
 
                 if not urls_to_scrape:
                     logger.info("✅ Already up to date!")
@@ -414,7 +433,12 @@ class IcaScraper:
                     )
 
             # Scrape recipes
-            recipes = await self.scrape_recipes(client, urls_to_scrape, bool(max_recipes))
+            recipes = await self.scrape_recipes(
+                client,
+                urls_to_scrape,
+                bool(max_recipes),
+                stream_saver=stream_saver,
+            )
 
             if self._cancel_flag:
                 return make_recipe_scrape_result(
@@ -435,6 +459,33 @@ class IcaScraper:
     async def scrape_incremental(self) -> RecipeScrapeResult:
         """Incremental scrape: only new recipes not already in database."""
         return await self.scrape_all_recipes()
+
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict:
+        """Scrape and save in small batches."""
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        result = await self.scrape_all_recipes(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
 
     # ========== DATABASE OPERATIONS ==========
 

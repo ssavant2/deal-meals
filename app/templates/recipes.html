@@ -133,6 +133,10 @@
     .attention-pulse {
         animation: attention-pulse 1s ease-in-out 3;
     }
+    #run-scraper-btn.image-download-lock {
+        max-width: 100%;
+        white-space: normal;
+    }
 </style>
 {% endblock %}
 
@@ -234,8 +238,18 @@
                     <div class="col-md-4">
                         <label class="form-label">&nbsp;</label>
                         <div>
-                            <button class="btn btn-primary" id="run-scraper-btn" data-action="runScraper">
-                                <i class="bi bi-play-fill"></i> {{ t('recipes.fetch_recipes') }}
+                            <button
+                                class="btn btn-primary{% if image_download_running|default(false) %} image-download-lock{% endif %}"
+                                id="run-scraper-btn"
+                                data-action="runScraper"
+                                data-default-label="{{ t('recipes.fetch_recipes') }}"
+                                {% if image_download_running|default(false) %}disabled aria-disabled="true" title="{{ t('recipes.wait_for_image_download') }}"{% endif %}
+                            >
+                                {% if image_download_running|default(false) %}
+                                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>{{ t('recipes.image_download_in_progress_button') }}
+                                {% else %}
+                                    <i class="bi bi-play-fill"></i> {{ t('recipes.fetch_recipes') }}
+                                {% endif %}
                             </button>
                         </div>
                     </div>
@@ -393,6 +407,7 @@ window.DealMealsRecipesI18n = {
     close: {{ t('common.close')|tojson }},
 
     // Recipes
+    fetch_recipes: {{ t('recipes.fetch_recipes')|tojson }},
     recipes: {{ t('recipes.recipes')|tojson }},
     recipes_fetched: {{ t('recipes.recipes_fetched')|tojson }},
     never_run: {{ t('recipes.never_run')|tojson }},
@@ -411,6 +426,7 @@ window.DealMealsRecipesI18n = {
     fetching: {{ t('recipes.fetching')|tojson }},
     waiting_server: {{ t('recipes.waiting_server')|tojson }},
     cancelling: {{ t('recipes.cancelling')|tojson }},
+    image_download_in_progress_button: {{ t('recipes.image_download_in_progress_button')|tojson }},
     recipes_found: {{ t('recipes.recipes_found')|tojson }},
     fetch_complete: {{ t('recipes.fetch_complete')|tojson }},
     new_recipes_found: {{ t('recipes.new_recipes_found')|tojson }},
@@ -542,6 +558,7 @@ window.DealMealsRecipesI18n = {
     'recipes.error_prefix': {{ t('recipes.error_prefix')|tojson }},
     'recipes.scraper_started': {{ t('recipes.scraper_started')|tojson }},
     'recipes.scraper_already_running': {{ t('recipes.scraper_already_running')|tojson }},
+    'recipes.wait_for_image_download': {{ t('recipes.wait_for_image_download')|tojson }},
     'recipes.scraper_not_found': {{ t('recipes.scraper_not_found')|tojson }},
     'recipes.source_not_found': {{ t('recipes.source_not_found')|tojson }},
     'recipes.clear_inactive_only': {{ t('recipes.clear_inactive_only')|tojson }},
@@ -557,9 +574,10 @@ window.DealMealsRecipesI18n = {
     'error.not_available': {{ t('error.not_available')|tojson }}
 };
 window.DealMealsRecipesPage = {
-    locale: {{ current_locale|tojson }}
+    locale: {{ current_locale|tojson }},
+    image_download_running: {{ (image_download_running|default(false))|tojson }}
 };
 window.DealMealsI18n = window.DealMealsRecipesI18n;
 </script>
-<script nonce="{{ csp_nonce }}" src="/static/js/recipes.js"></script>
+<script nonce="{{ csp_nonce }}" src="/static/js/recipes.js?v={{ csp_nonce }}"></script>
 {% endblock %}

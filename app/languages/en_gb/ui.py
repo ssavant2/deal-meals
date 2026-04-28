@@ -687,6 +687,7 @@ UI = {
     # Image download API messages (backend)
     # ===========================================
     'images.download_already_running': 'Download already in progress',
+    'images.download_wait_for_recipe_scraper': 'Wait until recipe fetching has finished before downloading images.',
     'images.download_started': 'Download started',
     'images.no_download_running': 'No download in progress',
     'images.download_cancelling': 'Cancelling download...',
@@ -739,6 +740,8 @@ UI = {
     'recipes.error_prefix': 'Error: {error}',
     'recipes.ready_to_run': 'Ready to run',
     'recipes.no_active_fetch': 'No active fetch to cancel',
+    'recipes.wait_for_image_download': 'Wait until image downloading has finished before fetching recipes.',
+    'recipes.image_download_in_progress_button': 'Downloading recipe images - please wait',
     'recipes.recipe_not_found': 'Recipe not found',
     'recipes.recipe_hidden': 'Recipe has been hidden',
     'recipes.recipe_restored': 'Recipe has been restored',

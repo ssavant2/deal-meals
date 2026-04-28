@@ -34,10 +34,32 @@ let pollingInterval = null;
 let currentScraperId = null;
 let completedScrapes = 0;
 let runAllQueue = null;  // { scrapers: [], index: 0, totalNew: 0 } when running all active
+let imageDownloadRunning = Boolean(pageConfig.image_download_running);
+let imageDownloadLockInterval = null;
+let imageDownloadPollDelay = null;
+let imageAutoDownloadEnabled = false;
+let runButtonDefaultHtml = '';
+let runButtonRecipeLocked = false;
+let postRecipeImageLockInterval = null;
+let postRecipeImageLockTimeout = null;
+const IMAGE_DOWNLOAD_RUNNING_POLL_MS = 1000;
+const POST_RECIPE_IMAGE_LOCK_WATCH_MS = 30000;
 
 // Load scrapers on page load
 document.addEventListener('DOMContentLoaded', function() {
     initScheduleFields();
+    initRecipeRunButtonState();
+    refreshImageAutoDownloadPreference();
+    refreshImageDownloadLock();
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            stopImageDownloadLockPolling();
+            stopPostRecipeImageLockWatch();
+        } else {
+            refreshImageAutoDownloadPreference();
+            refreshImageDownloadLock();
+        }
+    });
 
     // Load UI preferences first (for onboarding state), then scrapers
     fetch('/api/ui-preferences').then(r => r.json()).then(data => {
@@ -49,6 +71,142 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function initRecipeRunButtonState() {
+    const btn = document.getElementById('run-scraper-btn');
+    if (btn && !runButtonDefaultHtml) {
+        const label = btn.dataset.defaultLabel || i18n.fetch_recipes || 'Fetch recipes';
+        runButtonDefaultHtml = `<i class="bi bi-play-fill"></i> ${escapeHtml(label)}`;
+    }
+    updateRecipeRunButtonState();
+}
+
+function setRecipeRunButtonLocked(locked) {
+    runButtonRecipeLocked = locked;
+    updateRecipeRunButtonState();
+}
+
+function updateRecipeRunButtonState() {
+    const btn = document.getElementById('run-scraper-btn');
+    if (!btn) return;
+    if (!runButtonDefaultHtml) {
+        const label = btn.dataset.defaultLabel || i18n.fetch_recipes || 'Fetch recipes';
+        runButtonDefaultHtml = `<i class="bi bi-play-fill"></i> ${escapeHtml(label)}`;
+    }
+
+    if (imageDownloadRunning) {
+        const label = i18n.image_download_in_progress_button || t('recipes.wait_for_image_download');
+        btn.disabled = true;
+        btn.classList.remove('btn-info');
+        btn.classList.add('btn-primary', 'image-download-lock');
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>${escapeHtml(label)}`;
+        btn.title = t('recipes.wait_for_image_download');
+        btn.setAttribute('aria-disabled', 'true');
+        return;
+    }
+
+    btn.disabled = runButtonRecipeLocked;
+    btn.classList.remove('btn-info', 'image-download-lock');
+    btn.classList.add('btn-primary');
+    btn.innerHTML = runButtonDefaultHtml;
+    btn.title = '';
+    if (!runButtonRecipeLocked) btn.removeAttribute('aria-disabled');
+}
+
+async function refreshImageDownloadLock() {
+    try {
+        const response = await fetch('/api/images/download/status');
+        if (!response.ok) return imageDownloadRunning;
+        const data = await response.json();
+        if (!data.success) return imageDownloadRunning;
+        imageDownloadRunning = Boolean(data.running);
+        updateRecipeRunButtonState();
+        syncImageDownloadLockPolling();
+        return imageDownloadRunning;
+    } catch (error) {
+        console.error('Error checking image download status:', error);
+        return imageDownloadRunning;
+    }
+}
+
+async function refreshImageAutoDownloadPreference() {
+    try {
+        const response = await fetch('/api/images/preferences');
+        if (!response.ok) return imageAutoDownloadEnabled;
+        const data = await response.json();
+        if (!data.success) return imageAutoDownloadEnabled;
+        imageAutoDownloadEnabled = Boolean(data.auto_download);
+        return imageAutoDownloadEnabled;
+    } catch (error) {
+        console.error('Error checking image preferences:', error);
+        return imageAutoDownloadEnabled;
+    }
+}
+
+async function refreshImageDownloadLockAfterRecipeComplete() {
+    if (!(await refreshImageAutoDownloadPreference())) {
+        return;
+    }
+
+    stopPostRecipeImageLockWatch();
+    const startedAt = Date.now();
+    const checkForImageDownload = async () => {
+        const running = await refreshImageDownloadLock();
+        if (running || Date.now() - startedAt >= POST_RECIPE_IMAGE_LOCK_WATCH_MS) {
+            stopPostRecipeImageLockWatch();
+        }
+    };
+
+    await checkForImageDownload();
+    if (!imageDownloadRunning) {
+        postRecipeImageLockInterval = setInterval(
+            checkForImageDownload,
+            IMAGE_DOWNLOAD_RUNNING_POLL_MS
+        );
+        postRecipeImageLockTimeout = setTimeout(
+            stopPostRecipeImageLockWatch,
+            POST_RECIPE_IMAGE_LOCK_WATCH_MS + IMAGE_DOWNLOAD_RUNNING_POLL_MS
+        );
+    }
+}
+
+function syncImageDownloadLockPolling() {
+    if (document.hidden || !imageDownloadRunning) {
+        stopImageDownloadLockPolling();
+        return;
+    }
+
+    const delay = IMAGE_DOWNLOAD_RUNNING_POLL_MS;
+    if (imageDownloadLockInterval && imageDownloadPollDelay === delay) {
+        return;
+    }
+
+    if (imageDownloadLockInterval) {
+        clearInterval(imageDownloadLockInterval);
+    }
+
+    imageDownloadPollDelay = delay;
+    imageDownloadLockInterval = setInterval(refreshImageDownloadLock, delay);
+}
+
+function stopImageDownloadLockPolling() {
+    if (imageDownloadLockInterval) {
+        clearInterval(imageDownloadLockInterval);
+        imageDownloadLockInterval = null;
+    }
+    imageDownloadPollDelay = null;
+}
+
+function stopPostRecipeImageLockWatch() {
+    if (postRecipeImageLockInterval) {
+        clearInterval(postRecipeImageLockInterval);
+        postRecipeImageLockInterval = null;
+    }
+    if (postRecipeImageLockTimeout) {
+        clearTimeout(postRecipeImageLockTimeout);
+        postRecipeImageLockTimeout = null;
+    }
+}
 
 async function checkRunningScrapers() {
     try {
@@ -85,8 +243,7 @@ async function checkRunningScrapers() {
             };
 
             // Show progress UI
-            const btn = document.getElementById('run-scraper-btn');
-            btn.disabled = true;
+            setRecipeRunButtonLocked(true);
             document.getElementById('progress-container').classList.add('active');
             document.getElementById('result-container').style.display = 'none';
 
@@ -126,8 +283,7 @@ async function checkRunningScrapers() {
                 modeSelect.value = runningData.mode;
             }
 
-            const btn = document.getElementById('run-scraper-btn');
-            btn.disabled = true;
+            setRecipeRunButtonLocked(true);
 
             const progressContainer = document.getElementById('progress-container');
             const resultContainer = document.getElementById('result-container');
@@ -153,7 +309,7 @@ function _makeQueueCallback() {
     return async (result) => {
         if (!runAllQueue) {
             document.getElementById('progress-container').classList.remove('active');
-            document.getElementById('run-scraper-btn').disabled = false;
+            setRecipeRunButtonLocked(false);
             loadScrapers();
             loadAllSchedules();
             return;
@@ -847,6 +1003,10 @@ async function runScraper() {
         return;
     }
 
+    if (await refreshImageDownloadLock()) {
+        return;
+    }
+
     // Route to sequential runner for "all active"
     if (scraperId === '__all_active__') {
         runAllActive();
@@ -892,8 +1052,7 @@ async function runScraper() {
     }
 
     // Disable button and show progress
-    const btn = document.getElementById('run-scraper-btn');
-    btn.disabled = true;
+    setRecipeRunButtonLocked(true);
 
     const progressContainer = document.getElementById('progress-container');
     const resultContainer = document.getElementById('result-container');
@@ -923,12 +1082,12 @@ async function runScraper() {
             startPolling(scraperId);
         } else {
             showResult('error', t(data.message_key, data.message_params) || data.message);
-            btn.disabled = false;
+            setRecipeRunButtonLocked(false);
             progressContainer.classList.remove('active');
         }
     } catch (error) {
         showResult('error', i18n.error + ': ' + error.message);
-        btn.disabled = false;
+        setRecipeRunButtonLocked(false);
         progressContainer.classList.remove('active');
     }
 }
@@ -945,7 +1104,7 @@ function startPolling(scraperId, onComplete) {
                     pollingInterval = null;
                     currentScraperId = null;
                     document.getElementById('progress-container').classList.remove('active');
-                    document.getElementById('run-scraper-btn').disabled = false;
+                    setRecipeRunButtonLocked(false);
                     showResult('error', i18n.could_not_load);
                 }
                 return;
@@ -973,15 +1132,21 @@ function startPolling(scraperId, onComplete) {
                         return;
                     }
 
-                    document.getElementById('progress-container').classList.remove('active');
-                    document.getElementById('run-scraper-btn').disabled = false;
-
                     if (data.status === 'complete') {
-                        showDetailedResult(data);
-                        // Reload scrapers and schedules to get updated stats
-                        loadScrapers();
-                        loadAllSchedules();
+                        showDetailedResult(data, {
+                            didOpen: () => {
+                                document.getElementById('progress-container').classList.remove('active');
+                                setRecipeRunButtonLocked(false);
+                                refreshImageDownloadLockAfterRecipeComplete();
+                            },
+                            didClose: () => {
+                                loadScrapers();
+                                loadAllSchedules();
+                            }
+                        });
                     } else if (data.status === 'cancelled') {
+                        document.getElementById('progress-container').classList.remove('active');
+                        setRecipeRunButtonLocked(false);
                         Swal.fire({
                             icon: 'info',
                             title: i18n.cancelled,
@@ -990,6 +1155,8 @@ function startPolling(scraperId, onComplete) {
                             showConfirmButton: false
                         });
                     } else if (data.status === 'error') {
+                        document.getElementById('progress-container').classList.remove('active');
+                        setRecipeRunButtonLocked(false);
                         showResult('error', t(data.message_key, data.message_params) || data.message);
                     }
                 }
@@ -1001,7 +1168,7 @@ function startPolling(scraperId, onComplete) {
                 pollingInterval = null;
                 currentScraperId = null;
                 document.getElementById('progress-container').classList.remove('active');
-                document.getElementById('run-scraper-btn').disabled = false;
+                setRecipeRunButtonLocked(false);
                 showResult('error', i18n.could_not_load);
             }
         }
@@ -1052,6 +1219,10 @@ async function runAllActive() {
 
     if (activeScrapers.length === 0) {
         Swal.fire({ icon: 'warning', title: i18n.select_source, text: i18n.select_source_first });
+        return;
+    }
+
+    if (await refreshImageDownloadLock()) {
         return;
     }
 
@@ -1109,8 +1280,7 @@ async function runAllActive() {
     runAllQueue = { scrapers: activeScrapers, index: 0, totalNew: 0 };
 
     // Show progress UI
-    const btn = document.getElementById('run-scraper-btn');
-    btn.disabled = true;
+    setRecipeRunButtonLocked(true);
     const progressContainer = document.getElementById('progress-container');
     const resultContainer = document.getElementById('result-container');
     progressContainer.classList.add('active');
@@ -1227,9 +1397,6 @@ async function finishRunAll() {
         cacheReady = await waitForCacheReady();
     }
 
-    document.getElementById('progress-container').classList.remove('active');
-    document.getElementById('run-scraper-btn').disabled = false;
-
     // Track completed scrapes (once for the whole batch)
     completedScrapes++;
     fetch('/api/ui-preferences', {
@@ -1251,15 +1418,20 @@ async function finishRunAll() {
         html: summaryHtml,
         confirmButtonText: i18n.ok,
         timer: autoClose ? 8000 : undefined,
-        timerProgressBar: autoClose
+        timerProgressBar: autoClose,
+        didOpen: () => {
+            document.getElementById('progress-container').classList.remove('active');
+            setRecipeRunButtonLocked(false);
+            refreshImageDownloadLockAfterRecipeComplete();
+        },
+        didClose: () => {
+            loadScrapers();
+            loadAllSchedules();
+        }
     });
-
-    // Reload scrapers and schedules to get updated stats
-    loadScrapers();
-    loadAllSchedules();
 }
 
-function showDetailedResult(data) {
+function showDetailedResult(data, modalOptions = {}) {
     // Build HTML content for detailed result popup
     // Map mode to translated label
     const modeLabelMap = {
@@ -1314,7 +1486,8 @@ function showDetailedResult(data) {
         html: html,
         confirmButtonText: i18n.ok,
         timer: autoClose ? 8000 : undefined,
-        timerProgressBar: autoClose
+        timerProgressBar: autoClose,
+        ...modalOptions
     });
 }
 

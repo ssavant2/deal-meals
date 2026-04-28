@@ -57,7 +57,7 @@ sys.path.insert(0, app_dir)
 from database import get_db_session
 from scrapers.recipes._common import (
     _is_type, RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, split_serving_lists
+    parse_iso8601_duration, split_serving_lists, StreamingRecipeSaver
 )
 
 # GUI Metadata
@@ -253,6 +253,14 @@ class ArlaScraper:
                 "total": total,
             })
 
+    async def _report_activity(self):
+        """Report scraper activity without changing visible progress."""
+        if self._progress_callback:
+            try:
+                await self._progress_callback({"activity_only": True})
+            except Exception:
+                pass
+
     # ========== SITEMAP PARSING ==========
 
     async def get_all_recipe_urls(self, client: httpx.AsyncClient) -> List[str]:
@@ -434,6 +442,7 @@ class ArlaScraper:
         self,
         client: httpx.AsyncClient,
         urls: List[str],
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> List[Dict]:
         """Scrape multiple recipes with adaptive rate limiting.
 
@@ -479,22 +488,27 @@ class ArlaScraper:
                 else:
                     logger.debug(f"   Gave up after retry: {url}")
             elif result is not None:
-                recipes.append(result)
+                if stream_saver:
+                    await stream_saver.add(result)
+                else:
+                    recipes.append(result)
                 # Success: ease delay back toward base
                 if current_delay > REQUEST_DELAY:
                     current_delay = max(REQUEST_DELAY, current_delay - 0.5)
 
             processed += 1
+            await self._report_activity()
 
             # Progress logging (based on original URLs processed)
             done = processed - retried
             if done % 10 == 0 or not queue:
+                found_count = stream_saver.seen_count if stream_saver else len(recipes)
                 logger.info(
                     f"   Progress: {done}/{total_original} "
-                    f"({len(recipes)} found, delay={current_delay}s, retried={retried})"
+                    f"({found_count} found, delay={current_delay}s, retried={retried})"
                 )
                 await self._report_progress(
-                    f"Fetched {len(recipes)} recipes...",
+                    f"Fetched {found_count} recipes...",
                     done, total_original,
                 )
 
@@ -511,6 +525,7 @@ class ArlaScraper:
         max_recipes: Optional[int] = None,
         batch_size: int = 10,
         force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         """Main scraping method (matches interface expected by GUI).
 
@@ -551,7 +566,7 @@ class ArlaScraper:
             else:
                 # Incremental: only new URLs not in database
                 existing_urls = self._get_existing_urls()
-                candidate_urls = all_urls[:MAX_RECIPES]
+                candidate_urls = all_urls if max_recipes else all_urls[:MAX_RECIPES]
                 urls_to_scrape = [url for url in candidate_urls if url not in existing_urls]
 
                 if max_recipes and len(urls_to_scrape) > max_recipes:
@@ -572,7 +587,11 @@ class ArlaScraper:
                     )
 
             # Scrape recipes
-            recipes = await self.scrape_recipes(client, urls_to_scrape)
+            recipes = await self.scrape_recipes(
+                client,
+                urls_to_scrape,
+                stream_saver=stream_saver,
+            )
 
             if self._cancel_flag:
                 return make_recipe_scrape_result(
@@ -593,6 +612,33 @@ class ArlaScraper:
     async def scrape_incremental(self) -> RecipeScrapeResult:
         """Incremental scrape: only new recipes not already in database."""
         return await self.scrape_all_recipes()
+
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict:
+        """Scrape and save in small batches."""
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        result = await self.scrape_all_recipes(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
 
     # ========== DATABASE OPERATIONS ==========
 

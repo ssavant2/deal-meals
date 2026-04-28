@@ -59,7 +59,8 @@ from database import get_db_session
 from models import FoundRecipe
 from scrapers.recipes._common import (
     _is_type, RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, unescape_html
+    parse_iso8601_duration, save_recipes_to_database,
+    StreamingRecipeSaver, unescape_html
 )
 
 # GUI Metadata
@@ -71,6 +72,9 @@ SOURCE_URL = "https://www.zeta.nu"
 
 # Scraper config
 MIN_INGREDIENTS = 3  # Skip recipes with fewer ingredients
+SCRAPE_BATCH_SIZE = 6
+CONCURRENT_REQUESTS = 3
+SAVE_BATCH_SIZE = 50
 
 # Zeta.nu JSON-LD has ingredient text with missing spaces between qualifiers
 # and ingredient names (e.g., "torkadoregano" instead of "torkad oregano").
@@ -267,6 +271,14 @@ class ZetaScraper:
                 "total": total,
                 "success": success
             })
+
+    async def _report_activity(self):
+        """Report scraper activity without changing visible progress."""
+        if self._progress_callback:
+            try:
+                await self._progress_callback({"activity_only": True})
+            except Exception:
+                pass
 
     async def discover_sitemap_urls(self, client: httpx.AsyncClient) -> List[str]:
         """
@@ -563,17 +575,114 @@ class ZetaScraper:
     ) -> Optional[Dict]:
         """Wrapper with semaphore for concurrency control."""
         async with semaphore:
-            return await self.scrape_recipe_httpx(client, url)
+            result = await self.scrape_recipe_httpx(client, url)
+            await self._report_activity()
+            return result
 
     def save_recipes(self, recipes: List[Dict], overwrite: bool = False) -> Dict:
         """Save recipes to database."""
-        from scrapers.recipes._common import save_recipes_to_database
         return save_recipes_to_database(recipes, DB_SOURCE_NAME, clear_old=overwrite)
+
+    async def _get_urls_to_scrape(
+        self,
+        max_recipes: Optional[int] = None,
+        force_all: bool = False,
+    ) -> List[str]:
+        """Build the ordered URL list for either full or incremental mode."""
+        all_urls_with_dates = await self.get_recipe_urls_from_sitemap()
+        all_urls_with_dates.sort(key=lambda x: x[1] or "1970-01-01", reverse=True)
+        all_urls = [url for url, _ in all_urls_with_dates]
+
+        logger.info(f"Found {len(all_urls)} total recipe URLs from sitemap")
+        if not all_urls:
+            return []
+
+        if force_all:
+            urls_to_scrape = all_urls[:max_recipes] if max_recipes else all_urls
+            logger.info(f"FULL MODE: Scraping {len(urls_to_scrape)} recipes")
+            return urls_to_scrape
+
+        existing_urls = await self.get_existing_urls()
+        urls_to_scrape = [url for url in all_urls if url not in existing_urls]
+        if max_recipes and len(urls_to_scrape) > max_recipes:
+            urls_to_scrape = urls_to_scrape[:max_recipes]
+
+        logger.info(f"Existing in DB: {len(existing_urls)}")
+        logger.info(f"New to scrape: {len(urls_to_scrape)}")
+        return urls_to_scrape
+
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict[str, int]:
+        """Scrape and save in small chunks to keep full Zeta sync memory flat."""
+        logger.info(f"\n{'='*60}")
+        logger.info("ZETA RECIPE SCRAPER (streaming save)")
+        logger.info(f"{'='*60}\n")
+
+        urls_to_scrape = await self._get_urls_to_scrape(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+        )
+
+        if not urls_to_scrape:
+            reason = "no_recipe_urls" if overwrite else "no_new_recipes"
+            saver = StreamingRecipeSaver(
+                DB_SOURCE_NAME,
+                batch_size=SAVE_BATCH_SIZE,
+                overwrite=overwrite,
+                max_recipes=max_recipes,
+            )
+            stats = await saver.finish()
+            stats["scrape_status"] = "success_empty" if overwrite else "no_new_recipes"
+            stats["scrape_reason"] = reason
+            return stats
+
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            batch_size=SAVE_BATCH_SIZE,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        total = len(urls_to_scrape)
+
+        semaphore = asyncio.Semaphore(CONCURRENT_REQUESTS)
+        async with httpx.AsyncClient(
+            headers=self.headers,
+            timeout=30,
+            event_hooks={"request": [ssrf_safe_event_hook]},
+        ) as client:
+            for i in range(0, total, SCRAPE_BATCH_SIZE):
+                if self._cancel_flag:
+                    logger.info("Zeta scrape cancelled")
+                    break
+
+                batch = urls_to_scrape[i:i + SCRAPE_BATCH_SIZE]
+                tasks = [
+                    self.scrape_recipe_with_semaphore(client, url, semaphore)
+                    for url in batch
+                ]
+                results = await asyncio.gather(*tasks)
+
+                for recipe in results:
+                    await saver.add(recipe)
+
+                progress = min(i + SCRAPE_BATCH_SIZE, total)
+                logger.info(f"   Progress: {progress}/{total} ({saver.seen_count} successful)")
+                await self._report_progress(progress, total, saver.seen_count)
+
+                if i + SCRAPE_BATCH_SIZE < total:
+                    await asyncio.sleep(1.0)
+
+        stats = await saver.finish(cancelled=self._cancel_flag)
+        logger.success(f"\nScraped and saved {saver.seen_count} Zeta recipes")
+        return stats
 
     async def scrape_all_recipes(
         self,
         max_recipes: Optional[int] = None,
-        batch_size: int = 5,
+        batch_size: int = SCRAPE_BATCH_SIZE,
         skip_discovery: bool = False,  # Ignored - we always use sitemap
         force_all: bool = False
     ) -> RecipeScrapeResult:
@@ -598,58 +707,33 @@ class ZetaScraper:
         logger.info("ZETA RECIPE SCRAPER (Sitemap + httpx)")
         logger.info(f"{'='*60}\n")
 
-        # Get all URLs from sitemap
-        all_urls_with_dates = await self.get_recipe_urls_from_sitemap()
-        # Sort by lastmod descending (newest first) for incremental priority
-        all_urls_with_dates.sort(key=lambda x: x[1] or "1970-01-01", reverse=True)
-        all_urls = [url for url, _ in all_urls_with_dates]
+        urls_to_scrape = await self._get_urls_to_scrape(
+            max_recipes=max_recipes,
+            force_all=force_all,
+        )
 
-        logger.info(f"Found {len(all_urls)} total recipe URLs from sitemap")
-
-        if not all_urls:
-            logger.warning("No recipe URLs found in sitemap!")
+        if not urls_to_scrape:
+            if force_all:
+                logger.warning("No recipe URLs found in sitemap!")
+            else:
+                logger.success("All recipes already in database!")
             return make_recipe_scrape_result(
                 [],
                 force_all=force_all,
                 max_recipes=max_recipes,
-                failed=True,
-                reason="no_recipe_urls",
+                reason="no_recipe_urls" if force_all else "no_new_recipes",
+                failed=force_all,
             )
 
-        # Determine which URLs to scrape
-        if force_all:
-            # Full mode: scrape everything
-            urls_to_scrape = all_urls[:max_recipes] if max_recipes else all_urls
-            logger.info(f"FULL MODE: Scraping {len(urls_to_scrape)} recipes")
-        else:
-            # Incremental: only new URLs (compare against DB)
-            existing_urls = await self.get_existing_urls()
-            urls_to_scrape = [url for url in all_urls if url not in existing_urls]
-
-            if max_recipes and len(urls_to_scrape) > max_recipes:
-                urls_to_scrape = urls_to_scrape[:max_recipes]
-
-            logger.info(f"Existing in DB: {len(existing_urls)}")
-            logger.info(f"New to scrape: {len(urls_to_scrape)}")
-
-            if not urls_to_scrape:
-                logger.success("All recipes already in database!")
-                return make_recipe_scrape_result(
-                    [],
-                    force_all=force_all,
-                    max_recipes=max_recipes,
-                    reason="no_new_recipes",
-                )
-
         # Scrape recipes with concurrency
-        logger.info(f"\nScraping {len(urls_to_scrape)} recipes (5 concurrent)...")
+        logger.info(f"\nScraping {len(urls_to_scrape)} recipes ({CONCURRENT_REQUESTS} concurrent)...")
 
         recipes = []
-        semaphore = asyncio.Semaphore(5)
+        semaphore = asyncio.Semaphore(CONCURRENT_REQUESTS)
 
         async with httpx.AsyncClient(headers=self.headers, timeout=30, event_hooks={"request": [ssrf_safe_event_hook]}) as client:
             # Process in batches for progress logging
-            batch_size = 10
+            batch_size = SCRAPE_BATCH_SIZE
             total = len(urls_to_scrape)
 
             for i in range(0, total, batch_size):
@@ -756,19 +840,13 @@ async def overwrite_scrape():
     logger.info("="*60 + "\n")
 
     scraper = ZetaScraper()
-    recipes = await scraper.scrape_all_recipes(force_all=True)
-
-    if not recipes:
-        logger.warning("No recipes scraped!")
-        return {"created": 0, "updated": 0, "skipped": 0, "mode": "overwrite"}
-
-    logger.info(f"\nSaving {len(recipes)} recipes to database (clearing old first)...")
-    stats = scraper.save_recipes(recipes, overwrite=True)
+    stats = await scraper.scrape_and_save(overwrite=True)
 
     logger.info(f"\n{'='*60}")
     logger.info("OVERWRITE COMPLETE")
     logger.info(f"  Cleared: {stats['cleared']}")
     logger.info(f"  Created: {stats['created']}")
+    logger.info(f"  Updated: {stats['updated']}")
     logger.info(f"  Skipped: {stats['skipped']}")
     logger.info("="*60)
 

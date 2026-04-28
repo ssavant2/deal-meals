@@ -67,7 +67,7 @@ from database import get_db_session
 from models import FoundRecipe
 from scrapers.recipes._common import (
     RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, split_serving_lists
+    parse_iso8601_duration, split_serving_lists, StreamingRecipeSaver
 )
 
 # GUI Metadata
@@ -133,6 +133,14 @@ class CoopScraper:
                 })
             except Exception as e:
                 logger.debug(f"WebSocket progress callback failed: {e}")
+
+    async def _send_activity(self):
+        """Report scraper activity without changing visible progress."""
+        if self._progress_callback:
+            try:
+                await self._progress_callback({"activity_only": True})
+            except Exception as e:
+                logger.debug(f"WebSocket activity callback failed: {e}")
 
     async def get_recipe_urls_from_sitemap(self) -> List[str]:
         """Fetch recipe URLs from sitemap."""
@@ -277,7 +285,8 @@ class CoopScraper:
         self,
         max_recipes: Optional[int] = None,
         batch_size: int = CONCURRENT_WORKERS,
-        force_all: bool = False
+        force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         """
         Main scraping method.
@@ -320,9 +329,17 @@ class CoopScraper:
             existing_urls = self.get_existing_urls()
             new_urls = [u for u in shuffled_urls if u not in existing_urls]
             # Use higher limit until we reach target (~1000 recipes), then small batches
-            limit = MAX_URLS if len(existing_urls) < EXPECTED_RECIPE_COUNT * 0.9 else MAX_INCREMENTAL
+            filling_initial_target = len(existing_urls) < EXPECTED_RECIPE_COUNT * 0.9
+            if max_recipes:
+                limit = max_recipes
+            elif filling_initial_target:
+                limit = MAX_URLS
+            else:
+                limit = MAX_INCREMENTAL
             urls_to_scrape = new_urls[:limit]
-            if limit > MAX_INCREMENTAL:
+            if max_recipes:
+                logger.info(f"Incremental mode (configured): {len(urls_to_scrape)} URLs (of {len(new_urls)} new, skipped {len(existing_urls)} existing)")
+            elif filling_initial_target:
                 logger.info(f"Incremental mode (filling): {len(urls_to_scrape)} URLs — DB has {len(existing_urls)}, target {EXPECTED_RECIPE_COUNT}")
             else:
                 logger.info(f"Incremental mode: {len(urls_to_scrape)} URLs (of {len(new_urls)} new, skipped {len(existing_urls)} existing)")
@@ -390,8 +407,13 @@ class CoopScraper:
                     async with recipes_lock:
                         self._progress["current"] += 1
                         if recipe:
-                            recipes.append(recipe)
+                            if stream_saver:
+                                await stream_saver.add(recipe)
+                            else:
+                                recipes.append(recipe)
                             self._progress["success"] += 1
+
+                        await self._send_activity()
 
                         # Progress logging every 10 recipes (Coop is slow, 1 worker)
                         if self._progress["current"] % 10 == 0:
@@ -428,9 +450,10 @@ class CoopScraper:
                 await browser.close()
 
         # Log final stats
-        logger.info(f"Scraping complete: {len(recipes)} recipes from {len(urls_to_scrape)} URLs")
+        found_count = stream_saver.seen_count if stream_saver else len(recipes)
+        logger.info(f"Scraping complete: {found_count} recipes from {len(urls_to_scrape)} URLs")
         if urls_to_scrape:
-            logger.info(f"Hit rate: {len(recipes)/len(urls_to_scrape)*100:.1f}%")
+            logger.info(f"Hit rate: {found_count/len(urls_to_scrape)*100:.1f}%")
         logger.info(f"Fail reasons: {self._fail_reasons}")
 
         return make_recipe_scrape_result(
@@ -444,6 +467,33 @@ class CoopScraper:
     async def scrape_incremental(self) -> RecipeScrapeResult:
         """Incremental scrape: only new recipes not already in database."""
         return await self.scrape_all_recipes()
+
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict:
+        """Scrape and save in small batches."""
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        result = await self.scrape_all_recipes(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
 
 
 def save_to_database(recipes: List[Dict], clear_old: bool = False) -> Dict[str, int]:

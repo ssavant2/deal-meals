@@ -76,6 +76,20 @@ Gå till **Butiker**-sidan. Välj en butik (Willys, ICA, Coop, m.fl.), välj pla
 
 Gå tillbaka till **Startsidan**. Dina personliga receptförslag baserade på aktuella erbjudanden är nu redo!
 
+### Första cache-uppvärmningen
+
+När du har recept och butikserbjudanden behöver Deal Meals en lyckad ombyggnad
+av receptmatchningen innan Startsidan kan visa hela den aktuella uppsättningen
+förslag. Precis efter första installationen, en recepthämtning eller en
+erbjudandehämtning kan Startsidan därför kort visa färre förslag, gamla förslag
+eller inga förslag medan matchningscachen byggs om.
+
+Det finns också en liten prestandauppvärmning: den snabbaste optimerade
+cachevägen aktiveras efter 3 verifierade cacheuppdateringar i rad utan problem.
+Tills dess fungerar appen ändå, men den gör extra säkerhetskontroller och kan
+kännas långsammare. Schemaläggning av recept- och erbjudandehämtning gör att
+detta kan ske i bakgrunden.
+
 Startguiden försvinner automatiskt när alla steg är klara.
 
 ---

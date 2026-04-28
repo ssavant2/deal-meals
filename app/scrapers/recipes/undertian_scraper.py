@@ -37,7 +37,10 @@ app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.insert(0, app_dir)
 
 from database import get_db_session
-from scrapers.recipes._common import RecipeScrapeResult, make_recipe_scrape_result, split_serving_lists
+from scrapers.recipes._common import (
+    RecipeScrapeResult, make_recipe_scrape_result,
+    split_serving_lists, StreamingRecipeSaver
+)
 
 # GUI Metadata
 SCRAPER_NAME = "Undertian.com"
@@ -96,6 +99,14 @@ class UndertianScraper:
                 "current": current,
                 "total": total,
             })
+
+    async def _report_activity(self):
+        """Report scraper activity without changing visible progress."""
+        if self._progress_callback:
+            try:
+                await self._progress_callback({"activity_only": True})
+            except Exception:
+                pass
 
     # ========== SITEMAP PARSING ==========
 
@@ -292,6 +303,7 @@ class UndertianScraper:
         max_recipes: Optional[int] = None,
         batch_size: int = 10,
         force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         """Main scraping method (GUI-compatible interface).
 
@@ -333,7 +345,8 @@ class UndertianScraper:
             else:
                 # Incremental: skip already-saved URLs
                 existing_urls = self._get_existing_urls()
-                candidate_urls = [url for url, _ in all_urls[:MAX_RECIPES]]
+                all_candidate_urls = [url for url, _ in all_urls]
+                candidate_urls = all_candidate_urls if max_recipes else all_candidate_urls[:MAX_RECIPES]
                 urls_to_scrape = [url for url in candidate_urls if url not in existing_urls]
 
                 # Apply limit if set (max_recipes from GUI config)
@@ -365,12 +378,17 @@ class UndertianScraper:
 
                 recipe = await self.scrape_recipe(client, url)
                 if recipe:
-                    recipes.append(recipe)
+                    if stream_saver:
+                        await stream_saver.add(recipe)
+                    else:
+                        recipes.append(recipe)
+                await self._report_activity()
 
                 if (i + 1) % 10 == 0 or (i + 1) == total:
-                    logger.info(f"   Progress: {i + 1}/{total} ({len(recipes)} recipes found)")
+                    found_count = stream_saver.seen_count if stream_saver else len(recipes)
+                    logger.info(f"   Progress: {i + 1}/{total} ({found_count} recipes found)")
                     await self._report_progress(
-                        f"Fetched {len(recipes)} recipes...",
+                        f"Fetched {found_count} recipes...",
                         i + 1, total,
                     )
 
@@ -388,6 +406,33 @@ class UndertianScraper:
     async def scrape_incremental(self) -> RecipeScrapeResult:
         """Incremental scrape: only new recipes not already in database."""
         return await self.scrape_all_recipes()
+
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict:
+        """Scrape and save in small batches."""
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        result = await self.scrape_all_recipes(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
 
     # ========== DATABASE OPERATIONS ==========
 

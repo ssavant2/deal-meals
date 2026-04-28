@@ -35,6 +35,7 @@ from state import (
     running_scrapers, scraper_tasks, event_bus,
     update_running_scraper, get_running_scraper, get_scraper_lock,
     set_run_all_queue, update_run_all_queue, get_run_all_queue, clear_run_all_queue,
+    get_image_state,
 )
 
 # Import category constants
@@ -76,33 +77,74 @@ def create_background_task(coro, *, name: str = None) -> asyncio.Task:
 
 
 
-def _get_time_estimates(scraper_id: str) -> dict:
-    """Get time estimates for all modes based on history."""
+def _median(values: list[float]) -> float:
+    """Return median value for a non-empty numeric list."""
+    ordered = sorted(values)
+    mid = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[mid]
+    return (ordered[mid - 1] + ordered[mid]) / 2
+
+
+def _has_scraper_history_attempted_count(db) -> bool:
+    """Return True if the optional scalable-estimate column exists."""
+    return bool(db.execute(text("""
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'scraper_run_history'
+              AND column_name = 'attempted_count'
+        )
+    """)).scalar())
+
+
+def _get_time_estimates(scraper_id: str, target_attempts: dict | None = None) -> dict:
+    """Get time estimates for all modes based on history and current limits."""
     estimates = {}
+    target_attempts = target_attempts or {}
     try:
         with get_db_session() as db:
+            attempted_count_expr = (
+                "attempted_count"
+                if _has_scraper_history_attempted_count(db)
+                else "NULL::integer AS attempted_count"
+            )
             for mode in ['test', 'incremental', 'full']:
-                result = db.execute(
-                    text("""
-                        SELECT AVG(duration_seconds) as avg_duration,
-                               MAX(duration_seconds) as last_duration
-                        FROM (
-                            SELECT duration_seconds
-                            FROM scraper_run_history
-                            WHERE scraper_id = :scraper_id
-                              AND mode = :mode
-                              AND success = true
-                            ORDER BY run_at DESC
-                            LIMIT 5
-                        ) recent
+                rows = db.execute(
+                    text(f"""
+                        SELECT duration_seconds, {attempted_count_expr}, recipes_found
+                        FROM scraper_run_history
+                        WHERE scraper_id = :scraper_id
+                          AND mode = :mode
+                          AND success = true
+                        ORDER BY run_at DESC
+                        LIMIT 5
                     """),
                     {"scraper_id": scraper_id, "mode": mode}
-                ).fetchone()
+                ).fetchall()
 
-                if result and result.avg_duration:
+                if rows:
+                    durations = [int(row.duration_seconds) for row in rows if row.duration_seconds]
+                    if not durations:
+                        continue
+                    estimate_seconds = int(sum(durations) / len(durations))
+                    target_count = target_attempts.get(mode)
+                    scalable_rows = [
+                        row for row in rows
+                        if row.attempted_count and row.attempted_count > 0 and row.duration_seconds
+                    ]
+
+                    if target_count and len(scalable_rows) >= 3:
+                        seconds_per_attempt = [
+                            row.duration_seconds / row.attempted_count
+                            for row in scalable_rows
+                        ]
+                        estimate_seconds = max(1, int(round(_median(seconds_per_attempt) * target_count)))
+
                     estimates[mode] = {
-                        "avg_seconds": int(result.avg_duration),
-                        "last_seconds": int(result.last_duration) if result.last_duration else None
+                        "avg_seconds": estimate_seconds,
+                        "last_seconds": durations[0],
+                        "scaled": bool(target_count and len(scalable_rows) >= 3)
                     }
     except Exception as e:
         logger.error(f"Failed to get time estimates: {e}")
@@ -112,6 +154,7 @@ def _get_time_estimates(scraper_id: str) -> dict:
 
 DEFAULT_MAX_RECIPES = 50        # Default fetch limit for new/unconfigured scrapers
 UNLIMITED_SCRAPERS = {'myrecipes'}  # These scrapers default to "all" (no limit)
+SCRAPER_INACTIVITY_TIMEOUT_SECONDS = 5 * 60
 
 # Sentinel: scraper has a config row → respect its values (even if NULL = "all")
 _HAS_CONFIG = object()
@@ -782,10 +825,15 @@ def get_recipe_scrapers():
 
     scraper_list = []
     for s in scrapers:
-        estimates = _get_time_estimates(s.id)
         # Use db_source_name for database lookup (may differ from display name)
         db_name = s.db_source_name or s.name
         max_full, max_incr = _get_effective_config(s.id, scraper_configs)
+        estimate_targets = {
+            "test": 20,
+            "incremental": max_incr,
+            "full": max_full or s.expected_recipe_count,
+        }
+        estimates = _get_time_estimates(s.id, estimate_targets)
         scraper_data = {
             "id": s.id,
             "name": s.name,
@@ -1210,6 +1258,129 @@ def _coerce_nonnegative_int(value) -> int:
         return 0
 
 
+async def _finish_run_all_queue(total_new: int) -> dict:
+    """Finish the run-all queue and start once-per-queue follow-up jobs."""
+    total_new = _coerce_nonnegative_int(total_new)
+    await clear_run_all_queue()
+
+    cache_rebuild_started = False
+    auto_image_download_started = False
+    if total_new > 0:
+        try:
+            from cache_manager import compute_cache_async
+
+            with get_db_session() as db:
+                db.execute(text("""
+                    UPDATE cache_metadata SET status = 'computing'
+                    WHERE cache_name = 'recipe_offer_matches'
+                """))
+                db.commit()
+
+            create_background_task(
+                compute_cache_async(skip_if_busy=False),
+                name="cache-rebuild-run-all-recipes",
+            )
+            event_bus.publish({
+                "type": "cache_invalidated",
+                "source": "recipes-run-all",
+            })
+            cache_rebuild_started = True
+            logger.info(
+                "Started final cache rebuild after run-all recipe scrape "
+                f"({total_new} new recipes)"
+            )
+        except Exception as e:
+            logger.warning(f"Could not start final run-all cache rebuild: {e}")
+
+        try:
+            from utils.image_auto_download import trigger_auto_download_if_enabled
+
+            auto_image_download_started = await trigger_auto_download_if_enabled()
+            if auto_image_download_started:
+                logger.info("Started auto image download after run-all recipe scrape finished")
+        except Exception as e:
+            logger.warning(f"Could not start final run-all image download: {e}")
+
+    return {
+        "cache_rebuild_started": cache_rebuild_started,
+        "auto_image_download_started": auto_image_download_started,
+    }
+
+
+async def _start_recipe_scraper_background(scraper_id: str, mode: str, scraper_info=None):
+    """Start a scraper background task after caller has done validation/locking."""
+    scraper_info = scraper_info or scraper_manager.get_scraper(scraper_id)
+    if not scraper_info:
+        return None
+
+    await update_running_scraper(scraper_id, {
+        "running": True,
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "mode": mode,
+        "status": "starting",
+        "message_key": "recipes.starting_fetch"
+    }, replace=True)
+
+    task = asyncio.create_task(_run_scraper_task(scraper_id, mode))
+    scraper_tasks[scraper_id] = task
+
+    def _scraper_task_done(t: asyncio.Task, sid=scraper_id):
+        scraper_tasks.pop(sid, None)
+        if not t.cancelled() and t.exception():
+            logger.error(f"Scraper task {sid!r} failed: {t.exception()}")
+
+    task.add_done_callback(_scraper_task_done)
+    return scraper_info
+
+
+async def _resume_run_all_queue_if_stalled(completed_scraper_id: str, completed_new_recipes: int) -> None:
+    """Resume run-all if the browser did not advance the queue after completion."""
+    await asyncio.sleep(10)
+
+    queue_state = await get_run_all_queue()
+    if not queue_state.get("active"):
+        return
+
+    scraper_ids = queue_state.get("scraper_ids") or []
+    index = _coerce_nonnegative_int(queue_state.get("index"))
+    if index >= len(scraper_ids) or scraper_ids[index] != completed_scraper_id:
+        return
+
+    next_index = index + 1
+    total_new = _coerce_nonnegative_int(queue_state.get("total_new")) + _coerce_nonnegative_int(completed_new_recipes)
+
+    if next_index >= len(scraper_ids):
+        logger.info("Run-all queue was not finalized by client; finishing from backend")
+        await _finish_run_all_queue(total_new)
+        return
+
+    next_scraper_id = scraper_ids[next_index]
+    await update_run_all_queue(index=next_index, total_new=total_new)
+
+    # If the client woke up and started something while we were waiting, leave it alone.
+    for sid in list(running_scrapers.keys()):
+        state = await get_running_scraper(sid)
+        if state and state.get("running"):
+            return
+
+    lock = get_scraper_lock(next_scraper_id)
+    async with lock:
+        state = await get_running_scraper(next_scraper_id)
+        if state and state.get("running"):
+            return
+
+        scraper_info = scraper_manager.get_scraper(next_scraper_id)
+        if not scraper_info:
+            logger.warning(f"Run-all backend resume skipped missing scraper: {next_scraper_id}")
+            return
+
+        await _start_recipe_scraper_background(next_scraper_id, "incremental", scraper_info)
+        logger.info(
+            f"Run-all queue resumed by backend: {completed_scraper_id} -> {next_scraper_id} "
+            f"({next_index + 1}/{len(scraper_ids)})"
+        )
+
+
 @router.post("/recipe-scrapers/queue")
 async def manage_recipe_scraper_queue(request: Request):
     """Manage the run-all queue. Actions: start, advance, finish, cancel."""
@@ -1246,39 +1417,11 @@ async def manage_recipe_scraper_queue(request: Request):
 
     elif action == "finish":
         total_new = _coerce_nonnegative_int(body.get("total_new", 0))
-        await clear_run_all_queue()
-
-        cache_rebuild_started = False
-        if total_new > 0:
-            try:
-                from cache_manager import compute_cache_async
-
-                with get_db_session() as db:
-                    db.execute(text("""
-                        UPDATE cache_metadata SET status = 'computing'
-                        WHERE cache_name = 'recipe_offer_matches'
-                    """))
-                    db.commit()
-
-                create_background_task(
-                    compute_cache_async(skip_if_busy=False),
-                    name="cache-rebuild-run-all-recipes",
-                )
-                event_bus.publish({
-                    "type": "cache_invalidated",
-                    "source": "recipes-run-all",
-                })
-                cache_rebuild_started = True
-                logger.info(
-                    "Started final cache rebuild after run-all recipe scrape "
-                    f"({total_new} new recipes)"
-                )
-            except Exception as e:
-                logger.warning(f"Could not start final run-all cache rebuild: {e}")
+        finish_state = await _finish_run_all_queue(total_new)
 
         return JSONResponse({
             "success": True,
-            "cache_rebuild_started": cache_rebuild_started,
+            **finish_state,
         })
 
     elif action == "cancel":
@@ -1323,6 +1466,13 @@ async def run_recipe_scraper(scraper_id: str, request: Request):
                 "message_params": {"mode": mode}
             }, status_code=400)
 
+        image_state = await get_image_state()
+        if image_state.get("running"):
+            return JSONResponse({
+                "success": False,
+                "message_key": "recipes.wait_for_image_download"
+            }, status_code=409)
+
         await update_running_scraper(scraper_id, {
             "running": True,
             "started_at": datetime.now(timezone.utc).isoformat(),
@@ -1352,7 +1502,9 @@ async def run_recipe_scraper(scraper_id: str, request: Request):
 async def _run_scraper_task(scraper_id: str, mode: str):
     """Background task that runs the scraper."""
     start_time = time.time()
+    last_progress_at = time.monotonic()
     recipes_found = 0
+    attempted_count = 0
 
     try:
         scraper_class = scraper_manager.get_scraper_class(scraper_id)
@@ -1373,10 +1525,43 @@ async def _run_scraper_task(scraper_id: str, mode: str):
 
         expected_total = scraper_info.expected_recipe_count if scraper_info else 1000
 
+        def mark_scraper_activity() -> None:
+            nonlocal last_progress_at
+            last_progress_at = time.monotonic()
+
+        async def await_with_inactivity_timeout(coro, phase: str):
+            task = asyncio.create_task(coro)
+            try:
+                while True:
+                    done, _ = await asyncio.wait({task}, timeout=10)
+                    if task in done:
+                        return await task
+
+                    inactive_seconds = time.monotonic() - last_progress_at
+                    if inactive_seconds >= SCRAPER_INACTIVITY_TIMEOUT_SECONDS:
+                        task.cancel()
+                        try:
+                            await task
+                        except asyncio.CancelledError:
+                            pass
+                        raise TimeoutError(
+                            f"Recipe scraper timed out after {int(inactive_seconds)}s "
+                            f"inactive during {phase}"
+                        )
+            finally:
+                if not task.done():
+                    task.cancel()
+
         async def progress_callback(data: dict):
+            nonlocal attempted_count
+            mark_scraper_activity()
+            if data.get("activity_only"):
+                return
+
             current = data.get("current", 0)
             total = data.get("total", expected_total)
             found = data.get("success", 0)
+            attempted_count = max(attempted_count, _coerce_nonnegative_int(current))
             percent = round((current / total) * 100) if total > 0 else 0
 
             await update_running_scraper(scraper_id, {
@@ -1390,6 +1575,14 @@ async def _run_scraper_task(scraper_id: str, mode: str):
 
         if hasattr(scraper, 'set_progress_callback'):
             scraper.set_progress_callback(progress_callback)
+
+        def get_final_attempted_count() -> int | None:
+            progress = getattr(scraper, "_progress", None)
+            current = 0
+            if isinstance(progress, dict):
+                current = _coerce_nonnegative_int(progress.get("current"))
+            final_count = max(attempted_count, current)
+            return final_count if final_count > 0 else None
 
         def get_total_recipe_count():
             try:
@@ -1420,6 +1613,25 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 mode=run_mode,
                 source_name=db_source_name,
             )
+
+        def normalize_saved_result(save_result, run_mode: str):
+            if not isinstance(save_result, dict):
+                return normalize_result([], run_mode)
+            status = save_result.get("scrape_status")
+            if not status:
+                saved_count = (
+                    _coerce_nonnegative_int(save_result.get("saved"))
+                    + _coerce_nonnegative_int(save_result.get("created"))
+                    + _coerce_nonnegative_int(save_result.get("updated"))
+                )
+                status = "success" if saved_count > 0 else "success_empty"
+            return normalize_result({
+                "status": status,
+                "recipes": [],
+                "reason": save_result.get("scrape_reason"),
+                "message_key": save_result.get("message_key"),
+                "message_params": save_result.get("message_params") or {},
+            }, run_mode)
 
         async def handle_terminal_scrape_result(scrape_result) -> bool:
             if scrape_result.status == "cancelled":
@@ -1452,7 +1664,10 @@ async def _run_scraper_task(scraper_id: str, mode: str):
 
         if mode == "test":
             scrape_result = normalize_result(
-                await scraper.scrape_all_recipes(max_recipes=20),
+                await await_with_inactivity_timeout(
+                    scraper.scrape_all_recipes(max_recipes=20),
+                    "test scrape",
+                ),
                 "test",
             )
             if await handle_terminal_scrape_result(scrape_result):
@@ -1472,19 +1687,35 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             }, replace=True)
         elif mode == "full":
             await update_running_scraper(scraper_id, {"message_key": "recipes.fetching_all"})
-            scrape_result = normalize_result(
-                await scraper.scrape_all_recipes(force_all=True, max_recipes=max_full),
-                "full",
-            )
-            if await handle_terminal_scrape_result(scrape_result):
-                return
             result = {}
-            scraper_module = scraper_manager.get_module(scraper_id)
-            save_to_database = getattr(scraper_module, 'save_to_database')
-            if scrape_result.should_save or scrape_result.is_empty:
-                result = save_to_database(scrape_result, clear_old=True)
+            scrape_result = None
+            if hasattr(scraper, 'scrape_and_save'):
+                result = await await_with_inactivity_timeout(
+                    scraper.scrape_and_save(overwrite=True, max_recipes=max_full),
+                    "full scrape",
+                )
+                scrape_result = normalize_saved_result(result, "full")
+                if await handle_terminal_scrape_result(scrape_result):
+                    return
+            else:
+                scrape_result = normalize_result(
+                    await await_with_inactivity_timeout(
+                        scraper.scrape_all_recipes(force_all=True, max_recipes=max_full),
+                        "full scrape",
+                    ),
+                    "full",
+                )
+                if await handle_terminal_scrape_result(scrape_result):
+                    return
+                scraper_module = scraper_manager.get_module(scraper_id)
+                save_to_database = getattr(scraper_module, 'save_to_database')
+                if scrape_result.should_save or scrape_result.is_empty:
+                    result = save_to_database(scrape_result, clear_old=True)
 
-            new_count = result.get("created", 0) if isinstance(result, dict) else 0
+            new_count = (
+                result.get("saved", result.get("created", 0))
+                if isinstance(result, dict) else 0
+            )
             spell_count = result.get("spell_corrections", 0) if isinstance(result, dict) else 0
             recipes_found = new_count
             total_in_db = get_total_recipe_count()
@@ -1498,7 +1729,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 "new_recipes": new_count,
                 "total_in_db": total_in_db,
             }
-            note_key = note_for_result(scrape_result, "full")
+            note_key = note_for_result(scrape_result, "full") if scrape_result else None
             if note_key:
                 state["note_key"] = note_key
             if spell_count > 0:
@@ -1506,10 +1737,22 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             await update_running_scraper(scraper_id, state, replace=True)
         else:
             result = {}
-            if max_incr and hasattr(scraper, 'scrape_all_recipes'):
+            if hasattr(scraper, 'scrape_and_save'):
+                result = await await_with_inactivity_timeout(
+                    scraper.scrape_and_save(overwrite=False, max_recipes=max_incr),
+                    "incremental scrape",
+                )
+                scrape_result = normalize_saved_result(result, "incremental")
+                if await handle_terminal_scrape_result(scrape_result):
+                    return
+                new_count = result.get("created", 0) if isinstance(result, dict) else 0
+            elif max_incr and hasattr(scraper, 'scrape_all_recipes'):
                 # User-configured incremental limit — use scrape_all_recipes with max_recipes
                 scrape_result = normalize_result(
-                    await scraper.scrape_all_recipes(max_recipes=max_incr),
+                    await await_with_inactivity_timeout(
+                        scraper.scrape_all_recipes(max_recipes=max_incr),
+                        "incremental scrape",
+                    ),
                     "incremental",
                 )
                 scraper_module = scraper_manager.get_module(scraper_id)
@@ -1523,7 +1766,10 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                     new_count = 0
             elif hasattr(scraper, 'scrape_incremental'):
                 scrape_result = normalize_result(
-                    await scraper.scrape_incremental(),
+                    await await_with_inactivity_timeout(
+                        scraper.scrape_incremental(),
+                        "incremental scrape",
+                    ),
                     "incremental",
                 )
                 scraper_module = scraper_manager.get_module(scraper_id)
@@ -1535,13 +1781,12 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                     new_count = result.get("created", 0) if isinstance(result, dict) else 0
                 else:
                     new_count = 0
-            elif hasattr(scraper, 'scrape_and_save'):
-                result = await scraper.scrape_and_save(overwrite=False)
-                new_count = result.get("created", 0) if isinstance(result, dict) else 0
-                scrape_result = normalize_result([], "incremental")
             else:
                 scrape_result = normalize_result(
-                    await scraper.scrape_all_recipes(),
+                    await await_with_inactivity_timeout(
+                        scraper.scrape_all_recipes(),
+                        "incremental scrape",
+                    ),
                     "incremental",
                 )
                 scraper_module = scraper_manager.get_module(scraper_id)
@@ -1572,16 +1817,24 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             await update_running_scraper(scraper_id, state, replace=True)
 
         duration = int(time.time() - start_time)
-        save_run_history(scraper_id, mode, duration, recipes_found, success=True, update_schedule=True)
+        save_run_history(
+            scraper_id,
+            mode,
+            duration,
+            recipes_found,
+            attempted_count=get_final_attempted_count(),
+            success=True,
+            update_schedule=True,
+        )
 
         # Trigger cache rebuild + image auto-download (only for non-test modes with new recipes).
-        # During "run all", defer cache rebuild until the queue is finished so
-        # the cache is built once from the complete refreshed recipe set.
+        # During "run all", defer both until the queue is finished so the
+        # recipe scrapers do not compete with image downloads.
         if mode != "test" and recipes_found > 0:
             queue_state = await get_run_all_queue()
             if queue_state.get("active"):
                 logger.info(
-                    f"Deferred cache rebuild after {scraper_id} scrape because "
+                    f"Deferred cache rebuild and image auto-download after {scraper_id} scrape because "
                     f"run-all queue is active ({recipes_found} new recipes)"
                 )
             else:
@@ -1592,8 +1845,16 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 except Exception as e:
                     logger.warning(f"Could not start cache rebuild: {e}")
 
-            from utils.image_auto_download import trigger_auto_download_if_enabled
-            await trigger_auto_download_if_enabled()
+                from utils.image_auto_download import trigger_auto_download_if_enabled
+                await trigger_auto_download_if_enabled()
+
+        if mode == "incremental":
+            queue_state = await get_run_all_queue()
+            if queue_state.get("active"):
+                create_background_task(
+                    _resume_run_all_queue_if_stalled(scraper_id, recipes_found),
+                    name=f"run-all-resume-{scraper_id}",
+                )
 
     except asyncio.CancelledError:
         logger.info(f"Scraper {scraper_id} was cancelled")
@@ -1607,7 +1868,23 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             "message_params": {"error": friendly_error(e)}
         }, replace=True)
         duration = int(time.time() - start_time)
-        save_run_history(scraper_id, mode, duration, recipes_found, success=False, error_message=str(e))
+        save_run_history(
+            scraper_id,
+            mode,
+            duration,
+            recipes_found,
+            attempted_count=attempted_count if attempted_count > 0 else None,
+            success=False,
+            error_message=str(e),
+        )
+
+        if mode == "incremental":
+            queue_state = await get_run_all_queue()
+            if queue_state.get("active"):
+                create_background_task(
+                    _resume_run_all_queue_if_stalled(scraper_id, 0),
+                    name=f"run-all-resume-after-error-{scraper_id}",
+                )
 
 
 @router.get("/recipe-scrapers/{scraper_id}/status")

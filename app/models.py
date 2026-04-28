@@ -475,6 +475,7 @@ class ScraperRunHistory(Base):
     mode = Column(String(20), nullable=False)  # 'test', 'incremental', 'full'
     duration_seconds = Column(Integer, nullable=False)
     recipes_found = Column(Integer, default=0)
+    attempted_count = Column(Integer)
     success = Column(Boolean, default=True)
     error_message = Column(Text)
     run_at = Column(DateTime(timezone=True), default=_utcnow)

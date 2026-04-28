@@ -63,7 +63,7 @@ sys.path.insert(0, app_dir)
 from database import get_db_session
 from scrapers.recipes._common import (
     _is_type, RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, validate_image_url
+    parse_iso8601_duration, StreamingRecipeSaver, validate_image_url
 )
 
 # GUI Metadata
@@ -117,6 +117,14 @@ class KoketScraper:
                     "percent": round(self._progress["current"] / max(1, self._progress["total"]) * 100, 1),
                     "message": message or f"Bearbetar {self._progress['current']}/{self._progress['total']}..."
                 })
+            except Exception:
+                pass
+
+    async def _send_activity(self):
+        """Report scraper activity without changing visible progress."""
+        if self._progress_callback:
+            try:
+                await self._progress_callback({"activity_only": True})
             except Exception:
                 pass
 
@@ -434,7 +442,14 @@ class KoketScraper:
 
     # ========== PARALLEL SCRAPING ==========
 
-    async def _worker(self, worker_id: int, queue: asyncio.Queue, results: List[Dict], client: httpx.AsyncClient):
+    async def _worker(
+        self,
+        worker_id: int,
+        queue: asyncio.Queue,
+        results: List[Dict],
+        client: httpx.AsyncClient,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
+    ):
         """Worker that processes URLs from queue."""
         while not self._cancel_flag:
             try:
@@ -450,8 +465,13 @@ class KoketScraper:
                 self._progress["current"] += 1
 
                 if recipe:
-                    results.append(recipe)
+                    if stream_saver:
+                        await stream_saver.add(recipe)
+                    else:
+                        results.append(recipe)
                     self._progress["success"] += 1
+
+                await self._send_activity()
 
                 # Progress update every 10 recipes
                 if self._progress["current"] % 10 == 0:
@@ -466,7 +486,13 @@ class KoketScraper:
             finally:
                 queue.task_done()
 
-    async def scrape_recipes(self, client: httpx.AsyncClient, urls: List[str], is_test: bool = False) -> List[Dict]:
+    async def scrape_recipes(
+        self,
+        client: httpx.AsyncClient,
+        urls: List[str],
+        is_test: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
+    ) -> List[Dict]:
         """Scrape multiple recipes in parallel."""
         if not urls:
             return []
@@ -485,7 +511,7 @@ class KoketScraper:
         logger.info(f"   Starting {num_workers} workers for {len(urls)} URLs...")
 
         workers = [
-            asyncio.create_task(self._worker(i, queue, results, client))
+            asyncio.create_task(self._worker(i, queue, results, client, stream_saver))
             for i in range(num_workers)
         ]
 
@@ -496,10 +522,11 @@ class KoketScraper:
 
         # Log final summary
         fails = self._fail_reasons
-        logger.info(f"   DONE: {len(results)} recipes scraped")
+        found_count = stream_saver.seen_count if stream_saver else len(results)
+        logger.info(f"   DONE: {found_count} recipes scraped")
         logger.info(f"   Fail reasons: http_error={fails['http_error']}, no_jsonld={fails['no_jsonld']}, no_recipe_type={fails['no_recipe_type']}, no_ingredients={fails['no_ingredients']}, few_ingredients={fails['few_ingredients']}")
 
-        await self._send_progress(f"Done! {len(results)} recipes scraped.")
+        await self._send_progress(f"Done! {found_count} recipes scraped.")
         return results
 
     # ========== MAIN INTERFACE (GUI-compatible) ==========
@@ -508,7 +535,8 @@ class KoketScraper:
         self,
         max_recipes: Optional[int] = None,
         batch_size: int = 10,  # Not used, kept for interface compatibility
-        force_all: bool = False
+        force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         """
         Main scraping method (matches interface expected by GUI).
@@ -552,7 +580,8 @@ class KoketScraper:
                 # Incremental: only new URLs not in database
                 existing_urls = self._get_existing_urls()
                 existing_count = len(existing_urls)
-                candidate_urls = [url for url, _ in all_urls[:MAX_URLS]]
+                all_candidate_urls = [url for url, _ in all_urls]
+                candidate_urls = all_candidate_urls if max_recipes else all_candidate_urls[:MAX_URLS]
                 urls_to_scrape = [url for url in candidate_urls if url not in existing_urls]
 
                 if max_recipes and len(urls_to_scrape) > max_recipes:
@@ -564,7 +593,7 @@ class KoketScraper:
                 # Smart stop: If we're at 70%+ of expected count, remaining URLs are likely non-recipes
                 # (articles, categories, profiles that passed URL filter but have no Recipe schema)
                 expected_recipes = 1000  # Expected actual recipes in top URLs
-                if existing_count >= expected_recipes * 0.70:  # 700+ recipes
+                if max_recipes is None and existing_count >= expected_recipes * 0.70:  # 700+ recipes
                     # Sample first 50 URLs to check if any are actual recipes
                     sample_size = min(50, len(urls_to_scrape))
                     if sample_size > 0:
@@ -591,7 +620,12 @@ class KoketScraper:
                     )
 
             # Scrape recipes
-            recipes = await self.scrape_recipes(client, urls_to_scrape, bool(max_recipes))
+            recipes = await self.scrape_recipes(
+                client,
+                urls_to_scrape,
+                bool(max_recipes),
+                stream_saver=stream_saver,
+            )
 
             if self._cancel_flag:
                 return make_recipe_scrape_result(
@@ -602,10 +636,11 @@ class KoketScraper:
                     reason="cancelled",
                 )
 
-            logger.info(f"Scraped {len(recipes)} new recipes")
+            found_count = stream_saver.seen_count if stream_saver else len(recipes)
+            logger.info(f"Scraped {found_count} new recipes")
 
             # Inform if no new recipes found but we're already well-stocked
-            if not recipes and not force_all and not max_recipes:
+            if found_count == 0 and not force_all and not max_recipes:
                 existing_count = len(self._get_existing_urls())
                 if existing_count >= 700:
                     logger.info(f"No new recipes found - already have {existing_count} recipes (fully synced)")
@@ -620,6 +655,33 @@ class KoketScraper:
     async def scrape_incremental(self) -> RecipeScrapeResult:
         """Incremental scrape: only new recipes not already in database."""
         return await self.scrape_all_recipes()
+
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict:
+        """Scrape and save in small batches."""
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        result = await self.scrape_all_recipes(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
 
     def _get_existing_urls(self) -> set:
         """Get all existing recipe URLs from database."""

@@ -114,10 +114,19 @@ def stores_page(request: Request):
 
 
 @router.get("/recipes", response_class=HTMLResponse)
-def recipes_page(request: Request):
+async def recipes_page(request: Request):
     """Recipe sources management page."""
+    image_download_running = False
+    try:
+        from state import get_image_state
+        image_state = await get_image_state()
+        image_download_running = bool(image_state.get("running"))
+    except Exception as e:
+        logger.debug(f"Could not load image download state for recipes page: {e}")
+
     return templates.TemplateResponse("recipes.html", {
         "request": request,
+        "image_download_running": image_download_running,
         **get_i18n_context(request)
     })
 

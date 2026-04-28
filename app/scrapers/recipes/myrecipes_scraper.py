@@ -57,7 +57,8 @@ sys.path.insert(0, app_dir)
 from database import get_db_session
 from scrapers.recipes._common import (
     extract_json_ld_recipe, parse_iso8601_duration,
-    RecipeScrapeResult, make_recipe_scrape_result, validate_image_url, unescape_html
+    RecipeScrapeResult, make_recipe_scrape_result, StreamingRecipeSaver,
+    validate_image_url, unescape_html
 )
 
 # GUI Metadata
@@ -528,12 +529,13 @@ class MyRecipesScraper:
         self,
         max_recipes: Optional[int] = None,
         batch_size: int = 10,
-        force_all: bool = False
+        force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         """Main scraping method (GUI-compatible interface)."""
         self._cancel_flag = False
 
-        is_test = max_recipes is not None
+        is_test = max_recipes is not None and stream_saver is None
 
         # Full mode: reset all statuses
         if force_all and not is_test:
@@ -591,7 +593,10 @@ class MyRecipesScraper:
                 self._progress["current"] += 1
 
                 if recipe:
-                    recipes.append(recipe)
+                    if stream_saver:
+                        await stream_saver.add(recipe)
+                    else:
+                        recipes.append(recipe)
                     self._progress["success"] += 1
                     # Update URL status immediately (don't wait for save)
                     if not is_test:
@@ -602,8 +607,9 @@ class MyRecipesScraper:
                 await self._send_progress()
                 await asyncio.sleep(REQUEST_DELAY)
 
-        logger.info(f"Scraped {len(recipes)} recipes from {len(urls_to_scrape)} URLs")
-        await self._send_progress(f"Done! {len(recipes)} recipes fetched.")
+        found_count = stream_saver.seen_count if stream_saver else len(recipes)
+        logger.info(f"Scraped {found_count} recipes from {len(urls_to_scrape)} URLs")
+        await self._send_progress(f"Done! {found_count} recipes fetched.")
         return make_recipe_scrape_result(
             recipes,
             force_all=force_all,
@@ -615,6 +621,33 @@ class MyRecipesScraper:
     async def scrape_incremental(self) -> RecipeScrapeResult:
         """Incremental scrape: only pending URLs."""
         return await self.scrape_all_recipes()
+
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict:
+        """Scrape and save in small batches."""
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        result = await self.scrape_all_recipes(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
 
 
 # ========== MODULE-LEVEL FUNCTION (required by GUI) ==========

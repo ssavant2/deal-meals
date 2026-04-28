@@ -66,7 +66,10 @@ sys.path.insert(0, app_dir)
 
 from database import get_db_session
 from models import FoundRecipe
-from scrapers.recipes._common import _is_type, RecipeScrapeResult, make_recipe_scrape_result, parse_iso8601_duration
+from scrapers.recipes._common import (
+    _is_type, RecipeScrapeResult, make_recipe_scrape_result,
+    parse_iso8601_duration, StreamingRecipeSaver
+)
 
 # GUI Metadata
 SCRAPER_NAME = "Recepten.se"
@@ -108,6 +111,14 @@ class ReceptenScraper:
                 "total": total,
                 "success": success
             })
+
+    async def _report_activity(self):
+        """Report scraper activity without changing visible progress."""
+        if self._progress_callback:
+            try:
+                await self._progress_callback({"activity_only": True})
+            except Exception:
+                pass
 
     # ========== SITEMAP DISCOVERY ==========
 
@@ -403,7 +414,8 @@ class ReceptenScraper:
     async def scrape_recipes_concurrent(
         self,
         urls: List[str],
-        max_concurrent: int = 2
+        max_concurrent: int = 2,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> List[Dict]:
         """
         Scrape multiple recipes concurrently with httpx.
@@ -414,7 +426,9 @@ class ReceptenScraper:
 
         async def scrape_with_semaphore(client: httpx.AsyncClient, url: str) -> Optional[Dict]:
             async with semaphore:
-                return await self.scrape_recipe_httpx(client, url)
+                result = await self.scrape_recipe_httpx(client, url)
+                await self._report_activity()
+                return result
 
         async with httpx.AsyncClient(headers=self.headers, timeout=30, event_hooks={"request": [ssrf_safe_event_hook]}) as client:
             total = len(urls)
@@ -426,13 +440,18 @@ class ReceptenScraper:
                 tasks = [scrape_with_semaphore(client, url) for url in batch]
                 results = await asyncio.gather(*tasks)
 
-                batch_recipes = [r for r in results if r]
-                recipes.extend(batch_recipes)
+                for recipe in results:
+                    if recipe:
+                        if stream_saver:
+                            await stream_saver.add(recipe)
+                        else:
+                            recipes.append(recipe)
 
-                logger.info(f"   Progress: {min(i + batch_size, total)}/{total} ({len(recipes)} successful)")
+                found_count = stream_saver.seen_count if stream_saver else len(recipes)
+                logger.info(f"   Progress: {min(i + batch_size, total)}/{total} ({found_count} successful)")
 
                 # Report progress for GUI
-                await self._report_progress(min(i + batch_size, total), total, len(recipes))
+                await self._report_progress(min(i + batch_size, total), total, found_count)
 
                 # Delay between batches to be nice
                 await asyncio.sleep(1.0)
@@ -445,7 +464,8 @@ class ReceptenScraper:
         self,
         max_recipes: Optional[int] = None,
         batch_size: int = 2,
-        force_all: bool = False
+        force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         """
         Main scraping method (matches interface expected by GUI).
@@ -506,9 +526,14 @@ class ReceptenScraper:
         logger.info(f"📄 Scraping {len(urls_to_scrape)} recipes...")
 
         # Scrape concurrently
-        recipes = await self.scrape_recipes_concurrent(urls_to_scrape, max_concurrent=batch_size)
+        recipes = await self.scrape_recipes_concurrent(
+            urls_to_scrape,
+            max_concurrent=batch_size,
+            stream_saver=stream_saver,
+        )
 
-        logger.success(f"✅ Successfully scraped {len(recipes)} recipes!")
+        found_count = stream_saver.seen_count if stream_saver else len(recipes)
+        logger.success(f"✅ Successfully scraped {found_count} recipes!")
         return make_recipe_scrape_result(
             recipes,
             force_all=force_all,
@@ -525,6 +550,33 @@ class ReceptenScraper:
         """Save recipes to database."""
         from scrapers.recipes._common import save_recipes_to_database
         return save_recipes_to_database(recipes, DB_SOURCE_NAME, clear_old=overwrite)
+
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict:
+        """Scrape and save in small batches."""
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        result = await self.scrape_all_recipes(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
 
 
 # ============================================================================

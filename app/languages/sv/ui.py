@@ -686,6 +686,7 @@ UI = {
     # Image download API messages (backend)
     # ===========================================
     'images.download_already_running': 'Nedladdning pågår redan',
+    'images.download_wait_for_recipe_scraper': 'Vänta tills recepthämtningen är klar innan du laddar ner bilder.',
     'images.download_started': 'Nedladdning startad',
     'images.no_download_running': 'Ingen nedladdning pågår',
     'images.download_cancelling': 'Avbryter nedladdning...',
@@ -738,6 +739,8 @@ UI = {
     'recipes.error_prefix': 'Fel: {error}',
     'recipes.ready_to_run': 'Redo att köras',
     'recipes.no_active_fetch': 'Ingen aktiv hämtning att avbryta',
+    'recipes.wait_for_image_download': 'Vänta tills bildnedladdningen är klar innan du hämtar recept.',
+    'recipes.image_download_in_progress_button': 'Laddar ner receptbilder - vänligen vänta',
     'recipes.recipe_not_found': 'Recept hittades inte',
     'recipes.recipe_hidden': 'Receptet har dolts',
     'recipes.recipe_restored': 'Receptet har återställts',

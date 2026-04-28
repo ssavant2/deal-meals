@@ -32,6 +32,7 @@ from scrapers.recipes._common import (
     RecipeScrapeResult,
     make_recipe_scrape_result,
     save_recipes_to_database,
+    StreamingRecipeSaver,
 )
 
 SCRAPER_NAME = "[Site Name]"
@@ -58,6 +59,7 @@ class [SiteName]Scraper:
         max_recipes: Optional[int] = None,
         batch_size: int = 10,
         force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         recipes = []
         return make_recipe_scrape_result(
@@ -69,6 +71,34 @@ class [SiteName]Scraper:
     async def scrape_incremental(self) -> RecipeScrapeResult:
         return await self.scrape_all_recipes()
 
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict[str, int]:
+        """Scrape and save in small batches for GUI/scheduled production runs."""
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        result = await self.scrape_all_recipes(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
+
 
 def save_to_database(recipes, clear_old: bool = False) -> Dict[str, int]:
     return save_recipes_to_database(recipes, DB_SOURCE_NAME, clear_old=clear_old)
@@ -77,6 +107,12 @@ def save_to_database(recipes, clear_old: bool = False) -> Dict[str, int]:
 The rest of this file is template material for the two common implementation
 styles. For strategy tradeoffs and design notes, use
 [HOW_TO_ADD_SCRAPERS.md](HOW_TO_ADD_SCRAPERS.md).
+
+For large production scrapes, use the shared streaming-save path:
+`scrape_and_save()` creates a `StreamingRecipeSaver`, passes it into
+`scrape_all_recipes(..., stream_saver=saver)`, and calls `finish()` once after
+scraping completes. Test mode still calls `scrape_all_recipes(max_recipes=20)`
+without a saver, so keep the normal `RecipeScrapeResult` return path.
 
 ## Choose One Implementation Skeleton
 
@@ -111,6 +147,7 @@ from scrapers.recipes._common import (
     RecipeScrapeResult,
     make_recipe_scrape_result,
     save_recipes_to_database,
+    StreamingRecipeSaver,
 )
 
 # GUI Metadata - UPDATE THESE!
@@ -158,7 +195,13 @@ class [SiteName]Scraper:
         """Discover category URLs dynamically."""
         pass
     
-    async def scrape_all_recipes(self, max_recipes: Optional[int] = None, batch_size: int = 10, force_all: bool = False) -> RecipeScrapeResult:
+    async def scrape_all_recipes(
+        self,
+        max_recipes: Optional[int] = None,
+        batch_size: int = 10,
+        force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
+    ) -> RecipeScrapeResult:
         """
         Main scraping function.
 
@@ -183,8 +226,9 @@ class [SiteName]Scraper:
         if not recipe_urls:
             return make_recipe_scrape_result([], failed=True, reason="no_recipe_urls")
 
-        # Filter existing URLs unless force_all=True, scrape the remaining URLs,
-        # then return the recipes through the shared result helper.
+        # Filter existing URLs unless force_all=True, scrape the remaining URLs.
+        # If stream_saver is provided, add each recipe with
+        # await stream_saver.add(recipe) instead of appending to recipes.
         recipes = []
         return make_recipe_scrape_result(
             recipes,
@@ -215,9 +259,9 @@ class [SiteName]Scraper:
 
 ### 2. Optional CLI Save Function
 
-The web UI and scheduler save scraper results centrally after your public scrape
-method returns a `RecipeScrapeResult`. A module-level save function is still
-useful for developer CLI runs from `if __name__ == "__main__"`.
+The web UI and scheduler prefer `scrape_and_save()` when it exists. A
+module-level save function is still useful for developer CLI runs from
+`if __name__ == "__main__"` and for legacy/simple scrapers.
 
 ```python
 def save_to_database(recipes, clear_old: bool = False) -> Dict[str, int]:
@@ -233,6 +277,43 @@ def save_to_database(recipes, clear_old: bool = False) -> Dict[str, int]:
     """
     return save_recipes_to_database(recipes, DB_SOURCE_NAME, clear_old=clear_old)
 ```
+
+### 2b. Production Streaming Save
+
+```python
+async def scrape_and_save(
+    self,
+    overwrite: bool = False,
+    max_recipes: Optional[int] = None,
+) -> Dict[str, int]:
+    """Scrape and save in small batches."""
+    saver = StreamingRecipeSaver(
+        DB_SOURCE_NAME,
+        overwrite=overwrite,
+        max_recipes=max_recipes,
+    )
+    result = await self.scrape_all_recipes(
+        max_recipes=max_recipes,
+        force_all=overwrite,
+        stream_saver=saver,
+    )
+    if result.status == "failed":
+        stats = saver.stats.copy()
+        stats["scrape_status"] = "failed"
+        stats["scrape_reason"] = result.reason
+        return stats
+
+    stats = await saver.finish(cancelled=result.status == "cancelled")
+    if result.status == "no_new_recipes":
+        stats["scrape_status"] = "no_new_recipes"
+        stats["scrape_reason"] = result.reason
+    return stats
+```
+
+`StreamingRecipeSaver` saves batches of 50 recipes by default. In full mode it
+upserts batches during the run and deletes stale source recipes only after the
+scrape finishes successfully. Cancelled runs do not flush pending unsaved
+recipes.
 
 ### 3. Three Run Modes
 
@@ -322,13 +403,27 @@ scraper.set_progress_callback(callback)  # If method exists
 result = await scraper.scrape_all_recipes(max_recipes=20)
 
 # Incremental mode:
-result = await scraper.scrape_all_recipes()
+if hasattr(scraper, "scrape_and_save"):
+    result = await scraper.scrape_and_save(overwrite=False, max_recipes=max_incr)
+else:
+    result = await scraper.scrape_all_recipes(max_recipes=max_incr)
 
 # Full overwrite mode:
-result = await scraper.scrape_all_recipes(force_all=True)
+if hasattr(scraper, "scrape_and_save"):
+    result = await scraper.scrape_and_save(overwrite=True, max_recipes=max_full)
+else:
+    result = await scraper.scrape_all_recipes(force_all=True, max_recipes=max_full)
 ```
 
-The result is normalized centrally before saving. Return `make_recipe_scrape_result(..., failed=True, reason="...")` for discovery/API failures so old recipes are kept. Return `make_recipe_scrape_result(..., reason="no_new_recipes")` when the scrape worked but there was nothing new to fetch.
+The result is normalized centrally before final UI status handling. Return
+`make_recipe_scrape_result(..., failed=True, reason="...")` for discovery/API
+failures so old recipes are kept. Return
+`make_recipe_scrape_result(..., reason="no_new_recipes")` when the scrape worked
+but there was nothing new to fetch.
+
+For scrapers that implement `scrape_and_save()`, the router expects a stats dict
+with `created`, `updated`, `saved`, `errors`, `scrape_status`, and
+`scrape_reason` keys. `StreamingRecipeSaver.finish()` fills these fields.
 
 The `if __name__ == "__main__"` block in your scraper is for **developer CLI testing only** — the GUI never calls it.
 
@@ -377,6 +472,7 @@ from scrapers.recipes._common import (
     RecipeScrapeResult,
     make_recipe_scrape_result,
     save_recipes_to_database,
+    StreamingRecipeSaver,
 )
 from utils.security import ssrf_safe_event_hook
 
@@ -478,7 +574,8 @@ class [SiteName]Scraper:
         self,
         max_recipes: Optional[int] = None,
         batch_size: int = 10,
-        force_all: bool = False
+        force_all: bool = False,
+        stream_saver: Optional[StreamingRecipeSaver] = None,
     ) -> RecipeScrapeResult:
         """
         Main scraping method (matches interface expected by GUI).
@@ -495,8 +592,8 @@ class [SiteName]Scraper:
         if not recipe_urls:
             return make_recipe_scrape_result([], failed=True, reason="no_recipe_urls")
 
-        # Filter existing URLs unless force_all=True, scrape the remaining URLs,
-        # then return through the shared result helper.
+        # Filter existing URLs unless force_all=True, scrape the remaining URLs.
+        # If stream_saver is provided, add recipes to it as they are parsed.
         recipes = []
         return make_recipe_scrape_result(
             recipes,
@@ -510,6 +607,35 @@ class [SiteName]Scraper:
         Required by recipe_scraper_manager.py — validated at startup.
         """
         return await self.scrape_all_recipes()
+
+    async def scrape_and_save(
+        self,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ) -> Dict[str, int]:
+        """Scrape and save in small batches."""
+        saver = StreamingRecipeSaver(
+            DB_SOURCE_NAME,
+            overwrite=overwrite,
+            max_recipes=max_recipes,
+        )
+        result = await self.scrape_all_recipes(
+            max_recipes=max_recipes,
+            force_all=overwrite,
+            stream_saver=saver,
+        )
+        if result.status == "failed":
+            stats = saver.stats.copy()
+            stats["scrape_status"] = "failed"
+            stats["scrape_reason"] = result.reason
+            return stats
+
+        stats = await saver.finish(cancelled=result.status == "cancelled")
+        if result.status == "no_new_recipes":
+            stats["scrape_status"] = "no_new_recipes"
+            stats["scrape_reason"] = result.reason
+        return stats
+
 
 def save_to_database(recipes, clear_old: bool = False) -> Dict:
     """
@@ -763,6 +889,7 @@ from scrapers.recipes._common import (
     RecipeScrapeResult,
     make_recipe_scrape_result,
     save_recipes_to_database,
+    StreamingRecipeSaver,
     parse_iso8601_duration,
     extract_json_ld_recipe,
 )
@@ -785,6 +912,22 @@ return make_recipe_scrape_result([], failed=True, reason="no_recipe_urls")
 
 `RecipeScrapeResult` is list-like for `len(result)`, iteration, and slicing. Use
 `result.recipes` when you need the explicit recipe list.
+
+### `StreamingRecipeSaver`
+
+Saves parsed recipes in small batches during a production scrape:
+
+```python
+saver = StreamingRecipeSaver(DB_SOURCE_NAME, overwrite=overwrite, max_recipes=max_recipes)
+await saver.add(recipe)      # Flushes automatically every 50 recipes by default
+stats = await saver.finish() # Flushes remaining recipes and returns save stats
+```
+
+Use it from `scrape_and_save()` rather than calling `save_recipes_to_database()`
+inside your scrape loop. In full/overwrite mode it upserts batches as they are
+found, then deletes stale source recipes only after the full scrape succeeds.
+Cancelled runs call `finish(cancelled=True)`, which drops pending unsaved
+recipes and returns cancelled status metadata.
 
 ### `parse_iso8601_duration(duration: str) -> Optional[int]`
 

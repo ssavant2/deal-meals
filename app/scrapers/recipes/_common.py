@@ -5,11 +5,12 @@ Scrapers are NOT required to use these — they're convenience functions.
 """
 
 import html
+import asyncio
 import re
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Optional, Dict, List, Any, Union
+from typing import Optional, Dict, List, Any, Union, Set
 
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
@@ -423,10 +424,136 @@ def touch_source_scraped_at(source_name: str) -> int:
         return result.rowcount
 
 
+def delete_stale_source_recipes(source_name: str, keep_urls: Set[str]) -> int:
+    """Delete non-excluded recipes for a source that were not seen in a full sync."""
+    if not keep_urls:
+        return 0
+
+    from database import get_db_session
+    from models import FoundRecipe
+
+    with get_db_session() as db:
+        deleted = db.query(FoundRecipe).filter(
+            FoundRecipe.source_name == source_name,
+            (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None)),  # noqa: E712
+            ~FoundRecipe.url.in_(list(keep_urls)),
+        ).delete(synchronize_session=False)
+        db.commit()
+        return deleted
+
+
+class StreamingRecipeSaver:
+    """Save scraped recipes in small batches while keeping final-sync semantics."""
+
+    def __init__(
+        self,
+        source_name: str,
+        *,
+        batch_size: int = 50,
+        overwrite: bool = False,
+        max_recipes: Optional[int] = None,
+    ):
+        self.source_name = source_name
+        self.batch_size = batch_size
+        self.overwrite = overwrite
+        self.max_recipes = max_recipes
+        self.pending: List[Dict] = []
+        self.saved_urls: Set[str] = set()
+        self.seen_count = 0
+        self.stats: Dict[str, int] = {
+            "cleared": 0,
+            "created": 0,
+            "updated": 0,
+            "skipped": 0,
+            "errors": 0,
+            "spell_corrections": 0,
+            "stale_deleted": 0,
+            "saved": 0,
+        }
+
+    def _add_stats(self, stats: Dict[str, int]) -> None:
+        for key in ("cleared", "created", "updated", "skipped", "errors", "spell_corrections"):
+            self.stats[key] = self.stats.get(key, 0) + int(stats.get(key, 0) or 0)
+        self.stats["saved"] = self.stats.get("created", 0) + self.stats.get("updated", 0)
+
+    async def add(self, recipe: Optional[Dict]) -> None:
+        if not recipe:
+            return
+
+        self.pending.append(recipe)
+        self.seen_count += 1
+        url = recipe.get("url")
+        if url:
+            self.saved_urls.add(url)
+
+        if len(self.pending) >= self.batch_size:
+            await self.flush()
+
+    async def flush(self) -> None:
+        if not self.pending:
+            return
+
+        result = make_recipe_scrape_result(
+            self.pending,
+            force_all=self.overwrite,
+            max_recipes=self.max_recipes,
+        )
+        stats = await asyncio.to_thread(
+            save_recipes_to_database,
+            result,
+            self.source_name,
+            False,
+            False,
+        )
+        self._add_stats(stats)
+        logger.info(
+            f"Saved {self.source_name} batch: {len(self.pending)} recipes "
+            f"(created={stats.get('created', 0)}, updated={stats.get('updated', 0)})"
+        )
+        self.pending.clear()
+
+    async def finish(self, *, cancelled: bool = False) -> Dict[str, Any]:
+        if cancelled:
+            self.pending.clear()
+            self.stats["scrape_status"] = "cancelled"
+            self.stats["scrape_reason"] = "cancelled"
+            return self.stats
+
+        await self.flush()
+
+        if self.overwrite and self.saved_urls:
+            stale_deleted = await asyncio.to_thread(
+                delete_stale_source_recipes,
+                self.source_name,
+                self.saved_urls,
+            )
+            self.stats["stale_deleted"] = stale_deleted
+            self.stats["cleared"] = self.stats.get("cleared", 0) + stale_deleted
+            logger.info(
+                f"Deleted {stale_deleted} stale {self.source_name} recipes "
+                "after completed full scrape"
+            )
+        elif self.overwrite:
+            logger.warning(
+                f"Full {self.source_name} scrape produced no saveable recipes; "
+                "keeping existing DB rows"
+            )
+
+        if self.saved_urls or not self.overwrite:
+            touched = await asyncio.to_thread(touch_source_scraped_at, self.source_name)
+            logger.info(f"Touched scraped_at for {touched} {self.source_name} recipes")
+
+        self.stats["scrape_status"] = "success" if self.saved_urls else "success_empty"
+        self.stats["scrape_reason"] = None if self.saved_urls else "empty_result"
+        self.stats["saved"] = self.stats.get("created", 0) + self.stats.get("updated", 0)
+        return self.stats
+
+
 def save_recipes_to_database(
     recipes: Union[RecipeScrapeResult, List[Dict]],
     source_name: str,
     clear_old: bool = False,
+    touch_source: bool = True,
 ) -> Dict[str, int]:
     """Save scraped recipes to database with upsert logic.
 
@@ -442,6 +569,7 @@ def save_recipes_to_database(
             Optional: image_url, ingredients, prep_time_minutes, servings.
         source_name: The DB source identifier (e.g. "ICA.se", "Coop.se").
         clear_old: If True, delete old recipes for this source first.
+        touch_source: If True, update scraped_at for the whole source after saving.
 
     Returns:
         Stats dict with keys: cleared, created, updated, skipped, errors.
@@ -460,7 +588,8 @@ def save_recipes_to_database(
         # 'synced last month' stays accurate. Failed/cancelled runs should
         # not look like a fresh sync.
         if not scrape_result.is_failure:
-            touch_source_scraped_at(source_name)
+            if touch_source:
+                touch_source_scraped_at(source_name)
         stats["scrape_status"] = scrape_result.status
         stats["scrape_reason"] = scrape_result.reason
         return stats
@@ -605,8 +734,9 @@ def save_recipes_to_database(
     stats["scrape_status"] = scrape_result.status
     stats["scrape_reason"] = scrape_result.reason
 
-    # Touch all recipes for this source so 'synced last month' stays accurate
-    touched = touch_source_scraped_at(source_name)
-    logger.info(f"Touched scraped_at for {touched} {source_name} recipes")
+    if touch_source:
+        # Touch all recipes for this source so 'synced last month' stays accurate
+        touched = touch_source_scraped_at(source_name)
+        logger.info(f"Touched scraped_at for {touched} {source_name} recipes")
 
     return stats
