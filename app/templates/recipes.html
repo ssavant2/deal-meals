@@ -137,6 +137,21 @@
         max-width: 100%;
         white-space: normal;
     }
+    .recipe-button-loader {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        flex: 0 0 auto;
+        vertical-align: -0.125em;
+        transform-origin: 50% 50%;
+        animation: recipe-button-loader-spin 1s linear infinite;
+    }
+    .recipe-button-loader-track {
+        opacity: 0.35;
+    }
+    @keyframes recipe-button-loader-spin {
+        to { transform: rotate(360deg); }
+    }
 </style>
 {% endblock %}
 
@@ -246,7 +261,10 @@
                                 {% if image_download_running|default(false) %}disabled aria-disabled="true" title="{{ t('recipes.wait_for_image_download') }}"{% endif %}
                             >
                                 {% if image_download_running|default(false) %}
-                                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>{{ t('recipes.image_download_in_progress_button') }}
+                                    <svg class="recipe-button-loader me-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+                                        <circle class="recipe-button-loader-track" cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"></circle>
+                                        <circle cx="8" cy="2" r="1.75" fill="currentColor"></circle>
+                                    </svg>{{ t('recipes.image_download_in_progress_button') }}
                                 {% else %}
                                     <i class="bi bi-play-fill"></i> {{ t('recipes.fetch_recipes') }}
                                 {% endif %}

@@ -2,6 +2,11 @@
 const i18n = window.DealMealsRecipesI18n || {};
 const pageConfig = window.DealMealsRecipesPage || {};
 const RECIPE_LOCALE = pageConfig.locale || undefined;
+const recipeImageDownloadLoaderHtml = `
+    <svg class="recipe-button-loader me-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+        <circle class="recipe-button-loader-track" cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <circle cx="8" cy="2" r="1.75" fill="currentColor"></circle>
+    </svg>`;
 
 const modeNames = { incremental: 'mode_incremental', full: 'mode_full', test: 'mode_test' };
 
@@ -99,7 +104,7 @@ function updateRecipeRunButtonState() {
         btn.disabled = true;
         btn.classList.remove('btn-info');
         btn.classList.add('btn-primary', 'image-download-lock');
-        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>${escapeHtml(label)}`;
+        btn.innerHTML = `${recipeImageDownloadLoaderHtml}${escapeHtml(label)}`;
         btn.title = t('recipes.wait_for_image_download');
         btn.setAttribute('aria-disabled', 'true');
         return;
