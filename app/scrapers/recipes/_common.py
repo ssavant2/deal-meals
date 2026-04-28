@@ -6,13 +6,16 @@ Scrapers are NOT required to use these — they're convenience functions.
 
 import html
 import asyncio
+import ctypes
+import gc
+import os
 import re
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional, Dict, List, Any, Union, Set
 
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
 from sqlalchemy.exc import IntegrityError
 from loguru import logger
 
@@ -442,6 +445,42 @@ def delete_stale_source_recipes(source_name: str, keep_urls: Set[str]) -> int:
         return deleted
 
 
+_MALLOC_TRIM = None
+_MALLOC_TRIM_CHECKED = False
+
+
+def _get_malloc_trim():
+    """Return glibc malloc_trim when available."""
+    global _MALLOC_TRIM, _MALLOC_TRIM_CHECKED
+    if _MALLOC_TRIM_CHECKED:
+        return _MALLOC_TRIM
+
+    _MALLOC_TRIM_CHECKED = True
+    if os.name != "posix":
+        return None
+
+    try:
+        libc = ctypes.CDLL("libc.so.6")
+        trim = libc.malloc_trim
+        trim.argtypes = [ctypes.c_size_t]
+        trim.restype = ctypes.c_int
+        _MALLOC_TRIM = trim
+    except Exception:
+        _MALLOC_TRIM = None
+    return _MALLOC_TRIM
+
+
+def release_recipe_batch_memory() -> None:
+    """Encourage freed batch/session memory to return to the container."""
+    gc.collect()
+    trim = _get_malloc_trim()
+    if trim:
+        try:
+            trim(0)
+        except Exception:
+            pass
+
+
 class StreamingRecipeSaver:
     """Save scraped recipes in small batches while keeping final-sync semantics."""
 
@@ -511,6 +550,7 @@ class StreamingRecipeSaver:
             f"(created={stats.get('created', 0)}, updated={stats.get('updated', 0)})"
         )
         self.pending.clear()
+        release_recipe_batch_memory()
 
     async def finish(self, *, cancelled: bool = False) -> Dict[str, Any]:
         if cancelled:
@@ -546,6 +586,7 @@ class StreamingRecipeSaver:
         self.stats["scrape_status"] = "success" if self.saved_urls else "success_empty"
         self.stats["scrape_reason"] = None if self.saved_urls else "empty_result"
         self.stats["saved"] = self.stats.get("created", 0) + self.stats.get("updated", 0)
+        release_recipe_batch_memory()
         return self.stats
 
 
@@ -608,13 +649,19 @@ def save_recipes_to_database(
         logger.info(f"Deduplicated: {len(recipes)} -> {len(unique_recipes)} recipes")
         stats["skipped"] += dupes
 
+    unique_urls = [recipe.get("url") for recipe in unique_recipes if recipe.get("url")]
+
     with get_db_session() as db:
         # Load permanently excluded URLs (deleted duplicates etc)
-        excluded_urls = set(
-            row[0] for row in db.execute(
-                text("SELECT url FROM excluded_recipe_urls")
-            ).fetchall()
-        )
+        if unique_urls:
+            excluded_stmt = text(
+                "SELECT url FROM excluded_recipe_urls WHERE url IN :urls"
+            ).bindparams(bindparam("urls", expanding=True))
+            excluded_urls = {
+                row[0] for row in db.execute(excluded_stmt, {"urls": unique_urls}).fetchall()
+            }
+        else:
+            excluded_urls = set()
 
         # Filter out excluded URLs
         before_excl = len(unique_recipes)
@@ -629,19 +676,34 @@ def save_recipes_to_database(
             deleted = db.query(FoundRecipe).filter(
                 FoundRecipe.source_name == source_name,
                 (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None))  # noqa: E712
-            ).delete(synchronize_session='fetch')
+            ).delete(synchronize_session=False)
             stats["cleared"] = deleted
             db.commit()
             logger.info(f"Cleared {deleted} old recipes (preserved excluded)")
 
-        # Pre-load existing recipes to avoid N+1 queries
-        existing_map = {r.url: r for r in db.query(FoundRecipe).filter(
-            FoundRecipe.source_name == source_name).all()}
+        # Pre-load only the rows this save call can update. Streaming saves call
+        # this many times, so source-wide ORM loads become expensive over time.
+        if unique_urls:
+            existing_rows = db.query(FoundRecipe).filter(
+                FoundRecipe.source_name == source_name,
+                FoundRecipe.url.in_(unique_urls),
+            ).all()
+        else:
+            existing_rows = []
+        existing_map = {r.url: r for r in existing_rows}
 
         # Pre-load per-recipe spell check exclusions (original_word only, index-independent)
-        spell_exclusions_raw = db.execute(
-            text("SELECT recipe_id, original_word FROM spell_corrections WHERE excluded = true")
-        ).fetchall()
+        existing_ids = [r.id for r in existing_rows]
+        if existing_ids:
+            spell_exclusions_raw = db.query(
+                SpellCorrection.recipe_id,
+                SpellCorrection.original_word,
+            ).filter(
+                SpellCorrection.excluded == True,  # noqa: E712
+                SpellCorrection.recipe_id.in_(existing_ids),
+            ).all()
+        else:
+            spell_exclusions_raw = []
         spell_exclusions_by_recipe = {}
         for row in spell_exclusions_raw:
             rid = row[0]
