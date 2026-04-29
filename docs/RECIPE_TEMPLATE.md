@@ -939,9 +939,9 @@ urls_to_scrape = candidate_urls[:attempt_limit]
 
 Use this when `max_recipes` comes from the GUI. In incremental mode it is a
 target for successfully parsed recipes, not a strict URL-attempt count. The
-helper gives the scraper a small hidden buffer for recipe-like URLs that turn
-out to be articles, categories, or invalid pages, while still enforcing a hard
-cap.
+helper gives the scraper an adaptive hidden buffer for recipe-like URLs that
+turn out to be articles, categories, or invalid pages, while still enforcing a
+hard cap.
 
 ### `recipe_target_reached(...) -> bool`
 

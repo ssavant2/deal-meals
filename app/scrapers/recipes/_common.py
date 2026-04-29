@@ -20,7 +20,19 @@ from sqlalchemy.exc import IntegrityError
 from loguru import logger
 
 
-DEFAULT_INCREMENTAL_ATTEMPT_HARD_CAP = 300
+def _int_env(name: str, default: int, *, min_value: int = 1) -> int:
+    try:
+        return max(min_value, int(os.getenv(name, str(default))))
+    except (TypeError, ValueError):
+        return default
+
+
+DEFAULT_INCREMENTAL_ATTEMPT_MIN_CAP = _int_env("RECIPE_INCREMENTAL_ATTEMPT_MIN_CAP", 300)
+DEFAULT_INCREMENTAL_ATTEMPT_TARGET_MULTIPLIER = _int_env(
+    "RECIPE_INCREMENTAL_ATTEMPT_TARGET_MULTIPLIER",
+    50,
+)
+DEFAULT_INCREMENTAL_ATTEMPT_HARD_CAP = _int_env("RECIPE_INCREMENTAL_ATTEMPT_HARD_CAP", 2000)
 
 
 @dataclass
@@ -193,20 +205,24 @@ def incremental_attempt_limit(
     available_count: int,
     default_limit: Optional[int] = None,
     hard_cap: int = DEFAULT_INCREMENTAL_ATTEMPT_HARD_CAP,
+    min_cap: int = DEFAULT_INCREMENTAL_ATTEMPT_MIN_CAP,
+    target_multiplier: int = DEFAULT_INCREMENTAL_ATTEMPT_TARGET_MULTIPLIER,
 ) -> int:
     """Return how many candidate URLs to try for an incremental target.
 
     ``max_recipes`` is a target for usable recipes, not a strict URL-attempt
     limit. Some sites expose articles/profiles in recipe-like sitemaps, so a
     hidden attempt budget keeps the UI target intuitive without surfacing noisy
-    attempt counts. For small configured targets, the hard cap is the maximum
-    number of URLs to try before giving up; for larger targets, the target
-    itself becomes the maximum.
+    attempt counts. The budget scales with the target, but keeps an absolute cap
+    so bad hit rates cannot make a run unbounded.
     """
     available_count = max(0, int(available_count or 0))
     if max_recipes:
         target = max(1, int(max_recipes))
-        attempt_budget = max(target, int(hard_cap or 0))
+        scaled_budget = target * max(1, int(target_multiplier or 1))
+        buffered_budget = max(target, int(min_cap or 0), scaled_budget)
+        capped_budget = min(buffered_budget, max(target, int(hard_cap or 0)))
+        attempt_budget = max(target, capped_budget)
         return min(available_count, attempt_budget)
     if default_limit is None:
         return available_count

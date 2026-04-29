@@ -577,9 +577,10 @@ class YourSiteScraper:
 `max_recipes` is a target for successfully parsed recipes, not a strict number
 of URL attempts in incremental mode. Many sites expose article/category/profile
 URLs in recipe-like sitemaps. Use `incremental_attempt_limit()` to give the
-scraper a bounded hidden buffer of extra URLs, and use `recipe_target_reached()`
-to stop once the target is actually reached. Full/test mode can still use
-`max_recipes` as a strict slice when that is the desired behavior.
+scraper an adaptive but bounded hidden buffer of extra URLs, and use
+`recipe_target_reached()` to stop once the target is actually reached. Full/test
+mode can still use `max_recipes` as a strict slice when that is the desired
+behavior.
 
 ### 2.5 Required Recipe Format
 

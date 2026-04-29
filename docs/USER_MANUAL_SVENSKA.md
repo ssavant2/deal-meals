@@ -259,11 +259,11 @@ Varje receptkälla har en **kugghjulsknapp** (⚙) bredvid pilknappen. Klicka p�
 
 Antalet är ett mål för sparbara recept, inte ett strikt antal URL:er som
 skraparen får besöka. Vissa receptsajter listar även artiklar, kategorier eller
-trasiga sidor bland recept-URL:erna. Deal Meals kan därför prova några extra
-URL:er i bakgrunden för att nå målet, men har ett hårt internt tak så en dålig
-träffrad inte kan göra körningen orimligt lång. Om en källa helt enkelt inte har
-tillräckligt många nya giltiga recept kan resultatet bli lägre än det valda
-antalet.
+trasiga sidor bland recept-URL:erna. Deal Meals kan därför prova en dold,
+begränsad buffert av extra URL:er i bakgrunden för att nå målet, men har ett
+hårt internt tak så en dålig träffrad inte kan göra körningen orimligt lång. Om
+en källa helt enkelt inte har tillräckligt många nya giltiga recept kan
+resultatet bli lägre än det valda antalet.
 
 De valda värdena visas direkt i källans beskrivningstext (t.ex. "Recept från coop.se (500 / alla nya)").
 

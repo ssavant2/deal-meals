@@ -258,10 +258,11 @@ Each recipe source has a **gear button** (gear icon) next to the arrow button. C
 
 The number is a target for usable recipes, not a strict count of URLs the
 scraper may visit. Some recipe sites list articles, categories, or broken pages
-among recipe-like URLs. Deal Meals may therefore try a few extra URLs in the
-background to reach the target, but it has a hard internal cap so a bad hit rate
-cannot make the run unreasonably long. If a source simply does not have enough
-new valid recipes, the final count can be lower than the configured number.
+among recipe-like URLs. Deal Meals may therefore try a hidden, bounded buffer of
+extra URLs in the background to reach the target, but it has a hard internal cap
+so a bad hit rate cannot make the run unreasonably long. If a source simply does
+not have enough new valid recipes, the final count can be lower than the
+configured number.
 
 The configured values are shown in the source description text (e.g., "Recipes from coop.se (500 / all new)").
 

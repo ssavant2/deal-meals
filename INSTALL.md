@@ -276,6 +276,24 @@ Practical rollout behavior:
 - a plain restart on unchanged code does not reset that version-specific counter
 - if the probation history file is lost, the app has to build confidence again from scratch
 
+### Recipe Scraper Attempt Budgets
+
+Incremental recipe limits are targets for usable recipes, not strict URL-attempt
+counts. Some sources, especially large sitemap-based sites, list articles,
+profiles, categories, or broken pages among recipe-like URLs. Deal Meals uses a
+hidden bounded attempt budget so a target like `20` can still find 20 usable
+recipes after skipping invalid pages.
+
+Defaults:
+
+- `RECIPE_INCREMENTAL_ATTEMPT_MIN_CAP=300` — minimum hidden URL-attempt budget for a configured incremental target
+- `RECIPE_INCREMENTAL_ATTEMPT_TARGET_MULTIPLIER=50` — scale the hidden budget from the usable-recipe target
+- `RECIPE_INCREMENTAL_ATTEMPT_HARD_CAP=2000` — absolute hidden attempt cap, except that the user target itself is always allowed
+
+For example, a target of `20` may try up to `1000` candidate URLs by default
+(`20 * 50`), stopping early once 20 usable recipes are found. A target of `500`
+may try up to `2000` candidate URLs.
+
 ## Dev vs Production
 
 | Feature | Prod | Dev |
