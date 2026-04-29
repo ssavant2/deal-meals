@@ -183,6 +183,36 @@ COMMENT ON COLUMN image_download_failures.attempt_count IS 'Total attempts acros
 COMMENT ON COLUMN image_download_failures.permanently_failed IS 'True after 5 failed attempts - never retry';
 
 -- ============================================================================
+-- RECIPE_URL_DISCOVERY_CACHE - Rolling retry cache for recipe-like non-recipe URLs
+-- ============================================================================
+CREATE TABLE recipe_url_discovery_cache (
+    id SERIAL PRIMARY KEY,
+    source_name VARCHAR(100) NOT NULL,
+    url TEXT NOT NULL,
+    normalized_url TEXT NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    reason VARCHAR(64),
+    first_seen_at TIMESTAMPTZ DEFAULT NOW(),
+    last_checked_at TIMESTAMPTZ DEFAULT NOW(),
+    next_retry_at TIMESTAMPTZ,
+    retry_count INTEGER DEFAULT 0,
+    last_http_status INTEGER,
+    last_error TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT uq_recipe_url_discovery_source_url UNIQUE (source_name, normalized_url),
+    CONSTRAINT chk_recipe_url_discovery_status CHECK (status IN ('known_non_recipe', 'temporary_failed', 'permanently_skipped')),
+    CONSTRAINT chk_recipe_url_discovery_retry_count CHECK (retry_count >= 0)
+);
+
+CREATE INDEX idx_recipe_url_discovery_source_status
+    ON recipe_url_discovery_cache(source_name, status);
+CREATE INDEX idx_recipe_url_discovery_retry
+    ON recipe_url_discovery_cache(next_retry_at);
+
+COMMENT ON TABLE recipe_url_discovery_cache IS 'Rolling cache of recipe-like URLs that did not produce usable recipes';
+
+-- ============================================================================
 -- EXCLUDED_RECIPE_URLS - Permanently blocked recipe URLs (won't be re-scraped)
 -- ============================================================================
 CREATE TABLE excluded_recipe_urls (

@@ -591,6 +591,40 @@ class ImageDownloadFailure(Base):
         return f"<ImageDownloadFailure(recipe_id={self.recipe_id}, attempts={self.attempt_count}, permanent={self.permanently_failed})>"
 
 
+class RecipeUrlDiscoveryCache(Base):
+    """Rolling cache of recipe-like URLs that did not produce usable recipes."""
+    __tablename__ = "recipe_url_discovery_cache"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    source_name = Column(String(100), nullable=False)
+    url = Column(Text, nullable=False)
+    normalized_url = Column(Text, nullable=False)
+    status = Column(String(32), nullable=False)
+    reason = Column(String(64))
+    first_seen_at = Column(DateTime(timezone=True), default=_utcnow)
+    last_checked_at = Column(DateTime(timezone=True), default=_utcnow)
+    next_retry_at = Column(DateTime(timezone=True))
+    retry_count = Column(Integer, default=0)
+    last_http_status = Column(Integer)
+    last_error = Column(Text)
+    created_at = Column(DateTime(timezone=True), default=_utcnow)
+    updated_at = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
+
+    __table_args__ = (
+        UniqueConstraint('source_name', 'normalized_url', name='uq_recipe_url_discovery_source_url'),
+        CheckConstraint(
+            "status IN ('known_non_recipe', 'temporary_failed', 'permanently_skipped')",
+            name='chk_recipe_url_discovery_status',
+        ),
+        CheckConstraint('retry_count >= 0', name='chk_recipe_url_discovery_retry_count'),
+        Index('idx_recipe_url_discovery_source_status', 'source_name', 'status'),
+        Index('idx_recipe_url_discovery_retry', 'next_retry_at'),
+    )
+
+    def __repr__(self):
+        return f"<RecipeUrlDiscoveryCache(source='{self.source_name}', status='{self.status}')>"
+
+
 class CustomRecipeUrl(Base):
     """User-managed recipe URLs for the universal 'Mina Recept' scraper."""
     __tablename__ = "custom_recipe_urls"

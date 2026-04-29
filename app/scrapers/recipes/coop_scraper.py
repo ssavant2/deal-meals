@@ -301,6 +301,7 @@ class CoopScraper:
             RecipeScrapeResult with scraped recipe dicts
         """
         self._cancel_flag = False
+        self._target_reached = False
         self._progress = {"total": 0, "current": 0, "success": 0}
         self._fail_reasons = {k: 0 for k in self._fail_reasons}
 
@@ -386,6 +387,7 @@ class CoopScraper:
                         recipes=recipes,
                         stream_saver=stream_saver,
                     ):
+                        self._target_reached = True
                         self._cancel_flag = True
                         break
 
@@ -427,6 +429,7 @@ class CoopScraper:
                                 recipes=recipes,
                                 stream_saver=stream_saver,
                             ):
+                                self._target_reached = True
                                 self._cancel_flag = True
                             if saved_recipe:
                                 self._progress["success"] += 1
@@ -478,8 +481,12 @@ class CoopScraper:
             recipes,
             force_all=force_all,
             max_recipes=max_recipes,
-            reason="cancelled" if self._cancel_flag else None,
-            cancelled=self._cancel_flag,
+            reason=(
+                "target_reached"
+                if self._target_reached
+                else ("cancelled" if self._cancel_flag else None)
+            ),
+            cancelled=self._cancel_flag and not self._target_reached,
         )
 
     async def scrape_incremental(self) -> RecipeScrapeResult:

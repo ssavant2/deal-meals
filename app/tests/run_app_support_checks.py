@@ -17,6 +17,7 @@ CHECKS = [
     "run_frontend_smoke.py",
     "run_candidate_term_detail_checks.py",
     "run_recipe_ingredient_term_map_checks.py",
+    "run_recipe_url_discovery_checks.py",
     "run_shadow_candidate_selection_checks.py",
     "run_ingredient_routing_probation_checks.py",
     "run_delta_ingredient_routing_policy_checks.py",

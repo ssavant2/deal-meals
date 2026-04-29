@@ -84,7 +84,6 @@ original_settings = {
     "cache_delta_probation_min_ready_streak": settings.cache_delta_probation_min_ready_streak,
     "cache_delta_probation_min_version_ready_runs": settings.cache_delta_probation_min_version_ready_runs,
     "cache_delta_skip_full_preview_after_probation": settings.cache_delta_skip_full_preview_after_probation,
-    "cache_term_index_skip_fts_prefilter": settings.cache_term_index_skip_fts_prefilter,
     "cache_ingredient_routing_mode": settings.cache_ingredient_routing_mode,
     "cache_ingredient_routing_probation_history_file": (
         settings.cache_ingredient_routing_probation_history_file
@@ -107,7 +106,6 @@ try:
         settings.cache_delta_probation_min_ready_streak = 1
         settings.cache_delta_probation_min_version_ready_runs = 1
         settings.cache_delta_skip_full_preview_after_probation = True
-        settings.cache_term_index_skip_fts_prefilter = True
         settings.cache_ingredient_routing_probation_history_file = str(ingredient_history_path)
         settings.cache_ingredient_routing_probation_min_ready_streak = 1
         settings.cache_ingredient_routing_probation_min_version_ready_runs = 1
@@ -131,32 +129,6 @@ try:
         test("hint_first may skip full preview when both probation gates are ready", ready_hint_policy["verification_mode"], "probation_skip")
         test("hint_first keeps effective full preview disabled after both gates are ready", ready_hint_policy["effective_verify_full_preview"], False)
         test("hint_first no longer requires a fullscan baseline after both gates are ready", ready_hint_policy["ingredient_routing_requires_fullscan_baseline"], False)
-
-        settings.cache_term_index_skip_fts_prefilter = False
-        legacy_offer_policy = _resolve_delta_verification_policy(verify_full_preview=True)
-        test(
-            "legacy FTS prefilter forces offer-delta full preview despite green probation",
-            legacy_offer_policy["verification_mode"],
-            "full_preview_required_for_legacy_fts_prefilter",
-        )
-        test(
-            "legacy FTS prefilter keeps offer-delta full preview enabled",
-            legacy_offer_policy["effective_verify_full_preview"],
-            True,
-        )
-
-        legacy_recipe_policy = _resolve_recipe_delta_verification_policy(verify_full_preview=False)
-        test(
-            "legacy FTS prefilter forces recipe-delta full preview even when not requested",
-            legacy_recipe_policy["verification_mode"],
-            "full_preview_required_for_legacy_fts_prefilter",
-        )
-        test(
-            "legacy FTS prefilter keeps recipe-delta full preview enabled",
-            legacy_recipe_policy["effective_verify_full_preview"],
-            True,
-        )
-        settings.cache_term_index_skip_fts_prefilter = True
 
         with _temporary_ingredient_routing_mode("off"):
             test("temporary ingredient routing override is visible", settings.cache_ingredient_routing_mode, "off")

@@ -85,10 +85,12 @@ erbjudandehämtning kan Startsidan därför kort visa färre förslag, gamla fö
 eller inga förslag medan matchningscachen byggs om.
 
 Det finns också en liten prestandauppvärmning: den snabbaste optimerade
-cachevägen aktiveras efter 3 verifierade cacheuppdateringar i rad utan problem.
-Tills dess fungerar appen ändå, men den gör extra säkerhetskontroller och kan
-kännas långsammare. Schemaläggning av recept- och erbjudandehämtning gör att
-detta kan ske i bakgrunden.
+cachevägen är försiktigt uppvärmd. Recept-delta kan hoppa över sin fulla
+säkerhetsjämförelse efter 2 verifierade recept-deltor för aktuell
+matchningsversion, medan bredare cachevägar fortfarande kräver 3 verifierade
+cacheuppdateringar i rad. Tills dess fungerar appen ändå, men den gör extra
+säkerhetskontroller och kan kännas långsammare. Schemaläggning av recept- och
+erbjudandehämtning gör att detta kan ske i bakgrunden.
 
 Efter mindre inkrementella recepthämtningar uppdateras matchningscachen normalt
 med ett snabbt recept-delta för just de recept som ändrats. Vid första körning,

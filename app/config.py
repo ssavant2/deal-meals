@@ -90,22 +90,13 @@ class Settings(BaseSettings):
         description="Optional separate JSONL probation history path for recipe-delta runtime gating",
     )
     cache_recipe_delta_probation_min_ready_streak: int = Field(
-        default=3,
+        default=2,
         description="Minimum consecutive ready recipe-delta probation runs before skipping full preview",
     )
     cache_recipe_delta_probation_min_version_ready_runs: int = Field(
-        default=3,
+        default=2,
         description="Minimum ready recipe-delta probation runs for the current version triple",
     )
-    cache_term_index_skip_fts_prefilter: bool = Field(
-        default=True,
-        description=(
-            "When candidate_data_source is term_index, skip the FTS pre-filter "
-            "and let the compiled term-index decide which recipes are routed. "
-            "Set to False to force the legacy FTS pre-filter as a safety valve."
-        ),
-    )
-
     # Cache rebuild / ingredient routing phase 2
     cache_ingredient_routing_mode: str = Field(
         default="hint_first",

@@ -568,9 +568,6 @@ def _format_rebuild_summary_line(summary: Dict) -> str:
     )
     selection_mode = summary.get("recipe_selection_mode")
     selection_part = f" selection={selection_mode}" if selection_mode else ""
-    skip_fts = summary.get("term_index_skip_fts_prefilter")
-    if skip_fts is not None:
-        selection_part += f" skip_fts={str(bool(skip_fts)).lower()}"
 
     return (
         "CACHE_REBUILD "
@@ -794,7 +791,6 @@ class CacheManager:
             "cache_delta_enabled": settings.cache_delta_enabled,
             "cache_delta_verify_full_preview": settings.cache_delta_verify_full_preview,
             "cache_delta_skip_full_preview_after_probation": settings.cache_delta_skip_full_preview_after_probation,
-            "cache_term_index_skip_fts_prefilter": settings.cache_term_index_skip_fts_prefilter,
             "cache_delta_probation_history_file": probation_status["history_file"],
             "cache_delta_probation_ready": probation_status["ready"],
             "cache_delta_probation_reasons": probation_status["reasons"],
@@ -975,7 +971,6 @@ class CacheManager:
         compiled_recipe_stats = None
         worker_fields = {}
         requested_recipe_ids = {str(recipe_id) for recipe_id in recipe_ids} if recipe_ids is not None else None
-        term_index_skip_fts_prefilter = bool(settings.cache_term_index_skip_fts_prefilter)
         recipe_selection_mode = "not_selected"
         recipe_selection_scope_count = 0
         fts_filtered_count: Optional[int] = None
@@ -1024,7 +1019,6 @@ class CacheManager:
                     'selected_recipe_count': 0,
                     'recipe_selection_mode': recipe_selection_mode,
                     'recipe_selection_scope_count': recipe_selection_scope_count,
-                    'term_index_skip_fts_prefilter': term_index_skip_fts_prefilter,
                     'configured_rebuild_mode': configured_rebuild_profile['mode'],
                     'effective_rebuild_mode': effective_rebuild_mode,
                     'matcher_version': MATCHER_VERSION,
@@ -1047,7 +1041,6 @@ class CacheManager:
                     'selected_recipe_count': 0,
                     'recipe_selection_mode': recipe_selection_mode,
                     'recipe_selection_scope_count': recipe_selection_scope_count,
-                    'term_index_skip_fts_prefilter': term_index_skip_fts_prefilter,
                     'configured_rebuild_mode': configured_rebuild_profile['mode'],
                     'effective_rebuild_mode': effective_rebuild_mode,
                     'matcher_version': MATCHER_VERSION,
@@ -1197,9 +1190,6 @@ class CacheManager:
                 oid: data['keywords'] for oid, data in offer_data_cache.items()
             }
 
-            # Collect all unique keywords for the legacy FTS safety valve.
-            all_keywords = build_fts_keyword_set(offer_data_cache)
-
             # Get total recipe counts first (for stats) — non-excluded only.
             with get_db_session() as db:
                 base_filter = (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None))  # noqa: E712
@@ -1211,9 +1201,17 @@ class CacheManager:
                     eligible_query = eligible_query.filter(FoundRecipe.source_name.in_(enabled_sources))
                 total_eligible_in_db = eligible_query.count()
 
-            # Get recipes. Explicit recipe IDs use a direct DB path. In the
-            # official term-index profile, full-scope rebuilds can skip FTS and
-            # let persisted term postings decide the routed offer/recipe pairs.
+            def _load_active_recipe_scope() -> list[FoundRecipe]:
+                with get_db_session() as db:
+                    base_filter = (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None))  # noqa: E712
+                    query = db.query(FoundRecipe).filter(base_filter)
+                    if enabled_sources:
+                        query = query.filter(FoundRecipe.source_name.in_(enabled_sources))
+                    return query.all()
+
+            # Get recipes. Explicit recipe IDs use a direct DB path. The
+            # term-index cache profile deliberately uses the full active recipe
+            # scope and lets persisted term postings decide the routed pairs.
             # Always exclude hidden recipes.
             if requested_recipe_ids is not None:
                 if requested_recipe_ids:
@@ -1234,38 +1232,32 @@ class CacheManager:
                 )
                 recipe_selection_mode = "direct_subset"
                 recipe_selection_scope_count = len(requested_recipe_ids)
-            elif candidate_data_source == "term_index" and term_index_skip_fts_prefilter:
-                with get_db_session() as db:
-                    base_filter = (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None))  # noqa: E712
-                    query = db.query(FoundRecipe).filter(base_filter)
-                    if enabled_sources:
-                        query = query.filter(FoundRecipe.source_name.in_(enabled_sources))
-                    all_recipes = query.all()
+            elif candidate_data_source == "term_index":
+                all_recipes = _load_active_recipe_scope()
                 recipe_selection_mode = "term_index_full_scope"
                 recipe_selection_scope_count = total_eligible_in_db
                 logger.info(
                     "  Loaded active recipe scope for term-index routing: "
                     f"{len(all_recipes)}/{total_eligible_in_db} recipes selected"
                 )
-            elif self.matcher.USE_FTS and all_keywords:
-                all_recipes = self.matcher._get_recipes_by_fts(list(all_keywords), enabled_sources)
-                recipe_selection_mode = "fts_prefilter"
-                recipe_selection_scope_count = total_eligible_in_db
-                fts_filtered_count = max(0, total_eligible_in_db - len(all_recipes))
-                logger.info(
-                    "  FTS pre-filter: "
-                    f"{len(all_recipes)}/{total_eligible_in_db} recipes match offer keywords"
-                )
+            elif self.matcher.USE_FTS:
+                all_keywords = build_fts_keyword_set(offer_data_cache)
+                if all_keywords:
+                    all_recipes = self.matcher._get_recipes_by_fts(list(all_keywords), enabled_sources)
+                    recipe_selection_mode = "fts_prefilter"
+                    recipe_selection_scope_count = total_eligible_in_db
+                    fts_filtered_count = max(0, total_eligible_in_db - len(all_recipes))
+                    logger.info(
+                        "  FTS pre-filter: "
+                        f"{len(all_recipes)}/{total_eligible_in_db} recipes match offer keywords"
+                    )
+                else:
+                    all_recipes = _load_active_recipe_scope()
+                    recipe_selection_mode = "full_scope_no_fts"
+                    recipe_selection_scope_count = total_eligible_in_db
+                    logger.info(f"  Loaded {len(all_recipes)} recipes (no FTS keywords)")
             else:
-                with get_db_session() as db:
-                    base_filter = (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None))  # noqa: E712
-                    if enabled_sources:
-                        all_recipes = db.query(FoundRecipe).filter(
-                            FoundRecipe.source_name.in_(enabled_sources),
-                            base_filter
-                        ).all()
-                    else:
-                        all_recipes = db.query(FoundRecipe).filter(base_filter).all()
+                all_recipes = _load_active_recipe_scope()
                 recipe_selection_mode = "full_scope_no_fts"
                 recipe_selection_scope_count = total_eligible_in_db
                 logger.info(f"  Loaded {len(all_recipes)} recipes (no FTS)")
@@ -1273,7 +1265,7 @@ class CacheManager:
             logger.info(
                 "  Recipe selection: "
                 f"mode={recipe_selection_mode}, scope={len(all_recipes)}/"
-                f"{recipe_selection_scope_count}, skip_fts={term_index_skip_fts_prefilter}"
+                f"{recipe_selection_scope_count}"
             )
             logger.info(f"  Processing {len(all_recipes)} candidate recipes...")
 
@@ -1589,7 +1581,6 @@ class CacheManager:
                 'recipe_selection_mode': recipe_selection_mode,
                 'recipe_selection_scope_count': recipe_selection_scope_count,
                 'fts_filtered_count': fts_filtered_count,
-                'term_index_skip_fts_prefilter': term_index_skip_fts_prefilter,
                 'configured_rebuild_mode': configured_rebuild_profile['mode'],
                 'effective_rebuild_mode': effective_rebuild_mode,
                 'matcher_version': MATCHER_VERSION,
@@ -1638,7 +1629,6 @@ class CacheManager:
                 'recipe_selection_mode': recipe_selection_mode,
                 'recipe_selection_scope_count': recipe_selection_scope_count,
                 'fts_filtered_count': fts_filtered_count,
-                'term_index_skip_fts_prefilter': term_index_skip_fts_prefilter,
                 'configured_rebuild_mode': configured_rebuild_profile['mode'],
                 'effective_rebuild_mode': effective_rebuild_mode,
                 'matcher_version': MATCHER_VERSION,
@@ -1673,7 +1663,6 @@ class CacheManager:
                 'recipe_selection_mode': recipe_selection_mode,
                 'recipe_selection_scope_count': recipe_selection_scope_count,
                 'fts_filtered_count': fts_filtered_count,
-                'term_index_skip_fts_prefilter': term_index_skip_fts_prefilter,
                 'configured_rebuild_mode': configured_rebuild_profile['mode'],
                 'effective_rebuild_mode': effective_rebuild_mode,
                 'matcher_version': MATCHER_VERSION,

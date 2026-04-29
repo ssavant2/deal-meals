@@ -66,6 +66,11 @@ from scrapers.recipes._common import (
     make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
     StreamingRecipeSaver, validate_image_url
 )
+from scrapers.recipes.url_discovery_cache import (
+    record_non_recipe_url,
+    record_recipe_url,
+    select_urls_for_scrape,
+)
 
 # GUI Metadata
 SCRAPER_NAME = "Köket.se"
@@ -98,6 +103,10 @@ class KoketScraper:
         self._cancel_flag = False
         self._progress = {"total": 0, "current": 0, "success": 0}
         self._fail_reasons = {"http_error": 0, "no_jsonld": 0, "no_recipe_type": 0, "no_name": 0, "no_ingredients": 0, "few_ingredients": 0}
+        self._last_fail_reasons_by_url = {}
+        self._last_fail_http_status_by_url = {}
+        self._last_fail_errors_by_url = {}
+        self._discovery_recorded_non_recipe = 0
 
     def cancel(self):
         """Cancel ongoing scrape."""
@@ -128,6 +137,21 @@ class KoketScraper:
                 await self._progress_callback({"activity_only": True})
             except Exception:
                 pass
+
+    def _mark_failure(
+        self,
+        url: str,
+        reason: str,
+        *,
+        http_status: Optional[int] = None,
+        error: Optional[str] = None,
+    ) -> None:
+        self._fail_reasons[reason] = self._fail_reasons.get(reason, 0) + 1
+        self._last_fail_reasons_by_url[url] = reason
+        if http_status is not None:
+            self._last_fail_http_status_by_url[url] = http_status
+        if error:
+            self._last_fail_errors_by_url[url] = error
 
     # ========== INGREDIENT FILTERING ==========
 
@@ -364,27 +388,27 @@ class KoketScraper:
             if not recipe_data:
                 # Log what types we DID find for debugging
                 if json_ld_matches:
-                    self._fail_reasons["no_recipe_type"] += 1
+                    self._mark_failure(url, "no_recipe_type")
                 else:
-                    self._fail_reasons["no_jsonld"] += 1
+                    self._mark_failure(url, "no_jsonld")
                 return None
 
             # Extract fields
             name = recipe_data.get("name", "").strip()
             if not name:
-                self._fail_reasons["no_name"] += 1
+                self._mark_failure(url, "no_name")
                 return None
 
             # Ingredients
             ingredients = recipe_data.get("recipeIngredient", [])
             if not ingredients or not isinstance(ingredients, list):
-                self._fail_reasons["no_ingredients"] += 1
+                self._mark_failure(url, "no_ingredients")
                 return None
             ingredients = self._clean_ingredients(ingredients)
 
             # Filter: Skip recipes with too few ingredients
             if len(ingredients) < MIN_INGREDIENTS:
-                self._fail_reasons["few_ingredients"] += 1
+                self._mark_failure(url, "few_ingredients")
                 return None
 
             recipe = {
@@ -431,12 +455,13 @@ class KoketScraper:
             return recipe
 
         except httpx.HTTPStatusError as e:
-            self._fail_reasons["http_error"] += 1
+            status_code = e.response.status_code
+            self._mark_failure(url, "http_error", http_status=status_code, error=f"HTTP {status_code}")
             if self._fail_reasons["http_error"] <= 3:
-                logger.warning(f"   HTTP {e.response.status_code}: {url}")
+                logger.warning(f"   HTTP {status_code}: {url}")
             return None
         except Exception as e:
-            self._fail_reasons["http_error"] += 1
+            self._mark_failure(url, "http_error", error=str(e))
             if self._fail_reasons["http_error"] <= 3:
                 logger.warning(f"   Error: {e} - {url}")
             return None
@@ -451,6 +476,7 @@ class KoketScraper:
         client: httpx.AsyncClient,
         stream_saver: Optional[StreamingRecipeSaver] = None,
         max_recipes: Optional[int] = None,
+        record_discovery: bool = False,
     ):
         """Worker that processes URLs from queue."""
         def drain_queue() -> None:
@@ -492,12 +518,31 @@ class KoketScraper:
                         saved_recipe = True
                     if saved_recipe:
                         self._progress["success"] += 1
+                        if record_discovery:
+                            await asyncio.to_thread(
+                                record_recipe_url,
+                                source_name=DB_SOURCE_NAME,
+                                url=url,
+                            )
                     if recipe_target_reached(
                         max_recipes=max_recipes,
                         recipes=results,
                         stream_saver=stream_saver,
                     ):
                         drain_queue()
+                elif record_discovery:
+                    reason = self._last_fail_reasons_by_url.pop(url, "parse_error")
+                    http_status = self._last_fail_http_status_by_url.pop(url, None)
+                    error = self._last_fail_errors_by_url.pop(url, None)
+                    await asyncio.to_thread(
+                        record_non_recipe_url,
+                        source_name=DB_SOURCE_NAME,
+                        url=url,
+                        reason=reason,
+                        http_status=http_status,
+                        error=error,
+                    )
+                    self._discovery_recorded_non_recipe += 1
 
                 await self._send_activity()
 
@@ -521,6 +566,7 @@ class KoketScraper:
         is_test: bool = False,
         stream_saver: Optional[StreamingRecipeSaver] = None,
         max_recipes: Optional[int] = None,
+        record_discovery: bool = False,
     ) -> List[Dict]:
         """Scrape multiple recipes in parallel."""
         if not urls:
@@ -534,13 +580,27 @@ class KoketScraper:
 
         self._progress = {"total": len(urls), "current": 0, "success": 0}
         self._fail_reasons = {"http_error": 0, "no_jsonld": 0, "no_recipe_type": 0, "no_name": 0, "no_ingredients": 0, "few_ingredients": 0}
+        self._last_fail_reasons_by_url = {}
+        self._last_fail_http_status_by_url = {}
+        self._last_fail_errors_by_url = {}
+        self._discovery_recorded_non_recipe = 0
         await self._send_progress("Startar skrapning...")
 
         num_workers = 3 if is_test else CONCURRENT_WORKERS  # 3 workers for test, 1 for production
         logger.info(f"   Starting {num_workers} workers for {len(urls)} URLs...")
 
         workers = [
-            asyncio.create_task(self._worker(i, queue, results, client, stream_saver, max_recipes))
+            asyncio.create_task(
+                self._worker(
+                    i,
+                    queue,
+                    results,
+                    client,
+                    stream_saver,
+                    max_recipes,
+                    record_discovery,
+                )
+            )
             for i in range(num_workers)
         ]
 
@@ -554,6 +614,8 @@ class KoketScraper:
         found_count = stream_saver.seen_count if stream_saver else len(results)
         logger.info(f"   DONE: {found_count} recipes scraped")
         logger.info(f"   Fail reasons: http_error={fails['http_error']}, no_jsonld={fails['no_jsonld']}, no_recipe_type={fails['no_recipe_type']}, no_ingredients={fails['no_ingredients']}, few_ingredients={fails['few_ingredients']}")
+        if record_discovery:
+            logger.info(f"   URL discovery: recorded_non_recipe={self._discovery_recorded_non_recipe}")
 
         await self._send_progress(f"Done! {found_count} recipes scraped.")
         return results
@@ -566,6 +628,7 @@ class KoketScraper:
         batch_size: int = 10,  # Not used, kept for interface compatibility
         force_all: bool = False,
         stream_saver: Optional[StreamingRecipeSaver] = None,
+        bulk_import: bool = False,
     ) -> RecipeScrapeResult:
         """
         Main scraping method (matches interface expected by GUI).
@@ -601,6 +664,7 @@ class KoketScraper:
                 )
 
             # Determine which URLs to scrape
+            record_discovery = bool(stream_saver is not None and not force_all)
             if force_all:
                 # Full overwrite mode: top MAX_URLS by lastmod
                 urls_to_scrape = [url for url, _ in all_urls[:max_recipes or MAX_URLS]]
@@ -611,22 +675,40 @@ class KoketScraper:
                 existing_count = len(existing_urls)
                 all_candidate_urls = [url for url, _ in all_urls]
                 if max_recipes:
-                    new_candidate_urls = [
-                        url for url in all_candidate_urls if url not in existing_urls
-                    ]
                     attempt_limit = incremental_attempt_limit(
                         max_recipes=max_recipes,
-                        available_count=len(new_candidate_urls),
+                        available_count=len(all_candidate_urls),
                         default_limit=MAX_URLS,
                     )
-                    urls_to_scrape = new_candidate_urls[:attempt_limit]
-                    candidate_count = len(new_candidate_urls)
+                    if record_discovery:
+                        urls_to_scrape, discovery_stats = select_urls_for_scrape(
+                            source_name=DB_SOURCE_NAME,
+                            candidate_urls=all_candidate_urls,
+                            max_http_attempts=attempt_limit,
+                            bulk_import=bulk_import,
+                        )
+                        logger.info(f"   URL discovery prefilter: {discovery_stats.format_log_suffix()}")
+                    else:
+                        new_candidate_urls = [
+                            url for url in all_candidate_urls if url not in existing_urls
+                        ]
+                        urls_to_scrape = new_candidate_urls[:attempt_limit]
+                    candidate_count = len(all_candidate_urls)
                 else:
-                    candidate_urls = all_candidate_urls[:MAX_URLS]
-                    urls_to_scrape = [
-                        url for url in candidate_urls if url not in existing_urls
-                    ]
-                    candidate_count = len(candidate_urls)
+                    if record_discovery:
+                        urls_to_scrape, discovery_stats = select_urls_for_scrape(
+                            source_name=DB_SOURCE_NAME,
+                            candidate_urls=all_candidate_urls,
+                            max_http_attempts=MAX_URLS,
+                            bulk_import=bulk_import,
+                        )
+                        logger.info(f"   URL discovery prefilter: {discovery_stats.format_log_suffix()}")
+                    else:
+                        candidate_urls = all_candidate_urls[:MAX_URLS]
+                        urls_to_scrape = [
+                            url for url in candidate_urls if url not in existing_urls
+                        ]
+                    candidate_count = len(all_candidate_urls)
 
                 logger.info(
                     f"INCREMENTAL: {len(urls_to_scrape)} new URLs to try "
@@ -670,6 +752,7 @@ class KoketScraper:
                 bool(max_recipes),
                 stream_saver=stream_saver,
                 max_recipes=max_recipes,
+                record_discovery=record_discovery,
             )
 
             if self._cancel_flag:

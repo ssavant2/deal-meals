@@ -65,11 +65,10 @@ the live app behavior:
   should apply recipe-delta; stale indexes, large full imports, missing changed
   IDs, or failed verification should fall back to a full rebuild.
 - For cache candidate-selection changes, inspect `CACHE_REBUILD` and
-  `CACHE_REBUILD_SUMMARY` for `recipe_selection_mode` and
-  `term_index_skip_fts_prefilter`. The default cache path should use
-  `recipe_selection_mode=term_index_full_scope`; the legacy safety valve
-  `CACHE_TERM_INDEX_SKIP_FTS_PREFILTER=false` should force delta full-preview
-  verification instead of probation-skip.
+  `CACHE_REBUILD_SUMMARY` for `recipe_selection_mode`. The default term-index
+  cache path should use `recipe_selection_mode=term_index_full_scope`; FTS is
+  kept for recipe search and legacy matcher paths, not as a pre-filter for the
+  term-index recipe cache.
 - For configured recipe counts, remember that the number is a target for
   successfully parsed recipes. The scraper may try a bounded hidden buffer of
   extra URLs, while UI progress should show found recipes against the configured

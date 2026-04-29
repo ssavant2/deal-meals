@@ -582,6 +582,11 @@ scraper an adaptive but bounded hidden buffer of extra URLs, and use
 mode can still use `max_recipes` as a strict slice when that is the desired
 behavior.
 
+For large sitemap sources with many recipe-like non-recipe pages, use the shared
+URL discovery cache helper (`scrapers.recipes.url_discovery_cache`) before HTTP.
+It skips previously classified non-recipe URLs until their retry date without
+consuming the HTTP attempt budget. Test mode should not write discovery rows.
+
 ### 2.5 Required Recipe Format
 
 Each recipe dict must have:

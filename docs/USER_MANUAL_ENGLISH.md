@@ -84,10 +84,12 @@ Right after a first setup, recipe fetch, or offer fetch, the Home page may
 briefly show fewer suggestions, old suggestions, or no suggestions while the
 matching cache is rebuilt.
 
-There is also a small performance warm-up: the fastest optimized cache path is
-enabled after 3 consecutive clean verified cache refreshes. Until then the app
-still works, but it does extra safety verification and can feel slower.
-Scheduling recipe and store fetches lets this happen in the background.
+There is also a small performance warm-up: recipe delta can skip its full
+safety comparison after 2 verified recipe deltas for the current matcher
+version, while broader cache paths still require 3 consecutive clean verified
+cache refreshes. Until then the app still works, but it does extra safety
+verification and can feel slower. Scheduling recipe and store fetches lets this
+happen in the background.
 
 After small incremental recipe fetches, the matching cache is normally updated
 with a fast recipe delta for only the recipes that changed. On first run, larger

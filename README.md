@@ -82,20 +82,16 @@ There are two warm-up levels:
    needs one successful cache rebuild before the home page can show the full
    set of current suggestions.
 2. **Fast-path warm-up:** the optimized delta/hint-first path is deliberately
-   probation-gated. With the default settings, the fully optimized path opens
-   after **3 consecutive clean verified cache refreshes** for the current
-   matcher/compiler setup.
+   probation-gated. With the default settings, recipe-delta can skip its full
+   preview after **2 clean verified recipe deltas** for the current
+   matcher/compiler setup; broader offer and ingredient-routing gates use
+   **3 consecutive clean verified cache refreshes**.
 
 Until warm-up finishes, the app still works. It may show fewer suggestions, old
 suggestions, or no suggestions before the first rebuild completes; later, during
 fast-path probation, it simply keeps doing extra safety verification and can be
 slower. Scheduling recipe and store fetches lets these refreshes happen in the
 background.
-
-Recipe fetches use the same cache system. Small incremental recipe updates are
-normally applied as recipe-delta patches for only the changed recipes, while
-first runs, large full imports, and safety fallback cases rebuild the full
-matching cache.
 
 ## Requirements
 

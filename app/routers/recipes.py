@@ -1186,15 +1186,26 @@ def clear_scraper_recipes(scraper_id: str):
             reason=f"clear_scraper_recipes:{scraper_id}",
         )
         images_deleted = image_cleanup["deleted_count"]
+        try:
+            from scrapers.recipes.url_discovery_cache import clear_source_discovery_cache
 
-        logger.info(f"Cleared {deleted_count} recipes and {images_deleted} local images for {scraper_id}")
+            discovery_deleted = clear_source_discovery_cache(db_name)
+        except Exception as e:
+            discovery_deleted = 0
+            logger.debug(f"Could not clear URL discovery cache for {scraper_id}: {e}")
+
+        logger.info(
+            f"Cleared {deleted_count} recipes, {images_deleted} local images, "
+            f"and {discovery_deleted} URL discovery rows for {scraper_id}"
+        )
 
         return JSONResponse({
             "success": True,
             "message_key": "recipes.deleted_count",
             "message_params": {"recipes": deleted_count, "images": images_deleted, "name": scraper_info.name},
             "deleted_count": deleted_count,
-            "images_deleted": images_deleted
+            "images_deleted": images_deleted,
+            "discovery_deleted": discovery_deleted,
         })
     except Exception as e:
         logger.error(f"Error clearing recipes for {scraper_id}: {e}")

@@ -943,6 +943,11 @@ helper gives the scraper an adaptive hidden buffer for recipe-like URLs that
 turn out to be articles, categories, or invalid pages, while still enforcing a
 hard cap.
 
+For sitemap sources with many known non-recipe URLs, apply
+`scrapers.recipes.url_discovery_cache.select_urls_for_scrape()` before HTTP so
+cached non-recipe skips do not consume the attempt budget. Only save discovery
+rows for real save runs, not test mode.
+
 ### `recipe_target_reached(...) -> bool`
 
 Stops a scrape once the usable-recipe target has actually been reached:

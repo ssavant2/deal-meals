@@ -723,7 +723,6 @@ def _resolve_recipe_delta_verification_policy(*, verify_full_preview: bool) -> d
         min_ready_streak=settings.cache_recipe_delta_probation_min_ready_streak,
         min_version_ready_runs=settings.cache_recipe_delta_probation_min_version_ready_runs,
     )
-    term_index_skip_fts_prefilter = bool(settings.cache_term_index_skip_fts_prefilter)
     effective_verify_full_preview = verify_full_preview
     verification_mode = "disabled"
     if verify_full_preview:
@@ -733,16 +732,12 @@ def _resolve_recipe_delta_verification_policy(*, verify_full_preview: bool) -> d
             if probation_status["ready"]:
                 effective_verify_full_preview = False
                 verification_mode = "probation_skip"
-    if not term_index_skip_fts_prefilter:
-        effective_verify_full_preview = True
-        verification_mode = "full_preview_required_for_legacy_fts_prefilter"
     return {
         "requested_verify_full_preview": verify_full_preview,
         "effective_verify_full_preview": effective_verify_full_preview,
         "verification_mode": verification_mode,
         "probation_status": probation_status,
         "probation_history_path": history_path,
-        "term_index_skip_fts_prefilter": term_index_skip_fts_prefilter,
     }
 
 
@@ -918,7 +913,6 @@ def _apply_recipe_delta_unlocked(
                 "probation_history_file": verification_policy["probation_status"]["history_file"],
                 "probation_reasons": verification_policy["probation_status"]["reasons"],
                 "probation_summary": verification_policy["probation_status"]["summary"],
-                "term_index_skip_fts_prefilter": verification_policy["term_index_skip_fts_prefilter"],
                 **(extra or {}),
             },
         )
@@ -1039,7 +1033,6 @@ def _apply_recipe_delta_unlocked(
                 "requested_recipe_count": 0,
                 "selected_recipe_count": 0,
                 "recipe_selection_mode": "direct_subset",
-                "term_index_skip_fts_prefilter": verification_policy["term_index_skip_fts_prefilter"],
             }
             patch_entries = {}
 
@@ -1127,7 +1120,6 @@ def _apply_recipe_delta_unlocked(
             "probation_history_file": verification_policy["probation_status"]["history_file"],
             "probation_reasons": verification_policy["probation_status"]["reasons"],
             "probation_summary": verification_policy["probation_status"]["summary"],
-            "term_index_skip_fts_prefilter": verification_policy["term_index_skip_fts_prefilter"],
             "compiled_recipe_refresh": ir_stats,
             "recipe_term_refresh": term_stats,
             "patch_result": patch_result,
@@ -1147,12 +1139,6 @@ def _apply_recipe_delta_unlocked(
             ),
             "patch_preview_recipe_selection_mode": (
                 patch_preview.get("recipe_selection_mode") if patch_preview is not None else None
-            ),
-            "full_preview_term_index_skip_fts_prefilter": (
-                full_preview.get("term_index_skip_fts_prefilter") if full_preview is not None else None
-            ),
-            "patch_preview_term_index_skip_fts_prefilter": (
-                patch_preview.get("term_index_skip_fts_prefilter") if patch_preview is not None else None
             ),
             "cached": (
                 patch_result["total_matches"]
@@ -1189,7 +1175,6 @@ def _resolve_delta_verification_policy(*, verify_full_preview: bool) -> dict[str
     probation_status = get_delta_probation_gate_status()
     ingredient_routing_mode = get_configured_ingredient_routing_mode()
     ingredient_probation_status = get_ingredient_routing_probation_gate_status()
-    term_index_skip_fts_prefilter = bool(settings.cache_term_index_skip_fts_prefilter)
     ingredient_routing_fullscan_baseline_gate_ready = (
         probation_status["ready"] and ingredient_probation_status["ready"]
     )
@@ -1213,16 +1198,11 @@ def _resolve_delta_verification_policy(*, verify_full_preview: bool) -> dict[str
         if verification_mode in {"disabled", "probation_skip"}:
             verification_mode = "full_preview_required_for_hint_first"
 
-    if not term_index_skip_fts_prefilter:
-        effective_verify_full_preview = True
-        verification_mode = "full_preview_required_for_legacy_fts_prefilter"
-
     return {
         "requested_verify_full_preview": verify_full_preview,
         "effective_verify_full_preview": effective_verify_full_preview,
         "verification_mode": verification_mode,
         "probation_status": probation_status,
-        "term_index_skip_fts_prefilter": term_index_skip_fts_prefilter,
         "ingredient_routing_mode": ingredient_routing_mode,
         "ingredient_routing_probation_status": ingredient_probation_status,
         "ingredient_routing_fullscan_baseline_gate_ready": (
@@ -1263,7 +1243,6 @@ def _apply_verified_offer_delta_unlocked(
             "verify_full_preview": verification_policy["requested_verify_full_preview"],
             "effective_verify_full_preview": verification_policy["effective_verify_full_preview"],
             "verification_mode": verification_policy["verification_mode"],
-            "term_index_skip_fts_prefilter": verification_policy["term_index_skip_fts_prefilter"],
             "offer_change_counts": offer_changes.get("counts", {}),
             "recipe_change_counts": recipe_changes.get("counts", {}),
         }
@@ -1435,15 +1414,10 @@ def _apply_verified_offer_delta_unlocked(
         "probation_history_file": verification_policy["probation_status"]["history_file"],
         "probation_reasons": verification_policy["probation_status"]["reasons"],
         "probation_summary": verification_policy["probation_status"]["summary"],
-        "term_index_skip_fts_prefilter": verification_policy["term_index_skip_fts_prefilter"],
         "full_preview_recipe_selection_mode": (
             full_preview.get("recipe_selection_mode") if full_preview is not None else None
         ),
         "patch_preview_recipe_selection_mode": patch_preview.get("recipe_selection_mode"),
-        "full_preview_term_index_skip_fts_prefilter": (
-            full_preview.get("term_index_skip_fts_prefilter") if full_preview is not None else None
-        ),
-        "patch_preview_term_index_skip_fts_prefilter": patch_preview.get("term_index_skip_fts_prefilter"),
         "ingredient_routing_mode": patch_preview.get(
             "ingredient_routing_mode",
             verification_policy["ingredient_routing_mode"],
@@ -1559,7 +1533,6 @@ def apply_recipe_delta(
             "matcher_version": MATCHER_VERSION,
             "recipe_compiler_version": RECIPE_COMPILER_VERSION,
             "offer_compiler_version": OFFER_COMPILER_VERSION,
-            "term_index_skip_fts_prefilter": bool(settings.cache_term_index_skip_fts_prefilter),
         }
 
     if not settings.cache_recipe_delta_enabled:
@@ -1569,9 +1542,6 @@ def apply_recipe_delta(
             source=source,
             fallback_reason="recipe_delta_disabled",
             started_at=started_at,
-            extra={
-                "term_index_skip_fts_prefilter": bool(settings.cache_term_index_skip_fts_prefilter),
-            },
         )
         _emit_recipe_delta_summary(result, level="warning")
         return result

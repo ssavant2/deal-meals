@@ -23,12 +23,40 @@ from database import engine as app_engine
 
 MIN_RELEASE_FOR_MEMORY_CACHE_CLEANUP = (1, 0, 6)
 DROP_MEMORY_CACHE_PREFS_ID = "20260429_drop_memory_cache_preferences"
+CREATE_RECIPE_URL_DISCOVERY_CACHE_ID = "20260429_create_recipe_url_discovery_cache"
 MIGRATION_TABLE = "deal_meals_schema_migrations"
 
 DROP_MEMORY_CACHE_PREFS_SQL = """
 ALTER TABLE matching_preferences
 DROP COLUMN IF EXISTS cache_use_memory,
 DROP COLUMN IF EXISTS cache_max_memory_mb;
+""".strip()
+
+CREATE_RECIPE_URL_DISCOVERY_CACHE_SQL = """
+CREATE TABLE IF NOT EXISTS recipe_url_discovery_cache (
+    id SERIAL PRIMARY KEY,
+    source_name VARCHAR(100) NOT NULL,
+    url TEXT NOT NULL,
+    normalized_url TEXT NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    reason VARCHAR(64),
+    first_seen_at TIMESTAMPTZ DEFAULT NOW(),
+    last_checked_at TIMESTAMPTZ DEFAULT NOW(),
+    next_retry_at TIMESTAMPTZ,
+    retry_count INTEGER DEFAULT 0,
+    last_http_status INTEGER,
+    last_error TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT uq_recipe_url_discovery_source_url UNIQUE (source_name, normalized_url),
+    CONSTRAINT chk_recipe_url_discovery_status CHECK (status IN ('known_non_recipe', 'temporary_failed', 'permanently_skipped')),
+    CONSTRAINT chk_recipe_url_discovery_retry_count CHECK (retry_count >= 0)
+);
+
+CREATE INDEX IF NOT EXISTS idx_recipe_url_discovery_source_status
+    ON recipe_url_discovery_cache(source_name, status);
+CREATE INDEX IF NOT EXISTS idx_recipe_url_discovery_retry
+    ON recipe_url_discovery_cache(next_retry_at);
 """.strip()
 
 
@@ -144,6 +172,24 @@ def _warn_manual_memory_cache_cleanup(existing_columns: list[str]) -> None:
     )
 
 
+def _recipe_url_discovery_cache_exists(conn) -> bool:
+    row = conn.execute(text("""
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name = 'recipe_url_discovery_cache'
+    """)).fetchone()
+    return row is not None
+
+
+def _warn_manual_recipe_url_discovery_cache_create() -> None:
+    logger.warning(
+        "recipe_url_discovery_cache table is missing, but the app DB user "
+        "cannot run DDL. Run the startup migration with DB admin credentials "
+        "or create the table from database/init.sql before enabling URL discovery."
+    )
+
+
 def _run_drop_memory_cache_preferences(engine_info: _MigrationEngine, release_version: str) -> None:
     if not engine_info.can_run_ddl:
         with engine_info.engine.connect() as conn:
@@ -177,6 +223,31 @@ def _run_drop_memory_cache_preferences(engine_info: _MigrationEngine, release_ve
         )
 
 
+def _run_create_recipe_url_discovery_cache(engine_info: _MigrationEngine, release_version: str) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _recipe_url_discovery_cache_exists(conn):
+                _warn_manual_recipe_url_discovery_cache_create()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, CREATE_RECIPE_URL_DISCOVERY_CACHE_ID):
+            return
+
+        conn.execute(text(CREATE_RECIPE_URL_DISCOVERY_CACHE_SQL))
+        logger.info(
+            "Startup migration {} ensured recipe_url_discovery_cache exists",
+            CREATE_RECIPE_URL_DISCOVERY_CACHE_ID,
+        )
+        _record_migration(
+            conn,
+            CREATE_RECIPE_URL_DISCOVERY_CACHE_ID,
+            release_version,
+            {"table": "recipe_url_discovery_cache"},
+        )
+
+
 def run_startup_migrations(release_version: str) -> None:
     """Run one-off migrations that are safe during app startup."""
     if not _version_can_run_startup_migrations(release_version):
@@ -189,6 +260,7 @@ def run_startup_migrations(release_version: str) -> None:
     engine_info = _get_migration_engine()
     try:
         _run_drop_memory_cache_preferences(engine_info, release_version)
+        _run_create_recipe_url_discovery_cache(engine_info, release_version)
     except SQLAlchemyError as e:
         logger.warning(f"Startup migrations skipped after database error: {e}")
     finally:
