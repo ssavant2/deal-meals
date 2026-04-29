@@ -100,18 +100,17 @@ function updateRecipeRunButtonState() {
     }
 
     if (imageDownloadRunning) {
-        const label = i18n.image_download_in_progress_button || t('recipes.wait_for_image_download');
         btn.disabled = true;
         btn.classList.remove('btn-info');
-        btn.classList.add('btn-primary', 'image-download-lock');
-        btn.innerHTML = escapeHtml(label);
+        btn.classList.add('btn-primary');
+        btn.innerHTML = runButtonDefaultHtml;
         btn.title = t('recipes.wait_for_image_download');
         btn.setAttribute('aria-disabled', 'true');
         return;
     }
 
     btn.disabled = runButtonRecipeLocked;
-    btn.classList.remove('btn-info', 'image-download-lock');
+    btn.classList.remove('btn-info');
     btn.classList.add('btn-primary');
     btn.innerHTML = runButtonDefaultHtml;
     btn.title = '';
@@ -124,7 +123,7 @@ function translateImageDownloadStatus(data) {
         const message = t(key, data.message_params || {});
         if (message && message !== key) return message;
     }
-    return i18n.images_downloading || i18n.image_download_in_progress_button || '';
+    return i18n.images_downloading || '';
 }
 
 function setProgressCancelAction(action) {
@@ -255,7 +254,7 @@ function updateRecipeImageDownloadStatus(data = null, options = {}) {
     progressContainer.classList.add('active');
     if (resultContainer) resultContainer.style.display = 'none';
     setProgressCancelAction('cancelImageDownloadFromRecipes');
-    if (title) title.textContent = i18n.images_downloading || i18n.image_download_in_progress_button || '';
+    if (title) title.textContent = i18n.images_downloading || '';
     if (progressText) progressText.textContent = translateImageDownloadStatus(data);
     if (progressWrap) progressWrap.classList.remove('invisible');
 

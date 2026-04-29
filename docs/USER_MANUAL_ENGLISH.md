@@ -266,6 +266,12 @@ so a bad hit rate cannot make the run unreasonably long. If a source simply does
 not have enough new valid recipes, the final count can be lower than the
 configured number.
 
+For the built-in website scrapers, Deal Meals also remembers recipe-like URLs
+that recently failed to produce usable recipes and skips them until their retry
+date. This makes repeated incremental fetches faster without changing the visible
+target count. **My Recipes** is separate: it uses the statuses shown for each
+URL in its own modal.
+
 The configured values are shown in the source description text (e.g., "Recipes from coop.se (500 / all new)").
 
 ### 4.3 Fetching Recipes

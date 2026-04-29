@@ -71,6 +71,11 @@ from scrapers.recipes._common import (
     make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
     StreamingRecipeSaver
 )
+from scrapers.recipes.url_discovery_cache import (
+    record_non_recipe_url,
+    record_recipe_url,
+    select_urls_for_scrape,
+)
 
 # GUI Metadata
 SCRAPER_NAME = "Recepten.se"
@@ -95,6 +100,7 @@ class ReceptenScraper:
         }
         self._progress_callback = None
         self._cancel_flag = False
+        self._discovery_recorded_non_recipe = 0
 
     def set_progress_callback(self, callback):
         """Set callback for progress updates."""
@@ -418,6 +424,7 @@ class ReceptenScraper:
         max_concurrent: int = 2,
         stream_saver: Optional[StreamingRecipeSaver] = None,
         max_recipes: Optional[int] = None,
+        record_discovery: bool = False,
     ) -> List[Dict]:
         """
         Scrape multiple recipes concurrently with httpx.
@@ -425,6 +432,7 @@ class ReceptenScraper:
         """
         recipes = []
         semaphore = asyncio.Semaphore(max_concurrent)
+        self._discovery_recorded_non_recipe = 0
 
         async def scrape_with_semaphore(client: httpx.AsyncClient, url: str) -> Optional[Dict]:
             async with semaphore:
@@ -448,18 +456,42 @@ class ReceptenScraper:
                 tasks = [scrape_with_semaphore(client, url) for url in batch]
                 results = await asyncio.gather(*tasks)
 
-                for recipe in results:
+                for url, recipe in zip(batch, results):
                     if recipe:
                         if stream_saver:
+                            before_seen = stream_saver.seen_count
                             await stream_saver.add(recipe)
+                            saved_recipe = stream_saver.seen_count > before_seen
                         else:
                             recipes.append(recipe)
+                            saved_recipe = True
+                        if saved_recipe and record_discovery:
+                            await asyncio.to_thread(
+                                record_recipe_url,
+                                source_name=DB_SOURCE_NAME,
+                                url=url,
+                            )
+                            final_url = recipe.get("url")
+                            if final_url and final_url != url:
+                                await asyncio.to_thread(
+                                    record_recipe_url,
+                                    source_name=DB_SOURCE_NAME,
+                                    url=final_url,
+                                )
                         if recipe_target_reached(
                             max_recipes=max_recipes,
                             recipes=recipes,
                             stream_saver=stream_saver,
                         ):
                             break
+                    elif record_discovery:
+                        await asyncio.to_thread(
+                            record_non_recipe_url,
+                            source_name=DB_SOURCE_NAME,
+                            url=url,
+                            reason="parse_error",
+                        )
+                        self._discovery_recorded_non_recipe += 1
 
                 found_count = stream_saver.seen_count if stream_saver else len(recipes)
                 logger.info(f"   Progress: {min(i + batch_size, total)}/{total} ({found_count} successful)")
@@ -469,6 +501,9 @@ class ReceptenScraper:
 
                 # Delay between batches to be nice
                 await asyncio.sleep(1.0)
+
+        if record_discovery:
+            logger.info(f"   URL discovery: recorded_non_recipe={self._discovery_recorded_non_recipe}")
 
         return recipes
 
@@ -514,23 +549,14 @@ class ReceptenScraper:
         # Check which URLs are already in database (unless force_all)
         if not force_all:
             existing_urls = await self.get_existing_urls()
-            new_urls = [url for url in urls_only if url not in existing_urls]
+            record_discovery = bool(stream_saver is not None)
 
             logger.info(f"   Existing in DB: {len(existing_urls)}")
-            logger.info(f"   New to scrape: {len(new_urls)}")
 
-            if not new_urls:
-                logger.success("✅ All recipes already in database!")
-                return make_recipe_scrape_result(
-                    [],
-                    force_all=force_all,
-                    max_recipes=max_recipes,
-                    reason="no_new_recipes",
-                )
-
-            urls_to_scrape = new_urls
+            urls_to_scrape = urls_only
         else:
             urls_to_scrape = urls_only
+            record_discovery = False
             logger.info(f"   Force mode: scraping ALL {len(urls_to_scrape)} recipes")
 
         if force_all:
@@ -539,10 +565,29 @@ class ReceptenScraper:
         else:
             attempt_limit = incremental_attempt_limit(
                 max_recipes=max_recipes,
-                available_count=len(urls_to_scrape),
-                default_limit=len(urls_to_scrape),
+                available_count=len(urls_only),
+                default_limit=len(urls_only),
             )
-            urls_to_scrape = urls_to_scrape[:attempt_limit]
+            if record_discovery:
+                urls_to_scrape, discovery_stats = select_urls_for_scrape(
+                    source_name=DB_SOURCE_NAME,
+                    candidate_urls=urls_only,
+                    max_http_attempts=attempt_limit,
+                )
+                logger.info(f"   URL discovery prefilter: {discovery_stats.format_log_suffix()}")
+            else:
+                urls_to_scrape = [
+                    url for url in urls_only if url not in existing_urls
+                ][:attempt_limit]
+
+            if not urls_to_scrape:
+                logger.success("✅ All recipes already in database!")
+                return make_recipe_scrape_result(
+                    [],
+                    force_all=force_all,
+                    max_recipes=max_recipes,
+                    reason="no_new_recipes",
+                )
 
         logger.info(f"📄 Scraping {len(urls_to_scrape)} recipes...")
 
@@ -552,6 +597,7 @@ class ReceptenScraper:
             max_concurrent=batch_size,
             stream_saver=stream_saver,
             max_recipes=max_recipes,
+            record_discovery=record_discovery,
         )
 
         found_count = stream_saver.seen_count if stream_saver else len(recipes)

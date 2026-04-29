@@ -20,6 +20,7 @@ from database import get_db_session
 
 
 NON_RECIPE_RETRY_DAYS = (30, 45, 90, 180)
+DISCOVERY_CACHE_RETENTION_DAYS = sum(NON_RECIPE_RETRY_DAYS) * 2
 TEMPORARY_FAILURE_RETRY_DAYS = 3
 TEMPORARY_FAILURE_REASONS = {"http_error", "timeout", "network_error"}
 TRACKING_QUERY_PARAMS = {
@@ -359,4 +360,38 @@ def clear_source_discovery_cache(source_name: str) -> int:
             return int(result.rowcount or 0)
     except SQLAlchemyError as e:
         logger.debug(f"Could not clear recipe URL discovery cache for {source_name}: {e}")
+        return 0
+
+
+def cleanup_stale_discovery_cache(
+    *,
+    retention_days: int = DISCOVERY_CACHE_RETENTION_DAYS,
+    now: Optional[datetime] = None,
+) -> int:
+    """Delete old discovery rows that have not been checked for two retry cycles."""
+    now = now or _utcnow()
+    retention_days = max(1, int(retention_days or DISCOVERY_CACHE_RETENTION_DAYS))
+    cutoff = now - timedelta(days=retention_days)
+
+    try:
+        with get_db_session() as db:
+            result = db.execute(
+                text("""
+                    DELETE FROM recipe_url_discovery_cache
+                    WHERE last_checked_at < :cutoff
+                """),
+                {"cutoff": cutoff},
+            )
+            db.commit()
+            deleted = int(result.rowcount or 0)
+            if deleted:
+                logger.info(
+                    "Recipe URL discovery cleanup removed {} stale rows "
+                    "(retention_days={})",
+                    deleted,
+                    retention_days,
+                )
+            return deleted
+    except SQLAlchemyError as e:
+        logger.debug(f"Could not clean stale recipe URL discovery cache rows: {e}")
         return 0

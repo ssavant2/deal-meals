@@ -45,6 +45,11 @@ def main() -> int:
         discovery._retry_delay_for("temporary_failed", 12).days,
         3,
     )
+    check(
+        "stale discovery retention is two full retry cycles",
+        discovery.DISCOVERY_CACHE_RETENTION_DAYS,
+        690,
+    )
 
     original_known = discovery._load_existing_and_excluded_urls
     original_rows = discovery._load_discovery_rows

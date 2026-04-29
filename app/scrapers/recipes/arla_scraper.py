@@ -60,6 +60,11 @@ from scrapers.recipes._common import (
     make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
     split_serving_lists, StreamingRecipeSaver
 )
+from scrapers.recipes.url_discovery_cache import (
+    record_non_recipe_url,
+    record_recipe_url,
+    select_urls_for_scrape,
+)
 
 # GUI Metadata
 SCRAPER_NAME = "Arla.se"
@@ -236,6 +241,7 @@ class ArlaScraper:
         }
         self._progress_callback = None
         self._cancel_flag = False
+        self._discovery_recorded_non_recipe = 0
 
     def set_progress_callback(self, callback):
         """Set callback for progress updates."""
@@ -446,6 +452,7 @@ class ArlaScraper:
         urls: List[str],
         stream_saver: Optional[StreamingRecipeSaver] = None,
         max_recipes: Optional[int] = None,
+        record_discovery: bool = False,
     ) -> List[Dict]:
         """Scrape multiple recipes with adaptive rate limiting.
 
@@ -465,11 +472,12 @@ class ArlaScraper:
         total_original = len(urls)
         current_delay = REQUEST_DELAY
         retried = 0
+        self._discovery_recorded_non_recipe = 0
 
         # Queue entries: (url, retry_count)
         queue = deque((url, 0) for url in urls)
 
-        logger.info(f"Scraping {total_original} recipes (delay={current_delay}s)...")
+        logger.info(f"Scraping up to {total_original} selected URLs (delay={current_delay}s)...")
         await self._report_progress(f"Fetching {total_original} recipes...", 0, total_original, 0)
 
         processed = 0
@@ -490,11 +498,28 @@ class ArlaScraper:
                     logger.debug(f"   Rate limited, delay → {current_delay}s, re-queued: {url}")
                 else:
                     logger.debug(f"   Gave up after retry: {url}")
+                    if record_discovery:
+                        await asyncio.to_thread(
+                            record_non_recipe_url,
+                            source_name=DB_SOURCE_NAME,
+                            url=url,
+                            reason="http_error",
+                        )
+                        self._discovery_recorded_non_recipe += 1
             elif result is not None:
                 if stream_saver:
+                    before_seen = stream_saver.seen_count
                     await stream_saver.add(result)
+                    saved_recipe = stream_saver.seen_count > before_seen
                 else:
                     recipes.append(result)
+                    saved_recipe = True
+                if saved_recipe and record_discovery:
+                    await asyncio.to_thread(
+                        record_recipe_url,
+                        source_name=DB_SOURCE_NAME,
+                        url=url,
+                    )
                 # Success: ease delay back toward base
                 if current_delay > REQUEST_DELAY:
                     current_delay = max(REQUEST_DELAY, current_delay - 0.5)
@@ -504,6 +529,14 @@ class ArlaScraper:
                     stream_saver=stream_saver,
                 ):
                     queue.clear()
+            elif record_discovery:
+                await asyncio.to_thread(
+                    record_non_recipe_url,
+                    source_name=DB_SOURCE_NAME,
+                    url=url,
+                    reason="parse_error",
+                )
+                self._discovery_recorded_non_recipe += 1
 
             processed += 1
             await self._report_activity()
@@ -523,9 +556,11 @@ class ArlaScraper:
 
             await asyncio.sleep(current_delay)
 
+        found_count = stream_saver.seen_count if stream_saver else len(recipes)
+        attempted_count = max(0, processed - retried)
         logger.info(
-            f"   Done: {len(recipes)} recipes from {total_original} URLs "
-            f"({retried} retried, final delay={current_delay}s)"
+            f"   Done: {found_count} recipes from {attempted_count} attempted URLs "
+            f"({total_original} selected, {retried} retried, final delay={current_delay}s)"
         )
         return recipes
 
@@ -569,6 +604,7 @@ class ArlaScraper:
                 )
 
             # Determine which URLs to scrape
+            record_discovery = bool(stream_saver is not None and not force_all)
             if force_all:
                 urls_to_scrape = all_urls[:max_recipes or MAX_RECIPES]
                 logger.info(f"OVERWRITE MODE: Scraping {len(urls_to_scrape)} recipes")
@@ -576,20 +612,36 @@ class ArlaScraper:
                 # Incremental: only new URLs not in database
                 existing_urls = self._get_existing_urls()
                 if max_recipes:
-                    new_candidate_urls = [
-                        url for url in all_urls if url not in existing_urls
-                    ]
                     attempt_limit = incremental_attempt_limit(
                         max_recipes=max_recipes,
-                        available_count=len(new_candidate_urls),
+                        available_count=len(all_urls),
                         default_limit=MAX_RECIPES,
                     )
-                    urls_to_scrape = new_candidate_urls[:attempt_limit]
+                    if record_discovery:
+                        urls_to_scrape, discovery_stats = select_urls_for_scrape(
+                            source_name=DB_SOURCE_NAME,
+                            candidate_urls=all_urls,
+                            max_http_attempts=attempt_limit,
+                        )
+                        logger.info(f"   URL discovery prefilter: {discovery_stats.format_log_suffix()}")
+                    else:
+                        new_candidate_urls = [
+                            url for url in all_urls if url not in existing_urls
+                        ]
+                        urls_to_scrape = new_candidate_urls[:attempt_limit]
                 else:
-                    candidate_urls = all_urls[:MAX_RECIPES]
-                    urls_to_scrape = [
-                        url for url in candidate_urls if url not in existing_urls
-                    ]
+                    if record_discovery:
+                        urls_to_scrape, discovery_stats = select_urls_for_scrape(
+                            source_name=DB_SOURCE_NAME,
+                            candidate_urls=all_urls,
+                            max_http_attempts=MAX_RECIPES,
+                        )
+                        logger.info(f"   URL discovery prefilter: {discovery_stats.format_log_suffix()}")
+                    else:
+                        candidate_urls = all_urls[:MAX_RECIPES]
+                        urls_to_scrape = [
+                            url for url in candidate_urls if url not in existing_urls
+                        ]
 
                 logger.info(
                     f"INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape "
@@ -611,6 +663,7 @@ class ArlaScraper:
                 urls_to_scrape,
                 stream_saver=stream_saver,
                 max_recipes=max_recipes,
+                record_discovery=record_discovery,
             )
 
             if self._cancel_flag:
@@ -622,7 +675,10 @@ class ArlaScraper:
                     reason="cancelled",
                 )
 
-            logger.info(f"Scraped {len(recipes)} recipes")
+            found_count = stream_saver.seen_count if stream_saver else len(recipes)
+            logger.info(f"Scraped {found_count} recipes")
+            if record_discovery:
+                logger.info(f"   URL discovery: recorded_non_recipe={self._discovery_recorded_non_recipe}")
             return make_recipe_scrape_result(
                 recipes,
                 force_all=force_all,

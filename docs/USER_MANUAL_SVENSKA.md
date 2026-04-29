@@ -267,6 +267,12 @@ hårt internt tak så en dålig träffrad inte kan göra körningen orimligt lå
 en källa helt enkelt inte har tillräckligt många nya giltiga recept kan
 resultatet bli lägre än det valda antalet.
 
+För de inbyggda webbsideskraparna kommer Deal Meals också ihåg receptlika
+URL:er som nyligen inte gav något sparbart recept och hoppar över dem tills de
+ska testas igen. Det gör upprepade inkrementella hämtningar snabbare utan att
+ändra det synliga målet. **Mina Recept** är separat: där används statusen som
+visas för varje URL i den egna modalen.
+
 De valda värdena visas direkt i källans beskrivningstext (t.ex. "Recept från coop.se (500 / alla nya)").
 
 ### 4.3 Hämta recept

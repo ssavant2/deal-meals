@@ -734,7 +734,6 @@ UI = {
     'recipes.ready_to_run': 'Ready to run',
     'recipes.no_active_fetch': 'No active fetch to cancel',
     'recipes.wait_for_image_download': 'Wait until image downloading has finished before fetching recipes.',
-    'recipes.image_download_in_progress_button': 'Downloading recipe images - please wait',
     'recipes.recipe_not_found': 'Recipe not found',
     'recipes.recipe_hidden': 'Recipe has been hidden',
     'recipes.recipe_restored': 'Recipe has been restored',

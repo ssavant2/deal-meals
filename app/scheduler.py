@@ -240,6 +240,7 @@ class ScraperScheduler:
         # Daily cleanup of old scraper run history (30 days retention)
         from utils.scraper_history import cleanup_old_history
         from utils.recipe_image_cleanup import prune_orphan_recipe_images
+        from scrapers.recipes.url_discovery_cache import cleanup_stale_discovery_cache
 
         self.scheduler.add_job(
             cleanup_old_history,
@@ -252,6 +253,12 @@ class ScraperScheduler:
             CronTrigger(day_of_week="sun", hour=4, minute=0),
             id="cleanup_orphan_recipe_images",
             kwargs={"dry_run": False, "reason": "weekly_scheduler"},
+            replace_existing=True,
+        )
+        self.scheduler.add_job(
+            cleanup_stale_discovery_cache,
+            CronTrigger(day_of_week="sun", hour=3, minute=30),
+            id="cleanup_recipe_url_discovery_cache",
             replace_existing=True,
         )
 

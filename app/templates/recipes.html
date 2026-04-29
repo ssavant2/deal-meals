@@ -146,10 +146,6 @@
     .attention-pulse {
         animation: attention-pulse 1s ease-in-out 3;
     }
-    #run-scraper-btn.image-download-lock {
-        max-width: 100%;
-        white-space: normal;
-    }
 </style>
 {% endblock %}
 
@@ -252,17 +248,13 @@
                         <label class="form-label">&nbsp;</label>
                         <div>
                             <button
-                                class="btn btn-primary{% if image_download_running|default(false) %} image-download-lock{% endif %}"
+                                class="btn btn-primary"
                                 id="run-scraper-btn"
                                 data-action="runScraper"
                                 data-default-label="{{ t('recipes.fetch_recipes') }}"
                                 {% if image_download_running|default(false) %}disabled aria-disabled="true" title="{{ t('recipes.wait_for_image_download') }}"{% endif %}
                             >
-                                {% if image_download_running|default(false) %}
-                                    {{ t('recipes.image_download_in_progress_button') }}
-                                {% else %}
-                                    <i class="bi bi-play-fill"></i> {{ t('recipes.fetch_recipes') }}
-                                {% endif %}
+                                <i class="bi bi-play-fill"></i> {{ t('recipes.fetch_recipes') }}
                             </button>
                         </div>
                     </div>
@@ -450,7 +442,6 @@ window.DealMealsRecipesI18n = {
     fetching: {{ t('recipes.fetching')|tojson }},
     waiting_server: {{ t('recipes.waiting_server')|tojson }},
     cancelling: {{ t('recipes.cancelling')|tojson }},
-    image_download_in_progress_button: {{ t('recipes.image_download_in_progress_button')|tojson }},
     images_downloading: {{ t('config.images_downloading')|tojson }},
     images_cancelling: {{ t('config.images_cancelling')|tojson }},
     images_cancel_error: {{ t('config.images_cancel_error')|tojson }},

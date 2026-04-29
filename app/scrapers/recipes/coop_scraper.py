@@ -70,6 +70,11 @@ from scrapers.recipes._common import (
     parse_iso8601_duration, recipe_target_reached, split_serving_lists,
     StreamingRecipeSaver
 )
+from scrapers.recipes.url_discovery_cache import (
+    record_non_recipe_url,
+    record_recipe_url,
+    select_urls_for_scrape,
+)
 
 # GUI Metadata
 SCRAPER_NAME = "Coop.se"
@@ -112,6 +117,10 @@ class CoopScraper:
             "few_ingredients": 0,
             "timeout": 0
         }
+        self._last_fail_reasons_by_url = {}
+        self._last_fail_http_status_by_url = {}
+        self._last_fail_errors_by_url = {}
+        self._discovery_recorded_non_recipe = 0
 
     def cancel(self):
         """Cancel ongoing scrape."""
@@ -142,6 +151,21 @@ class CoopScraper:
                 await self._progress_callback({"activity_only": True})
             except Exception as e:
                 logger.debug(f"WebSocket activity callback failed: {e}")
+
+    def _mark_failure(
+        self,
+        url: str,
+        reason: str,
+        *,
+        http_status: Optional[int] = None,
+        error: Optional[str] = None,
+    ) -> None:
+        self._fail_reasons[reason] = self._fail_reasons.get(reason, 0) + 1
+        self._last_fail_reasons_by_url[url] = reason
+        if http_status is not None:
+            self._last_fail_http_status_by_url[url] = http_status
+        if error:
+            self._last_fail_errors_by_url[url] = error
 
     async def get_recipe_urls_from_sitemap(self) -> List[str]:
         """Fetch recipe URLs from sitemap."""
@@ -208,13 +232,13 @@ class CoopScraper:
             }''')
 
             if not jsonld_data:
-                self._fail_reasons["no_jsonld"] += 1
+                self._mark_failure(url, "no_jsonld")
                 return None
 
             at_type = jsonld_data.get("@type")
             is_recipe = at_type == "Recipe" or (isinstance(at_type, list) and "Recipe" in at_type)
             if not is_recipe:
-                self._fail_reasons["no_recipe_type"] += 1
+                self._mark_failure(url, "no_recipe_type")
                 return None
 
             # Use final URL after redirects (e.g. /rodkalslasagne/ → /gronsakslasagne/)
@@ -229,7 +253,7 @@ class CoopScraper:
             # Name (required)
             name = jsonld_data.get("name", "").strip()
             if not name:
-                self._fail_reasons["no_name"] += 1
+                self._mark_failure(url, "no_name")
                 return None
             recipe["name"] = html_lib.unescape(name)
 
@@ -238,11 +262,11 @@ class CoopScraper:
             # Split "Till servering" lists: "salladslök, chilimajonnäs och sesamfrön" → 3 items
             ingredients = split_serving_lists(ingredients)
             if not ingredients:
-                self._fail_reasons["no_ingredients"] += 1
+                self._mark_failure(url, "no_ingredients")
                 return None
 
             if len(ingredients) < MIN_INGREDIENTS:
-                self._fail_reasons["few_ingredients"] += 1
+                self._mark_failure(url, "few_ingredients")
                 return None
 
             recipe["ingredients"] = ingredients
@@ -275,11 +299,11 @@ class CoopScraper:
             return recipe
 
         except PlaywrightTimeout:
-            self._fail_reasons["timeout"] += 1
+            self._mark_failure(url, "timeout", error="playwright_timeout")
             return None
         except Exception as e:
             logger.debug(f"Error scraping {url}: {e}")
-            self._fail_reasons["http_error"] += 1
+            self._mark_failure(url, "http_error", error=str(e))
             return None
 
     async def scrape_all_recipes(
@@ -288,6 +312,7 @@ class CoopScraper:
         batch_size: int = CONCURRENT_WORKERS,
         force_all: bool = False,
         stream_saver: Optional[StreamingRecipeSaver] = None,
+        bulk_import: bool = False,
     ) -> RecipeScrapeResult:
         """
         Main scraping method.
@@ -304,6 +329,10 @@ class CoopScraper:
         self._target_reached = False
         self._progress = {"total": 0, "current": 0, "success": 0}
         self._fail_reasons = {k: 0 for k in self._fail_reasons}
+        self._last_fail_reasons_by_url = {}
+        self._last_fail_http_status_by_url = {}
+        self._last_fail_errors_by_url = {}
+        self._discovery_recorded_non_recipe = 0
 
         # Get URLs from sitemap
         all_urls = await self.get_recipe_urls_from_sitemap()
@@ -324,31 +353,52 @@ class CoopScraper:
         logger.info(f"Shuffled {len(shuffled_urls)} URLs with seed {RANDOM_SEED}")
 
         # Filter out existing unless force_all
+        record_discovery = bool(stream_saver is not None and not force_all)
         if force_all:
             urls_to_scrape = shuffled_urls[:max_recipes or MAX_URLS]
             logger.info(f"Force mode: scraping {len(urls_to_scrape)} URLs")
         else:
             existing_urls = self.get_existing_urls()
-            new_urls = [u for u in shuffled_urls if u not in existing_urls]
             # Use higher limit until we reach target (~1000 recipes), then small batches
             filling_initial_target = len(existing_urls) < EXPECTED_RECIPE_COUNT * 0.9
             if max_recipes:
                 limit = incremental_attempt_limit(
                     max_recipes=max_recipes,
-                    available_count=len(new_urls),
+                    available_count=len(shuffled_urls),
                     default_limit=MAX_INCREMENTAL,
                 )
             elif filling_initial_target:
                 limit = MAX_URLS
             else:
                 limit = MAX_INCREMENTAL
-            urls_to_scrape = new_urls[:limit]
+
+            if record_discovery:
+                urls_to_scrape, discovery_stats = select_urls_for_scrape(
+                    source_name=DB_SOURCE_NAME,
+                    candidate_urls=shuffled_urls,
+                    max_http_attempts=limit,
+                    bulk_import=bulk_import,
+                )
+                logger.info(f"URL discovery prefilter: {discovery_stats.format_log_suffix()}")
+            else:
+                new_urls = [u for u in shuffled_urls if u not in existing_urls]
+                urls_to_scrape = new_urls[:limit]
+
             if max_recipes:
-                logger.info(f"Incremental mode (configured): {len(urls_to_scrape)} URLs (of {len(new_urls)} new, skipped {len(existing_urls)} existing)")
+                logger.info(
+                    "Incremental mode (configured): "
+                    f"{len(urls_to_scrape)} candidate URLs selected "
+                    f"(target {max_recipes}, {len(shuffled_urls)} sitemap URLs, "
+                    f"{len(existing_urls)} recipes already in DB)"
+                )
             elif filling_initial_target:
                 logger.info(f"Incremental mode (filling): {len(urls_to_scrape)} URLs — DB has {len(existing_urls)}, target {EXPECTED_RECIPE_COUNT}")
             else:
-                logger.info(f"Incremental mode: {len(urls_to_scrape)} URLs (of {len(new_urls)} new, skipped {len(existing_urls)} existing)")
+                logger.info(
+                    "Incremental mode: "
+                    f"{len(urls_to_scrape)} candidate URLs selected "
+                    f"({len(shuffled_urls)} sitemap URLs, {len(existing_urls)} recipes already in DB)"
+                )
 
         if not urls_to_scrape:
             logger.info("No new recipes to scrape")
@@ -398,6 +448,7 @@ class CoopScraper:
                         logger.warning(f"Worker {worker_id} error on {url}: {e}")
                         consecutive_errors += 1
                         recipe = None
+                        self._mark_failure(url, "http_error", error=str(e))
 
                         # If too many consecutive errors, recreate context
                         if consecutive_errors >= max_consecutive_errors:
@@ -433,8 +484,34 @@ class CoopScraper:
                                 self._cancel_flag = True
                             if saved_recipe:
                                 self._progress["success"] += 1
+                                if record_discovery:
+                                    await asyncio.to_thread(
+                                        record_recipe_url,
+                                        source_name=DB_SOURCE_NAME,
+                                        url=url,
+                                    )
+                                    final_url = recipe.get("url")
+                                    if final_url and final_url != url:
+                                        await asyncio.to_thread(
+                                            record_recipe_url,
+                                            source_name=DB_SOURCE_NAME,
+                                            url=final_url,
+                                        )
 
                         await self._send_activity()
+                        if not recipe and record_discovery:
+                            reason = self._last_fail_reasons_by_url.pop(url, "parse_error")
+                            http_status = self._last_fail_http_status_by_url.pop(url, None)
+                            error = self._last_fail_errors_by_url.pop(url, None)
+                            await asyncio.to_thread(
+                                record_non_recipe_url,
+                                source_name=DB_SOURCE_NAME,
+                                url=url,
+                                reason=reason,
+                                http_status=http_status,
+                                error=error,
+                            )
+                            self._discovery_recorded_non_recipe += 1
 
                         # Progress logging every 10 recipes (Coop is slow, 1 worker)
                         if self._progress["current"] % 10 == 0:
@@ -472,10 +549,17 @@ class CoopScraper:
 
         # Log final stats
         found_count = stream_saver.seen_count if stream_saver else len(recipes)
-        logger.info(f"Scraping complete: {found_count} recipes from {len(urls_to_scrape)} URLs")
-        if urls_to_scrape:
-            logger.info(f"Hit rate: {found_count/len(urls_to_scrape)*100:.1f}%")
+        attempted_count = int(self._progress.get("current", 0) or 0)
+        selected_count = len(urls_to_scrape)
+        logger.info(
+            f"Scraping complete: {found_count} recipes from {attempted_count} "
+            f"attempted URLs ({selected_count} selected)"
+        )
+        if attempted_count:
+            logger.info(f"Hit rate: {found_count/attempted_count*100:.1f}%")
         logger.info(f"Fail reasons: {self._fail_reasons}")
+        if record_discovery:
+            logger.info(f"URL discovery: recorded_non_recipe={self._discovery_recorded_non_recipe}")
 
         return make_recipe_scrape_result(
             recipes,

@@ -69,6 +69,11 @@ from scrapers.recipes._common import (
     make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
     split_serving_lists, StreamingRecipeSaver
 )
+from scrapers.recipes.url_discovery_cache import (
+    record_non_recipe_url,
+    record_recipe_url,
+    select_urls_for_scrape,
+)
 
 # GUI Metadata
 SCRAPER_NAME = "ICA.se"
@@ -105,6 +110,7 @@ class IcaScraper:
         # For progress callbacks (WebSocket updates)
         self._progress_callback = None
         self._cancel_flag = False
+        self._discovery_recorded_non_recipe = 0
 
     def set_progress_callback(self, callback):
         """Set callback for progress updates."""
@@ -321,6 +327,7 @@ class IcaScraper:
         test_mode: bool = False,
         stream_saver: Optional[StreamingRecipeSaver] = None,
         max_recipes: Optional[int] = None,
+        record_discovery: bool = False,
     ) -> List[Dict]:
         """
         Scrape multiple recipes with rate limiting.
@@ -335,6 +342,7 @@ class IcaScraper:
         """
         recipes = []
         total = len(urls)
+        self._discovery_recorded_non_recipe = 0
 
         logger.info(f"📄 Scraping {total} recipes...")
         await self._report_progress(f"Fetching {total} recipes...", 0, total, 0)
@@ -347,15 +355,32 @@ class IcaScraper:
             recipe = await self.scrape_recipe(client, url)
             if recipe:
                 if stream_saver:
+                    before_seen = stream_saver.seen_count
                     await stream_saver.add(recipe)
+                    saved_recipe = stream_saver.seen_count > before_seen
                 else:
                     recipes.append(recipe)
+                    saved_recipe = True
+                if saved_recipe and record_discovery:
+                    await asyncio.to_thread(
+                        record_recipe_url,
+                        source_name=DB_SOURCE_NAME,
+                        url=url,
+                    )
                 if recipe_target_reached(
                     max_recipes=max_recipes,
                     recipes=recipes,
                     stream_saver=stream_saver,
                 ):
                     break
+            elif record_discovery:
+                await asyncio.to_thread(
+                    record_non_recipe_url,
+                    source_name=DB_SOURCE_NAME,
+                    url=url,
+                    reason="parse_error",
+                )
+                self._discovery_recorded_non_recipe += 1
             await self._report_activity()
 
             # Progress logging
@@ -413,6 +438,7 @@ class IcaScraper:
                 )
 
             # Determine which URLs to scrape
+            record_discovery = bool(stream_saver is not None and not force_all)
             if force_all:
                 # Full overwrite mode: top MAX_RECIPES by lastmod
                 urls_to_scrape = [url for url, _ in all_urls[:max_recipes or MAX_RECIPES]]
@@ -422,22 +448,38 @@ class IcaScraper:
                 existing_urls = self._get_existing_urls()
                 all_candidate_urls = [url for url, _ in all_urls]
                 if max_recipes:
-                    new_candidate_urls = [
-                        url for url in all_candidate_urls if url not in existing_urls
-                    ]
                     attempt_limit = incremental_attempt_limit(
                         max_recipes=max_recipes,
-                        available_count=len(new_candidate_urls),
+                        available_count=len(all_candidate_urls),
                         default_limit=MAX_RECIPES,
                     )
-                    urls_to_scrape = new_candidate_urls[:attempt_limit]
-                    candidate_count = len(new_candidate_urls)
+                    if record_discovery:
+                        urls_to_scrape, discovery_stats = select_urls_for_scrape(
+                            source_name=DB_SOURCE_NAME,
+                            candidate_urls=all_candidate_urls,
+                            max_http_attempts=attempt_limit,
+                        )
+                        logger.info(f"   URL discovery prefilter: {discovery_stats.format_log_suffix()}")
+                    else:
+                        new_candidate_urls = [
+                            url for url in all_candidate_urls if url not in existing_urls
+                        ]
+                        urls_to_scrape = new_candidate_urls[:attempt_limit]
+                    candidate_count = len(all_candidate_urls)
                 else:
-                    candidate_urls = all_candidate_urls[:MAX_RECIPES]
-                    urls_to_scrape = [
-                        url for url in candidate_urls if url not in existing_urls
-                    ]
-                    candidate_count = len(candidate_urls)
+                    if record_discovery:
+                        urls_to_scrape, discovery_stats = select_urls_for_scrape(
+                            source_name=DB_SOURCE_NAME,
+                            candidate_urls=all_candidate_urls,
+                            max_http_attempts=MAX_RECIPES,
+                        )
+                        logger.info(f"   URL discovery prefilter: {discovery_stats.format_log_suffix()}")
+                    else:
+                        candidate_urls = all_candidate_urls[:MAX_RECIPES]
+                        urls_to_scrape = [
+                            url for url in candidate_urls if url not in existing_urls
+                        ]
+                    candidate_count = len(all_candidate_urls)
 
                 logger.info(
                     f"📥 INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape "
@@ -460,6 +502,7 @@ class IcaScraper:
                 bool(max_recipes),
                 stream_saver=stream_saver,
                 max_recipes=max_recipes,
+                record_discovery=record_discovery,
             )
 
             if self._cancel_flag:
@@ -471,7 +514,10 @@ class IcaScraper:
                     reason="cancelled",
                 )
 
-            logger.info(f"✅ Scraped {len(recipes)} recipes")
+            found_count = stream_saver.seen_count if stream_saver else len(recipes)
+            logger.info(f"✅ Scraped {found_count} recipes")
+            if record_discovery:
+                logger.info(f"   URL discovery: recorded_non_recipe={self._discovery_recorded_non_recipe}")
             return make_recipe_scrape_result(
                 recipes,
                 force_all=force_all,

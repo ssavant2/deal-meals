@@ -585,7 +585,18 @@ behavior.
 For large sitemap sources with many recipe-like non-recipe pages, use the shared
 URL discovery cache helper (`scrapers.recipes.url_discovery_cache`) before HTTP.
 It skips previously classified non-recipe URLs until their retry date without
-consuming the HTTP attempt budget. Test mode should not write discovery rows.
+consuming the HTTP attempt budget. Built-in sitemap/list scrapers should use this
+consistently for persisted incremental runs as the pre-HTTP filtering step; the
+helper filters existing recipes, permanent exclusions, duplicate candidates, and
+known discovery misses together. Record successful saves with `record_recipe_url()`
+so stale discovery rows are cleared, and record terminal parse/HTTP misses with
+`record_non_recipe_url()`.
+
+Only write discovery rows for real save runs, typically when
+`stream_saver is not None and not force_all`. Test mode and dry runs should not
+mutate discovery state. Custom URL-list scrapers such as **My Recipes** do not use
+the discovery cache, because their user-provided URLs already have explicit
+per-URL status.
 
 ### 2.5 Required Recipe Format
 

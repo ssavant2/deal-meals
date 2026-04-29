@@ -122,6 +122,12 @@ for usable recipes rather than a raw URL-attempt limit. Use
 `recipe_target_reached()` inside the scrape loop to stop after enough valid
 recipes have been parsed.
 
+For sitemap/list scrapers, also use the shared URL discovery cache during
+persisted incremental runs. It belongs in the URL-selection path before HTTP and
+should be skipped for test/dry-run calls. Custom URL-list sources such as
+**My Recipes** should keep their own URL status model instead of using discovery
+cache rows.
+
 ## Choose One Implementation Skeleton
 
 There are two valid scraping approaches:
@@ -946,7 +952,11 @@ hard cap.
 For sitemap sources with many known non-recipe URLs, apply
 `scrapers.recipes.url_discovery_cache.select_urls_for_scrape()` before HTTP so
 cached non-recipe skips do not consume the attempt budget. Only save discovery
-rows for real save runs, not test mode.
+rows for real save runs, not test mode. In the normal production pattern this
+means `record_discovery = stream_saver is not None and not force_all`: select
+candidate URLs with `select_urls_for_scrape()`, clear stale misses with
+`record_recipe_url()` after a recipe is saved, and classify terminal misses with
+`record_non_recipe_url()`.
 
 ### `recipe_target_reached(...) -> bool`
 

@@ -73,6 +73,12 @@ the live app behavior:
   successfully parsed recipes. The scraper may try a bounded hidden buffer of
   extra URLs, while UI progress should show found recipes against the configured
   target rather than raw URL attempts.
+- For recipe URL discovery-cache changes, run the same small incremental scrape
+  twice for a sitemap/list source. The first run may log
+  `URL discovery: recorded_non_recipe=...`; the second should log
+  `URL discovery prefilter: ... skipped_discovery=...` when reusable misses are
+  present. Clearing or deleting a recipe source should also clear its discovery
+  rows.
 
 ## Local Workbench Tests
 
