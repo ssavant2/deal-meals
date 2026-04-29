@@ -622,17 +622,8 @@ UI = {
     'config.ranking_absolute': 'Kronor sparade',
     'config.ranking_percentage': 'Procent sparade',
 
-    # Advanced / Cache settings
+    # Advanced settings
     'config.advanced_settings': 'Avancerade inställningar',
-    'config.advanced': 'Receptcache',
-    'config.advanced_desc': 'Inställningar för prestanda och cache.',
-    'config.cache_use_memory': 'Spara receptcache i minnet',
-    'config.cache_use_memory_desc': 'Receptmatchningen sparas i RAM istället för databasen. Snabbare men använder mer minne.',
-    'config.cache_max_memory': 'Maximal minnesmängd',
-    'config.cache_max_memory_value': '{value} MB',
-    'config.cache_settings_applied': 'Cache-inställningar sparade',
-    'config.cache_mode_db': 'Databas (standard)',
-    'config.cache_mode_memory': 'RAM-cache aktiv',
 
     # Spell check
     'config.spellcheck': 'Stavningskontroll',

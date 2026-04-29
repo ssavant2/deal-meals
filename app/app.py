@@ -402,6 +402,12 @@ async def lifespan(app: FastAPI):
     logger.info(f"Starting Deal Meals ({VERSION_LABEL}) on port {port}")
     logger.info(f"Access at: {protocol}://{hostname}:{port}")
 
+    try:
+        from startup_migrations import run_startup_migrations
+        run_startup_migrations(RELEASE_VERSION)
+    except Exception as e:
+        logger.warning(f"Startup migrations failed (non-critical): {e}")
+
     if PLUGIN_SYSTEM_AVAILABLE:
         stores = get_all_stores()
         store_discovery_errors = get_store_discovery_errors()

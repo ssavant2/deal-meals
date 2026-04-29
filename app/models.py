@@ -224,10 +224,6 @@ class MatchingPreferences(Base):
     balance_veg = Column(Numeric(4, 2), default=0.25)
     balance_budget = Column(Numeric(4, 2), default=0.25)
 
-    # Cache settings
-    cache_use_memory = Column(Boolean, default=False)
-    cache_max_memory_mb = Column(Integer, default=150)
-
     created_at = Column(DateTime(timezone=True), default=_utcnow)
     updated_at = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
 

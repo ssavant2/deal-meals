@@ -230,8 +230,6 @@ CREATE TABLE matching_preferences (
     ranking_mode TEXT DEFAULT 'absolute',
     min_ingredients INTEGER DEFAULT 0,
     max_ingredients INTEGER DEFAULT 0,
-    cache_use_memory BOOLEAN DEFAULT false,
-    cache_max_memory_mb INTEGER DEFAULT 150,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT matching_preferences_singleton UNIQUE (singleton_key),
@@ -446,6 +444,18 @@ CREATE TABLE cache_metadata (
 );
 
 COMMENT ON TABLE cache_metadata IS 'Tracks cache computation status and timing';
+
+-- ============================================================================
+-- SCHEMA MIGRATIONS - One-off upgrades for existing installs
+-- ============================================================================
+CREATE TABLE deal_meals_schema_migrations (
+    id TEXT PRIMARY KEY,
+    applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    app_version TEXT,
+    details JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+COMMENT ON TABLE deal_meals_schema_migrations IS 'One-off schema upgrades applied by the app at startup';
 
 -- ============================================================================
 -- SCRAPER_SCHEDULES - Scheduled recipe scraper runs

@@ -488,8 +488,7 @@ def get_matching_preferences():
                     exclude_keywords, filtered_products, local_meat_only,
                     balance_meat, balance_fish, balance_veg, balance_budget,
                     excluded_brands,
-                    cache_use_memory, cache_max_memory_mb, ranking_mode,
-                    min_ingredients, max_ingredients
+                    ranking_mode, min_ingredients, max_ingredients
                 FROM matching_preferences
                 LIMIT 1
             """)).mappings().fetchone()
@@ -509,8 +508,6 @@ def get_matching_preferences():
                         "balance_veg": float(row['balance_veg']) if row['balance_veg'] is not None else 3.0,
                         "balance_budget": float(row['balance_budget']) if row['balance_budget'] is not None else 3.0,
                         "excluded_brands": row['excluded_brands'] or [],
-                        "cache_use_memory": bool(row['cache_use_memory']) if row['cache_use_memory'] is not None else False,
-                        "cache_max_memory_mb": int(row['cache_max_memory_mb']) if row['cache_max_memory_mb'] is not None else 150,
                         "ranking_mode": row['ranking_mode'] or 'absolute',
                         "min_ingredients": int(row['min_ingredients'] or 0),
                         "max_ingredients": int(row['max_ingredients'] or 0)
@@ -531,8 +528,6 @@ def get_matching_preferences():
                         "balance_veg": 3.0,
                         "balance_budget": 3.0,
                         "excluded_brands": [],
-                        "cache_use_memory": False,
-                        "cache_max_memory_mb": 150,
                         "ranking_mode": "absolute",
                         "min_ingredients": 0,
                         "max_ingredients": 0
@@ -573,9 +568,6 @@ async def save_matching_preferences(request: Request):
         min_ingredients = max(0, min(30, int(data.get('min_ingredients', 0))))
         max_ingredients = max(0, min(30, int(data.get('max_ingredients', 0))))
 
-        cache_use_memory = bool(data.get('cache_use_memory', False))
-        cache_max_memory_mb = max(50, min(500, int(data.get('cache_max_memory_mb', 150))))
-
         if not isinstance(exclude_keywords, list):
             exclude_keywords = []
         if not isinstance(filtered_products, list):
@@ -591,14 +583,12 @@ async def save_matching_preferences(request: Request):
                     exclude_meat, exclude_fish, exclude_dairy,
                     exclude_keywords, filtered_products, excluded_brands, local_meat_only,
                     balance_meat, balance_fish, balance_veg, balance_budget,
-                    ranking_mode, min_ingredients, max_ingredients,
-                    cache_use_memory, cache_max_memory_mb
+                    ranking_mode, min_ingredients, max_ingredients
                 ) VALUES (
                     :exclude_meat, :exclude_fish, :exclude_dairy,
                     :exclude_keywords, :filtered_products, :excluded_brands, :local_meat_only,
                     :balance_meat, :balance_fish, :balance_veg, :balance_budget,
-                    :ranking_mode, :min_ingredients, :max_ingredients,
-                    :cache_use_memory, :cache_max_memory_mb
+                    :ranking_mode, :min_ingredients, :max_ingredients
                 )
                 ON CONFLICT (singleton_key) DO UPDATE SET
                     exclude_meat = EXCLUDED.exclude_meat,
@@ -615,8 +605,6 @@ async def save_matching_preferences(request: Request):
                     ranking_mode = EXCLUDED.ranking_mode,
                     min_ingredients = EXCLUDED.min_ingredients,
                     max_ingredients = EXCLUDED.max_ingredients,
-                    cache_use_memory = EXCLUDED.cache_use_memory,
-                    cache_max_memory_mb = EXCLUDED.cache_max_memory_mb,
                     updated_at = NOW()
             """), {
                 "exclude_meat": exclude_meat,
@@ -632,16 +620,10 @@ async def save_matching_preferences(request: Request):
                 "balance_budget": balance_budget,
                 "ranking_mode": ranking_mode,
                 "min_ingredients": min_ingredients,
-                "max_ingredients": max_ingredients,
-                "cache_use_memory": cache_use_memory,
-                "cache_max_memory_mb": cache_max_memory_mb
+                "max_ingredients": max_ingredients
             })
 
             db.commit()
-
-        # Apply cache settings to the running cache manager
-        from cache_manager import cache_manager
-        cache_manager.apply_cache_settings(cache_use_memory, cache_max_memory_mb)
 
         return JSONResponse({
             "success": True,
@@ -1950,12 +1932,8 @@ async def cancel_recipe_scraper(scraper_id: str):
 # ============================================================================
 
 def _notify_recipe_visibility_changed(recipe_id, excluded: bool) -> None:
-    """Keep optional in-memory cache in sync with hidden/restored recipes."""
-    try:
-        from cache_manager import cache_manager
-        cache_manager.handle_recipe_visibility_changed(recipe_id, excluded)
-    except Exception as e:
-        logger.warning(f"Could not sync recipe visibility to cache: {e}")
+    """Visibility filters are applied by DB cache queries."""
+    return
 
 
 @router.patch("/recipes/{recipe_id}/exclude")

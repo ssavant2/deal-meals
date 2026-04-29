@@ -40,9 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load SSL status
     loadSSLStatus();
 
-    // Load cache settings (from same endpoint as matching preferences)
-    loadCacheSettings();
-
     // Load spell check badge count
     loadSpellCheckBadge();
 });
@@ -323,83 +320,6 @@ async function loadMatchingPreferences() {
         }
     } catch (error) {
         console.error('Error loading matching preferences:', error);
-    }
-}
-
-// ==================== Cache Settings ====================
-
-async function loadCacheSettings() {
-    try {
-        const response = await fetch('/api/matching/preferences');
-        if (!response.ok) return;
-        const data = await response.json();
-        if (data.success) {
-            const prefs = data.preferences;
-            const useMemory = prefs.cache_use_memory || false;
-            const maxMemory = prefs.cache_max_memory_mb || 150;
-
-            document.getElementById('cache-use-memory').checked = useMemory;
-            document.getElementById('cache-max-memory').value = maxMemory;
-            updateMemoryLabel(maxMemory);
-            toggleMemorySettings(useMemory);
-            updateCacheModeStatus(useMemory);
-        }
-    } catch (error) {
-        console.error('Error loading cache settings:', error);
-    }
-}
-
-function updateMemoryLabel(value) {
-    document.getElementById('cache-memory-label').textContent = value + ' MB';
-}
-
-function toggleMemorySettings(enabled) {
-    document.getElementById('cache-memory-settings').style.display = enabled ? 'block' : 'none';
-}
-
-function updateCacheModeStatus(useMemory) {
-    const icon = document.getElementById('cache-mode-status').querySelector('i');
-    const text = document.getElementById('cache-mode-text');
-    if (useMemory) {
-        icon.className = 'bi bi-memory';
-        text.textContent = i18n.cache_mode_memory;
-    } else {
-        icon.className = 'bi bi-database';
-        text.textContent = i18n.cache_mode_db;
-    }
-}
-
-async function saveCacheSettings() {
-    const useMemory = document.getElementById('cache-use-memory').checked;
-    const maxMemory = parseInt(document.getElementById('cache-max-memory').value);
-
-    toggleMemorySettings(useMemory);
-    updateCacheModeStatus(useMemory);
-
-    // Load current preferences and merge cache settings
-    try {
-        const getResp = await fetch('/api/matching/preferences');
-        if (!getResp.ok) return;
-        const getData = await getResp.json();
-        if (!getData.success) return;
-
-        const prefs = getData.preferences;
-        prefs.cache_use_memory = useMemory;
-        prefs.cache_max_memory_mb = maxMemory;
-
-        const response = await fetch('/api/matching/preferences', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(prefs)
-        });
-        if (!response.ok) {
-            Swal.fire({ icon: 'error', title: i18n.error });
-            return;
-        }
-
-        const data = await response.json();
-    } catch (error) {
-        console.error('Error saving cache settings:', error);
     }
 }
 
@@ -2228,7 +2148,6 @@ document.addEventListener('change', function(e) {
             case 'setHighContrast': setHighContrast(el.checked); break;
             case 'saveMatchingPreferences': saveMatchingPreferences(); break;
             case 'saveImagePreferences': saveImagePreferences(); break;
-            case 'saveCacheSettings': saveCacheSettings(); break;
             case 'toggleSSL': toggleSSL(); break;
             case 'updateSSLFileLabel': updateSSLFileLabel(el); break;
             case 'updateIngredientLabel': updateIngredientLabel(); break;
@@ -2251,7 +2170,6 @@ document.addEventListener('input', function(e) {
             case 'saveMatchingPreferencesDebounced': saveMatchingPreferencesDebounced(); break;
             case 'autoResize': autoResizeTextarea(el); break;
             case 'saveMatchingPreferences': saveMatchingPreferences(); break;
-            case 'updateMemoryLabel': updateMemoryLabel(el.value); break;
         }
     }
 });

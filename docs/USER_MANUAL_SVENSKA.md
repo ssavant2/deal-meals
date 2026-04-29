@@ -455,13 +455,6 @@ Hantera hur receptbilder lagras.
 
 Klicka på indikatorn för att hantera misslyckade bilder: försök igen individuellt, ta bort receptet, eller massradera alla misslyckade recept.
 
-#### Receptcache
-
-- **Använd minnescache** - Växla mellan databasbaserad och minnesbaserad caching
-- **Max minne** - Ställ in minnescachens storleksgräns (50-500 MB)
-
-Minnescache är snabbare men använder mer RAM. Databascache är mer pålitlig och består över omstarter.
-
 #### SSL/HTTPS
 
 Hantera appens HTTPS-certifikat:
@@ -599,7 +592,7 @@ Erbjudandena kan skilja sig avsevärt mellan dessa två alternativ, även inom s
 
 1. Gå till **Butiker** och hämta erbjudanden på nytt för dina butiker
 2. Gå tillbaka till **Startsidan** och klicka på **uppdateringsknappen** bredvid "Veckans fyndrecept"
-3. Om det inte hjälper, kolla **Konfiguration > Receptcache** och prova att byta cacheläge
+3. Om det inte hjälper, hämta om relevanta receptkällor och vänta tills cacheuppbyggnaden är klar
 
 ### Hur byter jag språk?
 

@@ -622,17 +622,8 @@ UI = {
     'config.ranking_absolute': 'Money saved',
     'config.ranking_percentage': 'Percentage saved',
 
-    # Advanced / Cache settings
+    # Advanced settings
     'config.advanced_settings': 'Advanced settings',
-    'config.advanced': 'Recipe cache',
-    'config.advanced_desc': 'Performance and cache settings.',
-    'config.cache_use_memory': 'Store recipe cache in memory',
-    'config.cache_use_memory_desc': 'Recipe matching is stored in RAM instead of the database. Faster but uses more memory.',
-    'config.cache_max_memory': 'Maximum memory usage',
-    'config.cache_max_memory_value': '{value} MB',
-    'config.cache_settings_applied': 'Cache settings saved',
-    'config.cache_mode_db': 'Database (default)',
-    'config.cache_mode_memory': 'RAM cache active',
 
     # Spell check
     'config.spellcheck': 'Spell check',

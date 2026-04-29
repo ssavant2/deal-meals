@@ -225,8 +225,15 @@ docker compose build --no-cache       # Rebuild with latest base image
 docker compose up -d                  # Restart with new image
 ```
 
-No database migrations needed — the schema is managed by `init.sql`
-(only runs on empty databases) and the app handles any runtime changes.
+Database schema changes for existing installs are applied by small idempotent
+startup migrations when needed. Fresh installs are still created from
+`database/init.sql`.
+
+The v1.0.6 startup migration removes the legacy memory-cache columns from
+`matching_preferences` when upgrading older databases. It records the migration
+in `deal_meals_schema_migrations` and will not run again after it has been
+applied. If the web container cannot use admin DB credentials from `.env`, it
+will log the exact SQL to run manually.
 
 ## Cache Runtime (advanced)
 

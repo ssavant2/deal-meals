@@ -454,13 +454,6 @@ Control how recipe images are stored and managed.
 
 Click the indicator to manage failed images: retry them individually, delete the recipe, or bulk-delete all failed recipes.
 
-#### Cache Settings
-
-- **Use Memory Cache** - Toggle between database-based and in-memory caching
-- **Max Memory** - Set the memory cache size limit (50-500 MB)
-
-Memory cache is faster but uses more RAM. Database cache is more reliable and persists across restarts.
-
 #### SSL/HTTPS
 
 Manage the app's HTTPS certificate:
@@ -596,7 +589,7 @@ The offers can differ significantly between these two options, even for the same
 
 1. Go to **Stores** and re-fetch offers for your stores
 2. Go back to **Home** and click the **refresh button** next to "Weekly deal recipes"
-3. If that doesn't help, check Settings > Cache and try toggling the cache mode
+3. If that doesn't help, re-fetch the relevant recipe sources and wait for the cache rebuild to finish
 
 ### How do I change the language?
 

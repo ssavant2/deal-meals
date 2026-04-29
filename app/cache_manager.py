@@ -680,21 +680,13 @@ class CacheManager:
     """
     Manages the recipe-offer match cache.
 
-    Pre-computes all matches and stores them in memory for fast retrieval.
-    Falls back to database if memory usage exceeds MAX_MEMORY_MB.
+    Pre-computes all matches and stores them in the database for fast retrieval.
     """
 
     CACHE_NAME = 'recipe_offer_matches'
-    MAX_MEMORY_MB = 150  # Fall back to DB if cache exceeds this
 
     def __init__(self):
         self.matcher = RecipeMatcher()
-        # In-memory cache: list of dicts with full recipe details
-        self._entries = []
-        # Pre-sorted memory views to avoid repeated full scans + sort on each request
-        self._memory_views = None
-        # Whether we're using memory or DB for this cache cycle
-        self._use_memory = False  # Default: DB (overridden by DB settings on first compute)
         # Cached unmatched offer count (set at cache rebuild, avoids slow JSONB query)
         self._unmatched_count = None
         self._total_offers = None
@@ -705,8 +697,6 @@ class CacheManager:
             "recipe_data_source": OFFICIAL_REBUILD_PROFILE["recipe_data_source"],
             "candidate_data_source": OFFICIAL_REBUILD_PROFILE["candidate_data_source"],
         }
-        # Load cache settings from DB
-        self._load_cache_settings()
 
     def get_rebuild_profile(self) -> Dict[str, str]:
         """Return the single supported full-rebuild profile."""
@@ -774,170 +764,6 @@ class CacheManager:
 
         self._unmatched_count = max(0, self._total_offers - len(matched_offer_ids))
 
-    def _load_cache_settings(self):
-        """Load cache mode settings from matching_preferences."""
-        try:
-            with get_db_session() as db:
-                result = db.execute(text(
-                    "SELECT cache_use_memory, cache_max_memory_mb FROM matching_preferences LIMIT 1"
-                )).fetchone()
-                if result:
-                    self._use_memory = bool(result[0]) if result[0] is not None else False
-                    self.MAX_MEMORY_MB = int(result[1]) if result[1] is not None else 150
-                    logger.info(f"  Cache settings: memory={'on' if self._use_memory else 'off'}, max={self.MAX_MEMORY_MB}MB")
-        except Exception as e:
-            # Columns may not exist yet (pre-migration) - use defaults
-            logger.debug(f"Could not load cache settings (pre-migration?): {e}")
-
-    def apply_cache_settings(self, use_memory: bool, max_memory_mb: int):
-        """Apply new cache settings from the config UI. Migrates data immediately."""
-        old_use_memory = self._use_memory
-        self._use_memory = use_memory
-        self.MAX_MEMORY_MB = max_memory_mb
-
-        if old_use_memory and not use_memory and self._entries:
-            # Switching memory → DB: migrate entries to DB, clear memory
-            logger.info("Cache mode changed: memory → DB, migrating entries...")
-            self._save_cache_to_db(self._entries)
-            self._entries = []
-            self._memory_views = None
-        elif not old_use_memory and use_memory:
-            # Switching DB → memory: load from DB into memory immediately
-            logger.info("Cache mode changed: DB → memory, loading entries...")
-            self._load_cache_from_db()
-
-        logger.info(f"Cache settings applied: memory={'on' if use_memory else 'off'}, max={max_memory_mb}MB")
-
-    def _load_cache_from_db(self):
-        """Load cache entries from DB into memory (for DB → memory migration)."""
-        try:
-            with get_db_session() as db:
-                rows = db.execute(text("""
-                    SELECT c.found_recipe_id, c.recipe_category, c.budget_score,
-                           c.total_savings, c.coverage_pct, c.num_matches,
-                           c.is_starred, c.match_data,
-                           r.name, r.url, r.source_name,
-                           r.image_url, r.local_image_path, r.prep_time_minutes,
-                           r.ingredients, r.servings
-                    FROM recipe_offer_cache c
-                    JOIN found_recipes r ON c.found_recipe_id = r.id
-                    WHERE r.excluded = FALSE OR r.excluded IS NULL
-                """)).fetchall()
-
-            if not rows:
-                logger.info("  No cache entries in DB to load")
-                self._entries = []
-                self._memory_views = None
-                return
-
-            entries = []
-            for row in rows:
-                match_data = row.match_data if isinstance(row.match_data, dict) else json.loads(row.match_data)
-                entries.append({
-                    'found_recipe_id': str(row.found_recipe_id),
-                    'recipe_category': row.recipe_category,
-                    'budget_score': float(row.budget_score or 0),
-                    'total_savings': float(row.total_savings or 0),
-                    'coverage_pct': float(row.coverage_pct or 0),
-                    'num_matches': row.num_matches,
-                    'is_starred': row.is_starred,
-                    'match_data': match_data,
-                    'name': row.name,
-                    'url': row.url,
-                    'source_name': row.source_name,
-                    'image_url': row.local_image_path or row.image_url,
-                    'prep_time_minutes': row.prep_time_minutes,
-                    'ingredients': row.ingredients or [],
-                    'ingredient_count': len(row.ingredients or []),
-                    'is_off_season': is_off_season_recipe(row.name),
-                    'servings': row.servings,
-                })
-
-            # Check size before committing to memory
-            sample_size = len(json.dumps(entries[0]))
-            estimated_mb = (sample_size * len(entries) * 3) / (1024 * 1024)
-            if estimated_mb > self.MAX_MEMORY_MB:
-                logger.warning(f"  ⚠️ DB cache too large for memory ({estimated_mb:.0f}MB > {self.MAX_MEMORY_MB}MB)")
-                self._use_memory = False
-                self._memory_views = None
-                return
-
-            self._entries = entries
-            self._rebuild_memory_views()
-            logger.info(f"  ✓ Loaded {len(entries)} cache entries from DB to memory (~{estimated_mb:.0f}MB)")
-
-        except Exception as e:
-            logger.error(f"Failed to load cache from DB: {e}")
-            self._use_memory = False
-            self._memory_views = None
-
-    def handle_recipe_visibility_changed(self, recipe_id: Optional[str], excluded: bool) -> None:
-        """Keep in-memory cache aligned when a recipe is hidden or restored."""
-        if not self._use_memory:
-            return
-
-        try:
-            if excluded and recipe_id:
-                rid = str(recipe_id)
-                before = len(self._entries)
-                self._entries = [
-                    entry for entry in self._entries
-                    if str(entry.get('found_recipe_id')) != rid
-                ]
-                if len(self._entries) != before:
-                    self._rebuild_memory_views()
-            elif not excluded:
-                self._load_cache_from_db()
-        except Exception as e:
-            logger.warning(f"Could not update in-memory cache after recipe visibility change: {e}")
-
-    def _rebuild_memory_views(self):
-        """Pre-build sorted in-memory views used by _get_from_memory()."""
-        if not self._entries:
-            self._memory_views = None
-            return
-
-        all_budget = tuple(
-            sorted(
-                self._entries,
-                key=lambda x: (x['budget_score'], x['is_starred']),
-                reverse=True,
-            )
-        )
-
-        by_category = {MEAT: [], FISH: [], VEGETARIAN: []}
-        for entry in self._entries:
-            cat = entry.get('recipe_category')
-            if cat in by_category:
-                by_category[cat].append(entry)
-
-        by_category_absolute = {
-            cat: tuple(
-                sorted(
-                    entries,
-                    key=lambda x: (x['total_savings'], x['is_starred']),
-                    reverse=True,
-                )
-            )
-            for cat, entries in by_category.items()
-        }
-        by_category_percentage = {
-            cat: tuple(
-                sorted(
-                    entries,
-                    key=lambda x: (x['match_data'].get('total_savings_pct', 0), x['is_starred']),
-                    reverse=True,
-                )
-            )
-            for cat, entries in by_category.items()
-        }
-
-        self._memory_views = {
-            'all_budget': all_budget,
-            'by_category_absolute': by_category_absolute,
-            'by_category_percentage': by_category_percentage,
-        }
-
     def _update_status(self, status: str, error_message: str = None):
         """Update cache metadata status (upserts row if missing)."""
         try:
@@ -953,10 +779,7 @@ class CacheManager:
             logger.error(f"Failed to update cache status: {e}")
 
     def _clear_cache_entries(self) -> None:
-        """Remove all active cache entries from memory and the DB cache table."""
-        self._entries = []
-        self._memory_views = None
-
+        """Remove all active cache entries from the DB cache table."""
         try:
             with get_db_session() as db:
                 db.execute(text("TRUNCATE recipe_offer_cache"))
@@ -1097,9 +920,6 @@ class CacheManager:
             self._update_status('computing')
 
         try:
-            # Reload cache settings (memory mode, max MB)
-            self._load_cache_settings()
-
             # Load preferences
             if not preferences:
                 preferences = get_effective_matching_preferences()
@@ -1733,41 +1553,15 @@ class CacheManager:
             raise
 
     def _save_cache(self, entries: List[Dict]):
-        """
-        Save cache entries to memory or DB based on settings.
-
-        Memory is ~50x faster than DB for both write and read.
-        Falls back to DB if memory mode is disabled or size exceeds MAX_MEMORY_MB.
-        """
+        """Save cache entries to the database."""
         if not entries:
             self._clear_cache_entries()
             return
 
-        if not self._use_memory:
-            # Memory mode disabled in settings - use DB
-            self._entries = []
-            self._memory_views = None
-            self._save_cache_to_db(entries)
-            return
-
-        # Estimate memory size: sample first entry and extrapolate
-        sample_size = len(json.dumps(entries[0])) if entries else 500
-        estimated_mb = (sample_size * len(entries) * 3) / (1024 * 1024)  # 3x for Python overhead
-
-        if estimated_mb > self.MAX_MEMORY_MB:
-            logger.warning(f"  ⚠️ Cache too large for memory ({estimated_mb:.0f}MB > {self.MAX_MEMORY_MB}MB), using DB")
-            self._entries = []
-            self._memory_views = None
-            self._save_cache_to_db(entries)
-            return
-
-        # Store in memory and rebuild pre-sorted views used by _get_from_memory().
-        self._entries = entries
-        self._rebuild_memory_views()
-        logger.info(f"  ✓ Saved {len(entries)} cache entries to memory (~{estimated_mb:.0f}MB)")
+        self._save_cache_to_db(entries)
 
     def _save_cache_to_db(self, entries: List[Dict]):
-        """Fallback: save to database if memory limit exceeded.
+        """Save cache entries to the database.
 
         Uses COPY in batches for bulk insert (~3-5x faster than execute_values).
         Batching keeps memory usage bounded even with 13k+ entries.
@@ -1836,7 +1630,6 @@ class CacheManager:
         """
         Get recipes from cache using non-destructive pagination.
 
-        Uses in-memory cache when available (~0ms), falls back to DB.
         Client sends exclude_ids (already shown recipes) to avoid duplicates.
         """
         if not preferences:
@@ -1853,35 +1646,7 @@ class CacheManager:
 
         exclude_set = set(exclude_ids) if exclude_ids else set()
 
-        if self._use_memory and self._entries:
-            return self._get_from_memory(preferences, max_results, exclude_set)
         return self._get_from_db(preferences, max_results, exclude_set)
-
-    def _entry_to_frontend(self, entry: Dict, fetch_category: str) -> Dict:
-        """Convert a cache entry to frontend-ready dict."""
-        md = entry['match_data']
-        return {
-            'id': entry['found_recipe_id'],
-            'name': entry['name'],
-            'url': entry['url'],
-            'source': entry['source_name'],
-            'image_url': entry['image_url'],
-            'prep_time_minutes': entry['prep_time_minutes'],
-            'ingredients': entry['ingredients'],
-            'servings': entry['servings'],
-            'category': fetch_category,
-            'match_score': md.get('match_score', 0),
-            'total_savings': entry['total_savings'],
-            'num_matches': entry['num_matches'],
-            'num_offers': md.get('num_offers', 0),
-            'matched_offers': md.get('matched_offers', []),
-            'coverage_pct': entry['coverage_pct'],
-            'budget_score': entry['budget_score'],
-            'ingredient_groups': md.get('ingredient_groups', []),
-            'total_savings_pct': md.get('total_savings_pct', 0),
-            'avg_savings_pct': md.get('avg_savings_pct', 0),
-            '_fetch_cat': fetch_category
-        }
 
     def _db_cache_row_to_frontend(self, row, fetch_category: str, display_category: Optional[str] = None) -> Dict:
         """Convert a joined recipe_offer_cache/found_recipes row to frontend-ready dict."""
@@ -1909,109 +1674,8 @@ class CacheManager:
             '_fetch_cat': fetch_category
         }
 
-    def _get_from_memory(self, preferences: Dict, max_results: int, exclude_set: set) -> List[Dict]:
-        """Serve recipes from in-memory cache with non-destructive pagination."""
-        balance = preferences.get('balance', {
-            MEAT: 0.25, FISH: 0.25, VEGETARIAN: 0.25, 'smart_buy': 0.25
-        })
-
-        exclude_categories = preferences.get('exclude_categories', [])
-        exclude_cats = set()
-        if any(cat in exclude_categories for cat in [MEAT, POULTRY, DELI]):
-            exclude_cats.add(MEAT)
-        if FISH in exclude_categories:
-            exclude_cats.add(FISH)
-
-        if not self._memory_views:
-            self._rebuild_memory_views()
-
-        min_ing = preferences.get('min_ingredients', 0)
-        max_ing = preferences.get('max_ingredients', 0)
-
-        # One filter pass to build the eligible id set and per-category counts.
-        eligible_ids = set()
-        cat_counts = {}
-        for cat in [MEAT, FISH, VEGETARIAN]:
-            if cat not in exclude_cats:
-                cat_counts[cat] = 0
-
-        for entry in self._entries:
-            entry_id = entry['found_recipe_id']
-            if entry_id in exclude_set:
-                continue
-            if entry.get('is_off_season'):
-                continue
-            if min_ing > 0 or max_ing > 0:
-                n = entry.get('ingredient_count', len(entry.get('ingredients') or []))
-                if min_ing > 0 and n < min_ing:
-                    continue
-                if max_ing > 0 and n > max_ing:
-                    continue
-
-            eligible_ids.add(entry_id)
-            cat = entry.get('recipe_category')
-            if cat in cat_counts:
-                cat_counts[cat] += 1
-
-        fetch_plan = self._calculate_fetch_plan(balance, cat_counts, max_results, list(exclude_cats))
-
-        all_recipes = []
-        picked_ids = set()
-
-        def _take_from_ranked(ranked_entries, wanted: int, fetch_category: str, *, excluded_categories: set | None = None):
-            if wanted <= 0:
-                return
-            added = 0
-            for entry in ranked_entries:
-                entry_id = entry['found_recipe_id']
-                if entry_id not in eligible_ids or entry_id in picked_ids:
-                    continue
-                if excluded_categories and entry['recipe_category'] in excluded_categories:
-                    continue
-                all_recipes.append(self._entry_to_frontend(entry, fetch_category))
-                picked_ids.add(entry_id)
-                added += 1
-                if added >= wanted:
-                    break
-
-        # Step 1: smart_buy - best budget_score
-        num_budget = fetch_plan.get('smart_buy', 0)
-        if num_budget > 0 and self._memory_views:
-            _take_from_ranked(
-                self._memory_views['all_budget'],
-                num_budget,
-                'smart_buy',
-                excluded_categories=exclude_cats,
-            )
-
-        # Step 2: per-category - best savings (absolute or percentage)
-        ranking_mode = preferences.get('ranking_mode', 'absolute')
-        ranked_by_category = (
-            self._memory_views['by_category_percentage']
-            if ranking_mode == 'percentage'
-            else self._memory_views['by_category_absolute']
-        ) if self._memory_views else {}
-        for cat in [MEAT, FISH, VEGETARIAN]:
-            num_to_fetch = fetch_plan.get(cat, 0)
-            if num_to_fetch <= 0 or cat in exclude_cats:
-                continue
-            _take_from_ranked(ranked_by_category.get(cat, ()), num_to_fetch, cat)
-
-        result = self._interleave_categories(all_recipes, fetch_plan)
-
-        actual_counts = {}
-        for r in result:
-            cat = r.get('_fetch_cat', r['category'])
-            actual_counts[cat] = actual_counts.get(cat, 0) + 1
-        logger.info(
-            f"✅ Returned {len(result)} recipes from memory "
-            f"(excluded {len(exclude_set)}, {len(eligible_ids)} eligible)"
-        )
-        logger.info(f"   Counts: {actual_counts}")
-        return result
-
     def _get_from_db(self, preferences: Dict, max_results: int, exclude_set: set) -> List[Dict]:
-        """Fallback: serve from DB cache when memory limit exceeded."""
+        """Serve recipes from the DB cache."""
         balance = preferences.get('balance', {
             MEAT: 0.25, FISH: 0.25, VEGETARIAN: 0.25, 'smart_buy': 0.25
         })
@@ -2313,59 +1977,31 @@ class CacheManager:
     def update_starred_for_source(self, source_name: str, is_starred: bool) -> int:
         """
         Update is_starred flag for all cache entries from a specific source.
-
-        Works with both memory and DB cache.
         """
-        source_lower = source_name.lower()
-        updated_count = 0
-
-        if self._use_memory and self._entries:
-            # Update in memory - fuzzy match on source_name
-            for entry in self._entries:
-                entry_source = (entry.get('source_name') or '').lower()
-                if (entry_source == source_lower
-                        or source_lower in entry_source
-                        or entry_source in source_lower):
-                    entry['is_starred'] = is_starred
-                    updated_count += 1
-            if updated_count:
-                self._rebuild_memory_views()
-        else:
-            # Update in DB
-            try:
-                with get_db_session() as db:
-                    result = db.execute(text("""
-                        UPDATE recipe_offer_cache c
-                        SET is_starred = :starred
-                        FROM found_recipes r
-                        WHERE c.found_recipe_id = r.id
-                          AND (
-                              LOWER(r.source_name) = LOWER(:source_name)
-                              OR LOWER(r.source_name) LIKE '%' || LOWER(:source_name) || '%'
-                              OR LOWER(:source_name) LIKE '%' || LOWER(r.source_name) || '%'
-                          )
-                    """), {"starred": is_starred, "source_name": source_name})
-                    db.commit()
-                    updated_count = result.rowcount
-            except Exception as e:
-                logger.error(f"Failed to update starred status for '{source_name}': {e}")
-                return 0
+        try:
+            with get_db_session() as db:
+                result = db.execute(text("""
+                    UPDATE recipe_offer_cache c
+                    SET is_starred = :starred
+                    FROM found_recipes r
+                    WHERE c.found_recipe_id = r.id
+                      AND (
+                          LOWER(r.source_name) = LOWER(:source_name)
+                          OR LOWER(r.source_name) LIKE '%' || LOWER(:source_name) || '%'
+                          OR LOWER(:source_name) LIKE '%' || LOWER(r.source_name) || '%'
+                      )
+                """), {"starred": is_starred, "source_name": source_name})
+                db.commit()
+                updated_count = result.rowcount
+        except Exception as e:
+            logger.error(f"Failed to update starred status for '{source_name}': {e}")
+            return 0
 
         logger.info(f"⭐ Updated is_starred={is_starred} for {updated_count} entries from '{source_name}'")
         return updated_count
 
     def get_matched_offer_ids(self) -> set:
         """Get all unique stable offer identifiers from the cache."""
-        if self._use_memory and self._entries:
-            ids = set()
-            for entry in self._entries:
-                for offer in entry['match_data'].get('matched_offers', []):
-                    oid = _extract_stable_matched_offer_key(offer)
-                    if oid:
-                        ids.add(oid)
-            return ids
-
-        # Fallback to DB
         with get_db_session() as db:
             result = db.execute(text("""
                 SELECT DISTINCT offer_key::text FROM (

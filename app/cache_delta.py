@@ -601,13 +601,6 @@ def _apply_verified_offer_delta_unlocked(
 
     started_at = time.perf_counter()
 
-    if cache_manager._use_memory:
-        return {
-            "success": False,
-            "applied": False,
-            "fallback_reason": "memory_cache_enabled",
-        }
-
     verification_policy = _resolve_delta_verification_policy(
         verify_full_preview=verify_full_preview,
     )
