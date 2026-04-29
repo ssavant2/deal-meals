@@ -46,11 +46,11 @@ from scrapers.recipes._common import (
 SCRAPER_NAME = "Undertian.com"
 DB_SOURCE_NAME = "Undertian.com"
 SCRAPER_DESCRIPTION = "Vegetariska budgetrecept från Undertian.com"
-EXPECTED_RECIPE_COUNT = 400
+EXPECTED_RECIPE_COUNT = 400  # Current WordPress recipe sitemap count
 SOURCE_URL = "https://undertian.com"
 
 # Scraper config
-MAX_RECIPES = 1000  # Take all available (~889)
+MAX_RECIPES = 400  # Take all recipes currently exposed by the recipe sitemap
 REQUEST_DELAY = 2.0  # Be gentle — hobby site
 CONCURRENT_REQUESTS = 2
 MIN_INGREDIENTS = 2
