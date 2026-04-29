@@ -518,10 +518,75 @@ OFFICIAL_REBUILD_PROFILE = {
 }
 
 
+def _summary_ms(value: Any) -> str:
+    if value is None:
+        return "n/a"
+    try:
+        return f"{int(value)}ms"
+    except (TypeError, ValueError):
+        return "n/a"
+
+
+def _format_rebuild_summary_line(summary: Dict) -> str:
+    phase_timings = summary.get("phase_timings_ms") or {}
+    phases = " ".join(
+        f"{label}={_summary_ms(phase_timings.get(key))}"
+        for key, label in (
+            ("compile_ms", "compile"),
+            ("route_ms", "route"),
+            ("score_ms", "score"),
+            ("write_ms", "write"),
+        )
+        if key in phase_timings
+    )
+    if not phases:
+        phases = "phases=n/a"
+
+    requested_count = summary.get("requested_recipe_count")
+    selected_count = summary.get("selected_recipe_count")
+    total_recipes = summary.get("total_recipes")
+    recipe_scope = requested_count or selected_count or total_recipes or "n/a"
+
+    matched_offers = summary.get("matched_offer_ids")
+    total_offers = summary.get("total_offers")
+    offer_scope = (
+        f"{matched_offers}/{total_offers}"
+        if matched_offers is not None and total_offers is not None
+        else "n/a"
+    )
+
+    fallback_count = summary.get("fullscan_fallback_count")
+    fallback_part = (
+        f" fullscan_fallbacks={fallback_count}"
+        if fallback_count is not None
+        else ""
+    )
+    routing_mode = (
+        summary.get("ingredient_routing_effective_mode")
+        or summary.get("ingredient_routing_mode")
+        or "n/a"
+    )
+
+    return (
+        "CACHE_REBUILD "
+        f"run={summary.get('run_kind', 'full')} "
+        f"status={summary.get('status', 'unknown')} "
+        f"mode={summary.get('effective_rebuild_mode', summary.get('configured_rebuild_mode', 'unknown'))} "
+        f"cached={summary.get('cached', 'n/a')} "
+        f"recipes={recipe_scope} "
+        f"offers={offer_scope} "
+        f"time={_summary_ms(summary.get('time_ms'))} "
+        f"{phases} "
+        f"routing={routing_mode}"
+        f"{fallback_part}"
+    )
+
+
 def _emit_rebuild_summary(summary: Dict, *, level: str = "info") -> None:
     """Emit one structured rebuild summary log line."""
     payload = json.dumps(summary, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     log = getattr(logger, level, logger.info)
+    log(_format_rebuild_summary_line(summary))
     log(f"CACHE_REBUILD_SUMMARY {payload}")
 
 

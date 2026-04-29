@@ -741,9 +741,71 @@ def _resolve_recipe_delta_verification_policy(*, verify_full_preview: bool) -> d
     }
 
 
+def _summary_ms(value: Any) -> str:
+    if value is None:
+        return "skipped"
+    try:
+        return f"{int(value)}ms"
+    except (TypeError, ValueError):
+        return "n/a"
+
+
+def _recipe_delta_count(summary: dict[str, Any], count_key: str, ids_key: str) -> int:
+    value = summary.get(count_key)
+    if value is not None:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+    ids = summary.get(ids_key)
+    return len(ids) if isinstance(ids, list) else 0
+
+
+def _format_recipe_delta_summary_line(summary: dict[str, Any]) -> str:
+    patch_result = summary.get("patch_result") or {}
+    fallback_reason = summary.get("fallback_reason")
+    if summary.get("applied"):
+        outcome = "applied"
+    elif fallback_reason:
+        outcome = "fallback"
+    elif summary.get("success"):
+        outcome = "preview"
+    else:
+        outcome = "not_applied"
+
+    inserted_count = patch_result.get("inserted_count")
+    if inserted_count is None:
+        inserted_count = summary.get("patch_preview_match_count")
+
+    deleted_count = patch_result.get("deleted_count")
+    total_matches = patch_result.get("total_matches")
+    if total_matches is None:
+        total_matches = summary.get("cached")
+
+    fallback_part = f" fallback={fallback_reason}" if fallback_reason else ""
+    source_part = f" source={summary.get('source')}" if summary.get("source") else ""
+
+    return (
+        "CACHE_RECIPE_DELTA "
+        f"{outcome}: "
+        f"changed={_recipe_delta_count(summary, 'changed_recipe_count', 'changed_recipe_ids')} "
+        f"removed={_recipe_delta_count(summary, 'removed_recipe_count', 'removed_recipe_ids')} "
+        f"inserted={inserted_count if inserted_count is not None else 'n/a'} "
+        f"deleted={deleted_count if deleted_count is not None else 'n/a'} "
+        f"cache_rows={total_matches if total_matches is not None else 'n/a'} "
+        f"preview={_summary_ms(summary.get('patch_preview_time_ms'))} "
+        f"full_preview={_summary_ms(summary.get('full_preview_time_ms'))} "
+        f"total={_summary_ms(summary.get('time_ms'))} "
+        f"verification={summary.get('verification_mode', 'n/a')}"
+        f"{fallback_part}"
+        f"{source_part}"
+    )
+
+
 def _emit_recipe_delta_summary(summary: dict[str, Any], *, level: str = "info") -> None:
     payload = json.dumps(summary, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     log_fn = logger.error if level == "error" else logger.warning if level == "warning" else logger.info
+    log_fn(_format_recipe_delta_summary_line(summary))
     log_fn(f"CACHE_RECIPE_DELTA_SUMMARY {payload}")
 
 
