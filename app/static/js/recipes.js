@@ -2,6 +2,7 @@
 const i18n = window.DealMealsRecipesI18n || {};
 const pageConfig = window.DealMealsRecipesPage || {};
 const RECIPE_LOCALE = pageConfig.locale || undefined;
+const ALL_ACTIVE_RECIPE_SCRAPERS_ID = '__all_active__';
 
 const modeNames = { incremental: 'mode_incremental', full: 'mode_full', test: 'mode_test' };
 
@@ -759,7 +760,7 @@ function populateSelect() {
     // Add "all active" option + separator (only if 2+ sources)
     if (sortedScrapers.length >= 2) {
         const allOption = document.createElement('option');
-        allOption.value = '__all_active__';
+        allOption.value = ALL_ACTIVE_RECIPE_SCRAPERS_ID;
         allOption.textContent = i18n.all_active_sources;
         select.appendChild(allOption);
 
@@ -789,7 +790,7 @@ function updateTimeEstimates() {
     const modeSelect = document.getElementById('mode-select');
 
     // Lock mode to incremental when "all active" is selected
-    if (scraperId === '__all_active__') {
+    if (scraperId === ALL_ACTIVE_RECIPE_SCRAPERS_ID) {
         modeSelect.value = 'incremental';
         modeSelect.disabled = true;
         container.style.display = 'none';
@@ -1201,7 +1202,7 @@ async function runScraper() {
     }
 
     // Route to sequential runner for "all active"
-    if (scraperId === '__all_active__') {
+    if (scraperId === ALL_ACTIVE_RECIPE_SCRAPERS_ID) {
         runAllActive();
         return;
     }
@@ -1468,14 +1469,24 @@ async function runAllActive() {
 
     // Register queue on server before starting (survives page reloads)
     try {
-        await fetch('/api/recipe-scrapers/queue', {
+        const response = await fetch('/api/recipe-scrapers/queue', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'start', scraper_ids: activeScrapers.map(s => s.id) })
         });
+        const data = await response.json();
+        if (!data.success) {
+            Swal.fire({
+                icon: 'warning',
+                title: i18n.already_running,
+                text: t(data.message_key, data.message_params || {}) || data.message
+            });
+            return;
+        }
     } catch (error) {
         console.error('Failed to register queue on server:', error);
-        // Continue anyway — worst case it won't survive a reload
+        Swal.fire({ icon: 'error', title: i18n.error, text: error.message });
+        return;
     }
 
     // Initialize in-memory queue
@@ -1526,6 +1537,12 @@ async function runNextInQueue() {
             document.getElementById('progress-message').textContent =
                 t('scraper_started', data.message_params || {});
 
+            startPolling(scraper.id, _makeQueueCallback());
+        } else if (data.message_key === 'recipes.scraper_already_running') {
+            // Backend rescue may have started this scraper first; keep polling it
+            // instead of skipping forward and accidentally finishing the queue early.
+            document.getElementById('progress-message').textContent =
+                t(data.message_key, data.message_params || {}) || i18n.fetching;
             startPolling(scraper.id, _makeQueueCallback());
         } else {
             // This scraper failed to start — skip to next
@@ -1588,6 +1605,11 @@ async function finishRunAll() {
             body: JSON.stringify({ action: 'finish', total_new: totalNew })
         });
         const data = await response.json();
+        if (data.finish_deferred) {
+            runAllQueue = queue;
+            checkRunningScrapers();
+            return;
+        }
         cacheRebuildStarted = Boolean(data.cache_rebuild_started);
     } catch (error) {
         console.error('Failed to finish queue on server:', error);
@@ -1776,8 +1798,8 @@ function renderScheduleTable() {
         if (col === 'scraper_id') {
             const scraperA = scrapers.find(s => s.id === a.scraper_id);
             const scraperB = scrapers.find(s => s.id === b.scraper_id);
-            valA = (scraperA ? scraperA.name : a.scraper_id).toLowerCase();
-            valB = (scraperB ? scraperB.name : b.scraper_id).toLowerCase();
+            valA = scheduleScraperName(a.scraper_id, scraperA).toLowerCase();
+            valB = scheduleScraperName(b.scraper_id, scraperB).toLowerCase();
         } else if (col === 'schedule') {
             // Sort by weekday (Monday=0 first, Sunday=6 last), then by hour
             // Combined value: day_of_week * 24 + hour
@@ -1827,7 +1849,7 @@ function renderScheduleTable() {
     for (const schedule of sortedSchedules) {
         // Find scraper name
         const scraper = scrapers.find(s => s.id === schedule.scraper_id);
-        const scraperName = scraper ? scraper.name : schedule.scraper_id;
+        const scraperName = scheduleScraperName(schedule.scraper_id, scraper);
 
         const description = formatScheduleDescription(schedule);
         const nextRun = schedule.next_run_at
@@ -1854,6 +1876,13 @@ function renderScheduleTable() {
 
     html += '</tbody></table>';
     container.innerHTML = html;
+}
+
+function scheduleScraperName(scraperId, scraper = null) {
+    if (scraperId === ALL_ACTIVE_RECIPE_SCRAPERS_ID) {
+        return i18n.all_active_sources;
+    }
+    return scraper ? scraper.name : scraperId;
 }
 
 function sortScheduleTable(column) {
@@ -1912,6 +1941,18 @@ function populateScheduleSelect() {
 
     // Sort alphabetically by name
     const sortedScrapers = scrapers.filter(s => s.enabled).sort((a, b) => a.name.localeCompare(b.name, RECIPE_LOCALE));
+    if (sortedScrapers.length >= 1) {
+        const allOption = document.createElement('option');
+        allOption.value = ALL_ACTIVE_RECIPE_SCRAPERS_ID;
+        allOption.textContent = i18n.all_active_sources;
+        select.appendChild(allOption);
+
+        const separator = document.createElement('option');
+        separator.disabled = true;
+        separator.textContent = '─────────────';
+        select.appendChild(separator);
+    }
+
     sortedScrapers.forEach(scraper => {
         const option = document.createElement('option');
         option.value = scraper.id;

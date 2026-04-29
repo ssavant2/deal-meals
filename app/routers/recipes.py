@@ -36,6 +36,7 @@ from state import (
     running_scrapers, scraper_tasks, event_bus,
     update_running_scraper, get_running_scraper, get_scraper_lock,
     set_run_all_queue, update_run_all_queue, get_run_all_queue, clear_run_all_queue,
+    claim_run_all_queue_finish,
     get_image_state,
 )
 
@@ -1286,6 +1287,16 @@ def _save_result_has_cache_changes(save_result: dict | None) -> bool:
     )
 
 
+def _scheduled_recipe_batch_active() -> bool:
+    try:
+        from scheduler import scraper_scheduler
+
+        return bool(scraper_scheduler.recipe_batch_active())
+    except Exception as e:
+        logger.debug(f"Could not inspect scheduled recipe batch state: {e}")
+        return False
+
+
 def _should_use_recipe_delta(
     *,
     mode: str,
@@ -1406,12 +1417,44 @@ async def _refresh_cache_after_recipe_scrape(
 async def _finish_run_all_queue(total_new: int) -> dict:
     """Finish the run-all queue and start once-per-queue follow-up jobs."""
     total_new = _coerce_nonnegative_int(total_new)
-    queue_state = await get_run_all_queue()
+    for scraper_id in list(running_scrapers.keys()):
+        state = await get_running_scraper(scraper_id)
+        if state and state.get("running"):
+            logger.info(
+                f"Run-all finish deferred because scraper {scraper_id} is still running"
+            )
+            return {
+                "cache_rebuild_started": False,
+                "auto_image_download_started": False,
+                "finish_deferred": True,
+                "running_scraper_id": scraper_id,
+            }
+
+    queue_state = await claim_run_all_queue_finish()
+    if not queue_state.get("active"):
+        cache_rebuild_started = False
+        try:
+            with get_db_session() as db:
+                row = db.execute(text("""
+                    SELECT status
+                    FROM cache_metadata
+                    WHERE cache_name = 'recipe_offer_matches'
+                """)).fetchone()
+                cache_rebuild_started = bool(row and row.status == "computing")
+        except Exception as e:
+            logger.debug(f"Could not inspect cache status for duplicate run-all finish: {e}")
+
+        logger.info("Run-all finish ignored because the queue is already inactive")
+        return {
+            "cache_rebuild_started": cache_rebuild_started,
+            "auto_image_download_started": False,
+            "already_finished": True,
+        }
+
     total_cache_changes = max(
         total_new,
         _coerce_nonnegative_int(queue_state.get("total_cache_changes")),
     )
-    await clear_run_all_queue()
 
     cache_rebuild_started = False
     auto_image_download_started = False
@@ -1545,6 +1588,11 @@ async def manage_recipe_scraper_queue(request: Request):
         scraper_ids = body.get("scraper_ids", [])
         if not scraper_ids:
             return JSONResponse({"success": False, "message": "No scrapers provided"}, status_code=400)
+        if _scheduled_recipe_batch_active():
+            return JSONResponse({
+                "success": False,
+                "message_key": "recipes.scheduled_scraper_running",
+            }, status_code=409)
         existing = await get_run_all_queue()
         if existing.get("active"):
             return JSONResponse({"success": False, "message": "Queue already active"}, status_code=409)
@@ -1588,6 +1636,12 @@ async def run_recipe_scraper(scraper_id: str, request: Request):
     """Run a recipe scraper."""
     if not RECIPE_SCRAPERS_AVAILABLE:
         return JSONResponse({"success": False, "message_key": "error.not_available"}, status_code=500)
+
+    if _scheduled_recipe_batch_active():
+        return JSONResponse({
+            "success": False,
+            "message_key": "recipes.scheduled_scraper_running",
+        }, status_code=409)
 
     lock = get_scraper_lock(scraper_id)
 

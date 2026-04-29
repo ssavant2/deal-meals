@@ -714,6 +714,7 @@ UI = {
     'recipes.deleted_count': 'Raderade {recipes} recept och {images} bilder från {name}',
     'recipes.delete_error': 'Fel vid radering: {error}',
     'recipes.scraper_already_running': 'Scraper {id} körs redan',
+    'recipes.scheduled_scraper_running': 'En schemalagd receptkörning pågår. Vänta tills den är klar innan du startar en manuell hämtning.',
     'recipes.starting_fetch': 'Startar hämtning...',
     'recipes.scraper_started': 'Skrapare {name} startad ({mode})',
     'recipes.could_not_find_scraper': 'Kunde inte hitta skrapar-klass',

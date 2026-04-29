@@ -6,6 +6,7 @@ Schedules are stored in the database and persist across restarts.
 """
 
 import json
+import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
@@ -17,9 +18,13 @@ from loguru import logger
 import importlib
 from zoneinfo import ZoneInfo
 
+from config import settings
 from database import get_db_session
 from scrapers.recipes._common import normalize_recipe_scrape_result
 from utils.scraper_history import save_run_history
+
+
+ALL_ACTIVE_RECIPE_SCRAPERS_ID = "__all_active__"
 
 
 @dataclass
@@ -57,6 +62,167 @@ class ScraperScheduler:
         self._scraper_lock = None  # Created lazily (needs running event loop)
         self._scrapers_waiting = 0
         self._batch_has_new_recipes = False
+        self._batch_has_cache_changes = False
+        self._batch_changed_recipe_ids: list[str] = []
+        self._batch_removed_recipe_ids: list[str] = []
+        self._batch_executed_scraper_ids: set[str] = set()
+
+    @staticmethod
+    def _extend_unique_id_list(target: list[str], values) -> None:
+        seen = set(target)
+        for value in values or []:
+            if value is None:
+                continue
+            text_value = str(value)
+            if text_value and text_value not in seen:
+                target.append(text_value)
+                seen.add(text_value)
+
+    @staticmethod
+    def _coerce_nonnegative_int(value) -> int:
+        try:
+            return max(0, int(value or 0))
+        except (TypeError, ValueError):
+            return 0
+
+    def _extract_recipe_delta_ids(self, save_result: dict | None) -> tuple[list[str], list[str]]:
+        if not isinstance(save_result, dict):
+            return [], []
+        changed_ids: list[str] = []
+        self._extend_unique_id_list(changed_ids, save_result.get("changed_recipe_ids"))
+        self._extend_unique_id_list(changed_ids, save_result.get("created_recipe_ids"))
+        self._extend_unique_id_list(changed_ids, save_result.get("updated_recipe_ids"))
+        removed_ids: list[str] = []
+        self._extend_unique_id_list(removed_ids, save_result.get("removed_recipe_ids"))
+        removed_set = set(removed_ids)
+        changed_ids = [recipe_id for recipe_id in changed_ids if recipe_id not in removed_set]
+        return changed_ids, removed_ids
+
+    def _save_result_has_cache_changes(self, save_result: dict | None) -> bool:
+        if not isinstance(save_result, dict):
+            return False
+        changed_ids, removed_ids = self._extract_recipe_delta_ids(save_result)
+        if changed_ids or removed_ids:
+            return True
+        return any(
+            self._coerce_nonnegative_int(save_result.get(key)) > 0
+            for key in ("created", "updated", "saved", "deleted")
+        )
+
+    def _record_batch_cache_changes(self, save_result: dict | None) -> None:
+        if not self._save_result_has_cache_changes(save_result):
+            return
+        changed_ids, removed_ids = self._extract_recipe_delta_ids(save_result)
+        self._extend_unique_id_list(self._batch_removed_recipe_ids, removed_ids)
+        removed_set = set(self._batch_removed_recipe_ids)
+        self._batch_changed_recipe_ids = [
+            recipe_id
+            for recipe_id in self._batch_changed_recipe_ids
+            if recipe_id not in removed_set
+        ]
+        self._extend_unique_id_list(self._batch_changed_recipe_ids, changed_ids)
+        self._batch_changed_recipe_ids = [
+            recipe_id
+            for recipe_id in self._batch_changed_recipe_ids
+            if recipe_id not in removed_set
+        ]
+        self._batch_has_cache_changes = True
+
+    def recipe_batch_active(self) -> bool:
+        """Return True while scheduled recipe scrapers or their batch cache refresh run."""
+        lock_busy = bool(self._scraper_lock and self._scraper_lock.locked())
+        return bool(
+            lock_busy
+            or self._scrapers_waiting > 0
+            or self._batch_has_cache_changes
+            or self._batch_has_new_recipes
+        )
+
+    def _get_enabled_recipe_scraper_ids(self) -> list[str]:
+        try:
+            from recipe_scraper_manager import scraper_manager
+
+            enabled_scrapers = scraper_manager.get_enabled_scrapers()
+            enabled_scrapers.sort(key=lambda scraper: scraper.name.lower())
+            return [scraper.id for scraper in enabled_scrapers]
+        except Exception as e:
+            logger.warning(f"Could not load enabled recipe scrapers for all-active schedule: {e}")
+            return []
+
+    async def _refresh_cache_after_scheduled_batch(self, last_scraper_id: str) -> None:
+        """Refresh recipe-offer cache once after a scheduled recipe batch."""
+        if not self._batch_has_cache_changes:
+            return
+
+        changed_ids = list(self._batch_changed_recipe_ids)
+        removed_ids = list(self._batch_removed_recipe_ids)
+        self._batch_has_cache_changes = False
+        self._batch_changed_recipe_ids = []
+        self._batch_removed_recipe_ids = []
+
+        try:
+            from cache_manager import compute_cache_async
+
+            if (changed_ids or removed_ids) and settings.cache_recipe_delta_enabled:
+                from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
+                from delta_probation_runtime import append_runtime_probation_history
+
+                logger.info(
+                    "Starting recipe-delta cache refresh after scheduled recipe batch "
+                    f"({len(changed_ids)} changed, {len(removed_ids)} removed, last={last_scraper_id})"
+                )
+                delta_result = await asyncio.get_running_loop().run_in_executor(
+                    None,
+                    lambda: apply_recipe_delta(
+                        changed_recipe_ids=changed_ids,
+                        removed_recipe_ids=removed_ids,
+                        source=f"scheduled_recipe_batch:{last_scraper_id}",
+                        apply=True,
+                        verify_full_preview=settings.cache_recipe_delta_verify_full_preview,
+                        skip_if_busy=False,
+                    ),
+                )
+                try:
+                    append_runtime_probation_history(
+                        delta_result,
+                        history_path=_recipe_delta_probation_history_path(),
+                        store_name=last_scraper_id,
+                        trigger="scheduled_recipe_batch",
+                    )
+                except Exception as history_error:
+                    logger.warning(f"Could not append scheduled recipe-delta history: {history_error}")
+
+                if delta_result.get("applied"):
+                    logger.success(
+                        "Scheduled recipe batch cache refresh complete "
+                        f"(delta): {delta_result.get('cached', delta_result.get('patch_result', {}).get('total_matches', 0))} "
+                        f"recipes in {delta_result.get('time_ms', 0)}ms"
+                    )
+                    return
+
+                logger.warning(
+                    "Scheduled recipe-delta was not applied "
+                    f"({delta_result.get('fallback_reason')}); falling back to full rebuild"
+                )
+
+            logger.info(
+                "Starting full cache rebuild after scheduled recipe batch "
+                f"(last={last_scraper_id})"
+            )
+            result = await compute_cache_async(skip_if_busy=False)
+            if result.get("skipped"):
+                logger.info(f"Scheduled recipe batch cache refresh skipped: {result.get('reason')}")
+            else:
+                logger.success(
+                    "Scheduled recipe batch cache refresh complete ({mode}): "
+                    "{cached} recipes in {time_ms}ms".format(
+                        mode=result.get("effective_rebuild_mode", "unknown"),
+                        cached=result.get("cached", 0),
+                        time_ms=result.get("time_ms", 0),
+                    )
+                )
+        except Exception as e:
+            logger.warning(f"Scheduled recipe batch cache refresh failed: {e}")
 
     def start(self):
         """Start the scheduler and load jobs from database."""
@@ -196,6 +362,26 @@ class ScraperScheduler:
         """
         import asyncio as _asyncio
 
+        try:
+            from state import get_run_all_queue, get_running_scraper, running_scrapers
+
+            queue_state = await get_run_all_queue()
+            if queue_state.get("active"):
+                logger.info(
+                    f"Skipping scheduled scraper {scraper_id}; manual run-all queue is active"
+                )
+                return
+            for running_scraper_id in list(running_scrapers.keys()):
+                state = await get_running_scraper(running_scraper_id)
+                if state and state.get("running"):
+                    logger.info(
+                        f"Skipping scheduled scraper {scraper_id}; "
+                        f"manual scraper {running_scraper_id} is running"
+                    )
+                    return
+        except Exception as e:
+            logger.debug(f"Could not inspect manual recipe scraper state before scheduled run: {e}")
+
         # Lazy-create lock (needs running event loop)
         if self._scraper_lock is None:
             self._scraper_lock = _asyncio.Lock()
@@ -208,23 +394,102 @@ class ScraperScheduler:
 
         async with self._scraper_lock:
             self._scrapers_waiting -= 1
-            await self._execute_scraper(scraper_id)
+            if scraper_id == ALL_ACTIVE_RECIPE_SCRAPERS_ID:
+                await self._execute_all_active_recipe_scrapers()
+            else:
+                await self._execute_scraper(scraper_id)
 
             # Grace period: let other same-time scrapers register (increment above)
             # before checking if we're the last one in the batch.
             await _asyncio.sleep(self._BATCH_GRACE_SECONDS)
 
-            if self._scrapers_waiting == 0 and self._batch_has_new_recipes:
-                # Last scraper in batch — trigger one combined image download
-                self._batch_has_new_recipes = False
+            if self._scrapers_waiting == 0:
                 try:
-                    from utils.image_auto_download import trigger_auto_download_if_enabled
-                    if await trigger_auto_download_if_enabled():
-                        logger.info(f"Auto-download triggered after scheduled batch (last scraper: {scraper_id})")
-                except Exception as e:
-                    logger.warning(f"Could not trigger auto-download after batch: {e}")
+                    if self._batch_has_cache_changes or self._batch_has_new_recipes:
+                        # Last scraper in batch — refresh cache once, then trigger one combined image download
+                        await self._refresh_cache_after_scheduled_batch(scraper_id)
+                        has_new_recipes = self._batch_has_new_recipes
+                        self._batch_has_new_recipes = False
+                        if not has_new_recipes:
+                            return
+                        try:
+                            from utils.image_auto_download import trigger_auto_download_if_enabled
+                            if await trigger_auto_download_if_enabled():
+                                logger.info(f"Auto-download triggered after scheduled batch (last scraper: {scraper_id})")
+                        except Exception as e:
+                            logger.warning(f"Could not trigger auto-download after batch: {e}")
+                finally:
+                    self._batch_executed_scraper_ids.clear()
             elif self._scrapers_waiting > 0:
                 logger.info(f"Skipping auto-download, {self._scrapers_waiting} more scrapers queued")
+
+    async def _execute_all_active_recipe_scrapers(self):
+        """Run all currently enabled recipe scrapers as one scheduled batch."""
+        import time
+
+        start_time = time.time()
+        enabled_scraper_ids = self._get_enabled_recipe_scraper_ids()
+        total_recipes_found = 0
+
+        if not enabled_scraper_ids:
+            logger.info("Scheduled all-active recipe scrape skipped; no active recipe sources")
+            self._update_last_run(ALL_ACTIVE_RECIPE_SCRAPERS_ID)
+            job = self.scheduler.get_job(f"scraper_{ALL_ACTIVE_RECIPE_SCRAPERS_ID}")
+            if job and job.next_run_time:
+                self._update_next_run(ALL_ACTIVE_RECIPE_SCRAPERS_ID, job.next_run_time)
+            save_run_history(
+                ALL_ACTIVE_RECIPE_SCRAPERS_ID,
+                "incremental",
+                int(time.time() - start_time),
+                0,
+                success=True,
+            )
+            return
+
+        logger.info(
+            "Running scheduled all-active recipe scrape "
+            f"({len(enabled_scraper_ids)} sources)"
+        )
+        try:
+            for index, source_scraper_id in enumerate(enabled_scraper_ids, start=1):
+                if source_scraper_id in self._batch_executed_scraper_ids:
+                    logger.info(
+                        "Scheduled all-active recipe scrape skipping "
+                        f"{source_scraper_id}; already ran in this batch"
+                    )
+                    continue
+                logger.info(
+                    "Scheduled all-active recipe scrape: "
+                    f"{source_scraper_id} ({index}/{len(enabled_scraper_ids)})"
+                )
+                total_recipes_found += await self._execute_scraper(source_scraper_id)
+
+            duration = int(time.time() - start_time)
+            self._update_last_run(ALL_ACTIVE_RECIPE_SCRAPERS_ID)
+            job = self.scheduler.get_job(f"scraper_{ALL_ACTIVE_RECIPE_SCRAPERS_ID}")
+            if job and job.next_run_time:
+                self._update_next_run(ALL_ACTIVE_RECIPE_SCRAPERS_ID, job.next_run_time)
+            save_run_history(
+                ALL_ACTIVE_RECIPE_SCRAPERS_ID,
+                "incremental",
+                duration,
+                total_recipes_found,
+                success=True,
+            )
+            logger.info(
+                "Scheduled all-active recipe scrape complete: "
+                f"{total_recipes_found} new recipes across {len(enabled_scraper_ids)} sources"
+            )
+        except Exception as e:
+            logger.exception("Scheduled all-active recipe scrape failed")
+            save_run_history(
+                ALL_ACTIVE_RECIPE_SCRAPERS_ID,
+                "incremental",
+                int(time.time() - start_time),
+                total_recipes_found,
+                success=False,
+                error_message=str(e),
+            )
 
     async def _execute_scraper(self, scraper_id: str):
         """Run the actual scraper logic (called under lock)."""
@@ -232,6 +497,12 @@ class ScraperScheduler:
         start_time = time.time()
         recipes_found = 0
         attempted_count = 0
+        save_result_for_cache: dict = {}
+
+        if scraper_id in self._batch_executed_scraper_ids:
+            logger.info(f"Skipping scheduled scraper {scraper_id}; already ran in this batch")
+            return 0
+        self._batch_executed_scraper_ids.add(scraper_id)
 
         logger.info(f"Running scheduled scraper: {scraper_id}")
 
@@ -241,7 +512,7 @@ class ScraperScheduler:
             scraper_class = scraper_manager.get_scraper_class(scraper_id)
             if not scraper_class:
                 logger.error(f"Scraper class not found for {scraper_id}")
-                return
+                return 0
 
             # Run incremental scrape
             scraper = scraper_class()
@@ -281,15 +552,17 @@ class ScraperScheduler:
                     raise RuntimeError(scrape_result.reason or "recipe_scrape_failed")
                 if scrape_result.status == "cancelled":
                     logger.info(f"Scheduled scrape cancelled for {scraper_id}")
-                    return
+                    return 0
                 scraper_module = importlib.import_module(f"scrapers.recipes.{scraper_id}_scraper")
                 save_to_database = getattr(scraper_module, 'save_to_database')
                 if scrape_result.should_save:
                     result = save_to_database(scrape_result, clear_old=False)
+                    save_result_for_cache = result if isinstance(result, dict) else {}
                     recipes_found = result.get("created", 0) if isinstance(result, dict) else 0
                 logger.info(f"Scheduled scrape complete for {scraper_id}: {recipes_found} new recipes")
             elif hasattr(scraper, 'scrape_and_save'):
                 result = await scraper.scrape_and_save(overwrite=False)
+                save_result_for_cache = result if isinstance(result, dict) else {}
                 recipes_found = result.get("created", 0) if isinstance(result, dict) else 0
                 logger.info(f"Scheduled scrape complete for {scraper_id}: {result}")
             else:
@@ -302,10 +575,11 @@ class ScraperScheduler:
                     raise RuntimeError(scrape_result.reason or "recipe_scrape_failed")
                 if scrape_result.status == "cancelled":
                     logger.info(f"Scheduled scrape cancelled for {scraper_id}")
-                    return
+                    return 0
                 scraper_module = importlib.import_module(f"scrapers.recipes.{scraper_id}_scraper")
                 save_to_database = getattr(scraper_module, 'save_to_database')
                 result = save_to_database(scrape_result, clear_old=False) if scrape_result.should_save else {}
+                save_result_for_cache = result if isinstance(result, dict) else {}
                 recipes_found = result.get("created", 0) if isinstance(result, dict) else len(scrape_result)
                 logger.info(f"Scheduled scrape complete for {scraper_id}: {len(scrape_result)} recipes")
 
@@ -330,6 +604,8 @@ class ScraperScheduler:
             # Flag for batch download (checked after lock release grace period)
             if recipes_found > 0:
                 self._batch_has_new_recipes = True
+            self._record_batch_cache_changes(save_result_for_cache)
+            return recipes_found
 
         except Exception as e:
             logger.exception(f"Scheduled scraper {scraper_id} failed")
@@ -343,6 +619,7 @@ class ScraperScheduler:
                 success=False,
                 error_message=str(e),
             )
+            return 0
 
     def _update_last_run(self, scraper_id: str):
         """Update last_run_at in database."""

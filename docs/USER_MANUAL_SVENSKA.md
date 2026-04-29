@@ -302,7 +302,7 @@ en källa fungerar.
 
 Precis som butiksscheman kan du automatisera recepthämtning.
 
-Schemasektionen fungerar på samma sätt som på Butikssidan: välj en källa, ställ in frekvens och tid, och spara. Översiktstabellen visar alla receptscheman med senaste körningsresultat.
+Schemasektionen fungerar på samma sätt som på Butikssidan: välj en källa, ställ in frekvens och tid, och spara. Välj **Alla aktiva** för att köra alla receptkällor som är aktiva just då som en sekventiell schemalagd batch. Listan över aktiva källor kontrolleras när schemat körs, så källor som aktiveras eller inaktiveras senare inkluderas eller hoppas över automatiskt. Översiktstabellen visar alla receptscheman med senaste körningsresultat.
 
 ### 4.5 Mina Recept — Lägg till egna recept via URL
 

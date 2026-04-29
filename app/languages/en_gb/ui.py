@@ -715,6 +715,7 @@ UI = {
     'recipes.deleted_count': 'Deleted {recipes} recipes and {images} images from {name}',
     'recipes.delete_error': 'Error deleting: {error}',
     'recipes.scraper_already_running': 'Scraper {id} is already running',
+    'recipes.scheduled_scraper_running': 'A scheduled recipe run is in progress. Wait until it finishes before starting a manual fetch.',
     'recipes.starting_fetch': 'Starting fetch...',
     'recipes.scraper_started': 'Scraper {name} started ({mode})',
     'recipes.could_not_find_scraper': 'Could not find scraper class',

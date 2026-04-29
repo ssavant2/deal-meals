@@ -96,6 +96,15 @@ async def clear_run_all_queue() -> None:
         run_all_queue.clear()
 
 
+async def claim_run_all_queue_finish() -> dict:
+    """Atomically claim and clear the active run-all queue for finalization."""
+    async with _run_all_queue_lock:
+        state = run_all_queue.copy()
+        if state.get("active"):
+            run_all_queue.clear()
+        return state
+
+
 # ==================== HELPER FUNCTIONS ====================
 # These provide thread-safe access to global state.
 # Use these instead of directly modifying the dicts when possible.

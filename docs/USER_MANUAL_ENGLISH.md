@@ -300,7 +300,7 @@ source works.
 
 Just like store schedules, you can automate recipe fetching.
 
-The scheduling section works the same way as on the Stores page: pick a source, set frequency and time, and save. The overview table shows all recipe schedules with last run results.
+The scheduling section works the same way as on the Stores page: pick a source, set frequency and time, and save. Choose **All active** to run every currently enabled recipe source as one sequential scheduled batch. The active source list is checked when the schedule runs, so sources enabled or disabled later are included or skipped automatically. The overview table shows all recipe schedules with last run results.
 
 ### 4.5 My Recipes — Add Your Own Recipes via URL
 
