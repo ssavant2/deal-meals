@@ -2119,37 +2119,40 @@ async def cancel_recipe_scraper(scraper_id: str):
 # ============================================================================
 
 def _run_recipe_visibility_cache_refresh(recipe_ids: list[str], *, excluded: bool, source: str) -> None:
-    try:
-        if recipe_ids:
-            from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
-            from delta_probation_runtime import append_runtime_probation_history
+    if not recipe_ids:
+        logger.debug(f"Skipping recipe visibility cache refresh without recipe ids ({source})")
+        return
 
-            delta_result = apply_recipe_delta(
-                changed_recipe_ids=[] if excluded else recipe_ids,
-                removed_recipe_ids=recipe_ids if excluded else [],
-                source=source,
-                apply=True,
-                verify_full_preview=settings.cache_recipe_delta_verify_full_preview,
-                skip_if_busy=False,
+    try:
+        from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
+        from delta_probation_runtime import append_runtime_probation_history
+
+        delta_result = apply_recipe_delta(
+            changed_recipe_ids=[] if excluded else recipe_ids,
+            removed_recipe_ids=recipe_ids if excluded else [],
+            source=source,
+            apply=True,
+            verify_full_preview=settings.cache_recipe_delta_verify_full_preview,
+            skip_if_busy=False,
+        )
+        try:
+            append_runtime_probation_history(
+                delta_result,
+                history_path=_recipe_delta_probation_history_path(),
+                store_name="recipes-ui",
+                trigger=source,
             )
-            try:
-                append_runtime_probation_history(
-                    delta_result,
-                    history_path=_recipe_delta_probation_history_path(),
-                    store_name="recipes-ui",
-                    trigger=source,
-                )
-            except Exception as history_error:
-                logger.warning(f"Could not append recipe-delta probation history: {history_error}")
-            if delta_result.get("applied"):
-                logger.info(
-                    f"Recipe visibility cache delta applied ({source}, {len(recipe_ids)} recipes)"
-                )
-                return
-            logger.warning(
-                "Recipe visibility cache delta was not applied "
-                f"({delta_result.get('fallback_reason')}); falling back to full rebuild"
+        except Exception as history_error:
+            logger.warning(f"Could not append recipe-delta probation history: {history_error}")
+        if delta_result.get("applied"):
+            logger.info(
+                f"Recipe visibility cache delta applied ({source}, {len(recipe_ids)} recipes)"
             )
+            return
+        logger.warning(
+            "Recipe visibility cache delta was not applied "
+            f"({delta_result.get('fallback_reason')}); falling back to full rebuild"
+        )
 
         from cache_manager import refresh_cache_locked
 
