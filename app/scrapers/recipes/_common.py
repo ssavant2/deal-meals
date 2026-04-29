@@ -20,7 +20,6 @@ from sqlalchemy.exc import IntegrityError
 from loguru import logger
 
 
-DEFAULT_INCREMENTAL_ATTEMPT_MULTIPLIER = 5
 DEFAULT_INCREMENTAL_ATTEMPT_HARD_CAP = 300
 
 
@@ -193,23 +192,22 @@ def incremental_attempt_limit(
     max_recipes: Optional[int],
     available_count: int,
     default_limit: Optional[int] = None,
-    multiplier: int = DEFAULT_INCREMENTAL_ATTEMPT_MULTIPLIER,
     hard_cap: int = DEFAULT_INCREMENTAL_ATTEMPT_HARD_CAP,
 ) -> int:
     """Return how many candidate URLs to try for an incremental target.
 
     ``max_recipes`` is a target for usable recipes, not a strict URL-attempt
     limit. Some sites expose articles/profiles in recipe-like sitemaps, so a
-    small hidden buffer keeps the UI target intuitive without surfacing noisy
-    attempt counts. The absolute cap prevents pathological runs when a site's
-    sitemap has a long block of recipe-like URLs that never produce recipes.
+    hidden attempt budget keeps the UI target intuitive without surfacing noisy
+    attempt counts. For small configured targets, the hard cap is the maximum
+    number of URLs to try before giving up; for larger targets, the target
+    itself becomes the maximum.
     """
     available_count = max(0, int(available_count or 0))
     if max_recipes:
         target = max(1, int(max_recipes))
-        buffered_limit = max(target, target * max(1, multiplier))
-        effective_cap = max(target, int(hard_cap or 0))
-        return min(available_count, buffered_limit, effective_cap)
+        attempt_budget = max(target, int(hard_cap or 0))
+        return min(available_count, attempt_budget)
     if default_limit is None:
         return available_count
     return min(available_count, max(0, int(default_limit)))

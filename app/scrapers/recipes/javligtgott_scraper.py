@@ -360,13 +360,21 @@ class JavligtGottScraper:
                 # Incremental: skip already-saved URLs
                 existing_urls = self._get_existing_urls()
                 all_candidate_urls = [url for url, _ in all_urls]
-                attempt_limit = incremental_attempt_limit(
-                    max_recipes=max_recipes,
-                    available_count=len(all_candidate_urls),
-                    default_limit=MAX_RECIPES,
-                )
-                candidate_urls = all_candidate_urls[:attempt_limit]
-                urls_to_scrape = [url for url in candidate_urls if url not in existing_urls]
+                if max_recipes:
+                    new_candidate_urls = [
+                        url for url in all_candidate_urls if url not in existing_urls
+                    ]
+                    attempt_limit = incremental_attempt_limit(
+                        max_recipes=max_recipes,
+                        available_count=len(new_candidate_urls),
+                        default_limit=MAX_RECIPES,
+                    )
+                    urls_to_scrape = new_candidate_urls[:attempt_limit]
+                else:
+                    candidate_urls = all_candidate_urls[:MAX_RECIPES]
+                    urls_to_scrape = [
+                        url for url in candidate_urls if url not in existing_urls
+                    ]
 
                 logger.info(
                     f"INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape "

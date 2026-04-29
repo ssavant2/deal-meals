@@ -610,17 +610,27 @@ class KoketScraper:
                 existing_urls = self._get_existing_urls()
                 existing_count = len(existing_urls)
                 all_candidate_urls = [url for url, _ in all_urls]
-                attempt_limit = incremental_attempt_limit(
-                    max_recipes=max_recipes,
-                    available_count=len(all_candidate_urls),
-                    default_limit=MAX_URLS,
-                )
-                candidate_urls = all_candidate_urls[:attempt_limit]
-                urls_to_scrape = [url for url in candidate_urls if url not in existing_urls]
+                if max_recipes:
+                    new_candidate_urls = [
+                        url for url in all_candidate_urls if url not in existing_urls
+                    ]
+                    attempt_limit = incremental_attempt_limit(
+                        max_recipes=max_recipes,
+                        available_count=len(new_candidate_urls),
+                        default_limit=MAX_URLS,
+                    )
+                    urls_to_scrape = new_candidate_urls[:attempt_limit]
+                    candidate_count = len(new_candidate_urls)
+                else:
+                    candidate_urls = all_candidate_urls[:MAX_URLS]
+                    urls_to_scrape = [
+                        url for url in candidate_urls if url not in existing_urls
+                    ]
+                    candidate_count = len(candidate_urls)
 
                 logger.info(
                     f"INCREMENTAL: {len(urls_to_scrape)} new URLs to try "
-                    f"(target {max_recipes or 'auto'}, {len(candidate_urls)} candidates)"
+                    f"(target {max_recipes or 'auto'}, {candidate_count} candidates)"
                 )
                 logger.info(f"   Already in DB: {existing_count} recipes")
 
