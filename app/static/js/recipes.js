@@ -2,11 +2,6 @@
 const i18n = window.DealMealsRecipesI18n || {};
 const pageConfig = window.DealMealsRecipesPage || {};
 const RECIPE_LOCALE = pageConfig.locale || undefined;
-const recipeImageDownloadLoaderHtml = `
-    <svg class="recipe-button-loader me-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
-        <circle class="recipe-button-loader-track" cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"></circle>
-        <circle cx="8" cy="2" r="1.75" fill="currentColor"></circle>
-    </svg>`;
 
 const modeNames = { incremental: 'mode_incremental', full: 'mode_full', test: 'mode_test' };
 
@@ -47,8 +42,12 @@ let runButtonDefaultHtml = '';
 let runButtonRecipeLocked = false;
 let postRecipeImageLockInterval = null;
 let postRecipeImageLockTimeout = null;
+let pendingAutoImageCompletion = null;
+let pendingAutoImageStarted = false;
+let pendingAutoImageFallbackTimeout = null;
 const IMAGE_DOWNLOAD_RUNNING_POLL_MS = 1000;
 const POST_RECIPE_IMAGE_LOCK_WATCH_MS = 30000;
+const AUTO_IMAGE_FALLBACK_POPUP_MS = 5000;
 
 // Load scrapers on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -104,7 +103,7 @@ function updateRecipeRunButtonState() {
         btn.disabled = true;
         btn.classList.remove('btn-info');
         btn.classList.add('btn-primary', 'image-download-lock');
-        btn.innerHTML = `${recipeImageDownloadLoaderHtml}${escapeHtml(label)}`;
+        btn.innerHTML = escapeHtml(label);
         btn.title = t('recipes.wait_for_image_download');
         btn.setAttribute('aria-disabled', 'true');
         return;
@@ -118,7 +117,158 @@ function updateRecipeRunButtonState() {
     if (!runButtonRecipeLocked) btn.removeAttribute('aria-disabled');
 }
 
-async function refreshImageDownloadLock() {
+function translateImageDownloadStatus(data) {
+    const key = data?.message_key;
+    if (key) {
+        const message = t(key, data.message_params || {});
+        if (message && message !== key) return message;
+    }
+    return i18n.images_downloading || i18n.image_download_in_progress_button || '';
+}
+
+function setProgressCancelAction(action) {
+    const cancelBtn = document.getElementById('cancel-scraper-btn');
+    if (!cancelBtn) return;
+
+    cancelBtn.dataset.action = action;
+    cancelBtn.disabled = false;
+    cancelBtn.innerHTML = `<i class="bi bi-x-circle me-1"></i>${escapeHtml(i18n.cancel || 'Cancel')}`;
+}
+
+function setProgressPanelRecipeMode() {
+    const progressWrap = document.getElementById('image-download-progress-container');
+    if (progressWrap) {
+        progressWrap.classList.add('invisible');
+    }
+    const progressBar = document.getElementById('recipe-image-download-progress-bar');
+    if (progressBar) {
+        progressBar.style.width = '0%';
+        progressBar.setAttribute('aria-valuenow', '0');
+    }
+    setProgressCancelAction('cancelScraper');
+}
+
+function setPendingAutoImageCompletion(pending) {
+    pendingAutoImageCompletion = pending;
+    pendingAutoImageStarted = false;
+
+    if (pendingAutoImageFallbackTimeout) {
+        clearTimeout(pendingAutoImageFallbackTimeout);
+    }
+
+    pendingAutoImageFallbackTimeout = setTimeout(() => {
+        if (pendingAutoImageCompletion && !pendingAutoImageStarted) {
+            finishPendingAutoImageCompletion();
+        }
+    }, AUTO_IMAGE_FALLBACK_POPUP_MS);
+}
+
+function clearPendingAutoImageFallback() {
+    if (pendingAutoImageFallbackTimeout) {
+        clearTimeout(pendingAutoImageFallbackTimeout);
+        pendingAutoImageFallbackTimeout = null;
+    }
+}
+
+function showRunAllCompletePopup({ count, summaryHtml, autoClose }) {
+    Swal.fire({
+        icon: 'success',
+        title: t('all_complete', { count: count }),
+        html: summaryHtml,
+        confirmButtonText: i18n.ok,
+        heightAuto: false,
+        scrollbarPadding: false,
+        timer: autoClose ? 8000 : undefined,
+        timerProgressBar: autoClose,
+        didOpen: () => {
+            document.getElementById('progress-container').classList.remove('active');
+            setRecipeRunButtonLocked(false);
+        },
+        didClose: () => {
+            loadScrapers();
+            loadAllSchedules();
+        }
+    });
+}
+
+function finishPendingAutoImageCompletion() {
+    const pending = pendingAutoImageCompletion;
+    if (!pending) return;
+
+    pendingAutoImageCompletion = null;
+    pendingAutoImageStarted = false;
+    clearPendingAutoImageFallback();
+    stopPostRecipeImageLockWatch();
+
+    document.getElementById('progress-container')?.classList.remove('active');
+    setProgressPanelRecipeMode();
+    setRecipeRunButtonLocked(false);
+
+    if (pending.type === 'single') {
+        showDetailedResult(pending.data, {
+            didOpen: () => {
+                document.getElementById('progress-container').classList.remove('active');
+                setRecipeRunButtonLocked(false);
+            },
+            didClose: () => {
+                loadScrapers();
+                loadAllSchedules();
+            }
+        });
+        return;
+    }
+
+    if (pending.type === 'runAll') {
+        showRunAllCompletePopup(pending);
+    }
+}
+
+function updateRecipeImageDownloadStatus(data = null, options = {}) {
+    const progressContainer = document.getElementById('progress-container');
+    if (!progressContainer) return;
+
+    const running = data ? Boolean(data.running) : imageDownloadRunning;
+    if (!running) {
+        if (pendingAutoImageCompletion && pendingAutoImageStarted) {
+            finishPendingAutoImageCompletion();
+            return;
+        }
+        if (options.keepProgressWhenIdle) return;
+        const recipeProgressActive = Boolean(currentScraperId || pollingInterval || runAllQueue || runButtonRecipeLocked);
+        if (!recipeProgressActive) {
+            progressContainer.classList.remove('active');
+            setProgressPanelRecipeMode();
+        }
+        return;
+    }
+
+    const resultContainer = document.getElementById('result-container');
+    const title = document.getElementById('progress-title');
+    const progressText = document.getElementById('progress-message');
+    const progressWrap = document.getElementById('image-download-progress-container');
+    const progressBar = document.getElementById('recipe-image-download-progress-bar');
+
+    if (pendingAutoImageCompletion) {
+        pendingAutoImageStarted = true;
+    }
+    progressContainer.classList.add('active');
+    if (resultContainer) resultContainer.style.display = 'none';
+    setProgressCancelAction('cancelImageDownloadFromRecipes');
+    if (title) title.textContent = i18n.images_downloading || i18n.image_download_in_progress_button || '';
+    if (progressText) progressText.textContent = translateImageDownloadStatus(data);
+    if (progressWrap) progressWrap.classList.remove('invisible');
+
+    if (progressBar) {
+        const rawProgress = data?.progress;
+        const progress = Number.isFinite(Number(rawProgress))
+            ? Math.max(0, Math.min(100, Number(rawProgress)))
+            : 0;
+        progressBar.style.width = `${progress}%`;
+        progressBar.setAttribute('aria-valuenow', Math.round(progress));
+    }
+}
+
+async function refreshImageDownloadLock(options = {}) {
     try {
         const response = await fetch('/api/images/download/status');
         if (!response.ok) return imageDownloadRunning;
@@ -126,6 +276,7 @@ async function refreshImageDownloadLock() {
         if (!data.success) return imageDownloadRunning;
         imageDownloadRunning = Boolean(data.running);
         updateRecipeRunButtonState();
+        updateRecipeImageDownloadStatus(data, options);
         syncImageDownloadLockPolling();
         return imageDownloadRunning;
     } catch (error) {
@@ -150,16 +301,19 @@ async function refreshImageAutoDownloadPreference() {
 
 async function refreshImageDownloadLockAfterRecipeComplete() {
     if (!(await refreshImageAutoDownloadPreference())) {
-        return;
+        return false;
     }
 
     stopPostRecipeImageLockWatch();
     const startedAt = Date.now();
     const checkForImageDownload = async () => {
-        const running = await refreshImageDownloadLock();
-        if (running || Date.now() - startedAt >= POST_RECIPE_IMAGE_LOCK_WATCH_MS) {
+        const running = await refreshImageDownloadLock({ keepProgressWhenIdle: true });
+        const timedOut = Date.now() - startedAt >= POST_RECIPE_IMAGE_LOCK_WATCH_MS;
+        if (running || timedOut) {
             stopPostRecipeImageLockWatch();
+            if (timedOut && !running) updateRecipeImageDownloadStatus({ running: false });
         }
+        return running;
     };
 
     await checkForImageDownload();
@@ -173,6 +327,7 @@ async function refreshImageDownloadLockAfterRecipeComplete() {
             POST_RECIPE_IMAGE_LOCK_WATCH_MS + IMAGE_DOWNLOAD_RUNNING_POLL_MS
         );
     }
+    return true;
 }
 
 function syncImageDownloadLockPolling() {
@@ -213,6 +368,37 @@ function stopPostRecipeImageLockWatch() {
     }
 }
 
+async function shouldContinueToAutoImageDownload(data) {
+    if (!data || data.mode === 'test') return false;
+    if (!Number(data.new_recipes || 0)) return false;
+    return Boolean(await refreshImageAutoDownloadPreference());
+}
+
+async function cancelImageDownloadFromRecipes() {
+    const progressText = document.getElementById('progress-message');
+    const cancelBtn = document.getElementById('cancel-scraper-btn');
+
+    if (cancelBtn) cancelBtn.disabled = true;
+    if (progressText) progressText.textContent = i18n.images_cancelling || t('images.download_cancelling');
+
+    try {
+        const response = await fetch('/api/images/download/cancel', { method: 'POST' });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) {
+            throw new Error(window.DealMeals.resolveMessage(data, {
+                messages: i18n,
+                fallback: i18n.error || 'Error'
+            }));
+        }
+        await refreshImageDownloadLock();
+    } catch (error) {
+        if (progressText) {
+            progressText.textContent = `${i18n.images_cancel_error || i18n.error}: ${error.message}`;
+        }
+        if (cancelBtn) cancelBtn.disabled = false;
+    }
+}
+
 async function checkRunningScrapers() {
     try {
         // Check queue first — if a "run all" was active it takes priority
@@ -249,6 +435,7 @@ async function checkRunningScrapers() {
 
             // Show progress UI
             setRecipeRunButtonLocked(true);
+            setProgressPanelRecipeMode();
             document.getElementById('progress-container').classList.add('active');
             document.getElementById('result-container').style.display = 'none';
 
@@ -289,6 +476,7 @@ async function checkRunningScrapers() {
             }
 
             setRecipeRunButtonLocked(true);
+            setProgressPanelRecipeMode();
 
             const progressContainer = document.getElementById('progress-container');
             const resultContainer = document.getElementById('result-container');
@@ -1058,6 +1246,7 @@ async function runScraper() {
 
     // Disable button and show progress
     setRecipeRunButtonLocked(true);
+    setProgressPanelRecipeMode();
 
     const progressContainer = document.getElementById('progress-container');
     const resultContainer = document.getElementById('result-container');
@@ -1138,11 +1327,19 @@ function startPolling(scraperId, onComplete) {
                     }
 
                     if (data.status === 'complete') {
+                        if (await shouldContinueToAutoImageDownload(data)) {
+                            setPendingAutoImageCompletion({ type: 'single', data });
+                            setRecipeRunButtonLocked(false);
+                            refreshImageDownloadLockAfterRecipeComplete();
+                            loadScrapers();
+                            loadAllSchedules();
+                            return;
+                        }
+
                         showDetailedResult(data, {
                             didOpen: () => {
                                 document.getElementById('progress-container').classList.remove('active');
                                 setRecipeRunButtonLocked(false);
-                                refreshImageDownloadLockAfterRecipeComplete();
                             },
                             didClose: () => {
                                 loadScrapers();
@@ -1286,6 +1483,7 @@ async function runAllActive() {
 
     // Show progress UI
     setRecipeRunButtonLocked(true);
+    setProgressPanelRecipeMode();
     const progressContainer = document.getElementById('progress-container');
     const resultContainer = document.getElementById('result-container');
     progressContainer.classList.add('active');
@@ -1308,6 +1506,7 @@ async function runNextInQueue() {
     const current = queue.index + 1;
 
     // Update progress title with overall counter
+    setProgressPanelRecipeMode();
     document.getElementById('progress-title').textContent =
         t('running_all_progress', { name: scraper.name, current: current, total: total });
     document.getElementById('progress-message').textContent = i18n.waiting_server;
@@ -1396,6 +1595,7 @@ async function finishRunAll() {
 
     if (cacheRebuildStarted) {
         sessionStorage.setItem('suggestionsNeedRefresh', 'true');
+        setProgressPanelRecipeMode();
         document.getElementById('progress-container').classList.add('active');
         document.getElementById('progress-title').textContent = t('recipes.cache_rebuild_started');
         document.getElementById('progress-message').textContent = i18n.waiting_server;
@@ -1417,26 +1617,30 @@ async function finishRunAll() {
         summaryHtml += `<br><span class="text-muted">${escapeHtml(t('recipes.cache_rebuild_started'))}</span>`;
     }
 
-    Swal.fire({
-        icon: 'success',
-        title: t('all_complete', { count: count }),
-        html: summaryHtml,
-        confirmButtonText: i18n.ok,
-        timer: autoClose ? 8000 : undefined,
-        timerProgressBar: autoClose,
-        didOpen: () => {
-            document.getElementById('progress-container').classList.remove('active');
-            setRecipeRunButtonLocked(false);
-            refreshImageDownloadLockAfterRecipeComplete();
-        },
-        didClose: () => {
-            loadScrapers();
-            loadAllSchedules();
-        }
-    });
+    if (totalNew > 0 && await refreshImageAutoDownloadPreference()) {
+        setPendingAutoImageCompletion({
+            type: 'runAll',
+            count,
+            summaryHtml,
+            autoClose
+        });
+        setRecipeRunButtonLocked(false);
+        refreshImageDownloadLockAfterRecipeComplete();
+        loadScrapers();
+        loadAllSchedules();
+        return;
+    }
+
+    showRunAllCompletePopup({ count, summaryHtml, autoClose });
 }
 
 function showDetailedResult(data, modalOptions = {}) {
+    const silent = Boolean(modalOptions.silent);
+    if (silent) {
+        modalOptions = { ...modalOptions };
+        delete modalOptions.silent;
+    }
+
     // Build HTML content for detailed result popup
     // Map mode to translated label
     const modeLabelMap = {
@@ -1484,12 +1688,16 @@ function showDetailedResult(data, modalOptions = {}) {
         body: JSON.stringify({ completed_scrapes: completedScrapes })
     }).catch(() => {});
 
+    if (silent) return;
+
     const autoClose = completedScrapes > 3;
     Swal.fire({
         icon: 'success',
         title: t('fetch_complete', { mode: modeLabel }),
         html: html,
         confirmButtonText: i18n.ok,
+        heightAuto: false,
+        scrollbarPadding: false,
         timer: autoClose ? 8000 : undefined,
         timerProgressBar: autoClose,
         ...modalOptions
@@ -1929,6 +2137,7 @@ document.addEventListener('click', function(e) {
         case 'addMyRecipeUrl': addMyRecipeUrl(); break;
         case 'runScraper': runScraper(); break;
         case 'cancelScraper': cancelScraper(); break;
+        case 'cancelImageDownloadFromRecipes': cancelImageDownloadFromRecipes(); break;
         case 'saveSchedule': saveSchedule(); break;
         case 'deleteSchedule': deleteSchedule(); break;
         case 'openMyRecipesConfig': openMyRecipesConfig(); break;

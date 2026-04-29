@@ -476,6 +476,7 @@ UI = {
     'config.images_status': '{downloaded} of {total} images saved locally ({size})',
     'config.images_status_none': 'No images saved locally (0 MB)',
     'config.images_downloading': 'Downloading images...',
+    'config.images_starting': 'Starting image download...',
     'config.images_download_complete': '{count} images downloaded',
     'config.images_download_error': 'Could not download images',
 

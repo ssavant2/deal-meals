@@ -82,6 +82,19 @@
     .progress-container.active {
         display: block;
     }
+    .recipe-step-status-panel {
+        min-height: 88px;
+        display: flex;
+        align-items: center;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+    .recipe-step-status-body {
+        width: 100%;
+    }
+    .recipe-step-status-text {
+        min-width: 0;
+    }
     .schedule-table thead th {
         background-color: var(--subtheme2-bg) !important;
         color: var(--subtheme2-text) !important;
@@ -136,21 +149,6 @@
     #run-scraper-btn.image-download-lock {
         max-width: 100%;
         white-space: normal;
-    }
-    .recipe-button-loader {
-        display: inline-block;
-        width: 1rem;
-        height: 1rem;
-        flex: 0 0 auto;
-        vertical-align: -0.125em;
-        transform-origin: 50% 50%;
-        animation: recipe-button-loader-spin 1s linear infinite;
-    }
-    .recipe-button-loader-track {
-        opacity: 0.35;
-    }
-    @keyframes recipe-button-loader-spin {
-        to { transform: rotate(360deg); }
     }
 </style>
 {% endblock %}
@@ -261,10 +259,7 @@
                                 {% if image_download_running|default(false) %}disabled aria-disabled="true" title="{{ t('recipes.wait_for_image_download') }}"{% endif %}
                             >
                                 {% if image_download_running|default(false) %}
-                                    <svg class="recipe-button-loader me-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
-                                        <circle class="recipe-button-loader-track" cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"></circle>
-                                        <circle cx="8" cy="2" r="1.75" fill="currentColor"></circle>
-                                    </svg>{{ t('recipes.image_download_in_progress_button') }}
+                                    {{ t('recipes.image_download_in_progress_button') }}
                                 {% else %}
                                     <i class="bi bi-play-fill"></i> {{ t('recipes.fetch_recipes') }}
                                 {% endif %}
@@ -293,18 +288,29 @@
 
                 <!-- Progress area -->
                 <div class="progress-container mt-4" id="progress-container">
-                    <div class="alert alert-info">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
+                    <div class="alert alert-info recipe-step-status-panel">
+                        <div class="recipe-step-status-body d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center flex-grow-1 recipe-step-status-text">
                                 <div class="spinner-border spinner-border-sm me-3 running-indicator" role="status">
                                     <span class="visually-hidden">{{ t('common.loading') }}</span>
                                 </div>
-                                <div>
+                                <div class="flex-grow-1 recipe-step-status-text">
                                     <strong id="progress-title">{{ t('recipes.fetching') }}</strong>
                                     <p class="mb-0 small" id="progress-message">{{ t('stores.starting') }}</p>
+                                    <div class="progress mt-2 invisible" id="image-download-progress-container" style="height: 6px;">
+                                        <div
+                                            class="progress-bar progress-bar-striped progress-bar-animated"
+                                            id="recipe-image-download-progress-bar"
+                                            role="progressbar"
+                                            aria-valuenow="0"
+                                            aria-valuemin="0"
+                                            aria-valuemax="100"
+                                            style="width: 0%"
+                                        ></div>
+                                    </div>
                                 </div>
                             </div>
-                            <button class="btn btn-outline-danger btn-sm" id="cancel-scraper-btn" data-action="cancelScraper">
+                            <button class="btn btn-outline-danger btn-sm ms-3" id="cancel-scraper-btn" data-action="cancelScraper">
                                 <i class="bi bi-x-circle me-1"></i>{{ t('recipes.cancel') }}
                             </button>
                         </div>
@@ -445,6 +451,21 @@ window.DealMealsRecipesI18n = {
     waiting_server: {{ t('recipes.waiting_server')|tojson }},
     cancelling: {{ t('recipes.cancelling')|tojson }},
     image_download_in_progress_button: {{ t('recipes.image_download_in_progress_button')|tojson }},
+    images_downloading: {{ t('config.images_downloading')|tojson }},
+    images_cancelling: {{ t('config.images_cancelling')|tojson }},
+    images_cancel_error: {{ t('config.images_cancel_error')|tojson }},
+    'config.images_starting': {{ t('config.images_downloading')|tojson }},
+    'config.images_progress_analyzing': {{ t('config.images_progress_analyzing')|tojson }},
+    'config.images_progress_downloading': {{ t('config.images_progress_downloading')|tojson }},
+    'config.images_progress_current': {{ t('config.images_progress_current')|tojson }},
+    'config.images_progress_batch_pause': {{ t('config.images_progress_batch_pause')|tojson }},
+    'config.images_progress_rate_limited': {{ t('config.images_progress_rate_limited')|tojson }},
+    'config.images_progress_complete': {{ t('config.images_progress_complete')|tojson }},
+    'config.images_progress_complete_errors': {{ t('config.images_progress_complete_errors')|tojson }},
+    'config.images_progress_complete_blocked': {{ t('config.images_progress_complete_blocked')|tojson }},
+    'config.images_progress_cancelled': {{ t('config.images_progress_cancelled')|tojson }},
+    'config.images_progress_all_done': {{ t('config.images_progress_all_done')|tojson }},
+    'config.images_progress_all_done_failed': {{ t('config.images_progress_all_done_failed')|tojson }},
     recipes_found: {{ t('recipes.recipes_found')|tojson }},
     fetch_complete: {{ t('recipes.fetch_complete')|tojson }},
     new_recipes_found: {{ t('recipes.new_recipes_found')|tojson }},
@@ -582,6 +603,8 @@ window.DealMealsRecipesI18n = {
     'recipes.clear_inactive_only': {{ t('recipes.clear_inactive_only')|tojson }},
     'recipes.deleted_count': {{ t('recipes.deleted_count')|tojson }},
     'recipes.no_active_fetch': {{ t('recipes.no_active_fetch')|tojson }},
+    'images.no_download_running': {{ t('images.no_download_running')|tojson }},
+    'images.download_cancelling': {{ t('images.download_cancelling')|tojson }},
     'preferences.saved': {{ t('preferences.saved')|tojson }},
     'error.generic': {{ t('error.generic')|tojson }},
     'error.connection': {{ t('error.connection')|tojson }},

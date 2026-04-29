@@ -476,6 +476,7 @@ UI = {
     'config.images_status': '{downloaded} av {total} bilder sparade lokalt ({size})',
     'config.images_status_none': 'Inga bilder sparade lokalt (0 MB)',
     'config.images_downloading': 'Laddar ner bilder...',
+    'config.images_starting': 'Startar bildnedladdning...',
     'config.images_download_complete': '{count} bilder nedladdade',
     'config.images_download_error': 'Kunde inte ladda ner bilder',
 
