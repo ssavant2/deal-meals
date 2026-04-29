@@ -47,6 +47,11 @@ RUN mkdir -p /home/appuser/.cache/ms-playwright
 # Copy application (owned by root, readable by all — only specific dirs need writes)
 USER root
 COPY app/ .
+# Docker preserves host file modes during COPY. Normalize copied application
+# files so the non-root runtime user can always read templates, static assets
+# and Python modules even if the local checkout has restrictive permissions.
+RUN find /app -type d -exec chmod 755 {} + && \
+    find /app -type f -exec chmod 644 {} +
 RUN chown -R appuser:appuser /app/logs /app/static/recipe_images 2>/dev/null || true
 RUN mkdir -p /app/logs /app/static/recipe_images /app/static/vendor && \
     chown appuser:appuser /app/logs /app/static/recipe_images /app/static/vendor
