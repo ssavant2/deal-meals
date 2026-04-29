@@ -203,6 +203,7 @@ def build_runtime_probation_history_entry(
         "verification_mode": verification_mode,
         "verify_full_preview": result.get("verify_full_preview"),
         "effective_verify_full_preview": effective_verify_full_preview,
+        "term_index_skip_fts_prefilter": result.get("term_index_skip_fts_prefilter"),
         "fallback_reason": fallback_reason,
         "patch_recipe_count": result.get("patch_recipe_count"),
         "actual_changed_recipes": result.get("actual_changed_recipes"),

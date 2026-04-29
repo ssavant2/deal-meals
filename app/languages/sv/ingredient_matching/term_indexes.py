@@ -155,7 +155,7 @@ def build_offer_candidate_term_map(
 def build_fts_keyword_set(
     offer_data_cache: dict[int, dict[str, Any]],
 ) -> set[str]:
-    """Match the current FTS pre-filter term expansion in cache_manager.py."""
+    """Build the legacy FTS safety-valve keyword expansion."""
     all_keywords: set[str] = set()
     for compiled_offer_data in offer_data_cache.values():
         keywords = set(compiled_offer_data.get("keywords", ()))

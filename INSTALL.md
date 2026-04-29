@@ -254,6 +254,7 @@ Optional overrides for debugging:
 - `CACHE_DELTA_SKIP_FULL_PREVIEW_AFTER_PROBATION=false` — keep delta on the slower full-preview verification path even after probation is green
 - `CACHE_DELTA_PROBATION_MIN_READY_STREAK=10` — minimum consecutive ready probation runs before fast delta is allowed
 - `CACHE_DELTA_PROBATION_MIN_VERSION_READY_RUNS=3` — minimum ready probation runs for the current matcher/compiler versions
+- `CACHE_TERM_INDEX_SKIP_FTS_PREFILTER=false` — temporary legacy safety valve that restores the old recipe FTS pre-filter before term-index routing; delta keeps full-preview verification enabled in this mode
 
 Delta is safety-first. It can still fall back to a normal full `compiled`
 rebuild if the baseline is stale or parity is not clean.
