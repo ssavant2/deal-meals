@@ -67,8 +67,9 @@ sys.path.insert(0, app_dir)
 from database import get_db_session
 from models import FoundRecipe
 from scrapers.recipes._common import (
-    _is_type, RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, StreamingRecipeSaver
+    _is_type, RecipeScrapeResult, incremental_attempt_limit,
+    make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
+    StreamingRecipeSaver
 )
 
 # GUI Metadata
@@ -416,6 +417,7 @@ class ReceptenScraper:
         urls: List[str],
         max_concurrent: int = 2,
         stream_saver: Optional[StreamingRecipeSaver] = None,
+        max_recipes: Optional[int] = None,
     ) -> List[Dict]:
         """
         Scrape multiple recipes concurrently with httpx.
@@ -435,6 +437,12 @@ class ReceptenScraper:
             batch_size = 10
 
             for i in range(0, total, batch_size):
+                if recipe_target_reached(
+                    max_recipes=max_recipes,
+                    recipes=recipes,
+                    stream_saver=stream_saver,
+                ):
+                    break
                 batch = urls[i:i + batch_size]
 
                 tasks = [scrape_with_semaphore(client, url) for url in batch]
@@ -446,6 +454,12 @@ class ReceptenScraper:
                             await stream_saver.add(recipe)
                         else:
                             recipes.append(recipe)
+                        if recipe_target_reached(
+                            max_recipes=max_recipes,
+                            recipes=recipes,
+                            stream_saver=stream_saver,
+                        ):
+                            break
 
                 found_count = stream_saver.seen_count if stream_saver else len(recipes)
                 logger.info(f"   Progress: {min(i + batch_size, total)}/{total} ({found_count} successful)")
@@ -519,9 +533,16 @@ class ReceptenScraper:
             urls_to_scrape = urls_only
             logger.info(f"   Force mode: scraping ALL {len(urls_to_scrape)} recipes")
 
-        # Apply limit if specified
-        if max_recipes:
-            urls_to_scrape = urls_to_scrape[:max_recipes]
+        if force_all:
+            if max_recipes:
+                urls_to_scrape = urls_to_scrape[:max_recipes]
+        else:
+            attempt_limit = incremental_attempt_limit(
+                max_recipes=max_recipes,
+                available_count=len(urls_to_scrape),
+                default_limit=len(urls_to_scrape),
+            )
+            urls_to_scrape = urls_to_scrape[:attempt_limit]
 
         logger.info(f"📄 Scraping {len(urls_to_scrape)} recipes...")
 
@@ -530,6 +551,7 @@ class ReceptenScraper:
             urls_to_scrape,
             max_concurrent=batch_size,
             stream_saver=stream_saver,
+            max_recipes=max_recipes,
         )
 
         found_count = stream_saver.seen_count if stream_saver else len(recipes)

@@ -52,6 +52,23 @@ It opens the four main pages in Chromium at desktop and mobile viewport sizes,
 captures `pageerror`/`console.error`, and performs a few safe UI interactions. It
 uses Python Playwright from the web image; no Node toolchain is required.
 
+## Cache And Recipe Scraper Smoke
+
+After touching cache refresh logic or recipe scraper fetch limits, also verify
+the live app behavior:
+
+- Run syntax/import checks for the touched modules, for example
+  `PYTHONPYCACHEPREFIX=/tmp/deal-meals-pycache python3 -m py_compile ...`.
+- Run `git diff --check`.
+- For recipe-cache delta changes, perform a small incremental recipe scrape and
+  inspect the web logs for `CACHE_RECIPE_DELTA_SUMMARY`. A clean small scrape
+  should apply recipe-delta; stale indexes, large full imports, missing changed
+  IDs, or failed verification should fall back to a full rebuild.
+- For configured recipe counts, remember that the number is a target for
+  successfully parsed recipes. The scraper may try a bounded hidden buffer of
+  extra URLs, while UI progress should show found recipes against the configured
+  target rather than raw URL attempts.
+
 ## Local Workbench Tests
 
 Files matching `app/tests/test_*.py` are intentionally ignored. Keep using them

@@ -58,9 +58,9 @@ sys.path.insert(0, app_dir)
 from database import get_db_session
 from models import FoundRecipe
 from scrapers.recipes._common import (
-    _is_type, RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, save_recipes_to_database,
-    StreamingRecipeSaver, unescape_html
+    _is_type, RecipeScrapeResult, incremental_attempt_limit,
+    make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
+    save_recipes_to_database, StreamingRecipeSaver, unescape_html
 )
 
 # GUI Metadata
@@ -604,11 +604,15 @@ class ZetaScraper:
 
         existing_urls = await self.get_existing_urls()
         urls_to_scrape = [url for url in all_urls if url not in existing_urls]
-        if max_recipes and len(urls_to_scrape) > max_recipes:
-            urls_to_scrape = urls_to_scrape[:max_recipes]
+        attempt_limit = incremental_attempt_limit(
+            max_recipes=max_recipes,
+            available_count=len(urls_to_scrape),
+            default_limit=len(urls_to_scrape),
+        )
+        urls_to_scrape = urls_to_scrape[:attempt_limit]
 
         logger.info(f"Existing in DB: {len(existing_urls)}")
-        logger.info(f"New to scrape: {len(urls_to_scrape)}")
+        logger.info(f"New to scrape: {len(urls_to_scrape)} (target {max_recipes or 'auto'})")
         return urls_to_scrape
 
     async def scrape_and_save(
@@ -657,6 +661,8 @@ class ZetaScraper:
                 if self._cancel_flag:
                     logger.info("Zeta scrape cancelled")
                     break
+                if recipe_target_reached(max_recipes=max_recipes, stream_saver=saver):
+                    break
 
                 batch = urls_to_scrape[i:i + SCRAPE_BATCH_SIZE]
                 tasks = [
@@ -667,6 +673,8 @@ class ZetaScraper:
 
                 for recipe in results:
                     await saver.add(recipe)
+                    if recipe_target_reached(max_recipes=max_recipes, stream_saver=saver):
+                        break
 
                 progress = min(i + SCRAPE_BATCH_SIZE, total)
                 logger.info(f"   Progress: {progress}/{total} ({saver.seen_count} successful)")
@@ -737,6 +745,8 @@ class ZetaScraper:
             total = len(urls_to_scrape)
 
             for i in range(0, total, batch_size):
+                if recipe_target_reached(max_recipes=max_recipes, recipes=recipes):
+                    break
                 batch = urls_to_scrape[i:i + batch_size]
 
                 tasks = [
@@ -748,6 +758,8 @@ class ZetaScraper:
 
                 batch_recipes = [r for r in results if r]
                 recipes.extend(batch_recipes)
+                if recipe_target_reached(max_recipes=max_recipes, recipes=recipes):
+                    recipes = recipes[:max_recipes]
 
                 progress = min(i + batch_size, total)
                 logger.info(f"   Progress: {progress}/{total} ({len(recipes)} successful)")

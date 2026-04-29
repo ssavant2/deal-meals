@@ -56,9 +56,9 @@ sys.path.insert(0, app_dir)
 
 from database import get_db_session
 from scrapers.recipes._common import (
-    extract_json_ld_recipe, parse_iso8601_duration,
-    RecipeScrapeResult, make_recipe_scrape_result, StreamingRecipeSaver,
-    validate_image_url, unescape_html
+    extract_json_ld_recipe, incremental_attempt_limit, parse_iso8601_duration,
+    RecipeScrapeResult, make_recipe_scrape_result, recipe_target_reached,
+    StreamingRecipeSaver, validate_image_url, unescape_html
 )
 
 # GUI Metadata
@@ -554,8 +554,15 @@ class MyRecipesScraper:
                 reason="no_pending_urls",
             )
 
-        if is_test:
-            urls_to_scrape = urls_to_scrape[:max_recipes or 5]
+        if max_recipes:
+            attempt_limit = incremental_attempt_limit(
+                max_recipes=max_recipes,
+                available_count=len(urls_to_scrape),
+                default_limit=5 if is_test else len(urls_to_scrape),
+            )
+            urls_to_scrape = urls_to_scrape[:attempt_limit]
+        elif is_test:
+            urls_to_scrape = urls_to_scrape[:5]
 
         self._progress = {"total": len(urls_to_scrape), "current": 0, "success": 0}
         await self._send_progress("Starting recipe fetch...")
@@ -601,6 +608,13 @@ class MyRecipesScraper:
                     # Update URL status immediately (don't wait for save)
                     if not is_test:
                         self._update_url_status(url, "ok", label=recipe["name"])
+                    if recipe_target_reached(
+                        max_recipes=max_recipes,
+                        recipes=recipes,
+                        stream_saver=stream_saver,
+                    ):
+                        await self._send_progress()
+                        break
                 elif not is_test:
                     self._update_url_status(url, "no_recipe", error="No JSON-LD Recipe found")
 

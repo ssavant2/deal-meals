@@ -40,6 +40,7 @@ from .compiled_recipes import (
     load_compiled_recipe_runtime_cache,
     prepare_recipe_match_runtime_data,
     refresh_compiled_recipe_match_data,
+    refresh_compiled_recipe_match_data_for_recipe_ids,
     resolve_recipe_match_runtime_data,
     serialize_prepared_recipe_match_runtime_data,
 )
@@ -77,6 +78,7 @@ from .term_indexes import (
     load_compiled_recipe_term_postings,
     refresh_compiled_offer_term_index,
     refresh_compiled_recipe_term_index,
+    refresh_compiled_recipe_term_index_for_recipe_ids,
 )
 from .versioning import (
     MATCHER_HASH_FILES,
@@ -340,7 +342,9 @@ __all__ = [
     'refresh_compiled_offer_match_data',
     'refresh_compiled_offer_term_index',
     'refresh_compiled_recipe_match_data',
+    'refresh_compiled_recipe_match_data_for_recipe_ids',
     'refresh_compiled_recipe_term_index',
+    'refresh_compiled_recipe_term_index_for_recipe_ids',
     'resolve_recipe_match_runtime_data',
     'rewrite_buljong_eller_fond',
     'serialize_prepared_recipe_match_runtime_data',

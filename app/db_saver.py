@@ -231,7 +231,7 @@ async def _trigger_cache_refresh_async(store_name: str = None):
 
     Called after offers are saved to pre-compute matches for fast page loads.
     Uses the global cache_manager instance via compute_cache_async() so
-    the in-memory cache is updated for the web server.
+    the DB-backed cache is refreshed for the web server.
 
     If store_name is provided, marks this as a background rebuild so home.html
     can notify the user via SSE.

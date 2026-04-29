@@ -1125,9 +1125,27 @@ class CacheManager:
                     (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None))  # noqa: E712
                 ).count()
 
-            # Get recipes (using FTS if available)
-            # Always exclude hidden recipes
-            if self.matcher.USE_FTS and all_keywords:
+            # Get recipes. Explicit recipe IDs use a direct DB path; full
+            # rebuilds keep the broad FTS pre-filter.
+            # Always exclude hidden recipes.
+            if requested_recipe_ids is not None:
+                if requested_recipe_ids:
+                    with get_db_session() as db:
+                        base_filter = (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None))  # noqa: E712
+                        filters = [
+                            FoundRecipe.id.in_(list(requested_recipe_ids)),
+                            base_filter,
+                        ]
+                        if enabled_sources:
+                            filters.append(FoundRecipe.source_name.in_(enabled_sources))
+                        all_recipes = db.query(FoundRecipe).filter(*filters).all()
+                else:
+                    all_recipes = []
+                logger.info(
+                    "  Direct recipe subset: "
+                    f"{len(all_recipes)}/{len(requested_recipe_ids)} requested ids selected"
+                )
+            elif self.matcher.USE_FTS and all_keywords:
                 all_recipes = self.matcher._get_recipes_by_fts(list(all_keywords), enabled_sources)
                 logger.info(f"  FTS pre-filter: {len(all_recipes)}/{total_in_db} recipes match offer keywords")
             else:
@@ -1141,16 +1159,6 @@ class CacheManager:
                     else:
                         all_recipes = db.query(FoundRecipe).filter(base_filter).all()
                 logger.info(f"  Loaded {len(all_recipes)} recipes (no FTS)")
-
-            if requested_recipe_ids is not None:
-                all_recipes = [
-                    recipe for recipe in all_recipes
-                    if str(recipe.id) in requested_recipe_ids
-                ]
-                logger.info(
-                    "  Applied recipe subset filter: "
-                    f"{len(all_recipes)}/{len(requested_recipe_ids)} requested ids selected"
-                )
 
             logger.info(f"  Processing {len(all_recipes)} candidate recipes...")
 

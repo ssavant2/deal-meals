@@ -58,8 +58,9 @@ sys.path.insert(0, app_dir)
 from database import get_db_session
 from models import FoundRecipe
 from scrapers.recipes._common import (
-    _is_type, RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, StreamingRecipeSaver
+    _is_type, RecipeScrapeResult, incremental_attempt_limit,
+    make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
+    StreamingRecipeSaver
 )
 
 # GUI Metadata
@@ -359,6 +360,7 @@ class MathemScraper:
         urls: List[str],
         max_concurrent: int = 5,
         stream_saver: Optional[StreamingRecipeSaver] = None,
+        max_recipes: Optional[int] = None,
     ) -> List[Dict]:
         """
         Scrape multiple recipes concurrently with httpx.
@@ -385,6 +387,12 @@ class MathemScraper:
             # Process in batches for progress logging
             batch_size = 10
             for i in range(0, len(urls), batch_size):
+                if recipe_target_reached(
+                    max_recipes=max_recipes,
+                    recipes=recipes,
+                    stream_saver=stream_saver,
+                ):
+                    break
                 batch = urls[i:i + batch_size]
                 batch_num = i // batch_size + 1
                 total_batches = (len(urls) + batch_size - 1) // batch_size
@@ -400,6 +408,12 @@ class MathemScraper:
                             await stream_saver.add(recipe)
                         else:
                             recipes.append(recipe)
+                        if recipe_target_reached(
+                            max_recipes=max_recipes,
+                            recipes=recipes,
+                            stream_saver=stream_saver,
+                        ):
+                            break
 
                 # Report progress for GUI
                 progress = min(i + batch_size, len(urls))
@@ -465,10 +479,17 @@ class MathemScraper:
             existing = await self.get_existing_recipes()
             urls_to_scrape = [url for url in all_urls if url not in existing]
 
-            if max_recipes and len(urls_to_scrape) > max_recipes:
-                urls_to_scrape = urls_to_scrape[:max_recipes]
+            attempt_limit = incremental_attempt_limit(
+                max_recipes=max_recipes,
+                available_count=len(urls_to_scrape),
+                default_limit=len(urls_to_scrape),
+            )
+            urls_to_scrape = urls_to_scrape[:attempt_limit]
 
-            logger.info(f"INCREMENTAL MODE: {len(urls_to_scrape)} new recipes to scrape")
+            logger.info(
+                f"INCREMENTAL MODE: {len(urls_to_scrape)} new recipes to scrape "
+                f"(target {max_recipes or 'auto'})"
+            )
 
             if not urls_to_scrape:
                 logger.info("   No new recipes found!")
@@ -482,6 +503,7 @@ class MathemScraper:
         recipes = await self.scrape_recipes_concurrent(
             urls_to_scrape,
             stream_saver=stream_saver,
+            max_recipes=max_recipes,
         )
         found_count = stream_saver.seen_count if stream_saver else len(recipes)
         logger.info(f"\nScraped {found_count} recipes successfully")

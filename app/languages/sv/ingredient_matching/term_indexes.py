@@ -89,6 +89,21 @@ def _acquire_refresh_lock(db, lock_key: int) -> None:
     )
 
 
+def _dedupe_recipe_ids(*id_lists: list[str] | None) -> list[str]:
+    ids: list[str] = []
+    seen: set[str] = set()
+    for id_list in id_lists:
+        for value in id_list or []:
+            if value is None:
+                continue
+            str_value = str(value)
+            if str_value in seen:
+                continue
+            ids.append(str_value)
+            seen.add(str_value)
+    return ids
+
+
 def _replace_compiled_term_rows(db, *, table_name: str, model, rows: list[dict[str, Any]], lock_key: int) -> str:
     _acquire_refresh_lock(db, lock_key)
     replace_mode = "truncate"
@@ -468,6 +483,96 @@ def refresh_compiled_recipe_term_index() -> dict[str, Any]:
         "distinct_routing_terms": len(routing_term_types),
         "term_manifest_hash": term_manifest_hash,
         "replace_mode": replace_mode,
+    }
+
+
+def refresh_compiled_recipe_term_index_for_recipe_ids(
+    recipe_ids: list[str],
+    remove_recipe_ids: list[str] | None = None,
+) -> dict[str, Any]:
+    """Refresh recipe term-index rows for selected recipes."""
+    ensure_compiled_recipe_term_index_table()
+    ensure_compiled_recipe_match_table()
+
+    requested_ids = _dedupe_recipe_ids(recipe_ids)
+    remove_ids = _dedupe_recipe_ids(remove_recipe_ids)
+    affected_ids = _dedupe_recipe_ids(requested_ids, remove_ids)
+    if not affected_ids:
+        return {
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "indexed_recipes": 0,
+            "index_rows": 0,
+            "missing_recipe_ids": [],
+            "inactive_recipe_ids": [],
+        }
+
+    term_pairs, offer_term_stats = load_compiled_offer_term_manifest()
+    term_manifest_hash = offer_term_stats["term_manifest_hash"]
+    if not term_manifest_hash:
+        raise RuntimeError("compiled_offer_term_index is empty; refresh offer term index first")
+    routing_term_types = _select_routing_term_types(term_pairs)
+
+    with get_db_session() as db:
+        _acquire_refresh_lock(db, _COMPILED_RECIPE_TERM_REFRESH_LOCK)
+        recipes = db.query(FoundRecipe).filter(FoundRecipe.id.in_(affected_ids)).all()
+
+        found_ids = {str(recipe.id) for recipe in recipes}
+        missing_ids = [recipe_id for recipe_id in affected_ids if recipe_id not in found_ids]
+        active_recipes = [
+            recipe for recipe in recipes
+            if not bool(recipe.excluded)
+        ]
+        inactive_ids = [
+            str(recipe.id)
+            for recipe in recipes
+            if bool(recipe.excluded)
+        ]
+
+        payload_cache, _stats = load_compiled_recipe_payload_cache(active_recipes)
+        search_texts = build_recipe_search_text_map(
+            active_recipes,
+            compiled_recipe_payload_cache=payload_cache,
+        )
+
+        indexed_at = datetime.now(timezone.utc)
+        rows = []
+        for recipe in active_recipes:
+            recipe_id = str(recipe.id)
+            search_text = search_texts.get(recipe_id)
+            if not search_text:
+                continue
+            recipe_identity_key = build_recipe_identity_key(recipe)
+            for term, term_type in sorted(routing_term_types.items()):
+                if term in search_text:
+                    rows.append({
+                        "found_recipe_id": recipe.id,
+                        "recipe_identity_key": recipe_identity_key,
+                        "matcher_version": MATCHER_VERSION,
+                        "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+                        "term_manifest_hash": term_manifest_hash,
+                        "term": term,
+                        "term_type": term_type,
+                        "indexed_at": indexed_at,
+                    })
+
+        db.query(CompiledRecipeTermIndex).filter(
+            CompiledRecipeTermIndex.found_recipe_id.in_(affected_ids)
+        ).delete(synchronize_session=False)
+        if rows:
+            db.bulk_insert_mappings(CompiledRecipeTermIndex, rows)
+        db.commit()
+
+    return {
+        "matcher_version": MATCHER_VERSION,
+        "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+        "indexed_recipes": len(active_recipes),
+        "index_rows": len(rows),
+        "distinct_terms": len(term_pairs),
+        "distinct_routing_terms": len(routing_term_types),
+        "term_manifest_hash": term_manifest_hash,
+        "missing_recipe_ids": missing_ids,
+        "inactive_recipe_ids": inactive_ids,
     }
 
 

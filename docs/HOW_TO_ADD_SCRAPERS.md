@@ -479,7 +479,9 @@ SCRAPER_WARNING = "Large scraper — full mode takes ~30 minutes"
 from scrapers.recipes._common import (
     RecipeScrapeResult,
     StreamingRecipeSaver,
+    incremental_attempt_limit,
     make_recipe_scrape_result,
+    recipe_target_reached,
 )
 
 class YourSiteScraper:
@@ -524,8 +526,15 @@ class YourSiteScraper:
             existing = self._get_existing_urls()
             urls = [u for u in all_urls if u not in existing]
 
-        if max_recipes:
+        if force_all and max_recipes:
             urls = urls[:max_recipes]
+        elif not force_all:
+            attempt_limit = incremental_attempt_limit(
+                max_recipes=max_recipes,
+                available_count=len(urls),
+                default_limit=len(urls),
+            )
+            urls = urls[:attempt_limit]
 
         recipes = []
         processed = 0
@@ -541,6 +550,12 @@ class YourSiteScraper:
                 else:
                     recipes.append(recipe)
                 success += 1
+                if recipe_target_reached(
+                    max_recipes=max_recipes,
+                    recipes=recipes,
+                    stream_saver=stream_saver,
+                ):
+                    break
             # Send progress updates
             if self._progress_callback:
                 await self._progress_callback({
@@ -558,6 +573,13 @@ class YourSiteScraper:
             cancelled=self._cancel_flag,
         )
 ```
+
+`max_recipes` is a target for successfully parsed recipes, not a strict number
+of URL attempts in incremental mode. Many sites expose article/category/profile
+URLs in recipe-like sitemaps. Use `incremental_attempt_limit()` to give the
+scraper a bounded hidden buffer of extra URLs, and use `recipe_target_reached()`
+to stop once the target is actually reached. Full/test mode can still use
+`max_recipes` as a strict slice when that is the desired behavior.
 
 ### 2.5 Required Recipe Format
 
@@ -595,7 +617,7 @@ def save_to_database(recipes, clear_old=False):
     return save_recipes_to_database(recipes, DB_SOURCE_NAME, clear_old=clear_old)
 ```
 
-`recipes` may be either a plain `list[dict]` or a `RecipeScrapeResult`. The shared function handles deduplication, upsert (update existing / insert new), permanently excluded URLs, spell checking, per-recipe commits, and error handling. Returns `{"cleared": N, "created": N, "updated": N, "skipped": N, "errors": N, "spell_corrections": N}` plus scrape status metadata.
+`recipes` may be either a plain `list[dict]` or a `RecipeScrapeResult`. The shared function handles deduplication, upsert (update existing / insert new), permanently excluded URLs, spell checking, per-recipe commits, and error handling. Returns `{"cleared": N, "created": N, "updated": N, "skipped": N, "errors": N, "spell_corrections": N}` plus scrape status metadata and changed recipe IDs (`created_recipe_ids`, `updated_recipe_ids`, `changed_recipe_ids`, `removed_recipe_ids`) used by the recipe-cache delta path.
 
 When using `StreamingRecipeSaver`, do **not** call `save_to_database()` for each
 batch yourself. Add recipes to the saver and call `finish()` once after the
@@ -692,8 +714,11 @@ only after `finish()` succeeds. If a full scrape fails or is cancelled, old
 recipes are kept. `finish(cancelled=True)` drops unsaved pending recipes instead
 of flushing them.
 
-Cache rebuilds and automatic image downloads are triggered by the router after
+Cache refreshes and automatic image downloads are triggered by the router after
 the whole scraper (or run-all queue) completes, not after each streaming batch.
+Small incremental recipe changes usually use recipe-delta to patch
+`recipe_offer_cache`; run-all queues, large full imports, missing change IDs, or
+failed safety verification fall back to a full rebuild.
 
 ### 2.9 Progress Callbacks (Recommended)
 
@@ -735,6 +760,11 @@ class YourSiteScraper:
 - `total` (int) — total items to process
 - `success` (int) — number of successful recipes
 - `message` (str, optional) — status text
+
+For configured incremental recipe runs, the router displays progress using
+`success` against the user's configured recipe target, so internal URL-attempt
+buffers are not exposed in the UI. Still send `current`/`total` for logs,
+timeouts, and developer diagnostics.
 
 ### 2.10 Real Examples
 

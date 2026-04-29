@@ -66,8 +66,9 @@ sys.path.insert(0, app_dir)
 from database import get_db_session
 from models import FoundRecipe
 from scrapers.recipes._common import (
-    RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, split_serving_lists, StreamingRecipeSaver
+    RecipeScrapeResult, incremental_attempt_limit, make_recipe_scrape_result,
+    parse_iso8601_duration, recipe_target_reached, split_serving_lists,
+    StreamingRecipeSaver
 )
 
 # GUI Metadata
@@ -323,7 +324,7 @@ class CoopScraper:
 
         # Filter out existing unless force_all
         if force_all:
-            urls_to_scrape = shuffled_urls[:MAX_URLS]
+            urls_to_scrape = shuffled_urls[:max_recipes or MAX_URLS]
             logger.info(f"Force mode: scraping {len(urls_to_scrape)} URLs")
         else:
             existing_urls = self.get_existing_urls()
@@ -331,7 +332,11 @@ class CoopScraper:
             # Use higher limit until we reach target (~1000 recipes), then small batches
             filling_initial_target = len(existing_urls) < EXPECTED_RECIPE_COUNT * 0.9
             if max_recipes:
-                limit = max_recipes
+                limit = incremental_attempt_limit(
+                    max_recipes=max_recipes,
+                    available_count=len(new_urls),
+                    default_limit=MAX_INCREMENTAL,
+                )
             elif filling_initial_target:
                 limit = MAX_URLS
             else:
@@ -343,10 +348,6 @@ class CoopScraper:
                 logger.info(f"Incremental mode (filling): {len(urls_to_scrape)} URLs — DB has {len(existing_urls)}, target {EXPECTED_RECIPE_COUNT}")
             else:
                 logger.info(f"Incremental mode: {len(urls_to_scrape)} URLs (of {len(new_urls)} new, skipped {len(existing_urls)} existing)")
-
-        # Apply max_recipes limit
-        if max_recipes:
-            urls_to_scrape = urls_to_scrape[:max_recipes]
 
         if not urls_to_scrape:
             logger.info("No new recipes to scrape")
@@ -380,6 +381,13 @@ class CoopScraper:
                 for url in urls:
                     if self._cancel_flag:
                         break
+                    if recipe_target_reached(
+                        max_recipes=max_recipes,
+                        recipes=recipes,
+                        stream_saver=stream_saver,
+                    ):
+                        self._cancel_flag = True
+                        break
 
                     try:
                         recipe = await self.scrape_recipe_playwright(page, url)
@@ -408,10 +416,20 @@ class CoopScraper:
                         self._progress["current"] += 1
                         if recipe:
                             if stream_saver:
+                                before_seen = stream_saver.seen_count
                                 await stream_saver.add(recipe)
+                                saved_recipe = stream_saver.seen_count > before_seen
                             else:
                                 recipes.append(recipe)
-                            self._progress["success"] += 1
+                                saved_recipe = True
+                            if recipe_target_reached(
+                                max_recipes=max_recipes,
+                                recipes=recipes,
+                                stream_saver=stream_saver,
+                            ):
+                                self._cancel_flag = True
+                            if saved_recipe:
+                                self._progress["success"] += 1
 
                         await self._send_activity()
 

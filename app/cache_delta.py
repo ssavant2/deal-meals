@@ -9,9 +9,11 @@ from decimal import Decimal
 from hashlib import sha256
 import json
 import os
+from pathlib import Path
 import time
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import text
 
 try:
@@ -66,7 +68,9 @@ try:
         refresh_compiled_offer_match_data,
         refresh_compiled_offer_term_index,
         refresh_compiled_recipe_match_data,
+        refresh_compiled_recipe_match_data_for_recipe_ids,
         refresh_compiled_recipe_term_index,
+        refresh_compiled_recipe_term_index_for_recipe_ids,
     )
 except ModuleNotFoundError:
     from app.languages.matcher_runtime import (
@@ -89,7 +93,9 @@ except ModuleNotFoundError:
         refresh_compiled_offer_match_data,
         refresh_compiled_offer_term_index,
         refresh_compiled_recipe_match_data,
+        refresh_compiled_recipe_match_data_for_recipe_ids,
         refresh_compiled_recipe_term_index,
+        refresh_compiled_recipe_term_index_for_recipe_ids,
     )
 
 
@@ -376,6 +382,86 @@ def _materialize_delta_entries(
     return materialized
 
 
+def patch_recipe_offer_cache_entries(
+    patch_entries: list[dict[str, Any]],
+    changed_recipe_ids: list[str],
+    removed_recipe_ids: list[str] | None = None,
+) -> dict[str, Any]:
+    """Patch active recipe cache rows for selected recipe IDs."""
+    normalized_removed_ids = set(_dedupe_recipe_delta_ids(removed_recipe_ids))
+    normalized_changed_ids = [
+        recipe_id
+        for recipe_id in _dedupe_recipe_delta_ids(changed_recipe_ids)
+        if recipe_id not in normalized_removed_ids
+    ]
+    touched_recipe_ids = _dedupe_recipe_delta_ids(normalized_changed_ids, list(normalized_removed_ids))
+    patch_entry_map = _raw_entry_map_from_entries(patch_entries)
+    unexpected_patch_ids = set(patch_entry_map) - set(normalized_changed_ids)
+    if unexpected_patch_ids:
+        raise ValueError(
+            "Recipe cache patch contains entries outside changed_recipe_ids: "
+            f"{sorted(unexpected_patch_ids)[:10]}"
+        )
+
+    with get_db_session() as db:
+        deleted_count = 0
+        if touched_recipe_ids:
+            delete_result = db.execute(
+                text("""
+                    DELETE FROM recipe_offer_cache
+                    WHERE found_recipe_id = ANY(CAST(:recipe_ids AS uuid[]))
+                """),
+                {"recipe_ids": touched_recipe_ids},
+            )
+            deleted_count = delete_result.rowcount or 0
+
+        insert_sql = text("""
+            INSERT INTO recipe_offer_cache (
+                found_recipe_id,
+                recipe_category,
+                budget_score,
+                total_savings,
+                coverage_pct,
+                num_matches,
+                is_starred,
+                match_data,
+                computed_at
+            ) VALUES (
+                CAST(:found_recipe_id AS uuid),
+                :recipe_category,
+                :budget_score,
+                :total_savings,
+                :coverage_pct,
+                :num_matches,
+                :is_starred,
+                CAST(:match_data AS jsonb),
+                NOW()
+            )
+        """)
+        for entry in patch_entry_map.values():
+            db.execute(insert_sql, {
+                "found_recipe_id": entry["found_recipe_id"],
+                "recipe_category": entry["recipe_category"],
+                "budget_score": entry["budget_score"],
+                "total_savings": entry["total_savings"],
+                "coverage_pct": entry["coverage_pct"],
+                "num_matches": entry["num_matches"],
+                "is_starred": entry["is_starred"],
+                "match_data": json.dumps(entry["match_data"]),
+            })
+
+        total_matches = db.execute(text("SELECT COUNT(*) FROM recipe_offer_cache")).scalar() or 0
+        db.commit()
+
+    return {
+        "deleted_recipe_ids": touched_recipe_ids,
+        "deleted_count": deleted_count,
+        "inserted_recipe_ids": sorted(patch_entry_map),
+        "inserted_count": len(patch_entry_map),
+        "total_matches": total_matches,
+    }
+
+
 def _build_current_offer_term_postings(offers: list[Offer]) -> dict[str, set[str]]:
     postings: dict[str, set[str]] = defaultdict(set)
     for offer in offers:
@@ -538,6 +624,129 @@ def _update_cache_metadata(*, total_matches: int, time_ms: int, total_recipes: i
         db.commit()
 
 
+def _set_cache_metadata_status(status: str, error_message: str | None = None) -> None:
+    with get_db_session() as db:
+        db.execute(text("""
+            INSERT INTO cache_metadata (cache_name, status, error_message)
+            VALUES ('recipe_offer_matches', :status, :error_message)
+            ON CONFLICT (cache_name) DO UPDATE SET
+                status = :status,
+                error_message = :error_message
+        """), {"status": status, "error_message": error_message})
+        db.commit()
+
+
+def _active_recipe_count_from_db() -> int:
+    with get_db_session() as db:
+        return db.execute(text("""
+            SELECT COUNT(*)
+            FROM found_recipes
+            WHERE excluded = FALSE OR excluded IS NULL
+        """)).scalar() or 0
+
+
+def _active_cache_state() -> dict[str, Any]:
+    with get_db_session() as db:
+        metadata = db.execute(text("""
+            SELECT status, total_matches, total_recipes
+            FROM cache_metadata
+            WHERE cache_name = 'recipe_offer_matches'
+        """)).mappings().fetchone()
+        cache_rows = db.execute(text("SELECT COUNT(*) FROM recipe_offer_cache")).scalar() or 0
+        offer_rows = db.execute(text("SELECT COUNT(*) FROM offers")).scalar() or 0
+    return {
+        "status": metadata["status"] if metadata else None,
+        "metadata_total_matches": metadata["total_matches"] if metadata else None,
+        "metadata_total_recipes": metadata["total_recipes"] if metadata else None,
+        "cache_rows": cache_rows,
+        "offer_rows": offer_rows,
+    }
+
+
+def _recipe_delta_total_recipes(full_preview: dict[str, Any] | None, cache_state: dict[str, Any]) -> int:
+    if full_preview is not None and full_preview.get("total_recipes") is not None:
+        return int(full_preview["total_recipes"])
+    if cache_state.get("metadata_total_recipes") is not None:
+        return int(cache_state["metadata_total_recipes"])
+    return _active_recipe_count_from_db()
+
+
+def _refresh_unmatched_offer_count_from_db(cache_manager) -> dict[str, int]:
+    with get_db_session() as db:
+        total_offers = db.execute(text("SELECT COUNT(*) FROM offers")).scalar() or 0
+        matched_offer_count = db.execute(text("""
+            SELECT COUNT(DISTINCT offer_key)
+            FROM (
+                SELECT COALESCE(mo->>'offer_identity_key', mo->>'id') AS offer_key
+                FROM recipe_offer_cache c,
+                     jsonb_array_elements(c.match_data->'matched_offers') mo
+            ) sub
+            WHERE offer_key IS NOT NULL
+        """)).scalar() or 0
+    cache_manager._total_offers = total_offers
+    cache_manager._unmatched_count = max(0, total_offers - matched_offer_count)
+    return {
+        "total_offers": total_offers,
+        "matched_offer_ids": matched_offer_count,
+        "unmatched_offer_ids": cache_manager._unmatched_count,
+    }
+
+
+def _dedupe_recipe_delta_ids(*id_lists: list[str] | None) -> list[str]:
+    ids: list[str] = []
+    seen: set[str] = set()
+    for id_list in id_lists:
+        for value in id_list or []:
+            if value is None:
+                continue
+            str_value = str(value)
+            if str_value in seen:
+                continue
+            ids.append(str_value)
+            seen.add(str_value)
+    return ids
+
+
+def _recipe_delta_probation_history_path() -> Path | None:
+    configured = settings.cache_recipe_delta_probation_history_file
+    if configured:
+        return Path(configured)
+    if Path("/app").exists():
+        return Path("/app/data/recipe_delta_probation_history.jsonl")
+    return Path(__file__).resolve().parents[1] / "data" / "recipe_delta_probation_history.jsonl"
+
+
+def _resolve_recipe_delta_verification_policy(*, verify_full_preview: bool) -> dict[str, Any]:
+    history_path = _recipe_delta_probation_history_path()
+    probation_status = get_delta_probation_gate_status(
+        history_path=history_path,
+        min_ready_streak=settings.cache_recipe_delta_probation_min_ready_streak,
+        min_version_ready_runs=settings.cache_recipe_delta_probation_min_version_ready_runs,
+    )
+    effective_verify_full_preview = verify_full_preview
+    verification_mode = "disabled"
+    if verify_full_preview:
+        verification_mode = "full_preview"
+        if settings.cache_recipe_delta_skip_full_preview_after_probation:
+            verification_mode = "full_preview_pending_probation"
+            if probation_status["ready"]:
+                effective_verify_full_preview = False
+                verification_mode = "probation_skip"
+    return {
+        "requested_verify_full_preview": verify_full_preview,
+        "effective_verify_full_preview": effective_verify_full_preview,
+        "verification_mode": verification_mode,
+        "probation_status": probation_status,
+        "probation_history_path": history_path,
+    }
+
+
+def _emit_recipe_delta_summary(summary: dict[str, Any], *, level: str = "info") -> None:
+    payload = json.dumps(summary, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    log_fn = logger.error if level == "error" else logger.warning if level == "warning" else logger.info
+    log_fn(f"CACHE_RECIPE_DELTA_SUMMARY {payload}")
+
+
 def _set_runtime_rebuild_profile(cache_manager) -> None:
     configured = cache_manager.get_rebuild_profile()
     cache_manager._last_rebuild_profile = {
@@ -547,6 +756,349 @@ def _set_runtime_rebuild_profile(cache_manager) -> None:
         "recipe_data_source": "compiled_payload",
         "candidate_data_source": "term_index",
     }
+
+
+def _recipe_delta_fallback_result(
+    *,
+    changed_recipe_ids: list[str],
+    removed_recipe_ids: list[str],
+    source: str | None,
+    fallback_reason: str,
+    started_at: float,
+    error: Exception | str | None = None,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+    result = {
+        "success": False,
+        "applied": False,
+        "ready_to_apply": False,
+        "fallback_reason": fallback_reason,
+        "error": str(error) if error is not None else None,
+        "source": source,
+        "changed_recipe_count": len(changed_recipe_ids),
+        "removed_recipe_count": len(removed_recipe_ids),
+        "patch_recipe_count": len(changed_recipe_ids),
+        "actual_changed_recipes": None,
+        "planner_covers_preview_diff": None,
+        "materialized_patch_matches_full_preview": None,
+        "cached": None,
+        "total_recipes": None,
+        "time_ms": elapsed_ms,
+        "effective_rebuild_mode": "compiled",
+        "matcher_version": MATCHER_VERSION,
+        "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+        "offer_compiler_version": OFFER_COMPILER_VERSION,
+    }
+    if extra:
+        result.update(extra)
+    return result
+
+
+def _apply_recipe_delta_unlocked(
+    *,
+    changed_recipe_ids: list[str],
+    removed_recipe_ids: list[str] | None = None,
+    source: str | None = None,
+    apply: bool = True,
+    verify_full_preview: bool = True,
+) -> dict[str, Any]:
+    """Apply a recipe-driven delta patch to the active cache table."""
+    try:
+        from cache_manager import cache_manager
+    except ModuleNotFoundError:
+        from app.cache_manager import cache_manager
+
+    started_at = time.perf_counter()
+    removed_ids = _dedupe_recipe_delta_ids(removed_recipe_ids)
+    removed_set = set(removed_ids)
+    changed_ids = [
+        recipe_id
+        for recipe_id in _dedupe_recipe_delta_ids(changed_recipe_ids)
+        if recipe_id not in removed_set
+    ]
+    status_was_set = False
+
+    verification_policy = _resolve_recipe_delta_verification_policy(
+        verify_full_preview=verify_full_preview,
+    )
+    delta_verification_max_workers = _delta_verification_max_workers()
+
+    def _fallback(
+        reason: str,
+        *,
+        error: Exception | str | None = None,
+        extra: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if status_was_set:
+            try:
+                _set_cache_metadata_status("ready")
+            except Exception as status_error:
+                logger.warning(f"Could not restore cache metadata after recipe delta fallback: {status_error}")
+        result = _recipe_delta_fallback_result(
+            changed_recipe_ids=changed_ids,
+            removed_recipe_ids=removed_ids,
+            source=source,
+            fallback_reason=reason,
+            started_at=started_at,
+            error=error,
+            extra={
+                "verify_full_preview": verification_policy["requested_verify_full_preview"],
+                "effective_verify_full_preview": verification_policy["effective_verify_full_preview"],
+                "verification_mode": verification_policy["verification_mode"],
+                "delta_verification_max_workers": delta_verification_max_workers,
+                "probation_ready": verification_policy["probation_status"]["ready"],
+                "probation_history_file": verification_policy["probation_status"]["history_file"],
+                "probation_reasons": verification_policy["probation_status"]["reasons"],
+                "probation_summary": verification_policy["probation_status"]["summary"],
+                **(extra or {}),
+            },
+        )
+        _emit_recipe_delta_summary(result, level="warning")
+        return result
+
+    cache_state = _active_cache_state()
+    if cache_state["status"] != "ready":
+        return _fallback("cache_not_ready", extra={"cache_state": cache_state})
+    if cache_state["cache_rows"] == 0 and cache_state["offer_rows"] > 0:
+        return _fallback("active_cache_empty", extra={"cache_state": cache_state})
+
+    if apply:
+        _set_cache_metadata_status("computing")
+        status_was_set = True
+
+    ir_stats = None
+    term_stats = None
+    full_preview = None
+    patch_preview = None
+    full_preview_snapshot: dict[str, str] | None = None
+    actual_changed_recipe_ids: list[str] = []
+    materialized_diff = {
+        "parity_ok": True,
+        "mismatched_count": 0,
+        "mismatched_sample": [],
+    }
+
+    try:
+        baseline_entry_map: dict[str, dict[str, Any]] = {}
+        baseline_snapshot: dict[str, str] = {}
+        if verification_policy["effective_verify_full_preview"]:
+            baseline_entries_list = _raw_entries_from_table(ACTIVE_CACHE_TABLE)
+            baseline_entry_map = _raw_entry_map_from_entries(baseline_entries_list)
+            baseline_snapshot = _fingerprint_snapshot_from_entries(baseline_entries_list)
+            del baseline_entries_list
+
+        try:
+            ir_stats = refresh_compiled_recipe_match_data_for_recipe_ids(
+                changed_ids,
+                remove_recipe_ids=removed_ids,
+            )
+        except Exception as exc:
+            return _fallback(
+                "recipe_ir_refresh_failed",
+                error=exc,
+                extra={
+                    "compiled_recipe_refresh": ir_stats,
+                    "recipe_term_refresh": term_stats,
+                },
+            )
+        try:
+            term_stats = refresh_compiled_recipe_term_index_for_recipe_ids(
+                changed_ids,
+                remove_recipe_ids=removed_ids,
+            )
+        except Exception as exc:
+            return _fallback(
+                "recipe_term_index_refresh_failed",
+                error=exc,
+                extra={
+                    "compiled_recipe_refresh": ir_stats,
+                    "recipe_term_refresh": term_stats,
+                },
+            )
+
+        if verification_policy["effective_verify_full_preview"]:
+            try:
+                full_preview = cache_manager.refresh_cache(
+                    persist=False,
+                    return_entries=True,
+                    run_kind="recipe_delta_full_preview",
+                    input_scope="live",
+                    max_workers=delta_verification_max_workers,
+                )
+                full_preview_entries = full_preview.pop("entries")
+                full_preview_snapshot = _fingerprint_snapshot_from_entries(full_preview_entries)
+                del full_preview_entries
+            except Exception as exc:
+                return _fallback(
+                    "recipe_delta_full_preview_failed",
+                    error=exc,
+                    extra={
+                        "compiled_recipe_refresh": ir_stats,
+                        "recipe_term_refresh": term_stats,
+                    },
+                )
+
+        patch_entries: dict[str, dict[str, Any]]
+        if changed_ids:
+            try:
+                patch_preview = cache_manager.refresh_cache(
+                    persist=False,
+                    return_entries=True,
+                    recipe_ids=changed_ids,
+                    run_kind="recipe_delta_patch_preview",
+                    input_scope="live",
+                    max_workers=delta_verification_max_workers,
+                )
+                patch_preview_entries = patch_preview.pop("entries")
+                patch_entries = _raw_entry_map_from_entries(patch_preview_entries)
+                del patch_preview_entries
+            except Exception as exc:
+                return _fallback(
+                    "recipe_delta_patch_preview_failed",
+                    error=exc,
+                    extra={
+                        "compiled_recipe_refresh": ir_stats,
+                        "recipe_term_refresh": term_stats,
+                        "full_preview_time_ms": full_preview["time_ms"] if full_preview else None,
+                    },
+                )
+        else:
+            patch_preview = {
+                "time_ms": 0,
+                "total_recipes": 0,
+                "cached": 0,
+                "requested_recipe_count": 0,
+                "selected_recipe_count": 0,
+            }
+            patch_entries = {}
+
+        scope_covers_preview_diff = True
+        materialized_matches_full_preview = True
+        if full_preview_snapshot is not None:
+            materialized_entries = _materialize_delta_entries(
+                baseline_entry_map,
+                patch_entries,
+                patch_recipe_ids=changed_ids,
+                remove_recipe_ids=removed_ids,
+            )
+            materialized_snapshot = _fingerprint_snapshot_from_entries(
+                list(materialized_entries.values())
+            )
+            del materialized_entries
+            materialized_diff = _compare_snapshots(materialized_snapshot, full_preview_snapshot)
+            actual_changed_recipe_ids = _compute_actual_changed_recipe_ids(
+                baseline_snapshot,
+                full_preview_snapshot,
+            )
+            scope_covers_preview_diff = set(actual_changed_recipe_ids).issubset(
+                set(changed_ids) | set(removed_ids)
+            )
+            materialized_matches_full_preview = materialized_diff["parity_ok"]
+
+        ready_to_apply = scope_covers_preview_diff and materialized_matches_full_preview
+        fallback_reason = None
+        if not scope_covers_preview_diff:
+            fallback_reason = "recipe_delta_scope_missed_preview_diff"
+        elif not materialized_matches_full_preview:
+            fallback_reason = "materialized_patch_mismatch"
+
+        patch_result = None
+        unmatched_offer_counts = None
+        applied = False
+        if apply and ready_to_apply:
+            try:
+                patch_result = patch_recipe_offer_cache_entries(
+                    list(patch_entries.values()),
+                    changed_ids,
+                    removed_recipe_ids=removed_ids,
+                )
+                unmatched_offer_counts = _refresh_unmatched_offer_count_from_db(cache_manager)
+                _set_runtime_rebuild_profile(cache_manager)
+                elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+                _update_cache_metadata(
+                    total_matches=patch_result["total_matches"],
+                    total_recipes=_recipe_delta_total_recipes(full_preview, cache_state),
+                    time_ms=elapsed_ms,
+                )
+                status_was_set = False
+                applied = True
+            except Exception as exc:
+                return _fallback(
+                    "recipe_cache_patch_failed",
+                    error=exc,
+                    extra={
+                        "compiled_recipe_refresh": ir_stats,
+                        "recipe_term_refresh": term_stats,
+                        "full_preview_time_ms": full_preview["time_ms"] if full_preview else None,
+                        "patch_preview_time_ms": patch_preview["time_ms"] if patch_preview else None,
+                    },
+                )
+        elif apply:
+            _set_cache_metadata_status("ready")
+            status_was_set = False
+
+        elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+        result = {
+            "success": ready_to_apply,
+            "applied": applied,
+            "ready_to_apply": ready_to_apply,
+            "fallback_reason": fallback_reason,
+            "source": source,
+            "changed_recipe_count": len(changed_ids),
+            "removed_recipe_count": len(removed_ids),
+            "changed_recipe_ids": changed_ids,
+            "removed_recipe_ids": removed_ids,
+            "verify_full_preview": verification_policy["requested_verify_full_preview"],
+            "effective_verify_full_preview": verification_policy["effective_verify_full_preview"],
+            "verification_mode": verification_policy["verification_mode"],
+            "delta_verification_max_workers": delta_verification_max_workers,
+            "probation_ready": verification_policy["probation_status"]["ready"],
+            "probation_history_file": verification_policy["probation_status"]["history_file"],
+            "probation_reasons": verification_policy["probation_status"]["reasons"],
+            "probation_summary": verification_policy["probation_status"]["summary"],
+            "compiled_recipe_refresh": ir_stats,
+            "recipe_term_refresh": term_stats,
+            "patch_result": patch_result,
+            "unmatched_offer_counts": unmatched_offer_counts,
+            "patch_recipe_count": len(changed_ids),
+            "patch_preview_match_count": len(patch_entries),
+            "actual_changed_recipes": len(actual_changed_recipe_ids),
+            "actual_changed_recipe_ids_sample": actual_changed_recipe_ids[:10],
+            "planner_covers_preview_diff": scope_covers_preview_diff,
+            "materialized_patch_matches_full_preview": materialized_matches_full_preview,
+            "materialized_mismatched_count": materialized_diff.get("mismatched_count", 0),
+            "materialized_mismatched_sample": materialized_diff.get("mismatched_sample", []),
+            "full_preview_time_ms": full_preview["time_ms"] if full_preview is not None else None,
+            "patch_preview_time_ms": patch_preview["time_ms"] if patch_preview is not None else None,
+            "cached": (
+                patch_result["total_matches"]
+                if patch_result
+                else cache_state["cache_rows"]
+            ),
+            "total_recipes": _recipe_delta_total_recipes(full_preview, cache_state),
+            "time_ms": elapsed_ms,
+            "effective_rebuild_mode": "delta" if applied else "compiled",
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "offer_compiler_version": OFFER_COMPILER_VERSION,
+            "offer_data_source": "compiled",
+            "recipe_data_source": "compiled_payload",
+            "candidate_data_source": "term_index",
+        }
+        _emit_recipe_delta_summary(result, level="info" if ready_to_apply else "warning")
+        return result
+    except Exception as exc:
+        return _fallback(
+            "recipe_delta_unexpected_error",
+            error=exc,
+            extra={
+                "compiled_recipe_refresh": ir_stats,
+                "recipe_term_refresh": term_stats,
+                "full_preview_time_ms": full_preview["time_ms"] if full_preview else None,
+                "patch_preview_time_ms": patch_preview["time_ms"] if patch_preview else None,
+            },
+        )
 
 
 def _resolve_delta_verification_policy(*, verify_full_preview: bool) -> dict[str, Any]:
@@ -867,4 +1419,72 @@ def apply_verified_offer_delta(
             apply=apply,
             verify_full_preview=verify_full_preview,
         ),
+    )
+
+
+def apply_recipe_delta(
+    *,
+    changed_recipe_ids: list[str] | None = None,
+    removed_recipe_ids: list[str] | None = None,
+    source: str | None = None,
+    apply: bool = True,
+    verify_full_preview: bool | None = None,
+    skip_if_busy: bool = True,
+) -> dict[str, Any]:
+    """Apply recipe delta through the shared cache operation lock."""
+    started_at = time.perf_counter()
+    removed_ids = _dedupe_recipe_delta_ids(removed_recipe_ids)
+    removed_set = set(removed_ids)
+    changed_ids = [
+        recipe_id
+        for recipe_id in _dedupe_recipe_delta_ids(changed_recipe_ids)
+        if recipe_id not in removed_set
+    ]
+
+    if not changed_ids and not removed_ids:
+        return {
+            "success": True,
+            "applied": False,
+            "ready_to_apply": True,
+            "noop": True,
+            "fallback_reason": None,
+            "source": source,
+            "changed_recipe_count": 0,
+            "removed_recipe_count": 0,
+            "patch_recipe_count": 0,
+            "time_ms": int((time.perf_counter() - started_at) * 1000),
+            "effective_rebuild_mode": "delta",
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "offer_compiler_version": OFFER_COMPILER_VERSION,
+        }
+
+    if not settings.cache_recipe_delta_enabled:
+        result = _recipe_delta_fallback_result(
+            changed_recipe_ids=changed_ids,
+            removed_recipe_ids=removed_ids,
+            source=source,
+            fallback_reason="recipe_delta_disabled",
+            started_at=started_at,
+        )
+        _emit_recipe_delta_summary(result, level="warning")
+        return result
+
+    from cache_manager import run_cache_operation
+
+    effective_verify_full_preview = (
+        settings.cache_recipe_delta_verify_full_preview
+        if verify_full_preview is None
+        else verify_full_preview
+    )
+    return run_cache_operation(
+        "recipe_delta",
+        lambda: _apply_recipe_delta_unlocked(
+            changed_recipe_ids=changed_ids,
+            removed_recipe_ids=removed_ids,
+            source=source,
+            apply=apply,
+            verify_full_preview=effective_verify_full_preview,
+        ),
+        skip_if_busy=skip_if_busy,
     )

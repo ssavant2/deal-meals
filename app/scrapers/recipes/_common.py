@@ -20,6 +20,10 @@ from sqlalchemy.exc import IntegrityError
 from loguru import logger
 
 
+DEFAULT_INCREMENTAL_ATTEMPT_MULTIPLIER = 5
+DEFAULT_INCREMENTAL_ATTEMPT_HARD_CAP = 300
+
+
 @dataclass
 class RecipeScrapeResult:
     """
@@ -175,11 +179,54 @@ def make_recipe_scrape_result(
         return RecipeScrapeResult.cancelled(reason=reason, diagnostics=diagnostics)
     if failed:
         return RecipeScrapeResult.failed(reason=reason, diagnostics=diagnostics)
+    if max_recipes and recipes and len(recipes) > max_recipes:
+        recipes = recipes[:max_recipes]
     if recipes:
         return RecipeScrapeResult.success(recipes, reason=reason, diagnostics=diagnostics)
     if reason in {"no_new_recipes", "no_pending_urls"}:
         return RecipeScrapeResult.no_new_recipes(reason=reason, diagnostics=diagnostics)
     return RecipeScrapeResult.success_empty(reason=reason, diagnostics=diagnostics)
+
+
+def incremental_attempt_limit(
+    *,
+    max_recipes: Optional[int],
+    available_count: int,
+    default_limit: Optional[int] = None,
+    multiplier: int = DEFAULT_INCREMENTAL_ATTEMPT_MULTIPLIER,
+    hard_cap: int = DEFAULT_INCREMENTAL_ATTEMPT_HARD_CAP,
+) -> int:
+    """Return how many candidate URLs to try for an incremental target.
+
+    ``max_recipes`` is a target for usable recipes, not a strict URL-attempt
+    limit. Some sites expose articles/profiles in recipe-like sitemaps, so a
+    small hidden buffer keeps the UI target intuitive without surfacing noisy
+    attempt counts. The absolute cap prevents pathological runs when a site's
+    sitemap has a long block of recipe-like URLs that never produce recipes.
+    """
+    available_count = max(0, int(available_count or 0))
+    if max_recipes:
+        target = max(1, int(max_recipes))
+        buffered_limit = max(target, target * max(1, multiplier))
+        effective_cap = max(target, int(hard_cap or 0))
+        return min(available_count, buffered_limit, effective_cap)
+    if default_limit is None:
+        return available_count
+    return min(available_count, max(0, int(default_limit)))
+
+
+def recipe_target_reached(
+    *,
+    max_recipes: Optional[int],
+    recipes: Optional[List[Dict]] = None,
+    stream_saver: Optional[Any] = None,
+) -> bool:
+    """Return True when a scrape has reached its usable-recipe target."""
+    if not max_recipes:
+        return False
+    if stream_saver is not None:
+        return int(getattr(stream_saver, "seen_count", 0) or 0) >= int(max_recipes)
+    return len(recipes or []) >= int(max_recipes)
 
 
 def normalize_recipe_scrape_result(
@@ -427,22 +474,50 @@ def touch_source_scraped_at(source_name: str) -> int:
         return result.rowcount
 
 
-def delete_stale_source_recipes(source_name: str, keep_urls: Set[str]) -> int:
+def _extend_unique_id_list(target: List[str], values: List[Any]) -> None:
+    """Append stringified IDs to target, preserving order and uniqueness."""
+    seen = set(target)
+    for value in values or []:
+        if value is None:
+            continue
+        str_value = str(value)
+        if str_value in seen:
+            continue
+        target.append(str_value)
+        seen.add(str_value)
+
+
+def delete_stale_source_recipes_with_ids(source_name: str, keep_urls: Set[str]) -> Dict[str, Any]:
     """Delete non-excluded recipes for a source that were not seen in a full sync."""
+    result = {"deleted": 0, "removed_recipe_ids": []}
     if not keep_urls:
-        return 0
+        return result
 
     from database import get_db_session
     from models import FoundRecipe
 
     with get_db_session() as db:
+        stale_rows = db.query(FoundRecipe.id).filter(
+            FoundRecipe.source_name == source_name,
+            (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None)),  # noqa: E712
+            ~FoundRecipe.url.in_(list(keep_urls)),
+        ).all()
+        removed_ids = [str(row[0]) for row in stale_rows]
         deleted = db.query(FoundRecipe).filter(
             FoundRecipe.source_name == source_name,
             (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None)),  # noqa: E712
             ~FoundRecipe.url.in_(list(keep_urls)),
         ).delete(synchronize_session=False)
         db.commit()
-        return deleted
+
+    result["deleted"] = deleted
+    result["removed_recipe_ids"] = removed_ids
+    return result
+
+
+def delete_stale_source_recipes(source_name: str, keep_urls: Set[str]) -> int:
+    """Delete non-excluded recipes for a source that were not seen in a full sync."""
+    return int(delete_stale_source_recipes_with_ids(source_name, keep_urls)["deleted"])
 
 
 _MALLOC_TRIM = None
@@ -499,7 +574,7 @@ class StreamingRecipeSaver:
         self.pending: List[Dict] = []
         self.saved_urls: Set[str] = set()
         self.seen_count = 0
-        self.stats: Dict[str, int] = {
+        self.stats: Dict[str, Any] = {
             "cleared": 0,
             "created": 0,
             "updated": 0,
@@ -509,14 +584,23 @@ class StreamingRecipeSaver:
             "stale_deleted": 0,
             "saved": 0,
         }
+        self.stats["created_recipe_ids"] = []
+        self.stats["updated_recipe_ids"] = []
+        self.stats["changed_recipe_ids"] = []
+        self.stats["removed_recipe_ids"] = []
 
-    def _add_stats(self, stats: Dict[str, int]) -> None:
+    def _add_stats(self, stats: Dict[str, Any]) -> None:
         for key in ("cleared", "created", "updated", "skipped", "errors", "spell_corrections"):
             self.stats[key] = self.stats.get(key, 0) + int(stats.get(key, 0) or 0)
+        for key in ("created_recipe_ids", "updated_recipe_ids", "changed_recipe_ids", "removed_recipe_ids"):
+            self.stats.setdefault(key, [])
+            _extend_unique_id_list(self.stats[key], stats.get(key, []))
         self.stats["saved"] = self.stats.get("created", 0) + self.stats.get("updated", 0)
 
     async def add(self, recipe: Optional[Dict]) -> None:
         if not recipe:
+            return
+        if self.max_recipes and self.seen_count >= self.max_recipes:
             return
 
         self.pending.append(recipe)
@@ -562,13 +646,18 @@ class StreamingRecipeSaver:
         await self.flush()
 
         if self.overwrite and self.saved_urls:
-            stale_deleted = await asyncio.to_thread(
-                delete_stale_source_recipes,
+            stale_result = await asyncio.to_thread(
+                delete_stale_source_recipes_with_ids,
                 self.source_name,
                 self.saved_urls,
             )
+            stale_deleted = int(stale_result.get("deleted", 0) or 0)
             self.stats["stale_deleted"] = stale_deleted
             self.stats["cleared"] = self.stats.get("cleared", 0) + stale_deleted
+            _extend_unique_id_list(
+                self.stats["removed_recipe_ids"],
+                stale_result.get("removed_recipe_ids", []),
+            )
             logger.info(
                 f"Deleted {stale_deleted} stale {self.source_name} recipes "
                 "after completed full scrape"
@@ -595,7 +684,7 @@ def save_recipes_to_database(
     source_name: str,
     clear_old: bool = False,
     touch_source: bool = True,
-) -> Dict[str, int]:
+) -> Dict[str, Any]:
     """Save scraped recipes to database with upsert logic.
 
     Shared implementation used by all recipe scrapers. Handles:
@@ -613,7 +702,7 @@ def save_recipes_to_database(
         touch_source: If True, update scraped_at for the whole source after saving.
 
     Returns:
-        Stats dict with keys: cleared, created, updated, skipped, errors.
+        Stats dict with counters and affected recipe ID lists.
     """
     from database import get_db_session
     from models import FoundRecipe, SpellCorrection
@@ -622,7 +711,18 @@ def save_recipes_to_database(
     scrape_result = normalize_recipe_scrape_result(recipes, source_name=source_name)
     recipes = scrape_result.recipes
 
-    stats = {"cleared": 0, "created": 0, "updated": 0, "skipped": 0, "errors": 0, "spell_corrections": 0}
+    stats: Dict[str, Any] = {
+        "cleared": 0,
+        "created": 0,
+        "updated": 0,
+        "skipped": 0,
+        "errors": 0,
+        "spell_corrections": 0,
+        "created_recipe_ids": [],
+        "updated_recipe_ids": [],
+        "changed_recipe_ids": [],
+        "removed_recipe_ids": [],
+    }
 
     if not recipes:
         # Still touch scraped_at for successful empty/no-new runs so
@@ -673,12 +773,18 @@ def save_recipes_to_database(
 
         # Clear old recipes if requested (preserve excluded)
         if clear_old:
+            clear_rows = db.query(FoundRecipe.id).filter(
+                FoundRecipe.source_name == source_name,
+                (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None))  # noqa: E712
+            ).all()
+            cleared_ids = [str(row[0]) for row in clear_rows]
             deleted = db.query(FoundRecipe).filter(
                 FoundRecipe.source_name == source_name,
                 (FoundRecipe.excluded == False) | (FoundRecipe.excluded.is_(None))  # noqa: E712
             ).delete(synchronize_session=False)
-            stats["cleared"] = deleted
             db.commit()
+            stats["cleared"] = deleted
+            _extend_unique_id_list(stats["removed_recipe_ids"], cleared_ids)
             logger.info(f"Cleared {deleted} old recipes (preserved excluded)")
 
         # Pre-load only the rows this save call can update. Streaming saves call
@@ -740,6 +846,7 @@ def save_recipes_to_database(
                     existing.servings = recipe.get("servings")
                     existing.scraped_at = recipe.get("scraped_at", datetime.now(timezone.utc))
                     stats["updated"] += 1
+                    pending_change_kind = "updated"
                 else:
                     db.add(FoundRecipe(
                         source_name=source_name,
@@ -752,15 +859,23 @@ def save_recipes_to_database(
                         scraped_at=recipe.get("scraped_at", datetime.now(timezone.utc)),
                     ))
                     stats["created"] += 1
+                    pending_change_kind = "created"
 
                 db.commit()
+                saved_recipe_id = existing.id if existing else db.execute(
+                    text("SELECT id FROM found_recipes WHERE url = :url"),
+                    {"url": recipe["url"]}
+                ).scalar()
+                if saved_recipe_id:
+                    if pending_change_kind == "updated":
+                        _extend_unique_id_list(stats["updated_recipe_ids"], [saved_recipe_id])
+                    else:
+                        _extend_unique_id_list(stats["created_recipe_ids"], [saved_recipe_id])
+                    _extend_unique_id_list(stats["changed_recipe_ids"], [saved_recipe_id])
 
                 # Save spell corrections to DB (after commit so we have recipe_id)
                 if corrections:
-                    rid = existing.id if existing else db.execute(
-                        text("SELECT id FROM found_recipes WHERE url = :url"),
-                        {"url": recipe["url"]}
-                    ).scalar()
+                    rid = saved_recipe_id
                     if rid:
                         # Remove old non-excluded corrections for this recipe
                         db.execute(

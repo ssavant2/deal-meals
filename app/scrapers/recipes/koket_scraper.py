@@ -62,8 +62,9 @@ sys.path.insert(0, app_dir)
 
 from database import get_db_session
 from scrapers.recipes._common import (
-    _is_type, RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, StreamingRecipeSaver, validate_image_url
+    _is_type, RecipeScrapeResult, incremental_attempt_limit,
+    make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
+    StreamingRecipeSaver, validate_image_url
 )
 
 # GUI Metadata
@@ -449,8 +450,17 @@ class KoketScraper:
         results: List[Dict],
         client: httpx.AsyncClient,
         stream_saver: Optional[StreamingRecipeSaver] = None,
+        max_recipes: Optional[int] = None,
     ):
         """Worker that processes URLs from queue."""
+        def drain_queue() -> None:
+            while True:
+                try:
+                    queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    return
+                queue.task_done()
+
         while not self._cancel_flag:
             try:
                 url = await asyncio.wait_for(queue.get(), timeout=1.0)
@@ -460,16 +470,34 @@ class KoketScraper:
                 continue
 
             try:
+                if recipe_target_reached(
+                    max_recipes=max_recipes,
+                    recipes=results,
+                    stream_saver=stream_saver,
+                ):
+                    drain_queue()
+                    break
+
                 recipe = await self.scrape_single_recipe(client, url)
 
                 self._progress["current"] += 1
 
                 if recipe:
                     if stream_saver:
+                        before_seen = stream_saver.seen_count
                         await stream_saver.add(recipe)
+                        saved_recipe = stream_saver.seen_count > before_seen
                     else:
                         results.append(recipe)
-                    self._progress["success"] += 1
+                        saved_recipe = True
+                    if saved_recipe:
+                        self._progress["success"] += 1
+                    if recipe_target_reached(
+                        max_recipes=max_recipes,
+                        recipes=results,
+                        stream_saver=stream_saver,
+                    ):
+                        drain_queue()
 
                 await self._send_activity()
 
@@ -492,6 +520,7 @@ class KoketScraper:
         urls: List[str],
         is_test: bool = False,
         stream_saver: Optional[StreamingRecipeSaver] = None,
+        max_recipes: Optional[int] = None,
     ) -> List[Dict]:
         """Scrape multiple recipes in parallel."""
         if not urls:
@@ -511,7 +540,7 @@ class KoketScraper:
         logger.info(f"   Starting {num_workers} workers for {len(urls)} URLs...")
 
         workers = [
-            asyncio.create_task(self._worker(i, queue, results, client, stream_saver))
+            asyncio.create_task(self._worker(i, queue, results, client, stream_saver, max_recipes))
             for i in range(num_workers)
         ]
 
@@ -581,13 +610,18 @@ class KoketScraper:
                 existing_urls = self._get_existing_urls()
                 existing_count = len(existing_urls)
                 all_candidate_urls = [url for url, _ in all_urls]
-                candidate_urls = all_candidate_urls if max_recipes else all_candidate_urls[:MAX_URLS]
+                attempt_limit = incremental_attempt_limit(
+                    max_recipes=max_recipes,
+                    available_count=len(all_candidate_urls),
+                    default_limit=MAX_URLS,
+                )
+                candidate_urls = all_candidate_urls[:attempt_limit]
                 urls_to_scrape = [url for url in candidate_urls if url not in existing_urls]
 
-                if max_recipes and len(urls_to_scrape) > max_recipes:
-                    urls_to_scrape = urls_to_scrape[:max_recipes]
-
-                logger.info(f"INCREMENTAL: {len(urls_to_scrape)} new URLs to try (of {len(candidate_urls)} candidates)")
+                logger.info(
+                    f"INCREMENTAL: {len(urls_to_scrape)} new URLs to try "
+                    f"(target {max_recipes or 'auto'}, {len(candidate_urls)} candidates)"
+                )
                 logger.info(f"   Already in DB: {existing_count} recipes")
 
                 # Smart stop: If we're at 70%+ of expected count, remaining URLs are likely non-recipes
@@ -625,6 +659,7 @@ class KoketScraper:
                 urls_to_scrape,
                 bool(max_recipes),
                 stream_saver=stream_saver,
+                max_recipes=max_recipes,
             )
 
             if self._cancel_flag:

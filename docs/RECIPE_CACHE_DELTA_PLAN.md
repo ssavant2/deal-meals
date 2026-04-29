@@ -1,5 +1,49 @@
 # Plan: Inkrementell cacheuppdatering efter receptskrap
 
+## Aktuell status
+
+Senast uppdaterad: 2026-04-29 12:07.
+
+- Fas: Implementation, smoke-verifiering och dokumentationsuppdatering pågår.
+- Pågår: sista kontroll efter att inkrementella skrapgränser gjorts konsekventa
+  över receptskraparna:
+  ett konfigurerat antal betyder mål för sparbara recept, medan skraparna får
+  prova en dold URL-buffert med hårt tak. UI-progress visar hittade recept mot
+  användarens mål, inte interna URL-försök.
+- Klart: memory-cache är bortstädad och planen är uppdaterad med
+  UI-exclude/hard-delete-förtydliganden; receptsparflödet returnerar nu
+  skapade/ändrade/borttagna recept-ID:n. Inkrementella helpers för
+  recipe-IR och recipe term-index finns. `cache_delta.py` har nu en
+  `apply_recipe_delta`-entrypoint som previewar berörda recept, verifierar mot
+  full preview under probation och patchar `recipe_offer_cache` utan truncate.
+  Routerflödet använder recipe-delta för incremental scrape och för full scrape
+  när högst 50 recept berörs; UI-exclude/restore/delete triggar samma kedja i
+  bakgrunden.
+- Verifierat i dev-container: no-op-delta returnerar utan lockad DB-skrivning.
+  En single-recipe preview föll först tillbaka eftersom compiled term-index låg
+  på äldre matcher/offer-compiler-version, vilket verifierade fallbackvägen.
+  Efter en full rebuild med aktuella versioner gick single-recipe delta igenom:
+  med full-preview/probation patchades 1 cache-rad och totalen var stabil
+  (`10282` cacheträffar). Utan full-preview tog samma single-recipe delta ca
+  `847ms` och bevarade `cache_metadata.total_recipes=10757`.
+  Patch-transaktionen är rollback-verifierad genom ett avsiktligt
+  CHECK-constraint-fel efter DELETE; den gamla cache-raden låg kvar efter
+  rollback.
+- Run-all-kön har kvar första versionens strategi: ingen per-scraper delta där.
+  Den räknar däremot nu cache-berörda recept separat från "nya recept", så en
+  slutlig full rebuild triggas även om en run-all bara uppdaterar befintliga
+  recept.
+- Dokumentation uppdateras samtidigt i användarmanualerna, README,
+  scraper-guiden, receptmallen och testdokumentet så cache-delta och
+  receptantalens mål/buffert-semantik inte beskrivs som äldre full-rebuild eller
+  strikt URL-limit.
+- Slutkontroll: AST/syntax är OK för alla ändrade Python-filer,
+  `git diff --check` är OK, och kvarvarande `memory_cache`/`cache_use_memory`
+  träffar är begränsade till den avsiktliga startup-migrationen för att droppa
+  gamla kolumner. `deal-meals-dev-web` är omstartad och healthcheck är OK; vid
+  startup gjorde den en varm full rebuild på ca `4531ms`.
+- Nästa: kodreview och commit.
+
 ## Bakgrund
 
 Efter en inkrementell receptskrap kan loggen visa att bara ett fåtal recept
@@ -145,6 +189,11 @@ Uppdatera `save_recipes_to_database()` så stats innehåller:
 - `changed_recipe_ids`
 - `removed_recipe_ids` när relevant
 
+`changed_recipe_ids` ska vara `created_recipe_ids + updated_recipe_ids`
+deduplicerat. Alternativt kan stats utelämna `changed_recipe_ids` helt och låta
+delta-anroparen göra unionen, men begreppet måste vara entydigt i
+implementationen.
+
 För `StreamingRecipeSaver` ska dessa listor aggregeras över batchar.
 
 Praktiskt:
@@ -188,19 +237,29 @@ Den ska:
 - ta samma advisory lock som full refresh,
 - hålla lock, läsning, delete och insert i samma DB-session/transaktion eftersom
   `pg_advisory_xact_lock` är transaktionsbundet,
-- läsa aktuella `FoundRecipe`-rader för angivna ID:n,
-- jämföra lästa rader mot förväntade ID:n. Om ett ID i `recipe_ids` inte längre
-  finns i `found_recipes` ska det behandlas som `remove_recipe_id` internt,
+- läsa aktuella `FoundRecipe`-rader för `recipe_ids ∪ remove_recipe_ids`,
+- bygga compiled rows för alla dessa ID:n som fortfarande finns i
+  `found_recipes` med befintlig `build_compiled_recipe_match_row()`. Det är
+  viktigt för UI-exclude: full refresh behåller sådana recept i
+  `compiled_recipe_match_data` med `is_active=False`, och incremental helpern
+  ska matcha det beteendet,
+- jämföra lästa rader mot förväntade ID:n. Om ett ID inte längre finns i
+  `found_recipes` är det en hard-delete och ska behandlas som removed internt,
   inte ignoreras tyst eller orsaka exception,
-- bygga compiled rows med befintlig `build_compiled_recipe_match_row()`,
-- ta bort gamla compiled rows för dessa ID:n,
-- lägga in nya compiled rows,
-- ta bort compiled rows för `remove_recipe_ids`.
+- ta bort gamla compiled rows för berörda ID:n,
+- lägga in nya compiled rows för de ID:n som fortfarande finns.
+
+Hard-deletade ID:n behöver i normalfallet ingen explicit compiled-delete,
+eftersom `compiled_recipe_match_data` har FK-cascade mot `found_recipes`.
+En defensiv DELETE för saknade ID:n är ändå ofarlig, men den får inte användas
+som beteende för UI-exclude där `FoundRecipe`-raden finns kvar.
 
 Verifiering:
 
 - Kör helpern med ett känt recept-ID.
 - Kontrollera att `compiled_recipe_match_data` har exakt en aktiv rad för ID:t.
+- Exkludera ett recept och kontrollera att raden finns kvar med
+  `is_active=False`.
 - Kontrollera att `compiler_version` är aktuell.
 - Kontrollera att full refresh fortfarande fungerar.
 
@@ -262,8 +321,11 @@ Flöde:
 2. Sätt cachemetadata till `computing`.
 3. Validera att aktiv cache finns och är `ready`; annars fallback till full
    rebuild.
-4. Uppdatera recipe-IR för `changed_recipe_ids`.
-5. Uppdatera recipe term-index för `changed_recipe_ids`.
+4. Uppdatera recipe-IR för `changed_recipe_ids + removed_recipe_ids`. Helpern
+   ska skriva aktiva/inaktiva compiled rows för ID:n som fortfarande finns och
+   behandla saknade ID:n som hard-delete.
+5. Uppdatera recipe term-index för `changed_recipe_ids + removed_recipe_ids`.
+   Changed IDs får nya termrader; removed IDs får gamla termrader raderade.
 6. Kör `cache_manager.refresh_cache(..., persist=False, return_entries=True,
    recipe_ids=changed_recipe_ids)`.
 7. Kör en ny patch-helper som i en och samma transaktion:
@@ -280,6 +342,12 @@ Flöde:
 Ordningen i steg 4-6 är load-bearing. Recipe-IR och termindex måste vara
 uppdaterade och commitade innan patch preview körs. Annars riskerar en parallell
 offer-delta att se recipe changes och falla ut med `recipe_changes_detected`.
+
+Om steg 4 eller 5 kastar exception, till exempel vid korrupt receptdata,
+FK-konflikt eller låsproblem, ska `apply_recipe_delta` fånga felet, sätta en
+tydlig fallback_reason som `ir_refresh_failed` eller
+`term_index_refresh_failed`, återställa cachemetadata från `computing` och
+delegera till full rebuild via samma kedja som övriga fallback-fall.
 
 Patch-helpern får inte använda `_save_cache()` eller `_save_cache_to_db()`,
 eftersom båda representerar "ersätt hela cachetillståndet". Den ska vara en ny
@@ -410,6 +478,14 @@ flöden behöver antingen:
 - trigga `apply_recipe_delta(removed_recipe_ids=[...])`, eller
 - falla tillbaka till full rebuild om berörda ID:n inte finns tillgängliga.
 
+Explicit mapping:
+
+| Flöde | Delta-lista |
+| --- | --- |
+| UI-exclude | `removed_recipe_ids` för cache/termindex, men recipe-IR-helpern ska skriva `is_active=False` eftersom raden finns kvar |
+| UI-include / återaktivera | `changed_recipe_ids` |
+| Hard-delete | `removed_recipe_ids` |
+
 Detta ska inte lämnas åt `classify_current_recipe_changes()` inne i offer-delta,
 eftersom recept-deltans entrypoint annars bara ser ID:n från sparflödet.
 
@@ -498,8 +574,10 @@ CACHE_RECIPE_DELTA_SUMMARY {"applied": false, "fallback_reason": "..."}
   normaliseras så remove vinner.
 - Recept som går från match till ingen match måste få sin gamla cache-rad
   borttagen.
-- Borttagna eller exkluderade recept måste bort från både cache och termindex.
-  `recipe_offer_cache` och `compiled_recipe_match_data` har FK-cascade, men
+- Borttagna eller exkluderade recept måste bort från cache och termindex.
+  Däremot ska UI-exclude inte ta bort raden ur `compiled_recipe_match_data`;
+  full refresh behåller raden med `is_active=False`, och incremental helpern
+  ska göra samma. Hard-delete rensar `compiled_recipe_match_data` via FK-cascade.
   `compiled_recipe_term_index` har ingen FK mot `found_recipes`, så termrader
   för permanent borttagna recept måste raderas explicit.
 - Offer-term-manifest styr recipe term-index. Om manifestet ändras måste
@@ -538,6 +616,13 @@ förväntade och säkra beteendet.
 Målen förutsätter den nuvarande DB-cache-vägen. Det finns inte längre någon
 aktiv memory-cache-väg som recept-delta behöver patcha.
 
+Tröskeln på 2 sekunder förutsätter delta utan parallell full-preview-verifiering.
+Med `cache_recipe_delta_verify_full_preview=True`, vilket bör vara default i
+första probation-perioden, kan total tid hamna runt 1.5-2 sekunder eftersom
+hela compute-pipen körs för verifieringen. Det är acceptabelt under probation;
+efter probation faller verifieringen bort och målet bör hållas med bättre
+marginal.
+
 ## Paritetskontroll och probation
 
 Under utveckling och första utrullning bör recept-delta kunna köras med
@@ -556,6 +641,12 @@ Rekommenderat beslut: ha full-preview-verifiering på som default i början via
 efter N gröna körningar. Det speglar offer-deltans säkerhetsmodell men kan
 implementeras i en senare commit om första steget behöver hållas mindre.
 
+Återanvänd `delta_probation_runtime.append_runtime_probation_history(...)` med
+en trigger som `recipe_scrape` eller `recipe_delta`. Om
+`cache_recipe_delta_probation_history_file` pekar på en separat fil från
+offer-deltans historik hålls probation för recept-delta och offer-delta isär,
+men samma runtime-gate-mönster kan återanvändas.
+
 ## Definition of Done
 
 - `save_recipes_to_database()` returnerar recept-ID:n för skapade/ändrade
@@ -570,6 +661,8 @@ implementeras i en senare commit om första steget behöver hållas mindre.
 - Tomma input-listor ger no-op utan cachemetadata-skrivning.
 - Saknade changed IDs behandlas som removed IDs.
 - Överlapp mellan changed och removed normaliseras så removed vinner.
+- UI-exclude behåller compiled recipe IR-raden med `is_active=False`, men tar
+  bort cache- och termindexrader.
 - Recept-delta styrs av en egen settings-flagga.
 - Async-routerflöden kör sync-deltan via executor/wrapper.
 - Unmatched-offer-count beräknas som `total_offers - matched_offer_ids`.

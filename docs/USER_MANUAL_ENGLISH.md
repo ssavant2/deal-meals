@@ -89,6 +89,11 @@ enabled after 3 consecutive clean verified cache refreshes. Until then the app
 still works, but it does extra safety verification and can feel slower.
 Scheduling recipe and store fetches lets this happen in the background.
 
+After small incremental recipe fetches, the matching cache is normally updated
+with a fast recipe delta for only the recipes that changed. On first run, larger
+full fetches, or if a safety check fails, the app falls back to a full cache
+rebuild. You do not need to choose this manually.
+
 The start guide disappears automatically once all steps are complete.
 
 ---
@@ -251,7 +256,14 @@ Each recipe source has a **gear button** (gear icon) next to the arrow button. C
 - **Full fetch** — Number of recipes for "Full" mode. "Fetch all" = no limit.
 - **Incremental fetch** — Number of recipes for "Incremental" mode. "All new" = all new recipes since last fetch.
 
-The configured values are shown in the source description text (e.g., "Recept from coop.se (500 / all new)").
+The number is a target for usable recipes, not a strict count of URLs the
+scraper may visit. Some recipe sites list articles, categories, or broken pages
+among recipe-like URLs. Deal Meals may therefore try a few extra URLs in the
+background to reach the target, but it has a hard internal cap so a bad hit rate
+cannot make the run unreasonably long. If a source simply does not have enough
+new valid recipes, the final count can be lower than the configured number.
+
+The configured values are shown in the source description text (e.g., "Recipes from coop.se (500 / all new)").
 
 ### 4.3 Fetching Recipes
 
@@ -273,11 +285,14 @@ source works.
 
 **During the fetch:**
 - A spinner shows with the source name and progress (recipes found so far)
+- Progress shows found/usable recipes against your target, not internal URL attempts
 - You can **cancel** at any time with the red cancel button
 
 **After completion:**
 - A summary shows new recipes found and total in database
-- Recipe suggestions on the home page will refresh
+- Recipe suggestions on the home page will refresh. Small incremental fetches
+  usually update the cache with a fast delta; larger runs or fallback cases may
+  run a full rebuild.
 
 **Time estimates** appear below the source selector showing approximately how long each mode takes for the selected source.
 
@@ -488,7 +503,7 @@ Then recreate the web container with `docker compose up -d web` (restart does NO
 
 ### Should I schedule or run manually?
 
-**Scheduling is recommended.** When offers or recipes are fetched, the recipe matching cache is automatically rebuilt. With a normal number of offers this only takes a few seconds, but the actual fetching from the store's website can take a bit longer. If you schedule your fetches (e.g. overnight or early morning), everything happens in the background and your suggestions are ready when you open the app.
+**Scheduling is recommended.** When offers or recipes are fetched, the recipe matching cache is updated automatically. Small incremental recipe fetches can usually patch the cache with a fast delta, while offer fetches, large full recipe fetches, and fallback cases may run a full rebuild. If you schedule your fetches (e.g. overnight or early morning), everything happens in the background and your suggestions are ready when you open the app.
 
 You can run fetches manually too — but you'll need to wait while the offers download and the matching recalculates.
 

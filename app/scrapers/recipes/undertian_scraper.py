@@ -38,8 +38,8 @@ sys.path.insert(0, app_dir)
 
 from database import get_db_session
 from scrapers.recipes._common import (
-    RecipeScrapeResult, make_recipe_scrape_result,
-    split_serving_lists, StreamingRecipeSaver
+    RecipeScrapeResult, incremental_attempt_limit, make_recipe_scrape_result,
+    recipe_target_reached, split_serving_lists, StreamingRecipeSaver
 )
 
 # GUI Metadata
@@ -91,13 +91,14 @@ class UndertianScraper:
         """Signal cancellation."""
         self._cancel_flag = True
 
-    async def _report_progress(self, message: str, current: int = 0, total: int = 0):
+    async def _report_progress(self, message: str, current: int = 0, total: int = 0, success: int = 0):
         """Report progress via callback if set."""
         if self._progress_callback:
             await self._progress_callback({
                 "message": message,
                 "current": current,
                 "total": total,
+                "success": success,
             })
 
     async def _report_activity(self):
@@ -346,14 +347,18 @@ class UndertianScraper:
                 # Incremental: skip already-saved URLs
                 existing_urls = self._get_existing_urls()
                 all_candidate_urls = [url for url, _ in all_urls]
-                candidate_urls = all_candidate_urls if max_recipes else all_candidate_urls[:MAX_RECIPES]
+                attempt_limit = incremental_attempt_limit(
+                    max_recipes=max_recipes,
+                    available_count=len(all_candidate_urls),
+                    default_limit=MAX_RECIPES,
+                )
+                candidate_urls = all_candidate_urls[:attempt_limit]
                 urls_to_scrape = [url for url in candidate_urls if url not in existing_urls]
 
-                # Apply limit if set (max_recipes from GUI config)
-                if max_recipes and len(urls_to_scrape) > max_recipes:
-                    urls_to_scrape = urls_to_scrape[:max_recipes]
-
-                logger.info(f"INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape")
+                logger.info(
+                    f"INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape "
+                    f"(target {max_recipes or 'auto'})"
+                )
 
                 if not urls_to_scrape:
                     logger.info("Already up to date!")
@@ -369,7 +374,7 @@ class UndertianScraper:
             total = len(urls_to_scrape)
 
             logger.info(f"Scraping {total} recipes...")
-            await self._report_progress(f"Fetching {total} recipes...", 0, total)
+            await self._report_progress(f"Fetching {total} recipes...", 0, total, 0)
 
             for i, url in enumerate(urls_to_scrape):
                 if self._cancel_flag:
@@ -382,6 +387,12 @@ class UndertianScraper:
                         await stream_saver.add(recipe)
                     else:
                         recipes.append(recipe)
+                    if recipe_target_reached(
+                        max_recipes=max_recipes,
+                        recipes=recipes,
+                        stream_saver=stream_saver,
+                    ):
+                        break
                 await self._report_activity()
 
                 if (i + 1) % 10 == 0 or (i + 1) == total:
@@ -389,7 +400,7 @@ class UndertianScraper:
                     logger.info(f"   Progress: {i + 1}/{total} ({found_count} recipes found)")
                     await self._report_progress(
                         f"Fetched {found_count} recipes...",
-                        i + 1, total,
+                        i + 1, total, found_count,
                     )
 
                 await asyncio.sleep(REQUEST_DELAY)

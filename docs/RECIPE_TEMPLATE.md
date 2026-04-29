@@ -30,7 +30,9 @@ from typing import Dict, Optional
 
 from scrapers.recipes._common import (
     RecipeScrapeResult,
+    incremental_attempt_limit,
     make_recipe_scrape_result,
+    recipe_target_reached,
     save_recipes_to_database,
     StreamingRecipeSaver,
 )
@@ -113,6 +115,12 @@ For large production scrapes, use the shared streaming-save path:
 `scrape_all_recipes(..., stream_saver=saver)`, and calls `finish()` once after
 scraping completes. Test mode still calls `scrape_all_recipes(max_recipes=20)`
 without a saver, so keep the normal `RecipeScrapeResult` return path.
+
+When `max_recipes` comes from the GUI for incremental mode, treat it as a target
+for usable recipes rather than a raw URL-attempt limit. Use
+`incremental_attempt_limit()` when choosing candidate URLs and
+`recipe_target_reached()` inside the scrape loop to stop after enough valid
+recipes have been parsed.
 
 ## Choose One Implementation Skeleton
 
@@ -211,7 +219,7 @@ class [SiteName]Scraper:
         4. Return RecipeScrapeResult
 
         Args:
-            max_recipes: Limit number of recipes (for test mode, e.g., 20)
+            max_recipes: Target number of usable recipes (test mode uses 20)
             force_all: If True, skip existing check and scrape everything (for overwrite mode)
 
         Returns:
@@ -581,7 +589,7 @@ class [SiteName]Scraper:
         Main scraping method (matches interface expected by GUI).
 
         Args:
-            max_recipes: Limit number of recipes (for test mode)
+            max_recipes: Target number of usable recipes (test mode uses 20)
             batch_size: Concurrent requests (default 10)
             force_all: If True, scrape all recipes (for overwrite mode)
 
@@ -887,7 +895,9 @@ the same way.
 ```python
 from scrapers.recipes._common import (
     RecipeScrapeResult,
+    incremental_attempt_limit,
     make_recipe_scrape_result,
+    recipe_target_reached,
     save_recipes_to_database,
     StreamingRecipeSaver,
     parse_iso8601_duration,
@@ -912,6 +922,49 @@ return make_recipe_scrape_result([], failed=True, reason="no_recipe_urls")
 
 `RecipeScrapeResult` is list-like for `len(result)`, iteration, and slicing. Use
 `result.recipes` when you need the explicit recipe list.
+
+### `incremental_attempt_limit(...) -> int`
+
+Returns how many candidate URLs an incremental scrape should try for a
+configured recipe target:
+
+```python
+attempt_limit = incremental_attempt_limit(
+    max_recipes=max_recipes,
+    available_count=len(candidate_urls),
+    default_limit=MAX_RECIPES,
+)
+urls_to_scrape = candidate_urls[:attempt_limit]
+```
+
+Use this when `max_recipes` comes from the GUI. In incremental mode it is a
+target for successfully parsed recipes, not a strict URL-attempt count. The
+helper gives the scraper a small hidden buffer for recipe-like URLs that turn
+out to be articles, categories, or invalid pages, while still enforcing a hard
+cap.
+
+### `recipe_target_reached(...) -> bool`
+
+Stops a scrape once the usable-recipe target has actually been reached:
+
+```python
+if recipe:
+    if stream_saver:
+        await stream_saver.add(recipe)
+    else:
+        recipes.append(recipe)
+
+    if recipe_target_reached(
+        max_recipes=max_recipes,
+        recipes=recipes,
+        stream_saver=stream_saver,
+    ):
+        break
+```
+
+Use this together with `StreamingRecipeSaver`, because `StreamingRecipeSaver`
+tracks the number of accepted recipes even when batches have already been
+flushed to the database.
 
 ### `StreamingRecipeSaver`
 

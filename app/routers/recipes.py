@@ -12,6 +12,7 @@ This router handles all recipe-related API endpoints:
 
 import json
 import asyncio
+import threading
 import time
 from datetime import datetime, timezone
 from fastapi import APIRouter, Request
@@ -1240,14 +1241,181 @@ def _coerce_nonnegative_int(value) -> int:
         return 0
 
 
+MAX_FULL_RECIPE_DELTA_AFFECTED_RECIPES = 50
+
+
+def _dedupe_recipe_id_list(values) -> list[str]:
+    recipe_ids: list[str] = []
+    seen: set[str] = set()
+    for value in values or []:
+        if value is None:
+            continue
+        recipe_id = str(value)
+        if recipe_id in seen:
+            continue
+        recipe_ids.append(recipe_id)
+        seen.add(recipe_id)
+    return recipe_ids
+
+
+def _extract_recipe_delta_ids(save_result: dict | None) -> tuple[list[str], list[str]]:
+    if not isinstance(save_result, dict):
+        return [], []
+    removed_ids = _dedupe_recipe_id_list(save_result.get("removed_recipe_ids"))
+    removed_set = set(removed_ids)
+    changed_ids = _dedupe_recipe_id_list(
+        save_result.get("changed_recipe_ids")
+        or (
+            list(save_result.get("created_recipe_ids") or [])
+            + list(save_result.get("updated_recipe_ids") or [])
+        )
+    )
+    changed_ids = [recipe_id for recipe_id in changed_ids if recipe_id not in removed_set]
+    return changed_ids, removed_ids
+
+
+def _save_result_has_cache_changes(save_result: dict | None) -> bool:
+    if not isinstance(save_result, dict):
+        return False
+    changed_ids, removed_ids = _extract_recipe_delta_ids(save_result)
+    if changed_ids or removed_ids:
+        return True
+    return any(
+        _coerce_nonnegative_int(save_result.get(key)) > 0
+        for key in ("created", "updated", "saved", "deleted")
+    )
+
+
+def _should_use_recipe_delta(
+    *,
+    mode: str,
+    save_result: dict | None,
+    changed_recipe_ids: list[str],
+    removed_recipe_ids: list[str],
+) -> tuple[bool, str]:
+    if not settings.cache_recipe_delta_enabled:
+        return False, "recipe_delta_disabled"
+    if not changed_recipe_ids and not removed_recipe_ids:
+        if _save_result_has_cache_changes(save_result):
+            return False, "recipe_delta_ids_missing"
+        return False, "no_recipe_delta_ids"
+    if mode == "incremental":
+        return True, "incremental_recipe_delta"
+    if mode == "full":
+        affected_count = len(set(changed_recipe_ids) | set(removed_recipe_ids))
+        if affected_count <= MAX_FULL_RECIPE_DELTA_AFFECTED_RECIPES:
+            return True, "small_full_recipe_delta"
+        return False, f"full_recipe_delta_limit_exceeded:{affected_count}"
+    return False, f"unsupported_mode:{mode}"
+
+
+async def _refresh_cache_after_recipe_scrape(
+    *,
+    scraper_id: str,
+    mode: str,
+    save_result: dict | None,
+    recipes_found: int,
+) -> dict:
+    from cache_manager import compute_cache_async
+
+    changed_ids, removed_ids = _extract_recipe_delta_ids(save_result)
+    use_delta, reason = _should_use_recipe_delta(
+        mode=mode,
+        save_result=save_result,
+        changed_recipe_ids=changed_ids,
+        removed_recipe_ids=removed_ids,
+    )
+
+    delta_result = None
+    result = None
+    if use_delta:
+        try:
+            from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
+            from delta_probation_runtime import append_runtime_probation_history
+
+            logger.info(
+                "Starting recipe-delta cache refresh after {scraper} scrape "
+                "({changed} changed, {removed} removed, reason={reason})".format(
+                    scraper=scraper_id,
+                    changed=len(changed_ids),
+                    removed=len(removed_ids),
+                    reason=reason,
+                )
+            )
+            loop = asyncio.get_running_loop()
+            delta_result = await loop.run_in_executor(
+                None,
+                lambda: apply_recipe_delta(
+                    changed_recipe_ids=changed_ids,
+                    removed_recipe_ids=removed_ids,
+                    source=f"recipe_scrape:{scraper_id}:{mode}",
+                    apply=True,
+                    verify_full_preview=settings.cache_recipe_delta_verify_full_preview,
+                    skip_if_busy=False,
+                ),
+            )
+            try:
+                append_runtime_probation_history(
+                    delta_result,
+                    history_path=_recipe_delta_probation_history_path(),
+                    store_name=scraper_id,
+                    trigger="recipe_scrape",
+                )
+            except Exception as history_error:
+                logger.warning(f"Could not append recipe-delta probation history: {history_error}")
+            result = delta_result
+        except Exception as e:
+            logger.warning(
+                f"Recipe-delta cache refresh failed after {scraper_id} scrape ({e}); "
+                "falling back to full rebuild"
+            )
+            delta_result = {
+                "success": False,
+                "applied": False,
+                "fallback_reason": "recipe_delta_exception",
+                "error": str(e),
+            }
+
+        if not delta_result.get("applied"):
+            fallback_reason = delta_result.get("fallback_reason") or "recipe_delta_not_applied"
+            logger.warning(
+                f"Recipe-delta was not applied after {scraper_id} scrape "
+                f"({fallback_reason}); falling back to full rebuild"
+            )
+            result = await compute_cache_async(skip_if_busy=False)
+    else:
+        logger.info(
+            f"Starting full cache rebuild after {scraper_id} scrape "
+            f"({recipes_found} new recipes, delta_reason={reason})"
+        )
+        result = await compute_cache_async(skip_if_busy=False)
+
+    if result.get("skipped"):
+        logger.info(f"Recipe scrape cache refresh skipped: {result.get('reason')}")
+    else:
+        logger.success(
+            "Recipe scrape cache refresh complete ({mode}): {cached} recipes in {time_ms}ms".format(
+                mode=result.get("effective_rebuild_mode", "unknown"),
+                cached=result.get("cached", 0),
+                time_ms=result.get("time_ms", 0),
+            )
+        )
+    return result
+
+
 async def _finish_run_all_queue(total_new: int) -> dict:
     """Finish the run-all queue and start once-per-queue follow-up jobs."""
     total_new = _coerce_nonnegative_int(total_new)
+    queue_state = await get_run_all_queue()
+    total_cache_changes = max(
+        total_new,
+        _coerce_nonnegative_int(queue_state.get("total_cache_changes")),
+    )
     await clear_run_all_queue()
 
     cache_rebuild_started = False
     auto_image_download_started = False
-    if total_new > 0:
+    if total_cache_changes > 0:
         try:
             from cache_manager import compute_cache_async
 
@@ -1269,7 +1437,7 @@ async def _finish_run_all_queue(total_new: int) -> dict:
             cache_rebuild_started = True
             logger.info(
                 "Started final cache rebuild after run-all recipe scrape "
-                f"({total_new} new recipes)"
+                f"({total_new} new recipes, {total_cache_changes} cache-affecting changes)"
             )
         except Exception as e:
             logger.warning(f"Could not start final run-all cache rebuild: {e}")
@@ -1385,6 +1553,7 @@ async def manage_recipe_scraper_queue(request: Request):
             "scraper_ids": scraper_ids,
             "index": 0,
             "total_new": 0,
+            "total_cache_changes": 0,
             "started_at": datetime.now(timezone.utc).isoformat(),
         })
         return JSONResponse({"success": True})
@@ -1487,6 +1656,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
     last_progress_at = time.monotonic()
     recipes_found = 0
     attempted_count = 0
+    save_result_for_cache = {}
 
     try:
         scraper_class = scraper_manager.get_scraper_class(scraper_id)
@@ -1506,6 +1676,13 @@ async def _run_scraper_task(scraper_id: str, mode: str):
         })
 
         expected_total = scraper_info.expected_recipe_count if scraper_info else 1000
+        scraper_configs = _get_scraper_configs()
+        max_full, max_incr = _get_effective_config(scraper_id, scraper_configs)
+
+        # Mode labels are now i18n keys
+        mode_label_keys = {"test": "recipes.mode_test", "incremental": "recipes.mode_incremental", "full": "recipes.mode_full"}
+        mode_label_key = mode_label_keys.get(mode, mode)
+        db_source_name = (scraper_info.db_source_name or scraper_info.name) if scraper_info else None
 
         def mark_scraper_activity() -> None:
             nonlocal last_progress_at
@@ -1542,15 +1719,22 @@ async def _run_scraper_task(scraper_id: str, mode: str):
 
             current = data.get("current", 0)
             total = data.get("total", expected_total)
-            found = data.get("success", 0)
+            found = _coerce_nonnegative_int(data.get("success", 0))
             attempted_count = max(attempted_count, _coerce_nonnegative_int(current))
-            percent = round((current / total) * 100) if total > 0 else 0
+
+            display_current = current
+            display_total = total
+            if mode == "incremental" and max_incr and "success" in data:
+                display_total = max(1, _coerce_nonnegative_int(max_incr))
+                display_current = min(display_total, found)
+
+            percent = round((display_current / display_total) * 100) if display_total > 0 else 0
 
             await update_running_scraper(scraper_id, {
                 "message_key": "recipes.fetching_progress",
-                "message_params": {"current": current, "total": total, "percent": percent},
-                "current": current,
-                "total": total,
+                "message_params": {"current": display_current, "total": display_total, "percent": percent},
+                "current": display_current,
+                "total": display_total,
                 "recipes_found": found,
                 "percent": percent
             })
@@ -1579,15 +1763,6 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                     return result or 0
             except Exception:
                 return 0
-
-        # Load per-scraper config (fetch limits)
-        scraper_configs = _get_scraper_configs()
-        max_full, max_incr = _get_effective_config(scraper_id, scraper_configs)
-
-        # Mode labels are now i18n keys
-        mode_label_keys = {"test": "recipes.mode_test", "incremental": "recipes.mode_incremental", "full": "recipes.mode_full"}
-        mode_label_key = mode_label_keys.get(mode, mode)
-        db_source_name = (scraper_info.db_source_name or scraper_info.name) if scraper_info else None
 
         def normalize_result(raw_result, run_mode: str):
             return normalize_recipe_scrape_result(
@@ -1698,6 +1873,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 result.get("saved", result.get("created", 0))
                 if isinstance(result, dict) else 0
             )
+            save_result_for_cache = result if isinstance(result, dict) else {}
             spell_count = result.get("spell_corrections", 0) if isinstance(result, dict) else 0
             recipes_found = new_count
             total_in_db = get_total_recipe_count()
@@ -1779,6 +1955,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 new_count = result.get("created", 0) if isinstance(result, dict) else 0
 
             spell_count = result.get("spell_corrections", 0) if isinstance(result, dict) else 0
+            save_result_for_cache = result if isinstance(result, dict) else {}
             recipes_found = new_count
             total_in_db = get_total_recipe_count()
             state = {
@@ -1809,23 +1986,33 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             update_schedule=True,
         )
 
-        # Trigger cache rebuild + image auto-download (only for non-test modes with new recipes).
+        # Trigger cache refresh + image auto-download (only for non-test modes with DB changes).
         # During "run all", defer both until the queue is finished so the
         # recipe scrapers do not compete with image downloads.
-        if mode != "test" and recipes_found > 0:
+        if mode != "test" and _save_result_has_cache_changes(save_result_for_cache):
             queue_state = await get_run_all_queue()
             if queue_state.get("active"):
+                changed_ids, removed_ids = _extract_recipe_delta_ids(save_result_for_cache)
+                cache_change_units = len(set(changed_ids) | set(removed_ids)) or 1
+                total_cache_changes = _coerce_nonnegative_int(
+                    queue_state.get("total_cache_changes")
+                ) + cache_change_units
+                await update_run_all_queue(total_cache_changes=total_cache_changes)
                 logger.info(
                     f"Deferred cache rebuild and image auto-download after {scraper_id} scrape because "
                     f"run-all queue is active ({recipes_found} new recipes)"
                 )
             else:
-                try:
-                    from cache_manager import compute_cache_async
-                    create_background_task(compute_cache_async(), name=f"cache-rebuild-scraper-{scraper_id}")
-                    logger.info(f"Started cache rebuild after {scraper_id} scrape ({recipes_found} new recipes)")
-                except Exception as e:
-                    logger.warning(f"Could not start cache rebuild: {e}")
+                create_background_task(
+                    _refresh_cache_after_recipe_scrape(
+                        scraper_id=scraper_id,
+                        mode=mode,
+                        save_result=save_result_for_cache,
+                        recipes_found=recipes_found,
+                    ),
+                    name=f"cache-refresh-scraper-{scraper_id}",
+                )
+                logger.info(f"Started cache refresh after {scraper_id} scrape ({recipes_found} new recipes)")
 
                 from utils.image_auto_download import trigger_auto_download_if_enabled
                 await trigger_auto_download_if_enabled()
@@ -1931,9 +2118,64 @@ async def cancel_recipe_scraper(scraper_id: str):
 # RECIPE EXCLUSION (hide/restore)
 # ============================================================================
 
-def _notify_recipe_visibility_changed(recipe_id, excluded: bool) -> None:
-    """Visibility filters are applied by DB cache queries."""
-    return
+def _run_recipe_visibility_cache_refresh(recipe_ids: list[str], *, excluded: bool, source: str) -> None:
+    try:
+        if recipe_ids:
+            from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
+            from delta_probation_runtime import append_runtime_probation_history
+
+            delta_result = apply_recipe_delta(
+                changed_recipe_ids=[] if excluded else recipe_ids,
+                removed_recipe_ids=recipe_ids if excluded else [],
+                source=source,
+                apply=True,
+                verify_full_preview=settings.cache_recipe_delta_verify_full_preview,
+                skip_if_busy=False,
+            )
+            try:
+                append_runtime_probation_history(
+                    delta_result,
+                    history_path=_recipe_delta_probation_history_path(),
+                    store_name="recipes-ui",
+                    trigger=source,
+                )
+            except Exception as history_error:
+                logger.warning(f"Could not append recipe-delta probation history: {history_error}")
+            if delta_result.get("applied"):
+                logger.info(
+                    f"Recipe visibility cache delta applied ({source}, {len(recipe_ids)} recipes)"
+                )
+                return
+            logger.warning(
+                "Recipe visibility cache delta was not applied "
+                f"({delta_result.get('fallback_reason')}); falling back to full rebuild"
+            )
+
+        from cache_manager import refresh_cache_locked
+
+        result = refresh_cache_locked(skip_if_busy=False)
+        if result.get("skipped"):
+            logger.info(f"Recipe visibility cache rebuild skipped: {result.get('reason')}")
+        else:
+            logger.info(
+                "Recipe visibility cache rebuild complete: "
+                f"{result.get('cached', 0)} recipes in {result.get('time_ms', 0)}ms"
+            )
+    except Exception as e:
+        logger.warning(f"Recipe visibility cache refresh failed ({source}): {e}")
+
+
+def _notify_recipe_visibility_changed(recipe_id=None, excluded: bool = True, recipe_ids=None) -> None:
+    """Refresh cache/index state after hide, restore, or hard-delete actions."""
+    ids = _dedupe_recipe_id_list(recipe_ids if recipe_ids is not None else ([recipe_id] if recipe_id else []))
+    source = "ui_exclude_or_delete" if excluded else "ui_restore"
+    thread = threading.Thread(
+        target=_run_recipe_visibility_cache_refresh,
+        kwargs={"recipe_ids": ids, "excluded": excluded, "source": source},
+        name=f"recipe-visibility-cache-{source}",
+        daemon=True,
+    )
+    thread.start()
 
 
 @router.patch("/recipes/{recipe_id}/exclude")
@@ -2268,12 +2510,14 @@ def remove_all_excluded_urls():
                 UPDATE found_recipes
                 SET excluded = FALSE
                 WHERE excluded = TRUE
+                RETURNING id
             """))
             url_deleted = url_result.rowcount
-            hidden_restored = hidden_result.rowcount
+            restored_recipe_ids = [str(row.id) for row in hidden_result.fetchall()]
+            hidden_restored = len(restored_recipe_ids)
             db.commit()
             if hidden_restored:
-                _notify_recipe_visibility_changed(None, excluded=False)
+                _notify_recipe_visibility_changed(recipe_ids=restored_recipe_ids, excluded=False)
 
             logger.info(
                 f"Removed all exclusions ({url_deleted} URL entries, "

@@ -382,6 +382,21 @@ def _acquire_refresh_lock(db) -> None:
     )
 
 
+def _dedupe_recipe_ids(*id_lists: list[str] | None) -> list[str]:
+    ids: list[str] = []
+    seen: set[str] = set()
+    for id_list in id_lists:
+        for value in id_list or []:
+            if value is None:
+                continue
+            str_value = str(value)
+            if str_value in seen:
+                continue
+            ids.append(str_value)
+            seen.add(str_value)
+    return ids
+
+
 def build_compiled_recipe_match_row(
     recipe: FoundRecipe,
     *,
@@ -426,6 +441,53 @@ def refresh_compiled_recipe_match_data() -> dict[str, Any]:
     return {
         "compiler_version": RECIPE_COMPILER_VERSION,
         "compiled_recipes": len(rows),
+    }
+
+
+def refresh_compiled_recipe_match_data_for_recipe_ids(
+    recipe_ids: list[str],
+    remove_recipe_ids: list[str] | None = None,
+) -> dict[str, Any]:
+    """Refresh compiled recipe rows for selected recipes without a full rebuild."""
+    ensure_compiled_recipe_match_table()
+
+    requested_ids = _dedupe_recipe_ids(recipe_ids)
+    remove_ids = _dedupe_recipe_ids(remove_recipe_ids)
+    affected_ids = _dedupe_recipe_ids(requested_ids, remove_ids)
+    if not affected_ids:
+        return {
+            "compiler_version": RECIPE_COMPILER_VERSION,
+            "requested_recipe_count": 0,
+            "compiled_recipes": 0,
+            "missing_recipe_ids": [],
+            "inactive_recipe_ids": [],
+        }
+
+    with get_db_session() as db:
+        _acquire_refresh_lock(db)
+        recipes = db.query(FoundRecipe).filter(FoundRecipe.id.in_(affected_ids)).all()
+        found_ids = {str(recipe.id) for recipe in recipes}
+        missing_ids = [recipe_id for recipe_id in affected_ids if recipe_id not in found_ids]
+        rows = [build_compiled_recipe_match_row(recipe) for recipe in recipes]
+
+        db.query(CompiledRecipeMatchData).filter(
+            CompiledRecipeMatchData.found_recipe_id.in_(affected_ids)
+        ).delete(synchronize_session=False)
+        if rows:
+            db.bulk_insert_mappings(CompiledRecipeMatchData, rows)
+        db.commit()
+
+    inactive_ids = [
+        str(row["found_recipe_id"])
+        for row in rows
+        if not bool(row.get("is_active"))
+    ]
+    return {
+        "compiler_version": RECIPE_COMPILER_VERSION,
+        "requested_recipe_count": len(affected_ids),
+        "compiled_recipes": len(rows),
+        "missing_recipe_ids": missing_ids,
+        "inactive_recipe_ids": inactive_ids,
     }
 
 

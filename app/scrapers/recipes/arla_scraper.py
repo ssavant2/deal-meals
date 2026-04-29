@@ -56,8 +56,9 @@ sys.path.insert(0, app_dir)
 
 from database import get_db_session
 from scrapers.recipes._common import (
-    _is_type, RecipeScrapeResult, make_recipe_scrape_result,
-    parse_iso8601_duration, split_serving_lists, StreamingRecipeSaver
+    _is_type, RecipeScrapeResult, incremental_attempt_limit,
+    make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
+    split_serving_lists, StreamingRecipeSaver
 )
 
 # GUI Metadata
@@ -244,13 +245,14 @@ class ArlaScraper:
         """Signal cancellation."""
         self._cancel_flag = True
 
-    async def _report_progress(self, message: str, current: int = 0, total: int = 0):
+    async def _report_progress(self, message: str, current: int = 0, total: int = 0, success: int = 0):
         """Report progress via callback if set."""
         if self._progress_callback:
             await self._progress_callback({
                 "message": message,
                 "current": current,
                 "total": total,
+                "success": success,
             })
 
     async def _report_activity(self):
@@ -443,6 +445,7 @@ class ArlaScraper:
         client: httpx.AsyncClient,
         urls: List[str],
         stream_saver: Optional[StreamingRecipeSaver] = None,
+        max_recipes: Optional[int] = None,
     ) -> List[Dict]:
         """Scrape multiple recipes with adaptive rate limiting.
 
@@ -467,7 +470,7 @@ class ArlaScraper:
         queue = deque((url, 0) for url in urls)
 
         logger.info(f"Scraping {total_original} recipes (delay={current_delay}s)...")
-        await self._report_progress(f"Fetching {total_original} recipes...", 0, total_original)
+        await self._report_progress(f"Fetching {total_original} recipes...", 0, total_original, 0)
 
         processed = 0
         while queue:
@@ -495,6 +498,12 @@ class ArlaScraper:
                 # Success: ease delay back toward base
                 if current_delay > REQUEST_DELAY:
                     current_delay = max(REQUEST_DELAY, current_delay - 0.5)
+                if recipe_target_reached(
+                    max_recipes=max_recipes,
+                    recipes=recipes,
+                    stream_saver=stream_saver,
+                ):
+                    queue.clear()
 
             processed += 1
             await self._report_activity()
@@ -509,7 +518,7 @@ class ArlaScraper:
                 )
                 await self._report_progress(
                     f"Fetched {found_count} recipes...",
-                    done, total_original,
+                    done, total_original, found_count,
                 )
 
             await asyncio.sleep(current_delay)
@@ -566,15 +575,17 @@ class ArlaScraper:
             else:
                 # Incremental: only new URLs not in database
                 existing_urls = self._get_existing_urls()
-                candidate_urls = all_urls if max_recipes else all_urls[:MAX_RECIPES]
+                attempt_limit = incremental_attempt_limit(
+                    max_recipes=max_recipes,
+                    available_count=len(all_urls),
+                    default_limit=MAX_RECIPES,
+                )
+                candidate_urls = all_urls[:attempt_limit]
                 urls_to_scrape = [url for url in candidate_urls if url not in existing_urls]
-
-                if max_recipes and len(urls_to_scrape) > max_recipes:
-                    urls_to_scrape = urls_to_scrape[:max_recipes]
 
                 logger.info(
                     f"INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape "
-                    f"({len(existing_urls)} already in DB)"
+                    f"(target {max_recipes or 'auto'}, {len(existing_urls)} already in DB)"
                 )
 
                 if not urls_to_scrape:
@@ -591,6 +602,7 @@ class ArlaScraper:
                 client,
                 urls_to_scrape,
                 stream_saver=stream_saver,
+                max_recipes=max_recipes,
             )
 
             if self._cancel_flag:

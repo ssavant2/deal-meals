@@ -90,6 +90,11 @@ Tills dess fungerar appen ändå, men den gör extra säkerhetskontroller och ka
 kännas långsammare. Schemaläggning av recept- och erbjudandehämtning gör att
 detta kan ske i bakgrunden.
 
+Efter mindre inkrementella recepthämtningar uppdateras matchningscachen normalt
+med ett snabbt recept-delta för just de recept som ändrats. Vid första körning,
+större fullhämtningar eller om en säkerhetskontroll misslyckas faller appen
+tillbaka till en full cacheombyggnad. Det kräver inget manuellt val.
+
 Startguiden försvinner automatiskt när alla steg är klara.
 
 ---
@@ -252,6 +257,14 @@ Varje receptkälla har en **kugghjulsknapp** (⚙) bredvid pilknappen. Klicka p�
 - **Full hämtning** — Antal recept vid "Full"-körning. "Hämta alla" = inga begränsningar.
 - **Inkrementell hämtning** — Antal recept vid "Inkrementell"-körning. "Alla nya" = alla nya recept sedan senaste hämtningen.
 
+Antalet är ett mål för sparbara recept, inte ett strikt antal URL:er som
+skraparen får besöka. Vissa receptsajter listar även artiklar, kategorier eller
+trasiga sidor bland recept-URL:erna. Deal Meals kan därför prova några extra
+URL:er i bakgrunden för att nå målet, men har ett hårt internt tak så en dålig
+träffrad inte kan göra körningen orimligt lång. Om en källa helt enkelt inte har
+tillräckligt många nya giltiga recept kan resultatet bli lägre än det valda
+antalet.
+
 De valda värdena visas direkt i källans beskrivningstext (t.ex. "Recept från coop.se (500 / alla nya)").
 
 ### 4.3 Hämta recept
@@ -274,11 +287,14 @@ en källa fungerar.
 
 **Under hämtningen:**
 - En snurrande ikon visas med källans namn och förlopp (antal recept hittade hittills)
+- Förloppet visar hittade/sparbara recept mot ditt mål, inte interna URL-försök
 - Du kan **avbryta** när som helst med den röda avbryt-knappen
 
 **Efter slutförd hämtning:**
 - En sammanfattning visar nya recept och totalt antal i databasen
-- Receptförslagen på startsidan uppdateras
+- Receptförslagen på startsidan uppdateras. Små inkrementella hämtningar brukar
+  uppdatera cachen med ett snabbt delta; större körningar eller fallback-lägen
+  kan göra en full ombyggnad.
 
 **Tidsuppskattningar** visas under källväljaren med ungefärlig tid för varje läge för den valda källan.
 
@@ -489,7 +505,7 @@ Starta sedan om web-containern med `docker compose up -d web` (restart laddar IN
 
 ### Bör jag schemalägga eller köra manuellt?
 
-**Schemalägga är rekommenderat.** När erbjudanden eller recept hämtas byggs receptmatchningen om automatiskt. Med normalt antal erbjudanden tar det bara några sekunder, men själva hämtningen från butikens webbplats kan ta lite längre. Om du schemalägger hämtningarna (t.ex. på natten eller tidigt på morgonen) sker allt i bakgrunden och dina förslag är klara när du öppnar appen.
+**Schemalägga är rekommenderat.** När erbjudanden eller recept hämtas uppdateras receptmatchningen automatiskt. Små inkrementella recepthämtningar kan oftast patcha cachen med ett snabbt delta, medan erbjudandehämtningar, stora fullhämtningar och fallback-lägen kan göra en full ombyggnad. Om du schemalägger hämtningarna (t.ex. på natten eller tidigt på morgonen) sker allt i bakgrunden och dina förslag är klara när du öppnar appen.
 
 Du kan köra hämtningar manuellt också — men då får du vänta medan erbjudandena laddas ner och matchningen beräknas om.
 

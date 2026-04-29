@@ -92,6 +92,13 @@ fast-path probation, it simply keeps doing extra safety verification and can be
 slower. Scheduling recipe and store fetches lets these refreshes happen in the
 background.
 
+Recipe fetches use the same cache system. Small incremental recipe updates are
+normally applied as recipe-delta patches for only the changed recipes, while
+first runs, large full imports, and safety fallback cases rebuild the full
+matching cache. Recipe-source fetch limits are targets for usable recipes; a
+scraper may try a bounded hidden buffer of extra URLs when a source has
+recipe-like pages that do not produce valid recipes.
+
 ## Requirements
 
 - Docker with Compose v2
