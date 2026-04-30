@@ -97,6 +97,13 @@ class Settings(BaseSettings):
         default=2,
         description="Minimum ready recipe-delta probation runs for the current version triple",
     )
+    cache_recipe_delta_max_affected_ratio: float = Field(
+        default=0.02,
+        description=(
+            "Maximum fraction of active recipes a recipe scrape may affect before "
+            "falling back to a full cache rebuild"
+        ),
+    )
     # Cache rebuild / ingredient routing phase 2
     cache_ingredient_routing_mode: str = Field(
         default="hint_first",

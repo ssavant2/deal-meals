@@ -91,9 +91,12 @@ def build_cache_last_operation(
         "run_kind",
         "source",
         "fallback_reason",
+        "trigger_reason",
         "error",
         "effective_rebuild_mode",
         "recipe_selection_mode",
+        "recipe_delta_decision",
+        "recipe_delta_reason",
         "verification_mode",
         "matcher_version",
         "recipe_compiler_version",
@@ -125,6 +128,8 @@ def build_cache_last_operation(
         "patch_preview_time_ms",
         "materialized_mismatched_count",
         "actual_changed_recipes",
+        "affected_recipe_count",
+        "active_recipe_count",
         "matched_offer_ids",
         "total_offers",
         "unmatched_offer_ids",
@@ -158,6 +163,15 @@ def build_cache_last_operation(
             safe_value = _safe_int(patch_result.get(source_key))
             if safe_value is not None:
                 op[target_key] = safe_value
+
+    for key in ("affected_ratio_pct", "delta_ratio_threshold_pct"):
+        value = summary.get(key)
+        if value is None:
+            continue
+        try:
+            op[key] = round(float(value), 4)
+        except (TypeError, ValueError):
+            continue
 
     return op
 

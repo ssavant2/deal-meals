@@ -20,6 +20,11 @@ except ModuleNotFoundError:
     from app.cache_operation_metadata import summarize_cache_operation_history
 
 try:
+    from config import settings
+except ModuleNotFoundError:
+    from app.config import settings
+
+try:
     from languages.matcher_runtime import (
         MATCHER_VERSION,
         OFFER_COMPILER_VERSION,
@@ -241,6 +246,10 @@ def run_cache_doctor() -> dict[str, Any]:
                         "cache_metadata.last_operation column is missing",
                     ))
                 if has_operation_history:
+                    operation_history_summary["delta_ratio_threshold_pct"] = round(
+                        float(settings.cache_recipe_delta_max_affected_ratio) * 100,
+                        4,
+                    )
                     checks.append(_check(
                         "cache_metadata:operation_history",
                         "ok" if operation_history_summary["history_size"] > 0 else "warning",

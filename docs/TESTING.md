@@ -39,9 +39,9 @@ docker compose exec -T -w /app web python tests/run_app_support_checks.py
 ```
 
 This runs the sanity check plus the tracked helper checks for cache doctor
-metadata, candidate routing, ingredient term maps, shadow candidate selection,
-ingredient-routing probation, delta verification policy, and the minimal
-frontend smoke.
+metadata, recipe cache refresh decisions, candidate routing, ingredient term
+maps, shadow candidate selection, ingredient-routing probation, delta
+verification policy, and the minimal frontend smoke.
 
 The frontend smoke can also be run directly:
 

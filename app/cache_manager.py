@@ -931,6 +931,8 @@ class CacheManager:
         input_scope: str = "live",
         fixture_hash: Optional[str] = None,
         max_workers: Optional[int] = None,
+        source: Optional[str] = None,
+        operation_context: Optional[Dict[str, Any]] = None,
     ) -> Dict:
         """
         Compute recipe-offer matches for all recipes.
@@ -950,12 +952,16 @@ class CacheManager:
             fixture_hash: Optional frozen fixture hash to attach to rebuild logs.
             max_workers: Optional cap for process-pool workers. Delta verification
                 previews use this to reduce peak memory while holding snapshots.
+            source: Optional operation source for cache-operation diagnostics.
+            operation_context: Optional compact diagnostic fields to attach to
+                rebuild summaries and cache-operation history.
 
         Returns:
             Stats dict: {'total_recipes': N, 'cached': M, 'time_ms': T}
         """
         start_time = time.perf_counter()
         run_kind = run_kind or ("full" if persist else "shadow_full")
+        operation_context = dict(operation_context or {})
         configured_rebuild_profile = self.get_rebuild_profile()
         offer_data_source = configured_rebuild_profile["offer_data_source"]
         recipe_data_source = configured_rebuild_profile["recipe_data_source"]
@@ -1045,13 +1051,16 @@ class CacheManager:
                     'recipe_data_source': recipe_data_source,
                     'candidate_data_source': candidate_data_source,
                     'run_kind': run_kind,
+                    'source': source,
                     'input_scope': input_scope,
                     'fixture_hash': fixture_hash,
                     'phase_timings_ms': phase_timings,
+                    **operation_context,
                     **ingredient_routing_fields,
                 }
                 _emit_rebuild_summary({
                     'run_kind': run_kind,
+                    'source': source,
                     'input_scope': input_scope,
                     'fixture_hash': fixture_hash,
                     'requested_recipe_count': len(requested_recipe_ids or ()),
@@ -1066,6 +1075,7 @@ class CacheManager:
                     'offer_data_source': offer_data_source,
                     'recipe_data_source': recipe_data_source,
                     'candidate_data_source': candidate_data_source,
+                    **operation_context,
                     **ingredient_routing_fields,
                     'phase_timings_ms': phase_timings,
                     'total_recipes': 0,
@@ -1607,9 +1617,11 @@ class CacheManager:
                 'recipe_data_source': recipe_data_source,
                 'candidate_data_source': candidate_data_source,
                 'run_kind': run_kind,
+                'source': source,
                 'input_scope': input_scope,
                 'fixture_hash': fixture_hash,
                 'phase_timings_ms': phase_timings,
+                **operation_context,
                 **worker_fields,
                 **ingredient_routing_fields,
             }
@@ -1649,9 +1661,11 @@ class CacheManager:
                     },
                     operation_type="full_rebuild",
                     status="ready",
+                    source=source,
                 )
             _emit_rebuild_summary({
                 'run_kind': run_kind,
+                'source': source,
                 'input_scope': input_scope,
                 'fixture_hash': fixture_hash,
                 'requested_recipe_count': len(requested_recipe_ids or ()),
@@ -1667,6 +1681,7 @@ class CacheManager:
                 'offer_data_source': offer_data_source,
                 'recipe_data_source': recipe_data_source,
                 'candidate_data_source': candidate_data_source,
+                **operation_context,
                 **ingredient_routing_summary_fields,
                 **worker_fields,
                 'phase_timings_ms': phase_timings,
@@ -1687,6 +1702,7 @@ class CacheManager:
             logger.error(f"❌ Cache computation failed: {e}")
             _emit_rebuild_summary({
                 'run_kind': run_kind,
+                'source': source,
                 'input_scope': input_scope,
                 'fixture_hash': fixture_hash,
                 'requested_recipe_count': len(requested_recipe_ids or ()),
@@ -1701,6 +1717,7 @@ class CacheManager:
                 'offer_data_source': offer_data_source,
                 'recipe_data_source': recipe_data_source,
                 'candidate_data_source': candidate_data_source,
+                **operation_context,
                 **ingredient_routing_fields,
                 **worker_fields,
                 'phase_timings_ms': phase_timings,
@@ -1713,6 +1730,7 @@ class CacheManager:
                 record_cache_last_operation(
                     {
                         "run_kind": run_kind,
+                        "source": source,
                         "input_scope": input_scope,
                         "fixture_hash": fixture_hash,
                         "requested_recipe_count": len(requested_recipe_ids or ()),
@@ -1729,12 +1747,14 @@ class CacheManager:
                         "candidate_data_source": candidate_data_source,
                         **ingredient_routing_fields,
                         **worker_fields,
+                        **operation_context,
                         "status": "error",
                         "error": str(e),
                         "time_ms": int((time.perf_counter() - start_time) * 1000),
                     },
                     operation_type="full_rebuild",
                     status="error",
+                    source=source,
                 )
             raise
 
@@ -2133,6 +2153,8 @@ class CacheManager:
         input_scope: str = "live",
         fixture_hash: Optional[str] = None,
         max_workers: Optional[int] = None,
+        source: Optional[str] = None,
+        operation_context: Optional[Dict[str, Any]] = None,
     ) -> Dict:
         """Run cache rebuild using the single supported compiled profile."""
         return self.compute_cache(
@@ -2144,6 +2166,8 @@ class CacheManager:
             input_scope=input_scope,
             fixture_hash=fixture_hash,
             max_workers=max_workers,
+            source=source,
+            operation_context=operation_context,
         )
 
     def reset_cache(self) -> Dict:
@@ -2245,11 +2269,19 @@ def refresh_cache_locked(
     preferences: Optional[Dict] = None,
     *,
     skip_if_busy: bool = True,
+    run_kind: Optional[str] = None,
+    source: Optional[str] = None,
+    operation_context: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Refresh the global cache through the shared cache operation lock."""
     return run_cache_operation(
         "full_rebuild",
-        lambda: cache_manager.refresh_cache(preferences),
+        lambda: cache_manager.refresh_cache(
+            preferences,
+            run_kind=run_kind,
+            source=source,
+            operation_context=operation_context,
+        ),
         skip_if_busy=skip_if_busy,
     )
 
@@ -2258,6 +2290,9 @@ async def compute_cache_async(
     preferences: Optional[Dict] = None,
     *,
     skip_if_busy: bool = True,
+    run_kind: Optional[str] = None,
+    source: Optional[str] = None,
+    operation_context: Optional[Dict[str, Any]] = None,
 ) -> Dict:
     """
     Async wrapper for cache computation.
@@ -2269,7 +2304,13 @@ async def compute_cache_async(
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(
         None,
-        lambda: refresh_cache_locked(preferences, skip_if_busy=skip_if_busy),
+        lambda: refresh_cache_locked(
+            preferences,
+            skip_if_busy=skip_if_busy,
+            run_kind=run_kind,
+            source=source,
+            operation_context=operation_context,
+        ),
     )
 
 

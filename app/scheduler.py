@@ -20,6 +20,10 @@ from zoneinfo import ZoneInfo
 
 from config import settings
 from database import get_db_session
+from recipe_cache_refresh_decision import (
+    decide_recipe_cache_refresh_strategy,
+    load_recipe_cache_status_snapshot,
+)
 from scrapers.recipes._common import normalize_recipe_scrape_result
 from utils.scraper_history import save_run_history
 
@@ -65,6 +69,7 @@ class ScraperScheduler:
         self._batch_has_cache_changes = False
         self._batch_changed_recipe_ids: list[str] = []
         self._batch_removed_recipe_ids: list[str] = []
+        self._batch_cache_delta_ids_missing = False
         self._batch_executed_scraper_ids: set[str] = set()
 
     @staticmethod
@@ -113,6 +118,8 @@ class ScraperScheduler:
         if not self._save_result_has_cache_changes(save_result):
             return
         changed_ids, removed_ids = self._extract_recipe_delta_ids(save_result)
+        if not changed_ids and not removed_ids:
+            self._batch_cache_delta_ids_missing = True
         self._extend_unique_id_list(self._batch_removed_recipe_ids, removed_ids)
         removed_set = set(self._batch_removed_recipe_ids)
         self._batch_changed_recipe_ids = [
@@ -156,14 +163,29 @@ class ScraperScheduler:
 
         changed_ids = list(self._batch_changed_recipe_ids)
         removed_ids = list(self._batch_removed_recipe_ids)
+        ids_missing = self._batch_cache_delta_ids_missing
         self._batch_has_cache_changes = False
         self._batch_changed_recipe_ids = []
         self._batch_removed_recipe_ids = []
+        self._batch_cache_delta_ids_missing = False
 
         try:
             from cache_manager import compute_cache_async
 
-            if (changed_ids or removed_ids) and settings.cache_recipe_delta_enabled:
+            cache_snapshot = load_recipe_cache_status_snapshot()
+            decision = decide_recipe_cache_refresh_strategy(
+                changed_ids,
+                removed_ids,
+                ids_missing,
+                source_kind="scheduled_recipe_batch",
+                mode="incremental",
+                cache_status_snapshot=cache_snapshot,
+            )
+            source = f"scheduled_recipe_batch:{last_scraper_id}"
+            operation_context = decision.to_operation_context()
+            logger.info(decision.log_summary(label="Scheduled recipe batch cache decision"))
+
+            if decision.uses_delta:
                 from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
                 from delta_probation_runtime import append_runtime_probation_history
 
@@ -176,10 +198,11 @@ class ScraperScheduler:
                     lambda: apply_recipe_delta(
                         changed_recipe_ids=changed_ids,
                         removed_recipe_ids=removed_ids,
-                        source=f"scheduled_recipe_batch:{last_scraper_id}",
+                        source=source,
                         apply=True,
                         verify_full_preview=settings.cache_recipe_delta_verify_full_preview,
                         skip_if_busy=False,
+                        operation_context=operation_context,
                     ),
                 )
                 try:
@@ -205,11 +228,36 @@ class ScraperScheduler:
                     f"({delta_result.get('fallback_reason')}); falling back to full rebuild"
                 )
 
-            logger.info(
-                "Starting full cache rebuild after scheduled recipe batch "
-                f"(last={last_scraper_id})"
-            )
-            result = await compute_cache_async(skip_if_busy=False)
+                fallback_reason = delta_result.get("fallback_reason") or "recipe_delta_not_applied"
+                result = await compute_cache_async(
+                    skip_if_busy=False,
+                    run_kind="recipe_delta_fallback_full_rebuild",
+                    source=source,
+                    operation_context={
+                        **operation_context,
+                        "trigger_reason": f"delta_apply_failed:{fallback_reason}",
+                    },
+                )
+            elif decision.strategy == "full":
+                logger.info(
+                    "Starting full cache rebuild after scheduled recipe batch "
+                    f"(last={last_scraper_id}, reason={decision.reason})"
+                )
+                result = await compute_cache_async(
+                    skip_if_busy=False,
+                    run_kind="scheduled_recipe_batch_full_rebuild",
+                    source=source,
+                    operation_context=operation_context,
+                )
+            else:
+                result = {
+                    "success": True,
+                    "skipped": True,
+                    "reason": decision.reason,
+                    "effective_rebuild_mode": "noop",
+                    "cached": 0,
+                    "time_ms": 0,
+                }
             if result.get("skipped"):
                 logger.info(f"Scheduled recipe batch cache refresh skipped: {result.get('reason')}")
             else:

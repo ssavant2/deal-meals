@@ -869,6 +869,8 @@ def _apply_recipe_delta_unlocked(
     source: str | None = None,
     apply: bool = True,
     verify_full_preview: bool = True,
+    cache_status_snapshot: dict[str, Any] | None = None,
+    operation_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Apply a recipe-driven delta patch to the active cache table."""
     try:
@@ -885,6 +887,7 @@ def _apply_recipe_delta_unlocked(
         if recipe_id not in removed_set
     ]
     status_was_set = False
+    operation_context = dict(operation_context or {})
 
     verification_policy = _resolve_recipe_delta_verification_policy(
         verify_full_preview=verify_full_preview,
@@ -918,6 +921,7 @@ def _apply_recipe_delta_unlocked(
                 "probation_history_file": verification_policy["probation_status"]["history_file"],
                 "probation_reasons": verification_policy["probation_status"]["reasons"],
                 "probation_summary": verification_policy["probation_status"]["summary"],
+                **operation_context,
                 **(extra or {}),
             },
         )
@@ -931,7 +935,7 @@ def _apply_recipe_delta_unlocked(
         _emit_recipe_delta_summary(result, level="warning")
         return result
 
-    cache_state = _active_cache_state()
+    cache_state = dict(cache_status_snapshot or _active_cache_state())
     if cache_state["status"] != "ready":
         return _fallback("cache_not_ready", extra={"cache_state": cache_state})
     if cache_state["cache_rows"] == 0 and cache_state["offer_rows"] > 0:
@@ -1166,6 +1170,7 @@ def _apply_recipe_delta_unlocked(
             "offer_data_source": "compiled",
             "recipe_data_source": "compiled_payload",
             "candidate_data_source": "term_index",
+            **operation_context,
         }
         if apply:
             record_cache_last_operation(
@@ -1539,6 +1544,8 @@ def apply_recipe_delta(
     apply: bool = True,
     verify_full_preview: bool | None = None,
     skip_if_busy: bool = True,
+    cache_status_snapshot: dict[str, Any] | None = None,
+    operation_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Apply recipe delta through the shared cache operation lock."""
     started_at = time.perf_counter()
@@ -1549,6 +1556,7 @@ def apply_recipe_delta(
         for recipe_id in _dedupe_recipe_delta_ids(changed_recipe_ids)
         if recipe_id not in removed_set
     ]
+    operation_context = dict(operation_context or {})
 
     if not changed_ids and not removed_ids:
         return {
@@ -1566,6 +1574,7 @@ def apply_recipe_delta(
             "matcher_version": MATCHER_VERSION,
             "recipe_compiler_version": RECIPE_COMPILER_VERSION,
             "offer_compiler_version": OFFER_COMPILER_VERSION,
+            **operation_context,
         }
 
     if not settings.cache_recipe_delta_enabled:
@@ -1576,6 +1585,7 @@ def apply_recipe_delta(
             fallback_reason="recipe_delta_disabled",
             started_at=started_at,
         )
+        result.update(operation_context)
         _emit_recipe_delta_summary(result, level="warning")
         return result
 
@@ -1594,6 +1604,8 @@ def apply_recipe_delta(
             source=source,
             apply=apply,
             verify_full_preview=effective_verify_full_preview,
+            cache_status_snapshot=cache_status_snapshot,
+            operation_context=operation_context,
         ),
         skip_if_busy=skip_if_busy,
     )

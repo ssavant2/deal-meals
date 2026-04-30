@@ -513,14 +513,28 @@ function _makeQueueCallback() {
         }
 
         runAllQueue.index++;
+        const requestedIndex = runAllQueue.index;
 
         // Sync updated index + totalNew to server before starting next
         try {
-            await fetch('/api/recipe-scrapers/queue', {
+            const response = await fetch('/api/recipe-scrapers/queue', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'advance', index: runAllQueue.index, total_new: runAllQueue.totalNew })
             });
+            const data = await response.json();
+            if (data.success && data.active) {
+                runAllQueue.index = Number.isInteger(data.index) ? data.index : runAllQueue.index;
+                runAllQueue.totalNew = Number.isInteger(data.total_new) ? data.total_new : runAllQueue.totalNew;
+                if (data.stale_advance || runAllQueue.index !== requestedIndex) {
+                    await checkRunningScrapers();
+                    return;
+                }
+            } else if (data.success && data.active === false) {
+                runAllQueue = null;
+                await checkRunningScrapers();
+                return;
+            }
         } catch (error) {
             console.error('Failed to advance queue on server:', error);
         }
@@ -1287,15 +1301,20 @@ async function runScraper() {
 }
 
 function startPolling(scraperId, onComplete) {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+
     // Poll every 2 seconds
     let pollFailCount = 0;
-    pollingInterval = setInterval(async () => {
+    const intervalId = setInterval(async () => {
         try {
             const response = await fetch(`/api/recipe-scrapers/${scraperId}/status`);
             if (!response.ok) {
                 if (++pollFailCount >= 5) {
-                    clearInterval(pollingInterval);
-                    pollingInterval = null;
+                    clearInterval(intervalId);
+                    if (pollingInterval === intervalId) pollingInterval = null;
                     currentScraperId = null;
                     document.getElementById('progress-container').classList.remove('active');
                     setRecipeRunButtonLocked(false);
@@ -1316,8 +1335,8 @@ function startPolling(scraperId, onComplete) {
 
                 if (!data.running) {
                     // Scraper finished
-                    clearInterval(pollingInterval);
-                    pollingInterval = null;
+                    clearInterval(intervalId);
+                    if (pollingInterval === intervalId) pollingInterval = null;
                     currentScraperId = null;
 
                     // If a custom onComplete callback is provided, use it instead of default behavior
@@ -1366,8 +1385,8 @@ function startPolling(scraperId, onComplete) {
         } catch (error) {
             console.error('Polling error:', error);
             if (++pollFailCount >= 5) {
-                clearInterval(pollingInterval);
-                pollingInterval = null;
+                clearInterval(intervalId);
+                if (pollingInterval === intervalId) pollingInterval = null;
                 currentScraperId = null;
                 document.getElementById('progress-container').classList.remove('active');
                 setRecipeRunButtonLocked(false);
@@ -1375,6 +1394,7 @@ function startPolling(scraperId, onComplete) {
             }
         }
     }, 2000);
+    pollingInterval = intervalId;
 }
 
 async function cancelScraper() {

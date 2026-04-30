@@ -40,6 +40,13 @@ def main() -> int:
                 "deleted_count": 2,
                 "inserted_recipe_ids": ["should-not-be-persisted"],
             },
+            "trigger_reason": "delta_apply_failed:materialized_patch_mismatch",
+            "recipe_delta_decision": "full",
+            "recipe_delta_reason": "ratio_above_threshold",
+            "affected_recipe_count": "500",
+            "active_recipe_count": "13000",
+            "affected_ratio_pct": "3.8461",
+            "delta_ratio_threshold_pct": 2.0,
             "error": "x" * 700,
         },
         operation_type="recipe_delta",
@@ -50,6 +57,11 @@ def main() -> int:
     check("operation changed count coerced", operation["changed_recipe_count"], 20)
     check("operation patch total", operation["total_matches"], 1234)
     check("operation patch inserted", operation["patch_inserted_count"], 18)
+    check("operation trigger reason", operation["trigger_reason"], "delta_apply_failed:materialized_patch_mismatch")
+    check("operation recipe delta decision", operation["recipe_delta_decision"], "full")
+    check("operation affected recipe count", operation["affected_recipe_count"], 500)
+    check("operation affected ratio pct", operation["affected_ratio_pct"], 3.8461)
+    check("operation threshold pct", operation["delta_ratio_threshold_pct"], 2.0)
     check("operation excludes id lists", "changed_recipe_ids" in operation, False)
     check("operation truncates long error", operation["error"].endswith("..."), True)
     check("operation truncates to bounded length", len(operation["error"]), 503)

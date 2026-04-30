@@ -25,6 +25,12 @@ from sqlalchemy import text
 from loguru import logger
 
 from database import get_db_session
+from recipe_cache_refresh_decision import (
+    RecipeCacheRefreshDecision,
+    RecipeCacheStatusSnapshot,
+    decide_recipe_cache_refresh_strategy,
+    load_recipe_cache_status_snapshot,
+)
 from scrapers.recipes._common import normalize_recipe_scrape_result
 from utils.errors import friendly_error, is_valid_uuid
 from utils.recipe_image_cleanup import (
@@ -1261,7 +1267,11 @@ async def get_recipe_scraper_queue():
     """Get current run-all queue state."""
     state = await get_run_all_queue()
     if state.get("active"):
-        return JSONResponse({"success": True, **state})
+        public_fields = {"active", "scraper_ids", "index", "total_new"}
+        return JSONResponse({
+            "success": True,
+            **{key: value for key, value in state.items() if key in public_fields},
+        })
     return JSONResponse({"success": True, "active": False})
 
 
@@ -1272,7 +1282,15 @@ def _coerce_nonnegative_int(value) -> int:
         return 0
 
 
-MAX_FULL_RECIPE_DELTA_AFFECTED_RECIPES = 50
+def _iso_timestamp_at_or_after(value: str | None, threshold: str | None) -> bool:
+    if not value or not threshold:
+        return False
+    try:
+        parsed_value = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed_threshold = datetime.fromisoformat(threshold.replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return False
+    return parsed_value >= parsed_threshold
 
 
 def _dedupe_recipe_id_list(values) -> list[str]:
@@ -1317,6 +1335,46 @@ def _save_result_has_cache_changes(save_result: dict | None) -> bool:
     )
 
 
+def _merge_recipe_delta_ids(
+    existing_changed_ids,
+    existing_removed_ids,
+    new_changed_ids,
+    new_removed_ids,
+) -> tuple[list[str], list[str]]:
+    removed_ids = _dedupe_recipe_id_list(
+        list(existing_removed_ids or []) + list(new_removed_ids or [])
+    )
+    removed_set = set(removed_ids)
+    changed_ids = [
+        recipe_id
+        for recipe_id in _dedupe_recipe_id_list(
+            list(existing_changed_ids or []) + list(new_changed_ids or [])
+        )
+        if recipe_id not in removed_set
+    ]
+    return changed_ids, removed_ids
+
+
+def _recipe_delta_ids_missing(save_result: dict | None, changed_ids: list[str], removed_ids: list[str]) -> bool:
+    return _save_result_has_cache_changes(save_result) and not changed_ids and not removed_ids
+
+
+def _cache_metadata_status_from_snapshot(snapshot: RecipeCacheStatusSnapshot) -> dict:
+    return snapshot.to_cache_state()
+
+
+def _set_cache_metadata_status(status: str, error_message: str | None = None) -> None:
+    with get_db_session() as db:
+        db.execute(text("""
+            INSERT INTO cache_metadata (cache_name, status, error_message)
+            VALUES ('recipe_offer_matches', :status, :error_message)
+            ON CONFLICT (cache_name) DO UPDATE SET
+                status = :status,
+                error_message = :error_message
+        """), {"status": status, "error_message": error_message})
+        db.commit()
+
+
 def _scheduled_recipe_batch_active() -> bool:
     try:
         from scheduler import scraper_scheduler
@@ -1325,29 +1383,6 @@ def _scheduled_recipe_batch_active() -> bool:
     except Exception as e:
         logger.debug(f"Could not inspect scheduled recipe batch state: {e}")
         return False
-
-
-def _should_use_recipe_delta(
-    *,
-    mode: str,
-    save_result: dict | None,
-    changed_recipe_ids: list[str],
-    removed_recipe_ids: list[str],
-) -> tuple[bool, str]:
-    if not settings.cache_recipe_delta_enabled:
-        return False, "recipe_delta_disabled"
-    if not changed_recipe_ids and not removed_recipe_ids:
-        if _save_result_has_cache_changes(save_result):
-            return False, "recipe_delta_ids_missing"
-        return False, "no_recipe_delta_ids"
-    if mode == "incremental":
-        return True, "incremental_recipe_delta"
-    if mode == "full":
-        affected_count = len(set(changed_recipe_ids) | set(removed_recipe_ids))
-        if affected_count <= MAX_FULL_RECIPE_DELTA_AFFECTED_RECIPES:
-            return True, "small_full_recipe_delta"
-        return False, f"full_recipe_delta_limit_exceeded:{affected_count}"
-    return False, f"unsupported_mode:{mode}"
 
 
 async def _refresh_cache_after_recipe_scrape(
@@ -1360,16 +1395,23 @@ async def _refresh_cache_after_recipe_scrape(
     from cache_manager import compute_cache_async
 
     changed_ids, removed_ids = _extract_recipe_delta_ids(save_result)
-    use_delta, reason = _should_use_recipe_delta(
+    ids_missing = _recipe_delta_ids_missing(save_result, changed_ids, removed_ids)
+    cache_snapshot = load_recipe_cache_status_snapshot()
+    decision = decide_recipe_cache_refresh_strategy(
+        changed_ids,
+        removed_ids,
+        ids_missing,
+        source_kind="recipe_scrape",
         mode=mode,
-        save_result=save_result,
-        changed_recipe_ids=changed_ids,
-        removed_recipe_ids=removed_ids,
+        cache_status_snapshot=cache_snapshot,
     )
+    source = f"recipe_scrape:{scraper_id}:{mode}"
+    operation_context = decision.to_operation_context()
+    logger.info(decision.log_summary(label=f"Recipe scrape cache decision ({scraper_id})"))
 
     delta_result = None
     result = None
-    if use_delta:
+    if decision.uses_delta:
         try:
             from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
             from delta_probation_runtime import append_runtime_probation_history
@@ -1380,7 +1422,7 @@ async def _refresh_cache_after_recipe_scrape(
                     scraper=scraper_id,
                     changed=len(changed_ids),
                     removed=len(removed_ids),
-                    reason=reason,
+                    reason=decision.reason,
                 )
             )
             loop = asyncio.get_running_loop()
@@ -1389,10 +1431,11 @@ async def _refresh_cache_after_recipe_scrape(
                 lambda: apply_recipe_delta(
                     changed_recipe_ids=changed_ids,
                     removed_recipe_ids=removed_ids,
-                    source=f"recipe_scrape:{scraper_id}:{mode}",
+                    source=source,
                     apply=True,
                     verify_full_preview=settings.cache_recipe_delta_verify_full_preview,
                     skip_if_busy=False,
+                    operation_context=operation_context,
                 ),
             )
             try:
@@ -1423,13 +1466,35 @@ async def _refresh_cache_after_recipe_scrape(
                 f"Recipe-delta was not applied after {scraper_id} scrape "
                 f"({fallback_reason}); falling back to full rebuild"
             )
-            result = await compute_cache_async(skip_if_busy=False)
-    else:
+            result = await compute_cache_async(
+                skip_if_busy=False,
+                run_kind="recipe_delta_fallback_full_rebuild",
+                source=source,
+                operation_context={
+                    **operation_context,
+                    "trigger_reason": f"delta_apply_failed:{fallback_reason}",
+                },
+            )
+    elif decision.strategy == "full":
         logger.info(
             f"Starting full cache rebuild after {scraper_id} scrape "
-            f"({recipes_found} new recipes, delta_reason={reason})"
+            f"({recipes_found} new recipes, delta_reason={decision.reason})"
         )
-        result = await compute_cache_async(skip_if_busy=False)
+        result = await compute_cache_async(
+            skip_if_busy=False,
+            run_kind="recipe_scrape_full_rebuild",
+            source=source,
+            operation_context=operation_context,
+        )
+    else:
+        result = {
+            "success": True,
+            "skipped": True,
+            "reason": decision.reason,
+            "effective_rebuild_mode": "noop",
+            "cached": 0,
+            "time_ms": 0,
+        }
 
     if result.get("skipped"):
         logger.info(f"Recipe scrape cache refresh skipped: {result.get('reason')}")
@@ -1444,6 +1509,104 @@ async def _refresh_cache_after_recipe_scrape(
     return result
 
 
+async def _refresh_cache_after_run_all_queue(
+    *,
+    queue_state: dict,
+    decision: RecipeCacheRefreshDecision,
+    cache_snapshot: RecipeCacheStatusSnapshot,
+) -> dict:
+    from cache_manager import compute_cache_async
+
+    changed_ids = _dedupe_recipe_id_list(queue_state.get("changed_recipe_ids"))
+    removed_ids = _dedupe_recipe_id_list(queue_state.get("removed_recipe_ids"))
+    source = "recipe_run_all"
+    operation_context = decision.to_operation_context()
+    result = None
+
+    try:
+        logger.info(decision.log_summary(label="Run-all cache decision"))
+        if decision.uses_delta:
+            from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
+            from delta_probation_runtime import append_runtime_probation_history
+
+            delta_result = await asyncio.get_running_loop().run_in_executor(
+                None,
+                lambda: apply_recipe_delta(
+                    changed_recipe_ids=changed_ids,
+                    removed_recipe_ids=removed_ids,
+                    source=source,
+                    apply=True,
+                    verify_full_preview=settings.cache_recipe_delta_verify_full_preview,
+                    skip_if_busy=False,
+                    cache_status_snapshot=_cache_metadata_status_from_snapshot(cache_snapshot),
+                    operation_context=operation_context,
+                ),
+            )
+            try:
+                append_runtime_probation_history(
+                    delta_result,
+                    history_path=_recipe_delta_probation_history_path(),
+                    store_name="run_all",
+                    trigger="recipe_run_all",
+                )
+            except Exception as history_error:
+                logger.warning(f"Could not append run-all recipe-delta history: {history_error}")
+
+            if delta_result.get("applied"):
+                result = delta_result
+            else:
+                fallback_reason = delta_result.get("fallback_reason") or "recipe_delta_not_applied"
+                logger.warning(
+                    f"Run-all recipe-delta was not applied ({fallback_reason}); "
+                    "falling back to full rebuild"
+                )
+                result = await compute_cache_async(
+                    skip_if_busy=False,
+                    run_kind="recipe_delta_fallback_full_rebuild",
+                    source=source,
+                    operation_context={
+                        **operation_context,
+                        "trigger_reason": f"delta_apply_failed:{fallback_reason}",
+                    },
+                )
+        elif decision.strategy == "full":
+            result = await compute_cache_async(
+                skip_if_busy=False,
+                run_kind="recipe_run_all_full_rebuild",
+                source=source,
+                operation_context=operation_context,
+            )
+        else:
+            _set_cache_metadata_status("ready")
+            result = {
+                "success": True,
+                "skipped": True,
+                "reason": decision.reason,
+                "effective_rebuild_mode": "noop",
+                "cached": 0,
+                "time_ms": 0,
+            }
+
+        if result.get("skipped"):
+            logger.info(f"Run-all cache refresh skipped: {result.get('reason')}")
+        else:
+            logger.success(
+                "Run-all cache refresh complete ({mode}): {cached} recipes in {time_ms}ms".format(
+                    mode=result.get("effective_rebuild_mode", "unknown"),
+                    cached=result.get("cached", result.get("patch_result", {}).get("total_matches", 0)),
+                    time_ms=result.get("time_ms", 0),
+                )
+            )
+        return result
+    except Exception as exc:
+        try:
+            _set_cache_metadata_status("error", str(exc))
+        except Exception as status_error:
+            logger.warning(f"Could not mark run-all cache refresh error: {status_error}")
+        logger.warning(f"Run-all cache refresh failed: {exc}")
+        raise
+
+
 async def _finish_run_all_queue(total_new: int) -> dict:
     """Finish the run-all queue and start once-per-queue follow-up jobs."""
     total_new = _coerce_nonnegative_int(total_new)
@@ -1455,6 +1618,7 @@ async def _finish_run_all_queue(total_new: int) -> dict:
             )
             return {
                 "cache_rebuild_started": False,
+                "cache_rebuild_kind": "noop",
                 "auto_image_download_started": False,
                 "finish_deferred": True,
                 "running_scraper_id": scraper_id,
@@ -1477,43 +1641,69 @@ async def _finish_run_all_queue(total_new: int) -> dict:
         logger.info("Run-all finish ignored because the queue is already inactive")
         return {
             "cache_rebuild_started": cache_rebuild_started,
+            "cache_rebuild_kind": "unknown" if cache_rebuild_started else "noop",
             "auto_image_download_started": False,
             "already_finished": True,
         }
 
-    total_cache_changes = max(
-        total_new,
-        _coerce_nonnegative_int(queue_state.get("total_cache_changes")),
+    changed_ids = _dedupe_recipe_id_list(queue_state.get("changed_recipe_ids"))
+    removed_ids = _dedupe_recipe_id_list(queue_state.get("removed_recipe_ids"))
+    ids_missing = bool(queue_state.get("cache_delta_ids_missing"))
+    total_cache_changes = (
+        len(set(changed_ids) | set(removed_ids))
+        if not ids_missing
+        else max(1, _coerce_nonnegative_int(queue_state.get("total_cache_changes")))
     )
 
     cache_rebuild_started = False
+    cache_rebuild_kind = "noop"
     auto_image_download_started = False
-    if total_cache_changes > 0:
+    if total_cache_changes > 0 or ids_missing:
         try:
-            from cache_manager import compute_cache_async
-
-            with get_db_session() as db:
-                db.execute(text("""
-                    UPDATE cache_metadata SET status = 'computing'
-                    WHERE cache_name = 'recipe_offer_matches'
-                """))
-                db.commit()
-
-            create_background_task(
-                compute_cache_async(skip_if_busy=False),
-                name="cache-rebuild-run-all-recipes",
+            cache_snapshot = load_recipe_cache_status_snapshot()
+            decision = decide_recipe_cache_refresh_strategy(
+                changed_ids,
+                removed_ids,
+                ids_missing,
+                source_kind="recipe_run_all",
+                mode="incremental",
+                cache_status_snapshot=cache_snapshot,
             )
-            event_bus.publish({
-                "type": "cache_invalidated",
-                "source": "recipes-run-all",
-            })
-            cache_rebuild_started = True
-            logger.info(
-                "Started final cache rebuild after run-all recipe scrape "
-                f"({total_new} new recipes, {total_cache_changes} cache-affecting changes)"
-            )
+
+            if decision.requires_cache_refresh:
+                _set_cache_metadata_status("computing")
+
+                create_background_task(
+                    _refresh_cache_after_run_all_queue(
+                        queue_state={
+                            **queue_state,
+                            "changed_recipe_ids": changed_ids,
+                            "removed_recipe_ids": removed_ids,
+                        },
+                        decision=decision,
+                        cache_snapshot=cache_snapshot,
+                    ),
+                    name="cache-refresh-run-all-recipes",
+                )
+                event_bus.publish({
+                    "type": "cache_invalidated",
+                    "source": "recipes-run-all",
+                })
+                cache_rebuild_started = True
+                cache_rebuild_kind = decision.strategy
+                logger.info(
+                    "Started final cache refresh after run-all recipe scrape "
+                    f"({total_new} new recipes, {total_cache_changes} cache-affecting changes, "
+                    f"strategy={decision.strategy}, reason={decision.reason})"
+                )
+            else:
+                logger.info(f"Run-all cache refresh not needed ({decision.reason})")
         except Exception as e:
             logger.warning(f"Could not start final run-all cache rebuild: {e}")
+            try:
+                _set_cache_metadata_status("error", str(e))
+            except Exception as status_error:
+                logger.warning(f"Could not mark failed run-all cache start: {status_error}")
 
         try:
             from utils.image_auto_download import trigger_auto_download_if_enabled
@@ -1526,6 +1716,7 @@ async def _finish_run_all_queue(total_new: int) -> dict:
 
     return {
         "cache_rebuild_started": cache_rebuild_started,
+        "cache_rebuild_kind": cache_rebuild_kind,
         "auto_image_download_started": auto_image_download_started,
     }
 
@@ -1632,17 +1823,38 @@ async def manage_recipe_scraper_queue(request: Request):
             "index": 0,
             "total_new": 0,
             "total_cache_changes": 0,
+            "changed_recipe_ids": [],
+            "removed_recipe_ids": [],
+            "cache_delta_ids_missing": False,
             "started_at": datetime.now(timezone.utc).isoformat(),
         })
         return JSONResponse({"success": True})
 
     elif action == "advance":
-        index = body.get("index")
-        total_new = _coerce_nonnegative_int(body.get("total_new", 0))
-        if index is None:
+        requested_index = body.get("index")
+        requested_total_new = _coerce_nonnegative_int(body.get("total_new", 0))
+        if requested_index is None:
             return JSONResponse({"success": False, "message": "index required"}, status_code=400)
-        await update_run_all_queue(index=index, total_new=total_new)
-        return JSONResponse({"success": True})
+        requested_index = _coerce_nonnegative_int(requested_index)
+
+        queue_state = await get_run_all_queue()
+        if not queue_state.get("active"):
+            return JSONResponse({"success": True, "active": False})
+
+        current_index = _coerce_nonnegative_int(queue_state.get("index"))
+        current_total_new = _coerce_nonnegative_int(queue_state.get("total_new"))
+        stale_advance = requested_index <= current_index
+        next_index = max(current_index, requested_index)
+        total_new = current_total_new if stale_advance else max(current_total_new, requested_total_new)
+
+        await update_run_all_queue(index=next_index, total_new=total_new)
+        return JSONResponse({
+            "success": True,
+            "active": True,
+            "index": next_index,
+            "total_new": total_new,
+            "stale_advance": stale_advance,
+        })
 
     elif action == "finish":
         total_new = _coerce_nonnegative_int(body.get("total_new", 0))
@@ -1700,6 +1912,30 @@ async def run_recipe_scraper(scraper_id: str, request: Request):
                 "message_key": "recipes.invalid_mode",
                 "message_params": {"mode": mode}
             }, status_code=400)
+
+        queue_state = await get_run_all_queue()
+        queue_ids = queue_state.get("scraper_ids") or []
+        queue_index = _coerce_nonnegative_int(queue_state.get("index"))
+        queue_current_id = queue_ids[queue_index] if queue_index < len(queue_ids) else None
+        if (
+            queue_state.get("active")
+            and mode == "incremental"
+            and scraper_id == queue_current_id
+            and state
+            and state.get("running") is False
+            and state.get("status") == "complete"
+            and _iso_timestamp_at_or_after(state.get("started_at"), queue_state.get("started_at"))
+        ):
+            logger.info(
+                f"Run-all ignored duplicate start for already-complete scraper {scraper_id} "
+                f"at queue index {queue_index}"
+            )
+            return JSONResponse({
+                "success": True,
+                "already_complete": True,
+                "message_key": "recipes.fetch_complete",
+                "mode": mode,
+            })
 
         image_state = await get_image_state()
         if image_state.get("running"):
@@ -2077,11 +2313,28 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             queue_state = await get_run_all_queue()
             if queue_state.get("active"):
                 changed_ids, removed_ids = _extract_recipe_delta_ids(save_result_for_cache)
-                cache_change_units = len(set(changed_ids) | set(removed_ids)) or 1
-                total_cache_changes = _coerce_nonnegative_int(
-                    queue_state.get("total_cache_changes")
-                ) + cache_change_units
-                await update_run_all_queue(total_cache_changes=total_cache_changes)
+                merged_changed_ids, merged_removed_ids = _merge_recipe_delta_ids(
+                    queue_state.get("changed_recipe_ids"),
+                    queue_state.get("removed_recipe_ids"),
+                    changed_ids,
+                    removed_ids,
+                )
+                ids_missing = bool(queue_state.get("cache_delta_ids_missing")) or (
+                    _save_result_has_cache_changes(save_result_for_cache)
+                    and not changed_ids
+                    and not removed_ids
+                )
+                total_cache_changes = (
+                    len(set(merged_changed_ids) | set(merged_removed_ids))
+                    if not ids_missing
+                    else max(1, _coerce_nonnegative_int(queue_state.get("total_cache_changes")))
+                )
+                await update_run_all_queue(
+                    changed_recipe_ids=merged_changed_ids,
+                    removed_recipe_ids=merged_removed_ids,
+                    cache_delta_ids_missing=ids_missing,
+                    total_cache_changes=total_cache_changes,
+                )
                 logger.info(
                     f"Deferred cache rebuild and image auto-download after {scraper_id} scrape because "
                     f"run-all queue is active ({recipes_found} new recipes)"
