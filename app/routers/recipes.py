@@ -717,6 +717,25 @@ def get_cache_status():
         })
 
 
+@router.get("/cache/doctor")
+def get_cache_doctor():
+    """Run read-only cache consistency diagnostics."""
+    try:
+        from cache_doctor import run_cache_doctor
+
+        return JSONResponse({
+            "success": True,
+            **run_cache_doctor(),
+        })
+    except Exception as e:
+        logger.error(f"Error running cache doctor: {e}")
+        return JSONResponse({
+            "success": False,
+            "status": "error",
+            "message_key": friendly_error(e),
+        }, status_code=500)
+
+
 MAX_SSE_SUBSCRIBERS = 10
 
 @router.get("/events/cache")

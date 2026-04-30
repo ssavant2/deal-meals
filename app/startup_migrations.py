@@ -24,6 +24,8 @@ from database import engine as app_engine
 MIN_RELEASE_FOR_MEMORY_CACHE_CLEANUP = (1, 0, 6)
 DROP_MEMORY_CACHE_PREFS_ID = "20260429_drop_memory_cache_preferences"
 CREATE_RECIPE_URL_DISCOVERY_CACHE_ID = "20260429_create_recipe_url_discovery_cache"
+ADD_CACHE_LAST_OPERATION_ID = "20260430_add_cache_last_operation"
+ADD_CACHE_OPERATION_HISTORY_ID = "20260430_add_cache_operation_history"
 MIGRATION_TABLE = "deal_meals_schema_migrations"
 
 DROP_MEMORY_CACHE_PREFS_SQL = """
@@ -57,6 +59,22 @@ CREATE INDEX IF NOT EXISTS idx_recipe_url_discovery_source_status
     ON recipe_url_discovery_cache(source_name, status);
 CREATE INDEX IF NOT EXISTS idx_recipe_url_discovery_retry
     ON recipe_url_discovery_cache(next_retry_at);
+""".strip()
+
+ADD_CACHE_LAST_OPERATION_SQL = """
+ALTER TABLE cache_metadata
+ADD COLUMN IF NOT EXISTS last_operation JSONB DEFAULT '{}'::jsonb;
+
+COMMENT ON COLUMN cache_metadata.last_operation
+    IS 'Small structured summary of the latest cache operation for diagnostics';
+""".strip()
+
+ADD_CACHE_OPERATION_HISTORY_SQL = """
+ALTER TABLE cache_metadata
+ADD COLUMN IF NOT EXISTS operation_history JSONB DEFAULT '[]'::jsonb;
+
+COMMENT ON COLUMN cache_metadata.operation_history
+    IS 'Rolling compact history of recent cache operations for fallback diagnostics';
 """.strip()
 
 
@@ -190,6 +208,45 @@ def _warn_manual_recipe_url_discovery_cache_create() -> None:
     )
 
 
+def _cache_last_operation_column_exists(conn) -> bool:
+    row = conn.execute(text("""
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'cache_metadata'
+          AND column_name = 'last_operation'
+    """)).fetchone()
+    return row is not None
+
+
+def _cache_operation_history_column_exists(conn) -> bool:
+    row = conn.execute(text("""
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'cache_metadata'
+          AND column_name = 'operation_history'
+    """)).fetchone()
+    return row is not None
+
+
+def _warn_manual_cache_last_operation_add() -> None:
+    logger.warning(
+        "cache_metadata.last_operation is missing, but the app DB user cannot "
+        "run DDL. Run the startup migration with DB admin credentials or add "
+        "the column from database/init.sql before relying on cache diagnostics."
+    )
+
+
+def _warn_manual_cache_operation_history_add() -> None:
+    logger.warning(
+        "cache_metadata.operation_history is missing, but the app DB user "
+        "cannot run DDL. Run the startup migration with DB admin credentials "
+        "or add the column from database/init.sql before relying on cache "
+        "fallback-frequency diagnostics."
+    )
+
+
 def _run_drop_memory_cache_preferences(engine_info: _MigrationEngine, release_version: str) -> None:
     if not engine_info.can_run_ddl:
         with engine_info.engine.connect() as conn:
@@ -248,6 +305,56 @@ def _run_create_recipe_url_discovery_cache(engine_info: _MigrationEngine, releas
         )
 
 
+def _run_add_cache_last_operation(engine_info: _MigrationEngine, release_version: str) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _cache_last_operation_column_exists(conn):
+                _warn_manual_cache_last_operation_add()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, ADD_CACHE_LAST_OPERATION_ID):
+            return
+
+        conn.execute(text(ADD_CACHE_LAST_OPERATION_SQL))
+        logger.info(
+            "Startup migration {} ensured cache_metadata.last_operation exists",
+            ADD_CACHE_LAST_OPERATION_ID,
+        )
+        _record_migration(
+            conn,
+            ADD_CACHE_LAST_OPERATION_ID,
+            release_version,
+            {"column": "cache_metadata.last_operation"},
+        )
+
+
+def _run_add_cache_operation_history(engine_info: _MigrationEngine, release_version: str) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _cache_operation_history_column_exists(conn):
+                _warn_manual_cache_operation_history_add()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, ADD_CACHE_OPERATION_HISTORY_ID):
+            return
+
+        conn.execute(text(ADD_CACHE_OPERATION_HISTORY_SQL))
+        logger.info(
+            "Startup migration {} ensured cache_metadata.operation_history exists",
+            ADD_CACHE_OPERATION_HISTORY_ID,
+        )
+        _record_migration(
+            conn,
+            ADD_CACHE_OPERATION_HISTORY_ID,
+            release_version,
+            {"column": "cache_metadata.operation_history"},
+        )
+
+
 def run_startup_migrations(release_version: str) -> None:
     """Run one-off migrations that are safe during app startup."""
     if not _version_can_run_startup_migrations(release_version):
@@ -261,6 +368,8 @@ def run_startup_migrations(release_version: str) -> None:
     try:
         _run_drop_memory_cache_preferences(engine_info, release_version)
         _run_create_recipe_url_discovery_cache(engine_info, release_version)
+        _run_add_cache_last_operation(engine_info, release_version)
+        _run_add_cache_operation_history(engine_info, release_version)
     except SQLAlchemyError as e:
         logger.warning(f"Startup migrations skipped after database error: {e}")
     finally:

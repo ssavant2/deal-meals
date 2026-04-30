@@ -52,6 +52,11 @@ except ModuleNotFoundError:
         get_ingredient_routing_probation_gate_status,
     )
 
+try:
+    from cache_operation_metadata import record_cache_last_operation
+except ModuleNotFoundError:
+    from app.cache_operation_metadata import record_cache_last_operation
+
 # Import matching logic
 try:
     from recipe_matcher import RecipeMatcher, get_effective_matching_preferences, get_enabled_recipe_sources
@@ -887,6 +892,18 @@ class CacheManager:
                 "error": error_message,
             })
             db.commit()
+        record_cache_last_operation(
+            {
+                "cached": 0,
+                "total_matches": 0,
+                "total_recipes": total_recipes,
+                "time_ms": time_ms,
+                "status": "ready",
+                "error": error_message,
+            },
+            operation_type="empty_cache",
+            status="ready",
+        )
 
     def clear_to_empty(
         self,
@@ -1620,6 +1637,19 @@ class CacheManager:
                 for key, value in ingredient_routing_fields.items()
                 if key != "shadow_samples_by_class"
             }
+            if persist:
+                record_cache_last_operation(
+                    {
+                        **result,
+                        "total_matches": total_matches,
+                        "matched_offer_ids": len(matched_offer_ids),
+                        "total_offers": len(offers),
+                        "unmatched_offer_ids": self._unmatched_count,
+                        "status": "ready",
+                    },
+                    operation_type="full_rebuild",
+                    status="ready",
+                )
             _emit_rebuild_summary({
                 'run_kind': run_kind,
                 'input_scope': input_scope,
@@ -1680,6 +1710,32 @@ class CacheManager:
             }, level="error")
             if persist:
                 self._update_status('error', str(e))
+                record_cache_last_operation(
+                    {
+                        "run_kind": run_kind,
+                        "input_scope": input_scope,
+                        "fixture_hash": fixture_hash,
+                        "requested_recipe_count": len(requested_recipe_ids or ()),
+                        "recipe_selection_mode": recipe_selection_mode,
+                        "recipe_selection_scope_count": recipe_selection_scope_count,
+                        "fts_filtered_count": fts_filtered_count,
+                        "configured_rebuild_mode": configured_rebuild_profile['mode'],
+                        "effective_rebuild_mode": effective_rebuild_mode,
+                        "matcher_version": MATCHER_VERSION,
+                        "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+                        "offer_compiler_version": OFFER_COMPILER_VERSION,
+                        "offer_data_source": offer_data_source,
+                        "recipe_data_source": recipe_data_source,
+                        "candidate_data_source": candidate_data_source,
+                        **ingredient_routing_fields,
+                        **worker_fields,
+                        "status": "error",
+                        "error": str(e),
+                        "time_ms": int((time.perf_counter() - start_time) * 1000),
+                    },
+                    operation_type="full_rebuild",
+                    status="error",
+                )
             raise
 
     def _save_cache(self, entries: List[Dict]):

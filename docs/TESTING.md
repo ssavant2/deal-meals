@@ -38,9 +38,10 @@ Run the tracked support suite with:
 docker compose exec -T -w /app web python tests/run_app_support_checks.py
 ```
 
-This runs the sanity check plus the tracked helper checks for candidate routing,
-ingredient term maps, shadow candidate selection, ingredient-routing probation,
-delta verification policy, and the minimal frontend smoke.
+This runs the sanity check plus the tracked helper checks for cache doctor
+metadata, candidate routing, ingredient term maps, shadow candidate selection,
+ingredient-routing probation, delta verification policy, and the minimal
+frontend smoke.
 
 The frontend smoke can also be run directly:
 
@@ -64,6 +65,11 @@ the live app behavior:
   inspect the web logs for `CACHE_RECIPE_DELTA_SUMMARY`. A clean small scrape
   should apply recipe-delta; stale indexes, large full imports, missing changed
   IDs, or failed verification should fall back to a full rebuild.
+- For cache diagnostics changes, call `GET /api/cache/doctor`. A healthy cache
+  should return `status=ok`, matching `cache_metadata.total_matches` and
+  `recipe_offer_cache` row count, a compact `cache_metadata.last_operation`
+  summary, and rolling fallback-frequency stats from
+  `cache_metadata.operation_history`.
 - For cache candidate-selection changes, inspect `CACHE_REBUILD` and
   `CACHE_REBUILD_SUMMARY` for `recipe_selection_mode`. The default term-index
   cache path should use `recipe_selection_mode=term_index_full_scope`; FTS is

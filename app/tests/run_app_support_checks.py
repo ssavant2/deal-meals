@@ -15,6 +15,7 @@ import sys
 CHECKS = [
     "run_sanity_checks.py",
     "run_frontend_smoke.py",
+    "run_cache_doctor_checks.py",
     "run_candidate_term_detail_checks.py",
     "run_recipe_ingredient_term_map_checks.py",
     "run_recipe_url_discovery_checks.py",

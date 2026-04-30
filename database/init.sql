@@ -468,12 +468,16 @@ CREATE TABLE cache_metadata (
     total_matches INTEGER,
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'computing', 'ready', 'error')),
     error_message TEXT,
+    last_operation JSONB DEFAULT '{}'::jsonb,
+    operation_history JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     last_background_rebuild_at TIMESTAMPTZ,
     background_rebuild_source TEXT
 );
 
 COMMENT ON TABLE cache_metadata IS 'Tracks cache computation status and timing';
+COMMENT ON COLUMN cache_metadata.last_operation IS 'Small structured summary of the latest cache operation for diagnostics';
+COMMENT ON COLUMN cache_metadata.operation_history IS 'Rolling compact history of recent cache operations for fallback diagnostics';
 
 -- ============================================================================
 -- SCHEMA MIGRATIONS - One-off upgrades for existing installs

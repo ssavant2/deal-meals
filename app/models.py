@@ -450,6 +450,8 @@ class CacheMetadata(Base):
     total_matches = Column(Integer)
     status = Column(String(20), default='pending')  # pending, computing, ready, error
     error_message = Column(Text)
+    last_operation = Column(JSONB, default=dict)
+    operation_history = Column(JSONB, default=list)
     last_background_rebuild_at = Column(DateTime(timezone=True))
     background_rebuild_source = Column(Text)
     created_at = Column(DateTime(timezone=True), default=_utcnow)

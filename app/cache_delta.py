@@ -43,6 +43,11 @@ except ModuleNotFoundError:
     )
 
 try:
+    from cache_operation_metadata import record_cache_last_operation
+except ModuleNotFoundError:
+    from app.cache_operation_metadata import record_cache_last_operation
+
+try:
     from models import FoundRecipe, Offer
 except ModuleNotFoundError:
     from app.models import FoundRecipe, Offer
@@ -916,6 +921,13 @@ def _apply_recipe_delta_unlocked(
                 **(extra or {}),
             },
         )
+        if apply:
+            record_cache_last_operation(
+                result,
+                operation_type="recipe_delta",
+                status="fallback",
+                source=source,
+            )
         _emit_recipe_delta_summary(result, level="warning")
         return result
 
@@ -1155,6 +1167,13 @@ def _apply_recipe_delta_unlocked(
             "recipe_data_source": "compiled_payload",
             "candidate_data_source": "term_index",
         }
+        if apply:
+            record_cache_last_operation(
+                result,
+                operation_type="recipe_delta",
+                status="ready" if applied else "fallback",
+                source=source,
+            )
         _emit_recipe_delta_summary(result, level="info" if ready_to_apply else "warning")
         return result
     except Exception as exc:
@@ -1236,7 +1255,7 @@ def _apply_verified_offer_delta_unlocked(
     offer_changes = classify_current_offer_changes(offers)
     recipe_changes = classify_current_recipe_changes(recipes)
     if recipe_changes.get("all_impacted_recipe_ids"):
-        return {
+        result = {
             "success": False,
             "applied": False,
             "fallback_reason": "recipe_changes_detected",
@@ -1246,6 +1265,13 @@ def _apply_verified_offer_delta_unlocked(
             "offer_change_counts": offer_changes.get("counts", {}),
             "recipe_change_counts": recipe_changes.get("counts", {}),
         }
+        if apply:
+            record_cache_last_operation(
+                result,
+                operation_type="offer_delta",
+                status="fallback",
+            )
+        return result
 
     current_offer_term_postings = _build_current_offer_term_postings(offers)
     (
@@ -1401,7 +1427,7 @@ def _apply_verified_offer_delta_unlocked(
         applied = True
 
     elapsed_ms = int((time.perf_counter() - started_at) * 1000)
-    return {
+    result = {
         "success": ready_to_apply,
         "applied": applied,
         "ready_to_apply": ready_to_apply,
@@ -1479,6 +1505,13 @@ def _apply_verified_offer_delta_unlocked(
             "recipe": current_recipe_term_stats,
         },
     }
+    if apply:
+        record_cache_last_operation(
+            result,
+            operation_type="offer_delta",
+            status="ready" if applied else "fallback",
+        )
+    return result
 
 
 def apply_verified_offer_delta(
