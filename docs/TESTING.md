@@ -39,9 +39,10 @@ docker compose exec -T -w /app web python tests/run_app_support_checks.py
 ```
 
 This runs the sanity check plus the tracked helper checks for cache doctor
-metadata, recipe cache refresh decisions, candidate routing, ingredient term
-maps, shadow candidate selection, ingredient-routing probation, delta
-verification policy, and the minimal frontend smoke.
+metadata, recipe cache refresh decisions, recipe-delta patch rollback behavior,
+candidate routing, ingredient term maps, shadow candidate selection,
+ingredient-routing probation, delta verification policy, and the minimal
+frontend smoke.
 
 The frontend smoke can also be run directly:
 
@@ -65,6 +66,10 @@ the live app behavior:
   inspect the web logs for `CACHE_RECIPE_DELTA_SUMMARY`. A clean small scrape
   should apply recipe-delta; stale indexes, large full imports, missing changed
   IDs, or failed verification should fall back to a full rebuild.
+- The support suite also includes `run_recipe_delta_patch_checks.py`, which uses
+  temporary recipe rows to verify recipe-delta no-op handling, changed/removed
+  patching, rejected patch scopes, and rollback if an insert fails after the
+  cache rows have been deleted inside the patch transaction.
 - For cache diagnostics changes, call `GET /api/cache/doctor`. A healthy cache
   should return `status=ok`, matching `cache_metadata.total_matches` and
   `recipe_offer_cache` row count, a compact `cache_metadata.last_operation`
