@@ -463,6 +463,70 @@ CREATE INDEX idx_compiled_recipe_term_manifest
 COMMENT ON TABLE compiled_recipe_term_index IS 'Persistent recipe-term postings for candidate routing';
 
 -- ============================================================================
+-- COMPILED_RECIPE_SEARCH_TERM_INDEX - Persistent recipe term postings for pantry
+-- ============================================================================
+CREATE TABLE compiled_recipe_search_term_index (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    found_recipe_id UUID NOT NULL,
+    recipe_identity_key VARCHAR(64) NOT NULL,
+    recipe_source_hash VARCHAR(64) NOT NULL,
+    matcher_version VARCHAR(64) NOT NULL,
+    recipe_compiler_version VARCHAR(64) NOT NULL,
+    index_version_hash VARCHAR(64) NOT NULL,
+    term VARCHAR(255) NOT NULL,
+    term_type VARCHAR(40) NOT NULL,
+    indexed_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT uq_compiled_recipe_search_term_entry UNIQUE (
+        recipe_identity_key,
+        matcher_version,
+        recipe_compiler_version,
+        index_version_hash,
+        term,
+        term_type
+    ),
+    CONSTRAINT fk_compiled_recipe_search_term_found_recipe
+        FOREIGN KEY (found_recipe_id)
+        REFERENCES found_recipes(id)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX idx_compiled_recipe_search_term_lookup
+    ON compiled_recipe_search_term_index(matcher_version, recipe_compiler_version, index_version_hash, term);
+CREATE INDEX idx_compiled_recipe_search_term_found_recipe
+    ON compiled_recipe_search_term_index(found_recipe_id);
+CREATE INDEX idx_compiled_recipe_search_term_scoring
+    ON compiled_recipe_search_term_index(matcher_version, recipe_compiler_version, index_version_hash, found_recipe_id, term_type, term);
+CREATE INDEX idx_compiled_recipe_search_term_recipe
+    ON compiled_recipe_search_term_index(matcher_version, recipe_compiler_version, recipe_identity_key);
+CREATE INDEX idx_compiled_recipe_search_term_hash
+    ON compiled_recipe_search_term_index(index_version_hash);
+
+COMMENT ON TABLE compiled_recipe_search_term_index IS 'Persistent recipe-search term postings for pantry candidate selection';
+
+CREATE TABLE compiled_recipe_search_term_index_status (
+    status_key VARCHAR(50) PRIMARY KEY DEFAULT 'pantry_search',
+    status VARCHAR(20) NOT NULL DEFAULT 'degraded',
+    matcher_version VARCHAR(64),
+    recipe_compiler_version VARCHAR(64),
+    index_version_hash VARCHAR(64),
+    active_scope_count INTEGER NOT NULL DEFAULT 0,
+    indexed_recipe_count INTEGER NOT NULL DEFAULT 0,
+    empty_term_recipe_count INTEGER NOT NULL DEFAULT 0,
+    last_full_refresh_at TIMESTAMPTZ,
+    last_incremental_refresh_at TIMESTAMPTZ,
+    last_error TEXT DEFAULT 'never refreshed',
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT chk_compiled_recipe_search_term_status
+        CHECK (status IN ('ready', 'refreshing', 'degraded'))
+);
+
+INSERT INTO compiled_recipe_search_term_index_status (status_key, status, last_error)
+VALUES ('pantry_search', 'degraded', 'never refreshed')
+ON CONFLICT (status_key) DO NOTHING;
+
+COMMENT ON TABLE compiled_recipe_search_term_index_status IS 'Singleton health row for the pantry recipe-search term index';
+
+-- ============================================================================
 -- CACHE_METADATA - Tracks cache computation status
 -- ============================================================================
 CREATE TABLE cache_metadata (

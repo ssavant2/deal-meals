@@ -57,19 +57,23 @@ def main() -> int:
     original_ratio = settings.cache_recipe_delta_max_affected_ratio
     try:
         settings.cache_recipe_delta_enabled = True
-        settings.cache_recipe_delta_max_affected_ratio = 0.02
+        settings.cache_recipe_delta_max_affected_ratio = 0.05
 
         small = decide([str(i) for i in range(20)])
         check("small incremental uses delta", small.strategy, "delta")
         check("small incremental reason", small.reason, "ratio_within_threshold")
         check("small affected count", small.affected_recipe_count, 20)
-        check("small threshold pct", small.delta_ratio_threshold_pct, 2.0)
+        check("small threshold pct", small.delta_ratio_threshold_pct, 5.0)
 
-        large = decide([str(i) for i in range(500)], mode="incremental")
+        medium = decide([str(i) for i in range(500)], mode="incremental")
+        check("medium incremental uses delta", medium.strategy, "delta")
+        check("medium incremental reason", medium.reason, "ratio_within_threshold")
+
+        large = decide([str(i) for i in range(800)], mode="incremental")
         check("large incremental uses full", large.strategy, "full")
         check("large incremental reason", large.reason, "ratio_above_threshold")
 
-        full_mode_large = decide([str(i) for i in range(500)], mode="full")
+        full_mode_large = decide([str(i) for i in range(800)], mode="full")
         check("large full uses same policy", full_mode_large.strategy, "full")
         check("full mode uses same reason", full_mode_large.reason, "ratio_above_threshold")
 

@@ -443,6 +443,73 @@ class CompiledRecipeTermIndex(Base):
         return f"<CompiledRecipeTermIndex(recipe_id={self.found_recipe_id}, term='{self.term}')>"
 
 
+class CompiledRecipeSearchTermIndex(Base):
+    """Persistent recipe-search term postings for pantry candidate selection."""
+    __tablename__ = "compiled_recipe_search_term_index"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuidv7()"))
+    found_recipe_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("found_recipes.id", ondelete="CASCADE", name="fk_compiled_recipe_search_term_found_recipe"),
+        nullable=False,
+    )
+    recipe_identity_key = Column(String(64), nullable=False)
+    recipe_source_hash = Column(String(64), nullable=False)
+
+    matcher_version = Column(String(64), nullable=False)
+    recipe_compiler_version = Column(String(64), nullable=False)
+    index_version_hash = Column(String(64), nullable=False)
+
+    term = Column(String(255), nullable=False)
+    term_type = Column(String(40), nullable=False)
+    indexed_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    __table_args__ = (
+        Index('idx_compiled_recipe_search_term_lookup', 'matcher_version', 'recipe_compiler_version', 'index_version_hash', 'term'),
+        Index('idx_compiled_recipe_search_term_found_recipe', 'found_recipe_id'),
+        Index('idx_compiled_recipe_search_term_scoring', 'matcher_version', 'recipe_compiler_version', 'index_version_hash', 'found_recipe_id', 'term_type', 'term'),
+        Index('idx_compiled_recipe_search_term_recipe', 'matcher_version', 'recipe_compiler_version', 'recipe_identity_key'),
+        Index('idx_compiled_recipe_search_term_hash', 'index_version_hash'),
+        UniqueConstraint(
+            'recipe_identity_key',
+            'matcher_version',
+            'recipe_compiler_version',
+            'index_version_hash',
+            'term',
+            'term_type',
+            name='uq_compiled_recipe_search_term_entry',
+        ),
+    )
+
+    def __repr__(self):
+        return f"<CompiledRecipeSearchTermIndex(recipe_id={self.found_recipe_id}, term='{self.term}')>"
+
+
+class CompiledRecipeSearchTermIndexStatus(Base):
+    """Singleton health row for the pantry recipe-search term index."""
+    __tablename__ = "compiled_recipe_search_term_index_status"
+
+    status_key = Column(String(50), primary_key=True, server_default=text("'pantry_search'"))
+    status = Column(String(20), nullable=False, default="degraded")
+    matcher_version = Column(String(64))
+    recipe_compiler_version = Column(String(64))
+    index_version_hash = Column(String(64))
+    active_scope_count = Column(Integer, default=0, nullable=False)
+    indexed_recipe_count = Column(Integer, default=0, nullable=False)
+    empty_term_recipe_count = Column(Integer, default=0, nullable=False)
+    last_full_refresh_at = Column(DateTime(timezone=True))
+    last_incremental_refresh_at = Column(DateTime(timezone=True))
+    last_error = Column(Text)
+    updated_at = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
+
+    __table_args__ = (
+        CheckConstraint("status IN ('ready', 'refreshing', 'degraded')", name='chk_compiled_recipe_search_term_status'),
+    )
+
+    def __repr__(self):
+        return f"<CompiledRecipeSearchTermIndexStatus(status='{self.status}')>"
+
+
 class CacheMetadata(Base):
     """Tracks cache computation status and timing."""
     __tablename__ = "cache_metadata"

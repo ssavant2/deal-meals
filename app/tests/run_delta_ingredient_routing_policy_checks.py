@@ -12,6 +12,7 @@ import tempfile
 sys.path.insert(0, '/app' if os.path.exists('/app') else os.path.join(os.path.dirname(__file__), '..'))
 
 from cache_delta import (  # noqa: E402
+    _enforce_recipe_delta_preview_size_gate,
     _ingredient_routing_summary_from_result,
     _resolve_delta_verification_policy,
     _resolve_recipe_delta_verification_policy,
@@ -84,6 +85,13 @@ original_settings = {
     "cache_delta_probation_min_ready_streak": settings.cache_delta_probation_min_ready_streak,
     "cache_delta_probation_min_version_ready_runs": settings.cache_delta_probation_min_version_ready_runs,
     "cache_delta_skip_full_preview_after_probation": settings.cache_delta_skip_full_preview_after_probation,
+    "cache_recipe_delta_probation_history_file": settings.cache_recipe_delta_probation_history_file,
+    "cache_recipe_delta_probation_min_ready_streak": settings.cache_recipe_delta_probation_min_ready_streak,
+    "cache_recipe_delta_probation_min_version_ready_runs": settings.cache_recipe_delta_probation_min_version_ready_runs,
+    "cache_recipe_delta_skip_full_preview_after_probation": settings.cache_recipe_delta_skip_full_preview_after_probation,
+    "cache_recipe_delta_skip_full_preview_max_affected_ratio": (
+        settings.cache_recipe_delta_skip_full_preview_max_affected_ratio
+    ),
     "cache_ingredient_routing_mode": settings.cache_ingredient_routing_mode,
     "cache_ingredient_routing_probation_history_file": (
         settings.cache_ingredient_routing_probation_history_file
@@ -99,13 +107,20 @@ original_settings = {
 try:
     with tempfile.TemporaryDirectory() as tmp_dir:
         delta_history_path = Path(tmp_dir) / "delta_probation.jsonl"
+        recipe_delta_history_path = Path(tmp_dir) / "recipe_delta_probation.jsonl"
         ingredient_history_path = Path(tmp_dir) / "ingredient_probation.jsonl"
         _write_ready_delta_history(delta_history_path)
+        _write_ready_delta_history(recipe_delta_history_path)
 
         settings.cache_delta_probation_history_file = str(delta_history_path)
         settings.cache_delta_probation_min_ready_streak = 1
         settings.cache_delta_probation_min_version_ready_runs = 1
         settings.cache_delta_skip_full_preview_after_probation = True
+        settings.cache_recipe_delta_probation_history_file = str(recipe_delta_history_path)
+        settings.cache_recipe_delta_probation_min_ready_streak = 1
+        settings.cache_recipe_delta_probation_min_version_ready_runs = 1
+        settings.cache_recipe_delta_skip_full_preview_after_probation = True
+        settings.cache_recipe_delta_skip_full_preview_max_affected_ratio = 0.025
         settings.cache_ingredient_routing_probation_history_file = str(ingredient_history_path)
         settings.cache_ingredient_routing_probation_min_ready_streak = 1
         settings.cache_ingredient_routing_probation_min_version_ready_runs = 1
@@ -114,6 +129,23 @@ try:
         off_policy = _resolve_delta_verification_policy(verify_full_preview=True)
         test("delta probation may skip full preview when ingredient routing is off", off_policy["verification_mode"], "probation_skip")
         test("off mode keeps effective full preview disabled after delta probation", off_policy["effective_verify_full_preview"], False)
+
+        recipe_policy = _resolve_recipe_delta_verification_policy(verify_full_preview=True)
+        test("recipe-delta may skip full preview after one ready current-version run", recipe_policy["verification_mode"], "probation_skip")
+        test("recipe-delta keeps effective full preview disabled after one ready run", recipe_policy["effective_verify_full_preview"], False)
+        small_recipe_policy = _enforce_recipe_delta_preview_size_gate(
+            recipe_policy,
+            affected_recipe_count=1000,
+            active_recipe_count=40000,
+        )
+        test("small recipe-delta keeps probation skip after size gate", small_recipe_policy["verification_mode"], "probation_skip")
+        large_recipe_policy = _enforce_recipe_delta_preview_size_gate(
+            recipe_policy,
+            affected_recipe_count=1100,
+            active_recipe_count=40000,
+        )
+        test("larger recipe-delta keeps full preview despite probation", large_recipe_policy["verification_mode"], "full_preview_required_for_large_recipe_delta")
+        test("larger recipe-delta re-enables effective full preview", large_recipe_policy["effective_verify_full_preview"], True)
 
         settings.cache_ingredient_routing_mode = "hint_first"
         hint_policy = _resolve_delta_verification_policy(verify_full_preview=True)

@@ -40,7 +40,7 @@ docker compose exec -T -w /app web python tests/run_app_support_checks.py
 
 This runs the sanity check plus the tracked helper checks for cache doctor
 metadata, recipe cache refresh decisions, recipe-delta patch rollback behavior,
-candidate routing, ingredient term maps, shadow candidate selection,
+pantry search-term index policy, candidate routing, ingredient term maps, shadow candidate selection,
 ingredient-routing probation, delta verification policy, and the minimal
 frontend smoke.
 
@@ -90,6 +90,13 @@ the live app behavior:
   `URL discovery prefilter: ... skipped_discovery=...` when reusable misses are
   present. Clearing or deleting a recipe source should also clear its discovery
   rows.
+- For pantry search-term index changes, refresh the index in dev with
+  `POST /api/pantry-search-index/refresh`, keep
+  `PANTRY_SEARCH_TERM_INDEX_MAX_CANDIDATES=0` so normal queries are not capped,
+  then compare pantry latency, fallback reasons, and top results against the
+  legacy path. The index path is enabled by default, but falls back to legacy if
+  the index is missing or stale. Positive candidate caps are only for explicit
+  safety-ceiling experiments.
 
 ## Local Workbench Tests
 

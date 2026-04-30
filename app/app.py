@@ -19,6 +19,16 @@ from datetime import datetime
 from loguru import logger
 from sqlalchemy import text
 
+# Keep the primary Docker log focused on app events. HTTP access lines are
+# persisted separately below and are intentionally hidden from stdout/stderr.
+logger.remove()
+logger.add(
+    sys.stderr,
+    level="INFO",
+    format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level:<8} | {name}:{function}:{line} - {message}",
+    filter=lambda record: record["extra"].get("name") != "access",
+)
+
 # Persist logs to file (survives container restarts via volume mount)
 try:
     logger.add(
@@ -393,6 +403,55 @@ def _sync_recipe_sources() -> None:
     )
 
 
+async def _ensure_pantry_search_index_ready_on_startup() -> None:
+    if not app_settings.pantry_search_term_index_enabled:
+        return
+
+    try:
+        from pantry_search_index import (
+            compiled_recipe_search_term_index_needs_refresh,
+            refresh_compiled_recipe_search_term_index,
+        )
+        import asyncio
+
+        needs_refresh, reason = compiled_recipe_search_term_index_needs_refresh()
+        if not needs_refresh:
+            logger.info("Pantry search-term index ready at startup")
+            return
+
+        logger.info(
+            "Pantry search-term index refresh queued at startup ({})",
+            reason,
+        )
+
+        async def _refresh_in_background() -> None:
+            try:
+                result = await asyncio.get_running_loop().run_in_executor(
+                    None,
+                    refresh_compiled_recipe_search_term_index,
+                )
+                logger.info(
+                    "Pantry search-term index refreshed at startup "
+                    "(rows={}, recipes={})",
+                    result.get("index_rows", 0),
+                    result.get("indexed_recipe_count", 0),
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Pantry search-term index startup refresh failed; pantry "
+                    "will fall back to legacy until refreshed: {}",
+                    exc,
+                )
+
+        asyncio.create_task(_refresh_in_background())
+    except Exception as exc:
+        logger.warning(
+            "Could not inspect pantry search-term index at startup; pantry will "
+            "fall back to legacy if needed: {}",
+            exc,
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup/shutdown events."""
@@ -504,6 +563,8 @@ async def lifespan(app: FastAPI):
                 logger.critical("No cache data available — recipes will use live computation (SLOW)")
         except Exception as e2:
             logger.critical(f"Could not check stale cache: {e2}")
+
+    await _ensure_pantry_search_index_ready_on_startup()
 
     yield
 

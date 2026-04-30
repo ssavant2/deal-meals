@@ -90,18 +90,41 @@ class Settings(BaseSettings):
         description="Optional separate JSONL probation history path for recipe-delta runtime gating",
     )
     cache_recipe_delta_probation_min_ready_streak: int = Field(
-        default=2,
+        default=1,
         description="Minimum consecutive ready recipe-delta probation runs before skipping full preview",
     )
     cache_recipe_delta_probation_min_version_ready_runs: int = Field(
-        default=2,
+        default=1,
         description="Minimum ready recipe-delta probation runs for the current version triple",
     )
+    cache_recipe_delta_skip_full_preview_max_affected_ratio: float = Field(
+        default=0.025,
+        description=(
+            "Maximum affected/active recipe ratio that may skip recipe-delta "
+            "full-preview after probation. Larger deltas may still use recipe-"
+            "delta, but keep full-preview verification."
+        ),
+    )
     cache_recipe_delta_max_affected_ratio: float = Field(
-        default=0.02,
+        default=0.05,
         description=(
             "Maximum fraction of active recipes a recipe scrape may affect before "
             "falling back to a full cache rebuild"
+        ),
+    )
+    pantry_search_term_index_enabled: bool = Field(
+        default=True,
+        description="Use the compiled pantry search-term index for /api/pantry-match",
+    )
+    pantry_search_term_index_shadow_logging_enabled: bool = Field(
+        default=False,
+        description="Log pantry search-term index diagnostics while keeping legacy results",
+    )
+    pantry_search_term_index_max_candidates: int = Field(
+        default=0,
+        description=(
+            "Optional hard safety cap for pantry search-term index candidates. "
+            "0 means no extra cap beyond the active pantry scope."
         ),
     )
     # Cache rebuild / ingredient routing phase 2

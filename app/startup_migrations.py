@@ -28,6 +28,7 @@ ADD_CACHE_LAST_OPERATION_ID = "20260430_add_cache_last_operation"
 ADD_CACHE_OPERATION_HISTORY_ID = "20260430_add_cache_operation_history"
 ADD_RECIPE_TERM_FOUND_RECIPE_INDEX_ID = "20260430_add_recipe_term_found_recipe_index"
 ADD_RECIPE_TERM_FOUND_RECIPE_FK_ID = "20260430_add_recipe_term_found_recipe_fk"
+CREATE_RECIPE_SEARCH_TERM_INDEX_ID = "20260430_create_recipe_search_term_index"
 MIGRATION_TABLE = "deal_meals_schema_migrations"
 
 DROP_MEMORY_CACHE_PREFS_SQL = """
@@ -107,6 +108,77 @@ BEGIN
         ON DELETE CASCADE;
     END IF;
 END $$;
+""".strip()
+
+CREATE_RECIPE_SEARCH_TERM_INDEX_SQL = """
+CREATE TABLE IF NOT EXISTS compiled_recipe_search_term_index (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    found_recipe_id UUID NOT NULL,
+    recipe_identity_key VARCHAR(64) NOT NULL,
+    recipe_source_hash VARCHAR(64) NOT NULL,
+    matcher_version VARCHAR(64) NOT NULL,
+    recipe_compiler_version VARCHAR(64) NOT NULL,
+    index_version_hash VARCHAR(64) NOT NULL,
+    term VARCHAR(255) NOT NULL,
+    term_type VARCHAR(40) NOT NULL,
+    indexed_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT uq_compiled_recipe_search_term_entry UNIQUE (
+        recipe_identity_key,
+        matcher_version,
+        recipe_compiler_version,
+        index_version_hash,
+        term,
+        term_type
+    )
+);
+
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_search_term_lookup
+    ON compiled_recipe_search_term_index(matcher_version, recipe_compiler_version, index_version_hash, term);
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_search_term_found_recipe
+    ON compiled_recipe_search_term_index(found_recipe_id);
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_search_term_scoring
+    ON compiled_recipe_search_term_index(matcher_version, recipe_compiler_version, index_version_hash, found_recipe_id, term_type, term);
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_search_term_recipe
+    ON compiled_recipe_search_term_index(matcher_version, recipe_compiler_version, recipe_identity_key);
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_search_term_hash
+    ON compiled_recipe_search_term_index(index_version_hash);
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'fk_compiled_recipe_search_term_found_recipe'
+          AND conrelid = 'compiled_recipe_search_term_index'::regclass
+    ) THEN
+        ALTER TABLE compiled_recipe_search_term_index
+        ADD CONSTRAINT fk_compiled_recipe_search_term_found_recipe
+        FOREIGN KEY (found_recipe_id)
+        REFERENCES found_recipes(id)
+        ON DELETE CASCADE;
+    END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS compiled_recipe_search_term_index_status (
+    status_key VARCHAR(50) PRIMARY KEY DEFAULT 'pantry_search',
+    status VARCHAR(20) NOT NULL DEFAULT 'degraded',
+    matcher_version VARCHAR(64),
+    recipe_compiler_version VARCHAR(64),
+    index_version_hash VARCHAR(64),
+    active_scope_count INTEGER NOT NULL DEFAULT 0,
+    indexed_recipe_count INTEGER NOT NULL DEFAULT 0,
+    empty_term_recipe_count INTEGER NOT NULL DEFAULT 0,
+    last_full_refresh_at TIMESTAMPTZ,
+    last_incremental_refresh_at TIMESTAMPTZ,
+    last_error TEXT DEFAULT 'never refreshed',
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT chk_compiled_recipe_search_term_status
+        CHECK (status IN ('ready', 'refreshing', 'degraded'))
+);
+
+INSERT INTO compiled_recipe_search_term_index_status (status_key, status, last_error)
+VALUES ('pantry_search', 'degraded', 'never refreshed')
+ON CONFLICT (status_key) DO NOTHING;
 """.strip()
 
 
@@ -283,6 +355,26 @@ def _compiled_recipe_term_found_recipe_fk_exists(conn) -> bool:
     return row is not None
 
 
+def _compiled_recipe_search_term_index_exists(conn) -> bool:
+    row = conn.execute(text("""
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name = 'compiled_recipe_search_term_index'
+    """)).fetchone()
+    return row is not None
+
+
+def _compiled_recipe_search_term_status_exists(conn) -> bool:
+    row = conn.execute(text("""
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name = 'compiled_recipe_search_term_index_status'
+    """)).fetchone()
+    return row is not None
+
+
 def _warn_manual_cache_last_operation_add() -> None:
     logger.warning(
         "cache_metadata.last_operation is missing, but the app DB user cannot "
@@ -315,6 +407,15 @@ def _warn_manual_recipe_term_fk_add() -> None:
         "but the app DB user cannot run DDL. Run the startup migration with "
         "DB admin credentials or apply the FK from database/init.sql after "
         "removing orphaned term-index rows."
+    )
+
+
+def _warn_manual_recipe_search_term_index_create() -> None:
+    logger.warning(
+        "compiled_recipe_search_term_index tables are missing, but the app DB "
+        "user cannot run DDL. Run the startup migration with DB admin "
+        "credentials or create the tables from database/init.sql before "
+        "enabling pantry search-term indexing."
     )
 
 
@@ -487,6 +588,39 @@ def _run_add_recipe_term_found_recipe_fk(engine_info: _MigrationEngine, release_
         )
 
 
+def _run_create_recipe_search_term_index(engine_info: _MigrationEngine, release_version: str) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not (
+                _compiled_recipe_search_term_index_exists(conn)
+                and _compiled_recipe_search_term_status_exists(conn)
+            ):
+                _warn_manual_recipe_search_term_index_create()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, CREATE_RECIPE_SEARCH_TERM_INDEX_ID):
+            return
+
+        conn.execute(text(CREATE_RECIPE_SEARCH_TERM_INDEX_SQL))
+        logger.info(
+            "Startup migration {} ensured compiled_recipe_search_term_index tables exist",
+            CREATE_RECIPE_SEARCH_TERM_INDEX_ID,
+        )
+        _record_migration(
+            conn,
+            CREATE_RECIPE_SEARCH_TERM_INDEX_ID,
+            release_version,
+            {
+                "tables": [
+                    "compiled_recipe_search_term_index",
+                    "compiled_recipe_search_term_index_status",
+                ],
+            },
+        )
+
+
 def run_startup_migrations(release_version: str) -> None:
     """Run one-off migrations that are safe during app startup."""
     if not _version_can_run_startup_migrations(release_version):
@@ -504,6 +638,7 @@ def run_startup_migrations(release_version: str) -> None:
         _run_add_cache_operation_history(engine_info, release_version)
         _run_add_recipe_term_found_recipe_index(engine_info, release_version)
         _run_add_recipe_term_found_recipe_fk(engine_info, release_version)
+        _run_create_recipe_search_term_index(engine_info, release_version)
     except SQLAlchemyError as e:
         logger.warning(f"Startup migrations skipped after database error: {e}")
     finally:

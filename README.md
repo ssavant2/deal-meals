@@ -189,6 +189,7 @@ See [INSTALL.md](INSTALL.md) for the full developer install, and
 - [Installation Guide](INSTALL.md) — detailed setup, developer install, reverse proxy, troubleshooting
 - [Security](docs/SECURITY.md) — threat model and implemented hardening
 - [Testing](docs/TESTING.md) — tracked app-support checks vs local workbench tests
+- [Cache Fallback Runbook](docs/CACHE_FALLBACK_RUNBOOK.md) — diagnosing repeated cache-delta fallbacks
 - [User Manual (Svenska)](docs/USER_MANUAL_SVENSKA.md) — full user guide in Swedish
 - [User Manual (English)](docs/USER_MANUAL_ENGLISH.md) — full user guide in English
 

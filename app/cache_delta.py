@@ -103,6 +103,17 @@ except ModuleNotFoundError:
         refresh_compiled_recipe_term_index_for_recipe_ids,
     )
 
+try:
+    from pantry_search_index import (
+        refresh_compiled_recipe_search_term_index,
+        refresh_compiled_recipe_search_term_index_for_recipe_ids,
+    )
+except ModuleNotFoundError:
+    from app.pantry_search_index import (
+        refresh_compiled_recipe_search_term_index,
+        refresh_compiled_recipe_search_term_index_for_recipe_ids,
+    )
+
 
 ACTIVE_CACHE_TABLE = "recipe_offer_cache"
 PERSISTED_ENTRY_FIELDS = (
@@ -743,7 +754,42 @@ def _resolve_recipe_delta_verification_policy(*, verify_full_preview: bool) -> d
         "verification_mode": verification_mode,
         "probation_status": probation_status,
         "probation_history_path": history_path,
+        "skip_full_preview_max_affected_ratio": (
+            settings.cache_recipe_delta_skip_full_preview_max_affected_ratio
+        ),
     }
+
+
+def _enforce_recipe_delta_preview_size_gate(
+    verification_policy: dict[str, Any],
+    *,
+    affected_recipe_count: int,
+    active_recipe_count: int | None,
+) -> dict[str, Any]:
+    """Keep full-preview for larger recipe-deltas even after probation is green."""
+    result = dict(verification_policy)
+    max_ratio = float(settings.cache_recipe_delta_skip_full_preview_max_affected_ratio)
+    result["skip_full_preview_affected_recipe_count"] = affected_recipe_count
+    result["skip_full_preview_active_recipe_count"] = active_recipe_count
+    result["skip_full_preview_affected_ratio"] = None
+
+    if not result.get("requested_verify_full_preview"):
+        return result
+    if result.get("verification_mode") != "probation_skip":
+        return result
+    if max_ratio <= 0:
+        return result
+    if not active_recipe_count or active_recipe_count <= 0:
+        result["effective_verify_full_preview"] = True
+        result["verification_mode"] = "full_preview_required_for_unknown_recipe_delta_size"
+        return result
+
+    affected_ratio = affected_recipe_count / active_recipe_count
+    result["skip_full_preview_affected_ratio"] = affected_ratio
+    if affected_ratio > max_ratio:
+        result["effective_verify_full_preview"] = True
+        result["verification_mode"] = "full_preview_required_for_large_recipe_delta"
+    return result
 
 
 def _summary_ms(value: Any) -> str:
@@ -916,6 +962,18 @@ def _apply_recipe_delta_unlocked(
                 "verify_full_preview": verification_policy["requested_verify_full_preview"],
                 "effective_verify_full_preview": verification_policy["effective_verify_full_preview"],
                 "verification_mode": verification_policy["verification_mode"],
+                "skip_full_preview_max_affected_ratio": verification_policy.get(
+                    "skip_full_preview_max_affected_ratio"
+                ),
+                "skip_full_preview_affected_recipe_count": verification_policy.get(
+                    "skip_full_preview_affected_recipe_count"
+                ),
+                "skip_full_preview_active_recipe_count": verification_policy.get(
+                    "skip_full_preview_active_recipe_count"
+                ),
+                "skip_full_preview_affected_ratio": verification_policy.get(
+                    "skip_full_preview_affected_ratio"
+                ),
                 "delta_verification_max_workers": delta_verification_max_workers,
                 "probation_ready": verification_policy["probation_status"]["ready"],
                 "probation_history_file": verification_policy["probation_status"]["history_file"],
@@ -940,6 +998,16 @@ def _apply_recipe_delta_unlocked(
         return _fallback("cache_not_ready", extra={"cache_state": cache_state})
     if cache_state["cache_rows"] == 0 and cache_state["offer_rows"] > 0:
         return _fallback("active_cache_empty", extra={"cache_state": cache_state})
+    active_recipe_count = operation_context.get("active_recipe_count")
+    if active_recipe_count is None:
+        active_recipe_count = cache_state.get("metadata_total_recipes")
+    if active_recipe_count is None:
+        active_recipe_count = _active_recipe_count_from_db()
+    verification_policy = _enforce_recipe_delta_preview_size_gate(
+        verification_policy,
+        affected_recipe_count=len(changed_ids) + len(removed_ids),
+        active_recipe_count=int(active_recipe_count or 0),
+    )
 
     if apply:
         _set_cache_metadata_status("computing")
@@ -947,6 +1015,7 @@ def _apply_recipe_delta_unlocked(
 
     ir_stats = None
     term_stats = None
+    pantry_search_term_stats = None
     full_preview = None
     patch_preview = None
     full_preview_snapshot: dict[str, str] | None = None
@@ -978,6 +1047,7 @@ def _apply_recipe_delta_unlocked(
                 extra={
                     "compiled_recipe_refresh": ir_stats,
                     "recipe_term_refresh": term_stats,
+                    "pantry_search_term_refresh": pantry_search_term_stats,
                 },
             )
         try:
@@ -992,7 +1062,23 @@ def _apply_recipe_delta_unlocked(
                 extra={
                     "compiled_recipe_refresh": ir_stats,
                     "recipe_term_refresh": term_stats,
+                    "pantry_search_term_refresh": pantry_search_term_stats,
                 },
+            )
+        try:
+            pantry_search_term_stats = refresh_compiled_recipe_search_term_index_for_recipe_ids(
+                changed_ids,
+                remove_recipe_ids=removed_ids,
+            )
+        except Exception as exc:
+            pantry_search_term_stats = {
+                "success": False,
+                "error": str(exc),
+            }
+            logger.warning(
+                "Pantry search-term index refresh failed during recipe delta; "
+                "pantry will fall back to legacy until the index is refreshed: {}",
+                exc,
             )
 
         if verification_policy["effective_verify_full_preview"]:
@@ -1014,6 +1100,7 @@ def _apply_recipe_delta_unlocked(
                     extra={
                         "compiled_recipe_refresh": ir_stats,
                         "recipe_term_refresh": term_stats,
+                        "pantry_search_term_refresh": pantry_search_term_stats,
                     },
                 )
 
@@ -1038,6 +1125,7 @@ def _apply_recipe_delta_unlocked(
                     extra={
                         "compiled_recipe_refresh": ir_stats,
                         "recipe_term_refresh": term_stats,
+                        "pantry_search_term_refresh": pantry_search_term_stats,
                         "full_preview_time_ms": full_preview["time_ms"] if full_preview else None,
                     },
                 )
@@ -1109,6 +1197,7 @@ def _apply_recipe_delta_unlocked(
                     extra={
                         "compiled_recipe_refresh": ir_stats,
                         "recipe_term_refresh": term_stats,
+                        "pantry_search_term_refresh": pantry_search_term_stats,
                         "full_preview_time_ms": full_preview["time_ms"] if full_preview else None,
                         "patch_preview_time_ms": patch_preview["time_ms"] if patch_preview else None,
                     },
@@ -1131,6 +1220,18 @@ def _apply_recipe_delta_unlocked(
             "verify_full_preview": verification_policy["requested_verify_full_preview"],
             "effective_verify_full_preview": verification_policy["effective_verify_full_preview"],
             "verification_mode": verification_policy["verification_mode"],
+            "skip_full_preview_max_affected_ratio": verification_policy.get(
+                "skip_full_preview_max_affected_ratio"
+            ),
+            "skip_full_preview_affected_recipe_count": verification_policy.get(
+                "skip_full_preview_affected_recipe_count"
+            ),
+            "skip_full_preview_active_recipe_count": verification_policy.get(
+                "skip_full_preview_active_recipe_count"
+            ),
+            "skip_full_preview_affected_ratio": verification_policy.get(
+                "skip_full_preview_affected_ratio"
+            ),
             "delta_verification_max_workers": delta_verification_max_workers,
             "probation_ready": verification_policy["probation_status"]["ready"],
             "probation_history_file": verification_policy["probation_status"]["history_file"],
@@ -1138,6 +1239,7 @@ def _apply_recipe_delta_unlocked(
             "probation_summary": verification_policy["probation_status"]["summary"],
             "compiled_recipe_refresh": ir_stats,
             "recipe_term_refresh": term_stats,
+            "pantry_search_term_refresh": pantry_search_term_stats,
             "patch_result": patch_result,
             "unmatched_offer_counts": unmatched_offer_counts,
             "patch_recipe_count": len(changed_ids),
@@ -1188,6 +1290,7 @@ def _apply_recipe_delta_unlocked(
             extra={
                 "compiled_recipe_refresh": ir_stats,
                 "recipe_term_refresh": term_stats,
+                "pantry_search_term_refresh": pantry_search_term_stats,
                 "full_preview_time_ms": full_preview["time_ms"] if full_preview else None,
                 "patch_preview_time_ms": patch_preview["time_ms"] if patch_preview else None,
             },
@@ -1314,6 +1417,14 @@ def _apply_verified_offer_delta_unlocked(
     refresh_compiled_recipe_match_data()
     refresh_compiled_offer_term_index()
     refresh_compiled_recipe_term_index()
+    try:
+        refresh_compiled_recipe_search_term_index()
+    except Exception as exc:
+        logger.warning(
+            "Pantry search-term index refresh failed during offer delta setup; "
+            "pantry will fall back to legacy until the index is refreshed: {}",
+            exc,
+        )
 
     manager = cache_manager
     full_preview = None

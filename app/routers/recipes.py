@@ -1385,6 +1385,54 @@ def _scheduled_recipe_batch_active() -> bool:
         return False
 
 
+async def _refresh_pantry_search_index_after_recipe_change(source: str) -> dict | None:
+    """Best-effort sync for the optional pantry search-term index after full rebuilds."""
+    try:
+        from pantry_search_index import refresh_compiled_recipe_search_term_index
+
+        result = await asyncio.get_running_loop().run_in_executor(
+            None,
+            refresh_compiled_recipe_search_term_index,
+        )
+        logger.info(
+            "Pantry search-term index refreshed after {} (rows={}, recipes={})",
+            source,
+            result.get("index_rows", 0),
+            result.get("indexed_recipe_count", 0),
+        )
+        return result
+    except Exception as exc:
+        logger.warning(
+            "Pantry search-term index refresh failed after {}; pantry will "
+            "fall back to legacy until refreshed: {}",
+            source,
+            exc,
+        )
+        return None
+
+
+def _refresh_pantry_search_index_after_recipe_change_sync(source: str) -> dict | None:
+    try:
+        from pantry_search_index import refresh_compiled_recipe_search_term_index
+
+        result = refresh_compiled_recipe_search_term_index()
+        logger.info(
+            "Pantry search-term index refreshed after {} (rows={}, recipes={})",
+            source,
+            result.get("index_rows", 0),
+            result.get("indexed_recipe_count", 0),
+        )
+        return result
+    except Exception as exc:
+        logger.warning(
+            "Pantry search-term index refresh failed after {}; pantry will "
+            "fall back to legacy until refreshed: {}",
+            source,
+            exc,
+        )
+        return None
+
+
 async def _refresh_cache_after_recipe_scrape(
     *,
     scraper_id: str,
@@ -1475,6 +1523,7 @@ async def _refresh_cache_after_recipe_scrape(
                     "trigger_reason": f"delta_apply_failed:{fallback_reason}",
                 },
             )
+            result["pantry_search_term_refresh"] = await _refresh_pantry_search_index_after_recipe_change(source)
     elif decision.strategy == "full":
         logger.info(
             f"Starting full cache rebuild after {scraper_id} scrape "
@@ -1486,6 +1535,7 @@ async def _refresh_cache_after_recipe_scrape(
             source=source,
             operation_context=operation_context,
         )
+        result["pantry_search_term_refresh"] = await _refresh_pantry_search_index_after_recipe_change(source)
     else:
         result = {
             "success": True,
@@ -1569,6 +1619,7 @@ async def _refresh_cache_after_run_all_queue(
                         "trigger_reason": f"delta_apply_failed:{fallback_reason}",
                     },
                 )
+                result["pantry_search_term_refresh"] = await _refresh_pantry_search_index_after_recipe_change(source)
         elif decision.strategy == "full":
             result = await compute_cache_async(
                 skip_if_busy=False,
@@ -1576,6 +1627,7 @@ async def _refresh_cache_after_run_all_queue(
                 source=source,
                 operation_context=operation_context,
             )
+            result["pantry_search_term_refresh"] = await _refresh_pantry_search_index_after_recipe_change(source)
         else:
             _set_cache_metadata_status("ready")
             result = {
@@ -2494,6 +2546,7 @@ def _run_recipe_visibility_cache_refresh(recipe_ids: list[str], *, excluded: boo
         from cache_manager import refresh_cache_locked
 
         result = refresh_cache_locked(skip_if_busy=False)
+        result["pantry_search_term_refresh"] = _refresh_pantry_search_index_after_recipe_change_sync(source)
         if result.get("skipped"):
             logger.info(f"Recipe visibility cache rebuild skipped: {result.get('reason')}")
         else:

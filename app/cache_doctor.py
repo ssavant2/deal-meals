@@ -37,6 +37,11 @@ except ModuleNotFoundError:
         RECIPE_COMPILER_VERSION,
     )
 
+try:
+    from pantry_search_index import PANTRY_SEARCH_INDEX_VERSION_HASH, PANTRY_SEARCH_STATUS_KEY
+except ModuleNotFoundError:
+    from app.pantry_search_index import PANTRY_SEARCH_INDEX_VERSION_HASH, PANTRY_SEARCH_STATUS_KEY
+
 
 CACHE_NAME = "recipe_offer_matches"
 _SEVERITY_ORDER = {"ok": 0, "warning": 1, "error": 2}
@@ -330,6 +335,7 @@ def run_cache_doctor() -> dict[str, Any]:
             )
 
             _compiled_recipe_checks(checks, db)
+            _compiled_recipe_search_term_checks(checks, db)
             _compiled_offer_checks(checks, db)
 
     except Exception as exc:
@@ -450,6 +456,179 @@ def _compiled_recipe_checks(checks: list[dict[str, Any]], db) -> None:
         },
         ok_message="compiled_recipe_term_index uses current matcher and recipe compiler versions",
         bad_message="compiled_recipe_term_index contains stale matcher/compiler versions",
+        bad_status="warning",
+    )
+
+
+def _compiled_recipe_search_term_checks(checks: list[dict[str, Any]], db) -> None:
+    index_exists = _table_exists(db, "compiled_recipe_search_term_index")
+    status_exists = _table_exists(db, "compiled_recipe_search_term_index_status")
+    checks.append(_check(
+        "compiled_recipe_search_term_index:table",
+        "ok" if index_exists else "warning",
+        (
+            "compiled_recipe_search_term_index exists"
+            if index_exists
+            else "compiled_recipe_search_term_index is missing"
+        ),
+    ))
+    checks.append(_check(
+        "compiled_recipe_search_term_index:status_table",
+        "ok" if status_exists else "warning",
+        (
+            "compiled_recipe_search_term_index_status exists"
+            if status_exists
+            else "compiled_recipe_search_term_index_status is missing"
+        ),
+    ))
+    if not index_exists or not status_exists:
+        return
+
+    status = _row(db, """
+        SELECT status,
+               matcher_version,
+               recipe_compiler_version,
+               index_version_hash,
+               active_scope_count,
+               indexed_recipe_count,
+               empty_term_recipe_count,
+               last_error,
+               updated_at
+        FROM compiled_recipe_search_term_index_status
+        WHERE status_key = :status_key
+    """, {"status_key": PANTRY_SEARCH_STATUS_KEY})
+    if not status:
+        checks.append(_check(
+            "compiled_recipe_search_term_index:status_row",
+            "warning",
+            "compiled_recipe_search_term_index_status row is missing",
+        ))
+        return
+
+    status_value = status.get("status")
+    checks.append(_check(
+        "compiled_recipe_search_term_index:status",
+        "ok" if status_value == "ready" else "warning",
+        (
+            "Pantry search-term index is ready"
+            if status_value == "ready"
+            else "Pantry search-term index is not ready"
+        ),
+        index_status=_json_ready(status),
+    ))
+
+    version_mismatches = {
+        "matcher_version": (status.get("matcher_version"), MATCHER_VERSION),
+        "recipe_compiler_version": (status.get("recipe_compiler_version"), RECIPE_COMPILER_VERSION),
+        "index_version_hash": (status.get("index_version_hash"), PANTRY_SEARCH_INDEX_VERSION_HASH),
+    }
+    mismatched = {
+        field: {"actual": actual, "expected": expected}
+        for field, (actual, expected) in version_mismatches.items()
+        if actual != expected
+    }
+    checks.append(_check(
+        "compiled_recipe_search_term_index:status_versions",
+        "ok" if not mismatched else "warning",
+        (
+            "Pantry search-term index status matches current versions"
+            if not mismatched
+            else "Pantry search-term index status has stale versions"
+        ),
+        mismatches=mismatched,
+    ))
+
+    active_scope_count = int(_scalar(db, """
+        SELECT COUNT(*)
+        FROM found_recipes
+        WHERE ingredients IS NOT NULL
+          AND jsonb_array_length(ingredients) > 0
+          AND (excluded = FALSE OR excluded IS NULL)
+    """) or 0)
+    checks.append(_check(
+        "compiled_recipe_search_term_index:active_scope_count",
+        "ok" if int(status.get("active_scope_count") or 0) == active_scope_count else "warning",
+        (
+            "Pantry search-term index active scope count matches found_recipes"
+            if int(status.get("active_scope_count") or 0) == active_scope_count
+            else "Pantry search-term index active scope count is stale"
+        ),
+        status_active_scope_count=int(status.get("active_scope_count") or 0),
+        actual_active_scope_count=active_scope_count,
+    ))
+
+    _count_check(
+        checks,
+        db,
+        name="compiled_recipe_search_term_index:orphans",
+        sql="""
+            SELECT COUNT(*)
+            FROM compiled_recipe_search_term_index t
+            LEFT JOIN found_recipes r ON r.id = t.found_recipe_id
+            WHERE r.id IS NULL
+        """,
+        ok_message="compiled_recipe_search_term_index has no orphaned recipe rows",
+        bad_message="compiled_recipe_search_term_index contains rows for missing recipes",
+        bad_status="warning",
+    )
+    _count_check(
+        checks,
+        db,
+        name="compiled_recipe_search_term_index:excluded_recipes",
+        sql="""
+            SELECT COUNT(*)
+            FROM compiled_recipe_search_term_index t
+            JOIN found_recipes r ON r.id = t.found_recipe_id
+            WHERE COALESCE(r.excluded, FALSE) = TRUE
+        """,
+        ok_message="compiled_recipe_search_term_index has no excluded recipes",
+        bad_message="compiled_recipe_search_term_index contains excluded recipes",
+        bad_status="warning",
+    )
+    _count_check(
+        checks,
+        db,
+        name="compiled_recipe_search_term_index:stale_version",
+        sql="""
+            SELECT COUNT(*)
+            FROM compiled_recipe_search_term_index
+            WHERE matcher_version <> :matcher_version
+               OR recipe_compiler_version <> :recipe_compiler_version
+               OR index_version_hash <> :index_version_hash
+        """,
+        params={
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "index_version_hash": PANTRY_SEARCH_INDEX_VERSION_HASH,
+        },
+        ok_message="compiled_recipe_search_term_index uses current versions",
+        bad_message="compiled_recipe_search_term_index contains stale versions",
+        bad_status="warning",
+    )
+    _count_check(
+        checks,
+        db,
+        name="compiled_recipe_search_term_index:source_hash_mismatch",
+        sql="""
+            SELECT COUNT(*)
+            FROM compiled_recipe_search_term_index t
+            JOIN compiled_recipe_match_data c ON c.found_recipe_id = t.found_recipe_id
+            WHERE t.matcher_version = :matcher_version
+              AND t.recipe_compiler_version = :recipe_compiler_version
+              AND t.index_version_hash = :index_version_hash
+              AND c.compiler_version = :recipe_compiler_version
+              AND t.recipe_source_hash <> c.recipe_source_hash
+        """,
+        params={
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "index_version_hash": PANTRY_SEARCH_INDEX_VERSION_HASH,
+        },
+        ok_message="compiled_recipe_search_term_index source hashes match compiled recipe IR",
+        bad_message=(
+            "compiled_recipe_search_term_index source hashes are stale; "
+            "run incremental or full pantry search-term index refresh"
+        ),
         bad_status="warning",
     )
 
