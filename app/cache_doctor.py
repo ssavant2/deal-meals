@@ -95,6 +95,25 @@ def _column_exists(db, table_name: str, column_name: str) -> bool:
     """, {"table_name": table_name, "column_name": column_name}))
 
 
+def _index_exists(db, table_name: str, index_name: str) -> bool:
+    return bool(_scalar(db, """
+        SELECT 1
+        FROM pg_indexes
+        WHERE schemaname = 'public'
+          AND tablename = :table_name
+          AND indexname = :index_name
+    """, {"table_name": table_name, "index_name": index_name}))
+
+
+def _constraint_exists(db, table_name: str, constraint_name: str) -> bool:
+    return bool(_scalar(db, """
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = :constraint_name
+          AND conrelid = CAST(:table_name AS regclass)
+    """, {"table_name": table_name, "constraint_name": constraint_name}))
+
+
 def _count_check(
     checks: list[dict[str, Any]],
     db,
@@ -378,6 +397,34 @@ def _compiled_recipe_checks(checks: list[dict[str, Any]], db) -> None:
         bad_message="compiled_recipe_term_index contains rows for missing recipes",
         bad_status="warning",
     )
+    found_recipe_index_exists = _index_exists(
+        db,
+        "compiled_recipe_term_index",
+        "idx_compiled_recipe_term_found_recipe",
+    )
+    checks.append(_check(
+        "compiled_recipe_term_index:found_recipe_index",
+        "ok" if found_recipe_index_exists else "warning",
+        (
+            "compiled_recipe_term_index has found_recipe_id index"
+            if found_recipe_index_exists
+            else "compiled_recipe_term_index is missing found_recipe_id index"
+        ),
+    ))
+    found_recipe_fk_exists = _constraint_exists(
+        db,
+        "compiled_recipe_term_index",
+        "fk_compiled_recipe_term_found_recipe",
+    )
+    checks.append(_check(
+        "compiled_recipe_term_index:found_recipe_fk",
+        "ok" if found_recipe_fk_exists else "warning",
+        (
+            "compiled_recipe_term_index has found_recipe_id FK cascade"
+            if found_recipe_fk_exists
+            else "compiled_recipe_term_index is missing found_recipe_id FK cascade"
+        ),
+    ))
     _count_check(
         checks,
         db,

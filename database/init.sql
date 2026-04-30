@@ -444,11 +444,17 @@ CREATE TABLE compiled_recipe_term_index (
         term_manifest_hash,
         term,
         term_type
-    )
+    ),
+    CONSTRAINT fk_compiled_recipe_term_found_recipe
+        FOREIGN KEY (found_recipe_id)
+        REFERENCES found_recipes(id)
+        ON DELETE CASCADE
 );
 
 CREATE INDEX idx_compiled_recipe_term_lookup
     ON compiled_recipe_term_index(matcher_version, recipe_compiler_version, term);
+CREATE INDEX idx_compiled_recipe_term_found_recipe
+    ON compiled_recipe_term_index(found_recipe_id);
 CREATE INDEX idx_compiled_recipe_term_recipe
     ON compiled_recipe_term_index(matcher_version, recipe_compiler_version, recipe_identity_key);
 CREATE INDEX idx_compiled_recipe_term_manifest

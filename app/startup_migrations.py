@@ -26,6 +26,8 @@ DROP_MEMORY_CACHE_PREFS_ID = "20260429_drop_memory_cache_preferences"
 CREATE_RECIPE_URL_DISCOVERY_CACHE_ID = "20260429_create_recipe_url_discovery_cache"
 ADD_CACHE_LAST_OPERATION_ID = "20260430_add_cache_last_operation"
 ADD_CACHE_OPERATION_HISTORY_ID = "20260430_add_cache_operation_history"
+ADD_RECIPE_TERM_FOUND_RECIPE_INDEX_ID = "20260430_add_recipe_term_found_recipe_index"
+ADD_RECIPE_TERM_FOUND_RECIPE_FK_ID = "20260430_add_recipe_term_found_recipe_fk"
 MIGRATION_TABLE = "deal_meals_schema_migrations"
 
 DROP_MEMORY_CACHE_PREFS_SQL = """
@@ -75,6 +77,36 @@ ADD COLUMN IF NOT EXISTS operation_history JSONB DEFAULT '[]'::jsonb;
 
 COMMENT ON COLUMN cache_metadata.operation_history
     IS 'Rolling compact history of recent cache operations for fallback diagnostics';
+""".strip()
+
+ADD_RECIPE_TERM_FOUND_RECIPE_INDEX_SQL = """
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_term_found_recipe
+    ON compiled_recipe_term_index(found_recipe_id);
+""".strip()
+
+ADD_RECIPE_TERM_FOUND_RECIPE_FK_SQL = """
+DELETE FROM compiled_recipe_term_index t
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM found_recipes r
+    WHERE r.id = t.found_recipe_id
+);
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'fk_compiled_recipe_term_found_recipe'
+          AND conrelid = 'compiled_recipe_term_index'::regclass
+    ) THEN
+        ALTER TABLE compiled_recipe_term_index
+        ADD CONSTRAINT fk_compiled_recipe_term_found_recipe
+        FOREIGN KEY (found_recipe_id)
+        REFERENCES found_recipes(id)
+        ON DELETE CASCADE;
+    END IF;
+END $$;
 """.strip()
 
 
@@ -230,6 +262,27 @@ def _cache_operation_history_column_exists(conn) -> bool:
     return row is not None
 
 
+def _compiled_recipe_term_found_recipe_index_exists(conn) -> bool:
+    row = conn.execute(text("""
+        SELECT 1
+        FROM pg_indexes
+        WHERE schemaname = 'public'
+          AND tablename = 'compiled_recipe_term_index'
+          AND indexname = 'idx_compiled_recipe_term_found_recipe'
+    """)).fetchone()
+    return row is not None
+
+
+def _compiled_recipe_term_found_recipe_fk_exists(conn) -> bool:
+    row = conn.execute(text("""
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'fk_compiled_recipe_term_found_recipe'
+          AND conrelid = 'compiled_recipe_term_index'::regclass
+    """)).fetchone()
+    return row is not None
+
+
 def _warn_manual_cache_last_operation_add() -> None:
     logger.warning(
         "cache_metadata.last_operation is missing, but the app DB user cannot "
@@ -244,6 +297,24 @@ def _warn_manual_cache_operation_history_add() -> None:
         "cannot run DDL. Run the startup migration with DB admin credentials "
         "or add the column from database/init.sql before relying on cache "
         "fallback-frequency diagnostics."
+    )
+
+
+def _warn_manual_recipe_term_index_add() -> None:
+    logger.warning(
+        "compiled_recipe_term_index(found_recipe_id) index is missing, but "
+        "the app DB user cannot run DDL. Run the startup migration with DB "
+        "admin credentials or create idx_compiled_recipe_term_found_recipe "
+        "from database/init.sql."
+    )
+
+
+def _warn_manual_recipe_term_fk_add() -> None:
+    logger.warning(
+        "compiled_recipe_term_index.found_recipe_id foreign key is missing, "
+        "but the app DB user cannot run DDL. Run the startup migration with "
+        "DB admin credentials or apply the FK from database/init.sql after "
+        "removing orphaned term-index rows."
     )
 
 
@@ -355,6 +426,67 @@ def _run_add_cache_operation_history(engine_info: _MigrationEngine, release_vers
         )
 
 
+def _run_add_recipe_term_found_recipe_index(engine_info: _MigrationEngine, release_version: str) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _compiled_recipe_term_found_recipe_index_exists(conn):
+                _warn_manual_recipe_term_index_add()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, ADD_RECIPE_TERM_FOUND_RECIPE_INDEX_ID):
+            return
+
+        conn.execute(text(ADD_RECIPE_TERM_FOUND_RECIPE_INDEX_SQL))
+        logger.info(
+            "Startup migration {} ensured compiled_recipe_term_index(found_recipe_id) index exists",
+            ADD_RECIPE_TERM_FOUND_RECIPE_INDEX_ID,
+        )
+        _record_migration(
+            conn,
+            ADD_RECIPE_TERM_FOUND_RECIPE_INDEX_ID,
+            release_version,
+            {"index": "idx_compiled_recipe_term_found_recipe"},
+        )
+
+
+def _run_add_recipe_term_found_recipe_fk(engine_info: _MigrationEngine, release_version: str) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _compiled_recipe_term_found_recipe_fk_exists(conn):
+                _warn_manual_recipe_term_fk_add()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, ADD_RECIPE_TERM_FOUND_RECIPE_FK_ID):
+            return
+
+        orphan_count = conn.execute(text("""
+            SELECT COUNT(*)
+            FROM compiled_recipe_term_index t
+            LEFT JOIN found_recipes r ON r.id = t.found_recipe_id
+            WHERE r.id IS NULL
+        """)).scalar() or 0
+        conn.execute(text(ADD_RECIPE_TERM_FOUND_RECIPE_FK_SQL))
+        logger.info(
+            "Startup migration {} ensured compiled_recipe_term_index.found_recipe_id FK exists "
+            "(removed {} orphaned rows before adding constraint)",
+            ADD_RECIPE_TERM_FOUND_RECIPE_FK_ID,
+            orphan_count,
+        )
+        _record_migration(
+            conn,
+            ADD_RECIPE_TERM_FOUND_RECIPE_FK_ID,
+            release_version,
+            {
+                "constraint": "fk_compiled_recipe_term_found_recipe",
+                "orphan_rows_removed": int(orphan_count),
+            },
+        )
+
+
 def run_startup_migrations(release_version: str) -> None:
     """Run one-off migrations that are safe during app startup."""
     if not _version_can_run_startup_migrations(release_version):
@@ -370,6 +502,8 @@ def run_startup_migrations(release_version: str) -> None:
         _run_create_recipe_url_discovery_cache(engine_info, release_version)
         _run_add_cache_last_operation(engine_info, release_version)
         _run_add_cache_operation_history(engine_info, release_version)
+        _run_add_recipe_term_found_recipe_index(engine_info, release_version)
+        _run_add_recipe_term_found_recipe_fk(engine_info, release_version)
     except SQLAlchemyError as e:
         logger.warning(f"Startup migrations skipped after database error: {e}")
     finally:

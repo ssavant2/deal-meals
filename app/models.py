@@ -408,7 +408,11 @@ class CompiledRecipeTermIndex(Base):
     __tablename__ = "compiled_recipe_term_index"
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuidv7()"))
-    found_recipe_id = Column(UUID(as_uuid=True), nullable=False)
+    found_recipe_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("found_recipes.id", ondelete="CASCADE", name="fk_compiled_recipe_term_found_recipe"),
+        nullable=False,
+    )
     recipe_identity_key = Column(String(64), nullable=False)
 
     matcher_version = Column(String(64), nullable=False)
@@ -421,6 +425,7 @@ class CompiledRecipeTermIndex(Base):
 
     __table_args__ = (
         Index('idx_compiled_recipe_term_lookup', 'matcher_version', 'recipe_compiler_version', 'term'),
+        Index('idx_compiled_recipe_term_found_recipe', 'found_recipe_id'),
         Index('idx_compiled_recipe_term_recipe', 'matcher_version', 'recipe_compiler_version', 'recipe_identity_key'),
         Index('idx_compiled_recipe_term_manifest', 'term_manifest_hash'),
         UniqueConstraint(
