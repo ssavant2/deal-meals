@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deal Meals - Swedish grocery deals matched with recipes</title>
+  <meta name="description" content="Deal Meals is a self-hosted app that matches Swedish grocery store offers with thousands of recipes, helping you plan meals around what is on sale this week.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://ssavant2.github.io/deal-meals/">
+  <meta property="og:title" content="Deal Meals">
+  <meta property="og:description" content="A self-hosted Swedish grocery deal aggregator with recipe suggestions.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ssavant2.github.io/deal-meals/">
+  <meta property="og:image" content="https://ssavant2.github.io/deal-meals/screenshots/recipe-list.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #15191d;
+      --surface: #1f252b;
+      --surface-strong: #2a323a;
+      --text: #f7fafc;
+      --muted: #c7d2df;
+      --line: #3b4651;
+      --accent: #38d9a9;
+      --accent-2: #4dabf7;
+      --warning: #ffd166;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .hero {
+      min-height: 92vh;
+      display: grid;
+      align-items: end;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(10, 12, 14, 0.38) 0%, rgba(10, 12, 14, 0.78) 62%, var(--bg) 100%),
+        url("screenshots/recipe-list.png") center top / cover no-repeat;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.12);
+      pointer-events: none;
+    }
+
+    .nav {
+      position: absolute;
+      z-index: 2;
+      inset: 0 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.2rem clamp(1rem, 4vw, 3rem);
+      color: #fff;
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav a,
+    .button {
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .nav a {
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 0.95rem;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      width: min(1120px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 7rem 0 6rem;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      margin: 0 0 1rem;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 860px;
+      font-size: clamp(3rem, 8vw, 7.5rem);
+      line-height: 0.92;
+      letter-spacing: 0;
+    }
+
+    .hero-copy {
+      max-width: 680px;
+      margin: 1.4rem 0 0;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 2rem;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0.72rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    .button.primary {
+      color: #07110e;
+      background: var(--accent);
+      border-color: transparent;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 4rem 0;
+    }
+
+    section {
+      padding: 3rem 0;
+      border-top: 1px solid var(--line);
+    }
+
+    h2 {
+      margin: 0 0 1rem;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 820px;
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.8rem;
+    }
+
+    .feature {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 1.2rem;
+    }
+
+    .feature strong {
+      display: block;
+      font-size: 1.05rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .screenshots {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.8rem;
+    }
+
+    figure {
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1.22;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    figcaption {
+      padding: 0.8rem 1rem 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .install {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.95fr);
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    pre {
+      margin: 0;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0f1317;
+      color: #e6edf3;
+      padding: 1rem;
+      font-size: 0.92rem;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    .note {
+      color: var(--muted);
+      margin-top: 1rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      padding: 2rem 0 3rem;
+      width: min(1120px, calc(100% - 2rem));
+      margin: 0 auto;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 820px) {
+      .hero {
+        min-height: 88vh;
+      }
+
+      .nav {
+        align-items: flex-start;
+      }
+
+      .feature-grid,
+      .screenshots,
+      .install {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-content {
+        padding-bottom: 4.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav" aria-label="Project links">
+      <div class="brand">Deal Meals</div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#screenshots">Screenshots</a>
+        <a href="https://github.com/ssavant2/deal-meals">GitHub</a>
+      </div>
+    </nav>
+
+    <div class="hero-content">
+      <p class="eyebrow">Self-hosted Swedish meal planning</p>
+      <h1>Deal Meals</h1>
+      <p class="hero-copy">
+        Match current Swedish grocery offers with thousands of recipes and find
+        meal ideas based on what is actually on sale this week.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/ssavant2/deal-meals">View on GitHub</a>
+        <a class="button" href="https://github.com/ssavant2/deal-meals/releases/latest">Latest release</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="features">
+      <h2>Built for Swedish groceries and recipes</h2>
+      <p class="lead">
+        Deal Meals fetches weekly offers from Swedish grocery chains, scrapes
+        Swedish recipe sources, and matches ingredients against products with a
+        Swedish-language matching engine.
+      </p>
+
+      <div class="feature-grid">
+        <div class="feature">
+          <strong>Weekly deals</strong>
+          <p>Scrapes offers from Willys, ICA, Hemkop, Mathem and Coop.</p>
+        </div>
+        <div class="feature">
+          <strong>Recipe suggestions</strong>
+          <p>Ranks recipes by savings, coverage and practical ingredient matches.</p>
+        </div>
+        <div class="feature">
+          <strong>Self-hosted</strong>
+          <p>Runs in Docker with a web UI, local cache, recipe images and settings.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="screenshots">
+      <h2>What it looks like</h2>
+      <p class="lead">
+        The app focuses on the weekly workflow: fetch offers, gather recipes,
+        review matches, and pick meals worth cooking.
+      </p>
+
+      <div class="screenshots">
+        <figure>
+          <img src="screenshots/recipe-list.png" alt="Deal Meals recipe list sorted by savings" loading="lazy">
+          <figcaption>Recipes matched against current offers.</figcaption>
+        </figure>
+        <figure>
+          <img src="screenshots/recipe-card.png" alt="Deal Meals recipe card with matched products and savings" loading="lazy">
+          <figcaption>Matched products and savings for each recipe.</figcaption>
+        </figure>
+        <figure>
+          <img src="screenshots/recipe-sources.png" alt="Deal Meals recipe source management screen" loading="lazy">
+          <figcaption>Recipe source management and scraping.</figcaption>
+        </figure>
+        <figure>
+          <img src="screenshots/settings.png" alt="Deal Meals settings screen" loading="lazy">
+          <figcaption>Store, language, image and matching settings.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="install" class="install">
+      <div>
+        <h2>Install with Docker</h2>
+        <p class="lead">
+          Download the Compose file and example environment, then start the app.
+          The full documentation lives in the GitHub repository.
+        </p>
+        <p class="note">
+          Deal Meals is a personal hobby project. Store and recipe scrapers may
+          need maintenance when third-party websites change.
+        </p>
+      </div>
+      <pre><code>mkdir deal-meals && cd deal-meals
+wget -O docker-compose.yml https://github.com/ssavant2/deal-meals/releases/latest/download/docker-compose.yml
+wget -O .env https://github.com/ssavant2/deal-meals/releases/latest/download/example.env
+docker compose up -d</code></pre>
+    </section>
+  </main>
+
+  <footer>
+    <span>Deal Meals is open source on GitHub: </span>
+    <a href="https://github.com/ssavant2/deal-meals">github.com/ssavant2/deal-meals</a>
+  </footer>
+</body>
+</html>
