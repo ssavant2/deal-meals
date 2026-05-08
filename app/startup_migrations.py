@@ -26,9 +26,12 @@ DROP_MEMORY_CACHE_PREFS_ID = "20260429_drop_memory_cache_preferences"
 CREATE_RECIPE_URL_DISCOVERY_CACHE_ID = "20260429_create_recipe_url_discovery_cache"
 ADD_CACHE_LAST_OPERATION_ID = "20260430_add_cache_last_operation"
 ADD_CACHE_OPERATION_HISTORY_ID = "20260430_add_cache_operation_history"
+ADD_COMPILED_OFFER_BASELINE_COMMITTED_ID = "20260501_add_compiled_offer_baseline_committed"
 ADD_RECIPE_TERM_FOUND_RECIPE_INDEX_ID = "20260430_add_recipe_term_found_recipe_index"
 ADD_RECIPE_TERM_FOUND_RECIPE_FK_ID = "20260430_add_recipe_term_found_recipe_fk"
 CREATE_RECIPE_SEARCH_TERM_INDEX_ID = "20260430_create_recipe_search_term_index"
+CREATE_RECIPE_OFFER_CANDIDATES_ID = "20260507_create_recipe_offer_candidates"
+ADD_CANDIDATE_JOIN_TERM_INDEXES_ID = "20260507_add_candidate_join_term_indexes"
 MIGRATION_TABLE = "deal_meals_schema_migrations"
 
 DROP_MEMORY_CACHE_PREFS_SQL = """
@@ -78,6 +81,14 @@ ADD COLUMN IF NOT EXISTS operation_history JSONB DEFAULT '[]'::jsonb;
 
 COMMENT ON COLUMN cache_metadata.operation_history
     IS 'Rolling compact history of recent cache operations for fallback diagnostics';
+""".strip()
+
+ADD_COMPILED_OFFER_BASELINE_COMMITTED_SQL = """
+ALTER TABLE cache_metadata
+ADD COLUMN IF NOT EXISTS compiled_offer_baseline_committed BOOLEAN NOT NULL DEFAULT TRUE;
+
+COMMENT ON COLUMN cache_metadata.compiled_offer_baseline_committed
+    IS 'False while compiled offer IR may be newer than the persisted recipe-offer cache';
 """.strip()
 
 ADD_RECIPE_TERM_FOUND_RECIPE_INDEX_SQL = """
@@ -179,6 +190,73 @@ CREATE TABLE IF NOT EXISTS compiled_recipe_search_term_index_status (
 INSERT INTO compiled_recipe_search_term_index_status (status_key, status, last_error)
 VALUES ('pantry_search', 'degraded', 'never refreshed')
 ON CONFLICT (status_key) DO NOTHING;
+""".strip()
+
+CREATE_RECIPE_OFFER_CANDIDATES_SQL = """
+CREATE TABLE IF NOT EXISTS compiled_recipe_offer_candidates (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    found_recipe_id UUID NOT NULL,
+    recipe_identity_key VARCHAR(64) NOT NULL,
+    offer_identity_key VARCHAR(64) NOT NULL,
+    store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+    matcher_version VARCHAR(64) NOT NULL,
+    recipe_compiler_version VARCHAR(64) NOT NULL,
+    offer_compiler_version VARCHAR(64) NOT NULL,
+    term_manifest_hash VARCHAR(64) NOT NULL,
+    matched_terms TEXT[] NOT NULL DEFAULT '{}'::text[],
+    candidate_reason VARCHAR(40) NOT NULL DEFAULT 'term_overlap',
+    indexed_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT uq_compiled_recipe_offer_candidate UNIQUE (
+        matcher_version,
+        recipe_compiler_version,
+        offer_compiler_version,
+        term_manifest_hash,
+        found_recipe_id,
+        offer_identity_key
+    )
+);
+
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_offer_candidate_chunk
+    ON compiled_recipe_offer_candidates(
+        matcher_version,
+        recipe_compiler_version,
+        offer_compiler_version,
+        term_manifest_hash,
+        found_recipe_id
+    );
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_offer_candidate_offer
+    ON compiled_recipe_offer_candidates(
+        matcher_version,
+        offer_compiler_version,
+        term_manifest_hash,
+        offer_identity_key
+    );
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_offer_candidate_recipe
+    ON compiled_recipe_offer_candidates(found_recipe_id);
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'fk_compiled_recipe_offer_candidate_recipe'
+          AND conrelid = 'compiled_recipe_offer_candidates'::regclass
+    ) THEN
+        ALTER TABLE compiled_recipe_offer_candidates
+        ADD CONSTRAINT fk_compiled_recipe_offer_candidate_recipe
+        FOREIGN KEY (found_recipe_id)
+        REFERENCES found_recipes(id)
+        ON DELETE CASCADE;
+    END IF;
+END $$;
+""".strip()
+
+ADD_CANDIDATE_JOIN_TERM_INDEXES_SQL = """
+CREATE INDEX IF NOT EXISTS idx_compiled_offer_term_candidate_join
+    ON compiled_offer_term_index(matcher_version, offer_compiler_version, term_manifest_hash, term);
+
+CREATE INDEX IF NOT EXISTS idx_compiled_recipe_term_candidate_join
+    ON compiled_recipe_term_index(matcher_version, recipe_compiler_version, term_manifest_hash, term);
 """.strip()
 
 
@@ -334,6 +412,17 @@ def _cache_operation_history_column_exists(conn) -> bool:
     return row is not None
 
 
+def _compiled_offer_baseline_committed_column_exists(conn) -> bool:
+    row = conn.execute(text("""
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'cache_metadata'
+          AND column_name = 'compiled_offer_baseline_committed'
+    """)).fetchone()
+    return row is not None
+
+
 def _compiled_recipe_term_found_recipe_index_exists(conn) -> bool:
     row = conn.execute(text("""
         SELECT 1
@@ -375,6 +464,16 @@ def _compiled_recipe_search_term_status_exists(conn) -> bool:
     return row is not None
 
 
+def _compiled_recipe_offer_candidates_exists(conn) -> bool:
+    row = conn.execute(text("""
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name = 'compiled_recipe_offer_candidates'
+    """)).fetchone()
+    return row is not None
+
+
 def _warn_manual_cache_last_operation_add() -> None:
     logger.warning(
         "cache_metadata.last_operation is missing, but the app DB user cannot "
@@ -389,6 +488,15 @@ def _warn_manual_cache_operation_history_add() -> None:
         "cannot run DDL. Run the startup migration with DB admin credentials "
         "or add the column from database/init.sql before relying on cache "
         "fallback-frequency diagnostics."
+    )
+
+
+def _warn_manual_compiled_offer_baseline_committed_add() -> None:
+    logger.warning(
+        "cache_metadata.compiled_offer_baseline_committed is missing, but the "
+        "app DB user cannot run DDL. Run the startup migration with DB admin "
+        "credentials or add the column from database/init.sql before relying "
+        "on stable offer-refresh decisions."
     )
 
 
@@ -416,6 +524,15 @@ def _warn_manual_recipe_search_term_index_create() -> None:
         "user cannot run DDL. Run the startup migration with DB admin "
         "credentials or create the tables from database/init.sql before "
         "enabling pantry search-term indexing."
+    )
+
+
+def _warn_manual_recipe_offer_candidates_create() -> None:
+    logger.warning(
+        "compiled_recipe_offer_candidates is missing, but the app DB user "
+        "cannot run DDL. Run the startup migration with DB admin credentials "
+        "or create the table from database/init.sql before enabling "
+        "database-backed cache candidate scoring."
     )
 
 
@@ -527,6 +644,34 @@ def _run_add_cache_operation_history(engine_info: _MigrationEngine, release_vers
         )
 
 
+def _run_add_compiled_offer_baseline_committed(
+    engine_info: _MigrationEngine,
+    release_version: str,
+) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _compiled_offer_baseline_committed_column_exists(conn):
+                _warn_manual_compiled_offer_baseline_committed_add()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, ADD_COMPILED_OFFER_BASELINE_COMMITTED_ID):
+            return
+
+        conn.execute(text(ADD_COMPILED_OFFER_BASELINE_COMMITTED_SQL))
+        logger.info(
+            "Startup migration {} ensured cache_metadata.compiled_offer_baseline_committed exists",
+            ADD_COMPILED_OFFER_BASELINE_COMMITTED_ID,
+        )
+        _record_migration(
+            conn,
+            ADD_COMPILED_OFFER_BASELINE_COMMITTED_ID,
+            release_version,
+            {"column": "cache_metadata.compiled_offer_baseline_committed"},
+        )
+
+
 def _run_add_recipe_term_found_recipe_index(engine_info: _MigrationEngine, release_version: str) -> None:
     if not engine_info.can_run_ddl:
         with engine_info.engine.connect() as conn:
@@ -621,6 +766,58 @@ def _run_create_recipe_search_term_index(engine_info: _MigrationEngine, release_
         )
 
 
+def _run_create_recipe_offer_candidates(engine_info: _MigrationEngine, release_version: str) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _compiled_recipe_offer_candidates_exists(conn):
+                _warn_manual_recipe_offer_candidates_create()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, CREATE_RECIPE_OFFER_CANDIDATES_ID):
+            return
+
+        conn.execute(text(CREATE_RECIPE_OFFER_CANDIDATES_SQL))
+        logger.info(
+            "Startup migration {} ensured compiled_recipe_offer_candidates exists",
+            CREATE_RECIPE_OFFER_CANDIDATES_ID,
+        )
+        _record_migration(
+            conn,
+            CREATE_RECIPE_OFFER_CANDIDATES_ID,
+            release_version,
+            {"table": "compiled_recipe_offer_candidates"},
+        )
+
+
+def _run_add_candidate_join_term_indexes(engine_info: _MigrationEngine, release_version: str) -> None:
+    if not engine_info.can_run_ddl:
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, ADD_CANDIDATE_JOIN_TERM_INDEXES_ID):
+            return
+
+        conn.execute(text(ADD_CANDIDATE_JOIN_TERM_INDEXES_SQL))
+        logger.info(
+            "Startup migration {} ensured candidate-routing term join indexes exist",
+            ADD_CANDIDATE_JOIN_TERM_INDEXES_ID,
+        )
+        _record_migration(
+            conn,
+            ADD_CANDIDATE_JOIN_TERM_INDEXES_ID,
+            release_version,
+            {
+                "indexes": [
+                    "idx_compiled_offer_term_candidate_join",
+                    "idx_compiled_recipe_term_candidate_join",
+                ],
+            },
+        )
+
+
 def run_startup_migrations(release_version: str) -> None:
     """Run one-off migrations that are safe during app startup."""
     if not _version_can_run_startup_migrations(release_version):
@@ -636,9 +833,12 @@ def run_startup_migrations(release_version: str) -> None:
         _run_create_recipe_url_discovery_cache(engine_info, release_version)
         _run_add_cache_last_operation(engine_info, release_version)
         _run_add_cache_operation_history(engine_info, release_version)
+        _run_add_compiled_offer_baseline_committed(engine_info, release_version)
         _run_add_recipe_term_found_recipe_index(engine_info, release_version)
         _run_add_recipe_term_found_recipe_fk(engine_info, release_version)
         _run_create_recipe_search_term_index(engine_info, release_version)
+        _run_create_recipe_offer_candidates(engine_info, release_version)
+        _run_add_candidate_join_term_indexes(engine_info, release_version)
     except SQLAlchemyError as e:
         logger.warning(f"Startup migrations skipped after database error: {e}")
     finally:

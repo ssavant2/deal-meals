@@ -33,7 +33,9 @@ from .recipe_text import (
     preserve_parenthetical_grouped_herb_leaves,
     preserve_non_concentrate_parenthetical,
     preserve_parenthetical_shiso_alternatives,
+    preserve_single_product_example_parentheticals,
     rewrite_buljong_eller_fond,
+    rewrite_truncated_chocolate_color_lists,
     rewrite_mince_of_alternatives,
     rewrite_truncated_eller_compounds,
 )
@@ -112,6 +114,106 @@ _WHITE_FISH_FILLET_MARKERS: FrozenSet[str] = frozenset({
 })
 
 
+def _is_truffle_oil_text(text: str) -> bool:
+    return 'tryffelolja' in text or (
+        'tryffel' in text and re.search(r'\b(?:olivolja|olja)\b', text) is not None
+    )
+
+
+def _is_chocolate_drink_text(text: str, brand: Optional[str] = None) -> bool:
+    combined = f"{text} {brand or ''}".lower()
+    return (
+        re.search(r"\b(?:chokladdryck|drickchoklad)\b", combined) is not None
+        or re.search(r"\bo'?boy\b", combined) is not None
+        or ('tigo' in combined and 'choklad' in combined)
+    )
+
+
+def _is_paprika_spice_product_text(text: str, category: Optional[str] = None) -> bool:
+    if 'paprika' not in text:
+        return False
+    if (category or '').lower() not in {'pantry', 'spices'}:
+        return False
+    if any(token in text for token in (
+        'puré', 'pure', 'paprikapure', 'pesto', 'mayo',
+        'kryddmix', 'gulasch', 'fylld', 'dolmar',
+        'tonfisk', 'örtsalt', 'ortsalt',
+    )):
+        return False
+    return (
+        'paprikapulver' in text
+        or 'paprikakrydda' in text
+        or re.search(r'\b(?:rökt|rokt)\s+paprika\b', text) is not None
+        or re.search(r'\bpaprika\s+(?:burk|påse|pase|stark)\b', text) is not None
+    )
+
+
+def _is_chipotle_spice_product_text(text: str, category: Optional[str] = None) -> bool:
+    if 'chipotle' not in text:
+        return False
+    if (category or '').lower() not in {'pantry', 'spices'}:
+        return False
+    if any(token in text for token in (
+        'sås', 'sas', 'sauce', 'hot sauce', 'bbq', 'barbecue',
+        'mayo', 'majonnäs', 'majonnas', 'bearnaise',
+        'glaze', 'marinad', 'dressing',
+    )):
+        return False
+    return any(token in text for token in (
+        'chili', 'chilli', 'krydda', 'spice', 'pulver', 'powder',
+    ))
+
+
+def _is_plain_sparkling_water_product_text(text: str, category: Optional[str] = None) -> bool:
+    if (category or '').lower() != 'beverages':
+        return False
+    if not re.search(r'\b(?:kolsyrat\s+vatten|mineralvatten|sparkling\s+water)\b', text):
+        return False
+    return not any(token in text for token in (
+        'citron', 'lime', 'citrus', 'apelsin', 'mandarin', 'jordgubb', 'hallon',
+        'granatäpple', 'granatapple', 'mango', 'päron', 'paron',
+        'persika', 'peach', 'smultron',
+        'skogsbär', 'skogsbar', 'björnbär', 'bjornbar', 'rabarber',
+        'körsbär', 'korsbar', 'fläder', 'flader', 'passion', 'äpple', 'apple',
+        'kaktus',
+    ))
+
+
+def _is_plain_instant_coffee_product_text(text: str, category: Optional[str] = None) -> bool:
+    if (category or '').lower() not in {'pantry', 'beverages'}:
+        return False
+    if not re.search(r'\b(?:snabbkaffe|pulverkaffe|instant\s+coffee)\b', text):
+        return False
+    return not any(token in text for token in (
+        'cappuccino', 'cappucino', 'latte', 'choklad', 'chocolate',
+        'karamell', 'caramel', 'vanilj', 'vanilla', 'irish',
+    ))
+
+
+_COFFEE_PRODUCT_FORM_CUES: FrozenSet[str] = frozenset({
+    'snabbkaffe', 'snabbkaffepulver', 'pulverkaffe',
+    'kaffepulver', 'kaffebönor', 'kaffebonor', 'kaffeböna', 'kaffebona',
+    'hela bönor', 'hela bonor', 'bönor', 'bonor',
+    'kaffekapslar', 'kaffekapsel', 'kapslar', 'kapsel',
+    'bryggkaffe', 'kokkaffe', 'malet kaffe', 'ground coffee',
+})
+
+
+def _is_brewed_coffee_ingredient_text(text: str) -> bool:
+    if 'kaffe' not in text and 'espresso' not in text:
+        return False
+    if any(cue in text for cue in _COFFEE_PRODUCT_FORM_CUES):
+        return False
+    return (
+        re.search(r'\b\d+(?:[.,]\d+)?\s*(?:dl|cl|ml|l)\b', text) is not None
+        or any(cue in text for cue in (
+            'starkt kaffe', 'stark kaffe',
+            'bryggt kaffe', 'bryggd kaffe', 'nybryggt kaffe', 'nybryggd kaffe',
+            'dubbla espresso', 'dubbel espresso',
+        ))
+    )
+
+
 def is_non_food_product(product_name: str, category: Optional[str] = None) -> bool:
     """
     Check if a product is non-food (hygiene, cleaning, etc).
@@ -135,6 +237,15 @@ def is_non_food_product(product_name: str, category: Optional[str] = None) -> bo
 
     # Normalize Swedish characters (tvattmedel → tvättmedel)
     name_normalized = fix_swedish_chars(product_name).lower()
+    category_lower = (category or '').lower()
+
+    # Some edible plant-based cheese products use words that are otherwise
+    # strong non-food signals, e.g. Oddlygood's "Munchy" mozzarella line.
+    if (
+        category_lower == 'dairy'
+        and any(token in name_normalized for token in ('mozzarella', 'ost', 'cheese', 'vegansk', 'vegan'))
+    ):
+        return False
 
     # Check against non-food keywords using pre-compiled combined pattern
     # This is ~50x faster than looping through each keyword
@@ -224,6 +335,16 @@ def extract_keywords_from_product(
             if re.search(r'\bgrenadine\b', _mixtales_name):
                 return ['grenadine']
         if brand_lower in _DRINK_BRANDS:
+            _drink_name = fix_swedish_chars(product_name).lower()
+            _soft_drink_brands = frozenset({
+                'jarritos', 'sprite', 'pepsi', 'coca-cola', 'fanta',
+                'trocadero', 'zingo',
+            })
+            if brand_lower in _soft_drink_brands or re.search(
+                r'\b(?:läsk|lask|cola|soda|fanta|sprite|pepsi|trocadero|zingo|jarritos)\b',
+                _drink_name,
+            ):
+                return ['läsk']
             return []
 
         # Strip brand name from product name to prevent brand words leaking as keywords.
@@ -236,18 +357,20 @@ def extract_keywords_from_product(
         # products like "Fiberhusk Glutenfri 300g Husk": stripping the brand leaves
         # generic residue words, but no real matcher keyword. Check the stripped name
         # with brand-less extraction and only keep it if it still yields keywords.
-        import re as _re
-        brand_pattern = _re.compile(r'\b' + _re.escape(brand_lower) + r'\b', _re.IGNORECASE)
-        stripped_name = brand_pattern.sub('', product_name).strip()
-        if stripped_name and stripped_name != product_name:
-            stripped_keywords = extract_keywords_from_product(
-                stripped_name,
-                category,
-                min_length=min_length,
-                brand=None,
-            )
-            if stripped_keywords:
-                product_name = stripped_name
+        _IDENTITY_BRANDS = frozenset({'västerbottens', 'vasterbottens'})
+        if fix_swedish_chars(brand_lower) not in _IDENTITY_BRANDS:
+            import re as _re
+            brand_pattern = _re.compile(r'\b' + _re.escape(brand_lower) + r'\b', _re.IGNORECASE)
+            stripped_name = brand_pattern.sub('', product_name).strip()
+            if stripped_name and stripped_name != product_name:
+                stripped_keywords = extract_keywords_from_product(
+                    stripped_name,
+                    category,
+                    min_length=min_length,
+                    brand=None,
+                )
+                if stripped_keywords:
+                    product_name = stripped_name
 
     # Filter out non-food products
     if is_non_food_product(product_name, category):
@@ -258,12 +381,171 @@ def extract_keywords_from_product(
     # carrier word and breaks ice cream normalization. Use pre_strip_name instead.
     original_name_lower = fix_swedish_chars(pre_strip_name).lower()
 
+    if (
+        ('kesella' in original_name_lower and 'vanilj' in original_name_lower)
+        or re.search(r'\bvanilj\s+kvarg\b', original_name_lower)
+        or 'vaniljkvarg' in original_name_lower
+    ):
+        return ['vaniljkvarg']
+
+    if any(token in original_name_lower for token in ('apelsinskal kanderat', 'kanderat apelsinskal')):
+        return ['kanderatapelsinskal', 'apelsinskal']
+
+    if (
+        (category or '').lower() == 'fruit'
+        and re.search(r'\b(?:blodgrape|grape)\b', original_name_lower)
+        and 'vindruv' not in original_name_lower
+    ):
+        return ['grapefrukt']
+
+    if _is_plain_sparkling_water_product_text(original_name_lower, category):
+        return ['sodavatten']
+
+    if (
+        (category or '').lower() == 'beverages'
+        and re.search(r'\b(?:läsk|lask|cola|soda|fanta|sprite|pepsi|trocadero|zingo|jarritos)\b', original_name_lower)
+        and not re.search(r'\b(?:kolsyrat\s+vatten|mineralvatten|sparkling\s+water|ginger\s+ale)\b', original_name_lower)
+    ):
+        return ['läsk']
+
+    if re.search(r'\bfalafel\s*mix\b|\bfalafelmix\b', original_name_lower):
+        return ['falafelmix', 'falafel']
+
+    if _is_plain_instant_coffee_product_text(original_name_lower, category):
+        return ['snabbkaffe']
+
+    if re.search(r'\bcitron\s*juice\b|\bcitronjuice\b', original_name_lower):
+        return ['citron', 'citronjuice']
+
+    if re.search(r'\blime\s*juice\b|\blimejuice\b', original_name_lower):
+        return ['lime', 'limejuice']
+
+    if (
+        (category or '').lower() == 'beverages'
+        and re.search(r'\b(?:folköl|folkol)\b', original_name_lower)
+        and not any(cue in original_name_lower for cue in ('ginger beer', 'root beer'))
+    ):
+        return ['folköl', 'öl']
+
+    if (
+        (category or '').lower() == 'beverages'
+        and re.search(r'\b(?:öl|ol|lager|beer|lättöl|lattol)\b', original_name_lower)
+        and not any(cue in original_name_lower for cue in ('ginger beer', 'root beer'))
+        and 'porter' not in original_name_lower
+    ):
+        return ['öl']
+
+    if (
+        (category or '').lower() == 'beverages'
+        and 'cider' in original_name_lower
+        and 'vinäger' not in original_name_lower
+        and 'vinager' not in original_name_lower
+    ):
+        if any(cue in original_name_lower for cue in ('äppel', 'appel', 'apple')):
+            return ['äppelcider', 'cider']
+        if any(cue in original_name_lower for cue in ('päron', 'paron', 'pear')):
+            return ['päroncider', 'cider']
+        if any(cue in original_name_lower for cue in ('fläder', 'flader', 'elderflower')):
+            return ['flädercider', 'cider']
+        if any(cue in original_name_lower for cue in ('bär', 'bar', 'berry', 'berries', 'hallon', 'jordgubb')):
+            return ['bärcider', 'cider']
+        return ['cider']
+
+    if (
+        (category or '').lower() in {'spices', 'pantry'}
+        and re.search(r'\bkoriander\b', original_name_lower)
+    ):
+        return ['koriander']
+
+    if (
+        (category or '').lower() == 'frozen'
+        and re.search(r'\bkoriander\b', original_name_lower)
+    ):
+        return ['koriander']
+
+    if (
+        (category or '').lower() == 'bread'
+        and re.search(
+            r'\b(?:fralla|frallor|fröfralla|fröfrallor|frofralla|frofrallor|'
+            r'grötfralla|grotfralla|surdegsfralla|småbröd|smabrod|'
+            r'småfranska|smafranska)\b',
+            original_name_lower,
+        )
+    ):
+        return ['styckbröd']
+
+    if (
+        (category or '').lower() in {'', 'bread'}
+        and re.search(r'\b(?:skivad|skivat|skivor)\b', original_name_lower)
+        and re.search(r'\b(?:bröd|brod)\b', original_name_lower)
+    ):
+        return ['formbröd']
+
+    if any(token in original_name_lower for token in (
+        'kokos riven', 'riven kokos', 'kokosflingor',
+        'kokos flakes', 'kokoschips', 'kokos chips',
+    )):
+        return ['kokosflingor', 'kokos']
+
+    if (
+        re.search(r'\bmajs\b', original_name_lower)
+        and any(cue in original_name_lower for cue in ('förkokt', 'forkokt', 'färdigkokt', 'fardigkokt'))
+    ):
+        return ['förkoktmajskolv', 'majskolv']
+
+    if (
+        any(cue in original_name_lower for cue in ('svartvinbär', 'svartvinbar', 'svart vinbär', 'svart vinbar'))
+        and re.search(r'\b(?:saft|lättdryck|lattdryck)\b', original_name_lower)
+    ):
+        return ['svartvinbärssaft']
+
+    if (
+        'ingefärsjuice' in original_name_lower
+        or 'ingefararjuice' in original_name_lower
+        or (
+            any(cue in original_name_lower for cue in ('ingefära', 'ingefara', 'ingefär', 'ingefer'))
+            and any(cue in original_name_lower for cue in ('pressad', 'juice', 'shot'))
+        )
+    ):
+        return ['ingefärsjuice']
+
     # Exact cocktail-ingredient exception: "Drinkmix Grenadine" is the real
     # cooking/drink ingredient grenadine, not just a flavored beverage.
     # Keep this narrow so other drink mixes stay blocked by the processed-food
     # and drink-brand paths below.
     if 'drinkmix' in original_name_lower and re.search(r'\bgrenadine\b', original_name_lower):
         return ['grenadine']
+
+    # Exact condiment / cooking-drink families that otherwise get swallowed by
+    # broad ready-meal or beverage filters.
+    if re.search(r'\b(?:green|grön|gron)\s+curry\s+paste\b', original_name_lower):
+        return ['gröncurrypasta']
+    if re.search(r'\b(?:red|röd|rod)\s+curry\s+paste\b', original_name_lower):
+        return ['rödcurrypasta']
+    if re.search(r'\b(?:yellow|gul)\s+curry\s+paste\b', original_name_lower):
+        return ['gulcurrypasta']
+    if re.search(r'\b(?:sweet\s*(?:&|and)?\s*sour|sötsur|sotsur)\s+(?:sås|sas|sauce)\b', original_name_lower):
+        return ['sötsursås']
+    if re.search(r'\bcrispy\s+chili\s+(?:in\s+)?oil\b|\bcrispychiliolja\b', original_name_lower):
+        return ['crispychiliolja']
+    if (
+        any(cue in original_name_lower for cue in ('svartvinbär', 'svartvinbar', 'svart vinbär', 'svart vinbar'))
+        and any(cue in original_name_lower for cue in ('gelé', 'gele'))
+    ):
+        return ['svartvinbärsgele']
+    if (
+        any(cue in original_name_lower for cue in (
+            'rödvinbär', 'rodvinbar', 'röd vinbär', 'rod vinbar',
+            'röda vinbär', 'roda vinbar',
+        ))
+        and any(cue in original_name_lower for cue in ('gelé', 'gele'))
+    ):
+        return ['rödvinbärsgele']
+    if (
+        re.search(r'\b(?:alkoholfri|alkfri|alcohol\s+free|non\s+alcoholic)\b', original_name_lower)
+        and re.search(r'\b(?:öl|ol|lager|beer)\b', original_name_lower)
+    ):
+        return ['alkoholfriöl']
 
     # Cooking recipes occasionally call for porter specifically. Keep that beer
     # family searchable as an exact ingredient without opening generic beer or
@@ -318,10 +600,103 @@ def extract_keywords_from_product(
             product_keywords.append('fläsklägg')
         return product_keywords
 
+    # Corn-fed chicken fillet cuts are still ordinary raw chicken fillet for
+    # recipe matching. Product wording often says "Majskyckling Bröstfilé",
+    # which otherwise leaves only separate "majskyckling" + "bröstfilé" tokens.
+    if (
+        (category or '').lower() in {'meat', 'poultry'}
+        and 'majskyckling' in original_name_lower
+        and any(cue in original_name_lower for cue in (
+            'filé', 'file', 'bröstfil', 'brostfil',
+            'innerfil', 'lårfil', 'larfil',
+        ))
+    ):
+        return ['kycklingfilé', 'kyckling']
+
     # Explicit candy ingredient: keep chocolate eggs as their own exact family
     # instead of treating them as generic candy or plain chocolate.
     if 'chokladägg' in original_name_lower or 'chokladagg' in original_name_lower:
         return ['chokladägg']
+
+    if re.search(r'\bpolly\b', original_name_lower):
+        return ['polly']
+
+    if 'strössel' in original_name_lower or 'strossel' in original_name_lower:
+        return ['strössel']
+
+    if (
+        'wokmix' in original_name_lower
+        or 'wok mix vegetables' in original_name_lower
+        or re.search(r'\bwok\s+mix\b', original_name_lower)
+        or (
+            re.search(r'\bwok\b', original_name_lower)
+            and not re.search(r'\b(?:woksås|woksas|wok\s+sauce|sauce|sås|sas|oil)\b', original_name_lower)
+        )
+    ):
+        return ['wokmix']
+
+    if (
+        ('grönsaker' in original_name_lower or 'gronsaker' in original_name_lower)
+        and ('sommar' in original_name_lower or 'apetit' in original_name_lower)
+    ):
+        return ['sommargrönsaker']
+
+    if (
+        (category or '').lower() == 'frozen'
+        and any(cue in original_name_lower for cue in ('örter', 'orter'))
+    ):
+        return ['frystaörter']
+
+    if 'tom kha' in original_name_lower:
+        return ['tomkha', 'kryddmix']
+
+    if 'chilimajo' in original_name_lower or 'sriracha mayo' in original_name_lower:
+        return ['chilimajo']
+
+    if (
+        ('svarta bönor' in original_name_lower or 'svarta bonor' in original_name_lower)
+        or (
+            re.search(r'\bblack\s+bean\b', original_name_lower)
+            and 'dip' not in original_name_lower
+        )
+    ):
+        return ['svartabönor', 'bönor']
+
+    if (
+        re.search(r'\bsm[öo]r\b', original_name_lower)
+        and (
+            re.search(r'\brapsolja\b', original_name_lower)
+            or ('flytande' in original_name_lower and re.search(r'\braps\b', original_name_lower))
+        )
+    ):
+        keywords = ['smörrapsolja']
+        if 'flytande' in original_name_lower:
+            keywords.append('flytandesmör')
+        return keywords
+
+    if 'bostongurka' in original_name_lower:
+        return ['bostongurka', 'gurka']
+
+    if (
+        'vitlök' in original_name_lower or 'vitlok' in original_name_lower
+    ) and re.search(r'\bmarinad\b', original_name_lower):
+        return ['vitlöksmarinad', 'marinad']
+
+    if 'potatismos' in original_name_lower:
+        if any(cue in original_name_lower for cue in (
+            'panerad', 'fisk', 'köttbullar', 'kottbullar', 'gräddsås', 'graddsas',
+            'från ', 'fran ', 'redo', 'gooh', 'nestle', 'nestlé', 'lax',
+        )):
+            return []
+        return ['potatismos']
+
+    # Exact cookie-brand ingredients in dessert recipes should find the cookie
+    # packs, while frozen ice-cream/ready-dessert carriers remain blocked.
+    if (
+        re.search(r'\boreo\b', original_name_lower)
+        and (category or '').lower() in {'snacks', 'pantry', 'bread'}
+    ):
+        return ['oreo']
 
     # Dessert-sauce exact ingredient: keep vanilla sauce visible instead of
     # treating it as a generic processed sauce or dairy flavor descriptor.
@@ -337,22 +712,49 @@ def extract_keywords_from_product(
         and not any(token in original_name_lower for token in (
             'herbamare', 'örtsalt', 'ortsalt',
             'knäcke', 'knacke', 'knackebrod',
+            'kex', 'chips', 'popcorn',
+            'choklad', 'chocolate',
+            'nöt', 'not', 'nötter', 'notter',
+            'cashew', 'mandel', 'pistage',
         ))
     ):
-        return ['havssalt']
+        return ['havssalt', 'flingsalt'] if 'maldon' in original_name_lower else ['havssalt']
 
-    # Yeast for bread is a specific product family and should not collapse to
-    # generic yeast or the sweet-dough yeast line.
+    # "Paprika Burk/Påse" and "Rökt Paprika" are spice jars, not fresh bell
+    # peppers. Keep them in the paprika-powder family so tsp paprikapulver
+    # recipes can find them, while puree/sauce/carrier products stay out.
+    if _is_paprika_spice_product_text(original_name_lower, category):
+        return ['paprikapulver']
+
+    # Recipe wording sometimes asks for "chipotlepasta eller pulver". Keep
+    # dry chipotle seasoning in a separate powder family so it can match that
+    # alternative without opening chipotle-flavored sauces/meat/mayo.
+    if _is_chipotle_spice_product_text(original_name_lower, category):
+        return ['chipotlepulver', 'chipotle']
+
+    # Yeast for bread keeps a specific primary keyword, with generic yeast as a
+    # route sibling for plain baker's-yeast ingredient wording.
     if re.search(
-        r'\b(?:jäst\s+för\s+matbröd|jast\s+for\s+matbrod|torrjäst(?:\s+för)?\s+matbröd|torrjast(?:\s+for)?\s+matbrod|matbrödsjäst|matbrodsjast)\b',
+        r'\b(?:jäst\s+(?:för\s+)?matbröd|jast\s+(?:for\s+)?matbrod|torrjäst(?:\s+för)?\s+matbröd|torrjast(?:\s+for)?\s+matbrod|matbrödsjäst|matbrodsjast)\b',
         original_name_lower,
     ):
-        return ['matbrödsjäst']
+        return ['matbrödsjäst', 'jäst']
+
+    # BreOliv/Bregott/Lätta/Flora are table margarine/spread products for
+    # recipe-matching purposes, not olive oil or free-standing brand tokens.
+    if (
+        (category or '').lower() in {'dairy', 'pantry'}
+        and re.search(r'\b(?:breoliv|bregott|lätta|latta|flora)\b', original_name_lower)
+    ):
+        return ['margarin']
 
     # Bao / steam buns are a buyable bread family of their own and should not
     # disappear into generic bread matching.
     if re.search(r'\b(?:steam\s+buns|bao\s+buns?|steambuns)\b', original_name_lower):
         return ['steambuns']
+
+    if (category or '').lower() == 'bread' and re.search(r'\bbaguett(?:e|er)?\b', original_name_lower):
+        return ['baguette']
 
     # Wheat sourdough starter wording in recipes should accept starter products,
     # but not finished sourdough bread that merely mentions vetesurdeg.
@@ -391,6 +793,43 @@ def extract_keywords_from_product(
     ):
         return ['sojamajonnäs']
 
+    # Plant-based mayo products should satisfy explicit vegan mayo recipe lines
+    # without allowing those lines to fall back to ordinary mayonnaise.
+    if (
+        any(token in original_name_lower for token in ('vegansk', 'vegan', 'plant based', 'plant-based'))
+        and any(token in original_name_lower for token in ('majonnäs', 'majonnas', 'mayo'))
+    ):
+        return ['veganskmajonnäs', 'majonnäs']
+
+    # Vegan cheese substitutes should stay in their own family. This also keeps
+    # flavor words in products like "Greek Style Oregano ... Vegansk Greenvie"
+    # from leaking into standalone herb matches.
+    explicit_vegan_cheese = (
+        any(token in original_name_lower for token in (
+            'vegansk', 'vegan', 'växtbaserad', 'vaxtbaserad',
+            'plant based', 'plant-based',
+        ))
+        and (
+            any(token in original_name_lower for token in (
+                'ost', 'cheese', 'cheddar', 'mozzarella', 'greek white',
+                'parveggio', 'grated', 'slices', 'flavour', 'flavor',
+            ))
+            or (brand or '').lower() in {'violife', 'greenvie'}
+            or any(token in original_name_lower for token in ('violife', 'greenvie'))
+        )
+    )
+    if explicit_vegan_cheese:
+        vegan_cheese_keywords = ['veganost', 'ost']
+        if 'mozzarella' in original_name_lower:
+            vegan_cheese_keywords.extend(['mozzarellaost', 'mozzarella'])
+        if 'cheddar' in original_name_lower:
+            vegan_cheese_keywords.append('cheddar')
+        if 'violife' in original_name_lower or (brand or '').lower() == 'violife':
+            vegan_cheese_keywords.append('violife')
+        if 'greenvie' in original_name_lower or (brand or '').lower() == 'greenvie':
+            vegan_cheese_keywords.append('greenvie')
+        return vegan_cheese_keywords
+
     # Sriracha-mayo products should stay in their own condiment family instead
     # of degrading into plain hot sauce or plain mayonnaise matches.
     if (
@@ -398,6 +837,45 @@ def extract_keywords_from_product(
         and any(token in original_name_lower for token in ('majonnäs', 'majonnas', 'mayo'))
     ):
         return ['srirachamajonnäs']
+
+    # Truffle mayo is an explicit flavored mayo family. Keep it distinct from
+    # plain mayonnaise so recipes asking for tryffelmajonnäs find exact products
+    # without falling back to ordinary mayo.
+    if (
+        'tryffel' in original_name_lower
+        and any(token in original_name_lower for token in ('majonnäs', 'majonnas', 'mayo'))
+    ):
+        return ['tryffelmajonnäs']
+
+    # Chocolate drink powders such as O'boy/Tigo are their own drink-powder
+    # family. They should not leak into ordinary baking/eating chocolate.
+    if _is_chocolate_drink_text(original_name_lower, brand):
+        return ['chokladdryck']
+
+    # Cordial/saft labels often split the fruit/floral word from "saft"
+    # ("Fläderblom Ekologisk Saft"). Keep those in the exact saft family.
+    if re.search(r'\b(?:saft|blandsaft)\b', original_name_lower):
+        saft_keywords = []
+        if 'fläderblom' in original_name_lower or 'fladerblom' in original_name_lower:
+            saft_keywords.append('flädersaft')
+        if 'rabarber' in original_name_lower:
+            saft_keywords.append('rabarbersaft')
+        if 'jordgubb' in original_name_lower:
+            saft_keywords.append('jordgubbssaft')
+        if saft_keywords:
+            return saft_keywords
+
+    if (
+        any(cue in original_name_lower for cue in ('condimento', 'balsamvinäger', 'balsamvinager', 'balsamico'))
+        and any(cue in original_name_lower for cue in ('rosé', 'rose'))
+    ):
+        return ['rosébalsamvinäger', 'balsamvinäger']
+
+    # Truffle oil is a named oil family. It should satisfy tryffelolja recipe
+    # lines regardless of white/black truffle wording, without forcing those
+    # exact recipes to fall back to plain olive oil.
+    if _is_truffle_oil_text(original_name_lower):
+        return ['tryffelolja', 'olivolja']
 
     # Explicit sparkling-wine ingredients should reach real mousserande vin
     # products without broadening to other sparkling drinks or preserves.
@@ -430,6 +908,13 @@ def extract_keywords_from_product(
         original_name_lower,
     ):
         return ['tacoskal']
+    # Spanish tortilla/omelette products are not soft tortilla breads/wraps.
+    if (
+        (category or '').lower() != 'bread'
+        and re.search(r'\btortilla\b', original_name_lower)
+        and re.search(r'\b(?:med|utan)\s+l[öo]k\b', original_name_lower)
+    ):
+        return []
     # Nestlé Fitness breakfast cereals should stay in their own cereal family
     # rather than degrading to the broad brand word "fitness", which also hits
     # snack bars. Keep this pantry-only and exclude explicit bar products.
@@ -447,6 +932,25 @@ def extract_keywords_from_product(
         and re.search(r'\braps(?:olja)?\b', original_name_lower)
     ):
         return ['flytandesmör']
+
+    # Boil-in-bag rice is still raw/plain cooking rice, not a ready meal. Keep
+    # this before the processed-food brand block because some brands also sell
+    # ready dishes.
+    if (
+        (category or '').lower() == 'pantry'
+        and re.search(r'\bboil[- ]in[- ]bag\b', original_name_lower)
+        and re.search(r'\b(?:basmatiris|jasminris|fullkornsris|långkornigt\s+ris|langkornigt\s+ris|ris)\b', original_name_lower)
+    ):
+        keywords = []
+        if 'fullkornsris' in original_name_lower:
+            keywords.append('fullkornsris')
+        keywords.append('ris')
+        return keywords
+
+    # Fermented cabbage is a real ingredient family. Emit only surkål so
+    # "Surkål med Morot" cannot satisfy standalone carrot lines.
+    if re.search(r'\bsur(?:kål|kal)\b', original_name_lower):
+        return ['surkål']
 
     # Baby food age label — "Från 12 Månader", "Från 6 mån" — not recipe ingredients
     if _BABY_FOOD_PATTERN.search(original_name_lower):
@@ -476,14 +980,20 @@ def extract_keywords_from_product(
     _pre_check_name = name_normalized.replace('glass noodles', 'glasnudlar').replace('glass noodle', 'glasnudlar')
     _pre_check_orig = original_name_lower.replace('glass noodles', 'glasnudlar').replace('glass noodle', 'glasnudlar')
     _plain_dark_chocolate_bar = (
-        'chokladkaka' in _pre_check_orig
-        and '%' in _pre_check_orig
-        and any(cue in _pre_check_orig for cue in ('mörk choklad', 'mork choklad'))
+        '%' in _pre_check_orig
+        and any(cue in _pre_check_orig for cue in (
+            'mörk choklad', 'mork choklad',
+            'dark chocolate', 'dark excellence',
+            'cocoa dark', 'cacao mörk', 'cacao mork',
+        ))
+        and any(cue in _pre_check_orig for cue in (
+            'choklad', 'chocolate', 'cocoa', 'cacao', 'bakchoklad',
+        ))
         and not any(flavor in _pre_check_orig for flavor in (
             'apelsin', 'chili', 'fikon', 'havssalt', 'seasalt',
             'karamell', 'caramel', 'caramelized', 'hazelnut', 'hassel',
             'mint', 'hallon', 'mango', 'passion', 'pistage',
-            'almond', 'lakrits', 'saltlakrits',
+            'almond', 'lakrits', 'saltlakrits', 'bönor', 'bonor',
         ))
     )
     if _plain_dark_chocolate_bar:
@@ -984,12 +1494,26 @@ def extract_keywords_from_product(
         if kw.endswith('korv') and kw != 'korv':
             if 'korv' not in keywords and 'korv' not in extra_keywords:
                 extra_keywords.append('korv')
+        # White/dark/light chocolate buttons are practical baking chocolate forms.
+        # Keep the bridge color-qualified so milk-chocolate buttons do not become
+        # generic cooking chocolate.
+        if (
+            kw in {'chokladknappar', 'chokladknapp'}
+            and any(color in original_name_lower for color in ('vit', 'mörk', 'mork', 'ljus'))
+            and 'choklad' not in keywords
+            and 'choklad' not in extra_keywords
+        ):
+            extra_keywords.append('choklad')
 
     if extra_keywords:
         keywords = extra_keywords + keywords
 
     # Remove duplicates while preserving order (dict.fromkeys is C-optimized)
     unique_keywords = list(dict.fromkeys(keywords))
+    if 'tunnbröd' in unique_keywords and 'bröd' in unique_keywords:
+        unique_keywords = ['tunnbröd'] + [
+            kw for kw in unique_keywords if kw != 'tunnbröd'
+        ]
 
     _DRIED_MUSHROOM_KEYWORDS = {
         'svamp', 'johan-svamp', 'johansvamp', 'karljohansvamp',
@@ -1013,6 +1537,23 @@ def extract_keywords_from_product(
     if 'champagne' in unique_keywords and 'mousserandevin' not in unique_keywords:
         unique_keywords.append('mousserandevin')
 
+    # Explicit Kalamata olive products and olive mixes should satisfy recipe
+    # lines asking for Kalamata olives. Keep olive oil, hummus, and tapenade out.
+    if (
+        'kalamata' in original_name_lower
+        and not any(blocker in original_name_lower for blocker in ('olivolja', 'hummus', 'tapenade'))
+        and any(cue in original_name_lower for cue in ('oliver', 'olivmix', 'snacksoliv'))
+        and 'kalamataoliver' not in unique_keywords
+    ):
+        unique_keywords.append('kalamataoliver')
+
+    if (
+        (category or '').lower() in {'fruit', 'vegetables'}
+        and re.search(r'\bblandad\s+sallad\b', original_name_lower) is not None
+        and 'salladsmix' not in unique_keywords
+    ):
+        unique_keywords.insert(0, 'salladsmix')
+
     # Soy-mayo products should stay in a combined condiment family instead of
     # degrading into separate soy-sauce or plain-mayonnaise matches.
     if (
@@ -1029,6 +1570,37 @@ def extract_keywords_from_product(
         and 'srirachamajonnäs' not in unique_keywords
     ):
         unique_keywords.append('srirachamajonnäs')
+
+    if (
+        'tryffel' in original_name_lower
+        and any(token in original_name_lower for token in ('majonnäs', 'majonnas', 'mayo'))
+        and 'tryffelmajonnäs' not in unique_keywords
+    ):
+        unique_keywords.append('tryffelmajonnäs')
+
+    if _is_truffle_oil_text(original_name_lower) and 'tryffelolja' not in unique_keywords:
+        unique_keywords = ['tryffelolja'] + [
+            kw for kw in unique_keywords if kw not in {'tryffel', 'olivolja'}
+        ]
+
+    if (
+        any(token in original_name_lower for token in ('vegansk', 'vegan', 'plant based', 'plant-based'))
+        and any(token in original_name_lower for token in ('majonnäs', 'majonnas', 'mayo'))
+    ):
+        if 'veganskmajonnäs' not in unique_keywords:
+            unique_keywords.append('veganskmajonnäs')
+        if 'majonnäs' not in unique_keywords:
+            unique_keywords.append('majonnäs')
+
+    # "Örter Provencale" is a dried herb blend. Keep the generic "örter" word
+    # out of broad extraction, but expose the product for explicit herb-blend
+    # recipe lines.
+    if (
+        any(token in original_name_lower for token in ('örter', 'orter'))
+        and any(token in original_name_lower for token in ('provencale', 'provençale'))
+        and 'örtblandningar' not in unique_keywords
+    ):
+        unique_keywords.append('örtblandningar')
 
     # Block products where the only keyword is too generic (e.g., "Kryddmix Classic" → ['kryddmix'])
     if len(unique_keywords) == 1 and unique_keywords[0] in SOLO_KEYWORD_BLOCK:
@@ -1090,6 +1662,25 @@ def extract_keywords_from_ingredient(
 
     # Normalize space variants (e.g., "corn flakes" -> "cornflakes")
     name = _apply_space_normalizations(name)
+    name = rewrite_truncated_chocolate_color_lists(name)
+
+    if 'crispychiliolja' in name:
+        return ['crispychiliolja']
+
+    if (
+        ('majskolv' in name or 'majskolvar' in name)
+        and any(cue in name for cue in ('färdigkokt', 'fardigkokt', 'förkokt', 'forkokt', 'kokt'))
+    ):
+        return ['förkoktmajskolv', 'majskolv']
+
+    if 'rotfrukter' in name or 'rotfrukt' in name:
+        return ['rotfruktsmix', 'morot', 'palsternacka', 'kålrot', 'rotselleri', 'rödbeta']
+
+    if re.search(r'\bfrysta?\s+(?:örter|orter)\b', name):
+        return ['frystaörter']
+
+    if 'sashimi' in name and 'lax' in name:
+        return ['sushilax', 'lax']
 
     # Plain measured "durumvete" in Swedish pasta recipes typically means durum
     # flour, not bulgur. Keep this ingredient-side and narrow to measured lines
@@ -1098,16 +1689,24 @@ def extract_keywords_from_ingredient(
     name = normalize_measured_durumvete_flour(name)
     name = normalize_measured_risotto_rice(name)
 
+    # Explicit truffle oil should stay on the truffle-oil family. White/black
+    # truffle wording is descriptive here, but plain olive oil is not a fallback.
+    if _is_truffle_oil_text(name):
+        return ['tryffelolja']
+
+    if 'kycklingsteak' in name or 'kycklingsteaks' in name:
+        return ['kycklingsteak', 'kyckling']
+
     # Candied/pickled ginger should not fall back to generic fresh ginger.
     # Keep explicit "(gari)" hints as a secondary keyword so sushi-ginger
     # products that only expose `gari` still match these ingredient lines.
     if 'syltadingefära' in name or 'syltadingefara' in name:
         return ['syltadingefära', 'gari'] if 'gari' in name else ['syltadingefära']
 
-    # Bread-yeast wording should stay on the exact baker's-yeast-for-bread
-    # family instead of collapsing to generic yeast or matbröd.
+    # Bread-yeast wording keeps its exact primary family, with generic yeast as
+    # a routing sibling for plain baker's-yeast ingredient lines.
     if 'matbrödsjäst' in name or 'matbrodsjast' in name:
-        return ['matbrödsjäst']
+        return ['matbrödsjäst', 'jäst']
     if (
         'jäst' in name
         and any(cue in name for cue in ('färsk', 'farsk'))
@@ -1124,10 +1723,28 @@ def extract_keywords_from_ingredient(
     if 'torkadsvamp' in name:
         return ['torkadsvamp']
 
+    if 'breoliv' in name:
+        return ['margarin']
+
+    if any(cue in name for cue in ('morotsspaghetti', 'kålrotsspaghetti', 'kalrotsspaghetti')):
+        return []
+
     # Coconut-drink wording should stay on the coconut-drink family instead of
     # leaking to whole coconut produce through the shared base word.
     if 'kokosdryck' in name:
         return ['kokosdryck']
+
+    if _is_chocolate_drink_text(name):
+        return ['chokladdryck']
+
+    if re.search(r'\bsur(?:kål|kal)\b', name):
+        return ['surkål']
+
+    if _is_brewed_coffee_ingredient_text(name):
+        return []
+
+    if 'chipotlepasta' in name and re.search(r'\b(?:eller|alt\.?|alternativt)\b.*\bpulver\b', name) is not None:
+        return ['chipotlepasta', 'chipotlepulver']
 
     # Explicit sea salt is a real pantry ingredient and should survive instead
     # of disappearing into the generic salt stop-word path.
@@ -1174,6 +1791,56 @@ def extract_keywords_from_ingredient(
     if 'chokladägg' in name or 'chokladagg' in name:
         return ['chokladägg']
 
+    if re.search(r'\bpolly\b', name):
+        return ['polly']
+
+    if 'limepepper' in name:
+        return ['limepepper']
+
+    if 'tomkha' in name:
+        return ['tomkha']
+
+    if 'wokgrönsaker' in name or 'wokgronsaker' in name:
+        return ['wokmix']
+
+    if 'sommargrönsaker' in name or 'sommargronsaker' in name:
+        return ['sommargrönsaker']
+
+    if 'smörrapsolja' in name:
+        return ['smörrapsolja']
+
+    if 'chilimajo' in name:
+        return ['chilimajo']
+
+    if 'svart böna' in name or 'svart bona' in name or 'svarta bönor' in name or 'svarta bonor' in name:
+        return ['svartabönor', 'bönor']
+
+    if 'kruksallad' in name:
+        return ['krispsallat']
+
+    if 'mineralvatten' in name:
+        return ['sodavatten']
+
+    if re.search(r'\bfärska?\s+örter\b|\bfarska?\s+orter\b', name):
+        return [
+            'basilika', 'persilja', 'dill', 'timjan', 'gräslök',
+            'rosmarin', 'koriander', 'oregano', 'mynta', 'salvia',
+        ]
+
+    if (
+        'färskost' in name
+        and ('örter' in name or 'orter' in name)
+    ):
+        # Herb cream cheese recipes can use herb/garlic-herb products, while
+        # plain naturell färskost remains a pragmatic fallback.
+        return ['färskost', 'vitlök']
+
+    if 'bostongurka' in name:
+        return ['bostongurka', 'gurka']
+
+    if re.search(r'\boreo\b', name):
+        return ['oreo']
+
     # Exact pesto compounds should not degrade into generic pesto or the raw
     # ingredient family. If stores later carry these exact variants, they can
     # match directly; otherwise the line should stay at 0 matches.
@@ -1214,6 +1881,7 @@ def extract_keywords_from_ingredient(
     name = preserve_parenthetical_grouped_herb_leaves(name)
     # Keep explicit shiso herb fallbacks before generic paren stripping.
     name = preserve_parenthetical_shiso_alternatives(name)
+    name = preserve_single_product_example_parentheticals(name)
     # Parenthetical "eller" segments are true ingredient alternatives, not
     # descriptive aside text. Lift them out before stripping remaining parens:
     # "olivolja (eller smör)" -> "olivolja eller smör"
@@ -1258,6 +1926,32 @@ def extract_keywords_from_ingredient(
     # e.g., "växtbaserad gurt" → "växtbaserad yoghurt" so check_yoghurt_match vego logic applies
     name = re.sub(r'\bgurt\b', 'yoghurt', name)
 
+    if (
+        ('kesella' in name and 'vanilj' in name)
+        or re.search(r'\bvanilj\s+kvarg\b', name)
+        or 'vaniljkvarg' in name
+    ):
+        return ['vaniljkvarg']
+
+    if any(token in name for token in (
+        'kanderade citrusskal', 'kanderat citrusskal',
+        'kanderade apelsinskal', 'kanderat apelsinskal',
+        'syltade apelsinskal', 'syltat apelsinskal',
+    )):
+        return ['kanderatapelsinskal']
+    if 'apelsinskal' in name and not any(token in name for token in ('kanderad', 'kanderade', 'syltad', 'syltade')):
+        return ['apelsin']
+
+    if re.search(r'\bfalafel\s*mix\b|\bfalafelmix\b', name):
+        return ['falafelmix']
+
+    if (
+        'sodavatten' in name
+        or re.search(r'\bkolsyrat\s+(?:vatten|mineralvatten)\b', name)
+        or re.search(r'\bmineralvatten\s+kolsyrat\b', name)
+    ):
+        return ['sodavatten']
+
     # Plant-based "matlagning" is recipe shorthand for purchasable cooking cream
     # products, not a bare adjective. Emit concrete cream keywords so phrases like
     # "Havrebaserad matlagning" can surface both havregrädde and matlagningsgrädde.
@@ -1284,6 +1978,21 @@ def extract_keywords_from_ingredient(
     # Keep this narrow — generic öl stays intentionally unmatched.
     if re.search(r'\bporter\b', name):
         return ['porter']
+    if re.search(r'\b(?:folköl|folkol)\b', name):
+        return ['folköl', 'öl']
+    if re.search(r'\b(?:öl|ol)\b', name):
+        return ['öl']
+    if re.search(r'\b(?:läsk|lask)\b', name):
+        return ['läsk']
+    if 'sötsursås' in name:
+        return ['sötsursås']
+    if 'alkoholfriöl' in name:
+        return ['alkoholfriöl']
+    if 'veganost' in name or re.search(r'\b(?:vegansk|vegan|växtbaserad|vaxtbaserad)\s+ost\b', name):
+        keywords = ['veganost']
+        if 'violife' in name:
+            keywords.append('violife')
+        return keywords
 
     # Remove negation phrases: "utan ägg" → remove both words.
     # "pasta utan ägg" should extract only "pasta", not "ägg".

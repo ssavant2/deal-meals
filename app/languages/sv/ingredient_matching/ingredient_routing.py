@@ -6,7 +6,49 @@ from collections.abc import Iterable
 from typing import Any
 
 from .compiled_recipes import resolve_recipe_match_runtime_data
+from .compound_text import _WORD_PATTERN
 from .synonyms import INGREDIENT_PARENTS
+
+
+_ROUTING_PARENT_TERMS = {
+    # Fullscan accepts these compound recipe words through substring/family
+    # matching. Expose the same family term for compiled route pairing without
+    # adding reverse offer keywords to every generic product in the family.
+    "kalamataoliver": "oliver",
+    "svartvinbärsgele": "vinbärsgele",
+    "svartvinbarsgele": "vinbarsgele",
+    "rödvinbärsgele": "vinbärsgele",
+    "rodvinbarsgele": "vinbarsgele",
+    "oreokaka": "oreo",
+    "oreokakor": "oreo",
+    "kycklingschnitzel": "schnitzel",
+    "prästost": "ost",
+    "prastost": "ost",
+    "johansvamp": "svamp",
+    "skogssvamp": "svamp",
+    "kycklinginnerfilé": "kyckling",
+    "kycklinginnerfiléer": "kyckling",
+    "kycklinginnerfile": "kyckling",
+    "kycklinginnerfileer": "kyckling",
+    "snabbkaffepulver": "snabbkaffe",
+    "kaffepulver": "snabbkaffe",
+    "pulverkaffe": "snabbkaffe",
+    "baguetter": "baguette",
+    "tortillabröd": "tortilla",
+    "tortillabrod": "tortilla",
+    "bladspenat": "spenat",
+    "babyspenat": "spenat",
+    "rödspättafilé": "rödspätta",
+    "rodspattafile": "rödspätta",
+    "ansjovisfiléer": "ansjovis",
+    "ansjovisfileer": "ansjovis",
+    "mandelpotatischips": "potatischips",
+    "lantchips": "potatischips",
+    "aprikoser": "aprikos",
+    "champinjoner": "champinjon",
+    "skogschampinjoner": "champinjoner",
+    "lammkotletter": "lammkotlett",
+}
 
 
 def build_recipe_ingredient_term_map(
@@ -39,13 +81,14 @@ def build_recipe_ingredient_term_map(
         }
         keyword_terms = set(extracted_keywords)
         for keyword in extracted_keywords:
-            parent = INGREDIENT_PARENTS.get(keyword)
+            parent = INGREDIENT_PARENTS.get(keyword) or _ROUTING_PARENT_TERMS.get(keyword)
             if parent:
                 keyword_terms.add(parent)
 
         haystack = f"{normalized_text} {prepared_text}".strip()
+        haystack_words = set(_WORD_PATTERN.findall(haystack)) if haystack else set()
         for term in terms:
-            if term in keyword_terms or (haystack and term in haystack):
+            if term in keyword_terms or term in haystack_words:
                 term_map[term].add(expanded_idx)
 
     return term_map

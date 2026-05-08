@@ -129,7 +129,7 @@ class ICAStore(StorePlugin):
         Uses https://handla.ica.se/api/store/v1?zip={postnr}&customerType=B2C
         Optionally filters by query (store name/city).
         """
-        logger.info(f"Searching ICA e-commerce stores for postal code: {postal_code}, query: '{query}'")
+        logger.info(f"Searching ICA e-commerce stores for configured postal code, query: '{query}'")
         stores = []
 
         # Prepare query filter
@@ -152,12 +152,14 @@ class ICAStore(StorePlugin):
                     data = response.json()
 
                     if not data.get("validZipCode"):
-                        logger.warning(f"Invalid postal code: {postal_code}")
+                        logger.warning("Invalid configured postal code")
                         return []
 
                     # Get stores that offer home delivery
                     delivery_stores = data.get("forHomeDelivery", [])
-                    logger.info(f"Found {len(delivery_stores)} e-commerce stores for {postal_code}")
+                    logger.info(
+                        f"Found {len(delivery_stores)} e-commerce stores for configured postal code"
+                    )
 
                     for store in delivery_stores:
                         store_id = store.get("id", "")
@@ -467,7 +469,7 @@ class ICAStore(StorePlugin):
         For e-handel: Scrapes from handla.ica.se with selected store
         """
         logger.info("Starting ICA scraping...")
-        logger.debug(f"Credentials received: {credentials}")
+        logger.debug("Credentials received")
 
         location_type = credentials.get("location_type", "ehandel") if credentials else "ehandel"
         failure_reason = None
@@ -488,14 +490,17 @@ class ICAStore(StorePlugin):
                 products = []
         else:
             # E-handel uses ehandel_store_id from dropdown selection
-            logger.debug(f"ICA e-handel credentials received: {credentials}")
+            logger.debug("ICA e-handel credentials received")
             ehandel_store_id = credentials.get("ehandel_store_id") if credentials else None
             ehandel_store_name = credentials.get("ehandel_store_name", "") if credentials else ""
             postal_code = credentials.get("postal_code") if credentials else None
             location_id = credentials.get("location_id") if credentials else None
 
             if ehandel_store_id:
-                logger.info(f"Scraping ICA e-handel for store: {ehandel_store_name} (ID: {ehandel_store_id}), postal: {postal_code}")
+                logger.info(
+                    f"Scraping ICA e-handel for store: {ehandel_store_name} "
+                    f"(ID: {ehandel_store_id})"
+                )
                 products = await self._scrape_ehandel_offers(
                     ehandel_store_id,
                     postal_code,
@@ -785,7 +790,7 @@ class ICAStore(StorePlugin):
             logger.error("No postal code configured - delivery address check should have caught this")
             return []
 
-        logger.info(f"Scraping ICA e-handel for store {store_id} with postal code {postal_code}")
+        logger.info(f"Scraping ICA e-handel for store {store_id} with configured postal code")
 
         try:
             async with async_playwright() as p:
@@ -1034,14 +1039,14 @@ class ICAStore(StorePlugin):
                         pass
 
                     # Step 3: Enter postal code
-                    logger.info(f"Step 3: Entering postal code: {postal_code}")
+                    logger.info("Step 3: Entering configured postal code")
                     try:
                         postal_input = page.locator('input#zipcode, input[name="zipcode"]').first
                         await postal_input.wait_for(timeout=10000)
                         await postal_input.fill(postal_code)
                         await asyncio.sleep(1)
                         await postal_input.press("Enter")
-                        logger.info(f"Submitted postal code: {postal_code}")
+                        logger.info("Submitted configured postal code")
                         await asyncio.sleep(4)  # Wait for delivery options to load
                     except Exception as e:
                         logger.error(f"Could not enter postal code: {e}")

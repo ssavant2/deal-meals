@@ -238,6 +238,7 @@ window.DealMealsStoresI18n = {
     fetched_products_with_variants: {{ t('stores.fetched_products_with_variants')|tojson }},
     scrape_complete: {{ t('stores.scrape_complete')|tojson }},
     error_occurred: {{ t('stores.error_occurred')|tojson }},
+    'stores.site_maintenance_title': {{ t('stores.site_maintenance_title')|tojson }},
     schedule_saved: {{ t('stores.schedule_saved')|tojson }},
     schedule_removed: {{ t('stores.schedule_removed')|tojson }},
     remove_schedule: {{ t('stores.remove_schedule')|tojson }},
@@ -267,6 +268,7 @@ window.DealMealsStoresI18n = {
     'ws.clearing_empty_offers': {{ t('ws.clearing_empty_offers')|tojson }},
     'ws.fetch_complete': {{ t('ws.fetch_complete')|tojson }},
     'ws.fetch_no_products_stale': {{ t('ws.fetch_no_products_stale')|tojson }},
+    'ws.store_site_maintenance': {{ t('ws.store_site_maintenance')|tojson }},
     'ws.fetch_empty_success': {{ t('ws.fetch_empty_success')|tojson }},
     'ws.fetch_done': {{ t('ws.fetch_done')|tojson }},
     'stores.fetching_offers': {{ t('stores.fetching_offers')|tojson }},
@@ -324,5 +326,5 @@ window.DealMealsStoresPage = {
 window.DealMealsI18n = window.DealMealsStoresI18n;
 
 </script>
-<script nonce="{{ csp_nonce }}" src="/static/js/stores.js"></script>
+<script nonce="{{ csp_nonce }}" src="/static/js/stores.js?v={{ csp_nonce }}"></script>
 {% endblock %}

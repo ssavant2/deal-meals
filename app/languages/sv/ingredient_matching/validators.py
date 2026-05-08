@@ -20,6 +20,7 @@ from .processed_rules import (
     _PROCESSED_INDICATOR_EQUIVALENTS,
     SPICE_VS_FRESH_RULES,
 )
+from .form_rules import RECIPE_FROZEN_INDICATORS
 from .specialty_rules import (
     SPECIALTY_QUALIFIERS,
     BIDIRECTIONAL_SPECIALTY_QUALIFIERS,
@@ -27,10 +28,43 @@ from .specialty_rules import (
     QUALIFIER_EQUIVALENTS,
 )
 
-_SMOKED_SPECIFIC_QUALIFIERS = frozenset({'kallrökt', 'kallrokt', 'varmrökt', 'varmrokt'})
+_SMOKED_SPECIFIC_QUALIFIERS = frozenset({
+    'kallrökt', 'kallrokt', 'kallr',
+    'varmrökt', 'varmrokt', 'varmr',
+})
 _GENERIC_SMOKED_QUALIFIERS = frozenset({'rökt', 'rokt'})
 _SWEET_CHILI_QUALIFIERS = frozenset({'sweet', 'söt', 'sota'})
 _UNSWEETENED_CHILI_QUALIFIERS = frozenset({'osötad', 'osotad', 'osötat', 'osotat'})
+_CHILI_COLOR_QUALIFIERS = frozenset({'röd', 'rod', 'red', 'grön', 'gron', 'green', 'gul', 'yellow'})
+_FRESH_COLOR_CHILI_INGREDIENT_CUES = frozenset({
+    'röd chili', 'rod chili',
+    'grön chili', 'gron chili',
+    'gul chili',
+    'röd chilipeppar', 'rod chilipeppar',
+    'grön chilipeppar', 'gron chilipeppar',
+    'gul chilipeppar',
+})
+_FRESH_CHILI_INGREDIENT_RE = re.compile(
+    r'\b(?:\d+(?:[,.]\d+)?\s*)?'
+    r'(?:(?:st|styck)\s+)?'
+    r'(?:(?:liten|lilla|stor|stora|skivad|skivade|röd|rod|grön|gron|gul)\s+)*'
+    r'(?:chilipeppar|chilifrukt|chilifrukter|chili)\b'
+)
+
+
+def _ingredient_requests_fresh_chili_text(ingredient_lower: str) -> bool:
+    if any(cue in ingredient_lower for cue in _FRESH_COLOR_CHILI_INGREDIENT_CUES):
+        return True
+    match = _FRESH_CHILI_INGREDIENT_RE.search(ingredient_lower)
+    if not match:
+        return False
+    segment = match.group(0)
+    if any(cue in segment.split() for cue in {'st', 'styck', 'liten', 'lilla', 'stor', 'stora', 'skivad', 'skivade'}):
+        return True
+    return (
+        'sambal' in ingredient_lower
+        and re.search(r'\b(?:chilipeppar|chilifrukt|chilifrukter|chili)\b.*\beller\b.*\bsambal\b', ingredient_lower) is not None
+    )
 _RE_ANIS_WORD = re.compile(r'\banis\b')
 _RE_KUMMIN_WORD = re.compile(r'\bkummin\b')
 _PAPRIKA_FRESH_COLOR_QUALIFIERS = frozenset({
@@ -49,7 +83,53 @@ _SPECIALTY_BASE_KEYWORD_ALIASES: Dict[str, Set[str]] = {
     # Smoked paprika checks live on the paprika base family even when the
     # recipe/product wording uses the compound spice keyword.
     'paprika': {'paprikapulver', 'paprikakrydda'},
+    'lax': {'laxfilé', 'laxfile'},
 }
+_HONEY_KEYWORDS = frozenset({'honung'})
+_LIQUID_HONEY_INGREDIENT_CUES = frozenset({'flytande'})
+_LIQUID_HONEY_PRODUCT_CUES = frozenset({'flytande'})
+_FROZEN_FRESH_HERB_FORM_KEYWORDS = frozenset({'koriander'})
+_EXPLICIT_DRY_OR_SEED_HERB_CUES = frozenset({
+    'torkad', 'torkade', 'torkat',
+    'malen', 'mald', 'malda', 'malna',
+    'frö', 'fro',
+    'korianderfrö', 'korianderfro',
+    'korianderfrön', 'korianderfron',
+})
+
+_POTATO_KEYWORDS = frozenset({'potatis', 'potatisar'})
+_POTATO_PRESERVED_RECIPE_CUES = frozenset({
+    'burk',
+    'konserv',
+    'konserverad',
+    'konserverade',
+    'avrunnen',
+    'avrunna',
+})
+_POTATO_PRESERVED_PRODUCT_CUES = frozenset({
+    'burk',
+    'konserv',
+    'konserverad',
+    'konserverade',
+    'tetra',
+})
+_POTATO_FRESH_PRODUCT_CUES = frozenset({
+    'klass',
+    'kl1',
+    'färsk',
+    'farsk',
+    'fast',
+    'mjölig',
+    'mjolig',
+    'kok',
+    'amandine',
+    'delikatess',
+    'mandel',
+    'sparris',
+    'bakpotatis',
+    'färskpotatis',
+    'farskpotatis',
+})
 
 
 def _qualifier_present_in_text(qualifier: str, text: str) -> bool:
@@ -120,11 +200,36 @@ def ingredient_has_spice_indicator(indicators: Set[str], ingredient_lower: str, 
     return False
 
 
+def frozen_fresh_herb_form_overrides_spice_indicator(ingredient_lower: str, base_word: str = "") -> bool:
+    """Allow explicit frozen herb wording to win over spice-sized measures."""
+
+    if base_word not in _FROZEN_FRESH_HERB_FORM_KEYWORDS:
+        return False
+    if not any(indicator in ingredient_lower for indicator in RECIPE_FROZEN_INDICATORS):
+        return False
+    return not ingredient_has_spice_indicator(
+        set(_EXPLICIT_DRY_OR_SEED_HERB_CUES),
+        ingredient_lower,
+        base_word,
+    )
+
+
 def _has_fennel_spice_list_context(ingredient_lower: str) -> bool:
     return (
         'eller' in ingredient_lower
         and ('fänkål' in ingredient_lower or 'fankal' in ingredient_lower)
         and (_RE_ANIS_WORD.search(ingredient_lower) or _RE_KUMMIN_WORD.search(ingredient_lower))
+    )
+
+
+def _has_optional_smoked_paprika_context(ingredient_lower: str) -> bool:
+    return (
+        'paprika' in ingredient_lower
+        and any(q in ingredient_lower for q in ('rökt', 'rokt'))
+        and (
+            re.search(r'\b(?:ev|eventuellt)\.?\b[^,;]*\b(?:rökt|rokt)\b', ingredient_lower) is not None
+            or re.search(r'\b(?:rökt|rokt)\b[^,;]*(?:efter smak|till avslutning)', ingredient_lower) is not None
+        )
     )
 
 
@@ -141,6 +246,41 @@ def _ingredient_implies_whole_kyckling(ingredient_lower: str) -> bool:
             or 'stor kyckling' in ingredient_lower
         )
     )
+
+
+def check_explicit_liquid_honey_match(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+) -> bool:
+    """Require explicit liquid honey products for explicit flytande honung lines."""
+    if matched_keyword not in _HONEY_KEYWORDS:
+        return True
+    if not any(cue in ingredient_lower for cue in _LIQUID_HONEY_INGREDIENT_CUES):
+        return True
+    return any(cue in product_lower for cue in _LIQUID_HONEY_PRODUCT_CUES)
+
+
+def check_plain_fresh_potato_match(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+    product_category: str = "",
+) -> bool:
+    """Keep generic potato broad for fresh potato variants, but block preserved packs."""
+    if matched_keyword not in _POTATO_KEYWORDS:
+        return True
+    if any(cue in ingredient_lower for cue in _POTATO_PRESERVED_RECIPE_CUES):
+        return True
+    if any(cue in product_lower for cue in _POTATO_PRESERVED_PRODUCT_CUES):
+        return False
+    has_packaged_whole_cue = (
+        _is_whole_word('hel', product_lower)
+        or _is_whole_word('hela', product_lower)
+    )
+    if has_packaged_whole_cue and not any(cue in product_lower for cue in _POTATO_FRESH_PRODUCT_CUES):
+        return False
+    return True
 
 
 def check_processed_product_rules(product_lower: str, ingredient_lower: str) -> bool:
@@ -188,9 +328,13 @@ def check_processed_product_rules(product_lower: str, ingredient_lower: str) -> 
                         _SPICE_AMOUNT_IMPLICIT_GROUND = frozenset({
                             'ingefära', 'ingefara',
                             'gurkmeja', 'kurkuma',
-                            'paprika',
+                            'paprika', 'chili',
                         })
-                        _GROUND_PRODUCT_INDICATORS = frozenset({'malen', 'malna', 'mald', 'malet', 'pulver', 'torkad', 'torkade'})
+                        _GROUND_PRODUCT_INDICATORS = frozenset({
+                            'malen', 'malna', 'mald', 'malet',
+                            'pulver', 'flakes', 'flingor',
+                            'torkad', 'torkade',
+                        })
                         _FRESH_INDICATORS = frozenset({'färsk', 'farsk', 'riven', 'hackad', 'pressad'})
                         _STRICT_GENERIC_MATCHES_ALL = frozenset({'sojabönor', 'sojabonor'})
                         ingredient_has_any_indicator = any(
@@ -299,10 +443,19 @@ def check_specialty_qualifiers(
                 found_qualifiers = [q for q in qualifiers if q in candidate]
                 if any(q in found_qualifiers for q in _SMOKED_SPECIFIC_QUALIFIERS):
                     found_qualifiers = [q for q in found_qualifiers if q not in _GENERIC_SMOKED_QUALIFIERS]
-                # For partial-skip keywords (e.g., choklad), remove skipped qualifiers
+                # For partial-skip keywords (e.g., choklad), remove skipped qualifiers.
+                # Exception: "vit choklad och mörk choklad" names multiple concrete
+                # chocolate families, so each concrete offer may satisfy one of them
+                # but plain/generic chocolate should not swallow the whole line.
                 skip_quals = _DIRECTION_A_SKIP_QUALIFIERS.get(base_word, set())
                 if skip_quals:
-                    found_qualifiers = [q for q in found_qualifiers if q not in skip_quals]
+                    chocolate_multi_family = (
+                        base_word in {'choklad', 'bakchoklad', 'blockchoklad'}
+                        and any(q in found_qualifiers for q in ('vit', 'ljus'))
+                        and any(q in found_qualifiers for q in ('mörk', 'mork'))
+                    )
+                    if not chocolate_multi_family:
+                        found_qualifiers = [q for q in found_qualifiers if q not in skip_quals]
                 if (
                     base_word == 'paprika'
                     and ingredient_has_spice_indicator(
@@ -314,6 +467,11 @@ def check_specialty_qualifiers(
                     found_qualifiers = [
                         q for q in found_qualifiers
                         if q not in _PAPRIKA_FRESH_COLOR_QUALIFIERS
+                    ]
+                if base_word == 'paprika' and _has_optional_smoked_paprika_context(candidate):
+                    found_qualifiers = [
+                        q for q in found_qualifiers
+                        if q not in _GENERIC_SMOKED_QUALIFIERS
                     ]
                 if not found_qualifiers:
                     direction_a_matched = True
@@ -336,16 +494,28 @@ def check_specialty_qualifiers(
                     # "tonfiskbiff", "tonfisksteak") is really asking for the
                     # fresh/frozen fillet family, not canned tuna. Accept the
                     # non-canned tuna forms as equivalent signals here.
-                    if base_word == 'tonfisk' and qualifier in {'bit', 'bitar', 'biff', 'steak'}:
+                    if base_word == 'tonfisk' and qualifier in {
+                        'färsk', 'farsk', 'fryst', 'filé', 'file',
+                        'bit', 'bitar', 'biff', 'steak',
+                    }:
                         equivalents = set(equivalents) | {
                             'bit', 'bitar', 'biff', 'steak',
-                            'färsk', 'fryst', 'filé', 'file',
+                            'färsk', 'farsk', 'fryst', 'filé', 'file',
                         }
                     if base_word == 'bönor' and qualifier in {'grön', 'gröna'}:
                         equivalents = {eq for eq in equivalents if eq != 'mix'}
                     if any(eq in offer_quals for eq in equivalents):
                         matched = True
                         break
+                if (
+                    not matched
+                    and base_word in {'färskost', 'fraiche'}
+                    and 'naturell' in offer_quals
+                ):
+                    # Stefan policy: when a recipe asks for a flavored
+                    # färskost/fraiche, the requested flavor and the naturell
+                    # base product are both acceptable fallbacks.
+                    matched = True
                 if not matched:
                     continue
 
@@ -393,12 +563,21 @@ def check_specialty_qualifiers(
         # Some keywords allow generic ingredient to match all variants:
         # - choklad: "choklad" (generic) = any darkness, "mörk choklad" = dark only
         # Most keywords do NOT: "färskost" (generic) = naturell, not flavored.
-        _GENERIC_MATCHES_ALL = {'choklad', 'bakchoklad', 'blockchoklad'}
+        _GENERIC_MATCHES_ALL = {
+            'choklad', 'bakchoklad', 'blockchoklad',
+            'chokladknappar', 'chokladknapp',
+        }
         ingredient_has_qualifier = any(
             any(q in candidate for q in qualifiers) for candidate in candidate_ingredients
         )
         for qualifier in offer_quals:
             if qualifier in BIDIRECTIONAL_SPECIALTY_QUALIFIERS or qualifier in per_kw_bidir:
+                if (
+                    base_word == 'fikon'
+                    and qualifier in {'torkad', 'torkade'}
+                    and not ingredient_has_qualifier
+                ):
+                    continue
                 # Skip Direction B for per-keyword bidirectional when ingredient is generic
                 # AND keyword allows generic-matches-all
                 if (not ingredient_has_qualifier
@@ -417,9 +596,44 @@ def check_specialty_qualifiers(
                 ):
                     continue
                 if (
+                    base_word == 'tonfisk'
+                    and qualifier in {'vatten', 'olja'}
+                    and not any(
+                        any(cue in candidate for cue in ('bit', 'bitar', 'biff', 'steak', 'färsk', 'farsk'))
+                        for candidate in candidate_ingredients
+                    )
+                ):
+                    continue
+                if (
                     base_word == 'kyckling'
                     and qualifier == 'hel'
                     and any(_ingredient_implies_whole_kyckling(candidate) for candidate in candidate_ingredients)
+                ):
+                    continue
+                if (
+                    base_word == 'färskost'
+                    and qualifier != 'naturell'
+                    and any('smaksatt' in candidate for candidate in candidate_ingredients)
+                ):
+                    continue
+                if (
+                    base_word == 'chili'
+                    and qualifier in _CHILI_COLOR_QUALIFIERS
+                    and any(
+                        any(chili_word in candidate for chili_word in ('chili', 'chilipeppar', 'chilifrukt', 'chilifrukter'))
+                        and not any(color_cue in candidate for color_cue in _FRESH_COLOR_CHILI_INGREDIENT_CUES)
+                        for candidate in candidate_ingredients
+                    )
+                ):
+                    continue
+                if (
+                    base_word in {'färskost', 'fraiche'}
+                    and qualifier in {'vitlök', 'vitlok', 'garlic'}
+                    and any(
+                        any(cue in candidate for cue in ('örter', 'orter', 'herbs'))
+                        for candidate in candidate_ingredients
+                    )
+                    and any(cue in offer_quals for cue in ('örter', 'orter', 'herbs'))
                 ):
                     continue
                 equivalents = QUALIFIER_EQUIVALENTS.get(qualifier, {qualifier})
@@ -494,6 +708,13 @@ def check_spice_vs_fresh_rules(product_lower: str, ingredient_lower: str, base_w
                     for fresh_word in rules['fresh_product_words']:
                         if fresh_word in product_lower:
                             if any(ind in ingredient_lower for ind in rules['dried_indicators']):
+                                if rule_base_word == 'chili' and _ingredient_requests_fresh_chili_text(ingredient_lower):
+                                    break
+                                if frozen_fresh_herb_form_overrides_spice_indicator(
+                                    ingredient_lower,
+                                    rule_base_word,
+                                ):
+                                    break
                                 return False
                             break
 

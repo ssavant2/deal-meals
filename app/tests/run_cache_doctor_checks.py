@@ -47,6 +47,22 @@ def main() -> int:
             "active_recipe_count": "13000",
             "affected_ratio_pct": "3.8461",
             "delta_ratio_threshold_pct": 2.0,
+            "changed_offer_sample": [
+                {
+                    "kind": "score_changed",
+                    "name": "x" * 300,
+                    "price": "12.00",
+                }
+            ],
+            "offer_change_counts": {"score_changed": 1},
+            "offer_delta_impact_mode": "fast_sql",
+            "cache_reconciliation_trigger": "recipe_batch:koket",
+            "cache_reconciliation_reason": "full_rebuild_age_due",
+            "cache_reconciliation_idle_seconds": "1200",
+            "cache_reconciliation_incremental_operations_since_full": "25",
+            "cache_reconciliation_min_age_hours": "168",
+            "cache_reconciliation_max_incremental_operations": "25",
+            "cache_reconciliation_last_full_age_hours": "200.5",
             "error": "x" * 700,
         },
         operation_type="recipe_delta",
@@ -62,6 +78,13 @@ def main() -> int:
     check("operation affected recipe count", operation["affected_recipe_count"], 500)
     check("operation affected ratio pct", operation["affected_ratio_pct"], 3.8461)
     check("operation threshold pct", operation["delta_ratio_threshold_pct"], 2.0)
+    check("operation offer impact mode", operation["offer_delta_impact_mode"], "fast_sql")
+    check("operation reconciliation trigger", operation["cache_reconciliation_trigger"], "recipe_batch:koket")
+    check("operation reconciliation idle", operation["cache_reconciliation_idle_seconds"], 1200)
+    check("operation reconciliation age", operation["cache_reconciliation_last_full_age_hours"], 200.5)
+    check("operation keeps changed offer sample", operation["changed_offer_sample"][0]["kind"], "score_changed")
+    check("operation bounds changed offer sample text", operation["changed_offer_sample"][0]["name"].endswith("..."), True)
+    check("operation keeps offer change counts", operation["offer_change_counts"]["score_changed"], 1)
     check("operation excludes id lists", "changed_recipe_ids" in operation, False)
     check("operation truncates long error", operation["error"].endswith("..."), True)
     check("operation truncates to bounded length", len(operation["error"]), 503)

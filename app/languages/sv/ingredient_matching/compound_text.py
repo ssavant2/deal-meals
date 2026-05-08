@@ -250,9 +250,9 @@ _COMPOUND_STRICT_PREFIX_KEYWORDS: FrozenSet[str] = frozenset({
 # e.g., "torrmjölk" has prefix "torr" but the product is called "mjölkpulver"
 _MEAT_MINCE_PREFIXES: Set[str] = {
     'nöt', 'not', 'lamm', 'fläsk', 'flask', 'bland', 'kalv', 'kyckling',
-    'kalkon', 'hjort', 'får', 'far', 'vildsvins', 'älg', 'alg',
-    'chorizo', 'salsiccia', 'högrevs', 'hogrevs', 'hamburger',
-    'höns', 'hons', 'ren', 'vilt',  # game/poultry
+    'kalkon', 'får', 'far', 'högrevs', 'hogrevs', 'höns', 'hons',
+    'vego', 'vegansk', 'vegetarisk', 'växtbaserad', 'vaxtbaserad',
+    'soja', 'quorn', 'baljväxt', 'baljvaxt',
     'kött', 'kott',
 }
 
@@ -266,8 +266,9 @@ _POULTRY_CUT_SUFFIXES: Set[str] = {
 
 _COMPOUND_QUALIFIER_ALIASES: Dict[str, Set[str]] = {
     'torr': {'pulver', 'torr'},  # torrmjölk = mjölkpulver
-    # köttfärs/hushållsfärs = generic meat mince → matches all meat färs types
-    # but NOT vegofärs/baljväxtfärs/quornfärs (plant-based ≠ kött)
+    # köttfärs/hushållsfärs are treated as practical generic mince in recipes:
+    # ordinary meat, poultry, lamb/veal and plant-based mince are accepted, while
+    # sausage mince, burger mince, fish mince and game stay specific.
     'kött': _MEAT_MINCE_PREFIXES,
     'kott': _MEAT_MINCE_PREFIXES,
     'hushålls': _MEAT_MINCE_PREFIXES,  # old Swedish term ≈ blandfärs

@@ -12,6 +12,7 @@ from typing import List, Dict, Any
 import asyncio
 import sys
 import os
+import time
 from functools import partial
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
@@ -38,9 +39,6 @@ except ModuleNotFoundError:
     from config import settings
 
 
-INGREDIENT_ROUTING_BASELINE_MISMATCH = "ingredient_routing_fullscan_baseline_mismatch"
-
-
 def _delta_exception_result(exc: Exception) -> Dict[str, Any]:
     return {
         "success": False,
@@ -50,9 +48,21 @@ def _delta_exception_result(exc: Exception) -> Dict[str, Any]:
     }
 
 
-def _delta_fallback_requires_fullscan(delta_result: Dict[str, Any]) -> bool:
-    """Return whether a failed delta attempt should rebuild with ingredient routing off."""
-    return delta_result.get("fallback_reason") == INGREDIENT_ROUTING_BASELINE_MISMATCH
+def _append_delta_probation_history_safely(
+    append_runtime_probation_history,
+    result: Dict[str, Any],
+    *,
+    store_name: str | None,
+    trigger: str,
+) -> None:
+    try:
+        append_runtime_probation_history(
+            result,
+            store_name=store_name,
+            trigger=trigger,
+        )
+    except Exception as exc:
+        logger.warning(f"Could not append delta probation history: {exc}")
 
 
 def _mark_background_rebuild(store_name: str | None) -> None:
@@ -72,34 +82,254 @@ def _mark_background_rebuild(store_name: str | None) -> None:
         logger.warning(f"Could not mark background rebuild: {e}")
 
 
-async def _compute_cache_async_after_delta_fallback(
-    compute_cache_async,
-    temporary_ingredient_routing_mode,
-    delta_result: Dict[str, Any],
-) -> Dict[str, Any]:
-    if _delta_fallback_requires_fullscan(delta_result):
-        logger.warning(
-            "Ingredient-routing baseline mismatch detected; "
-            "falling back with ingredient routing disabled"
-        )
-        with temporary_ingredient_routing_mode("off"):
-            return await compute_cache_async()
-    return await compute_cache_async()
+def _offer_refresh_source(store_name: str | None) -> str:
+    return f"offer_refresh:{store_name or 'unknown'}"
 
 
-def _refresh_cache_after_delta_fallback(
-    refresh_cache_locked,
-    temporary_ingredient_routing_mode,
+def _refresh_cache_direct_after_delta_fallback(
+    cache_manager,
     delta_result: Dict[str, Any],
+    *,
+    source: str,
+    operation_context: Dict[str, Any],
 ) -> Dict[str, Any]:
-    if _delta_fallback_requires_fullscan(delta_result):
-        logger.warning(
-            "Ingredient-routing baseline mismatch detected; "
-            "falling back with ingredient routing disabled"
+    full_context = {
+        **operation_context,
+        "trigger_reason": (
+            "delta_apply_failed:"
+            f"{delta_result.get('fallback_reason') or 'delta_verification_failed'}"
+        ),
+    }
+    return cache_manager.refresh_cache(
+        run_kind="offer_delta_fallback_full_rebuild",
+        source=source,
+        operation_context=full_context,
+    )
+
+
+def _run_offer_cache_refresh_unlocked(
+    store_name: str | None = None,
+    *,
+    trigger: str = "offer_refresh_sync",
+) -> Dict[str, Any]:
+    """Run offer-triggered cache refresh while the cache operation lock is held."""
+    from cache_manager import cache_manager
+    from cache_delta import (
+        _apply_verified_offer_delta_unlocked,
+        _refresh_unmatched_offer_count_from_db,
+    )
+    from cache_operation_metadata import record_cache_last_operation
+    from delta_probation_runtime import append_runtime_probation_history
+    from offer_cache_refresh_decision import (
+        decide_offer_cache_refresh_strategy,
+        set_compiled_offer_baseline_committed,
+    )
+    from languages.matcher_runtime import (
+        MATCHER_VERSION,
+        OFFER_COMPILER_VERSION,
+        RECIPE_COMPILER_VERSION,
+        refresh_compiled_offer_match_data,
+        refresh_compiled_offer_term_index,
+        refresh_compiled_recipe_match_data,
+        refresh_compiled_recipe_term_index,
+    )
+    from pantry_search_index import refresh_compiled_recipe_search_term_index
+
+    source = _offer_refresh_source(store_name)
+
+    def refresh_compiled_baselines_for_full_offer_refresh(*, include_recipes: bool = False) -> None:
+        set_compiled_offer_baseline_committed(False)
+        refresh_compiled_offer_match_data()
+        if include_recipes:
+            refresh_compiled_recipe_match_data()
+        refresh_compiled_offer_term_index()
+        refresh_compiled_recipe_term_index()
+        if include_recipes:
+            try:
+                refresh_compiled_recipe_search_term_index()
+            except Exception as exc:
+                logger.warning(
+                    "Pantry search-term index refresh failed before offer full rebuild; "
+                    "pantry will fall back to legacy until the index is refreshed: {}",
+                    exc,
+                )
+
+    if not store_name or not settings.cache_delta_enabled:
+        if store_name:
+            refresh_compiled_baselines_for_full_offer_refresh(include_recipes=False)
+        result = cache_manager.refresh_cache(
+            run_kind="offer_refresh_full_rebuild",
+            source=source,
         )
-        with temporary_ingredient_routing_mode("off"):
-            return refresh_cache_locked()
-    return refresh_cache_locked()
+        _mark_background_rebuild(store_name)
+        return result
+
+    if not settings.offer_refresh_decision_enabled:
+        logger.info("Offer refresh decision disabled; using legacy verified offer-delta path")
+        decision_context = {
+            "offer_refresh_strategy": "delta",
+            "offer_refresh_reason": "decision_disabled",
+        }
+        try:
+            delta_result = _apply_verified_offer_delta_unlocked(
+                apply=True,
+                verify_full_preview=settings.cache_delta_verify_full_preview,
+                operation_context=decision_context,
+            )
+        except Exception as e:
+            logger.warning(
+                f"Delta cache refresh failed ({e}); falling back to full compiled rebuild"
+            )
+            delta_result = {**_delta_exception_result(e), **decision_context}
+        if delta_result.get("applied"):
+            _append_delta_probation_history_safely(
+                append_runtime_probation_history,
+                delta_result,
+                store_name=store_name,
+                trigger=trigger,
+            )
+            _mark_background_rebuild(store_name)
+            return delta_result
+        result = _refresh_cache_direct_after_delta_fallback(
+            cache_manager,
+            delta_result,
+            source=source,
+            operation_context=decision_context,
+        )
+        history_result = dict(delta_result)
+        history_result["effective_rebuild_mode"] = result.get(
+            "effective_rebuild_mode",
+            history_result.get("effective_rebuild_mode"),
+        )
+        _append_delta_probation_history_safely(
+            append_runtime_probation_history,
+            history_result,
+            store_name=store_name,
+            trigger=trigger,
+        )
+        _mark_background_rebuild(store_name)
+        return result
+
+    decision = decide_offer_cache_refresh_strategy(store_name=store_name)
+    operation_context = decision.to_operation_context()
+
+    if decision.strategy == "skip":
+        started_at = time.perf_counter()
+        set_compiled_offer_baseline_committed(False)
+        refresh_compiled_offer_match_data()
+        refresh_compiled_offer_term_index()
+        unmatched_counts = _refresh_unmatched_offer_count_from_db(cache_manager)
+        set_compiled_offer_baseline_committed(True)
+        elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+        result = {
+            "success": True,
+            "applied": False,
+            "skipped": True,
+            "run_kind": "offer_refresh_skip",
+            "effective_rebuild_mode": "skip",
+            "status": "ready",
+            "cached": decision.metadata_total_matches or decision.cache_rows or 0,
+            "total_matches": decision.metadata_total_matches or decision.cache_rows or 0,
+            "total_recipes": decision.active_recipe_count,
+            "time_ms": elapsed_ms,
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "offer_compiler_version": OFFER_COMPILER_VERSION,
+            "offer_data_source": "compiled",
+            "recipe_data_source": "compiled_payload",
+            "candidate_data_source": "term_index",
+            **unmatched_counts,
+            **operation_context,
+        }
+        record_cache_last_operation(
+            result,
+            operation_type="offer_refresh_skip",
+            status="ready",
+            source=source,
+        )
+        _mark_background_rebuild(store_name)
+        return result
+
+    if decision.strategy == "full":
+        refresh_compiled_baselines_for_full_offer_refresh(
+            include_recipes=decision.reason == "recipe_changes_detected",
+        )
+        result = cache_manager.refresh_cache(
+            run_kind="offer_refresh_full_rebuild",
+            source=source,
+            operation_context=operation_context,
+        )
+        _mark_background_rebuild(store_name)
+        return result
+
+    try:
+        delta_result = _apply_verified_offer_delta_unlocked(
+            apply=True,
+            verify_full_preview=settings.cache_delta_verify_full_preview,
+            operation_context=operation_context,
+        )
+    except Exception as e:
+        logger.warning(
+            f"Delta cache refresh failed ({e}); falling back to full compiled rebuild"
+        )
+        delta_result = {**_delta_exception_result(e), **operation_context}
+
+    if delta_result.get("applied"):
+        _append_delta_probation_history_safely(
+            append_runtime_probation_history,
+            delta_result,
+            store_name=store_name,
+            trigger=trigger,
+        )
+        _mark_background_rebuild(store_name)
+        return delta_result
+
+    reason = delta_result.get("fallback_reason") or "delta_verification_failed"
+    logger.warning(
+        f"Delta cache refresh was not applied ({reason}); "
+        "falling back to full compiled rebuild"
+    )
+    result = _refresh_cache_direct_after_delta_fallback(
+        cache_manager,
+        delta_result,
+        source=source,
+        operation_context=operation_context,
+    )
+    history_result = dict(delta_result)
+    history_result["effective_rebuild_mode"] = result.get(
+        "effective_rebuild_mode",
+        history_result.get("effective_rebuild_mode"),
+    )
+    _append_delta_probation_history_safely(
+        append_runtime_probation_history,
+        history_result,
+        store_name=store_name,
+        trigger=trigger,
+    )
+    _mark_background_rebuild(store_name)
+    return result
+
+
+def run_offer_cache_refresh(
+    store_name: str | None = None,
+    *,
+    trigger: str = "offer_refresh_sync",
+) -> Dict[str, Any]:
+    """Run a store-triggered cache refresh through the shared cache lock."""
+    from cache_manager import run_cache_operation
+
+    return run_cache_operation(
+        "offer_refresh",
+        lambda: _run_offer_cache_refresh_unlocked(store_name, trigger=trigger),
+        skip_if_busy=False,
+    )
+
+
+async def run_offer_cache_refresh_async(store_name: str | None = None) -> Dict[str, Any]:
+    """Async wrapper for store-triggered cache refreshes."""
+    loop = asyncio.get_running_loop()
+    runner = partial(run_offer_cache_refresh, store_name, trigger="offer_refresh_async")
+    return await loop.run_in_executor(None, runner)
 
 
 def _build_offer_insert_mapping(
@@ -237,74 +467,24 @@ async def _trigger_cache_refresh_async(store_name: str = None):
     can notify the user via SSE.
     """
     try:
-        from cache_manager import compute_cache_async
-        from cache_delta import apply_verified_offer_delta, _temporary_ingredient_routing_mode
-        from delta_probation_runtime import append_runtime_probation_history
-
         logger.info(f"Triggering recipe cache refresh (background: {store_name})...")
-        result = None
-        delta_result = None
-
-        if store_name and settings.cache_delta_enabled:
-            logger.info(
-                "Delta cache refresh enabled for offer updates "
-                f"(verify_full_preview={settings.cache_delta_verify_full_preview})"
-            )
-            delta_runner = partial(
-                apply_verified_offer_delta,
-                apply=True,
-                verify_full_preview=settings.cache_delta_verify_full_preview,
-            )
-            try:
-                delta_result = await asyncio.get_running_loop().run_in_executor(None, delta_runner)
-            except Exception as e:
-                logger.warning(
-                    f"Delta cache refresh failed ({e}); "
-                    "falling back to full compiled rebuild"
-                )
-                delta_result = _delta_exception_result(e)
-            result = delta_result
-            if not delta_result.get("applied"):
-                reason = delta_result.get("fallback_reason") or "delta_verification_failed"
-                logger.warning(
-                    f"Delta cache refresh was not applied ({reason}); "
-                    "falling back to full compiled rebuild"
-                )
-                result = await _compute_cache_async_after_delta_fallback(
-                    compute_cache_async,
-                    _temporary_ingredient_routing_mode,
-                    delta_result,
-                )
-        else:
-            result = await compute_cache_async()
+        result = await run_offer_cache_refresh_async(store_name)
 
         if result.get('skipped'):
-            logger.info(f"Cache rebuild skipped: {result.get('reason')}")
-            return
-
-        logger.success(
-            "Cache refreshed ({mode}): {recipes} recipes in {time_ms}ms".format(
-                mode=result.get('effective_rebuild_mode', 'unknown'),
-                recipes=result.get('cached', 0),
-                time_ms=result.get('time_ms', 0),
-            )
-        )
-
-        if delta_result is not None:
-            history_result = dict(delta_result)
-            if not delta_result.get("applied"):
-                history_result["effective_rebuild_mode"] = result.get(
-                    "effective_rebuild_mode",
-                    history_result.get("effective_rebuild_mode"),
+            logger.info(
+                "Cache refresh skipped ({reason}) in {time_ms}ms".format(
+                    reason=result.get("offer_refresh_reason") or result.get("reason"),
+                    time_ms=result.get("time_ms", 0),
                 )
-            append_runtime_probation_history(
-                history_result,
-                store_name=store_name,
-                trigger="offer_refresh_async",
             )
-
-        # Mark this as a background rebuild so home.html can detect it
-        _mark_background_rebuild(store_name)
+        else:
+            logger.success(
+                "Cache refreshed ({mode}): {recipes} recipes in {time_ms}ms".format(
+                    mode=result.get('effective_rebuild_mode', 'unknown'),
+                    recipes=result.get('cached', 0),
+                    time_ms=result.get('time_ms', 0),
+                )
+            )
 
     except Exception as e:
         logger.error(f"Cache refresh failed: {e}")
@@ -519,54 +699,8 @@ def save_offers(store_name: str, products: List[Dict]) -> Dict[str, Any]:
                     loop.create_task(_trigger_cache_refresh_async(store_name))
                 except RuntimeError:
                     # No running event loop (e.g. to_thread or CLI usage) — run synchronously
-                    from cache_manager import refresh_cache_locked
-                    from cache_delta import apply_verified_offer_delta, _temporary_ingredient_routing_mode
-                    from delta_probation_runtime import append_runtime_probation_history
-
                     logger.info("No event loop available, running cache refresh synchronously")
-                    if store_name and settings.cache_delta_enabled:
-                        try:
-                            result = apply_verified_offer_delta(
-                                apply=True,
-                                verify_full_preview=settings.cache_delta_verify_full_preview,
-                            )
-                        except Exception as e:
-                            logger.warning(
-                                f"Delta cache refresh failed ({e}); "
-                                "falling back to full compiled rebuild"
-                            )
-                            result = _delta_exception_result(e)
-                        if not result.get("applied"):
-                            reason = result.get("fallback_reason") or "delta_verification_failed"
-                            logger.warning(
-                                f"Delta cache refresh was not applied ({reason}); "
-                                "falling back to full compiled rebuild"
-                            )
-                            fallback_result = _refresh_cache_after_delta_fallback(
-                                refresh_cache_locked,
-                                _temporary_ingredient_routing_mode,
-                                result,
-                            )
-                            history_result = dict(result)
-                            history_result["effective_rebuild_mode"] = fallback_result.get(
-                                "effective_rebuild_mode",
-                                history_result.get("effective_rebuild_mode"),
-                            )
-                            append_runtime_probation_history(
-                                history_result,
-                                store_name=store_name,
-                                trigger="offer_refresh_sync",
-                            )
-                        else:
-                            append_runtime_probation_history(
-                                result,
-                                store_name=store_name,
-                                trigger="offer_refresh_sync",
-                            )
-                    else:
-                        refresh_cache_locked()
-
-                    _mark_background_rebuild(store_name)
+                    run_offer_cache_refresh(store_name)
 
             return stats
 

@@ -189,6 +189,11 @@ def run_cache_doctor() -> dict[str, Any]:
 
             has_last_operation = _column_exists(db, "cache_metadata", "last_operation")
             has_operation_history = _column_exists(db, "cache_metadata", "operation_history")
+            has_compiled_offer_baseline_committed = _column_exists(
+                db,
+                "cache_metadata",
+                "compiled_offer_baseline_committed",
+            )
             metadata_select = """
                 SELECT
                     cache_name,
@@ -202,6 +207,7 @@ def run_cache_doctor() -> dict[str, Any]:
                     background_rebuild_source
                     __LAST_OPERATION_SELECT__
                     __OPERATION_HISTORY_SELECT__
+                    __COMPILED_OFFER_BASELINE_SELECT__
                 FROM cache_metadata
                 WHERE cache_name = :cache_name
             """
@@ -211,6 +217,13 @@ def run_cache_doctor() -> dict[str, Any]:
             ).replace(
                 "__OPERATION_HISTORY_SELECT__",
                 ", operation_history" if has_operation_history else "",
+            ).replace(
+                "__COMPILED_OFFER_BASELINE_SELECT__",
+                (
+                    ", compiled_offer_baseline_committed"
+                    if has_compiled_offer_baseline_committed
+                    else ""
+                ),
             )
             metadata = _row(db, metadata_select, {"cache_name": CACHE_NAME})
 
@@ -255,6 +268,27 @@ def run_cache_doctor() -> dict[str, Any]:
                         float(settings.cache_recipe_delta_max_affected_ratio) * 100,
                         4,
                     )
+                    operation_history_summary[
+                        "offer_delta_impacted_recipe_ratio_full_threshold_pct"
+                    ] = round(
+                        float(settings.offer_delta_impacted_recipe_ratio_full_threshold_pct),
+                        4,
+                    )
+                    operation_history_summary[
+                        "offer_delta_changed_offer_ratio_early_full_threshold_pct"
+                    ] = round(
+                        float(settings.offer_delta_changed_offer_ratio_early_full_threshold_pct),
+                        4,
+                    )
+                    operation_history_summary["cache_reconciliation_enabled"] = bool(
+                        settings.cache_reconciliation_enabled
+                    )
+                    operation_history_summary["cache_reconciliation_min_age_days"] = int(
+                        settings.cache_reconciliation_min_age_days
+                    )
+                    operation_history_summary[
+                        "cache_reconciliation_max_incremental_operations"
+                    ] = int(settings.cache_reconciliation_max_incremental_operations)
                     checks.append(_check(
                         "cache_metadata:operation_history",
                         "ok" if operation_history_summary["history_size"] > 0 else "warning",
@@ -278,6 +312,24 @@ def run_cache_doctor() -> dict[str, Any]:
                         "cache_metadata:operation_history",
                         "warning",
                         "cache_metadata.operation_history column is missing",
+                    ))
+                if has_compiled_offer_baseline_committed:
+                    baseline_committed = metadata.get("compiled_offer_baseline_committed")
+                    checks.append(_check(
+                        "cache_metadata:compiled_offer_baseline_committed",
+                        "ok" if baseline_committed is True else "warning",
+                        (
+                            "Compiled offer baseline is committed"
+                            if baseline_committed is True
+                            else "Compiled offer baseline may be newer than recipe_offer_cache"
+                        ),
+                        compiled_offer_baseline_committed=baseline_committed,
+                    ))
+                else:
+                    checks.append(_check(
+                        "cache_metadata:compiled_offer_baseline_committed",
+                        "warning",
+                        "cache_metadata.compiled_offer_baseline_committed column is missing",
                     ))
 
             cache_rows = int(_scalar(db, "SELECT COUNT(*) FROM recipe_offer_cache") or 0)
@@ -348,6 +400,16 @@ def run_cache_doctor() -> dict[str, Any]:
         "status": status,
         "checked_at": _utcnow_iso(),
         "versions": _versions(),
+        "offer_refresh_strategy": (
+            ((metadata or {}).get("last_operation") or {}).get("offer_refresh_strategy")
+            if isinstance((metadata or {}).get("last_operation"), dict)
+            else None
+        ),
+        "offer_refresh_reason": (
+            ((metadata or {}).get("last_operation") or {}).get("offer_refresh_reason")
+            if isinstance((metadata or {}).get("last_operation"), dict)
+            else None
+        ),
         "metadata": metadata,
         "operation_history": operation_history_summary,
         "summary": _summary(checks),

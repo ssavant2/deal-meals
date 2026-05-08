@@ -29,6 +29,40 @@ FRESH_HERB_KEYWORDS: FrozenSet[str] = frozenset({
 })
 
 
+FRESH_PRODUCE_CATEGORIES: FrozenSet[str] = frozenset({
+    'fruit',
+    'vegetables',
+})
+
+
+_CHILI_FRESH_KEYWORDS: FrozenSet[str] = frozenset({
+    'chili',
+    'chilipeppar',
+    'chilifrukt',
+    'chilifrukter',
+})
+
+
+_CHILI_FRESH_PRODUCT_CUES: FrozenSet[str] = frozenset({
+    'klass',
+    'kl1',
+    'röd',
+    'rod',
+    'grön',
+    'gron',
+    'gul',
+    'habanero',
+    'jalapeño',
+    'jalapeno',
+    'serrano',
+    'piri',
+    'piri-piri',
+    'piripiri',
+    'chilipeppar',
+    'chillipeppar',
+})
+
+
 FRESH_PRODUCT_INDICATORS: FrozenSet[str] = frozenset({
     'bunt', 'kruka', 'knippe', 'färsk', 'färska', 'farsk', 'farska',
     'lösvikt', 'losvikt', 'krus',
@@ -39,6 +73,25 @@ FRESH_PRODUCT_INDICATORS: FrozenSet[str] = frozenset({
     # prod_is_fresh and prod_is_dried to be True → blocking logic skipped.
     # Fresh chilipeppar products still identified via 'klass ' or 'bunt'.
 })
+
+
+def product_indicates_fresh_herb_form(
+    matched_keyword: str,
+    product_lower: str,
+    offer_category: str = "",
+) -> bool:
+    """Return True when an herb/chili product should be treated as fresh."""
+    if any(ind in product_lower for ind in DRIED_PRODUCT_INDICATORS):
+        return False
+    if any(ind in product_lower for ind in FROZEN_PRODUCT_INDICATORS):
+        return False
+    if any(ind in product_lower for ind in FRESH_PRODUCT_INDICATORS):
+        return True
+    if (offer_category or "").lower() in FRESH_PRODUCE_CATEGORIES:
+        return True
+    if matched_keyword in _CHILI_FRESH_KEYWORDS:
+        return any(cue in product_lower for cue in _CHILI_FRESH_PRODUCT_CUES)
+    return False
 
 
 DRIED_PRODUCT_INDICATORS: FrozenSet[str] = frozenset({
@@ -70,6 +123,7 @@ RECIPE_FRESH_INDICATORS: FrozenSet[str] = frozenset({
     'finhackad', 'finhackade',
     'finskuren', 'finskurna',
     'fint skuren', 'fint skurna',
+    'skuren', 'skurna',
     'klippt', 'klippta',
     'garnering',
     'servering',

@@ -18,6 +18,20 @@ except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
 
+_SPECIALTY_MINCE_PRODUCT_CUES: Set[str] = {
+    'chorizofärs', 'chorizofars',
+    'salsicciafärs', 'salsicciafars',
+    'hamburgerfärs', 'hamburgerfars',
+    'fiskfärs', 'fiskfars',
+    'laxfärs', 'laxfars',
+    'viltfärs', 'viltfars',
+    'hjortfärs', 'hjortfars',
+    'vildsvinsfärs', 'vildsvinsfars',
+    'älgfärs', 'algfars',
+    'renfärs', 'renfars',
+}
+
+
 # FALSE POSITIVE BLOCKERS - Ingredients that contain keywords but aren't related
 # ============================================================================
 # Problem: "ost" keyword matches "Ostronsås" because "ost" is substring of "ostron"
@@ -25,6 +39,10 @@ except ModuleNotFoundError:
 # Format: keyword -> set of words in ingredient that block the match
 
 _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
+    'läsk': {
+        'fläsk', 'flask',
+        'fläskkött', 'flaskkott',
+    },
     'ost': {
         'ostron', 'ostronsås', 'ostronsas',  # oyster sauce is NOT cheese
         'rostad', 'rostade', 'rostat', 'rosta', 'rostning',  # "Rostade jordnötter" / "rostning" - ost is substring
@@ -127,14 +145,11 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'löksill', 'loksill',  # pickled herring (onion herring) — "lök" is NOT the ingredient
     },
 
-    # Potato types - "potatis" should NOT match specific potato types
-    # "Potatis Smattochgott" should NOT match "färskpotatis" recipe
+    # Potato products - generic potatis may match fresh potato varieties, but
+    # not other species or prepared potato products.
     'potatis': {
-        'färskpotatis', 'farskpotatis',  # new potatoes (seasonal)
         'sötpotatis', 'sotpotatis',  # sweet potato (different species)
         'klyftpotatis',  # wedge potatoes (frozen/pre-made)
-        'bakpotatis',  # baking potatoes
-        'mandelpotatis',  # specific variety, not generic potatis
         'potatismjöl', 'potatismjol',  # potato starch (sauce thickener, different product)
         'potatischips',  # potato chips (snack)
         'potatisgnocchi',  # potato gnocchi (prepared pasta)
@@ -144,7 +159,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'potatismospulver',  # instant mashed potato powder
     },
     'potatisar': {
-        'färskpotatis', 'farskpotatis',  # plural offer keyword needs same blocker coverage
+        'sötpotatis', 'sotpotatis',
     },
 
     # Vanilla - "vanilj" should NOT match vanilla compound ingredients
@@ -332,6 +347,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'mjölkchoklad', 'mjolkchoklad',  # milk chocolate — dark/white should not match
         'chokladströssel', 'chokladstrossel',  # chocolate sprinkles ≠ baking chocolate (5 recipes)
         'chokladkräm', 'chokladkram',  # chocolate cream/spread (Nutella-style) ≠ solid baking chocolate
+        'ischokladformar', 'ischokladform',  # chocolate molds (kitchen tools) ≠ chocolate ("25 st Ischokladformar")
         # NOTE: 'varm choklad' handled via KEYWORD_SUPPRESSED_BY_CONTEXT, not FPB
         # NOTE: mörk/vit/ljus darkness qualifiers in _SPECIALTY_QUALIFIERS_RAW, not here
     },
@@ -544,11 +560,10 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         # NOTE: "Pasta Mezze Lune Sparris" moved to PNB (product name blocker) — FPB checks ingredient text, not product name
     },
 
-    # Kebab meat != kebab sauce/spice
-    # "Pirog Chicken Kebab" should NOT match recipes needing kebab sauce or kebab spice
+    # Kebab meat != kebab sauce/spice when the recipe explicitly asks for those.
     'kebab': {
-        'kebabsås', 'kebabsas',  # kebab sauce ≠ kebab meat
-        'kebabkrydda',  # kebab spice ≠ kebab meat
+        'kebabsås', 'kebabsas',
+        'kebabkrydda',
     },
 
     # Ground meat - "färs" should NOT match "färsk" (fresh), "färska", "färskt"
@@ -682,10 +697,12 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'högrev': {
         'högrevsfärs', 'hogrevsfars',
         'hamburgare', 'burger', 'burgare',  # burger patties ≠ raw chuck cut
+        'korv', 'kryddkorv', 'färskkorv', 'farskkorv', 'chorizo', 'salsiccia',
     },
     'hogrev': {
         'högrevsfärs', 'hogrevsfars',
         'hamburgare', 'burger', 'burgare',
+        'korv', 'kryddkorv', 'färskkorv', 'farskkorv', 'chorizo', 'salsiccia',
     },
 
     # Risotto - ready-made risotto meal ≠ raw risotto rice
@@ -758,7 +775,6 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'ströbröd': {
         'pankoströbröd', 'pankostrobrod',  # panko — Japanese style, different texture
     },
-
     # Ham - "skinka" should NOT match cured specialty hams
     # "Kokt Skinka" should NOT match recipe needing "parmaskinka"
     'skinka': {
@@ -1300,6 +1316,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # "Chilli Chipotle" should NOT match recipe needing "chipotlepasta"
     'chipotle': {
         'chipotlepasta',  # chipotle paste (different product from dried chipotle)
+        'chipotlepulver',  # exact paste/powder bridge should use chipotlepulver keyword
     },
 
     # Pumpa (squash) != pumpakärnor (pumpkin seeds) — different products
@@ -1375,6 +1392,8 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'svamparna',  # definite plural (cooking instruction reference)
         'portabellosvamp',  # portabello is a specific mushroom type — generic 'svamp' from compound shouldn't match Enoki etc.
         'svampsmak',  # mushroom-flavored ≠ actual mushrooms
+        'svampkrydda',  # mushroom spice/seasoning ≠ fresh mushrooms ("1 dl svampkrydda")
+        'svampkryddor',  # plural form of mushroom spice
     },
 
     # "Inläggning Snabb" (pickling liquid) ≠ "inläggningssill" (pickled herring)
@@ -1486,6 +1505,13 @@ FALSE_POSITIVE_BLOCKERS: Dict[str, Set[str]] = {
 # block the match.
 # Format: keyword -> set of words that, if in product name, block the match
 # UNLESS the same word also appears in the ingredient text.
+_PLAIN_MILK_PRODUCT_BLOCKERS: Set[str] = {
+    'chokladknappar',
+    'jordgubb', 'blåbär', 'hallon', 'banan', 'choklad', 'vanilj',
+    'protein',
+    'baby', 'yogo', '6m', '8m', '12m',
+}
+
 _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # BBQ sauce ≠ pulled meat with BBQ glaze
     # "Pulled Chicken Smokey BBQ med glaze" has keyword "bbqsås" but is a meat product
@@ -1586,6 +1612,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'ostsnacks',           # "Ostsnacks cheez ballz chili cheez" — snack
         'favabönor', 'favabonor', 'foul modemmas',  # bean conserve with chili flavor
         'mango',               # "Torkad Mango Chili Twist" — dried mango snack, not chili
+        'sriracha', 'sauce', 'sås', 'sas',
+        'soya', 'soy', 'grillspett', 'karré', 'karre',
     },
     'chilifrukt': {
         'örtsalt', 'ortsalt',
@@ -1631,6 +1659,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'balsamico', 'crema',   # "Crema di Balsamico ingefära" — balsamico cream, not ginger
         'tofu',                 # "Tofu marinerad soja ingefära" — tofu product, not ginger
         'marinerad',            # "Marinerad Tofu Sojasås & Ingefära" — marinated product
+        'friggs', 'marmelad', 'shot', 'juice', 'dryck', 'choklad',
     },
     # Tamari soy — block tofu products
     'tamarisoja': {
@@ -1639,6 +1668,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Cherry tomatoes — block pasta sauce
     'körsbärstomater': {
         'pastasås', 'pastasas',  # "Pastasås Körsbärstomat & Basilika" — sauce, not fresh tomatoes
+    },
+    'småtomat': {
+        'pastasås', 'pastasas',
     },
     # Balsamic vinegar — crema/glaze is not plain vinegar
     'balsamvinäger': {
@@ -1818,9 +1850,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'soltor': {'oliver', 'oliv'},  # "Snackoliver Soltor" is sun-dried olives, not soltorkade tomater
     'högrev': {
         'hamburgare', 'burger', 'burgare',  # burger patties ≠ raw chuck cut
+        'korv', 'kryddkorv', 'färskkorv', 'farskkorv', 'chorizo', 'salsiccia',
     },
     'hogrev': {
         'hamburgare', 'burger', 'burgare',
+        'korv', 'kryddkorv', 'färskkorv', 'farskkorv', 'chorizo', 'salsiccia',
     },
     'nötfärs': {
         'högrev',  # "Högrev av nöt i bit" is a beef cut, not ground beef (416 FP recipes)
@@ -1841,8 +1875,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'revbensspjäll': {'rub'},  # "BBQ rub Ribs" — spice rub product, not actual ribs/revbensspjäll
     'solrosfrön': {
         'knäcke', 'fröknäcke',
-        'saltad', 'saltade',
-    },  # Crispbread and salted snack seeds are not plain loose sunflower seeds
+    },  # Crispbread is not plain loose sunflower seeds
     'feta': {'sås fetaost'},  # "Sås Fetaost Original" — sauce product, not solid feta cheese
     'baguetter': {'vitlök', 'vitlok'},
     # Fish roe "rom" products ≠ rum (the spirit) for baking/desserts
@@ -2026,11 +2059,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'konserverade', 'konserverad',  # canned mushrooms
         'burk',                  # "Champinjoner på burk" — canned
         'inlagd', 'inlagda',     # pickled/preserved
-        # Fresh champinjoner always have "Klass 1" in name; "skivade"/"hela" = preserved jar products.
-        # DB: Champinjoner Skivade 290g ICA, Champinjoner Hela 290g ICA, Champinjoner skivade och smakrika 180g ICA
-        # are all preserved. Only "Klass 1" products are fresh. Safe to block these descriptors.
-        'skivade',               # "Champinjoner Skivade 290g" — preserved glass jar
-        'hela',                  # "Champinjoner Hela 290g" — preserved glass jar
+        # Cut descriptors are handled form-aware in matching.py so frozen sliced
+        # champignons are not mistaken for preserved jar products.
     },
     'champinjoner': {
         'pastasås', 'pastasas',
@@ -2039,8 +2069,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'konserverade', 'konserverad',
         'burk',
         'inlagd', 'inlagda',
-        'skivade',               # "Champinjoner Skivade 290g ICA" — preserved glass jar
-        'hela',                  # "Champinjoner Hela 290g ICA" — preserved glass jar
+        # Cut descriptors are handled form-aware in matching.py so frozen sliced
+        # champignons are not mistaken for preserved jar products.
     },
     # Filled pasta with mushroom ≠ raw/dried mushroom
     'karl-johansvamp': {
@@ -2063,8 +2093,12 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'tärnad ost', 'tarnad ost',  # "Tärnad ost i olja Gröna oliver" — cheese product, not olives
         'tapenade',  # olive paste/spread ≠ whole olives
     },
+    'kapris': {
+        'tapenade',  # caper flavor/component in tapenade ≠ standalone capers
+    },
     'mozzarella': {
         'fusii', 'pastakopp',  # ready pasta dishes with mozzarella as topping
+        'pompodoro', 'knorr',  # sauce/meal mix, not mozzarella cheese
     },
     'ricotta': {
         'potatisterrin',  # "Potatisterrin spenat & ricotta" is a potato dish, not ricotta cheese
@@ -2081,6 +2115,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'gurka': {
         'i lag',        # "Gurka i lag" = pickled, not fresh cucumber
         'tunnskivad',   # "Tunnskivad Gurka" = pickled (ICA/Önos product name)
+        'finhackad garant',  # current Garant product is pickled/sweet-sour, not fresh prep
         'boston',        # "Bostongurka" = sweet pickled relish, not fresh
     },
     'färskost': {
@@ -2221,6 +2256,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Pinsa (Italian flatbread pizza) ≠ generic bread types
     'tunnbröd': {'pinsa'},
     'tunnbrod': {'pinsa'},
+    'dragon': {'twin dragon', 'twin'},
     'surdegsbröd': {'pinsa'},
     'surdegsbrod': {'pinsa'},
     'formbröd': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod'},
@@ -2265,9 +2301,13 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Hamburger dressing ≠ hamburgerbröd/hamburgare
     'hamburger': {
         'dressing',  # "Original Hamburger Dressing" is not hamburger buns
+        'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod',
+        'burger bun', 'burger buns',
     },
     'hamburgare': {
         'dressing',  # "Original Hamburgare Dressing" is not a burger patty
+        'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod',
+        'burger bun', 'burger buns',
         'vego', 'vegansk', 'växtbaserad',  # vegan burger ≠ meat burger
     },
     # Pulled Turkey ≠ pulled vegobitar
@@ -2321,6 +2361,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'ricotta',                  # cheese-filled (Ricotta Spinaci Tortelloni)
         'pomodoro',                 # flavored filling (Tortelloni Pomodoro)
         'wasabi',                   # "Wasabi Pasta" = wasabi paste (tube), not pasta
+        'konjac',                   # konjac/shirataki noodles ≠ ordinary wheat pasta
         'pancetta',                 # "Pasta Mezze Lune Sparris och Pancetta" — meat-filled
         'pesto',                    # "Pasta Pesto 450g ICA" — pre-sauced, not plain pasta
         'sweet chili',              # "Pasta Sweet Chili 450g ICA" — pre-sauced, not plain pasta
@@ -2335,20 +2376,21 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'pancetta',                # "Pasta Mezze Lune Sparris och Pancetta" — meat-filled, not plain pasta
     },
     # Frozen ready meals with "chicken" in name ≠ plain pasta
-    'spaghetti': {'chicken', 'pastakrydda'},  # "Tagliatelle chicken 1kg Findus" via långpasta alias; "Spaghetti Pastakrydda" = spice mix
-    'spagetti': {'chicken', 'pastakrydda'},
-    'tagliatelle': {'chicken', 'pastakrydda'},
-    'linguine': {'chicken', 'pastakrydda'},
-    'capellini': {'chicken', 'pastakrydda'},       # "Tagliatelle chicken 1kg Findus" via långpasta alias
-    'fettuccine': {'chicken', 'pastakrydda'},
-    'fettuccini': {'chicken', 'pastakrydda'},
-    'fettucine': {'chicken', 'pastakrydda'},
-    'pappardelle': {'chicken'},
-    'tagliolini': {'chicken'},
-    'bucatini': {'chicken'},
+    'spaghetti': {'chicken', 'pastakrydda', 'konjac'},  # "Tagliatelle chicken 1kg Findus" via långpasta alias; "Spaghetti Pastakrydda" = spice mix
+    'spagetti': {'chicken', 'pastakrydda', 'konjac'},
+    'tagliatelle': {'chicken', 'pastakrydda', 'konjac'},
+    'linguine': {'chicken', 'pastakrydda', 'konjac'},
+    'capellini': {'chicken', 'pastakrydda', 'konjac'},       # "Tagliatelle chicken 1kg Findus" via långpasta alias
+    'fettuccine': {'chicken', 'pastakrydda', 'konjac'},
+    'fettuccini': {'chicken', 'pastakrydda', 'konjac'},
+    'fettucine': {'chicken', 'pastakrydda', 'konjac'},
+    'pappardelle': {'chicken', 'konjac'},
+    'tagliolini': {'chicken', 'konjac'},
+    'bucatini': {'chicken', 'konjac'},
     # Long pasta types excluded from "långpasta" group — specific products only match themselves
     'långpasta': {
         'gnocchi',
+        'konjac',                  # konjac/shirataki noodles ≠ tagliatelle/spaghetti
         'tortelloni', 'tortellini',
         'ravioli', 'cannelloni',
         'lasagneplattor',
@@ -2429,6 +2471,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # "Paprika Burk" is ground spice, "1 st Paprika" is fresh vegetable
     'paprika': {
         'burk', 'påse', 'pase',  # spice packaging → not fresh bell pepper
+        'file', 'filé', 'fil',   # preserved pepper fillets, not fresh whole paprika
         'tärnad',                # "Tärnad ost i olja Paprika" — cheese cubes, not fresh peppers
         'ost i olja',            # "Tärnad ost i olja Paprika" — cheese in oil, not bell pepper
         'santa maria',           # "Paprika Ekologisk 36g Santa Maria" — spice brand, not fresh
@@ -2440,6 +2483,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # PNB checks matched_keyword directly; keyword alias 'paprikor'→'paprika' doesn't resolve for PNB.
     'paprikor': {
         'burk', 'påse', 'pase',
+        'file', 'filé', 'fil',
         'tärnad',
         'santa maria',
         'vegeta',
@@ -2563,10 +2607,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'hasselnötskram': {'gelato'},
     'valnötter': {'nötsmör', 'nötsmor', 'rondelé', 'rondele', 'julien', 'råglevain', 'levain'},
     'valnötskärnor': {'nötsmör', 'nötsmor', 'rondelé', 'rondele', 'julien', 'råglevain', 'levain'},
-    'pistagenötter': {
-        'nötsmör', 'nötsmor',
-        'salt', 'saltade', 'havssalt',  # salted snack pistachios ≠ plain pistachios for baking/cooking
-    },  # glass removed — glass normalization handles pistachio ice cream
+    # Generic pistachios may use the salted snack rows in practice; explicit
+    # osaltade wording is handled as a directional requirement in matching.py.
+    'pistagenötter': {'nötsmör', 'nötsmor'},  # glass removed — glass normalization handles pistachio ice cream
     'pinjenötter': {'nötsmör', 'nötsmor'},
     # "Original Junior Kyckling" is a cold cut (pålägg), not raw chicken.
     # Block from matching recipes wanting kycklingfilé/kyckling.
@@ -2653,9 +2696,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'marinerad',              # "Kycklingbröstfilé strimlad marinerad"
         'korean',                 # "Korean Style" marinerad
         'thai strimlad',          # "Kyckling Färsk Thai Strimlad"
-        'pastramibröst', 'pastramibrost',  # deli pastrami ≠ raw fillet
+        'pastrami', 'pastramikryddad', 'pastramibröst', 'pastramibrost',  # deli pastrami ≠ raw fillet
+        'grillkryddad skivad',    # cooked/deli sliced chicken, not raw grill-seasoned fillet
         'örtmarinerad', 'ortmarinerad',    # deli herb-marinated slices
         'sweet chili',            # "Sweet chili kyckling Fryst" — pre-seasoned ready meal
+        'teriyaki',               # "Kyckling Teriyaki/nudlar/grön Findus" — ready meal with sauce + sides
     },
     'kycklingfile': {
         'wook', 'wok', 'junior', 'äggjaktsägg', 'aggjaktsagg',
@@ -2664,8 +2709,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'dumpling', 'dumplings',
         'thaikryddad', 'örtkryddad', 'ortkryddad', 'bbq',
         'marinerad', 'korean', 'thai strimlad',
-        'pastramibröst', 'pastramibrost', 'örtmarinerad', 'ortmarinerad',
+        'pastrami', 'pastramikryddad', 'pastramibröst', 'pastramibrost',
+        'grillkryddad skivad',
+        'örtmarinerad', 'ortmarinerad',
         'sweet chili',            # "Sweet chili kyckling Fryst" — pre-seasoned ready meal
+        'teriyaki',               # "Kyckling Teriyaki/nudlar/grön Findus" — ready meal
     },
     'kyckling': {
         'wook', 'wok', 'junior', 'äggjaktsägg', 'aggjaktsagg',
@@ -2675,10 +2723,24 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'bacon',  # "Bacon Kyckling Skivad" — processed, not raw chicken
         'thaikryddad', 'örtkryddad', 'ortkryddad', 'bbq',
         'marinerad', 'korean', 'thai strimlad',
-        'pastramibröst', 'pastramibrost', 'örtmarinerad', 'ortmarinerad',
+        'pastrami', 'pastramikryddad', 'pastramibröst', 'pastramibrost',
+        'grillkryddad skivad',
+        'örtmarinerad', 'ortmarinerad',
         'presentpåse', 'presentpase', 'presesentpåse', 'presesentpase',  # gift bag
         'sweet chili',            # "Sweet chili kyckling Fryst" — pre-seasoned ready meal
+        'teriyaki',               # "Kyckling Teriyaki/nudlar/grön Findus" — ready meal
     },
+    # Milk chocolate candy/buttons contain "mjölk" as flavor descriptor — NOT actual milk.
+    # "Chokladknappar Mjölk Odense" is candy/confection, not a milk product.
+    'mjölk': _PLAIN_MILK_PRODUCT_BLOCKERS,
+    'mjolk': _PLAIN_MILK_PRODUCT_BLOCKERS,
+    # Flavored/protein milk drinks are not plain cooking milk.
+    'mellanmjölk': _PLAIN_MILK_PRODUCT_BLOCKERS,
+    'mellanmjolk': _PLAIN_MILK_PRODUCT_BLOCKERS,
+    'standardmjölk': _PLAIN_MILK_PRODUCT_BLOCKERS,
+    'standardmjolk': _PLAIN_MILK_PRODUCT_BLOCKERS,
+    'lättmjölk': _PLAIN_MILK_PRODUCT_BLOCKERS,
+    'lattmjolk': _PLAIN_MILK_PRODUCT_BLOCKERS,
     # "Kyckling Örtkryddad" is seasoned chicken, not herb sauce/seasoning
     'örtkryddad': {'kyckling'},
     'ortkryddad': {'kyckling'},
@@ -2813,6 +2875,12 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'mjölkdryck': {
         'protein',      # "Protein Mjölkdryck Blåbär 5dl Arla" — sports drink, not cooking milk
     },
+    # Oregano-flavored vegan cheese carrier has no explicit cheese token in the
+    # product name; keep standalone oregano ingredients on actual herb products.
+    'oregano': {
+        'greenvie',
+        'ost', 'cheese',
+    },
     # Flavored date snacks ≠ plain baking dates
     'dadlar': {
         'fizzy',        # "Dadlar Fizzy Bottle 125g Dave & Jon's" — candy-coated dates
@@ -2932,6 +3000,19 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'knäcke',       # "Sesamknäcke Flingsalt 150g" — cracker, not salt
         'sesamknäcke',  # belt-and-suspenders
     },
+    # Sea salt as a flavor on snacks/candy/crackers ≠ actual cooking salt.
+    'havssalt': {
+        'kex', 'chips', 'popcorn',
+        'choklad', 'chocolate',
+        'nöt', 'not', 'nötter', 'notter',
+        'cashew', 'mandel', 'pistage',
+    },
+    'seasalt': {
+        'kex', 'chips', 'popcorn',
+        'choklad', 'chocolate',
+        'nöt', 'not', 'nötter', 'notter',
+        'cashew', 'mandel', 'pistage',
+    },
     # Canned tuna in broth ≠ actual bouillon
     'buljong': {
         'tonfisk',  # "Tonfisk i buljong 120g" — canned tuna, not bouillon
@@ -3010,15 +3091,14 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Prepared sweet/soured red cabbage ≠ fresh raw rödkål
     'rödkål': {'klassisk', 'dansk'},
     'rodkal': {'klassisk', 'dansk'},
-    # ---- Vegan substitutes ≠ animal-product recipes ----
-    # PNB blocks when 'vego'/'vegansk' IS in product name but NOT in ingredient text.
-    # Vegan recipes (ingredient says "vegofärs") have 'vego' in text → NOT blocked.
-    'köttfärs': {'vego', 'vegansk', 'soja', 'växtbaserad', 'fiskfärs'},  # fish mince ≠ meat mince
-    'kottfars': {'vego', 'vegansk', 'soja', 'växtbaserad', 'fiskfärs', 'fiskfars'},
-    'hushållsfärs': {'vego', 'vegansk', 'soja', 'växtbaserad'},
-    'hushallsfars': {'vego', 'vegansk', 'soja', 'växtbaserad'},
-    'färs': {'vego', 'vegansk', 'soja', 'växtbaserad', 'fiskfärs'},  # fish mince ≠ meat mince
-    'fars': {'vego', 'vegansk', 'soja', 'växtbaserad', 'fiskfärs', 'fiskfars'},
+    # Generic färs/köttfärs accepts ordinary mince, poultry mince and
+    # plant-based mince, but specialty mince families stay exact.
+    'köttfärs': set(_SPECIALTY_MINCE_PRODUCT_CUES),
+    'kottfars': set(_SPECIALTY_MINCE_PRODUCT_CUES),
+    'hushållsfärs': set(_SPECIALTY_MINCE_PRODUCT_CUES),
+    'hushallsfars': set(_SPECIALTY_MINCE_PRODUCT_CUES),
+    'färs': set(_SPECIALTY_MINCE_PRODUCT_CUES),
+    'fars': set(_SPECIALTY_MINCE_PRODUCT_CUES),
     'chorizo': {
         'salami',    # sliced salami-style chorizo ≠ cooking chorizo
         'fuet',      # fuet = dry-cured Spanish sausage, not cooking chorizo
@@ -3146,11 +3226,21 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'woksås', 'woksas', 'wok ',
         'dafgårds', 'dafgards', 'mama chin', 'bbq',
         'fryst', 'glazed',
+        'kycklingspett',  # "Kycklingspett Teriyaki Spicefield" — chicken skewer (raw meat) in marinade, not pure sauce
     },
     # Anklevermousse flavored ≠ plain
     'anklevermousse': {'cognac', 'grönpeppar', 'gronpeppar'},
-    # Kebab pizza/sauce ≠ kebab meat
-    'kebab': {'pizza', 'vitlöksås', 'vitloksas', 'feferoni', 'pirog'},
+    # Kebab meat ≠ kebab sauce/spice/bread or ready pizza products.
+    'kebab': {
+        'kebabsås', 'kebabsas', 'sås', 'sas',
+        'kebabkrydda', 'krydda',
+        'bröd', 'brod', 'somunbröd', 'somunbrod',
+        'pizza', 'panpizza', 'grandiosa',
+        'vitlöksås', 'vitloksas',
+        'feferoni', 'pirog',
+    },
+    # Feferoni/kebabfeferoni peppers ≠ ready sandwiches or prepared carriers.
+    'feferoni': {'baguette', 'macka', 'smörgås', 'smorgas', 'sandwich', 'panini', 'wrap', 'pizza'},
     # Korv kryddmix ≠ actual korv
     'korv': {'kryddmix', 'stroganoff kryddmix', 'stroganoff'},
     # Sprödpanerade räkor ≠ råa räkor; räkost (cheese spread) ≠ actual shrimp
@@ -3181,8 +3271,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # NOTE: 'mandel' caramel entry merged into existing mandel PNB above
     # --- Batch 4-5 review fixes ---
     # Ready-made products matching raw ingredient keywords
-    'västerbottensost': {'bites'},  # "Västerbottenost crispy bites" = snack ≠ cheese
-    'vasterbottensost': {'bites'},
+    'västerbotten': {'philadelphia', 'färskost', 'farskost', 'cream cheese'},
+    'vasterbotten': {'philadelphia', 'färskost', 'farskost', 'cream cheese'},
+    'västerbottensost': {'bites', 'philadelphia', 'färskost', 'farskost', 'cream cheese'},
+    'vasterbottensost': {'bites', 'philadelphia', 'färskost', 'farskost', 'cream cheese'},
     'vindruvor': {'smoothie'},  # "Fruktsmoothie Green Dream Äpple Vindruvor" ≠ fresh grapes
     'piadina': {'ristorante'},  # "Ristorante Piadina 4 formaggi" = frozen pizza ≠ plain flatbread
     'pizzadeg': {'sauce'},  # "Pizza sauce Tomat & Örter" ≠ pizza dough
@@ -3235,3 +3327,43 @@ PRODUCT_NAME_BLOCKERS: Dict[str, Set[str]] = {
     fix_swedish_chars(k).lower(): {fix_swedish_chars(w).lower() for w in v}
     for k, v in _PRODUCT_NAME_BLOCKERS_RAW.items()
 }
+
+_PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
+    # Batch review policy fixes: keep broad staples useful while blocking
+    # obvious carrier/processed false positives.
+    'havregryn': {'knäcke', 'knacke', 'knäckebröd', 'knackebrod', 'wasa', 'kex'},
+    'bröd': {'sirap'},
+    'brod': {'sirap'},
+    'rostbiff': {'deliskivor', 'deli skivor', 'skivad', 'skivor', 'pålägg', 'palagg'},
+    'lingon': {'sylt', '35%', 'lingon 35%'},
+    'björnbär': {'marmelad', 'sylt'},
+    'bjornbar': {'marmelad', 'sylt'},
+    'mjölk': {'bouchee', 'godis', 'godispåse', 'godispase'},
+    'mjolk': {'bouchee', 'godis', 'godispåse', 'godispase'},
+    'mellanmjölk': {'bouchee', 'godis', 'godispåse', 'godispase'},
+    'standardmjölk': {'bouchee', 'godis', 'godispåse', 'godispase'},
+    'kyckling': {'tunna skivor'},
+    'kycklingfilé': {'tunna skivor'},
+    'kycklingfile': {'tunna skivor'},
+    'havredryck': {'maple', 'walnut', 'choklad', 'caramel', 'karamell', 'hazelnut', 'nötvan', 'notvan'},
+    'havrebas': {'fraiche'},
+    'havregrädde': {'fraiche'},
+    'havregradde': {'fraiche'},
+    'grädde': {'fraiche'},
+    'gradde': {'fraiche'},
+    'hamburgerbröd': {'korvbröd', 'korvbrod', 'fries', 'soup', 'soppa', 'hamburgare', 'burgare'},
+    'vegobacon': {'baconost', 'mjukost'},
+    'sodavatten': {'citron', 'lime', 'citrus', 'apelsin', 'jordgubb', 'hallon', 'mango', 'päron', 'paron', 'äpple', 'apple'},
+    'snabbkaffe': {'3in 1', 'cappuccino', 'cappucino', 'choklad', 'karamell', 'vanilla', 'vanilj', 'latte'},
+    'apelsinskal': {'kanderat', 'kanderade', 'syltat', 'syltade'},
+    'vaniljkvarg': {'blåbär', 'blabar', 'fläder', 'flader', 'hallon', 'jordgubb'},
+    # Corn flour is an ingredient; breadcrumb products made with corn flour are
+    # still breadcrumbs, not majsmjöl for baking.
+    'majsmjöl': {'ströbröd', 'strobrod', 'pankoströbröd', 'pankostrobrod'},
+    'majsmjol': {'ströbröd', 'strobrod', 'pankoströbröd', 'pankostrobrod'},
+}
+
+for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():
+    PRODUCT_NAME_BLOCKERS.setdefault(fix_swedish_chars(_keyword).lower(), set()).update(
+        {fix_swedish_chars(w).lower() for w in _blockers}
+    )

@@ -20,6 +20,7 @@ try:
         MEAT_CATEGORIES,
         MEAT_EXTENDED_CATEGORIES,
         MEAT_NAME_KEYWORDS,
+        guess_category,
         is_lactose_free,
     )
     from languages.sv.food_filters import (
@@ -42,7 +43,6 @@ try:
         FOND_TYPE_CONTEXT,
         FOND_WORD,
         FRESH_HERB_KEYWORDS,
-        FRESH_PRODUCT_INDICATORS,
         FRESH_WORDS,
         FROZEN_PRODUCT_INDICATORS,
         HELKALKON_WORD,
@@ -76,13 +76,14 @@ try:
         build_offer_identity_key,
         resolve_recipe_match_runtime_data,
         extract_keywords_from_product,
+        product_indicates_fresh_herb_form,
     )
     from languages.sv.ingredient_matching.extraction import extract_keywords_from_ingredient
     from languages.sv.ingredient_matching.extraction import is_non_food_product
-    from languages.sv.ingredient_matching.matching import precompute_offer_data
+    from languages.sv.ingredient_matching.extraction import _is_plain_sparkling_water_product_text
+    from languages.sv.ingredient_matching.matching import matches_ingredient_fast, precompute_offer_data
     from languages.sv.ingredient_matching.engine import (
         build_precomputed_offer_match_data,
-        match_offer_to_ingredient,
     )
     from languages.sv.ingredient_matching.keywords import (
         PROCESSED_FOODS,
@@ -119,7 +120,13 @@ try:
         CLASSIFICATION_MEAT_KEYWORDS,
         SODA_WORD,
     )
-    from languages.sv.ingredient_matching.validators import ingredient_has_spice_indicator
+    from languages.sv.ingredient_matching.validators import (
+        frozen_fresh_herb_form_overrides_spice_indicator,
+        ingredient_has_spice_indicator,
+        _ingredient_requests_fresh_chili_text,
+    )
+    from languages.sv.ingredient_matching.validators import check_explicit_liquid_honey_match
+    from languages.sv.ingredient_matching.validators import check_plain_fresh_potato_match
     from languages.sv.ingredient_matching.validators import check_specialty_qualifiers
     from languages.sv.normalization import fix_swedish_chars
 except ModuleNotFoundError:
@@ -133,6 +140,7 @@ except ModuleNotFoundError:
         MEAT_CATEGORIES,
         MEAT_EXTENDED_CATEGORIES,
         MEAT_NAME_KEYWORDS,
+        guess_category,
         is_lactose_free,
     )
     from app.languages.sv.food_filters import (
@@ -155,7 +163,6 @@ except ModuleNotFoundError:
         FOND_TYPE_CONTEXT,
         FOND_WORD,
         FRESH_HERB_KEYWORDS,
-        FRESH_PRODUCT_INDICATORS,
         FRESH_WORDS,
         FROZEN_PRODUCT_INDICATORS,
         HELKALKON_WORD,
@@ -189,13 +196,14 @@ except ModuleNotFoundError:
         build_offer_identity_key,
         resolve_recipe_match_runtime_data,
         extract_keywords_from_product,
+        product_indicates_fresh_herb_form,
     )
     from app.languages.sv.ingredient_matching.extraction import extract_keywords_from_ingredient
     from app.languages.sv.ingredient_matching.extraction import is_non_food_product
-    from app.languages.sv.ingredient_matching.matching import precompute_offer_data
+    from app.languages.sv.ingredient_matching.extraction import _is_plain_sparkling_water_product_text
+    from app.languages.sv.ingredient_matching.matching import matches_ingredient_fast, precompute_offer_data
     from app.languages.sv.ingredient_matching.engine import (
         build_precomputed_offer_match_data,
-        match_offer_to_ingredient,
     )
     from app.languages.sv.ingredient_matching.keywords import (
         PROCESSED_FOODS,
@@ -232,7 +240,13 @@ except ModuleNotFoundError:
         CLASSIFICATION_MEAT_KEYWORDS,
         SODA_WORD,
     )
-    from app.languages.sv.ingredient_matching.validators import ingredient_has_spice_indicator
+    from app.languages.sv.ingredient_matching.validators import (
+        frozen_fresh_herb_form_overrides_spice_indicator,
+        ingredient_has_spice_indicator,
+        _ingredient_requests_fresh_chili_text,
+    )
+    from app.languages.sv.ingredient_matching.validators import check_explicit_liquid_honey_match
+    from app.languages.sv.ingredient_matching.validators import check_plain_fresh_potato_match
     from app.languages.sv.ingredient_matching.validators import check_specialty_qualifiers
     from app.languages.sv.normalization import fix_swedish_chars
 
@@ -245,12 +259,195 @@ from sqlalchemy.orm import joinedload
 import re
 
 
+def _build_offer_filter_word_pattern(
+    keywords: Iterable[str],
+    *,
+    normalize: bool,
+) -> re.Pattern | None:
+    normalized = sorted(
+        {
+            fix_swedish_chars(keyword).lower() if normalize else keyword
+            for keyword in keywords
+            if keyword
+        },
+        key=len,
+        reverse=True,
+    )
+    if not normalized:
+        return None
+    return re.compile(r'\b(?:' + '|'.join(re.escape(keyword) for keyword in normalized) + r')\b')
+
+
+_OFFER_FILTER_PROCESSED_FOODS_PATTERN = _build_offer_filter_word_pattern(
+    PROCESSED_FOODS,
+    normalize=True,
+)
+_PROCESSED_FOODS_EXEMPTION_PATTERN = _build_offer_filter_word_pattern(
+    PROCESSED_FOODS_EXEMPTIONS,
+    normalize=False,
+)
+
+
+def _has_processed_food_match(name_normalized: str) -> bool:
+    return bool(
+        _OFFER_FILTER_PROCESSED_FOODS_PATTERN
+        and _OFFER_FILTER_PROCESSED_FOODS_PATTERN.search(name_normalized)
+    )
+
+
+def _has_processed_food_exemption(name_normalized: str) -> bool:
+    return bool(
+        _PROCESSED_FOODS_EXEMPTION_PATTERN
+        and _PROCESSED_FOODS_EXEMPTION_PATTERN.search(name_normalized)
+    )
+
+
+_RECIPE_CANDY_INGREDIENT_KEYWORDS = frozenset({
+    'polly',
+    'dumle',
+    'daim',
+    'nonstop',
+    'smarties',
+    'noblesse',
+    'aftereight',
+    'kexchoklad',
+    'strössel',
+    'sprinkles',
+    'kolasås',
+    'chokladsås',
+    'nougatsås',
+    'maräng',
+    'marängdroppar',
+})
+
+
+def _is_recipe_named_candy_offer(name: str, category: str | None) -> bool:
+    """Allow candy offers only when they expose a recipe-ingredient identity."""
+    if (category or '').lower() != 'candy':
+        return False
+    keywords = set(extract_keywords_from_product(name, category or ''))
+    return bool(keywords & _RECIPE_CANDY_INGREDIENT_KEYWORDS)
+
+
+_EXPLICIT_VEGAN_RECIPE_CUES = frozenset({
+    'vegan', 'vegansk', 'veganskt', 'veganska',
+})
+_EXPLICIT_VEGAN_PRODUCT_CUES = frozenset({
+    'vegan', 'vegansk', 'veganskt', 'veganska',
+    'växtbaserad', 'växtbaserat', 'växtbaserade',
+    'vaxtbaserad', 'vaxtbaserat', 'vaxtbaserade',
+    'plant based', 'plant-based', 'plantbased',
+    'vego', 'vegetarisk', 'vegetariskt', 'vegetariska',
+    'anamma', 'jävligtgott', 'javligtgott', 'formbar',
+    'beyond', 'peas of heaven', 'oumph',
+})
+_EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES = frozenset({
+    'burgare', 'hamburgare',
+    'färs', 'fars',
+    'vego', 'vegoburgare', 'vegofärs', 'vegofars',
+    'formbar',
+})
+_VEGAN_RECIPE_PASTA_CUES = frozenset({
+    'pasta', 'långpasta', 'langpasta',
+    'tagliatelle', 'spaghetti', 'spagetti', 'linguine',
+    'fettuccine', 'fettuccini', 'pappardelle',
+})
+_EGG_PASTA_PRODUCT_CUES = frozenset({'äggpasta', 'aggpasta', 'ägg', 'agg', 'egg'})
+
+
+def _has_explicit_vegan_recipe_context(full_recipe_text: str) -> bool:
+    return any(cue in full_recipe_text for cue in _EXPLICIT_VEGAN_RECIPE_CUES)
+
+
+def _explicit_vegan_context_allows_product(
+    product_lower: str,
+    full_recipe_text: str,
+    ingredient_lower: str,
+) -> bool:
+    """Recipe-level vegan wording should not admit animal or vegetarian-only substitutes."""
+    if not _has_explicit_vegan_recipe_context(full_recipe_text):
+        return True
+
+    if (
+        any(cue in ingredient_lower for cue in _VEGAN_RECIPE_PASTA_CUES)
+        and any(cue in product_lower for cue in _EGG_PASTA_PRODUCT_CUES)
+    ):
+        return False
+
+    if not any(cue in ingredient_lower for cue in _EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES):
+        return True
+    return any(cue in product_lower for cue in _EXPLICIT_VEGAN_PRODUCT_CUES)
+
+
+def _vegan_context_allows_plant_based_product_blockers(
+    full_recipe_text: str,
+    ingredient_lower: str,
+    product_blockers: list[str],
+) -> bool:
+    if not _has_explicit_vegan_recipe_context(full_recipe_text):
+        return False
+    if not product_blockers:
+        return False
+    if not any(cue in ingredient_lower for cue in _EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES):
+        return False
+    return all(blocker in _EXPLICIT_VEGAN_PRODUCT_CUES for blocker in product_blockers)
+
+
+def _green_chili_mild_context_allows_product_blockers(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: str | None,
+    product_blockers: list[str],
+) -> bool:
+    if matched_keyword not in {'chili', 'chilipeppar', 'chilifrukt', 'chilifrukter'}:
+        return False
+    if set(product_blockers) != {'mild'}:
+        return False
+    ingredient_wants_green_chili = any(
+        cue in ingredient_lower
+        for cue in ('grön chili', 'gron chili', 'green chili', 'green chilli')
+    )
+    product_is_green_chili_mild = (
+        'mild' in product_lower
+        and any(
+            cue in product_lower
+            for cue in ('grön chili', 'gron chili', 'green chili', 'green chilli')
+        )
+    )
+    product_is_blocked_santa_maria_jar = (
+        '113g' in product_lower and 'santa maria' in product_lower
+    )
+    return (
+        ingredient_wants_green_chili
+        and product_is_green_chili_mild
+        and not product_is_blocked_santa_maria_jar
+    )
+
+
+def _sashimi_salmon_context_allows_product(
+    product_lower: str,
+    full_recipe_text: str,
+    ingredient_lower: str,
+    matched_keyword: str | None,
+) -> bool:
+    if 'sashimi' not in full_recipe_text:
+        return True
+    if matched_keyword not in {'lax', 'laxfilé', 'laxfile', 'fiskfilé', 'fiskfile'}:
+        return True
+    if 'lax' not in ingredient_lower and matched_keyword not in {'lax', 'laxfilé', 'laxfile'}:
+        return True
+    return any(cue in product_lower for cue in ('sushilax', 'sashimi', 'loin'))
+
+
 SPECIALTY_KEYWORD_ALIASES = {
     'chilipeppar': 'chili',
     'chilifrukt': 'chili',
     'chilifrukter': 'chili',
     'paprikapulver': 'paprika',
     'paprikakrydda': 'paprika',
+    'laxfilé': 'lax',
+    'laxfile': 'lax',
+    'kalamataoliver': 'oliver',
 }
 
 RECIPE_FTS_CONFIG = "swedish"
@@ -260,6 +457,97 @@ _RE_GRAM_MEASURE = re.compile(r'\d+\s*g\b')
 _RE_CHILI_COUNT_FRESH = re.compile(
     r'\b\d+\s*(?:st\s+)?(?:chili|chilipeppar|chilifrukt|chilifrukter)\b'
 )
+_FLAVOR_CARRIER_GROUPS = (
+    (
+        frozenset({
+            'pastasås', 'pastasas', 'sås', 'sas', 'sauce', 'sau',
+            'soya', 'soy',
+            'glaze', 'glazer', 'marinad', 'dressing',
+        }),
+        frozenset({
+            'pastasås', 'pastasas', 'sås', 'sas', 'sauce',
+            'soja', 'sojasås', 'sojasas', 'sriracha', 'chilisås', 'chilisas',
+            'glaze', 'glazer', 'marinad', 'dressing',
+        }),
+    ),
+    (
+        frozenset({'bröd', 'brod', 'levain', 'baguett', 'baguette', 'focaccia', 'tortilla', 'wrap'}),
+        frozenset({'bröd', 'brod', 'levain', 'baguett', 'baguette', 'focaccia', 'tortilla', 'wrap'}),
+    ),
+    (
+        frozenset({
+            'kyckling', 'kycklingfilé', 'kycklingfile',
+            'kycklingbröst', 'kycklingbrost',
+        }),
+        frozenset({
+            'kyckling', 'kycklingfilé', 'kycklingfile',
+            'kycklingbröst', 'kycklingbrost',
+        }),
+    ),
+)
+_READY_CARRIER_PRODUCT_CUES = frozenset({'pizza', 'schnitzel', 'ostschnitzel'})
+_READY_CARRIER_INGREDIENT_CUES = frozenset({
+    'pizza', 'pizzadeg', 'pizzabottn', 'pizzabottnar',
+    'schnitzel', 'ostschnitzel',
+})
+_COOKED_TURKEY_INGREDIENT_CUES = frozenset({
+    'färdiglagat', 'fardiglagat', 'färdiglagad', 'fardiglagad',
+    'tillagat', 'tillagad', 'kokt', 'kokta',
+})
+_COOKED_TURKEY_PRODUCT_CUES = frozenset({
+    'kokt', 'kokta', 'strimlad', 'strimlat', 'skivad', 'skivat',
+    'färdiglagad', 'fardiglagad', 'tillagad',
+})
+_COOKED_TURKEY_PRODUCT_BLOCKERS = frozenset({
+    'bröstfilé', 'brostfile', 'bröstfile', 'lårfilé', 'larfile', 'lårfile',
+    'grillkorv', 'korv', 'salami', 'mortadella',
+})
+_CHILI_SPICE_PRODUCT_CUES = frozenset({
+    'malen', 'malna', 'mald', 'malet',
+    'pulver', 'flakes', 'flingor', 'flinga', 'chilipulver', 'chiliflakes', 'chiliflingor',
+})
+_CHILI_SPICE_INGREDIENT_UNITS = frozenset({'tsk', 'krm', 'tesked', 'teskedar'})
+_FRESH_COLOR_CHILI_INGREDIENT_CUES = frozenset({
+    'röd chilipeppar', 'rod chilipeppar',
+    'grön chilipeppar', 'gron chilipeppar',
+    'gul chilipeppar',
+})
+_MEAT_FLAVOR_CARRIER_CATEGORIES = frozenset({'meat'})
+_MEAT_FLAVOR_CARRIER_INGREDIENT_CUES = frozenset({
+    'kött', 'kott', 'nöt', 'not', 'nötkött', 'notkott',
+    'fläsk', 'flask', 'karré', 'karre', 'biff',
+    'kyckling', 'kycklingfilé', 'kycklingfile',
+    'grillspett', 'korv', 'chorizo', 'salsiccia',
+    'falukorv', 'bacon', 'skinka',
+    'prosciutto', 'parmaskinka', 'serrano', 'serranoskinka',
+    'pancetta', 'lufttorkad', 'lufttorkade', 'lufttorkat', 'jamon',
+})
+_NON_FROZEN_PROCESSED_PRODUCT_INDICATORS = (
+    _PROCESSED_PRODUCT_INDICATORS - FROZEN_PRODUCT_INDICATORS
+)
+_PLAIN_DARK_CHOCOLATE_PRODUCT_CUES = frozenset({
+    'mörk choklad', 'mork choklad',
+    'dark chocolate', 'dark excellence',
+    'cocoa dark', 'cacao mörk', 'cacao mork',
+})
+_PLAIN_DARK_CHOCOLATE_IDENTITY_CUES = frozenset({
+    'choklad', 'chocolate', 'cocoa', 'cacao', 'bakchoklad',
+})
+_DARK_CHOCOLATE_FLAVOR_BLOCKERS = frozenset({
+    'apelsin', 'chili', 'fikon', 'havssalt', 'seasalt',
+    'karamell', 'caramel', 'caramelized', 'hazelnut', 'hassel',
+    'mint', 'hallon', 'mango', 'passion', 'pistage',
+    'almond', 'lakrits', 'saltlakrits', 'bönor', 'bonor',
+})
+
+
+def _is_plain_dark_chocolate_product(product_lower: str) -> bool:
+    return (
+        '%' in product_lower
+        and any(cue in product_lower for cue in _PLAIN_DARK_CHOCOLATE_PRODUCT_CUES)
+        and any(cue in product_lower for cue in _PLAIN_DARK_CHOCOLATE_IDENTITY_CUES)
+        and not any(cue in product_lower for cue in _DARK_CHOCOLATE_FLAVOR_BLOCKERS)
+    )
 
 
 def _flavor_keyword_blocked_by_carrier_text(ingredient_text: str, matched_keyword: str) -> bool:
@@ -292,6 +580,8 @@ def _flavor_keyword_blocked_by_carrier_text(ingredient_text: str, matched_keywor
             break
     if not carrier_blocked:
         ingredient_words = set(ingredient_text.split())
+        if matched_keyword in {'pesto', 'tapenade'} and {'pesto', 'tapenade'} <= ingredient_words:
+            return False
         if (ingredient_words & _CARRIER_SINGLE_WORDS) - {matched_keyword}:
             carrier_blocked = True
     return carrier_blocked
@@ -308,6 +598,7 @@ def match_recipe_to_offers(
     compiled_recipe_data: Optional[Dict] = None,
     ingredient_candidate_indices_by_offer: Optional[Dict[str, set[int]]] = None,
     ingredient_routing_mode: str = "off",
+    offer_match_context_cache: Optional[Dict[int, dict]] = None,
 ) -> Dict:
     """Swedish recipe-offer matching orchestration."""
     prepared_recipe = resolve_recipe_match_runtime_data(
@@ -337,7 +628,7 @@ def match_recipe_to_offers(
             fullscan_fallback_reason_counts.get(reason, 0) + 1
         )
 
-    def _validate_selection(initial_match: dict, shadow_events: Optional[list[dict]] = None):
+    def _validate_selection(initial_match: dict, validation_events: Optional[list[dict]] = None):
         return validate_offer_match_candidate(
             offer,
             offer_id,
@@ -355,7 +646,8 @@ def match_recipe_to_offers(
             ingredient_source_indices,
             merged_ingredients,
             full_recipe_text,
-            shadow_events,
+            validation_events,
+            offer_identity_key=initial_match['offer_identity_key'],
         )
 
     for offer in offers:
@@ -364,11 +656,19 @@ def match_recipe_to_offers(
             ingredient_routing_mode == "hint_first"
             and ingredient_candidate_indices_by_offer is not None
         )
-        offer_identity_key = build_offer_identity_key(offer)
-        hinted_indices = (
-            ingredient_candidate_indices_by_offer.get(offer_identity_key)
-            if use_hint_first
+        hinted_indices = None
+        if use_hint_first:
+            hinted_indices = ingredient_candidate_indices_by_offer.get(
+                build_offer_identity_key(offer)
+            )
+        normalized_hinted_indices = (
+            set(_normalized_candidate_indices(hinted_indices, len(ingredient_match_data_per_ing)))
+            if use_hint_first and hinted_indices is not None
             else None
+        )
+        hint_scope_covers_fullscan = (
+            normalized_hinted_indices is not None
+            and len(normalized_hinted_indices) == len(ingredient_match_data_per_ing)
         )
 
         if use_hint_first:
@@ -378,14 +678,15 @@ def match_recipe_to_offers(
                 offer_keywords,
                 offer_data_cache,
                 ingredient_match_data_per_ing,
-                hinted_indices or set(),
+                normalized_hinted_indices or set(),
+                offer_match_context_cache,
             )
             ingredient_check_count += initial_match['ingredient_check_count']
             hinted_check_count += initial_match['ingredient_check_count']
             fallback_reason = None
             offer_data = None
 
-            if not hinted_indices:
+            if not normalized_hinted_indices:
                 fallback_reason = "no_hint_for_routed_pair"
             elif not initial_match['matched_keyword'] or initial_match['matched_ing_idx'] is None:
                 hinted_no_match_count += 1
@@ -394,13 +695,16 @@ def match_recipe_to_offers(
                 hinted_offer_data = _validate_selection(initial_match, validation_events)
                 retry_outside_hint = any(
                     event.get('type') == 'validation_retry'
-                    and event.get('to_idx') not in hinted_indices
+                    and event.get('to_idx') not in normalized_hinted_indices
                     for event in validation_events
                 )
                 if retry_outside_hint:
                     fallback_reason = "validation_retry_moved_match_outside_hint"
                 elif hinted_offer_data:
                     offer_data = hinted_offer_data
+                elif hint_scope_covers_fullscan:
+                    # Fullscan would inspect the same ingredient set, so the reject is terminal.
+                    offer_data = None
                 else:
                     fallback_reason = "hinted_validation_rejected"
 
@@ -412,6 +716,7 @@ def match_recipe_to_offers(
                     offer_keywords,
                     offer_data_cache,
                     ingredient_match_data_per_ing,
+                    offer_match_context_cache=offer_match_context_cache,
                 )
                 ingredient_check_count += initial_match['ingredient_check_count']
                 offer_data = _validate_selection(initial_match)
@@ -422,6 +727,7 @@ def match_recipe_to_offers(
                 offer_keywords,
                 offer_data_cache,
                 ingredient_match_data_per_ing,
+                offer_match_context_cache=offer_match_context_cache,
             )
             ingredient_check_count += initial_match['ingredient_check_count']
             offer_data = _validate_selection(initial_match)
@@ -492,8 +798,21 @@ def match_recipe_to_offers(
     return result
 
 
+def _is_oreo_cookie_offer(name_lower: str, category: str) -> bool:
+    if category != 'bread' or not re.search(r'\boreo\b', name_lower):
+        return False
+    return not any(cue in name_lower for cue in (
+        'chokladkaka',
+        'marabou',
+        'sandwich',
+        'glass',
+        'ice cream',
+    ))
+
+
 def get_filtered_offers(preferences: Dict) -> List[Offer]:
     """Return Swedish sale offers filtered by user preferences."""
+
     with get_db_session() as db:
         food_categories = [
             'meat', 'fish', 'poultry', 'dairy', 'vegetables', 'fruit',
@@ -519,6 +838,22 @@ def get_filtered_offers(preferences: Dict) -> List[Offer]:
                 or is_cooking_nuts(name_lower)
                 or 'marshmallow' in name_lower
                 or is_cooking_chocolate(name_lower)
+                or _is_recipe_named_candy_offer(offer.name, offer.category)
+            ):
+                all_offers.append(offer)
+
+        beverage_food = db.query(Offer).options(joinedload(Offer.store)).filter(
+            Offer.category == 'beverages',
+        ).all()
+        beverage_food_categories = {
+            'meat', 'fish', 'poultry', 'dairy', 'vegetables', 'fruit',
+            'bread', 'deli', 'frozen', 'spices', 'pantry', 'pizza',
+        }
+        for offer in beverage_food:
+            offer_lower = fix_swedish_chars(offer.name).lower()
+            if (
+                guess_category(offer.name, offer.category) in beverage_food_categories
+                or _is_plain_sparkling_water_product_text(offer_lower, offer.category)
             ):
                 all_offers.append(offer)
 
@@ -570,17 +905,14 @@ def get_filtered_offers(preferences: Dict) -> List[Offer]:
             continue
 
         name_normalized = fix_swedish_chars(offer.name).lower()
-        skip_processed = False
-        for processed_keyword in PROCESSED_FOODS:
-            keyword_normalized = fix_swedish_chars(processed_keyword).lower()
-            if re.search(r'\b' + re.escape(keyword_normalized) + r'\b', name_normalized):
-                skip_processed = not any(
-                    re.search(r'\b' + re.escape(exemption) + r'\b', name_normalized)
-                    for exemption in PROCESSED_FOODS_EXEMPTIONS
-                )
-                break
+        skip_processed = (
+            _has_processed_food_match(name_normalized)
+            and not _has_processed_food_exemption(name_normalized)
+            and not _is_oreo_cookie_offer(name_normalized, offer.category)
+        )
         if skip_processed:
-            continue
+            if not _is_recipe_named_candy_offer(offer.name, offer.category):
+                continue
 
         if CHIPS_WORD in name_lower and not is_cooking_chips(name_lower):
             continue
@@ -869,6 +1201,11 @@ def build_initial_ingredient_groups(
         if not any(keyword in ingredient_lower for keyword in matched_keywords_set):
             continue
 
+        extracted_keywords = (
+            ingredient_match_data_per_ing[ing_idx].extracted_keywords
+            if ing_idx < len(ingredient_match_data_per_ing)
+            else frozenset()
+        )
         alternatives = parse_eller_alternatives(ingredient_text)
         alternatives_normalized = [
             _apply_space_normalizations(fix_swedish_chars(alternative).lower())
@@ -876,8 +1213,15 @@ def build_initial_ingredient_groups(
         ]
 
         family_keywords = set()
-        for alternative in alternatives:
-            for keyword in extract_keywords_from_ingredient(str(alternative)):
+        if len(alternatives) <= 1:
+            keyword_iterables = (extracted_keywords,)
+        else:
+            keyword_iterables = (
+                extract_keywords_from_ingredient(str(alternative))
+                for alternative in alternatives
+            )
+        for keywords in keyword_iterables:
+            for keyword in keywords:
                 canonical_keyword = INGREDIENT_PARENTS.get(keyword, keyword)
                 if canonical_keyword in matched_keywords_set:
                     family_keywords.add(canonical_keyword)
@@ -890,11 +1234,7 @@ def build_initial_ingredient_groups(
             'matched_keywords': {},
             'best_savings': 0.0,
             '_family_keywords': family_keywords,
-            '_extracted_keywords': (
-                ingredient_match_data_per_ing[ing_idx].extracted_keywords
-                if ing_idx < len(ingredient_match_data_per_ing)
-                else frozenset()
-            ),
+            '_extracted_keywords': extracted_keywords,
             '_ing_idx': ing_idx,
         }
         ingredient_groups.append(group)
@@ -947,7 +1287,7 @@ def build_offer_match_context(
     offer_keywords: Optional[Dict],
     offer_data_cache: Optional[Dict],
 ) -> dict:
-    """Prepare Swedish offer precompute data shared by fullscan and shadow paths."""
+    """Prepare Swedish offer precompute data shared by fullscan and hint-first paths."""
     offer_precomputed = (
         offer_data_cache[offer_id]
         if offer_data_cache and offer_id in offer_data_cache
@@ -986,6 +1326,7 @@ def build_offer_match_context(
         'effective_offer_data': effective_offer_data,
         'offer_match_keywords': offer_match_keywords,
         'offer_name_normalized': offer_name_normalized,
+        'offer_identity_key': build_offer_identity_key(offer),
     }
 
 
@@ -1002,6 +1343,19 @@ def _normalized_candidate_indices(
     })
 
 
+def _match_offer_to_ingredient_keyword(ingredient_data, offer_match_data) -> Optional[str]:
+    """Hot-path variant of the canonical engine that avoids MatchResult allocation."""
+    if not offer_match_data.precomputed:
+        return None
+    return matches_ingredient_fast(
+        offer_match_data.precomputed,
+        ingredient_data.normalized_text,
+        _prenormalized=True,
+        _prepared_fast_text=ingredient_data.prepared_fast_text,
+        _ingredient_words=ingredient_data.words,
+    )
+
+
 def collect_offer_match_candidates(
     ingredient_match_data_per_ing,
     offer_match_data,
@@ -1014,9 +1368,9 @@ def collect_offer_match_candidates(
         len(ingredient_match_data_per_ing),
     ):
         ing_data = ingredient_match_data_per_ing[ing_idx]
-        result = match_offer_to_ingredient(ing_data, offer_match_data)
-        if result.matched:
-            matched_candidates.append((ing_idx, result.matched_keyword))
+        matched_keyword = _match_offer_to_ingredient_keyword(ing_data, offer_match_data)
+        if matched_keyword:
+            matched_candidates.append((ing_idx, matched_keyword))
     return matched_candidates
 
 
@@ -1064,14 +1418,21 @@ def prepare_offer_match_candidate(
     offer_data_cache: Optional[Dict],
     ingredient_match_data_per_ing,
     candidate_indices: Optional[Iterable[int]] = None,
+    offer_match_context_cache: Optional[Dict[int, dict]] = None,
 ) -> dict:
     """Prepare Swedish offer precompute data and choose the initial ingredient match."""
-    context = build_offer_match_context(
-        offer,
-        offer_id,
-        offer_keywords,
-        offer_data_cache,
-    )
+    context = None
+    if offer_match_context_cache is not None:
+        context = offer_match_context_cache.get(offer_id)
+    if context is None:
+        context = build_offer_match_context(
+            offer,
+            offer_id,
+            offer_keywords,
+            offer_data_cache,
+        )
+        if offer_match_context_cache is not None:
+            offer_match_context_cache[offer_id] = context
     normalized_indices = (
         None if candidate_indices is None
         else _normalized_candidate_indices(candidate_indices, len(ingredient_match_data_per_ing))
@@ -1095,13 +1456,97 @@ def prepare_offer_match_candidate(
     }
 
 
-def _record_shadow_event(
-    shadow_events: Optional[list[dict]],
+def _record_validation_event(
+    validation_events: Optional[list[dict]],
     event_type: str,
     **details,
 ) -> None:
-    if shadow_events is not None:
-        shadow_events.append({'type': event_type, **details})
+    if validation_events is not None:
+        validation_events.append({'type': event_type, **details})
+
+
+def _flavor_carrier_context_blocked(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: str,
+    offer_category: str | None,
+) -> bool:
+    """Block flavor/filling words from matching as standalone grocery items."""
+    matched_kw_lower = matched_keyword.lower()
+    category_lower = (offer_category or '').lower()
+    if (
+        category_lower == 'pizza'
+        or any(cue in product_lower for cue in _READY_CARRIER_PRODUCT_CUES)
+    ):
+        if (
+            matched_kw_lower not in _READY_CARRIER_INGREDIENT_CUES
+            and not any(cue in ingredient_lower for cue in _READY_CARRIER_INGREDIENT_CUES)
+        ):
+            return True
+
+    if matched_kw_lower not in FLAVOR_WORDS:
+        return False
+
+    for product_cues, ingredient_cues in _FLAVOR_CARRIER_GROUPS:
+        if not any(cue in product_lower for cue in product_cues):
+            continue
+        if any(cue in ingredient_lower for cue in ingredient_cues):
+            continue
+        return True
+
+    if category_lower in _MEAT_FLAVOR_CARRIER_CATEGORIES:
+        if not any(cue in ingredient_lower for cue in _MEAT_FLAVOR_CARRIER_INGREDIENT_CUES):
+            return True
+
+    if category_lower == 'bread':
+        bread_cues = _FLAVOR_CARRIER_GROUPS[1][1]
+        if not any(cue in ingredient_lower for cue in bread_cues):
+            return True
+
+    return False
+
+
+def _ingredient_requests_cooked_turkey(ingredient_lower: str, matched_keyword: str) -> bool:
+    return (
+        matched_keyword in {'kalkon', 'kalkonkött', 'kalkonkott'}
+        and 'kalkon' in ingredient_lower
+        and any(cue in ingredient_lower for cue in _COOKED_TURKEY_INGREDIENT_CUES)
+    )
+
+
+def _cooked_turkey_product_allowed(product_lower: str, ingredient_lower: str, matched_keyword: str) -> bool:
+    if not _ingredient_requests_cooked_turkey(ingredient_lower, matched_keyword):
+        return True
+    if any(cue in product_lower for cue in _COOKED_TURKEY_PRODUCT_BLOCKERS):
+        return False
+    return any(cue in product_lower for cue in _COOKED_TURKEY_PRODUCT_CUES)
+
+
+def _ingredient_requests_chili_spice(ingredient_lower: str, matched_keyword: str) -> bool:
+    if matched_keyword not in {'chili', 'chilipeppar'}:
+        return False
+    if _ingredient_requests_fresh_chili_text(ingredient_lower):
+        return False
+    if (
+        any(cue in ingredient_lower for cue in _FRESH_COLOR_CHILI_INGREDIENT_CUES)
+        and not any(cue in ingredient_lower for cue in (
+            'malen', 'malna', 'mald', 'malet',
+            'pulver', 'flakes', 'flingor', 'flinga',
+            'ancho style', 'anchostyle',
+        ))
+    ):
+        return False
+    if any(unit in ingredient_lower.split() for unit in _CHILI_SPICE_INGREDIENT_UNITS):
+        return True
+    return any(cue in ingredient_lower for cue in (
+        'malen chili', 'chili pulver', 'chilipulver', 'chiliflakes', 'chiliflingor',
+    ))
+
+
+def _chili_spice_product_allowed(product_lower: str, ingredient_lower: str, matched_keyword: str) -> bool:
+    if not _ingredient_requests_chili_spice(ingredient_lower, matched_keyword):
+        return True
+    return any(cue in product_lower for cue in _CHILI_SPICE_PRODUCT_CUES)
 
 
 def validate_offer_match_candidate(
@@ -1121,7 +1566,8 @@ def validate_offer_match_candidate(
     ingredient_source_indices: list[int],
     merged_ingredients: list[str],
     full_recipe_text: str,
-    shadow_events: Optional[list[dict]] = None,
+    validation_events: Optional[list[dict]] = None,
+    offer_identity_key: Optional[str] = None,
 ) -> Optional[dict]:
     """Run Swedish phase-1 validation and return finalized offer_data or None."""
     if not matched_keyword or matched_ing_idx is None:
@@ -1146,9 +1592,14 @@ def validate_offer_match_candidate(
     if should_run_processed_rules:
         ing_norm = ingredients_normalized[matched_ing_idx]
         ing_norm = re.sub(r'\btandori\b', 'tandoori', ing_norm)
-        if not check_processed_product_rules(product_lower, ing_norm):
-            _record_shadow_event(
-                shadow_events,
+        pressed_ginger_juice_allowed = (
+            matched_keyword == 'ingefärsjuice'
+            and 'ingefärsjuice' in ing_norm
+            and any(cue in product_lower for cue in ('pressad', 'juice', 'shot'))
+        )
+        if not pressed_ginger_juice_allowed and not check_processed_product_rules(product_lower, ing_norm):
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='processed_product',
                 ing_idx=matched_ing_idx,
@@ -1191,10 +1642,10 @@ def validate_offer_match_candidate(
             retry_from_keyword = matched_keyword
             for retry_idx in range(matched_ing_idx + 1, len(ingredients_normalized)):
                 retry_ing = ingredients_normalized[retry_idx]
-                retry_result = match_offer_to_ingredient(
+                retry_result = _match_offer_to_ingredient_keyword(
                     ingredient_match_data_per_ing[retry_idx],
                     offer_match_data,
-                ).matched_keyword
+                )
                 if not retry_result:
                     continue
                 retry_kw = retry_result.lower()
@@ -1215,8 +1666,8 @@ def validate_offer_match_candidate(
                     matched_ing_idx = retry_idx
                     valid_ingredient_indices = {retry_idx}
                     sq_retried = True
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_retry',
                         rule='specialty_qualifier',
                         from_idx=retry_from_idx,
@@ -1226,8 +1677,8 @@ def validate_offer_match_candidate(
                     )
                     break
             if not sq_retried:
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='specialty_qualifier',
                     ing_idx=matched_ing_idx,
@@ -1239,10 +1690,46 @@ def validate_offer_match_candidate(
         suppressors = KEYWORD_SUPPRESSED_BY_CONTEXT[matched_keyword]
         ing_norm = ingredients_normalized[matched_ing_idx]
         if any(s in ing_norm for s in suppressors):
-            _record_shadow_event(
-                shadow_events,
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='context_suppression',
+                ing_idx=matched_ing_idx,
+                keyword=matched_keyword,
+            )
+            matched_keyword = None
+
+    if matched_keyword and matched_ing_idx is not None:
+        ing_norm = ingredients_normalized[matched_ing_idx]
+        if not _explicit_vegan_context_allows_product(product_lower, full_recipe_text, ing_norm):
+            _record_validation_event(
+                validation_events,
+                'validation_reject',
+                rule='recipe_context_requirement',
+                detail='explicit_vegan',
+                ing_idx=matched_ing_idx,
+                keyword=matched_keyword,
+            )
+            matched_keyword = None
+
+    if matched_keyword and matched_ing_idx is not None:
+        ing_norm = ingredients_normalized[matched_ing_idx]
+        product_lower = (
+            offer_precomputed['name_normalized']
+            if offer_precomputed is not None
+            else offer_name_normalized
+        )
+        if not _sashimi_salmon_context_allows_product(
+            product_lower,
+            full_recipe_text,
+            ing_norm,
+            matched_keyword,
+        ):
+            _record_validation_event(
+                validation_events,
+                'validation_reject',
+                rule='recipe_context_requirement',
+                detail='sashimi_salmon',
                 ing_idx=matched_ing_idx,
                 keyword=matched_keyword,
             )
@@ -1255,8 +1742,8 @@ def validate_offer_match_candidate(
             ing_norm,
             matched_keyword=matched_keyword.lower(),
         ):
-            _record_shadow_event(
-                shadow_events,
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='secondary_ingredient_pattern',
                 ing_idx=matched_ing_idx,
@@ -1274,8 +1761,8 @@ def validate_offer_match_candidate(
                 if marker_match:
                     marker_end = marker_match.end()
                     if ing_norm.find(matched_kw_lower, marker_end) >= 0:
-                        _record_shadow_event(
-                            shadow_events,
+                        _record_validation_event(
+                            validation_events,
                             'validation_reject',
                             rule='descriptor_suppression',
                             ing_idx=matched_ing_idx,
@@ -1290,8 +1777,8 @@ def validate_offer_match_candidate(
             matched_kw_lower = matched_keyword.lower()
             for req_word in icm:
                 if req_word in ing_norm and matched_kw_lower != req_word:
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='ingredient_context_missing',
                         ing_idx=matched_ing_idx,
@@ -1318,8 +1805,11 @@ def validate_offer_match_candidate(
             if svf_rule['mode'] == 'require':
                 svf_allowed = any(ind in ing_norm for ind in svf_rule['indicators'])
             else:
-                svf_allowed = not ingredient_has_spice_indicator(
-                    set(svf_rule['indicators']), ing_norm, svf_key
+                svf_allowed = (
+                    frozen_fresh_herb_form_overrides_spice_indicator(ing_norm, svf_key)
+                    or not ingredient_has_spice_indicator(
+                        set(svf_rule['indicators']), ing_norm, svf_key
+                    )
                 )
         else:
             svf_allowed = check_spice_vs_fresh_rules(product_lower, ing_norm, svf_key)
@@ -1328,19 +1818,19 @@ def validate_offer_match_candidate(
             svf_retried = False
             retry_from_idx = matched_ing_idx
             retry_from_keyword = matched_keyword
+            retry_offer_match_data = build_precomputed_offer_match_data(
+                offer.name,
+                category=offer.category,
+                brand=getattr(offer, 'brand', ''),
+                weight_grams=getattr(offer, 'weight_grams', None),
+                precomputed=precomputed_svf,
+            )
             for retry_idx in range(matched_ing_idx + 1, len(ingredients_normalized)):
                 retry_ing = ingredients_normalized[retry_idx]
-                retry_offer_match_data = build_precomputed_offer_match_data(
-                    offer.name,
-                    category=offer.category,
-                    brand=getattr(offer, 'brand', ''),
-                    weight_grams=getattr(offer, 'weight_grams', None),
-                    precomputed=precomputed_svf,
-                )
-                retry_result = match_offer_to_ingredient(
+                retry_result = _match_offer_to_ingredient_keyword(
                     ingredient_match_data_per_ing[retry_idx],
                     retry_offer_match_data,
-                ).matched_keyword
+                )
                 if not retry_result:
                     continue
                 retry_svf_key = retry_result if retry_result in SPICE_VS_FRESH_RULES else None
@@ -1355,8 +1845,11 @@ def validate_offer_match_candidate(
                         if retry_rule['mode'] == 'require':
                             retry_allowed = any(ind in retry_ing for ind in retry_rule['indicators'])
                         else:
-                            retry_allowed = not ingredient_has_spice_indicator(
-                                set(retry_rule['indicators']), retry_ing, retry_svf_key
+                            retry_allowed = (
+                                frozen_fresh_herb_form_overrides_spice_indicator(retry_ing, retry_svf_key)
+                                or not ingredient_has_spice_indicator(
+                                    set(retry_rule['indicators']), retry_ing, retry_svf_key
+                                )
                             )
                     else:
                         retry_allowed = check_spice_vs_fresh_rules(product_lower, retry_ing, retry_svf_key)
@@ -1365,8 +1858,8 @@ def validate_offer_match_candidate(
                 matched_keyword = retry_result
                 matched_ing_idx = retry_idx
                 svf_retried = True
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_retry',
                     rule='spice_fresh',
                     from_idx=retry_from_idx,
@@ -1376,8 +1869,8 @@ def validate_offer_match_candidate(
                 )
                 break
             if not svf_retried:
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='spice_fresh',
                     ing_idx=matched_ing_idx,
@@ -1394,17 +1887,13 @@ def validate_offer_match_candidate(
 
         prod_is_dried = any(di in product_lower for di in DRIED_PRODUCT_INDICATORS)
         prod_is_frozen = any(fi in product_lower for fi in FROZEN_PRODUCT_INDICATORS)
-        prod_is_fresh = any(fi in product_lower for fi in FRESH_PRODUCT_INDICATORS)
+        prod_is_fresh = product_indicates_fresh_herb_form(
+            matched_keyword,
+            product_lower,
+            getattr(offer, 'category', ''),
+        )
         if not prod_is_fresh and not prod_is_dried and not prod_is_frozen:
-            weight_grams = (
-                offer_precomputed.get('weight_grams')
-                if offer_precomputed is not None
-                else getattr(offer, 'weight_grams', None)
-            )
-            if weight_grams and weight_grams > 80:
-                prod_is_fresh = True
-            else:
-                prod_is_dried = True
+            prod_is_dried = True
         if prod_is_dried or prod_is_frozen or prod_is_fresh:
             ing_norm = ingredients_normalized[matched_ing_idx]
             ing_original_source = (
@@ -1425,8 +1914,13 @@ def validate_offer_match_candidate(
                 and _RE_CHILI_COUNT_FRESH.search(ing_norm)
             ):
                 recipe_wants_fresh = True
+            if (
+                matched_keyword in {'chili', 'chilipeppar', 'chilifrukt', 'chilifrukter'}
+                and _ingredient_requests_fresh_chili_text(ing_norm)
+            ):
+                recipe_wants_fresh = True
             if not recipe_wants_fresh and not recipe_wants_dried and not recipe_wants_frozen:
-                if any(m in ing_norm for m in ('tsk ', 'krm ', ' tsk ', ' krm ')):
+                if any(m in ing_norm for m in ('tsk ', 'krm ', 'msk ', ' tsk ', ' krm ', ' msk ')):
                     recipe_wants_dried = True
             if not recipe_wants_fresh and not recipe_wants_dried and not recipe_wants_frozen:
                 if (
@@ -1442,13 +1936,16 @@ def validate_offer_match_candidate(
                     recipe_wants_fresh = True
                 elif any(vi in ing_norm for vi in RECIPE_DRIED_VOLUME_INDICATORS):
                     recipe_wants_dried = True
-                elif matched_keyword in {'gräslök', 'graslok'}:
+                elif matched_keyword in {'gräslök', 'graslok', 'citronmeliss'}:
                     plain_graslok_default = True
                 else:
                     recipe_wants_dried = True
             should_block = False
             if prod_is_frozen:
-                if not recipe_wants_frozen and not plain_graslok_default:
+                # Frozen herbs are acceptable substitutes for fresh/plain herb
+                # ingredients. Keep the check asymmetric: dried spice wording
+                # should not accept frozen herb products.
+                if recipe_wants_dried:
                     should_block = True
             elif prod_is_dried and not prod_is_fresh:
                 if not recipe_wants_dried:
@@ -1457,8 +1954,8 @@ def validate_offer_match_candidate(
                 if not recipe_wants_fresh and not plain_graslok_default:
                     should_block = True
             if should_block:
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='carrier_flavor_context',
                     detail='fresh_herb_form',
@@ -1475,7 +1972,7 @@ def validate_offer_match_candidate(
         )
         ing_norm = ingredients_normalized[matched_ing_idx]
 
-        if any(ind in product_lower for ind in _PROCESSED_PRODUCT_INDICATORS):
+        if any(ind in product_lower for ind in _NON_FROZEN_PROCESSED_PRODUCT_INDICATORS):
             if has_eller_pattern(ing_norm):
                 processed_alt_allowed = False
                 for alt in parse_eller_alternatives(ing_norm):
@@ -1489,8 +1986,8 @@ def validate_offer_match_candidate(
                         processed_alt_allowed = True
                         break
                 if not processed_alt_allowed:
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='processed_product',
                         detail='processed_eller_alternatives',
@@ -1516,13 +2013,24 @@ def validate_offer_match_candidate(
                     and any(fi in ing_norm for fi in FRESH_WORDS)
                     and any(fi in product_lower for fi in FROZEN_PRODUCT_INDICATORS)
                 )
+                fresh_prepped_root_fallback = (
+                    matched_keyword in {'ingefära', 'ingefara'}
+                    and any(fi in ing_norm for fi in FRESH_WORDS)
+                    and 'riven' in product_lower
+                    and not any(ind in product_lower for ind in (
+                        'te', 'shot', 'juice', 'dryck', 'marmelad',
+                        'choklad', 'friggs', 'kanderad', 'syltad',
+                        'picklad', 'sushi',
+                    ))
+                )
                 if (
                     any(fw in ing_norm for fw in FRESH_WORDS)
                     and not explicitly_allows_processed
                     and not frozen_mushroom_fallback
+                    and not fresh_prepped_root_fallback
                 ):
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='processed_product',
                         detail='fresh_recipe_processed_product',
@@ -1536,8 +2044,8 @@ def validate_offer_match_candidate(
             and any(fw in ing_norm for fw in FRESH_WORDS)
             and BITAR_WORD in product_lower
         ):
-            _record_shadow_event(
-                shadow_events,
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='processed_product',
                 detail='sparris_bitar',
@@ -1554,8 +2062,8 @@ def validate_offer_match_candidate(
             and any(fi in ing_norm for fi in RECIPE_FROZEN_INDICATORS)
             and not any(fi in product_lower for fi in FROZEN_PRODUCT_INDICATORS)
         ):
-            _record_shadow_event(
-                shadow_events,
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='processed_product',
                 detail='frozen_fishfile',
@@ -1575,8 +2083,8 @@ def validate_offer_match_candidate(
             })
             if any(ind in ing_norm for ind in kantarell_preserved_ingredient):
                 if not any(ind in product_lower for ind in kantarell_preserved_product):
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='processed_product',
                         detail='preserved_kantarell',
@@ -1588,6 +2096,7 @@ def validate_offer_match_candidate(
         if matched_keyword in {
             'körsbärstomat', 'körsbärstomater',
             'korsbarstomat', 'korsbarstomater',
+            'småtomat',
         }:
             cherry_tomato_preserved_ingredient = frozenset({
                 'burk', 'konserv', 'konserverad', 'konserverade',
@@ -1598,8 +2107,8 @@ def validate_offer_match_candidate(
             })
             if any(ind in ing_norm for ind in cherry_tomato_preserved_ingredient):
                 if any(ind in product_lower for ind in cherry_tomato_fresh_product_cues):
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='processed_product',
                         detail='preserved_cherry_tomato',
@@ -1623,8 +2132,8 @@ def validate_offer_match_candidate(
             })
             if any(ind in ing_norm for ind in ('avrunnen', 'avrunna')):
                 if any(ind in product_lower for ind in non_canned_pineapple_cues):
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='processed_product',
                         detail='drained_pineapple',
@@ -1633,8 +2142,8 @@ def validate_offer_match_candidate(
                     )
                     matched_keyword = None
                 elif not any(ind in product_lower for ind in drained_pineapple_product_cues):
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='processed_product',
                         detail='drained_pineapple',
@@ -1644,8 +2153,8 @@ def validate_offer_match_candidate(
                     matched_keyword = None
 
         if matched_keyword == KALKON_WORD and HELKALKON_WORD in ing_norm:
-            _record_shadow_event(
-                shadow_events,
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='carrier_flavor_context',
                 detail='whole_turkey',
@@ -1663,8 +2172,8 @@ def validate_offer_match_candidate(
             wants_kyckling = 'kyckling' in ing_norm and 'kalkon' not in ing_norm
             wants_kalkon = 'kalkon' in ing_norm and 'kyckling' not in ing_norm
             if wants_kyckling and 'kalkon' in product_lower:
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='carrier_flavor_context',
                     detail='poultry_context',
@@ -1673,8 +2182,8 @@ def validate_offer_match_candidate(
                 )
                 matched_keyword = None
             if wants_kalkon and 'kyckling' in product_lower:
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='carrier_flavor_context',
                     detail='poultry_context',
@@ -1694,8 +2203,8 @@ def validate_offer_match_candidate(
             ing_norm = ingredients_normalized[matched_ing_idx]
             if any(fw in ing_norm for fw in FRESH_WORDS):
                 if not any(fw in product_lower for fw in FRESH_WORDS):
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='carrier_flavor_context',
                         detail='fresh_pasta',
@@ -1713,8 +2222,8 @@ def validate_offer_match_candidate(
         if BULJONG_WORD not in product_lower and FOND_WORD not in product_lower:
             ing_norm = ingredients_normalized[matched_ing_idx]
             if BULJONG_WORD in ing_norm or FOND_WORD in ing_norm:
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='carrier_flavor_context',
                     detail='bouillon_context',
@@ -1734,8 +2243,8 @@ def validate_offer_match_candidate(
                     else offer_name_normalized
                 )
                 if not any(dw in product_lower for dw in BULJONG_DEFAULT_WORDS):
-                    _record_shadow_event(
-                        shadow_events,
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='carrier_flavor_context',
                         detail='bouillon_type_context',
@@ -1752,8 +2261,8 @@ def validate_offer_match_candidate(
         )
         ing_norm = ingredients_normalized[matched_ing_idx]
         if not check_yoghurt_match(matched_keyword, ing_norm, product_lower):
-            _record_shadow_event(
-                shadow_events,
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='carrier_flavor_context',
                 detail='dairy_type',
@@ -1762,8 +2271,8 @@ def validate_offer_match_candidate(
             )
             matched_keyword = None
         elif not check_filmjolk_match(matched_keyword, ing_norm, product_lower):
-            _record_shadow_event(
-                shadow_events,
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='carrier_flavor_context',
                 detail='dairy_type',
@@ -1772,11 +2281,64 @@ def validate_offer_match_candidate(
             )
             matched_keyword = None
         elif not check_kvarg_match(matched_keyword, ing_norm, product_lower):
-            _record_shadow_event(
-                shadow_events,
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='carrier_flavor_context',
                 detail='dairy_type',
+                ing_idx=matched_ing_idx,
+                keyword=matched_keyword,
+            )
+            matched_keyword = None
+
+    if matched_keyword and matched_ing_idx is not None:
+        product_lower = (
+            offer_precomputed['name_normalized']
+            if offer_precomputed is not None
+            else offer_name_normalized
+        )
+        ing_norm = ingredients_normalized[matched_ing_idx]
+        if not check_explicit_liquid_honey_match(matched_keyword, ing_norm, product_lower):
+            _record_validation_event(
+                validation_events,
+                'validation_reject',
+                rule='carrier_flavor_context',
+                detail='explicit_liquid_honey',
+                ing_idx=matched_ing_idx,
+                keyword=matched_keyword,
+            )
+            matched_keyword = None
+        elif not check_plain_fresh_potato_match(
+            matched_keyword,
+            ing_norm,
+            product_lower,
+            getattr(offer, 'category', ''),
+        ):
+            _record_validation_event(
+                validation_events,
+                'validation_reject',
+                rule='processed_product',
+                detail='plain_fresh_potato',
+                ing_idx=matched_ing_idx,
+                keyword=matched_keyword,
+            )
+            matched_keyword = None
+        elif not _cooked_turkey_product_allowed(product_lower, ing_norm, matched_keyword):
+            _record_validation_event(
+                validation_events,
+                'validation_reject',
+                rule='processed_product',
+                detail='cooked_turkey_context',
+                ing_idx=matched_ing_idx,
+                keyword=matched_keyword,
+            )
+            matched_keyword = None
+        elif not _chili_spice_product_allowed(product_lower, ing_norm, matched_keyword):
+            _record_validation_event(
+                validation_events,
+                'validation_reject',
+                rule='processed_product',
+                detail='chili_spice_context',
                 ing_idx=matched_ing_idx,
                 keyword=matched_keyword,
             )
@@ -1796,9 +2358,22 @@ def validate_offer_match_candidate(
             product_blockers = [b for b in blocker_words if b in product_lower]
             if product_blockers:
                 ing_norm = ingredients_normalized[matched_ing_idx]
-                if not ingredient_satisfies_product_name_blockers(ing_norm, product_blockers):
-                    _record_shadow_event(
-                        shadow_events,
+                if _vegan_context_allows_plant_based_product_blockers(
+                    full_recipe_text,
+                    ing_norm,
+                    product_blockers,
+                ):
+                    pass
+                elif _green_chili_mild_context_allows_product_blockers(
+                    product_lower,
+                    ing_norm,
+                    matched_keyword,
+                    product_blockers,
+                ):
+                    pass
+                elif not ingredient_satisfies_product_name_blockers(ing_norm, product_blockers):
+                    _record_validation_event(
+                        validation_events,
                         'validation_reject',
                         rule='product_name_blocker',
                         ing_idx=matched_ing_idx,
@@ -1820,8 +2395,8 @@ def validate_offer_match_candidate(
                 break
         if type_found:
             if not any(word in product_lower for word in type_found):
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='carrier_flavor_context',
                     detail='fond_type_context',
@@ -1836,8 +2411,8 @@ def validate_offer_match_candidate(
             blockers = RECIPE_INGREDIENT_BLOCKERS[matched_kw_lower]
             ing_norm = ingredients_normalized[matched_ing_idx]
             if any(blocker in ing_norm for blocker in blockers):
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='carrier_flavor_context',
                     detail='recipe_ingredient_blocker',
@@ -1847,11 +2422,42 @@ def validate_offer_match_candidate(
                 matched_keyword = None
 
     if matched_keyword and matched_ing_idx is not None:
+        product_lower = (
+            offer_precomputed['name_normalized']
+            if offer_precomputed is not None
+            else offer_name_normalized
+        )
+        ing_norm = ingredients_normalized[matched_ing_idx]
+        if _flavor_carrier_context_blocked(
+            product_lower,
+            ing_norm,
+            matched_keyword,
+            getattr(offer, 'category', None),
+        ):
+            _record_validation_event(
+                validation_events,
+                'validation_reject',
+                rule='carrier_flavor_context',
+                detail='product_flavor_carrier',
+                ing_idx=matched_ing_idx,
+                keyword=matched_keyword,
+            )
+            matched_keyword = None
+
+    if matched_keyword and matched_ing_idx is not None:
         matched_kw_lower = matched_keyword.lower()
         ing_norm = ingredients_normalized[matched_ing_idx]
-        if matched_kw_lower in ing_norm and _is_false_positive_blocked(matched_kw_lower, ing_norm):
-            _record_shadow_event(
-                shadow_events,
+        kycklingsteak_fallback = (
+            matched_kw_lower == 'kyckling'
+            and ('kycklingsteak' in ing_norm or 'kycklingsteaks' in ing_norm)
+        )
+        if (
+            matched_kw_lower in ing_norm
+            and not kycklingsteak_fallback
+            and _is_false_positive_blocked(matched_kw_lower, ing_norm)
+        ):
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='carrier_flavor_context',
                 detail='false_positive_blocker',
@@ -1868,10 +2474,16 @@ def validate_offer_match_candidate(
         )
         if not any(vi in prod_lower for vi in VEG_PRODUCT_INDICATORS):
             ing_norm = ingredients_normalized[matched_ing_idx]
-            ing_words = set(ing_norm.split())
+            veg_scope = ing_norm
+            if ' eller ' in ing_norm:
+                for segment in (part.strip() for part in ing_norm.split(' eller ')):
+                    if matched_kw_lower in segment:
+                        veg_scope = segment
+                        break
+            ing_words = set(veg_scope.split())
             if ing_words & VEG_QUALIFIER_WORDS:
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='carrier_flavor_context',
                     detail='veg_qualifier',
@@ -1903,15 +2515,7 @@ def validate_offer_match_candidate(
                     matched_kw_lower == 'choklad'
                     and 'chokladkaka' in ing_norm
                     and any(cue in ing_norm for cue in ('mörk chokladkaka', 'mork chokladkaka'))
-                    and 'chokladkaka' in carrier_product_lower
-                    and '%' in carrier_product_lower
-                    and any(cue in carrier_product_lower for cue in ('mörk choklad', 'mork choklad'))
-                    and not any(flavor in carrier_product_lower for flavor in (
-                        'apelsin', 'chili', 'fikon', 'havssalt', 'seasalt',
-                        'karamell', 'caramel', 'caramelized', 'hazelnut', 'hassel',
-                        'mint', 'hallon', 'mango', 'passion', 'pistage',
-                        'almond', 'lakrits', 'saltlakrits',
-                    ))
+                    and _is_plain_dark_chocolate_product(carrier_product_lower)
                 )
                 if not contextual_cheese_use_case and not dark_chocolate_bar_use_case:
                     carrier_blocked = _flavor_keyword_blocked_by_carrier_text(
@@ -1945,10 +2549,10 @@ def validate_offer_match_candidate(
                         )
                         for retry_idx in range(matched_ing_idx + 1, len(ingredients_normalized)):
                             retry_ing = ingredients_normalized[retry_idx]
-                            retry_result = match_offer_to_ingredient(
+                            retry_result = _match_offer_to_ingredient_keyword(
                                 ingredient_match_data_per_ing[retry_idx],
                                 retry_offer_match_data,
-                            ).matched_keyword
+                            )
                             if retry_result:
                                 retry_keyword_lower = retry_result.lower()
                                 if retry_keyword_lower in FLAVOR_WORDS and retry_keyword_lower in retry_ing:
@@ -1960,8 +2564,8 @@ def validate_offer_match_candidate(
                                 matched_keyword = retry_result
                                 matched_ing_idx = retry_idx
                                 flavor_retried = True
-                                _record_shadow_event(
-                                    shadow_events,
+                                _record_validation_event(
+                                    validation_events,
                                     'validation_retry',
                                     rule='carrier_flavor_context',
                                     from_idx=retry_from_idx,
@@ -1971,8 +2575,8 @@ def validate_offer_match_candidate(
                                 )
                                 break
                     if not flavor_retried:
-                        _record_shadow_event(
-                            shadow_events,
+                        _record_validation_event(
+                            validation_events,
                             'validation_reject',
                             rule='carrier_flavor_context',
                             ing_idx=matched_ing_idx,
@@ -1992,8 +2596,8 @@ def validate_offer_match_candidate(
 
         for trigger, contexts in cuisine_triggers.items():
             if not any(ctx in full_recipe_text for ctx in contexts):
-                _record_shadow_event(
-                    shadow_events,
+                _record_validation_event(
+                    validation_events,
                     'validation_reject',
                     rule='carrier_flavor_context',
                     detail='cuisine_context',
@@ -2019,8 +2623,8 @@ def validate_offer_match_candidate(
             and ingredient_implies_whole_kyckling(ing_norm)
             and 'hel' not in offer_quals
         ):
-            _record_shadow_event(
-                shadow_events,
+            _record_validation_event(
+                validation_events,
                 'validation_reject',
                 rule='carrier_flavor_context',
                 detail='whole_chicken',
@@ -2049,7 +2653,8 @@ def validate_offer_match_candidate(
         if matched_ing_idx is not None and matched_ing_idx < len(ingredients_normalized)
         else ''
     )
-    has_qualifier_match = bool(offer_spec_quals.get(matched_keyword))
+    specialty_rank_keyword = SPECIALTY_KEYWORD_ALIASES.get(matched_keyword, matched_keyword)
+    has_qualifier_match = bool(offer_spec_quals.get(specialty_rank_keyword))
     qualifier_specificity_rank = compute_qualifier_specificity_rank(
         rank_ingredient,
         matched_keyword,
@@ -2063,7 +2668,7 @@ def validate_offer_match_candidate(
     )
     return {
         'id': str(offer.id),
-        'offer_identity_key': build_offer_identity_key(offer),
+        'offer_identity_key': offer_identity_key or build_offer_identity_key(offer),
         'name': offer.name,
         'price': float(offer.price) if offer.price else 0,
         'original_price': float(offer.original_price) if offer.original_price else None,
@@ -2080,203 +2685,6 @@ def validate_offer_match_candidate(
         '_valid_ingredients': valid_ingredient_indices,
         '_matched_ing_idx': source_ing_idx,
         '_matched_expanded_ing_idx': matched_ing_idx,
-    }
-
-
-def _validated_match_signature(offer_data: Optional[dict]) -> tuple[str, int | None] | None:
-    if not offer_data:
-        return None
-    return (
-        offer_data.get('matched_keyword'),
-        offer_data.get('_matched_expanded_ing_idx', offer_data.get('_matched_ing_idx')),
-    )
-
-
-def _validation_events_by_rule(events: list[dict], event_type: str) -> set[str]:
-    return {
-        str(event.get('rule'))
-        for event in events
-        if event.get('type') == event_type and event.get('rule')
-    }
-
-
-def _validate_shadow_selection(
-    *,
-    offer: Offer,
-    offer_id: int,
-    offer_data_cache: Optional[Dict],
-    context: dict,
-    selection: dict,
-    ingredient_match_data_per_ing,
-    ingredients_normalized: list[str],
-    ingredient_source_texts: list[str],
-    ingredient_source_indices: list[int],
-    merged_ingredients: list[str],
-    full_recipe_text: str,
-) -> tuple[Optional[dict], list[dict]]:
-    events: list[dict] = []
-    selected_keyword = selection.get('selected_keyword')
-    selected_ing_idx = selection.get('selected_ing_idx')
-    if not selected_keyword or selected_ing_idx is None:
-        return None, events
-
-    offer_data = validate_offer_match_candidate(
-        offer,
-        offer_id,
-        offer_data_cache,
-        selected_keyword,
-        selected_ing_idx,
-        context['offer_precomputed'],
-        context['offer_match_data'],
-        context['effective_offer_data'],
-        context['offer_match_keywords'],
-        context['offer_name_normalized'],
-        ingredient_match_data_per_ing,
-        ingredients_normalized,
-        ingredient_source_texts,
-        ingredient_source_indices,
-        merged_ingredients,
-        full_recipe_text,
-        events,
-    )
-    return offer_data, events
-
-
-def analyze_ingredient_routing_shadow(
-    offer: Offer,
-    offer_id: int,
-    offer_keywords: Optional[Dict],
-    offer_data_cache: Optional[Dict],
-    ingredient_match_data_per_ing,
-    hinted_indices: Iterable[int],
-    ingredients_normalized: list[str],
-    ingredient_source_texts: list[str],
-    ingredient_source_indices: list[int],
-    merged_ingredients: list[str],
-    full_recipe_text: str,
-) -> dict[str, Any]:
-    """Compare production fullscan selection with hinted selection without changing output."""
-    hint_set = set(_normalized_candidate_indices(hinted_indices, len(ingredient_match_data_per_ing)))
-    context = build_offer_match_context(
-        offer,
-        offer_id,
-        offer_keywords,
-        offer_data_cache,
-    )
-    full_selection = select_offer_match_candidate(
-        collect_offer_match_candidates(
-            ingredient_match_data_per_ing,
-            context['offer_match_data'],
-        ),
-        ingredient_match_data_per_ing,
-    )
-    hinted_selection = select_offer_match_candidate(
-        collect_offer_match_candidates(
-            ingredient_match_data_per_ing,
-            context['offer_match_data'],
-            hint_set,
-        ),
-        ingredient_match_data_per_ing,
-    )
-
-    full_offer_data, full_events = _validate_shadow_selection(
-        offer=offer,
-        offer_id=offer_id,
-        offer_data_cache=offer_data_cache,
-        context=context,
-        selection=full_selection,
-        ingredient_match_data_per_ing=ingredient_match_data_per_ing,
-        ingredients_normalized=ingredients_normalized,
-        ingredient_source_texts=ingredient_source_texts,
-        ingredient_source_indices=ingredient_source_indices,
-        merged_ingredients=merged_ingredients,
-        full_recipe_text=full_recipe_text,
-    )
-    hinted_offer_data, hinted_events = _validate_shadow_selection(
-        offer=offer,
-        offer_id=offer_id,
-        offer_data_cache=offer_data_cache,
-        context=context,
-        selection=hinted_selection,
-        ingredient_match_data_per_ing=ingredient_match_data_per_ing,
-        ingredients_normalized=ingredients_normalized,
-        ingredient_source_texts=ingredient_source_texts,
-        ingredient_source_indices=ingredient_source_indices,
-        merged_ingredients=merged_ingredients,
-        full_recipe_text=full_recipe_text,
-    )
-
-    mismatch_classes: set[str] = set()
-    full_initial_idx = full_selection.get('selected_ing_idx')
-    hinted_initial_idx = hinted_selection.get('selected_ing_idx')
-    if not hint_set:
-        mismatch_classes.add('no_hint_for_routed_pair')
-    if full_initial_idx is not None and full_initial_idx not in hint_set:
-        mismatch_classes.add('fullscan_initial_winner_outside_hint')
-    if full_selection.get('selected_by_fewer_keywords'):
-        mismatch_classes.add('fullscan_fewer_keyword_preference_winner')
-    if full_selection.get('selected_keyword') and not hinted_selection.get('selected_keyword'):
-        mismatch_classes.add('hinted_initial_no_match')
-    elif hinted_selection.get('selected_keyword') != full_selection.get('selected_keyword'):
-        mismatch_classes.add('hinted_different_matched_keyword')
-    elif (
-        hinted_initial_idx is not None
-        and full_initial_idx is not None
-        and hinted_initial_idx != full_initial_idx
-    ):
-        mismatch_classes.add('hinted_same_keyword_different_ingredient_line')
-
-    full_sig = _validated_match_signature(full_offer_data)
-    hinted_sig = _validated_match_signature(hinted_offer_data)
-    if full_sig != hinted_sig:
-        mismatch_classes.add('validated_candidate_change')
-
-    full_retry_events = [
-        event for event in full_events
-        if event.get('type') == 'validation_retry'
-    ]
-    for event in full_retry_events:
-        to_idx = event.get('to_idx')
-        if to_idx not in hint_set:
-            mismatch_classes.add('validation_retry_moved_match_outside_hint')
-            rule = event.get('rule')
-            if rule == 'specialty_qualifier':
-                mismatch_classes.add('specialty_retry_moved_match_outside_hint')
-            elif rule == 'spice_fresh':
-                mismatch_classes.add('spice_fresh_retry_moved_match_outside_hint')
-            elif rule == 'carrier_flavor_context':
-                mismatch_classes.add('carrier_flavor_context_retry_moved_match_outside_hint')
-            if full_initial_idx in hint_set:
-                mismatch_classes.add('hints_contain_initial_winner_but_miss_later_retry_candidates')
-
-    hinted_reject_rules = _validation_events_by_rule(hinted_events, 'validation_reject')
-    if full_sig and not hinted_sig:
-        if 'processed_product' in hinted_reject_rules:
-            mismatch_classes.add('processed_rule_rejected_hinted_match_fullscan_avoided')
-        if hinted_reject_rules & {
-            'carrier_flavor_context',
-            'context_suppression',
-            'secondary_ingredient_pattern',
-            'descriptor_suppression',
-            'ingredient_context_missing',
-        }:
-            mismatch_classes.add('carrier_flavor_context_rejected_hinted_match_fullscan_avoided')
-        if 'product_name_blocker' in hinted_reject_rules:
-            mismatch_classes.add('product_name_blocker_rejected_hinted_match_fullscan_avoided')
-
-    if full_sig != hinted_sig and not mismatch_classes:
-        mismatch_classes.add('unexplained_validated_mismatch')
-
-    return {
-        'hinted_indices': sorted(hint_set),
-        'fullscan_selection': full_selection,
-        'hinted_selection': hinted_selection,
-        'fullscan_validated_signature': full_sig,
-        'hinted_validated_signature': hinted_sig,
-        'fullscan_validation_events': full_events,
-        'hinted_validation_events': hinted_events,
-        'mismatch_classes': sorted(mismatch_classes),
-        'parity': full_sig == hinted_sig,
     }
 
 
@@ -2680,7 +3088,7 @@ def finalize_grouped_match_results(
         merge_key = (family_key, frozenset(group.get('_extracted_keywords', frozenset())))
         family_to_primary_group.setdefault(merge_key, group)
 
-    shadow_merged_groups = set()
+    hidden_merged_groups = set()
     for group in ingredient_groups:
         if group['matched_keywords']:
             continue
@@ -2696,10 +3104,10 @@ def finalize_grouped_match_results(
         merged_originals = primary_group.setdefault('_merged_originals', [primary_group['original']])
         if group['original'] not in merged_originals:
             merged_originals.append(group['original'])
-        shadow_merged_groups.add(id(group))
+        hidden_merged_groups.add(id(group))
 
-    if shadow_merged_groups:
-        total_ingredients = max(1, len(merged_ingredients) - len(shadow_merged_groups))
+    if hidden_merged_groups:
+        total_ingredients = max(1, len(merged_ingredients) - len(hidden_merged_groups))
         coverage_weight = (savings_pct_count / total_ingredients) if total_ingredients > 0 else 0.0
         total_savings_pct = round(avg_savings_pct * coverage_weight, 1)
         coverage_pct = min(100, (num_ingredients_matched / total_ingredients * 100)) if total_ingredients > 0 else 0
@@ -2707,7 +3115,7 @@ def finalize_grouped_match_results(
 
     ui_groups = []
     for group in ingredient_groups:
-        if id(group) in shadow_merged_groups:
+        if id(group) in hidden_merged_groups:
             continue
         if group['matched_keywords']:
             merged_originals = group.get('_merged_originals')
@@ -2760,9 +3168,22 @@ def ingredient_satisfies_product_name_blockers(
     product_blockers: list[str],
 ) -> bool:
     """Check ingredient-side blocker cues, preferring the most specific phrases."""
+    blocker_equivalents = {
+        'deliskivor': {'pålägg', 'palagg'},
+        'deli skivor': {'pålägg', 'palagg'},
+        'skivad': {'pålägg', 'palagg'},
+        'skivor': {'pålägg', 'palagg'},
+        'pålägg': {'pålägg', 'palagg', 'deliskivor'},
+        'palagg': {'pålägg', 'palagg', 'deliskivor'},
+        'najad': {'najad', 'najadlax', 'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt'},
+    }
     phrase_blockers = [b for b in product_blockers if ' ' in b]
     blockers_to_check = phrase_blockers or product_blockers
-    return any(b in ingredient_lower for b in blockers_to_check)
+    return any(
+        b in ingredient_lower
+        or any(eq in ingredient_lower for eq in blocker_equivalents.get(b, ()))
+        for b in blockers_to_check
+    )
 
 
 def ingredient_implies_whole_kyckling(ingredient_lower: str) -> bool:

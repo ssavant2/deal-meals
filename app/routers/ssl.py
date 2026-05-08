@@ -26,6 +26,45 @@ except ImportError:
 router = APIRouter(prefix="/api/ssl", tags=["ssl"])
 
 
+def _content_length_over_limit(value: str | None, limit_bytes: int) -> bool:
+    if not value:
+        return False
+    try:
+        return int(value) > limit_bytes
+    except ValueError:
+        return False
+
+
+def _extract_ssl_upload_payload(data) -> tuple[bytes | None, bytes | None, str | None]:
+    """Validate SSL upload JSON and return PEM data as bytes."""
+    if not isinstance(data, dict):
+        return None, None, "error.invalid_data"
+
+    cert_content = data.get("cert")
+    key_content = data.get("key")
+
+    if cert_content is None or key_content is None:
+        return None, None, "ssl.cert_and_key_required"
+    if not isinstance(cert_content, str) or not isinstance(key_content, str):
+        return None, None, "error.invalid_data"
+    if not cert_content or not key_content:
+        return None, None, "ssl.cert_and_key_required"
+
+    return cert_content.encode('utf-8'), key_content.encode('utf-8'), None
+
+
+def _extract_ssl_enabled_payload(data) -> tuple[bool | None, str | None]:
+    """Validate SSL enable JSON."""
+    if not isinstance(data, dict):
+        return None, "error.invalid_data"
+
+    enabled = data.get("enabled", False)
+    if not isinstance(enabled, bool):
+        return None, "error.invalid_data"
+
+    return enabled, None
+
+
 @router.get("/status")
 def get_ssl_status():
     """Get SSL/TLS configuration status."""
@@ -67,26 +106,20 @@ async def upload_ssl_certificates(request: Request):
     try:
         # Reject oversized payloads before parsing (normal cert+key is ~5 KB)
         content_length = request.headers.get("content-length")
-        if content_length and int(content_length) > 102_400:  # 100 KB
+        if _content_length_over_limit(content_length, 102_400):  # 100 KB
             return JSONResponse({
                 "success": False,
                 "message_key": "ssl.payload_too_large"
             }, status_code=413)
 
         data = await request.json()
-
-        cert_content = data.get("cert")
-        key_content = data.get("key")
-
-        if not cert_content or not key_content:
+        cert_data, key_data, message_key = _extract_ssl_upload_payload(data)
+        if message_key:
+            status_code = 400
             return JSONResponse({
                 "success": False,
-                "message_key": "ssl.cert_and_key_required"
-            }, status_code=400)
-
-        # Convert string content to bytes
-        cert_data = cert_content.encode('utf-8')
-        key_data = key_content.encode('utf-8')
+                "message_key": message_key
+            }, status_code=status_code)
 
         # Save and validate
         success, message = ssl_manager.save_certificates(cert_data, key_data)
@@ -124,7 +157,12 @@ async def enable_ssl(request: Request):
 
     try:
         data = await request.json()
-        enabled = data.get("enabled", False)
+        enabled, message_key = _extract_ssl_enabled_payload(data)
+        if message_key:
+            return JSONResponse({
+                "success": False,
+                "message_key": message_key
+            }, status_code=400)
 
         success, message = ssl_manager.set_ssl_enabled(enabled)
 

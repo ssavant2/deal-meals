@@ -92,6 +92,18 @@ def _get_or_create_store_record(db, store_id: str):
     return store_record
 
 
+def _extract_store_config_payload(data) -> tuple[dict | None, str | None]:
+    """Validate store config JSON and return the config object."""
+    if not isinstance(data, dict):
+        return None, "error.invalid_data"
+
+    config = data.get('config', data)
+    if not isinstance(config, dict):
+        return None, "error.invalid_data"
+
+    return config, None
+
+
 def _active_scrape_response(scrape: dict, store_id: str | None = None) -> dict:
     """Build the public response for an active store scrape."""
     started_at = scrape.get("started_at")
@@ -200,7 +212,9 @@ async def save_store_config(store_id: str, request: Request):
     """Save configuration for a store."""
     try:
         data = await request.json()
-        config = data.get('config', data)
+        config, message_key = _extract_store_config_payload(data)
+        if message_key:
+            return JSONResponse({"success": False, "message_key": message_key}, status_code=400)
 
         with get_db_session() as db:
             store_record = _get_or_create_store_record(db, store_id)

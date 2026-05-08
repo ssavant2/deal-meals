@@ -14,9 +14,12 @@ services:
   web:
     container_name: deal-meals-dev-web
     build: .
+    mem_limit: ${DEV_WEB_MEM_LIMIT:-1536m}
     environment:
       DEAL_MEALS_VERSION: ${DEAL_MEALS_VERSION:-dev}
       PYTHONDONTWRITEBYTECODE: "0"
+      CACHE_REBUILD_MAX_WORKERS: ${CACHE_REBUILD_MAX_WORKERS:-3}
+      CACHE_DELTA_VERIFICATION_MAX_WORKERS: ${CACHE_DELTA_VERIFICATION_MAX_WORKERS:-3}
     volumes:
       - ./app:/app
       - ./certs:/certs

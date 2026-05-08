@@ -46,7 +46,10 @@ from .recipe_text import (
     preserve_parenthetical_chili_alias,
     preserve_parenthetical_grouped_herb_leaves,
     preserve_parenthetical_shiso_alternatives,
+    preserve_spice_mix_preference_parentheticals,
+    preserve_single_product_example_parentheticals,
     rewrite_buljong_eller_fond,
+    rewrite_truncated_chocolate_color_lists,
     rewrite_mince_of_alternatives,
     rewrite_truncated_eller_compounds,
     strip_biff_portion_prep_phrase,
@@ -71,7 +74,12 @@ _TEXTURE_DESCRIPTOR_RE = re.compile(
     r"\b(?:" + TEXTURE_DESCRIPTOR_WORDS + r")\b",
     re.IGNORECASE,
 )
-_NEGATION_RE = re.compile(r"\b(?:" + NEGATION_WORDS + r")\s+\w+", re.IGNORECASE)
+_NEGATION_RE = re.compile(
+    r"\b(?:"
+    + NEGATION_WORDS
+    + r")\s+(?!(?:kärnor|karnor|kärna|karna|koncentrerad|koncentrerat|koncentrerade)\b)\w+",
+    re.IGNORECASE,
+)
 _COOKING_INSTRUCTION_RE = re.compile(
     r",\s*(?:" + COOKING_INSTRUCTION_WORDS + r")\s+.*$",
     re.IGNORECASE,
@@ -197,6 +205,7 @@ def prepare_recipe_match_runtime_data(recipe: FoundRecipe) -> dict[str, Any]:
         ingredient_norm = _apply_space_normalizations(
             fix_swedish_chars(str(ingredient)).lower()
         )
+        ingredient_norm = rewrite_truncated_chocolate_color_lists(ingredient_norm)
         ingredient_norm = rewrite_truncated_eller_compounds(ingredient_norm)
         ingredient_norm = rewrite_mince_of_alternatives(ingredient_norm)
         ingredient_norm = _TRUNCATED_COMPOUND_RE.sub(r" ", ingredient_norm)
@@ -206,6 +215,8 @@ def prepare_recipe_match_runtime_data(recipe: FoundRecipe) -> dict[str, Any]:
         ingredient_norm = preserve_non_concentrate_parenthetical(ingredient_norm)
         ingredient_norm = preserve_parenthetical_grouped_herb_leaves(ingredient_norm)
         ingredient_norm = preserve_parenthetical_shiso_alternatives(ingredient_norm)
+        ingredient_norm = preserve_spice_mix_preference_parentheticals(ingredient_norm)
+        ingredient_norm = preserve_single_product_example_parentheticals(ingredient_norm)
         ingredient_norm = strip_biff_portion_prep_phrase(ingredient_norm)
         ingredient_norm = _PREFERENCE_PAREN_RE.sub("", ingredient_norm)
         ingredient_norm = _EXAMPLE_PAREN_RE.sub("", ingredient_norm)
@@ -221,9 +232,18 @@ def prepare_recipe_match_runtime_data(recipe: FoundRecipe) -> dict[str, Any]:
         ingredient_norm = re.sub(r"\s+smaksatt\s+med\s+.*", "", ingredient_norm)
         ingredient_norm = _NEGATION_RE.sub("", ingredient_norm)
         ingredient_norm = rewrite_buljong_eller_fond(ingredient_norm)
+        # Mirror the live matcher: recipe term routing must expose the canonical
+        # yoghurt token for plant-based "gurt" lines.
+        ingredient_norm = re.sub(r"\bgurt\b", "gurt yoghurt", ingredient_norm)
+        # Keep microwave popcorn variants on both the product shorthand and the
+        # full compound so route terms cover Micropop and Micropopcorn offers.
+        if "micropopcorn" in ingredient_norm and "micropop " not in ingredient_norm:
+            ingredient_norm += " micropop popcorn"
+        if "surdegsbaguette" in ingredient_norm or "surdegsbaguett" in ingredient_norm:
+            ingredient_norm += " baguette"
 
         if (
-            not any(cue in ingredient_norm for cue in ("kålrotsspaghetti", "kalrotsspaghetti"))
+            not any(cue in ingredient_norm for cue in ("kålrotsspaghetti", "kalrotsspaghetti", "morotsspaghetti"))
             and any(
                 cue in ingredient_norm for cue in (
                     "långpasta", "langpasta",

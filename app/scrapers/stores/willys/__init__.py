@@ -68,6 +68,58 @@ class WillysStore(StorePlugin):
         self.campaigns_api = f"{self.base_url}/search/campaigns/offline"
         self.ehandel_url = f"{self.base_url}/erbjudanden/ehandel"
         self.product_api = f"{self.base_url}/axfood/rest/p"  # Product details API
+
+    @staticmethod
+    def _looks_like_maintenance_page(text: Optional[str]) -> bool:
+        """Detect Willys' maintenance/error page before treating it as an empty scrape."""
+        if not text:
+            return False
+        value = text.lower()
+        strong_phrases = (
+            "underhållsarbete pågår",
+            "willys.se är otillgänglig",
+            "otillgänglig på grund av underhållsarbete",
+            "willys är tillfälligt otillgänglig",
+            "sidan beräknas vara tillgänglig igen",
+            "driftstopp",
+            "driftstörning",
+        )
+        if any(phrase in value for phrase in strong_phrases):
+            return True
+
+        maintenance_terms = (
+            "underhåll",
+            "underhallsarbete",
+            "servicefönster",
+            "servicefonster",
+        )
+        outage_terms = (
+            "pågår",
+            "pagar",
+            "otillgänglig",
+            "otillganglig",
+            "tillfälligt",
+            "tillfalligt",
+            "försök igen senare",
+            "forsok igen senare",
+            "tillgänglig igen",
+            "tillganglig igen",
+        )
+        return any(term in value for term in maintenance_terms) and any(
+            term in value for term in outage_terms
+        )
+
+    @staticmethod
+    def _maintenance_result(stage: str) -> StoreScrapeResult:
+        logger.warning(f"Willys appears to be down for maintenance during {stage}")
+        return StoreScrapeResult.failed(
+            reason="site_maintenance",
+            message_key="ws.store_site_maintenance",
+            diagnostics={
+                "stage": stage,
+                "site_status": "maintenance",
+            },
+        )
     
     @property
     def config(self) -> StoreConfig:
@@ -139,6 +191,7 @@ class WillysStore(StorePlugin):
         logger.info("Starting Willys scraping...")
         # Reset per-run metadata so one scrape mode never leaks UI counts into the next.
         self._scrape_meta = None
+        self._maintenance_detected = False
 
         location_type = credentials.get('location_type', 'ehandel') if credentials else 'ehandel'
         location_id = credentials.get('location_id') if credentials else None
@@ -172,7 +225,7 @@ class WillysStore(StorePlugin):
                             'postal_code': addr[1],
                             'city': addr[2]
                         }
-                        logger.info(f"Using delivery address: {addr[0]}, {addr[1]} {addr[2]}")
+                        logger.info("Using configured delivery address")
             except Exception as e:
                 logger.warning(f"Could not fetch delivery address: {e}")
 
@@ -187,11 +240,15 @@ class WillysStore(StorePlugin):
                     session_cookies=session_cookies,
                 )
             else:
+                if await self._is_site_under_maintenance():
+                    return self._maintenance_result("ehandel_preflight")
                 logger.warning("Could not resolve e-commerce store via API - falling back to Playwright")
                 products = await self._scrape_ehandel_playwright(
                     cookies=session_cookies,
                     delivery_address=delivery_address
                 )
+                if not products and getattr(self, "_maintenance_detected", False):
+                    return self._maintenance_result("ehandel_playwright")
 
         logger.success(f"Scraped {len(products)} products from Willys ({location_type})")
         return self._scrape_result_from_products(
@@ -201,6 +258,24 @@ class WillysStore(StorePlugin):
     
     
     # ==================== API SCRAPING (STORE) ====================
+
+    async def _is_site_under_maintenance(self) -> bool:
+        """Best-effort preflight for Willys' maintenance/error page."""
+        try:
+            async with httpx.AsyncClient(
+                event_hooks={"request": [ssrf_safe_event_hook]},
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                    "Accept": "text/html,application/xhtml+xml",
+                },
+                follow_redirects=True,
+                timeout=HTTP_TIMEOUT,
+            ) as client:
+                response = await client.get(self.base_url)
+            return self._looks_like_maintenance_page(response.text)
+        except Exception as exc:
+            logger.debug(f"Could not run Willys maintenance preflight: {exc}")
+            return False
     
     async def _scrape_store_campaigns(self, store_id: str) -> List[Dict]:
         """Scrape store-specific campaigns via API."""
@@ -347,20 +422,26 @@ class WillysStore(StorePlugin):
                 response = await client.get(api_url, params={'b2b': 'false'})
 
             if response.status_code != 200:
-                logger.warning(f"Delivery store API returned status {response.status_code} for postal code {postal_code}")
+                logger.warning(
+                    f"Delivery store API returned status {response.status_code} "
+                    "for configured postal code"
+                )
                 return None
 
             data = response.json()
             store_id = data.get('deliveryStoreId')
             if store_id:
                 store_id = str(store_id)
-                logger.info(f"Resolved delivery store code {store_id} for postal code {postal_code}")
+                logger.info(f"Resolved delivery store code {store_id} for configured postal code")
                 return store_id
 
-            logger.warning(f"No deliveryStoreId returned for postal code {postal_code}: {data}")
+            logger.warning("No deliveryStoreId returned for configured postal code")
             return None
         except Exception as e:
-            logger.warning(f"Could not resolve delivery store code for {postal_code}: {e}")
+            logger.warning(
+                f"Could not resolve delivery store code for configured postal code: "
+                f"{type(e).__name__}"
+            )
             return None
 
     async def _resolve_ehandel_store_code(
@@ -728,7 +809,7 @@ class WillysStore(StorePlugin):
 
                     # Check if correct delivery address is already set
                     if delivery_address:
-                        logger.info(f"Target delivery address: {delivery_address['street']}, {delivery_address['postal_code']} {delivery_address['city']}")
+                        logger.info("Checking configured delivery address on page")
 
                         # First, check what address is currently shown on the page
                         page_content = await page.content()
@@ -739,10 +820,10 @@ class WillysStore(StorePlugin):
                         # Must check both street AND postal code to distinguish between same street in different cities
                         address_already_correct = False
                         if "Leverans:" in page_content and target_street in page_content and target_postal in page_content:
-                            logger.success(f"✓ Delivery address already set correctly (found '{target_street}' + '{target_postal}' on page)")
+                            logger.success("Delivery address already set correctly on page")
                             address_already_correct = True
                         else:
-                            logger.info(f"Address not set correctly - '{target_street}' with postal '{target_postal}' not found on page")
+                            logger.info("Configured delivery address is not set on page")
 
                         if not address_already_correct:
                             # Need to set up the delivery address
@@ -752,6 +833,10 @@ class WillysStore(StorePlugin):
 
                     # Verify final delivery mode
                     page_content = await page.content()
+                    if self._looks_like_maintenance_page(page_content):
+                        logger.warning("Willys maintenance page detected in Playwright fallback")
+                        self._maintenance_detected = True
+                        return []
                     current_url = page.url
                     logger.info(f"Current URL after address setup: {current_url}")
 
@@ -963,7 +1048,7 @@ class WillysStore(StorePlugin):
 
             # Type the address WITHOUT comma
             full_address = f"{delivery_address['street']} {delivery_address['postal_code']} {delivery_address['city']}"
-            logger.info(f"Typing address: {full_address}")
+            logger.info("Typing configured delivery address")
             await address_input.click()
             await asyncio.sleep(0.2)
             await address_input.type(full_address, delay=50)
@@ -1036,10 +1121,10 @@ class WillysStore(StorePlugin):
                                 # Dialog may take time to appear
                                 await asyncio.sleep(1.5)
                             suggestion_clicked = True
-                            logger.success(f"✓ Clicked exact match for '{street}'")
+                            logger.success("Clicked exact delivery-address match")
                     else:
                         # Fallback: click first option if no exact match
-                        logger.warning(f"No exact match for '{street}', clicking first option")
+                        logger.warning("No exact delivery-address match, clicking first option")
                         first_option = await page.query_selector(
                             '[data-testid="autocomplete-list"] li[role="option"]'
                         )
@@ -1100,7 +1185,7 @@ class WillysStore(StorePlugin):
                         f'''() => document.body.innerText.includes("Leverans till") && document.body.innerText.includes("{street_first_word}")''',
                         timeout=2000
                     )
-                    logger.success(f"✓ Found 'Leverans till {street_first_word}' dialog")
+                    logger.success("Found delivery confirmation dialog")
 
                     # Close the dialog with ESC - address is already saved
                     await page.keyboard.press('Escape')

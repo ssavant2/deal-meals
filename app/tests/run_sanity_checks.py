@@ -296,10 +296,132 @@ def _run_recipe_source_registry_sanity_checks() -> None:
     test("myrecipes registry commits insert", session.committed, True)
 
 
+def _run_pantry_input_validation_checks() -> None:
+    print("\n--- pantry input validation ---", flush=True)
+    from routers.pantry import _extract_raw_ingredients  # noqa: E402
+
+    test("pantry rejects non-object JSON", _extract_raw_ingredients([]), (None, "error.invalid_data"))
+    test(
+        "pantry rejects non-string ingredients",
+        _extract_raw_ingredients({"ingredients": []}),
+        (None, "error.invalid_data"),
+    )
+    test(
+        "pantry keeps empty string as no ingredients",
+        _extract_raw_ingredients({"ingredients": "   "}),
+        (None, "pantry.no_ingredients"),
+    )
+    test(
+        "pantry accepts string ingredients",
+        _extract_raw_ingredients({"ingredients": "pasta, tomat"}),
+        ("pasta, tomat", None),
+    )
+
+
+def _run_json_payload_validation_checks() -> None:
+    print("\n--- JSON payload validation ---", flush=True)
+    from routers.preferences import (  # noqa: E402
+        _extract_delivery_address_payload,
+        _extract_ui_preferences_payload,
+    )
+    from routers.ssl import (  # noqa: E402
+        _content_length_over_limit,
+        _extract_ssl_enabled_payload,
+        _extract_ssl_upload_payload,
+    )
+    from routers.stores import _extract_store_config_payload  # noqa: E402
+
+    test(
+        "delivery address rejects non-object JSON",
+        _extract_delivery_address_payload([]),
+        (None, None, None, "error.invalid_data", 400),
+    )
+    test(
+        "delivery address rejects non-string fields",
+        _extract_delivery_address_payload({"street_address": [], "postal_code": "12345", "city": "X"}),
+        (None, None, None, "error.invalid_data", 400),
+    )
+    test(
+        "delivery address keeps required-field validation",
+        _extract_delivery_address_payload({"street_address": "", "postal_code": "12345", "city": "X"}),
+        (None, None, None, "preferences.street_required", 422),
+    )
+    test(
+        "delivery address trims valid fields",
+        _extract_delivery_address_payload({
+            "street_address": "  Main 1 ",
+            "postal_code": " 12345 ",
+            "city": " City ",
+        }),
+        ("Main 1", "12345", "City", None, 200),
+    )
+    test("UI preferences rejects non-object JSON", _extract_ui_preferences_payload([]), (None, "error.invalid_data"))
+    test("UI preferences accepts object JSON", _extract_ui_preferences_payload({"sort": "savings"}), ({"sort": "savings"}, None))
+
+    test("store config rejects non-object JSON", _extract_store_config_payload([]), (None, "error.invalid_data"))
+    test("store config rejects non-object config", _extract_store_config_payload({"config": []}), (None, "error.invalid_data"))
+    test("store config accepts direct object", _extract_store_config_payload({"location_id": "1"}), ({"location_id": "1"}, None))
+    test("store config accepts nested object", _extract_store_config_payload({"config": {"location_id": "1"}}), ({"location_id": "1"}, None))
+
+    test("SSL upload rejects non-object JSON", _extract_ssl_upload_payload([]), (None, None, "error.invalid_data"))
+    test("SSL upload keeps missing cert/key validation", _extract_ssl_upload_payload({}), (None, None, "ssl.cert_and_key_required"))
+    test("SSL upload rejects non-string cert/key", _extract_ssl_upload_payload({"cert": [], "key": "key"}), (None, None, "error.invalid_data"))
+    test("SSL upload accepts string cert/key", _extract_ssl_upload_payload({"cert": "cert", "key": "key"}), (b"cert", b"key", None))
+    test("SSL enable rejects non-object JSON", _extract_ssl_enabled_payload([]), (None, "error.invalid_data"))
+    test("SSL enable rejects non-boolean value", _extract_ssl_enabled_payload({"enabled": "true"}), (None, "error.invalid_data"))
+    test("SSL enable keeps missing value as false", _extract_ssl_enabled_payload({}), (False, None))
+    test("SSL enable accepts boolean value", _extract_ssl_enabled_payload({"enabled": True}), (True, None))
+    test("SSL content length ignores malformed header", _content_length_over_limit("not-a-number", 100), False)
+    test("SSL content length blocks oversized upload", _content_length_over_limit("101", 100), True)
+
+
+def _run_myrecipes_playwright_security_checks() -> None:
+    print("\n--- myrecipes playwright request safety ---", flush=True)
+    from scrapers.recipes import myrecipes_scraper  # noqa: E402
+
+    calls = []
+
+    def fake_is_safe_url(url: str) -> bool:
+        calls.append(url)
+        return "public.example" in url
+
+    original_is_safe_url = myrecipes_scraper.is_safe_url
+    myrecipes_scraper.is_safe_url = fake_is_safe_url
+    try:
+        cache = {}
+        test(
+            "myrecipes allows non-network playwright data url",
+            myrecipes_scraper._is_playwright_request_url_allowed("data:text/plain,hello", cache),
+            True,
+        )
+        test("myrecipes non-network url skips ssrf check", calls, [])
+        test(
+            "myrecipes allows safe public playwright request",
+            myrecipes_scraper._is_playwright_request_url_allowed("https://public.example/app.js", cache),
+            True,
+        )
+        test(
+            "myrecipes blocks unsafe playwright request",
+            myrecipes_scraper._is_playwright_request_url_allowed("http://127.0.0.1/admin", cache),
+            False,
+        )
+        myrecipes_scraper._is_playwright_request_url_allowed("https://public.example/other.js", cache)
+        test(
+            "myrecipes caches playwright host safety checks",
+            calls,
+            ["https://public.example/app.js", "http://127.0.0.1/admin"],
+        )
+    finally:
+        myrecipes_scraper.is_safe_url = original_is_safe_url
+
+
 _run_matching_sanity_checks()
 _run_store_discovery_sanity_checks()
 _run_store_registry_sanity_checks()
 _run_recipe_source_registry_sanity_checks()
+_run_pantry_input_validation_checks()
+_run_json_payload_validation_checks()
+_run_myrecipes_playwright_security_checks()
 
 print("\n========================================", flush=True)
 print(f"TOTAL: {passed}/{passed + failed} checks passed", flush=True)

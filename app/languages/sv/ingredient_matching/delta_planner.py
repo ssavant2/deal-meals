@@ -98,7 +98,10 @@ def plan_offer_delta_recipe_impacts(
     current_offer_to_terms = invert_term_postings(current_offer_term_postings)
     persisted_offer_to_terms = invert_term_postings(persisted_offer_term_postings)
 
-    semantic_rematch_offer_ids = list(offer_change_summary.get("semantic_rematch_offer_ids", ()))
+    added_offer_ids = list(offer_change_summary.get("added_offer_ids", ()))
+    removed_offer_ids = list(offer_change_summary.get("removed_offer_ids", ()))
+    match_changed_offer_ids = list(offer_change_summary.get("match_changed_offer_ids", ()))
+    semantic_rematch_offer_ids = _sorted(set(added_offer_ids) | set(match_changed_offer_ids))
     forced_version_rematch_offer_ids = list(offer_change_summary.get("forced_version_rematch_offer_ids", ()))
     rescore_offer_ids = list(offer_change_summary.get("rescore_offer_ids", ()))
     display_only_offer_ids = list(offer_change_summary.get("display_only_offer_ids", ()))
@@ -113,7 +116,15 @@ def plan_offer_delta_recipe_impacts(
         offer_to_terms_maps=[current_offer_to_terms, persisted_offer_to_terms],
         recipe_term_postings_maps=[current_recipe_term_postings, persisted_recipe_term_postings],
     )
-    rematch_recipe_ids = _sorted(set(semantic_rematch_recipe_ids) | set(forced_version_recipe_ids))
+    removed_offer_recipe_ids = _recipe_ids_for_offer_ids_via_cache(
+        removed_offer_ids,
+        persisted_offer_recipe_map=persisted_offer_recipe_map,
+    )
+    rematch_recipe_ids = _sorted(
+        set(semantic_rematch_recipe_ids)
+        | set(forced_version_recipe_ids)
+        | set(removed_offer_recipe_ids)
+    )
 
     raw_rescore_recipe_ids = _recipe_ids_for_offer_ids_via_cache(
         rescore_offer_ids,
@@ -142,6 +153,7 @@ def plan_offer_delta_recipe_impacts(
         "semantic_rematch_terms": semantic_terms,
         "forced_version_rematch_recipe_ids": forced_version_recipe_ids,
         "forced_version_rematch_terms": forced_terms,
+        "removed_offer_recipe_ids": removed_offer_recipe_ids,
         "rematch_recipe_ids": rematch_recipe_ids,
         "raw_rescore_recipe_ids": raw_rescore_recipe_ids,
         "effective_rescore_recipe_ids": effective_rescore_recipe_ids,
@@ -151,6 +163,7 @@ def plan_offer_delta_recipe_impacts(
         "counts": {
             "semantic_rematch_recipes": len(semantic_rematch_recipe_ids),
             "forced_version_rematch_recipes": len(forced_version_recipe_ids),
+            "removed_offer_recipes": len(removed_offer_recipe_ids),
             "rematch_recipes": len(rematch_recipe_ids),
             "raw_rescore_recipes": len(raw_rescore_recipe_ids),
             "effective_rescore_recipes": len(effective_rescore_recipe_ids),

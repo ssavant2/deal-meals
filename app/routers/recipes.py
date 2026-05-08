@@ -688,6 +688,7 @@ def get_cache_status():
         from cache_manager import cache_manager
 
         runtime_status = cache_manager.get_runtime_rebuild_status()
+        freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=False)
         with get_db_session() as db:
             result = db.execute(text("""
                 SELECT status, total_matches, computation_time_ms,
@@ -705,6 +706,7 @@ def get_cache_status():
                     "time_ms": result.computation_time_ms,
                     "last_background_rebuild_at": result.last_background_rebuild_at.isoformat() if result.last_background_rebuild_at else None,
                     "background_rebuild_source": result.background_rebuild_source,
+                    "cache_freshness": freshness_status,
                     **runtime_status,
                 })
             else:
@@ -712,6 +714,7 @@ def get_cache_status():
                     "success": True,
                     "status": "unknown",
                     "ready": False,
+                    "cache_freshness": freshness_status,
                     **runtime_status,
                 })
     except Exception as e:
@@ -1433,6 +1436,31 @@ def _refresh_pantry_search_index_after_recipe_change_sync(source: str) -> dict |
         return None
 
 
+def _format_recipe_cache_refresh_complete(prefix: str, result: dict) -> str:
+    mode = result.get("effective_rebuild_mode", "unknown")
+    time_ms = result.get("time_ms", 0)
+
+    if mode == "delta":
+        full_preview_ms = result.get("full_preview_time_ms")
+        full_preview = f"{full_preview_ms}ms" if full_preview_ms is not None else "skipped"
+        patch_ms = result.get("patch_preview_time_ms")
+        patch = f"{patch_ms}ms" if patch_ms is not None else "unknown"
+        cached = result.get("cached", result.get("patch_result", {}).get("total_matches", 0))
+        return (
+            f"{prefix} cache refresh complete (delta): "
+            f"changed={result.get('changed_recipe_count', 0)} "
+            f"removed={result.get('removed_recipe_count', 0)} "
+            f"cache_rows={cached} total={time_ms}ms patch={patch} "
+            f"full_preview={full_preview} "
+            f"verification={result.get('verification_mode', 'unknown')}"
+        )
+
+    return (
+        f"{prefix} cache refresh complete ({mode}): "
+        f"cache_rows={result.get('cached', 0)} in {time_ms}ms"
+    )
+
+
 async def _refresh_cache_after_recipe_scrape(
     *,
     scraper_id: str,
@@ -1549,13 +1577,7 @@ async def _refresh_cache_after_recipe_scrape(
     if result.get("skipped"):
         logger.info(f"Recipe scrape cache refresh skipped: {result.get('reason')}")
     else:
-        logger.success(
-            "Recipe scrape cache refresh complete ({mode}): {cached} recipes in {time_ms}ms".format(
-                mode=result.get("effective_rebuild_mode", "unknown"),
-                cached=result.get("cached", 0),
-                time_ms=result.get("time_ms", 0),
-            )
-        )
+        logger.success(_format_recipe_cache_refresh_complete("Recipe scrape", result))
     return result
 
 
@@ -1642,13 +1664,7 @@ async def _refresh_cache_after_run_all_queue(
         if result.get("skipped"):
             logger.info(f"Run-all cache refresh skipped: {result.get('reason')}")
         else:
-            logger.success(
-                "Run-all cache refresh complete ({mode}): {cached} recipes in {time_ms}ms".format(
-                    mode=result.get("effective_rebuild_mode", "unknown"),
-                    cached=result.get("cached", result.get("patch_result", {}).get("total_matches", 0)),
-                    time_ms=result.get("time_ms", 0),
-                )
-            )
+            logger.success(_format_recipe_cache_refresh_complete("Run-all", result))
         return result
     except Exception as exc:
         try:
@@ -2948,8 +2964,11 @@ def count_unmatched_offers():
         with get_db_session() as db:
             total = db.execute(text("SELECT COUNT(*) FROM offers")).scalar() or 0
             matched = db.execute(text("""
-                SELECT COUNT(DISTINCT COALESCE(mo->>'offer_identity_key', mo->>'id'))
-                FROM recipe_offer_cache c, jsonb_array_elements(c.match_data->'matched_offers') mo
+                SELECT COUNT(DISTINCT offer_key)
+                FROM recipe_offer_cache c,
+                     jsonb_array_elements_text(
+                         jsonb_path_query_array(c.match_data, '$.matched_offers[*].offer_identity_key')
+                     ) AS offer_key
             """)).scalar() or 0
             return JSONResponse({"success": True, "count": max(0, total - matched)})
     except Exception as e:

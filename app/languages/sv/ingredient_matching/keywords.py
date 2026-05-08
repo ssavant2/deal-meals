@@ -19,7 +19,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'panerad', 'panerade', 'panerat',  # cooking method — "Bläckfiskring Panerade" should match via 'bläckfiskring', not 'panerade'
     'skuren', 'skurna', 'strimlad', 'strimlade',
     'riven', 'rivna', 'grovriven', 'finriven', 'finrivna', 'tärnad', 'tärnade', 'tärnat', 'smält', 'smälta',
-    'grovmalen', 'grovmalet', 'grovmalda',  # grinding descriptor - "Svartpeppar Grovmalen" should match on svartpeppar, not grovmalen
+    'grovmalen', 'grovmalet', 'grovmalda', 'grovmald', 'grovmalt',  # grinding descriptor - "Svartpeppar Grovmalen" should match on svartpeppar, not grovmalen
     'finmalet', 'finmalen', 'finmald', 'finmalda', 'finmalt',  # same for fine-ground — "Majsmjöl Finmalet" crosses flour types
     'vitaminberikad', 'vitaminberikade', 'vitaminberikat',  # fortification label — "Rapsolja D-vitaminberikad" crosses product types
     'passerad', 'passerade',  # processing form, not ingredient
@@ -59,10 +59,14 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'portionsbit', 'portionsbitar',  # packaging, not ingredient
     'portion', 'portioner',  # serving size ("O'boy Portion 10x28g" ≠ "4 portioner bulgur")
 
-    # Basic seasoning (too common - would match everything)
-    'salt', 'peppar', 'vatten', 'olja',
-    # NOTE: svartpeppar, vitpeppar, citronpeppar, vitlökspeppar removed —
-    # these are actual products that should match when recipes ask for them specifically
+    # Manual never-match staples: too common to create useful recipe offers.
+    # Specific neighboring terms like havssalt, strösocker and citronpeppar still
+    # match through their own explicit keywords.
+    'salt', 'peppar', 'svartpeppar', 'svartpepparkorn', 'svarpeppar',
+    'vatten', 'olja', 'socker',
+
+    # Non-buyable recipe byproducts: these require recipe-side handling, not offers.
+    'kikärtsspad', 'kikartsspad', 'aquafaba',
 
     # Generic descriptive words (cause false matches)
     'pressad', 'pressade',  # "Pressad Citron" - preparation method, not ingredient
@@ -169,6 +173,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'dubbel',  # "dubbelkolla innehållet!" → compound "dubbel" matches candy bars (Japp Dubbel, Sportlunch Dubbel). Not a food keyword.
     'brunt',  # "Brunt Farinsocker" — color descriptor. Matches "Krydda Brunt Senapsfrö"
     'garant', 'eldorado', 'sevan', 'findus', 'minella', 'ducali', 'risberg', 'delicato',  # store/product brand names (not food keywords)
+    'kockens',  # spice brand names in recipe text ("från Kockens kryddor") are context, not ingredients
     'vegeta',  # Podravka seasoning brand — substring matches "vegetabilisk/vegetarisk" in ingredient text
     'saluhall', 'thom',  # "Saluhall Paul Och Thom" - not food keywords
     'zeinas',  # "Basmati Quick N' Easy/2 Port Zeinas" brand
@@ -955,7 +960,9 @@ PROCESSED_FOODS: FrozenSet[str] = frozenset({
     'smältost', 'smaltost',  # processed cheese (burgers) - NOT real cheddar/ost
 
     # PREPARED VEGETABLE/FRUIT MIXES - not individual ingredients
-    'surkål', 'surkal',  # "Surkål med Morot" — fermented cabbage, not carrots
+    # NOTE: surkål/surkal is intentionally not here anymore. It is a buyable
+    # ingredient family and extraction returns only `surkål`, so "Surkål med
+    # Morot" still cannot satisfy standalone carrot lines.
     'kålmix', 'kalmix',  # "Kålmix Vitkål&morot" — coleslaw mix, not carrots or cabbage
     'morötter ärter', 'morotter arter',  # frozen peas+carrots mix, not individual vegetables
     'ärter majs paprika',  # "Ärter Majs Paprika Fryst" — frozen veggie mix
@@ -1751,6 +1758,7 @@ IMPLICIT_KEYWORDS: Dict[str, str] = {
 
     # Ribs (English) → Swedish revbensspjäll
     'ribs': 'revbensspjäll',  # "Baby back ribs" → matches revbensspjäll recipes
+    'spareribs': 'revbensspjäll',
 
     # Soy sauce (English product name) → Swedish keyword
     'soy': 'soja',  # "Japanese Soy Sauce" → soja (matches sojasås recipes)
@@ -1770,6 +1778,8 @@ IMPLICIT_KEYWORDS: Dict[str, str] = {
 
     # Spelling normalization (product vs recipe spelling differ)
     'sallatsmix': 'salladsmix',  # ICA spells with t, recipes with d
+    'blandsallad': 'salladsmix',
+    'gourmetsallad': 'salladsmix',
 
     # Fresh chili peppers → also match recipe keyword "chili"
     # "Chilipeppar Röd" → keyword 'chilipeppar' + implicit 'chili' → matches "1 röd chili"
@@ -1816,7 +1826,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'jäst',  # yeast (4 chars) — "Jäst Original Färsk"
     'bjäst',  # nutritional yeast (5 chars) — maps to näringsjäst
     # Japanese/Korean cooking ingredients
-    'nori',  # seaweed sheets (4 chars) — "Sushi Nori Roasted Seeweed"
+    'nori', 'alger',  # seaweed sheets/generic algae — "Sushi Nori Roasted Seeweed"
     'mirin',  # rice wine (5 chars) — "Mirin"
     'wasabi',  # wasabi (6 chars) — "Wasabi Paste"
     'comte', 'comté',  # Comté cheese — needed for "Comte" product names
@@ -1846,6 +1856,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'russin',  # raisins (6 chars)
     'linser',  # lentils (6 chars)
     'linfrö', 'linfro',  # flax seeds (6 chars) — "Linfrö Helt", "Linfrö Krossat"
+    'frön', 'fron',  # generic seed lines ("4 dl frön")
     # NOTE: 'kaffe' intentionally NOT here — recipes say "1 dl starkt kaffe" meaning
     # brewed coffee (make it yourself), not a product to buy. Same as vatten/salt.
     'råris',  # brown rice (5 chars)
@@ -1860,7 +1871,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     # 183 sylt recipes. Compound "hallonsylt"/"lingonsylt" (10 chars) still pass min_length.
     'panko',  # Japanese breadcrumbs
     'naan',  # Indian bread ("Naan Bread Original") — 23 recipes use naan/naanbröd
-    'gyros', 'kebab', 'ribs',  # prepared meat dishes
+    'gyros', 'kebab', 'ribs', 'öl', 'ol',  # prepared meat dishes / beer for cooking recipes
     'fylld', 'fyllda',  # "Fylld Gnocchi" → compound keyword (see _COMPOUND_WORDS_SET)
     'oumph',  # vegetarian pulled product ("Pulled Oumph")
     'fries',  # english name for pommes (mapped to 'pommes' via KEYWORD_SYNONYMS)
@@ -1954,19 +1965,112 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'sarek',  # Norrländskt tunnbröd brand (5 chars) — maps to tunnbröd
     'liba',   # Liba tunnbröd brand (4 chars) — maps to tunnbröd
     'cider',  # alcoholic/non-alcoholic cider (5 chars) — FPB already blocks cidervinäger collision
+    'dumle',  # candy brand used as ingredient in baking
+    'polly',  # candy brand used as explicit dessert/baking ingredient
+    'daim',  # candy brand used as explicit dessert/baking ingredient
+    'mache',  # product spelling for machesallat/maché
+    'oreo',  # exact cookie brand ingredient in baking/dessert recipes
+    'läsk', 'lask',  # explicit soft-drink ingredients
 })
 
 OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = {
     'färskpotatis': ['potatis'],
     'farskpotatis': ['potatis'],
+    'bakpotatis': ['potatis'],
+    'sparrispotatis': ['potatis'],
     'glutenfrihavregryn': ['havregryn'],
-    'vegoburgare': ['vegetariskhamburgare'],
-    'veggoburgare': ['vegetariskhamburgare'],
+    'vegoburgare': ['vegetariskhamburgare', 'hamburgare', 'burgare'],
+    'veggoburgare': ['vegetariskhamburgare', 'hamburgare', 'burgare'],
     'halloumiburgare': ['vegetariskhamburgare'],
     'grillostburgare': ['vegetariskhamburgare'],
+    'ädelost': ['ädel'],
+    'adelost': ['adel'],
+    'mjölkpulver': ['torrmjölk'],
+    'mjolkpulver': ['torrmjölk'],
+    'basilico': ['basilikapesto'],
+    'cornichons': ['inlagdgurka', 'cornichoner'],
+    'cornichoner': ['inlagdgurka', 'cornichons'],
+    'smörgåspickles': ['inlagdgurka', 'cornichons'],
+    'smorgaspickles': ['inlagdgurka', 'cornichons'],
+    'sockerärtor': ['salladsärtor'],
+    'sockerartor': ['salladsärtor'],
+    'salladsärtor': ['sockerärtor'],
+    'salladsartor': ['sockerärtor'],
+    'majsmjöl': ['polenta'],
+    'majsmjol': ['polenta'],
+    'polenta': ['majsmjöl'],
+    'persiljesmör': ['aromsmör'],
+    'persiljesmor': ['aromsmör'],
+    'vitlökssmör': ['aromsmör'],
+    'vitlokssmor': ['aromsmör'],
+    'sobanudlar': ['nudlar'],
+    'udonnudlar': ['nudlar'],
+    'ramennudlar': ['nudlar'],
+    'somennudlar': ['nudlar'],
+    'äggnudlar': ['nudlar'],
+    'aggnudlar': ['nudlar'],
+    'risnudlar': ['nudlar'],
+    'glasnudlar': ['nudlar'],
+    'vetenudlar': ['nudlar'],
+    'ananasskivor': ['ananas'],
+    'chiafrön': ['frön'],
+    'chiafron': ['fron'],
+    'bockhornsklöver': ['frön'],
+    'bockhornsklover': ['fron'],
+    'pumpakärnor': ['frön'],
+    'pumpakarnor': ['fron'],
+    'pumpafrön': ['frön'],
+    'pumpafron': ['fron'],
+    'sesamfrön': ['frön'],
+    'sesamfron': ['fron'],
+    'solrosfrön': ['solroskärnor', 'frön'],
+    'solrosfron': ['solroskarnor', 'fron'],
+    'solroskärnor': ['solrosfrön', 'frön'],
+    'solroskarnor': ['solrosfron', 'fron'],
+    'linfrö': ['frön'],
+    'linfro': ['fron'],
+    'krustader': ['minikrustader'],
+    'marängtoppar': ['maräng'],
+    'marangtoppar': ['marang'],
+    'marängdroppar': ['maräng'],
+    'marangdroppar': ['marang'],
+    'quornfärs': ['vegofärs'],
+    'quornfars': ['vegofärs'],
+    # Raw veal cuts are acceptable fallbacks for recipe wording such as
+    # "kalvkött med ben" when bone-in veal is unavailable. Keep this on raw cut
+    # keywords only, not kalvfärs/kalvkorv/sylta/fond/buljong.
+    'kalvhögrev': ['kalvkött'],
+    'kalvhogrev': ['kalvkött'],
+    'kalvbiff': ['kalvkött'],
+    'kalventrecote': ['kalvkött'],
+    'kalvschnitzel': ['kalvkött'],
+    'kalvstek': ['kalvkött'],
+    'kalvfilé': ['kalvkött'],
+    'kalvfile': ['kalvkött'],
+    'kalvytterfilé': ['kalvkött'],
+    'kalvytterfile': ['kalvkött'],
+    'kalvinnanlår': ['kalvkött'],
+    'kalvinnanlar': ['kalvkött'],
+    'kalvlägg': ['kalvkött'],
+    'kalvlagg': ['kalvkött'],
+    'kalvbog': ['kalvkött'],
+    'kalvbringa': ['kalvkött'],
+    'kalvkotlett': ['kalvkött'],
+    'kalvrygg': ['kalvkött'],
     # Fish fillets → base fish name (recipes say "torsk"/"lax", stores sell "Torskfilé"/"Laxfilé")
     'laxfilé': ['lax', 'fiskfilé'],
     'laxfile': ['lax', 'fiskfilé'],
+    # Generic white-fish-fillet recipe wording should reach common white fish
+    # products even when current offer names are sparse ("Torsk", "Kolja").
+    'torsk': ['fiskfilé'],
+    'stillahavstorsk': ['fiskfilé'],
+    'kolja': ['fiskfilé'],
+    'sej': ['fiskfilé'],
+    'rödspätta': ['fiskfilé'],
+    'rodspatta': ['fiskfilé'],
+    # Najadlax is cured/smoked salmon and should participate in explicit
+    # sliced/cured salmon recipe lines through lax specialty qualifiers.
+    'najadlax': ['lax'],
     # Mussel species → base mussels (recipes say "musslor", stores sell "Blåmusslor"/"Grönmusslor")
     'blåmusslor': ['musslor'],
     'blamusslor': ['musslor'],
@@ -2106,6 +2210,12 @@ OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = {
     # Generic sausage wording should surface common named sausage families too.
     'chorizo': ['korv'],
     'salsiccia': ['korv'],
+    'kabanoss': ['korv'],
+    'cabanossy': ['korv'],
+    'bratwurst': ['korv'],
+    'isterband': ['korv'],
+    'medister': ['korv'],
+    'merguez': ['korv'],
     # Plain macaroni recipes should still surface ordinary dry macaroni products.
     'idealmakaroner': ['pasta'],
     # Colored Thai curry pastes should satisfy the matching colored curry family.
@@ -2114,6 +2224,10 @@ OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = {
     'gröncurrypasta': ['gröncurry'],
     'groncurrypasta': ['groncurry'],
     'gulcurrypasta': ['gulcurry'],
+    # Measured generic chili spice lines can use flakes or powder; fresh-chili
+    # contexts are still gated by spice/fresh form rules.
+    'chiliflakes': ['chili'],
+    'chiliflingor': ['chili'],
     # Turkey compound products → generic base keyword (direction 1 only, no reverse mapping)
     # So recipe "bacon" finds "Kalkonbacon", but recipe "kalkonbacon" does NOT find generic bacon
     'kalkonbacon': ['bacon'],
@@ -2127,7 +2241,7 @@ OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = {
     # NOTE: buljong↔fond cross-matching removed. Buljong and fond are separate product
     # categories. "kycklingbuljong eller fond" is handled in extract_keywords_from_ingredient
     # by rewriting "eller fond" → "eller kycklingfond" based on the preceding buljong type.
-    'kantarellfond': ['fond'],  # kantarellfond has no parent, keeps original keyword
+    'kantarellfond': ['fond', 'svampfond'],  # kantarellfond has no parent, keeps original keyword
     # === Bread type mappings ===
     # Rost/toast breads → formbröd (same sliced bread category)
     'rostbröd': ['formbröd'],
@@ -2144,18 +2258,31 @@ OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = {
     'levainrost': ['formbröd'],  # Levainrost (sourdough toast)
     "roast'n": ['formbröd'],  # Roast'n Toast
     'brioche': ['formbröd'],  # brioche rostbröd
+    'slider': ['hamburgerbröd'],
+    'sliders': ['hamburgerbröd'],
+    'jättefranska': ['formbröd', 'formfranska'],
+    'jattefranska': ['formbröd', 'formfranska'],
     # Formbröd products → also match recipe keyword 'formfranska' (55 recipes)
     'formbröd': ['formfranska'],
-    # Norrländska tunnbröd brand names → tunnbröd
+    # Actual tunnbröd products/brands → tunnbröd. Do not bridge other soft
+    # breads such as Hönökaka/Polarpärlan; they are not tunnbröd.
     'sarek': ['tunnbröd'],
     'abisko': ['tunnbröd'],
     'njalla': ['tunnbröd'],
-    'polarkaka': ['tunnbröd'],
-    'polarpärlan': ['tunnbröd'],
-    'polarparlan': ['tunnbröd'],
-    'hönökaka': ['tunnbröd'],
-    'honokaka': ['tunnbröd'],
     'liba': ['tunnbröd'],  # Liba Original Tunnbröd
+    'fralla': ['styckbröd'],
+    'fröfralla': ['styckbröd'],
+    'frofralla': ['styckbröd'],
+    'grötfralla': ['styckbröd'],
+    'grotfralla': ['styckbröd'],
+    'surdegsfralla': ['styckbröd'],
+    'småbröd': ['styckbröd'],
+    'smabrod': ['styckbröd'],
+    'småfranska': ['styckbröd'],
+    'smafranska': ['styckbröd'],
+    'minibaguette': ['baguette'],
+    'sportbaguette': ['baguette'],
+    'mayo': ['majonnäs'],
     # Generic "kex" recipe lines should surface obvious cracker/cookie families
     # without having to collapse every product to the generic keyword.
     'digestivekex': ['kex'],
@@ -2176,7 +2303,7 @@ OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = {
     'jordnotssmor': ['nötsmör'],
     # Coconut products → 'kokos' so they match "riven kokos" recipes
     'kokosflingor': ['kokos'],
-    'kokoschips': ['kokos'],
+    'kokoschips': ['kokos', 'kokosflingor'],
     # Pickled cucumber products → 'inlagdgurka' so they match "inlagd gurka" / "ättiksgurka" recipes
     'gurkailag': ['inlagdgurka'],          # "Gurka i lag" (after SPACE_NORM)
     'tunnskivadgurka': ['inlagdgurka'],    # "Tunnskivad Gurka" (after SPACE_NORM)
@@ -2191,6 +2318,7 @@ OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = {
     # 'grönsallad' is a nearby generic wording used for the same leafy lettuce family.
     # None of the species-specific keywords (kruksallat, isbergssallat, etc.) are substrings
     # of those recipe words, so leafy lettuce offers need explicit extra keywords.
+    'salladsblad': ['grönsallad'],
     'sallat': ['plocksallat', 'salladsblad', 'grönsallad'],
     'plocksallat': ['salladsblad', 'grönsallad'],
     'kruksallat': ['plocksallat', 'salladsblad', 'grönsallad'],
@@ -2252,6 +2380,8 @@ OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = {
     # check_yoghurt_match ensures only vego recipes match vego yoghurt products.
     'plantgurt': ['plantgurt', 'yoghurt'],
     'havregurt': ['havregurt', 'yoghurt'],
+    'kokosgurt': ['kokosgurt', 'yoghurt'],
+    'soygurt': ['soygurt', 'yoghurt'],
     # Cherry tomato singular/plural: recipes use singular "körsbärstomat" but offers have keyword
     # "körsbärstomater" (plural). Swedish plural is longer than singular, so "körsbärstomater"
     # is not a substring of "körsbärstomat" → FTS pre-filter misses the recipe.

@@ -403,9 +403,9 @@ def _sync_recipe_sources() -> None:
     )
 
 
-async def _ensure_pantry_search_index_ready_on_startup() -> None:
+async def _ensure_pantry_search_index_ready_on_startup():
     if not app_settings.pantry_search_term_index_enabled:
-        return
+        return None
 
     try:
         from pantry_search_index import (
@@ -417,7 +417,15 @@ async def _ensure_pantry_search_index_ready_on_startup() -> None:
         needs_refresh, reason = compiled_recipe_search_term_index_needs_refresh()
         if not needs_refresh:
             logger.info("Pantry search-term index ready at startup")
-            return
+            return None
+
+        if not app_settings.pantry_search_startup_refresh_enabled:
+            logger.info(
+                "Pantry search-term index refresh needed at startup ({}) but "
+                "startup refresh is disabled",
+                reason,
+            )
+            return None
 
         logger.info(
             "Pantry search-term index refresh queued at startup ({})",
@@ -443,13 +451,17 @@ async def _ensure_pantry_search_index_ready_on_startup() -> None:
                     exc,
                 )
 
-        asyncio.create_task(_refresh_in_background())
+        return asyncio.create_task(
+            _refresh_in_background(),
+            name="startup-pantry-search-index-refresh",
+        )
     except Exception as exc:
         logger.warning(
             "Could not inspect pantry search-term index at startup; pantry will "
             "fall back to legacy if needed: {}",
             exc,
         )
+        return None
 
 
 @asynccontextmanager
@@ -503,74 +515,160 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Scheduler failed to start: {e} — app continues without scheduling")
 
-    # Rebuild recipe-offer cache on startup (ensures cache is always valid)
-    # Run in thread executor: compute_cache uses multiprocessing (fork), which
-    # deadlocks when called directly from asyncio. In a thread there is no
-    # running event loop, so fork() works normally.
-    from cache_manager import refresh_cache_locked
+    # Queue recipe-offer cache rebuild on startup without blocking the web
+    # process from becoming healthy. Existing cache rows remain servable while
+    # the background rebuild computes a fresh replacement.
+    from cache_manager import cache_manager, compute_cache_async
     import asyncio
 
-    cache_ok = False
-    for attempt in range(2):
-        try:
-            result = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: refresh_cache_locked(skip_if_busy=False),
-            )
+    existing_cache_rows = 0
+    try:
+        from database import SessionLocal
+        session = SessionLocal()
+        existing_cache_rows = session.execute(
+            text("SELECT COUNT(*) FROM recipe_offer_cache")
+        ).scalar()
+        if existing_cache_rows and existing_cache_rows > 0:
+            session.execute(text(
+                "UPDATE cache_metadata SET status = 'ready' "
+                "WHERE cache_name = 'recipe_offer_matches' "
+                "AND status = 'computing'"
+            ))
+            session.commit()
+        session.close()
+        if existing_cache_rows and existing_cache_rows > 0:
             logger.info(
-                "Cache rebuilt ({}/{}): {} recipes in {}ms",
-                result.get('effective_rebuild_mode', 'unknown'),
-                result.get('configured_rebuild_mode', 'unknown'),
-                result.get('cached', 0),
-                result.get('time_ms', 0),
+                "Serving existing cache at startup "
+                f"({existing_cache_rows} entries)"
             )
-            cache_ok = True
-            break
-        except Exception as e:
-            if attempt == 0:
-                logger.error(f"Cache rebuild failed (attempt 1/2): {e} — retrying...")
-            else:
-                logger.critical(
-                    f"CACHE BUILD FAILED after 2 attempts: {e}\n"
-                    "The web server will start but recipe suggestions may be "
-                    "missing or slow. Check database connectivity and disk space."
-                )
+        else:
+            logger.warning(
+                "No cache data available at startup; recipe suggestions may be "
+                "missing until a scrape or manual cache reset rebuilds it"
+            )
 
-    if not cache_ok:
-        # Check if stale cache data exists in DB
-        try:
-            from database import SessionLocal
-            from sqlalchemy import text
-            session = SessionLocal()
-            stale_count = session.execute(
-                text("SELECT COUNT(*) FROM recipe_offer_cache")
-            ).scalar()
-            session.close()
-            if stale_count and stale_count > 0:
-                logger.warning(
-                    f"Using STALE cache data ({stale_count} entries) — "
-                    "recipes may show outdated offers"
+        cache_freshness = cache_manager.inspect_cache_freshness(include_version_scan=True)
+        app.state.startup_cache_freshness = cache_freshness
+        freshness_state = cache_freshness.get("state", "unknown")
+        freshness_reasons = cache_freshness.get("reasons") or []
+        if freshness_state == "fresh":
+            logger.info(
+                "Startup cache freshness: fresh "
+                f"(rows={cache_freshness.get('cached_rows')}, "
+                f"active_recipes={cache_freshness.get('active_recipe_count')})"
+            )
+        elif cache_freshness.get("servable"):
+            logger.warning(
+                "Startup cache freshness: serving existing cache but rebuild "
+                f"is recommended (state={freshness_state}, "
+                f"reasons={','.join(freshness_reasons) or 'unknown'}, "
+                f"rows={cache_freshness.get('cached_rows')}, "
+                f"active_recipes={cache_freshness.get('active_recipe_count')})"
+            )
+        else:
+            logger.warning(
+                "Startup cache freshness: cache is not servable "
+                f"(state={freshness_state}, "
+                f"reasons={','.join(freshness_reasons) or 'unknown'})"
+            )
+    except Exception as e:
+        logger.warning(f"Could not inspect startup cache state: {e}")
+
+    pantry_search_task = await _ensure_pantry_search_index_ready_on_startup()
+
+    async def _refresh_cache_after_startup() -> None:
+        if pantry_search_task is not None:
+            logger.info(
+                "Startup cache rebuild waiting for pantry search-term index "
+                "refresh to finish"
+            )
+            await pantry_search_task
+
+        cache_ok = False
+        for attempt in range(2):
+            try:
+                result = await compute_cache_async(
+                    skip_if_busy=False,
+                    run_kind="startup_background_full_rebuild",
+                    source="startup",
                 )
-                # Set status to 'ready' so stale data is served
+                logger.info(
+                    "Startup background cache rebuilt ({}/{}): {} recipes in {}ms",
+                    result.get('effective_rebuild_mode', 'unknown'),
+                    result.get('configured_rebuild_mode', 'unknown'),
+                    result.get('cached', 0),
+                    result.get('time_ms', 0),
+                )
+                cache_ok = True
+                break
+            except Exception as e:
+                if attempt == 0:
+                    logger.error(
+                        "Startup background cache rebuild failed "
+                        f"(attempt 1/2): {e} — retrying..."
+                    )
+                else:
+                    logger.critical(
+                        f"STARTUP BACKGROUND CACHE BUILD FAILED after 2 attempts: {e}\n"
+                        "The web server will keep serving existing cache data "
+                        "if available. Check database connectivity and disk space."
+                    )
+
+        if not cache_ok:
+            # Check if stale cache data exists in DB
+            try:
+                from database import SessionLocal
                 session = SessionLocal()
-                session.execute(text(
-                    "UPDATE cache_metadata SET status = 'ready' "
-                    "WHERE cache_name = 'recipe_offer_matches'"
-                ))
-                session.commit()
+                stale_count = session.execute(
+                    text("SELECT COUNT(*) FROM recipe_offer_cache")
+                ).scalar()
                 session.close()
-            else:
-                logger.critical("No cache data available — recipes will use live computation (SLOW)")
-        except Exception as e2:
-            logger.critical(f"Could not check stale cache: {e2}")
+                if stale_count and stale_count > 0:
+                    logger.warning(
+                        f"Using STALE cache data ({stale_count} entries) — "
+                        "recipes may show outdated offers"
+                    )
+                    # Set status to 'ready' so stale data is served
+                    session = SessionLocal()
+                    session.execute(text(
+                        "UPDATE cache_metadata SET status = 'ready' "
+                        "WHERE cache_name = 'recipe_offer_matches'"
+                    ))
+                    session.commit()
+                    session.close()
+                else:
+                    logger.critical(
+                        "No cache data available — recipes will use live "
+                        "computation (SLOW)"
+                    )
+            except Exception as e2:
+                logger.critical(f"Could not check stale cache: {e2}")
 
-    await _ensure_pantry_search_index_ready_on_startup()
+    app.state.startup_pantry_search_task = pantry_search_task
+    if app_settings.cache_startup_background_rebuild_enabled:
+        app.state.startup_cache_rebuild_task = asyncio.create_task(
+            _refresh_cache_after_startup(),
+            name="startup-cache-rebuild",
+        )
+    else:
+        app.state.startup_cache_rebuild_task = None
+        logger.info(
+            "Startup cache policy: serving existing cache; full rebuild is "
+            "manual/scheduled, not part of web startup"
+        )
 
     yield
 
+    startup_cache_task = getattr(app.state, "startup_cache_rebuild_task", None)
+    if startup_cache_task and not startup_cache_task.done():
+        logger.info("Startup cache rebuild still running during shutdown")
+
     # Shutdown scheduler
     if SCHEDULER_AVAILABLE:
-        scraper_scheduler.shutdown()
+        try:
+            scraper_scheduler.shutdown()
+        except Exception as e:
+            logger.warning(f"Scheduler shutdown failed: {e}")
 
     # Close database connections
     shutdown_db()
@@ -608,6 +706,67 @@ async def json_decode_error_handler(request: Request, exc: json.JSONDecodeError)
         {"success": False, "message_key": "error.invalid_data"},
         status_code=400
     )
+
+
+# ==================== REQUEST BODY SIZE LIMIT ====================
+# Most mutating API calls only carry small JSON payloads. Read and replay the
+# body with a hard cap so endpoints can keep using request.json() safely even
+# when Content-Length is absent or wrong.
+
+MAX_MUTATING_REQUEST_BODY_BYTES = 1 * 1024 * 1024
+MUTATING_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
+
+
+def _request_body_too_large_response() -> JSONResponse:
+    return JSONResponse(
+        {"success": False, "message_key": "error.payload_too_large"},
+        status_code=413,
+    )
+
+
+def _content_length_exceeds_limit(request: Request, limit_bytes: int) -> bool:
+    content_length = request.headers.get("content-length")
+    if not content_length:
+        return False
+    try:
+        return int(content_length) > limit_bytes
+    except ValueError:
+        return False
+
+
+def _replay_request_body(request: Request, body: bytes) -> None:
+    sent = False
+
+    async def receive():
+        nonlocal sent
+        if sent:
+            return {"type": "http.request", "body": b"", "more_body": False}
+        sent = True
+        return {"type": "http.request", "body": body, "more_body": False}
+
+    request._body = body  # noqa: SLF001 - Starlette uses this cache internally.
+    request._receive = receive  # noqa: SLF001 - Replays the capped body downstream.
+
+
+@app.middleware("http")
+async def cap_mutating_request_body(request: Request, call_next):
+    """Reject mutating request bodies over 1 MB before endpoint parsing."""
+    if request.method not in MUTATING_METHODS:
+        return await call_next(request)
+
+    if _content_length_exceeds_limit(request, MAX_MUTATING_REQUEST_BODY_BYTES):
+        logger.warning(f"Blocked oversized request body for {request.method} {request.url.path}")
+        return _request_body_too_large_response()
+
+    body = bytearray()
+    async for chunk in request.stream():
+        body.extend(chunk)
+        if len(body) > MAX_MUTATING_REQUEST_BODY_BYTES:
+            logger.warning(f"Blocked oversized streamed request body for {request.method} {request.url.path}")
+            return _request_body_too_large_response()
+
+    _replay_request_body(request, bytes(body))
+    return await call_next(request)
 
 
 # ==================== CSRF / ORIGIN PROTECTION MIDDLEWARE ====================
@@ -652,11 +811,16 @@ async def add_security_headers(request: Request, call_next):
 
     import time as _time
     start = _time.monotonic()
+    path = request.url.path
+    try:
+        from activity_tracker import record_user_activity
+        record_user_activity(path, request.method)
+    except Exception as exc:
+        logger.debug(f"Could not record user activity for {request.method} {path}: {exc}")
     response = await call_next(request)
     duration_ms = int((_time.monotonic() - start) * 1000)
 
     # Access log (skip health checks and static assets to reduce noise)
-    path = request.url.path
     if not path.startswith("/static/") and path != "/health":
         client = get_client_ip(request)
         _access_logger.info(

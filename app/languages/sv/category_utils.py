@@ -313,6 +313,8 @@ def _reclassify(product_name: str, category: str) -> str:
     if category == 'beverages':
         name_lower = product_name.lower()
         _BEVERAGES_TO_PANTRY_KEYWORDS = (
+            'bamboo shoot',
+            'coconut milk',
             'gnocco', 'gnocchi', 'pasta ', 'nudlar',
             'flingor', 'müsli', 'musli', 'granola', 'müslibar',
             'gryn', 'bulgur', 'couscous', 'quinoa',
@@ -321,6 +323,9 @@ def _reclassify(product_name: str, category: str) -> str:
             'honung',
             'vinäger',
             'sylt ', 'marmelad',
+            'kantarell i vatten',
+            'kantareller i vatten',
+            'tomater i tomatjuice',
             'bakpulver', 'bikarbonat',
             'bönor', 'linser', 'kikärtor',
             'krydda',  # "Chai Latte Krydda" — spice product

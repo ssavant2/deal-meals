@@ -453,6 +453,8 @@ CARRIER_CONTEXT_REQUIRED: FrozenSet[str] = frozenset({
     'pastasås',  # fix_swedish_chars('pastasas') → 'pastasås'; name_words_all uses Swedish form
     'pinsasås',  # sauce carrier: raw 'nduja' should not match a pinsasås ingredient
     'pinsasas',  # normalized form used in ingredient/product matching
+    'salsa',  # condiment carrier: flavor/liquor words in salsa are not standalone ingredients
+    'knäckebröd', 'knackebrod', 'knäcke', 'knacke',
     'pålägg', 'palagg',  # deli-slice carrier: raw cuts and generic spreads should not match
     # Tube soft-cheese spreads: explicit flavored "mjukost" lines should only
     # match products that carry the same flavor signal, while plain "mjukost"
@@ -682,6 +684,10 @@ CONTEXT_WORD_KEYWORD_EXEMPTIONS: Dict[str, FrozenSet[str]] = {
     'tortellini': frozenset({'mozzarella', 'ricotta', 'spinaci', 'pancetta'}),
     'ravioli': frozenset({'mozzarella', 'ricotta', 'spinaci', 'pancetta'}),
     'fylld gnocchi': frozenset({'mozzarella', 'ricotta'}),
+    'burrata': frozenset({'mozzarella', 'mozarella'}),
+    # "Fior di latte" is a mozzarella style, not a coffee-latte carrier.
+    'mozzarella': frozenset({'burrata', 'latte'}),
+    'mozarella': frozenset({'burrata', 'latte'}),
     'coppa': frozenset({'parma'}),
     'coppadiparma': frozenset({'parma'}),
 
@@ -692,6 +698,11 @@ CONTEXT_WORD_KEYWORD_EXEMPTIONS: Dict[str, FrozenSet[str]] = {
     # Chiliflakes: "Chiliflingor Påse" normalizes to keyword 'chiliflakes' — 'flingor' context
     # is redundant since the keyword itself implies flakes/flingor
     'chiliflakes': frozenset({'flingor', 'flakes'}),
+
+    # Fresh chili varieties are acceptable for generic fresh chili/chilifrukter.
+    # Keep dried/specialty varieties such as chipotle/ancho context-required.
+    'chili': frozenset({'habanero', 'jalapeño', 'jalapeno'}),
+    'chilipeppar': frozenset({'habanero', 'jalapeño', 'jalapeno'}),
 
     # Deli platter products expose component cheeses/chark words in the name,
     # but "charkbricka" ingredients are meant to accept those assortments.
@@ -764,6 +775,13 @@ CONTEXT_WORD_KEYWORD_EXEMPTIONS: Dict[str, FrozenSet[str]] = {
     # Treat 'parma'/'prosciutto' as naming context for the same deli product when
     # we've already bridged the product into keyword 'parmaskinka'.
     'parmaskinka': frozenset({'parma', 'prosciutto'}),
+    # Generic prosciutto recipes can accept origin/form variants in the
+    # air-dried-ham family; these words describe the same deli family, not a
+    # separate carrier that should block the product.
+    'prosciutto': frozenset({
+        'parma', 'crudo', 'serrano', 'jamon', 'jamón',
+        'lufttorkad', 'lufttorkade', 'lufttorkat', 'skinka',
+    }),
 
     # Burger patties: "Marrowbone Beef Burger" IS a burger — 'burger' context shouldn't block itself
     'hamburgare': frozenset({'burger', 'burgare'}),
@@ -960,9 +978,9 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # Plain almonds should not match when the ingredient explicitly asks for one of them.
     'mandel': {'bittermandel', 'marconamandlar'},
     'mandlar': {'marconamandlar'},
-    # "apelsinskal" / "syltade apelsinskal" wants peel, and explicit
-    # "blodapelsin" wants the specific blood-orange variety, not generic orange.
-    'apelsin': {'apelsinskal', 'blodapelsin', 'blodapelsiner'},
+    # Explicit "blodapelsin" wants the specific blood-orange variety, not generic orange.
+    # Plain cocktail "apelsinskal" is treated as fresh orange zest by extraction.
+    'apelsin': {'blodapelsin', 'blodapelsiner', 'kanderad', 'kanderade', 'syltad', 'syltade'},
     # "kittost" = specific dessert cheese (Castello). Generic "ost" products
     # should NOT match when recipe specifically asks for kittost.
     'ost': {'kittost', 'vitmögelost', 'vitmogelost', 'svecia', 'paneer', 'ostkrokar', 'ostkrok'},

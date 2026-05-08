@@ -427,7 +427,7 @@ Some ingredients are so common in recipes that they would create hundreds of mat
 
 | Category | Ingredients |
 |----------|-------------|
-| Basic seasoning | salt, pepper, black pepper, white pepper, lemon pepper, garlic pepper |
+| Basic seasoning | salt, pepper, black pepper |
 | Cooking liquids | water, oil |
 | Sugar types | sugar (generic) |
 

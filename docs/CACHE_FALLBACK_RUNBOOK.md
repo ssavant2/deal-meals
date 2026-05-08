@@ -49,8 +49,16 @@ These cases are normal:
   cache may need a full rebuild.
 - A single `cache_operation_in_progress` usually only means another cache
   operation already holds the lock.
-- During probation, total time may be higher because full-preview verifies that
-  delta and full rebuild would produce the same result.
+- Small recipe-deltas normally skip full-preview and verify only the patch
+  scope. This keeps a 10-recipe scrape from running a full 13k-recipe preview
+  inside the web process. Larger recipe changes should cross the delta threshold
+  and use the full rebuild subprocess instead.
+- If recipe-delta full-preview is explicitly re-enabled for probation, total
+  time may be higher because full-preview verifies that delta and full rebuild
+  would produce the same result.
+- Small offer-deltas follow the same runtime policy: patch-preview verifies the
+  impacted recipe scope, while large offer changes should use the full rebuild
+  path selected by the offer refresh decision.
 
 ## Common Recipe-Delta Reasons
 
@@ -78,7 +86,6 @@ These cases are normal:
 | `recipe_changes_detected` | Offer-delta refuses to run when recipe-IR does not match recipes. | Run recipe/full rebuild first. This prevents offer-delta from using the wrong recipe baseline. |
 | `planner_missed_preview_diff` | The offer-delta planner did not cover the full-preview diff. | Let fallback/full rebuild run. Repeated failures need planner analysis. |
 | `materialized_patch_mismatch` | The materialized offer-delta does not match full-preview. | Run a full rebuild. Repeated failures indicate a delta planning or materialization bug. |
-| `ingredient_routing_fullscan_baseline_mismatch` | Hint routing and fullscan baseline produced different results during verification. | Keep fallback. Inspect ingredient-routing probation before trusting hint-first. |
 | `delta_exception:*` | Offer-delta threw an exception. | Read logs around the error and let fallback/full rebuild establish a new baseline. |
 
 ## Practical Playbooks
@@ -158,6 +165,15 @@ Support checks in dev:
 ```bash
 docker compose exec -T -w /app web python tests/run_app_support_checks.py
 ```
+
+Read-only matcher/cache full DB diff for suspected semantic drift:
+
+```bash
+docker compose exec -T -w /app web python tests/run_matcher_full_db_diff.py --sample-limit 25
+```
+
+This is a heavy live parity gate, not a quick support check. See
+`docs/TESTING.md` for when to run it and how to interpret the result.
 
 ## Safe Fallback
 

@@ -417,6 +417,8 @@ CREATE TABLE compiled_offer_term_index (
 
 CREATE INDEX idx_compiled_offer_term_lookup
     ON compiled_offer_term_index(matcher_version, offer_compiler_version, term);
+CREATE INDEX idx_compiled_offer_term_candidate_join
+    ON compiled_offer_term_index(matcher_version, offer_compiler_version, term_manifest_hash, term);
 CREATE INDEX idx_compiled_offer_term_offer
     ON compiled_offer_term_index(matcher_version, offer_compiler_version, offer_identity_key);
 CREATE INDEX idx_compiled_offer_term_manifest
@@ -453,6 +455,8 @@ CREATE TABLE compiled_recipe_term_index (
 
 CREATE INDEX idx_compiled_recipe_term_lookup
     ON compiled_recipe_term_index(matcher_version, recipe_compiler_version, term);
+CREATE INDEX idx_compiled_recipe_term_candidate_join
+    ON compiled_recipe_term_index(matcher_version, recipe_compiler_version, term_manifest_hash, term);
 CREATE INDEX idx_compiled_recipe_term_found_recipe
     ON compiled_recipe_term_index(found_recipe_id);
 CREATE INDEX idx_compiled_recipe_term_recipe
@@ -461,6 +465,57 @@ CREATE INDEX idx_compiled_recipe_term_manifest
     ON compiled_recipe_term_index(term_manifest_hash);
 
 COMMENT ON TABLE compiled_recipe_term_index IS 'Persistent recipe-term postings for candidate routing';
+
+-- ============================================================================
+-- COMPILED_RECIPE_OFFER_CANDIDATES - Persistent candidate pairs for rebuild scoring
+-- ============================================================================
+CREATE TABLE compiled_recipe_offer_candidates (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    found_recipe_id UUID NOT NULL,
+    recipe_identity_key VARCHAR(64) NOT NULL,
+    offer_identity_key VARCHAR(64) NOT NULL,
+    store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+    matcher_version VARCHAR(64) NOT NULL,
+    recipe_compiler_version VARCHAR(64) NOT NULL,
+    offer_compiler_version VARCHAR(64) NOT NULL,
+    term_manifest_hash VARCHAR(64) NOT NULL,
+    matched_terms TEXT[] NOT NULL DEFAULT '{}'::text[],
+    candidate_reason VARCHAR(40) NOT NULL DEFAULT 'term_overlap',
+    indexed_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT uq_compiled_recipe_offer_candidate UNIQUE (
+        matcher_version,
+        recipe_compiler_version,
+        offer_compiler_version,
+        term_manifest_hash,
+        found_recipe_id,
+        offer_identity_key
+    ),
+    CONSTRAINT fk_compiled_recipe_offer_candidate_recipe
+        FOREIGN KEY (found_recipe_id)
+        REFERENCES found_recipes(id)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX idx_compiled_recipe_offer_candidate_chunk
+    ON compiled_recipe_offer_candidates(
+        matcher_version,
+        recipe_compiler_version,
+        offer_compiler_version,
+        term_manifest_hash,
+        found_recipe_id
+    );
+CREATE INDEX idx_compiled_recipe_offer_candidate_offer
+    ON compiled_recipe_offer_candidates(
+        matcher_version,
+        offer_compiler_version,
+        term_manifest_hash,
+        offer_identity_key
+    );
+CREATE INDEX idx_compiled_recipe_offer_candidate_recipe
+    ON compiled_recipe_offer_candidates(found_recipe_id);
+
+COMMENT ON TABLE compiled_recipe_offer_candidates IS 'Persistent recipe-offer candidate pairs derived from term postings for bounded cache rebuild scoring';
+COMMENT ON COLUMN compiled_recipe_offer_candidates.matched_terms IS 'Routing terms shared by the recipe and offer term indexes';
 
 -- ============================================================================
 -- COMPILED_RECIPE_SEARCH_TERM_INDEX - Persistent recipe term postings for pantry
@@ -540,6 +595,7 @@ CREATE TABLE cache_metadata (
     error_message TEXT,
     last_operation JSONB DEFAULT '{}'::jsonb,
     operation_history JSONB DEFAULT '[]'::jsonb,
+    compiled_offer_baseline_committed BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     last_background_rebuild_at TIMESTAMPTZ,
     background_rebuild_source TEXT
@@ -548,6 +604,7 @@ CREATE TABLE cache_metadata (
 COMMENT ON TABLE cache_metadata IS 'Tracks cache computation status and timing';
 COMMENT ON COLUMN cache_metadata.last_operation IS 'Small structured summary of the latest cache operation for diagnostics';
 COMMENT ON COLUMN cache_metadata.operation_history IS 'Rolling compact history of recent cache operations for fallback diagnostics';
+COMMENT ON COLUMN cache_metadata.compiled_offer_baseline_committed IS 'False while compiled offer IR may be newer than the persisted recipe-offer cache';
 
 -- ============================================================================
 -- SCHEMA MIGRATIONS - One-off upgrades for existing installs

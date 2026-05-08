@@ -1012,11 +1012,14 @@ async function scrapeStore(store) {
             pollBackendScrapeStatus();
 
             const isStoreConfigError = isStoreConfigErrorKey(data.message_key);
+            const isSiteMaintenance = data.message_key === 'ws.store_site_maintenance';
             Swal.fire({
-                icon: isStoreConfigError ? 'warning' : 'error',
-                title: isStoreConfigError ? i18n['stores.store_config_incomplete_title'] : i18n.error_occurred,
+                icon: (isStoreConfigError || isSiteMaintenance) ? 'warning' : 'error',
+                title: isStoreConfigError
+                    ? i18n['stores.store_config_incomplete_title']
+                    : (isSiteMaintenance ? i18n['stores.site_maintenance_title'] : i18n.error_occurred),
                 text: (data.message_key ? t(data.message_key, data.message_params) : null) || data.message,
-                confirmButtonColor: isStoreConfigError ? '#ffc107' : '#dc3545'
+                confirmButtonColor: (isStoreConfigError || isSiteMaintenance) ? '#ffc107' : '#dc3545'
             });
         }
 

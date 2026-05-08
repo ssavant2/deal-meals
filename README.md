@@ -99,17 +99,39 @@ background.
 - ~2 GB RAM for a normal install with the bundled container limits.
 
 Large recipe libraries need more memory during cache rebuilds and verified delta
-previews. As a conservative sizing rule, budget roughly 1 GiB of web-container
-memory per 10,000 active/candidate recipes when rebuilds run in parallel, plus
-the database container memory. If you import tens of thousands of recipes,
-increase the web memory limit or lower the cache worker caps in `.env`.
+previews. Startup does not run a full rebuild by default: the app serves any
+existing cache immediately, and cache refreshes are triggered by scrapes or a
+manual cache reset. Persistent rebuilds stream their result batches through
+PostgreSQL instead of keeping every cache row in Python memory. Async rebuilds
+also run in a separate Python subprocess by default; that keeps the web event
+loop responsive and makes the memory budget apply to the rebuild job instead of
+permanently bloating the web process.
+
+The standalone compose defaults full rebuilds and delta verification to at most
+3 workers and uses the database-backed candidate path. The bundled 1536 MiB web
+container is the target memory budget for the default Swedish data shape. If you
+raise worker caps for faster local or high-memory installs, raise the web memory
+limit too and measure it on your own recipe/store data. The development compose
+override also defaults `web` to 1536 MiB; set `DEV_WEB_MEM_LIMIT` locally if you
+need a larger one-off ceiling.
+
+Rebuild logs include `CACHE_REBUILD_PROGRESS` lines for the long phases, with a
+text progress bar, percent, elapsed time and ETA. The ingredient routing
+optimization currently defaults to the quality-preserving full ingredient scan
+inside already-routed candidate offers; the experimental `hint_first` mode is
+kept as an opt-in diagnostics path until it beats the default on real data. The
+longer-term rebuild pipeline work is tracked in
+[Cache Rebuild Architecture Plan](docs/CACHE_REBUILD_ARCHITECTURE_PLAN.md).
 
 ```env
-# Normal rebuilds use n-1 detected cores, capped here to avoid memory spikes.
+# Normal rebuilds use at most 3 workers by default.
 CACHE_REBUILD_MAX_WORKERS=3
 
-# Delta verification previews are capped the same way and never above rebuild.
+# Delta verification previews use their own cap: min(n-1 cores, 3 workers).
 CACHE_DELTA_VERIFICATION_MAX_WORKERS=3
+
+# Optional diagnostics/fallback only. Leave unset for normal production.
+# CACHE_REBUILD_CANDIDATE_DATA_SOURCE=term_index
 ```
 
 ## Network Security

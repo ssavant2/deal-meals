@@ -20,6 +20,14 @@ FOND_TYPE_CONTEXT = {
     'gronsak': {'grönsak', 'gronsak', 'vegetable'},
     'fisk': {'fisk', 'hummer', 'skaldjur'},
     'hummer': {'fisk', 'hummer', 'skaldjur'},
+    'skaldjur': {
+        'skaldjur', 'hummer', 'räk', 'rak', 'kräft', 'kraft',
+        'krabba', 'krabb', 'mussla', 'musslor', 'mussel',
+    },
+    'skaldjurs': {
+        'skaldjur', 'hummer', 'räk', 'rak', 'kräft', 'kraft',
+        'krabba', 'krabb', 'mussla', 'musslor', 'mussel',
+    },
 }
 
 # Contextual cheese: flag use-case cheeses that match the recipe type.

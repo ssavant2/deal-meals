@@ -18,7 +18,9 @@ ALLOWED_YOGURT_TYPES: FrozenSet[str] = frozenset({
 _YOGHURT_KEYWORDS: FrozenSet[str] = frozenset({
     fix_swedish_chars(w).lower() for w in {
         'yoghurt', 'yogurt',
+        'yoghur',
         'vaniljyoghurt',
+        'kardemummayoghurt', 'kardemummayogurt', 'kardemummayoghur',
         'matlagningsyoghurt', 'matyoghurt',
         'lättyoghurt',
         'kvargyoghurt', 'yoghurtkvarg',
@@ -68,6 +70,10 @@ _YOGHURT_VEGO_INDICATORS: FrozenSet[str] = frozenset({
     }
 })
 
+_EXPLICIT_YOGHURT_FLAVOR_REQUIREMENTS = {
+    'kardemumma': frozenset({'kardemumma', 'cardamom'}),
+}
+
 
 _YOGHURT_COOKING_INDICATORS: FrozenSet[str] = frozenset({
     fix_swedish_chars(w).lower() for w in {
@@ -110,11 +116,21 @@ def check_yoghurt_match(keyword: str, ingredient_lower: str,
     if keyword not in _YOGHURT_KEYWORDS:
         return True
     if not ('yoghurt' in product_name_lower or 'yogurt' in product_name_lower
-            or 'gurt' in product_name_lower):
+            or 'yoghur' in product_name_lower or 'gurt' in product_name_lower):
         return True
 
     if any(f in product_name_lower for f in _YOGHURT_SNACK_FLAVORS):
         return False
+
+    for flavor, product_cues in _EXPLICIT_YOGHURT_FLAVOR_REQUIREMENTS.items():
+        if any(cue in ingredient_lower for cue in (
+            f'{flavor}yoghurt',
+            f'{flavor}yogurt',
+            f'{flavor}yoghur',
+            f'{flavor} yoghurt',
+            f'{flavor} yogurt',
+        )):
+            return any(cue in product_name_lower for cue in product_cues)
 
     is_vanilj_product = any(v in product_name_lower for v in _YOGHURT_VANILJ_INDICATORS)
     is_vego_product = (any(v in product_name_lower for v in _YOGHURT_VEGO_INDICATORS)

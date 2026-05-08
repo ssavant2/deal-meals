@@ -9,7 +9,7 @@ Related data:
 """
 
 import re
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, FrozenSet, Iterable, List, Optional
 
 try:
     from languages.sv.normalization import fix_swedish_chars
@@ -39,11 +39,15 @@ from .compound_text import (
     _WORD_PATTERN_4PLUS,
     _RE_SPICE_AMOUNT,
 )
-from .extraction import extract_keywords_from_product
+from .extraction import (
+    extract_keywords_from_product,
+    _is_brewed_coffee_ingredient_text,
+    _is_chocolate_drink_text,
+    _is_truffle_oil_text,
+)
 from .extraction_patterns import _INGREDIENT_PARENTS_REVERSE, _PARENS_PATTERN
 from .form_rules import (
     FRESH_HERB_KEYWORDS,
-    FRESH_PRODUCT_INDICATORS,
     DRIED_PRODUCT_INDICATORS,
     FROZEN_PRODUCT_INDICATORS,
     RECIPE_FRESH_INDICATORS,
@@ -53,12 +57,14 @@ from .form_rules import (
     JUICE_PRODUCT_INDICATORS,
     JUICE_INGREDIENT_INDICATORS,
     JUICE_RULE_KEYWORDS,
+    product_indicates_fresh_herb_form,
 )
 from .keywords import FLAVOR_WORDS, IMPORTANT_SHORT_KEYWORDS, OFFER_EXTRA_KEYWORDS
 from .match_filters import (
     _QUALIFIER_REQUIRED_KEYWORDS,
     SECONDARY_INGREDIENT_PATTERNS,
 )
+from .no_match_policies import find_no_match_policy_hits
 from .normalization import (
     _SPACE_NORM_LOOKUP,
     _SPACE_NORM_PATTERN,
@@ -83,8 +89,11 @@ from .recipe_text import (
     preserve_parenthetical_grouped_herb_leaves,
     preserve_non_concentrate_parenthetical,
     preserve_parenthetical_shiso_alternatives,
+    preserve_spice_mix_preference_parentheticals,
+    preserve_single_product_example_parentheticals,
     strip_biff_portion_prep_phrase,
     rewrite_mince_of_alternatives,
+    rewrite_truncated_chocolate_color_lists,
     rewrite_truncated_eller_compounds,
 )
 from .specialty_rules import (
@@ -93,7 +102,13 @@ from .specialty_rules import (
     BIDIRECTIONAL_PER_KEYWORD,
     QUALIFIER_EQUIVALENTS,
 )
-from .validators import check_specialty_qualifiers, ingredient_has_spice_indicator
+from .validators import (
+    check_explicit_liquid_honey_match,
+    check_plain_fresh_potato_match,
+    check_specialty_qualifiers,
+    frozen_fresh_herb_form_overrides_spice_indicator,
+    ingredient_has_spice_indicator,
+)
 from .synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS
 
 _RE_CHILI_COUNT_FRESH = re.compile(
@@ -101,6 +116,186 @@ _RE_CHILI_COUNT_FRESH = re.compile(
 )
 _SWEET_CHILI_QUALIFIERS = frozenset({'sweet', 'söt', 'sota'})
 _UNSWEETENED_CHILI_QUALIFIERS = frozenset({'osötad', 'osotad', 'osötat', 'osotat'})
+_SPICE_MIX_CONTEXT_KEYWORDS = frozenset({
+    'grillkrydda',
+})
+_SPICE_MIX_VARIANT_CUES = {
+    'taco': frozenset({'taco', 'tacos', 'tacokrydda', 'texmex', 'tex-mex'}),
+    'tikka': frozenset({'tikka'}),
+    'garam': frozenset({'garam'}),
+    'tandoori': frozenset({'tandoori', 'tandori'}),
+    'raita': frozenset({'raita'}),
+    'fajita': frozenset({'fajita'}),
+    'cajun': frozenset({'cajun'}),
+    'paneng': frozenset({'paneng', 'panang'}),
+    'korma': frozenset({'korma'}),
+    'kyckling': frozenset({'kyckling', 'chicken'}),
+    'grill': frozenset({'grill', 'grillkrydda'}),
+    'asian': frozenset({'asian', 'asiatisk', 'asiatiska'}),
+    'korean': frozenset({'korean', 'koreansk', 'koreanska', 'bulgogi'}),
+    'crispy': frozenset({'crispy', 'coating', 'krispig', 'krispiga'}),
+    'garlic': frozenset({'garlic', 'vitlök', 'vitlok'}),
+    'bifteki': frozenset({'bifteki'}),
+}
+_SPICE_MIX_GENERIC_INGREDIENT_WORDS = frozenset({
+    'kryddmix', 'krydda',
+    'spice', 'spices', 'mix',
+    'santa', 'maria',
+    'påse', 'pase', 'förp', 'forp', 'förpackning', 'forpackning',
+    'till', 'med', 'gärna', 'garna', 'helst',
+    'msk', 'tsk', 'krm',
+    'masala',
+})
+_SPICE_MIX_MATCH_KEYWORDS = frozenset({
+    'kryddmix',
+    'spice',
+    'spices',
+    'mix',
+})
+_SPICE_MIX_FLAVOR_COMPONENT_KEYWORDS = frozenset({
+    'vitlök', 'vitlok',
+    'honung',
+    'chili', 'chilipeppar',
+    'paprika',
+    'lök', 'lok',
+    'örter', 'orter',
+})
+_TRUFFLE_OIL_MATCH_KEYWORDS = frozenset({'tryffelolja', 'olivolja', 'jungfruolivolja'})
+_EXPLICIT_EXTRA_VIRGIN_OLIVE_OIL_MATCH_KEYWORDS = frozenset({'olivolja', 'jungfruolivolja'})
+_EXPLICIT_EXTRA_VIRGIN_OLIVE_OIL_INGREDIENT_CUES = frozenset({
+    'extra jungfruolivolja',
+    'extra virgin',
+    'jungfruolivolja classico',
+})
+_EXPLICIT_EXTRA_VIRGIN_OLIVE_OIL_BLOCKED_PRODUCT_CUES = frozenset({
+    'citron', 'limone', 'lemon',
+    'spray',
+})
+_CHOCOLATE_DRINK_MATCH_KEYWORDS = frozenset({'chokladdryck', 'choklad', 'bakchoklad', 'blockchoklad', 'kakao'})
+
+
+def _has_whole_word_match(keyword: str, text: str) -> bool:
+    pos = 0
+    kw_len = len(keyword)
+    while True:
+        pos = text.find(keyword, pos)
+        if pos == -1:
+            return False
+        before_ok = pos == 0 or not text[pos - 1].isalpha()
+        end_pos = pos + kw_len
+        after_ok = end_pos >= len(text) or not text[end_pos].isalpha()
+        if before_ok and after_ok:
+            return True
+        pos += 1
+
+
+def _keyword_occurs_in_ingredient(keyword: str, ingredient_lower: str) -> bool:
+    if keyword not in ingredient_lower:
+        return False
+    if len(keyword) <= 2:
+        return _has_whole_word_match(keyword, ingredient_lower)
+    return True
+
+
+def _truffle_oil_requirement_allows_product(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+    product_keywords: Iterable[str],
+) -> bool:
+    if matched_keyword not in _TRUFFLE_OIL_MATCH_KEYWORDS:
+        return True
+    if not _is_truffle_oil_text(ingredient_lower):
+        return True
+    return 'tryffelolja' in set(product_keywords) or _is_truffle_oil_text(product_lower)
+
+
+def _explicit_extra_virgin_olive_oil_requirement_allows_product(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+) -> bool:
+    if matched_keyword not in _EXPLICIT_EXTRA_VIRGIN_OLIVE_OIL_MATCH_KEYWORDS:
+        return True
+    if not any(cue in ingredient_lower for cue in _EXPLICIT_EXTRA_VIRGIN_OLIVE_OIL_INGREDIENT_CUES):
+        return True
+    return not any(cue in product_lower for cue in _EXPLICIT_EXTRA_VIRGIN_OLIVE_OIL_BLOCKED_PRODUCT_CUES)
+
+
+def _chocolate_drink_requirement_allows_product(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+    product_keywords: Iterable[str],
+) -> bool:
+    if matched_keyword not in _CHOCOLATE_DRINK_MATCH_KEYWORDS:
+        return True
+    if not _is_chocolate_drink_text(ingredient_lower):
+        return True
+    return 'chokladdryck' in set(product_keywords) or _is_chocolate_drink_text(product_lower)
+_EXPLICIT_VEGAN_PRODUCT_CUES = frozenset({
+    'vegansk', 'veganska', 'veganskt',
+    'vegan',
+    'växtbaserad', 'vaxtbaserad',
+    'plant based', 'plant-based',
+    'vegetabilisk',
+    'violife', 'greenvie',
+})
+_PLANT_BASED_PRODUCT_CUES = frozenset({
+    *_EXPLICIT_VEGAN_PRODUCT_CUES,
+    'vego', 'vegetarisk', 'vegetariskt', 'vegetariska',
+    'quorn',
+    'anamma', 'jävligtgott', 'javligtgott',
+    'formbar',
+    'oatly', 'planti', 'alpro',
+    'havre', 'havregurt', 'plantgurt', 'havredryck', 'havregrädde', 'havregradde',
+    'soja', 'sojagurt', 'sojadryck',
+    'mandel', 'mandeldryck',
+    'ärt', 'art', 'ärtdryck', 'artdryck',
+    'kokosgurt', 'kokosdryck', 'kokosmjölk', 'kokosmjolk',
+})
+_VEGETARIAN_PRODUCT_CUES = frozenset({
+    *_PLANT_BASED_PRODUCT_CUES,
+    'vegetarisk', 'vegetariskt', 'vegetariska',
+    'halloumi', 'halloumiburgare',
+    'grillost', 'grillostburgare',
+})
+_LACTOSE_FREE_PRODUCT_CUES = frozenset({
+    'laktosfri', 'laktosfritt', 'laktosfria',
+    'lactose free', 'lactose-free',
+    *_PLANT_BASED_PRODUCT_CUES,
+})
+_GLUTEN_FREE_PRODUCT_CUES = frozenset({
+    'glutenfri', 'glutenfritt', 'glutenfria',
+    'gluten free', 'gluten-free',
+})
+_VEGAN_RECIPE_CUES = frozenset({
+    'vegansk', 'veganska', 'veganskt',
+    'vegan',
+    'växtbaserad', 'vaxtbaserad',
+    'plant based', 'plant-based',
+})
+_VEGETARIAN_RECIPE_CUES = frozenset({'vegetarisk', 'vegetariskt', 'vegetariska', 'vego'})
+_LACTOSE_FREE_RECIPE_CUES = frozenset({
+    'laktosfri', 'laktosfritt', 'laktosfria',
+    'lactose free', 'lactose-free',
+})
+_GLUTEN_FREE_RECIPE_CUES = frozenset({
+    'glutenfri', 'glutenfritt', 'glutenfria',
+    'gluten free', 'gluten-free',
+})
+_PLANT_BASED_RECIPE_BASE_REQUIREMENTS: tuple[tuple[FrozenSet[str], FrozenSet[str]], ...] = (
+    (
+        frozenset({'havrebaserad', 'havregrädde', 'havregradde', 'havremat', 'havredryck', 'havremjölk', 'havremjolk'}),
+        frozenset({'havre', 'havrebaserad', 'havregrädde', 'havregradde', 'havremat', 'oatly', 'imat'}),
+    ),
+    (
+        frozenset({'soyabaserad', 'sojabaserad', 'sojagrädde', 'sojagradde', 'soya'}),
+        frozenset({'soja', 'soya', 'soy', 'soyabaserad', 'sojabaserad', 'sojagrädde', 'sojagradde', 'alpro'}),
+    ),
+)
+_VEGAN_CHEESE_MATCH_KEYWORDS = frozenset({'ost', 'veganost', 'violife', 'greenvie'})
+_SMORDEG_MATCH_KEYWORDS = frozenset({'smördeg', 'smordeg'})
 _RE_ANIS_WORD = re.compile(r'\banis\b')
 _RE_KUMMIN_WORD = re.compile(r'\bkummin\b')
 _COOKED_KYCKLINGKLUBBA_INGREDIENT_CUES = frozenset({
@@ -113,7 +308,7 @@ _COOKED_KYCKLINGKLUBBA_INGREDIENT_CUES = frozenset({
     'kokt', 'kokta',
     'rökt', 'rokt',
 })
-_PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'salami', 'salame'})
+_PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'kalkon', 'salami', 'salame', 'rostbiff'})
 _COOKED_KYCKLING_PRODUCT_CUES = frozenset({
     'färdigkyckling',
     'färdiggrillad', 'fardiggrillad',
@@ -144,7 +339,7 @@ _LONG_PASTA_INGREDIENT_CUES = frozenset({
     'capellini',
 })
 _NON_PASTA_LONG_PASTA_COMPOUND_CUES = frozenset({
-    'kålrotsspaghetti', 'kalrotsspaghetti',
+    'kålrotsspaghetti', 'kalrotsspaghetti', 'morotsspaghetti',
 })
 _ROE_FAMILY_INGREDIENT_CUES = {
     'stenbitsrom': frozenset({'stenbitsrom', 'storkornskaviar'}),
@@ -161,6 +356,10 @@ _CONTEXT_WORD_INGREDIENT_ALIASES = {
     # Keep this narrow: the ingredient alias only satisfies the context check
     # if the product itself also contains the alias.
     'pastasås': frozenset({'tomatsås', 'tomatsas'}),
+    'plantgurt': frozenset({'gurt', 'yoghurt'}),
+    'havregurt': frozenset({'gurt', 'yoghurt'}),
+    'kokosgurt': frozenset({'gurt', 'yoghurt'}),
+    'soygurt': frozenset({'gurt', 'yoghurt'}),
 }
 _SPECIALTY_KEYWORD_ALIASES = {
     # Fresh chili family has several recipe-side surface forms that should all
@@ -172,6 +371,9 @@ _SPECIALTY_KEYWORD_ALIASES = {
     # the ingredient/product keyword itself is "paprikapulver".
     'paprikapulver': 'paprika',
     'paprikakrydda': 'paprika',
+    'laxfilé': 'lax',
+    'laxfile': 'lax',
+    'kalamataoliver': 'oliver',
 }
 _INGREDIENT_PARENT_TEXT_ALIASES = {
     # Ordinary short pasta shapes should behave like generic "pasta" in recipe
@@ -227,10 +429,276 @@ _NON_READY_CHICKPEA_INGREDIENT_CUES = frozenset({
 _READY_PACKAGED_CHICKPEA_MEASURE_RE = re.compile(r'\b\d+(?:[.,]\d+)?\s*(?:g|kg|ml)\b')
 _BLOCKED_READY_CHICKPEA_PRODUCT_CUES = frozenset({
     'torr', 'torra',
+    'torkad', 'torkade',
     'fryst', 'frysta',
     'rostad', 'rostade',
 })
 _READY_PACKAGED_BEET_MEASURE_RE = re.compile(r'\b\d+(?:[.,]\d+)?\s*(?:g|kg|ml)\b')
+_BEET_KEYWORDS = frozenset({'rödbeta', 'rödbetor', 'rodbeta', 'rodbetor'})
+_BEET_PICKLED_INGREDIENT_CUES = frozenset({
+    'inlagd', 'inlagda',
+    'konserverad', 'konserverade',
+    'gammaldags', 'gammeldags',
+})
+_BEET_PRECOOKED_CUES = frozenset({
+    'förkokt', 'förkokta',
+    'forkokt', 'forkokta',
+})
+_BEET_STRONG_PRESERVED_CUES = frozenset({
+    *_BEET_PICKLED_INGREDIENT_CUES,
+    *_BEET_PRECOOKED_CUES,
+})
+_BEET_SLICED_CUES = frozenset({'skivad', 'skivade', 'skivor'})
+_BEET_WHOLE_PRESERVED_PRODUCT_CUES = frozenset({'hela'})
+_BEET_PICKLED_OR_JAR_PRODUCT_CUES = frozenset({
+    *_BEET_PICKLED_INGREDIENT_CUES,
+    *_BEET_SLICED_CUES,
+    *_BEET_WHOLE_PRESERVED_PRODUCT_CUES,
+})
+_BEET_PRESERVED_PRODUCT_CUES = frozenset({
+    *_BEET_STRONG_PRESERVED_CUES,
+    *_BEET_SLICED_CUES,
+    *_BEET_WHOLE_PRESERVED_PRODUCT_CUES,
+})
+_BEET_FRESH_PREP_CUES = frozenset({
+    'medelstor', 'medelstora',
+    'stor', 'stora',
+    'liten', 'litet', 'lilla', 'små', 'sma',
+    'tunt', 'tunna', 'tunt skivade', 'tunt skivad',
+    'rå', 'råa', 'ra', 'raa',
+    'färsk', 'färska', 'farsk', 'farska',
+})
+_SESAME_SEED_KEYWORDS = frozenset({'sesamfrö', 'sesamfrön', 'sesamfro', 'sesamfron'})
+_TOFU_KEYWORDS = frozenset({'tofu'})
+_TOFU_PREPARED_PRODUCT_CUES = frozenset({
+    'crispy',
+    'friterad', 'friterade', 'friterat',
+    'marinerad', 'marinerade',
+    'rökt', 'rokt',
+    'sojamarinerad', 'sojamarinerade',
+    'chili',
+    'vitlök', 'vitlok',
+})
+_BREAD_SLICE_KEYWORDS = frozenset({'bröd', 'brod', 'formbröd', 'formbrod'})
+_BREAD_SLICE_INGREDIENT_CUES = frozenset({
+    'brödskiva', 'brodskiva',
+    'brödskivor', 'brodskivor',
+    'skiva bröd', 'skiva brod',
+    'skivor bröd', 'skivor brod',
+})
+_BREAD_SLICE_BLOCKED_PRODUCT_CUES = frozenset({
+    'bagel', 'bagels',
+    'liba',
+    'tunnbröd', 'tunnbrod',
+    'somun',
+    'pitabröd', 'pitabrod', 'pita',
+    'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod',
+    'korvbröd', 'korvbrod',
+    'fralla', 'frallor',
+    'småbröd', 'smabrod',
+    'naan',
+    'pinsa',
+    'focaccia',
+    'tortilla',
+})
+_SMOKED_TURKEY_BREAST_KEYWORDS = frozenset({
+    'kalkon',
+    'kalkonbröst', 'kalkonbrost',
+    'kalkonbröstfil', 'kalkonbrostfil',
+})
+_SMOKED_TURKEY_BREAST_INGREDIENT_CUES = frozenset({
+    'rökt', 'rokt',
+    'extrarökt', 'extrarokt',
+    'alspånsrökt', 'alspansrokt',
+    'basturökt', 'basturokt',
+    'pastrami',
+    'skiva', 'skivad', 'skivor',
+    'pålägg', 'palagg',
+})
+_SMOKED_TURKEY_BREAST_PRODUCT_CUES = frozenset({
+    'rökt', 'rokt',
+    'extrarökt', 'extrarokt',
+    'alspånsrökt', 'alspansrokt',
+    'basturökt', 'basturokt',
+    'pastrami',
+    'grillad', 'grillat',
+    'skivad', 'skivade', 'skivor',
+    'deliskivor', 'deli skivor',
+    'pålägg', 'palagg',
+})
+_PLAIN_PLANT_DRINK_KEYWORDS = frozenset({
+    'växtdryck', 'vaxtdryck',
+    'havredryck', 'sojadryck', 'mandeldryck', 'ärtdryck', 'artdryck',
+    'risdryck', 'kokosdryck',
+    'havremjölk', 'havremjolk',
+    'mjölk', 'mjolk', 'dryck',
+})
+_PLAIN_PLANT_DRINK_INGREDIENT_CUES = frozenset({
+    'växtdryck', 'vaxtdryck',
+    'växtbaserad mjölk', 'vaxtbaserad mjolk',
+    'växtbaserad mjölkdryck', 'vaxtbaserad mjolkdryck',
+    'havredryck', 'havremjölk', 'havremjolk',
+    'sojadryck', 'mandeldryck', 'ärtdryck', 'artdryck',
+    'risdryck', 'kokosdryck',
+})
+_PLANT_DRINK_FLAVOR_CUES = frozenset({
+    'choklad', 'chocolate',
+    'dumle',
+    'karamell', 'caramel', 'carame', 'kola',
+    'hasselnöt', 'hasselnot', 'hazelnut', 'hazeln',
+    'maple', 'walnut',
+    'nötvan', 'notvan',
+    'matcha',
+    'vanilj', 'vanilla', 'vanill',
+    'jordgubb', 'strawberry',
+    'blåbär', 'blabar', 'blueberry',
+})
+_PLANT_BASED_PRODUCT_REQUIRED_INGREDIENT_CUES = frozenset({
+    'vegansk', 'veganska', 'veganskt',
+    'vegan',
+    'växtbaserad', 'vaxtbaserad',
+    'plant based', 'plant-based',
+    'vego',
+    'vegofärs', 'vegofars',
+    'vegosmör', 'vegosmor',
+    'peas of heaven',
+    'blödande burgare', 'blodande burgare',
+})
+_PLANT_BASED_REQUIRED_KEYWORDS = frozenset({
+    'burgare', 'hamburgare', 'vegetariskhamburgare',
+    'korv', 'bratwurst',
+    'färs', 'fars', 'nötfärs', 'notfars', 'köttfärs', 'kottfars',
+    'smör', 'smor', 'margarin',
+})
+_CANNED_TOMATO_PRODUCT_CUES = frozenset({
+    'burk', 'konserv', 'konserverad', 'konserverade',
+    'tomatjuice', 'juice',
+    'krossad', 'krossade',
+    'passerade', 'finkrossad', 'finkrossade',
+    'skalad', 'skalade',
+    'tetra',
+})
+_FRESH_TOMATO_PRODUCT_CUES = frozenset({
+    'klass', 'kl 1', 'klass 1',
+    'färsk', 'farsk',
+    'kvist',
+    'babyplommon',
+})
+_PRESERVED_FRUIT_PRODUCT_CUES = frozenset({
+    'sockerlag', 'lag',
+    'halvor',
+    'konserv', 'konserverad', 'konserverade',
+    'burk',
+    'torkad', 'torkade',
+})
+_PRESERVED_ASPARAGUS_PRODUCT_CUES = frozenset({
+    'bitar',
+    'burk', 'konserv', 'konserverad', 'konserverade',
+    'lag',
+    'hel sparris vit',
+})
+_NOODLE_PREPARED_PRODUCT_CUES = frozenset({
+    'flavour', 'flavou', 'flavor', 'flavored', 'flavoured', 'smak',
+    'biff', 'beef',
+    'kyckling', 'chicken',
+    'kimchi',
+    'tom yum',
+    'pho ga',
+    'cup',
+    'demae', 'nissin',
+    'snabbnudlar', 'instant', 'instantnudlar',
+    'meal',
+})
+_MIXED_JUICE_FLAVOR_CUES = frozenset({
+    'äpple', 'apple',
+    'ananas',
+    'kiwi',
+    'apelsin', 'orange',
+    'morot',
+    'ingefära', 'ingefara',
+    'rödbeta', 'rodbeta',
+    'mango',
+    'passion',
+    'grape', 'grapefrukt',
+    'yuzu',
+    'hallon',
+    'jordgubb',
+    'blåbär', 'blabar',
+})
+_AGED_CHEESE_MATCH_KEYWORDS = frozenset({'ost', 'västerbottensost', 'vasterbottensost'})
+_AGED_CHEESE_INGREDIENT_CUES = frozenset({
+    'lagrad ost', 'vällagrad ost', 'vallagrad ost',
+    'västerbottensost', 'vasterbottensost',
+})
+_AGED_CHEESE_PRODUCT_CUES = frozenset({
+    'lagrad', 'vällagrad', 'vallagrad', 'mellanlagrad',
+    'herrgård', 'herrgard',
+    'präst', 'prast',
+    'greve',
+    'gruyère', 'gruyere',
+    'västerbottens', 'vasterbottens',
+})
+_AGED_CHEESE_BLOCKED_PRODUCT_CUES = frozenset({
+    'vegansk', 'vegan', 'violife', 'greenvie', 'växtbaserad', 'vaxtbaserad',
+    'cream cheese', 'färskost', 'farskost',
+    'mjukost',
+    'grill ost', 'grillost',
+    'salladsost',
+    'grekisk', 'greek white',
+    'ostsås', 'ostsas', 'cheese sauce',
+    'creamy original flavour', 'block original flavour',
+})
+_SALSA_CHEESE_SAUCE_PRODUCT_CUES = frozenset({
+    'cheese sauce',
+    'ostsås', 'ostsas',
+    'queso',
+})
+_RAW_MEAT_PREPARED_PRODUCT_CUES = frozenset({
+    'marinerad', 'marinerade',
+    'kryddmarinerad', 'kryddmarinerade',
+    'rökt', 'rokt', 'rökta', 'rokta', 'rökig', 'rokig',
+    'smokey', 'smoky',
+    'grillad', 'grillade',
+    'bbq',
+    'glaze', 'glazed',
+    'sweet',
+    'chili',
+    'souvlaki', 'grillspett', 'spett',
+})
+_TUNA_STEAK_FAMILY_INGREDIENT_CUES = frozenset({
+    'färsk', 'farsk',
+    'fryst', 'frysta',
+    'filé', 'file',
+    'bit', 'bitar',
+    'biff',
+    'steak',
+})
+_TUNA_CANNED_OR_PREPARED_PRODUCT_CUES = frozenset({
+    'vatten',
+    'olja', 'solrosolja',
+    'buljong',
+    'burk', 'konserv', 'tetra',
+    'finfördelad', 'finfordelad',
+    'pastej',
+    'baguettesallad', 'tramezzini', 'smörgås', 'smorgas', 'sallad',
+    'kattmat', 'mousse', 'våt', 'vat',
+})
+_TUNA_STEAK_FAMILY_PRODUCT_CUES = frozenset({
+    'färsk', 'farsk',
+    'fryst', 'frysta',
+    'filé', 'file',
+    'steak', 'steaks',
+})
+_TEMPEH_HELBIT_MATCH_KEYWORDS = frozenset({'helbit', 'tempeh'})
+_BARTA_BRAND_CUES = frozenset({'bärta', 'barta'})
+_PLAIN_TEMPEH_HELBIT_INGREDIENT_CUES = frozenset({'naturell', 'natural'})
+_PREPARED_TEMPEH_HELBIT_PRODUCT_CUES = frozenset({
+    'rökt', 'rokt', 'rökig', 'rokig',
+    'alspånsrökt', 'alspansrokt',
+    'smoked',
+    'marinerad', 'marinerade',
+    'bbq', 'chili', 'teriyaki', 'grillad', 'grillade',
+})
 _LENTIL_KEYWORDS = frozenset({'linser'})
 _READY_PACKAGED_LENTIL_INGREDIENT_CUES = frozenset({
     'kokt', 'kokta',
@@ -257,6 +725,29 @@ _READY_PACKAGED_LENTIL_PRODUCT_CUES = frozenset({
     'färdigkokta', 'fardigkokta',
     'burk', 'tetra',
 })
+_DRY_LENTIL_INGREDIENT_CUES = frozenset({
+    'torr', 'torra',
+    'torkad', 'torkade',
+    'okokt', 'okokta',
+})
+_CARROT_KEYWORDS = frozenset({'morot', 'morötter', 'morotter', 'morätter', 'moratter'})
+_PRESERVED_CARROT_INGREDIENT_CUES = frozenset({
+    'burk', 'konserv', 'konserverad', 'konserverade',
+    'tetra',
+    'förkokt', 'förkokta', 'forkokt', 'forkokta',
+    'färdigkokt', 'fardigkokt', 'färdigkokta', 'fardigkokta',
+    'avrunnen', 'avrunna',
+    'i lag',
+})
+_PRESERVED_CARROT_PRODUCT_CUES = frozenset({
+    'burk', 'konserv', 'konserverad', 'konserverade',
+    'tetra',
+    'förkokt', 'förkokta', 'forkokt', 'forkokta',
+    'färdigkokt', 'fardigkokt', 'färdigkokta', 'fardigkokta',
+    'i lag',
+    'små hela', 'sma hela',
+})
+_CITRUS_ZEST_KEYWORDS = frozenset({'citronzest', 'limezest'})
 _RIVEN_CHEDDAR_KEYWORDS = frozenset({'cheddar', 'cheddarost'})
 _CHEDDAR_SPREAD_PRODUCT_CUES = frozenset({
     'mjukost',
@@ -274,12 +765,32 @@ _GENERIC_FROZEN_FISH_INGREDIENT_CUES = frozenset({
     'fryst', 'frysta', 'djupfryst', 'djupfrysta',
 })
 _EXACT_COMPOUND_ONLY_INGREDIENTS = {
+    'savoiardikex': frozenset({'kex'}),
+    'porter': frozenset({'öl', 'ol', 'alkoholfriöl'}),
+    'hamburgerbröd': frozenset({'bröd', 'brod', 'potato', 'potatis', 'korvbröd', 'korvbrod', 'hamburgare'}),
+    'beyondburgare': frozenset({'hamburgare', 'burgare', 'svartpeppar', 'peppar'}),
+    'björnbärssaft': frozenset({'björnbär', 'björnbärs', 'björnbä', 'bjornbar', 'bjornbars', 'marmelad', 'sylt'}),
+    'svartvinbärssaft': frozenset({'vinbär', 'vinbärs', 'svartvinbär', 'svartvinbärs', 'svart', 'vinbar', 'vinbars'}),
+    'vaniljkvarg': frozenset({'kesella', 'kvarg'}),
+    'kanderatapelsinskal': frozenset({'apelsin', 'citrus'}),
+    'huvudsallad': frozenset({'sallad', 'sallat', 'grönsallad'}),
+    'apelsinläsk': frozenset({'apelsin'}),
+    'apelsinlask': frozenset({'apelsin'}),
     'glutenfrihavregryn': frozenset({'havregryn'}),
     'vegetariskhamburgare': frozenset({'hamburgare'}),
     'sojamajonnäs': frozenset({'soja', 'majonnäs'}),
     'sojamajonnas': frozenset({'soja', 'majonnäs'}),
     'srirachamajonnäs': frozenset({'sriracha', 'majonnäs'}),
     'srirachamajonnas': frozenset({'sriracha', 'majonnäs'}),
+    'tryffelmajonnäs': frozenset({'tryffel', 'majonnäs', 'mayo'}),
+    'tryffelmajonnas': frozenset({'tryffel', 'majonnas', 'mayo'}),
+    'tryffelmayo': frozenset({'tryffel', 'majonnäs', 'majonnas', 'mayo'}),
+    'cashewmeetlyfärs': frozenset({'cashew', 'cashewnöt', 'cashewnötter', 'nötter'}),
+    'cashewmeetlyfars': frozenset({'cashew', 'cashewnot', 'cashewnotter', 'notter'}),
+    'svartvinbärsgele': frozenset({'vinbär', 'vinbärs', 'svartvinbär', 'svartvinbärs'}),
+    'svartvinbarsgele': frozenset({'vinbar', 'vinbars', 'svartvinbar', 'svartvinbars'}),
+    'vinbärsgele': frozenset({'vinbär', 'vinbärs'}),
+    'vinbarsgele': frozenset({'vinbar', 'vinbars'}),
     'kantarellpesto': frozenset({'pesto', 'kantarell', 'kantareller', 'svamp'}),
     'kronärtskockspesto': frozenset({'pesto', 'kronärtskocka', 'kronartskocka'}),
     'kronartskockspesto': frozenset({'pesto', 'kronärtskocka', 'kronartskocka'}),
@@ -289,6 +800,8 @@ _EXACT_COMPOUND_ONLY_INGREDIENTS = {
     'kalrotsgari': frozenset({'kålrot'}),
     'romsås': frozenset({'rom'}),
     'romsas': frozenset({'rom'}),
+    'pizza spices': frozenset({'pizza', 'spices'}),
+    'pizza spice': frozenset({'pizza', 'spice'}),
     'skinkschnitzel': frozenset({'schnitzel'}),
     'fläskschnitzel': frozenset({'schnitzel'}),
     'flaskschnitzel': frozenset({'schnitzel'}),
@@ -308,7 +821,20 @@ _EXACT_COMPOUND_ONLY_INGREDIENTS = {
     'torkadsvamp': frozenset({'svamp'}),
     'flytandesmör': frozenset({'smör', 'smor'}),
     'flytandesmor': frozenset({'smör', 'smor'}),
+    'vitlökssmör': frozenset({
+        'vitlök', 'vitlok',
+        'vitlöksklyfta', 'vitlöksklyftor',
+        'vitloksklyfta', 'vitloksklyftor',
+        'vitlöksklyft', 'vitloksklyft',
+    }),
+    'vitlokssmor': frozenset({
+        'vitlök', 'vitlok',
+        'vitlöksklyfta', 'vitlöksklyftor',
+        'vitloksklyfta', 'vitloksklyftor',
+        'vitlöksklyft', 'vitloksklyft',
+    }),
     'fitnessflingor': frozenset({'fitness'}),
+    'thick cut file': frozenset({'fil', 'file'}),
     'durumvetemjöl': frozenset({'vetemjöl'}),
     'durumvetemjol': frozenset({'vetemjöl'}),
     'vetemjölspecial': frozenset({'vetemjöl'}),
@@ -320,7 +846,31 @@ _EXACT_COMPOUND_ONLY_INGREDIENTS = {
         'morot', 'morötter', 'morotter', 'julienne',
         'pasta', 'långpasta', 'langpasta', 'spaghetti', 'spagetti',
     }),
+    'kanelglass': frozenset({'kanel'}),
+    'dillpicklad': frozenset({'dill'}),
+    'kumminstekt': frozenset({'kummin'}),
 }
+_BREWED_COFFEE_BLOCKED_KEYWORDS = frozenset({
+    'kaffe', 'coffee', 'espresso', 'kokkaffe', 'bryggkaffe', 'snabbkaffe',
+})
+_RECIPE_NEVER_MATCH_KEYWORDS = frozenset({
+    'salt',
+    'peppar',
+    'svartpeppar',
+    'svartpepparkorn',
+    'svarpeppar',
+    'vatten',
+    'olja',
+    'socker',
+    'kikärtsspad',
+    'kikartsspad',
+    'aquafaba',
+})
+_NON_BUYABLE_ROOT_VEG_PASTA_CUES = frozenset({
+    'morotsspaghetti',
+    'kålrotsspaghetti',
+    'kalrotsspaghetti',
+})
 
 
 def _append_canonical_keyword_synonyms(text: str) -> str:
@@ -356,6 +906,7 @@ def _append_canonical_keyword_synonyms(text: str) -> str:
         and 'långpasta' not in text
         and 'langpasta' not in text
         and 'långpasta' not in extras
+        and not any(cue in text for cue in _NON_BUYABLE_ROOT_VEG_PASTA_CUES)
     ):
         extras.append('långpasta')
     # Fresh-sausage recipe wording needs the generic sausage umbrella exposed in
@@ -371,6 +922,15 @@ def _append_canonical_keyword_synonyms(text: str) -> str:
         and 'korv' not in extras
     ):
         extras.append('korv')
+    if (
+        'chipotlepasta' in text
+        and re.search(r'\b(?:eller|alt\.?|alternativt)\b.*\bpulver\b', text) is not None
+        and 'chipotlepulver' not in text
+        and 'chipotlepulver' not in extras
+    ):
+        extras.append('chipotlepulver')
+    if 'kycklingsteak' in text and 'kyckling' not in extras:
+        extras.append('kyckling')
     if not extras:
         return text
     return text + ' ' + ' '.join(extras)
@@ -408,9 +968,262 @@ def _product_matches_roe_family(product_keywords: List[str], roe_family: str) ->
 
 
 def _ingredient_wants_spirit_rom(ingredient_lower: str) -> bool:
-    """Explicit `ljus/mörk/vit rom` lines are spirit, not fish roe."""
+    """Explicit or volume-measured `rom` lines are spirit, not fish roe."""
 
-    return any(cue in ingredient_lower for cue in _ROM_SPIRIT_INGREDIENT_CUES)
+    return (
+        any(cue in ingredient_lower for cue in _ROM_SPIRIT_INGREDIENT_CUES)
+        or re.search(r'\b\d+(?:[,.]\d+)?\s*(?:dl|cl)\s+rom\b', ingredient_lower) is not None
+    )
+
+
+_COOKED_TURKEY_INGREDIENT_CUES = frozenset({
+    'färdiglagat', 'fardiglagat', 'färdiglagad', 'fardiglagad',
+    'tillagat', 'tillagad', 'kokt', 'kokta',
+})
+_COOKED_TURKEY_PRODUCT_CUES = frozenset({
+    'kokt', 'kokta', 'strimlad', 'strimlat', 'skivad', 'skivat',
+    'färdiglagad', 'fardiglagad', 'tillagad',
+})
+_COOKED_TURKEY_PRODUCT_BLOCKERS = frozenset({
+    'bröstfilé', 'brostfile', 'bröstfile', 'lårfilé', 'larfile', 'lårfile',
+    'grillkorv', 'korv', 'salami', 'mortadella',
+})
+_CHILI_SPICE_PRODUCT_CUES = frozenset({
+    'malen', 'malna', 'mald', 'malet',
+    'pulver', 'flakes', 'flingor', 'flinga', 'chilipulver', 'chiliflakes', 'chiliflingor',
+})
+_CHILI_SPICE_INGREDIENT_UNITS = frozenset({'tsk', 'krm', 'tesked', 'teskedar'})
+_FRESH_COLOR_CHILI_INGREDIENT_CUES = frozenset({
+    'röd chili', 'rod chili',
+    'grön chili', 'gron chili',
+    'gul chili',
+    'röd chilipeppar', 'rod chilipeppar',
+    'grön chilipeppar', 'gron chilipeppar',
+    'gul chilipeppar',
+})
+_CHILI_COLOR_QUALIFIERS = frozenset({'röd', 'rod', 'red', 'grön', 'gron', 'green', 'gul', 'yellow'})
+_FRESH_CHILI_UNIT_CUES = frozenset({'st', 'styck', 'liten', 'lilla', 'stor', 'stora', 'skivad', 'skivade'})
+_FRESH_CHILI_INGREDIENT_RE = re.compile(
+    r'\b(?:\d+(?:[,.]\d+)?\s*)?'
+    r'(?:(?:st|styck)\s+)?'
+    r'(?:(?:liten|lilla|stor|stora|skivad|skivade|röd|rod|grön|gron|gul)\s+)*'
+    r'(?:chilipeppar|chilifrukt|chilifrukter|chili)\b'
+)
+
+
+def _ingredient_requests_cooked_turkey(ingredient_lower: str, matched_keyword: str) -> bool:
+    return (
+        matched_keyword in {'kalkon', 'kalkonkött', 'kalkonkott'}
+        and 'kalkon' in ingredient_lower
+        and any(cue in ingredient_lower for cue in _COOKED_TURKEY_INGREDIENT_CUES)
+    )
+
+
+def _cooked_turkey_product_allowed(product_lower: str, ingredient_lower: str, matched_keyword: str) -> bool:
+    if not _ingredient_requests_cooked_turkey(ingredient_lower, matched_keyword):
+        return True
+    if any(cue in product_lower for cue in _COOKED_TURKEY_PRODUCT_BLOCKERS):
+        return False
+    return any(cue in product_lower for cue in _COOKED_TURKEY_PRODUCT_CUES)
+
+
+def _ingredient_requests_chili_spice(ingredient_lower: str, matched_keyword: str) -> bool:
+    if matched_keyword not in {'chili', 'chilipeppar'}:
+        return False
+    if _ingredient_requests_fresh_chili(ingredient_lower, matched_keyword):
+        return False
+    if (
+        any(cue in ingredient_lower for cue in _FRESH_COLOR_CHILI_INGREDIENT_CUES)
+        and not any(cue in ingredient_lower for cue in (
+            'malen', 'malna', 'mald', 'malet',
+            'pulver', 'flakes', 'flingor', 'flinga',
+            'ancho style', 'anchostyle',
+        ))
+    ):
+        return False
+    if any(unit in ingredient_lower.split() for unit in _CHILI_SPICE_INGREDIENT_UNITS):
+        return True
+    return any(cue in ingredient_lower for cue in (
+        'malen chili', 'chili pulver', 'chilipulver', 'chiliflakes', 'chiliflingor',
+    ))
+
+
+def _ingredient_requests_fresh_chili(ingredient_lower: str, matched_keyword: str) -> bool:
+    if matched_keyword not in {'chili', 'chilipeppar'}:
+        return False
+    if any(cue in ingredient_lower for cue in _FRESH_COLOR_CHILI_INGREDIENT_CUES):
+        return True
+    match = _FRESH_CHILI_INGREDIENT_RE.search(ingredient_lower)
+    if not match:
+        return False
+    prefix = ingredient_lower[:match.start()].split()[-2:]
+    segment = match.group(0)
+    if any(cue in segment.split() for cue in _FRESH_CHILI_UNIT_CUES):
+        return True
+    if prefix and any(cue in prefix for cue in _FRESH_CHILI_UNIT_CUES):
+        return True
+    return (
+        'sambal' in ingredient_lower
+        and re.search(r'\b(?:chilipeppar|chilifrukt|chilifrukter|chili)\b.*\beller\b.*\bsambal\b', ingredient_lower) is not None
+    )
+
+
+def _ingredient_has_explicit_chili_color(ingredient_lower: str) -> bool:
+    return any(cue in ingredient_lower for cue in _FRESH_COLOR_CHILI_INGREDIENT_CUES)
+
+
+def _chili_spice_product_allowed(product_lower: str, ingredient_lower: str, matched_keyword: str) -> bool:
+    if not _ingredient_requests_chili_spice(ingredient_lower, matched_keyword):
+        return True
+    return any(cue in product_lower for cue in _CHILI_SPICE_PRODUCT_CUES)
+
+
+def _fresh_chili_product_allowed(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: str,
+    category: str,
+) -> bool:
+    if not _ingredient_requests_fresh_chili(ingredient_lower, matched_keyword):
+        return True
+    if any(cue in product_lower for cue in _CHILI_SPICE_PRODUCT_CUES):
+        return False
+    if category in {'fruit', 'vegetables'}:
+        return True
+    if category == 'frozen':
+        return any(ind in product_lower for ind in FROZEN_PRODUCT_INDICATORS)
+    if not category:
+        return any(cue in product_lower for cue in (
+            'klass', 'kl1',
+            'färsk', 'farsk',
+            'fryst', 'frysta',
+            'peppar röd', 'peppar rod',
+            'peppar grön', 'peppar gron',
+            'peppar gul',
+        ))
+    return False
+
+
+def _soy_sauce_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: str,
+) -> bool:
+    if matched_keyword not in {'soja', 'soya', 'soy'}:
+        return True
+    if not (
+        re.search(r'\b(?:kinesisk|japansk)\s+soj[ay]\b', ingredient_lower)
+        or re.search(r'\bsojasås\b|\bsojasas\b|\bsoy\s+sauce\b', ingredient_lower)
+    ):
+        return True
+    return not any(
+        cue in product_lower
+        for cue in (
+            'cuisine',
+            'matlagningsgrädde',
+            'matlagningsgradde',
+            'matlagningsbas',
+            'grädde',
+            'gradde',
+            'alpro',
+            'havre',
+            'sojabaserad matlagning',
+            'soyabaserad matlagning',
+        )
+    )
+
+
+def _whole_cardamom_seed_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: str,
+) -> bool:
+    if matched_keyword != 'kardemumma':
+        return True
+    if not any(cue in ingredient_lower for cue in ('kardemummakärnor', 'kardemummakarnor')):
+        return True
+    return any(
+        cue in product_lower
+        for cue in ('kärnor', 'karnor', 'kapsel', 'kapslar', 'hel', 'hela')
+    )
+
+
+def _tortilla_product_allowed(product_lower: str, ingredient_lower: str, matched_keyword: str) -> bool:
+    if matched_keyword not in {'tortilla', 'tortillas'}:
+        return True
+    is_corn_only = (
+        'corn' in product_lower
+        and not any(cue in product_lower for cue in ('wheat', 'vete'))
+    )
+    if not is_corn_only:
+        return True
+    explicit_wheat_or_pizza_tortilla = any(cue in ingredient_lower for cue in (
+        'vetetortilla',
+        'vetetortillas',
+        'vete tortilla',
+        'vete tortillas',
+        'pizza tortilla',
+        'pizza tortillas',
+    ))
+    return not explicit_wheat_or_pizza_tortilla
+
+
+def _spice_mix_context_allows_component_match(
+    product_keywords: Iterable[str],
+    ingredient_lower: str,
+    matched_keyword: str,
+) -> bool:
+    if matched_keyword not in _SPICE_MIX_FLAVOR_COMPONENT_KEYWORDS:
+        return True
+    keyword_set = set(product_keywords)
+    required_mix_keywords = {
+        context
+        for context in _SPICE_MIX_CONTEXT_KEYWORDS
+        if context in ingredient_lower
+    }
+    if not required_mix_keywords:
+        return True
+    return bool(keyword_set & required_mix_keywords)
+
+
+def _spice_mix_variant_allows_product(
+    product_keywords: Iterable[str],
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: str,
+) -> bool:
+    """Explicit spice-mix variants should not cross-match on the bare carrier."""
+
+    if 'kryddmix' not in ingredient_lower and 'tacokrydda' not in ingredient_lower:
+        return True
+    if (
+        matched_keyword not in _SPICE_MIX_MATCH_KEYWORDS
+        and matched_keyword not in _SPICE_MIX_VARIANT_CUES
+    ):
+        return True
+
+    requested_variants = {
+        variant
+        for variant, cues in _SPICE_MIX_VARIANT_CUES.items()
+        if any(cue in ingredient_lower for cue in cues)
+    }
+    requested_words = {
+        word
+        for word in _WORD_PATTERN_4PLUS.findall(ingredient_lower)
+        if word not in _SPICE_MIX_GENERIC_INGREDIENT_WORDS
+        and not word.isdigit()
+    }
+    if not requested_variants and not requested_words:
+        return True
+
+    product_text = f"{product_lower} {' '.join(product_keywords)}"
+    return (
+        any(word in product_text for word in requested_words)
+        or any(
+            any(cue in product_text for cue in _SPICE_MIX_VARIANT_CUES[variant])
+            for variant in requested_variants
+        )
+    )
 
 
 def _ingredient_requests_long_pasta(ingredient_lower: str) -> bool:
@@ -419,6 +1232,20 @@ def _ingredient_requests_long_pasta(ingredient_lower: str) -> bool:
     if any(cue in ingredient_lower for cue in _NON_PASTA_LONG_PASTA_COMPOUND_CUES):
         return False
     return any(cue in ingredient_lower for cue in _LONG_PASTA_INGREDIENT_CUES)
+
+
+def _ingredient_is_non_buyable_root_veg_pasta(ingredient_lower: str) -> bool:
+    return any(cue in ingredient_lower for cue in _NON_BUYABLE_ROOT_VEG_PASTA_CUES)
+
+
+def _ingredient_requests_generic_mince(ingredient_lower: str) -> bool:
+    return bool(
+        re.search(r'\b(?:färs|fars)\b', ingredient_lower)
+        or any(cue in ingredient_lower for cue in (
+            'köttfärs', 'kottfars',
+            'hushållsfärs', 'hushallsfars',
+        ))
+    )
 
 
 def _ingredient_requests_ready_packaged_chickpeas(ingredient_lower: str) -> bool:
@@ -453,20 +1280,46 @@ def _ingredient_requests_ready_packaged_lentils(ingredient_lower: str) -> bool:
     return any(cue in ingredient_lower for cue in _READY_PACKAGED_LENTIL_INGREDIENT_CUES)
 
 
+def _ingredient_requests_dry_lentils(ingredient_lower: str) -> bool:
+    """Return True when a lentil ingredient explicitly wants dry/uncooked lentils."""
+
+    return any(cue in ingredient_lower for cue in _DRY_LENTIL_INGREDIENT_CUES)
+
+
 def _ready_packaged_lentil_allows_product(
     product_lower: str,
     ingredient_lower: str,
     matched_keyword: Optional[str],
 ) -> bool:
-    """Cooked/pre-cooked lentil lines should not accept dry or split lentils."""
+    """Keep dry lentils and cooked/pre-cooked lentil packs separate."""
 
     if matched_keyword not in _LENTIL_KEYWORDS:
         return True
+    if _ingredient_requests_dry_lentils(ingredient_lower):
+        return not any(cue in product_lower for cue in _READY_PACKAGED_LENTIL_PRODUCT_CUES)
     if not _ingredient_requests_ready_packaged_lentils(ingredient_lower):
         return True
     if any(cue in product_lower for cue in _BLOCKED_READY_LENTIL_PRODUCT_CUES):
         return False
     return any(cue in product_lower for cue in _READY_PACKAGED_LENTIL_PRODUCT_CUES)
+
+
+def _carrot_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Keep plain/fresh carrots separate from preserved or ready-cooked carrot packs."""
+
+    if matched_keyword not in _CARROT_KEYWORDS:
+        return True
+    product_is_preserved = any(cue in product_lower for cue in _PRESERVED_CARROT_PRODUCT_CUES)
+    ingredient_wants_preserved = any(cue in ingredient_lower for cue in _PRESERVED_CARROT_INGREDIENT_CUES)
+    if ingredient_wants_preserved:
+        return product_is_preserved
+    if product_is_preserved:
+        return False
+    return True
 
 
 def _ingredient_requests_preserved_whole_beets(ingredient_lower: str) -> bool:
@@ -486,6 +1339,985 @@ def _ingredient_requests_preserved_whole_beets(ingredient_lower: str) -> bool:
     return bool(_READY_PACKAGED_BEET_MEASURE_RE.search(ingredient_lower))
 
 
+def _beet_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Keep fresh, pre-cooked, and jarred beetroot forms separate."""
+
+    if matched_keyword not in _BEET_KEYWORDS:
+        return True
+
+    has_pickled_wording = any(cue in ingredient_lower for cue in _BEET_PICKLED_INGREDIENT_CUES)
+    has_precooked_wording = any(cue in ingredient_lower for cue in _BEET_PRECOOKED_CUES)
+    has_sliced_wording = any(cue in ingredient_lower for cue in _BEET_SLICED_CUES)
+    has_packaged_whole_wording = _ingredient_requests_preserved_whole_beets(ingredient_lower)
+    fresh_prep = any(cue in ingredient_lower for cue in _BEET_FRESH_PREP_CUES)
+
+    wants_pickled_or_jar = (
+        has_pickled_wording
+        or has_packaged_whole_wording
+        or (has_sliced_wording and not fresh_prep)
+    )
+    wants_preserved = (
+        has_pickled_wording
+        or has_precooked_wording
+        or has_packaged_whole_wording
+        or (has_sliced_wording and not fresh_prep)
+    )
+
+    product_is_pickled_or_jar = any(cue in product_lower for cue in _BEET_PICKLED_OR_JAR_PRODUCT_CUES)
+    product_is_preserved = any(cue in product_lower for cue in _BEET_PRESERVED_PRODUCT_CUES)
+    product_is_precooked = any(cue in product_lower for cue in _BEET_PRECOOKED_CUES)
+
+    if has_sliced_wording and fresh_prep and not has_pickled_wording and not has_precooked_wording:
+        return not product_is_preserved
+    if wants_pickled_or_jar:
+        return product_is_pickled_or_jar
+    if has_precooked_wording:
+        return product_is_precooked
+    if not wants_preserved and product_is_preserved:
+        return False
+    return True
+
+
+def _sesame_seed_product_allows_requirement(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Respect explicit black/white/hulled sesame seed wording."""
+
+    if matched_keyword not in _SESAME_SEED_KEYWORDS:
+        return True
+
+    wants_black = any(cue in ingredient_lower for cue in (
+        'svarta sesam', 'svart sesam',
+        'black sesame',
+    ))
+    wants_white = any(cue in ingredient_lower for cue in (
+        'vita sesam', 'vit sesam',
+        'white sesame',
+    ))
+    wants_hulled = any(cue in ingredient_lower for cue in (
+        'skalade sesam', 'skalad sesam',
+        'hulled sesame',
+    ))
+
+    product_black = any(cue in product_lower for cue in ('svarta', 'svart', 'black'))
+    product_unhulled = any(cue in product_lower for cue in ('oskalade', 'oskalad', 'unhulled'))
+
+    if wants_black:
+        return product_black
+    if wants_white and product_black:
+        return False
+    if wants_hulled and (product_black or product_unhulled):
+        return False
+    return True
+
+
+def _ingredient_requests_plain_or_form_tofu(ingredient_lower: str) -> bool:
+    if 'tofu' not in ingredient_lower:
+        return False
+    return (
+        'fast' in ingredient_lower
+        or 'extra fast' in ingredient_lower
+        or 'naturell' in ingredient_lower
+        or 'silkes' in ingredient_lower
+        or 'silke' in ingredient_lower
+    )
+
+
+def _tofu_product_allows_requirement(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Explicit fast/plain/silken tofu should not accept prepared or flavored tofu."""
+
+    if matched_keyword not in _TOFU_KEYWORDS:
+        return True
+    if not _ingredient_requests_plain_or_form_tofu(ingredient_lower):
+        return True
+    return not any(cue in product_lower for cue in _TOFU_PREPARED_PRODUCT_CUES)
+
+
+def _bread_slice_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """A recipe bread slice should not widen to flatbread, bagels, or buns."""
+
+    if matched_keyword not in _BREAD_SLICE_KEYWORDS:
+        return True
+    if not any(cue in ingredient_lower for cue in _BREAD_SLICE_INGREDIENT_CUES):
+        return True
+    return not any(cue in product_lower for cue in _BREAD_SLICE_BLOCKED_PRODUCT_CUES)
+
+
+def _pepparrotsvisp_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Pepparrotsvisp is a prepared whipped horseradish product, not raw root."""
+
+    if 'pepparrotsvisp' not in ingredient_lower:
+        return True
+    if matched_keyword not in {'pepparrotsvisp', 'pepparrot'}:
+        return True
+    return 'pepparrotsvisp' in product_lower
+
+
+def _smoked_turkey_breast_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Smoked/sliced turkey-breast sandwich wording should stay in deli products."""
+
+    if matched_keyword not in _SMOKED_TURKEY_BREAST_KEYWORDS:
+        return True
+    if 'kalkon' not in ingredient_lower:
+        return True
+    if not any(cue in ingredient_lower for cue in _SMOKED_TURKEY_BREAST_INGREDIENT_CUES):
+        return True
+    return any(cue in product_lower for cue in _SMOKED_TURKEY_BREAST_PRODUCT_CUES)
+
+
+def _plain_plant_drink_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Plain plant milk/drink ingredients should not accept flavored drink variants."""
+
+    if matched_keyword not in _PLAIN_PLANT_DRINK_KEYWORDS:
+        return True
+    if not any(cue in ingredient_lower for cue in _PLAIN_PLANT_DRINK_INGREDIENT_CUES):
+        return True
+    if any(cue in ingredient_lower for cue in _PLANT_DRINK_FLAVOR_CUES):
+        return True
+    return not any(cue in product_lower for cue in _PLANT_DRINK_FLAVOR_CUES)
+
+
+def _explicit_plant_based_food_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+    product_keywords: Iterable[str],
+) -> bool:
+    """Explicit vegan/plant-based base foods should not fall back to meat/dairy."""
+
+    if matched_keyword not in _PLANT_BASED_REQUIRED_KEYWORDS:
+        return True
+    if not any(cue in ingredient_lower for cue in _PLANT_BASED_PRODUCT_REQUIRED_INGREDIENT_CUES):
+        return True
+    return _product_is_explicit_vegan(product_lower, product_keywords)
+
+
+def _hjortronsylt_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in {'sylt', 'hjortronsylt'}:
+        return True
+    if 'hjortronsylt' not in ingredient_lower:
+        return True
+    return 'hjortron' in product_lower
+
+
+def _batch10_form_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Batch-review form constraints that are general grocery principles."""
+
+    if matched_keyword in {'persika', 'persikor'} and any(cue in ingredient_lower for cue in ('färsk persika', 'farsk persika', 'färska persikor', 'farska persikor')):
+        if any(cue in product_lower for cue in _PRESERVED_FRUIT_PRODUCT_CUES):
+            return False
+
+    if (
+        matched_keyword in {'tomat', 'tomater', 'körsbärstomat', 'körsbärstomater', 'korsbarstomat', 'korsbarstomater', 'småtomat'}
+        and any(cue in ingredient_lower for cue in ('konserverad', 'konserverade', 'konserv', 'burk'))
+        and any(cue in ingredient_lower for cue in ('körsbärstomat', 'korsbarstomat', 'småtomat', 'smatomat', 'tomat'))
+        and not any(cue in ingredient_lower for cue in ('färska eller', 'farska eller', 'färsk eller', 'farsk eller'))
+    ):
+        return not any(cue in product_lower for cue in _FRESH_TOMATO_PRODUCT_CUES)
+
+    if matched_keyword == 'sparris' and any(cue in ingredient_lower for cue in ('färsk sparris', 'farsk sparris', 'sparris färsk', 'sparris farsk')):
+        if any(cue in product_lower for cue in _PRESERVED_ASPARAGUS_PRODUCT_CUES):
+            return False
+
+    if matched_keyword in {'zucchini', 'squash'}:
+        ingredient_wants_green = any(cue in ingredient_lower for cue in ('grön zucchini', 'gron zucchini', 'grön squash', 'gron squash'))
+        ingredient_wants_yellow = any(cue in ingredient_lower for cue in ('gul zucchini', 'gul squash'))
+        if ingredient_wants_green and 'gul' in product_lower:
+            return False
+        if ingredient_wants_yellow and any(cue in product_lower for cue in ('grön', 'gron')):
+            return False
+
+    return True
+
+
+def _noodle_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if any(cue in ingredient_lower for cue in ('snabbnudlar', 'instantnudlar')):
+        return False
+    if matched_keyword not in {'nudlar', 'risnudlar', 'glasnudlar', 'äggnudlar', 'aggnudlar', 'vermicelli', 'pasta'}:
+        return True
+    if any(cue in product_lower for cue in _NOODLE_PREPARED_PRODUCT_CUES):
+        return False
+    wants_glass = any(cue in ingredient_lower for cue in ('glasnudlar', 'vermicellinudlar'))
+    wants_rice = 'risnudlar' in ingredient_lower
+    wants_egg = any(cue in ingredient_lower for cue in ('äggnudlar', 'aggnudlar', 'ägg nudlar', 'agg nudlar'))
+    if not wants_glass and not wants_rice and not wants_egg:
+        return True
+    if wants_egg and not any(cue in product_lower for cue in ('äggnud', 'aggnud', 'egg noodle', 'egg noodles')):
+        return False
+    if wants_glass and 'pasta' in product_lower:
+        return False
+    return True
+
+
+def _citrus_juice_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in {'citron', 'lime', 'citronjuice', 'limejuice'}:
+        return True
+    if not any(ind in product_lower for ind in JUICE_PRODUCT_INDICATORS):
+        return True
+    if not any(ind in ingredient_lower for ind in JUICE_INGREDIENT_INDICATORS):
+        return True
+    return not any(cue in product_lower for cue in _MIXED_JUICE_FLAVOR_CUES)
+
+
+def _aged_cheese_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in _AGED_CHEESE_MATCH_KEYWORDS:
+        return True
+    if not any(cue in ingredient_lower for cue in _AGED_CHEESE_INGREDIENT_CUES):
+        return True
+    if any(cue in product_lower for cue in _AGED_CHEESE_BLOCKED_PRODUCT_CUES):
+        return False
+    return any(cue in product_lower for cue in _AGED_CHEESE_PRODUCT_CUES)
+
+
+def _salsa_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword != 'salsa':
+        return True
+    if 'salsa' not in ingredient_lower:
+        return True
+    return not any(cue in product_lower for cue in _SALSA_CHEESE_SAUCE_PRODUCT_CUES)
+
+
+_KETCHUP_TYPE_CHILI_SAUCE_BLOCKED_PRODUCT_CUES = frozenset({
+    'ayam',
+    'vitlök', 'vitlok', 'garlic',
+    'sriracha',
+    'thai',
+    'sweet chili', 'söt chili', 'sot chili',
+    'gochujang', 'go-chu-jang',
+})
+
+
+def _ketchup_type_chili_sauce_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in {'chilisås', 'chilisas'}:
+        return True
+    if 'ketchuptyp' not in ingredient_lower and 'ketchup typ' not in ingredient_lower:
+        return True
+    return not any(cue in product_lower for cue in _KETCHUP_TYPE_CHILI_SAUCE_BLOCKED_PRODUCT_CUES)
+
+
+_PISTACHIO_MATCH_KEYWORDS = frozenset({
+    'pistagenöt', 'pistagenötter', 'pistagenot', 'pistagenotter',
+    'pistaschnöt', 'pistaschnötter', 'pistaschnot', 'pistaschnotter',
+    'pistaschkärnor', 'pistaschkarnor',
+})
+_SALTED_NUT_PRODUCT_CUES = frozenset({
+    'salt', 'saltade', 'havssalt', 'sea salt', 'seasalt',
+})
+
+
+def _pistachio_salt_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in _PISTACHIO_MATCH_KEYWORDS:
+        return True
+    if not any(cue in ingredient_lower for cue in ('osaltad', 'osaltade', 'utan salt')):
+        return True
+    return not any(cue in product_lower for cue in _SALTED_NUT_PRODUCT_CUES)
+
+
+def _kiwi_color_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword != 'kiwi':
+        return True
+    wants_yellow = (
+        re.search(r'\bkiwi\s+gul\b|\bgul\s+kiwi\b', ingredient_lower) is not None
+    )
+    wants_green = (
+        re.search(r'\bkiwi\s+(?:grön|gron)\b|\b(?:grön|gron)\s+kiwi\b', ingredient_lower) is not None
+    )
+    product_is_yellow = (
+        'kiwi' in product_lower
+        and re.search(r'\b(?:gul|gula|gold|yellow)\b', product_lower) is not None
+    )
+    if wants_yellow:
+        return product_is_yellow
+    if wants_green:
+        return not product_is_yellow
+    return True
+
+
+def _falafel_mix_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in {'falafel', 'falafelmix'}:
+        return True
+    if not re.search(r'\bfalafel\s*mix\b|\bfalafelmix\b', ingredient_lower):
+        return True
+    return any(cue in product_lower for cue in ('falafelmix', 'falafel mix', 'mix', 'pulver'))
+
+
+_PLAIN_CHILISAS_BLOCKED_PRODUCT_CUES = frozenset({
+    'ayam',
+    'vitlök', 'vitlok', 'garlic',
+    'sriracha',
+    'sweet chili', 'söt chili', 'sot chili',
+    'thai',
+    'gochujang', 'go-chu-jang',
+})
+_PLAIN_CHILISAS_EXPLICIT_VARIANT_CUES = frozenset({
+    'sweet', 'söt', 'sot',
+    'sriracha',
+    'gochujang', 'go-chu-jang',
+    'vitlök', 'vitlok', 'garlic',
+    'thai',
+})
+_HERB_CREAM_CHEESE_CUES = frozenset({'örter', 'orter', 'herbs'})
+_CHICKEN_SCHNITZEL_BLOCKED_PRODUCT_CUES = frozenset({
+    'vegetarisk', 'vegetariska', 'vegansk', 'vego', 'plant-based',
+    'plant based', 'oumph', 'hälsans kök', 'halsans kok',
+    'fläsk', 'flask', 'skink', 'kalv', 'ostschnitzel', 'ost schnitzel',
+})
+_GENERIC_MINCE_FLAVORED_PRODUCT_CUES = frozenset({
+    'chorizofärs', 'chorizofars',
+    'salsicciafärs', 'salsicciafars',
+    'hamburgerfärs', 'hamburgerfars',
+    'fiskfärs', 'fiskfars',
+    'laxfärs', 'laxfars',
+    'viltfärs', 'viltfars',
+    'hjortfärs', 'hjortfars',
+    'vildsvinsfärs', 'vildsvinsfars',
+    'älgfärs', 'algfars',
+    'renfärs', 'renfars',
+})
+_HERRING_FILLET_INGREDIENT_CUES = frozenset({
+    'sillfilé', 'sillfile',
+    'sillfiléer', 'sillfileer',
+    'strömmingsfilé', 'strommingsfile',
+    'strömmingsfiléer', 'strommingsfileer',
+    'strömmingsfileer',
+})
+_PREPARED_HERRING_PRODUCT_CUES = frozenset({
+    'inlagd', 'inlagda',
+    'inläggningssill', 'inlaggningssill',
+    'matjessill',
+    'senapssill',
+    'löksill', 'loksill',
+    'kryddsill',
+    'gravad', 'rökt', 'rokt',
+})
+_PRASTOST_ALLOWED_PRODUCT_CUES = frozenset({
+    'präst', 'prast',
+    'herrgård', 'herrgard',
+    'västerbotten', 'vasterbotten',
+})
+_PRASTOST_BLOCKED_PRODUCT_CUES = frozenset({
+    'gouda', 'edamer', 'gräddost', 'graddost',
+    'vitost', 'salladsost', 'grekisk',
+    'vegan', 'vegansk', 'växtbaserad', 'vaxtbaserad', 'violife',
+    'grillost', 'halloumi', 'färskost', 'farskost', 'philadelphia',
+    'spread', 'block original flavour',
+})
+_CANNED_TUNA_PRODUCT_CUES = frozenset({
+    'vatten', 'olja', 'i olja', 'finfördelad', 'finfordelad',
+    '3x', 'msc abba', 'abba', 'eldorado', 'garant',
+})
+_TANDOORI_COOKING_SAUCE_INGREDIENT_CUES = frozenset({
+    'matlagningssås', 'matlagningssas',
+    'tandoorisås', 'tandoorisas',
+    'tandoori sås', 'tandoori sas',
+})
+_TANDOORI_COOKING_SAUCE_PRODUCT_CUES = frozenset({
+    'sås', 'sas', 'sauce',
+    'paste', 'pasta',
+    'pataks', 'patak',
+    'burk', 'jar',
+    '450g',
+})
+_TANDOORI_DRY_SPICE_PRODUCT_CUES = frozenset({
+    'krydda', 'kryddmix',
+    'spice', 'spices',
+    'santa maria',
+    '35g',
+})
+_FRESH_TUNA_PRODUCT_CUES = frozenset({
+    'steak', 'steaks', 'tataki', 'färsk', 'farsk', 'filet', 'filé', 'file',
+    'baguettesallad', 'tramezzini', 'sallad',
+})
+_SEASONED_CHICKEN_FILLET_CUES = frozenset({
+    'grillkryddad', 'kryddad', 'marinerad', 'marinerade',
+    'bbq', 'barbeque', 'barbecue', 'grillad', 'grillat',
+})
+_SAVORY_CREAM_CHEESE_BLOCKED_CUES = frozenset({
+    'västerbotten', 'vasterbotten',
+    'vitlök', 'vitlok', 'garlic',
+    'örter', 'orter', 'herbs',
+    'chili', 'paprika', 'pepparrot',
+    'tomat', 'kantarell', 'ramslök', 'ramslok',
+})
+_PLAIN_FRESH_CHEESE_PRODUCT_CUES = frozenset({
+    'naturell', 'original', 'plain',
+})
+_FLAVORED_FRESH_CHEESE_PRODUCT_CUES = _SAVORY_CREAM_CHEESE_BLOCKED_CUES | frozenset({
+    'smaksatt',
+    'curry',
+    'jalapeno', 'jalapeño',
+    'tryffel',
+    'blue',
+    'blåmögel', 'blamogel',
+    'bleu',
+    'peppar',
+    'gräslök', 'graslok',
+    'chimichurri',
+    'nöt', 'not',
+    'oliver',
+    'grekisk',
+})
+_CREAM_KEYWORDS = frozenset({'grädde', 'gradde'})
+_CREAM_PERCENT_RE = re.compile(r'(\d+(?:[,.]\d+)?)\s*%')
+_LOW_FAT_OR_COOKING_CREAM_CUES = frozenset({
+    'matgrädde', 'matgradde',
+    'matlagningsgrädde', 'matlagningsgradde',
+    'matlagning', 'matlagnings',
+    'havre', 'havremat', 'havregrädde', 'havregradde',
+    'imat',
+})
+_APPLE_CIDER_REQUEST_CUES = frozenset({'äppelcider', 'applelcider', 'apple cider'})
+_APPLE_CIDER_PRODUCT_BLOCKERS = frozenset({
+    'päron', 'paron', 'pear',
+    'fläder', 'flader', 'elderflower',
+    'bär', 'bar', 'berry', 'berries',
+    'hallon', 'jordgubb', 'skogsbär', 'skogsbar',
+})
+_APPLE_CIDER_PRODUCT_CUES = frozenset({'äppel', 'appel', 'apple'})
+_BLACK_PEPPER_KEYWORDS = frozenset({'svartpeppar'})
+_WHOLE_BLACK_PEPPER_CUES = frozenset({'pepparkorn', 'hel', 'hela'})
+_GROUND_BLACK_PEPPER_CUES = frozenset({'malen', 'mald', 'malet', 'malna'})
+_COARSE_BLACK_PEPPER_CUES = frozenset({'grovmalen', 'grovmalet', 'grovmald', 'grovmalt', 'grovmalda'})
+_PASTASAS_TOMATO_BLOCKED_CUES = frozenset({
+    'ost', 'ostar', 'cheese',
+    'svamp', 'mushroom', 'champinjon',
+    'vodka',
+})
+_SALTED_POTATO_CHIPS_FLAVOR_BLOCKERS = frozenset({
+    'bacon', 'cheese', 'ost', 'sourcream', 'grill', 'dill', 'tryffel',
+    'chili', 'bbq', 'barbecue', 'jalapeno', 'ranch', 'vinäger',
+})
+
+
+def _percent_values(text: str) -> List[float]:
+    values = []
+    for match in _CREAM_PERCENT_RE.finditer(text):
+        try:
+            values.append(float(match.group(1).replace(',', '.')))
+        except ValueError:
+            continue
+    return values
+
+
+def _high_fat_cream_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Explicit 30-40% cream wording should behave like whipping cream."""
+
+    if matched_keyword not in _CREAM_KEYWORDS:
+        return True
+    if 'grädde' not in ingredient_lower and 'gradde' not in ingredient_lower:
+        return True
+    requested_percents = _percent_values(ingredient_lower)
+    if not requested_percents or max(requested_percents) < 30:
+        return True
+    if any(cue in product_lower for cue in _LOW_FAT_OR_COOKING_CREAM_CUES):
+        return False
+    product_percents = _percent_values(product_lower)
+    if product_percents:
+        return max(product_percents) >= 30
+    return 'visp' in product_lower
+
+
+def _apple_cider_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in {'cider', 'äppelcider', 'applelcider'}:
+        return True
+    wants_apple_cider = (
+        any(cue in ingredient_lower for cue in _APPLE_CIDER_REQUEST_CUES)
+        or (
+            'cider' in ingredient_lower
+            and any(cue in ingredient_lower for cue in ('äpple', 'appel', 'apple', 'äppel'))
+        )
+    )
+    if not wants_apple_cider:
+        return True
+    if any(cue in product_lower for cue in _APPLE_CIDER_PRODUCT_BLOCKERS):
+        return False
+    return any(cue in product_lower for cue in _APPLE_CIDER_PRODUCT_CUES)
+
+
+def _product_has_word(product_lower: str, cue: str) -> bool:
+    return re.search(rf'\b{re.escape(cue)}\b', product_lower) is not None
+
+
+def _black_pepper_form_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in _BLACK_PEPPER_KEYWORDS:
+        return True
+    wants_whole = (
+        'pepparkorn' in ingredient_lower
+        or re.search(r'\bhela?\s+svartpeppar\b', ingredient_lower) is not None
+    )
+    wants_coarse = any(cue in ingredient_lower for cue in _COARSE_BLACK_PEPPER_CUES)
+    wants_ground = (
+        any(cue in ingredient_lower for cue in _GROUND_BLACK_PEPPER_CUES)
+        and not wants_coarse
+        and 'nymalen' not in ingredient_lower
+        and 'färskmalen' not in ingredient_lower
+    )
+    if not (wants_whole or wants_coarse or wants_ground):
+        return True
+
+    product_whole = (
+        'pepparkorn' in product_lower
+        or any(_product_has_word(product_lower, cue) for cue in _WHOLE_BLACK_PEPPER_CUES)
+    )
+    product_coarse = any(cue in product_lower for cue in _COARSE_BLACK_PEPPER_CUES)
+    product_ground = (
+        any(cue in product_lower for cue in _GROUND_BLACK_PEPPER_CUES)
+        and not product_coarse
+    )
+
+    if wants_whole:
+        return product_whole and not product_ground and not product_coarse
+    if wants_coarse:
+        return product_whole or product_coarse
+    if wants_ground:
+        return product_ground and not product_whole and not product_coarse
+    return True
+
+
+def _pastasås_variant_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in {'pastasås', 'pastasas'}:
+        return True
+    classic_requested = any(cue in ingredient_lower for cue in ('classico', 'classic', 'klassisk'))
+    if classic_requested:
+        return (
+            any(cue in product_lower for cue in ('classico', 'classic', 'klassisk'))
+            and not any(cue in product_lower for cue in _PASTASAS_TOMATO_BLOCKED_CUES)
+        )
+    tomato_requested = (
+        ('pastasås' in ingredient_lower or 'pastasas' in ingredient_lower)
+        and ('tomat' in ingredient_lower or 'tomatsås' in ingredient_lower or 'tomatsas' in ingredient_lower)
+    )
+    if not tomato_requested:
+        return True
+    return not any(cue in product_lower for cue in _PASTASAS_TOMATO_BLOCKED_CUES)
+
+
+def _orange_juice_concentrate_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword != 'apelsinjuice':
+        return True
+    if 'koncentrat' not in ingredient_lower and 'concentrate' not in ingredient_lower:
+        return True
+    return 'koncentrat' in product_lower or 'concentrate' in product_lower
+
+
+def _guajillo_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+    product_keywords: Iterable[str],
+) -> bool:
+    if 'guajillo' not in ingredient_lower:
+        return True
+    if matched_keyword not in {'chili', 'chilipeppar', 'chilifrukt', 'chilifrukter'}:
+        return True
+    return 'guajillo' in product_lower or 'guajillo' in set(product_keywords)
+
+
+def _fennel_seed_form_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in {'fänkål', 'fankal'}:
+        return True
+    if not any(cue in ingredient_lower for cue in ('fänkålsfrö', 'fankalsfro', 'fänkålsfrön', 'fankalsfron')):
+        return True
+    if any(cue in ingredient_lower for cue in _GROUND_BLACK_PEPPER_CUES):
+        return True
+    return not any(cue in product_lower for cue in _GROUND_BLACK_PEPPER_CUES)
+
+
+def _coarse_mustard_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in {'senap', 'dijonsenap'}:
+        return True
+    if not any(cue in ingredient_lower for cue in ('grovkornig', 'grovkornigt', 'grov senap', 'grovsenap')):
+        return True
+    return any(cue in product_lower for cue in ('grov', 'grovkornig', 'skånsk', 'skansk'))
+
+
+def _salted_potato_chips_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword == 'mandelpotatis' and 'mandelpotatischips' in ingredient_lower:
+        return 'chips' in product_lower
+    if matched_keyword not in {'potatischips', 'chips'}:
+        return True
+    if 'potatischips' not in ingredient_lower:
+        return True
+    if not any(cue in ingredient_lower for cue in ('saltade', 'saltad', 'saltat')):
+        return True
+    if any(cue in product_lower for cue in _SALTED_POTATO_CHIPS_FLAVOR_BLOCKERS):
+        return False
+    return True
+
+
+def _batch15_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+    product_keywords: Iterable[str],
+) -> bool:
+    return (
+        _high_fat_cream_requirement_allows_product(product_lower, ingredient_lower, matched_keyword)
+        and _apple_cider_requirement_allows_product(product_lower, ingredient_lower, matched_keyword)
+        and _black_pepper_form_allows_product(product_lower, ingredient_lower, matched_keyword)
+        and _pastasås_variant_allows_product(product_lower, ingredient_lower, matched_keyword)
+        and _orange_juice_concentrate_allows_product(product_lower, ingredient_lower, matched_keyword)
+        and _guajillo_requirement_allows_product(product_lower, ingredient_lower, matched_keyword, product_keywords)
+        and _fennel_seed_form_allows_product(product_lower, ingredient_lower, matched_keyword)
+        and _coarse_mustard_allows_product(product_lower, ingredient_lower, matched_keyword)
+        and _salted_potato_chips_allows_product(product_lower, ingredient_lower, matched_keyword)
+    )
+
+
+def _batch14_completion_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+    product_keywords: Iterable[str] = (),
+) -> bool:
+    """Principle fixes gathered from the final Batch 14 completion pass."""
+
+    product_kw_set = set(product_keywords)
+
+    if matched_keyword in {'chilisås', 'chilisas'} and any(
+        cue in ingredient_lower for cue in ('chilisås', 'chilisas')
+    ):
+        if not any(cue in ingredient_lower for cue in _PLAIN_CHILISAS_EXPLICIT_VARIANT_CUES):
+            if any(cue in product_lower for cue in _PLAIN_CHILISAS_BLOCKED_PRODUCT_CUES):
+                return False
+
+    if 'limepepper' in ingredient_lower:
+        return 'limepepper' in product_lower or 'limepepper' in product_kw_set
+
+    if 'tomkha' in ingredient_lower:
+        return 'tomkha' in product_lower or 'tomkha' in product_kw_set
+
+    if 'tandoori' in ingredient_lower and matched_keyword in {'tandoori', 'kryddmix'}:
+        if any(cue in ingredient_lower for cue in _TANDOORI_COOKING_SAUCE_INGREDIENT_CUES):
+            if any(cue in product_lower for cue in _TANDOORI_DRY_SPICE_PRODUCT_CUES):
+                return False
+            return any(cue in product_lower for cue in _TANDOORI_COOKING_SAUCE_PRODUCT_CUES)
+
+    if (
+        ('wokgrönsaker' in ingredient_lower or 'wokgronsaker' in ingredient_lower)
+        and any(cue in ingredient_lower for cue in ('burk', 'sköljd', 'sköljda', 'skoljd', 'skoljda'))
+    ):
+        return (
+            matched_keyword in {'wokgrönsaker', 'wokgronsaker', 'wokmix'}
+            and any(cue in product_lower for cue in ('brine', 'burk', 'konserv'))
+        )
+
+    if (
+        any(cue in ingredient_lower for cue in (
+            'jästa svarta bönor', 'jasta svarta bonor',
+            'fermenterade svarta bönor', 'fermenterade svarta bonor',
+        ))
+        and matched_keyword in {'svartabönor', 'svartabonor', 'bönor', 'bonor'}
+    ):
+        return any(cue in product_lower for cue in (
+            'jäst', 'jästa', 'jasta', 'fermenterad', 'fermenterade',
+        ))
+
+    if 'chilimajo' in ingredient_lower:
+        return (
+            'chilimajo' in product_lower
+            or 'chilimajo' in product_kw_set
+            or ('sriracha' in product_lower and ('mayo' in product_lower or 'majonnäs' in product_lower or 'majonnas' in product_lower))
+        )
+
+    if 'kycklingschnitzel' in ingredient_lower and matched_keyword in {'schnitzel', 'kycklingschnitzel'}:
+        if 'kyckling' not in product_lower and 'kyckling' not in product_kw_set:
+            return False
+        if any(cue in product_lower for cue in _CHICKEN_SCHNITZEL_BLOCKED_PRODUCT_CUES):
+            return False
+
+    if 'äggfri' in ingredient_lower or 'aggfri' in ingredient_lower:
+        if matched_keyword in {'långpasta', 'langpasta', 'tagliatelle', 'pasta'}:
+            if re.search(r'\b(?:ägg|agg|egg)\b', product_lower):
+                return False
+
+    if any(cue in ingredient_lower for cue in _VEGAN_RECIPE_CUES):
+        if ('burgare' in ingredient_lower or 'färs' in ingredient_lower or 'fars' in ingredient_lower):
+            if 'quorn' in product_lower and not any(cue in product_lower for cue in _EXPLICIT_VEGAN_PRODUCT_CUES):
+                return False
+
+    if matched_keyword in {'fänkål', 'fankal'} and (
+        'fänkålsfrö' in ingredient_lower
+        or 'fankalsfro' in ingredient_lower
+        or 'fänkålsfrön' in ingredient_lower
+        or 'fankalsfron' in ingredient_lower
+    ):
+        if 'hela' in ingredient_lower or 'hel' in ingredient_lower:
+            if 'malen' in product_lower or 'mald' in product_lower:
+                return False
+
+    if 'torkadsvamp' in ingredient_lower or (
+        'torkad' in ingredient_lower and 'svamp' in ingredient_lower
+    ):
+        if matched_keyword in {'svamp', 'champinjon', 'champinjoner', 'kantarell', 'kantareller'}:
+            if not (
+                'torkad' in product_lower
+                or 'torkade' in product_lower
+                or 'torkadsvamp' in product_kw_set
+            ):
+                return False
+
+    if matched_keyword in {'färs', 'fars'} and _ingredient_requests_generic_mince(ingredient_lower):
+        if any(cue in product_lower for cue in _GENERIC_MINCE_FLAVORED_PRODUCT_CUES):
+            return False
+
+    if matched_keyword == 'sill' and any(cue in ingredient_lower for cue in _HERRING_FILLET_INGREDIENT_CUES):
+        if any(cue in product_lower for cue in _PREPARED_HERRING_PRODUCT_CUES):
+            return False
+
+    if 'prästost' in ingredient_lower or 'prastost' in ingredient_lower:
+        if matched_keyword in {'ost', 'prästost', 'prastost', 'präst', 'prast'}:
+            if any(cue in product_lower for cue in _PRASTOST_BLOCKED_PRODUCT_CUES):
+                return False
+            if not any(cue in product_lower for cue in _PRASTOST_ALLOWED_PRODUCT_CUES):
+                return False
+
+    if matched_keyword == 'tonfisk' and any(cue in ingredient_lower for cue in ('tonfisk',)):
+        ingredient_wants_steak = any(cue in ingredient_lower for cue in _TUNA_STEAK_FAMILY_INGREDIENT_CUES)
+        if not ingredient_wants_steak:
+            if any(cue in product_lower for cue in _FRESH_TUNA_PRODUCT_CUES):
+                return False
+            if not any(cue in product_lower for cue in _CANNED_TUNA_PRODUCT_CUES):
+                return False
+
+    if 'smörrapsolja' in ingredient_lower or 'smorrapsolja' in ingredient_lower:
+        return (
+            any(cue in product_lower for cue in ('smör', 'smor'))
+            and (
+                'rapsolja' in product_lower
+                or ('flytande' in product_lower and 'raps' in product_lower)
+            )
+        )
+
+    if 'ancho' in ingredient_lower and matched_keyword in {'ancho', 'chili', 'chiliflakes', 'chilipulver'}:
+        return 'ancho' in product_lower or 'ancho' in product_kw_set
+
+    if matched_keyword == 'vaniljglass' and 'vaniljglass' in ingredient_lower:
+        if 'jordgubbssås' in product_lower or 'jordgubbssas' in product_lower:
+            return False
+
+    if 'kycklinginnerfilé' in ingredient_lower or 'kycklinginnerfile' in ingredient_lower:
+        if matched_keyword in {'kycklingfilé', 'kycklingfile', 'kyckling'}:
+            if any(cue in product_lower for cue in _SEASONED_CHICKEN_FILLET_CUES):
+                return False
+
+    if matched_keyword in {'kryddnejlika', 'nejlikor', 'nejlika'}:
+        if any(cue in ingredient_lower for cue in ('malen', 'mald', 'malda')):
+            if not any(cue in product_lower for cue in ('malen', 'malda', 'mald')):
+                return False
+
+    if matched_keyword in {'färskost', 'farskost'} and (
+        'cream cheese' in ingredient_lower or 'färskost' in ingredient_lower or 'farskost' in ingredient_lower
+    ):
+        if 'smaksatt' in ingredient_lower:
+            if any(cue in product_lower for cue in _PLAIN_FRESH_CHEESE_PRODUCT_CUES):
+                return False
+            return any(cue in product_lower for cue in _FLAVORED_FRESH_CHEESE_PRODUCT_CUES)
+        if not any(cue in ingredient_lower for cue in _SAVORY_CREAM_CHEESE_BLOCKED_CUES):
+            if any(cue in product_lower for cue in _SAVORY_CREAM_CHEESE_BLOCKED_CUES):
+                return False
+
+    return True
+
+
+_OLIVE_MATCH_KEYWORDS = frozenset({
+    'oliver', 'oliv', 'kalamata', 'kalamataoliver',
+})
+_PITTED_OLIVE_INGREDIENT_CUES = frozenset({
+    'urkärnad', 'urkärnade', 'urkarnad', 'urkarnade',
+    'utan kärnor', 'utan karnor',
+    'kärnfri', 'kärnfria', 'karnfri', 'karnfria',
+})
+_PITTED_OLIVE_PRODUCT_CUES = frozenset({
+    'urkärnad', 'urkärnade', 'urkarnad', 'urkarnade',
+    'utan kärnor', 'utan karnor',
+    'kärnfri', 'kärnfria', 'karnfri', 'karnfria',
+})
+_OLIVE_WITH_PITS_PRODUCT_CUES = frozenset({
+    'med kärnor', 'med karnor',
+})
+
+
+def _pitted_olive_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    # Pragmatic olive matching: with/without pits is not a hard product-family
+    # boundary for recipe matching, so keep pitted wording informational only.
+    return True
+
+
+def _exact_pasta_shape_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if 'maccaronetti' not in ingredient_lower:
+        return True
+    if matched_keyword not in {'pasta', 'långpasta', 'langpasta'}:
+        return True
+    return 'maccaronetti' in product_lower
+
+
+def _gochujang_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if 'gochujang' not in ingredient_lower:
+        return True
+    if matched_keyword not in {'gochujang', 'chilipasta', 'chili', 'chilisås', 'chilisas'}:
+        return True
+    if 'gochujang' not in product_lower and 'go-chu-jang' not in product_lower:
+        return False
+    return not any(cue in product_lower for cue in ('kyckling', 'chicken', 'spett', 'skewers', 'färdig', 'fardig'))
+
+
+def _raw_meat_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword in {'fläsk', 'flask', 'fläskkött', 'flaskkott'} and any(
+        cue in ingredient_lower for cue in ('fläsk', 'flask', 'fläskkött', 'flaskkott')
+    ):
+        if not any(cue in ingredient_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES):
+            return not any(cue in product_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES)
+    if matched_keyword in {'revbensspjäll', 'revbensspjall', 'ribs'} and 'revbensspjäll' in ingredient_lower:
+        if not any(cue in ingredient_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES):
+            return not any(cue in product_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES)
+    if matched_keyword in {'fläskkarré', 'flaskkarre', 'karré', 'karre'} and any(
+        cue in ingredient_lower for cue in ('fläskkarré', 'flaskkarre', 'karré', 'karre')
+    ):
+        if any(cue in ingredient_lower for cue in ('benfri fläskkarré', 'benfri flaskkarre')):
+            if 'med ben' in product_lower:
+                return False
+        if not any(cue in ingredient_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES):
+            return not any(cue in product_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES)
+    if matched_keyword == 'kycklingben' and 'kycklingben' in ingredient_lower:
+        if not any(cue in ingredient_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES):
+            return not any(cue in product_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES)
+    return True
+
+
+def _plain_tempeh_helbit_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    if matched_keyword not in _TEMPEH_HELBIT_MATCH_KEYWORDS:
+        return True
+    if not any(cue in ingredient_lower for cue in ('helbit', 'tempeh', 'bärta', 'barta')):
+        return True
+    if any(cue in ingredient_lower for cue in _BARTA_BRAND_CUES):
+        return any(cue in product_lower for cue in _BARTA_BRAND_CUES)
+    if (
+        'helbit' in ingredient_lower
+        and any(cue in ingredient_lower for cue in _PLAIN_TEMPEH_HELBIT_INGREDIENT_CUES)
+    ):
+        return not any(cue in product_lower for cue in _PREPARED_TEMPEH_HELBIT_PRODUCT_CUES)
+    return True
+
+
 def _riven_cheddar_allows_product(
     product_lower: str,
     ingredient_lower: str,
@@ -498,6 +2330,28 @@ def _riven_cheddar_allows_product(
     if 'riven' not in ingredient_lower:
         return True
     return not any(cue in product_lower for cue in _CHEDDAR_SPREAD_PRODUCT_CUES)
+
+
+_SALTA_KEX_PRODUCT_CUES = frozenset({
+    'salt', 'salta', 'saltade', 'saltin', 'saltiner',
+    'cracker', 'crackers',
+})
+
+
+def _salta_kex_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Explicit salta kex should not accept sweet biscuit products."""
+
+    if matched_keyword != 'kex':
+        return True
+    if 'kex' not in ingredient_lower:
+        return True
+    if not any(cue in ingredient_lower for cue in ('salta', 'saltade', 'saltat')):
+        return True
+    return any(cue in product_lower for cue in _SALTA_KEX_PRODUCT_CUES)
 
 
 def _ingredient_requests_generic_frozen_fish_fillet(ingredient_lower: str) -> bool:
@@ -585,11 +2439,11 @@ def _steak_style_tuna_product_allowed(
     """Piece/steak tuna recipes should route to fresh/frozen tuna, not canned tuna."""
     if matched_keyword != 'tonfisk':
         return False
-    if not any(cue in ingredient_lower for cue in (' bit ', ' bitar ', 'biff', 'steak')):
+    if not any(cue in ingredient_lower for cue in _TUNA_STEAK_FAMILY_INGREDIENT_CUES):
         return False
-    if any(cue in product_lower for cue in ('vatten', 'olja', 'solrosolja', 'buljong', 'burk', 'konserv')):
+    if any(cue in product_lower for cue in _TUNA_CANNED_OR_PREPARED_PRODUCT_CUES):
         return False
-    return any(cue in product_lower for cue in ('färsk', 'farsk', 'fryst', 'frysta', 'filé', 'file'))
+    return any(cue in product_lower for cue in _TUNA_STEAK_FAMILY_PRODUCT_CUES)
 
 
 def _ingredient_implies_whole_kyckling(ingredient_lower: str) -> bool:
@@ -674,6 +2528,36 @@ _COLORED_CURRY_RULES = (
     (frozenset({'gul', 'yellow'}), 'gulcurry', 'gulcurrypasta'),
 )
 
+_CHILI_VARIETY_KEYWORDS = frozenset({
+    'jalapeno', 'jalapenos',
+    'habanero',
+    'serrano',
+    'piri',
+})
+
+_CHILI_VARIETY_PRODUCT_BLOCKERS = frozenset({
+    'mayo', 'majonnäs', 'majonnas',
+    'dressing',
+    'sås', 'sas', 'sauce', 'salsa', 'relish',
+    'peppers', 'sliced', 'skivad', 'skivade',
+    'oliver',
+    'chips', 'chip', 'majskakor', 'riskakor',
+    'ostcrème', 'ostcreme', 'cheezy',
+    'korv', 'salami', 'chorizo',
+    'snus', 'tobaksfritt',
+})
+
+
+def _is_plain_fresh_or_frozen_chili_variety_product(product_lower: str, category: str) -> bool:
+    """True for plain produce-form chili varieties, not jarred/flavored carriers."""
+    if category not in {'fruit', 'vegetables', 'frozen'}:
+        return False
+    if any(blocker in product_lower for blocker in _CHILI_VARIETY_PRODUCT_BLOCKERS):
+        return False
+    if category in {'fruit', 'vegetables'}:
+        return True
+    return any(ind in product_lower for ind in FROZEN_PRODUCT_INDICATORS)
+
 
 def _expand_offer_keywords_for_matching(product_keywords: List[str], product_name: str = "") -> List[str]:
     """Mirror the small offer-side keyword bridges that uncached matching needs."""
@@ -710,6 +2594,17 @@ def _expand_offer_keywords_for_matching(product_keywords: List[str], product_nam
                     seen.add(extra)
 
     offer_words = set(fix_swedish_chars(product_name).lower().split()) if product_name else set()
+    _prepared_prosciutto_carriers = frozenset({'pizza', 'pinsa', 'tortellini', 'tortelloni', 'ravioli'})
+    _air_dried_skinka_cues = frozenset({'lufttorkad', 'lufttorkade', 'lufttorkat'})
+    _is_air_dried_ham = (
+        'prosciutto' in offer_words
+        or offer_words & {'serrano', 'jamon', 'jamón'}
+        or ('skinka' in offer_words and offer_words & _air_dried_skinka_cues)
+    )
+    if _is_air_dried_ham and not offer_words & _prepared_prosciutto_carriers:
+        if 'prosciutto' not in seen:
+            expanded.append('prosciutto')
+            seen.add('prosciutto')
     has_curry_paste_family = (
         'currypasta' in seen
         or any(paste_kw in seen for _, _, paste_kw in _COLORED_CURRY_RULES)
@@ -727,6 +2622,152 @@ def _expand_offer_keywords_for_matching(product_keywords: List[str], product_nam
                 break
 
     return expanded
+
+
+def _product_is_explicit_vegan(product_lower: str, product_keywords: Iterable[str]) -> bool:
+    keyword_set = set(product_keywords)
+    if keyword_set & {'veganost', 'veganskmajonnäs', 'veganskmajonnas', 'violife', 'greenvie'}:
+        return True
+    return any(cue in product_lower or cue in keyword_set for cue in _PLANT_BASED_PRODUCT_CUES)
+
+
+def _product_satisfies_recipe_label(
+    product_lower: str,
+    product_keywords: Iterable[str],
+    allowed_cues: FrozenSet[str],
+) -> bool:
+    keyword_set = set(product_keywords)
+    return any(cue in product_lower or cue in keyword_set for cue in allowed_cues)
+
+
+def _ingredient_requests_vegan_cheese(ingredient_lower: str) -> bool:
+    return (
+        'veganost' in ingredient_lower
+        or 'violife' in ingredient_lower
+        or re.search(
+            r'\b(?:vegansk|vegan|växtbaserad|vaxtbaserad|plant based|plant-based)\s+ost\b',
+            ingredient_lower,
+        ) is not None
+    )
+
+
+def _ingredient_requests_vegan_smordeg(ingredient_lower: str) -> bool:
+    return (
+        any(cue in ingredient_lower for cue in ('smördeg', 'smordeg'))
+        and any(cue in ingredient_lower for cue in _VEGAN_RECIPE_CUES)
+    )
+
+
+def _ingredient_label_scope(ingredient_lower: str, matched_keyword: str) -> str:
+    if ' eller ' not in ingredient_lower:
+        return ingredient_lower
+    segments = [segment.strip() for segment in ingredient_lower.split(' eller ') if segment.strip()]
+    for segment in segments:
+        if matched_keyword in segment:
+            return segment
+    return ingredient_lower
+
+
+def _explicit_vegan_requirement_allows_product(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+    product_keywords: Iterable[str],
+) -> bool:
+    scoped_ingredient = _ingredient_label_scope(ingredient_lower, matched_keyword)
+    for ingredient_cues, product_cues in _PLANT_BASED_RECIPE_BASE_REQUIREMENTS:
+        if (
+            any(cue in scoped_ingredient for cue in ingredient_cues)
+            and not _product_satisfies_recipe_label(product_lower, product_keywords, product_cues)
+        ):
+            return False
+    if (
+        any(cue in scoped_ingredient for cue in _VEGAN_RECIPE_CUES)
+        and not _product_satisfies_recipe_label(product_lower, product_keywords, _PLANT_BASED_PRODUCT_CUES)
+    ):
+        return False
+    if (
+        any(cue in scoped_ingredient for cue in _VEGETARIAN_RECIPE_CUES)
+        and not _product_satisfies_recipe_label(product_lower, product_keywords, _VEGETARIAN_PRODUCT_CUES)
+    ):
+        return False
+    if (
+        any(cue in scoped_ingredient for cue in _LACTOSE_FREE_RECIPE_CUES)
+        and not _product_satisfies_recipe_label(product_lower, product_keywords, _LACTOSE_FREE_PRODUCT_CUES)
+    ):
+        return False
+    if (
+        any(cue in scoped_ingredient for cue in _GLUTEN_FREE_RECIPE_CUES)
+        and not _product_satisfies_recipe_label(product_lower, product_keywords, _GLUTEN_FREE_PRODUCT_CUES)
+    ):
+        return False
+    if (
+        matched_keyword in _SMORDEG_MATCH_KEYWORDS
+        and _ingredient_requests_vegan_smordeg(ingredient_lower)
+    ):
+        return _product_is_explicit_vegan(product_lower, product_keywords)
+    if (
+        matched_keyword in _VEGAN_CHEESE_MATCH_KEYWORDS
+        and _ingredient_requests_vegan_cheese(ingredient_lower)
+    ):
+        return _product_is_explicit_vegan(product_lower, product_keywords)
+    return True
+
+
+def _explicit_vegan_cheese_variant_allows_product(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+) -> bool:
+    if 'violife' not in ingredient_lower:
+        return True
+    if 'violife' not in product_lower:
+        return False
+    if matched_keyword not in _VEGAN_CHEESE_MATCH_KEYWORDS and matched_keyword != 'cheddar':
+        return True
+    if any(cue in ingredient_lower for cue in ('smokey', 'smoky', 'smoked', 'smoke')):
+        if not any(cue in product_lower for cue in ('smokey', 'smoky', 'smoked', 'smoke')):
+            return False
+    if 'cheddar' in ingredient_lower and 'cheddar' not in product_lower:
+        return False
+    if 'mature' in ingredient_lower and not any(cue in product_lower for cue in ('mature', 'epic')):
+        return False
+    if re.search(r'\bblock\b', ingredient_lower) and any(
+        cue in product_lower for cue in ('slices', 'skivor', 'skivad', 'grated', 'riven', 'shredded')
+    ):
+        return False
+    return True
+
+
+def _hard_tunnbrod_allows_product(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+) -> bool:
+    if matched_keyword not in {'tunnbröd', 'tunnbrod'}:
+        return True
+    if not any(cue in ingredient_lower for cue in ('hårt tunnbröd', 'hart tunnbrod', 'hård tunnbröd', 'hard tunnbrod')):
+        return True
+    return any(cue in product_lower for cue in (
+        'hårt', 'hart', 'hård', 'hard',
+        'gene', 'mjälloms', 'mjalloms', 'moilas',
+    ))
+
+
+def _rostbiff_palagg_allows_product(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+) -> bool:
+    if matched_keyword != 'rostbiff':
+        return True
+    if not any(cue in ingredient_lower for cue in ('pålägg', 'palagg')):
+        return True
+    return any(cue in product_lower for cue in (
+        'deliskivor', 'deli skivor',
+        'skivor', 'skivad', 'skeva',
+        'pålägg', 'palagg',
+    ))
 
 
 def matches_ingredient(
@@ -774,8 +2815,10 @@ def matches_ingredient(
         ingredient_lower = preserve_parenthetical_grouped_herb_leaves(ingredient_lower)
         ingredient_lower = preserve_parenthetical_shiso_alternatives(ingredient_lower)
         ingredient_lower = preserve_non_concentrate_parenthetical(ingredient_lower)
+        ingredient_lower = preserve_spice_mix_preference_parentheticals(ingredient_lower)
     ingredient_lower = normalize_measured_durumvete_flour(ingredient_lower)
     ingredient_lower = normalize_measured_risotto_rice(ingredient_lower)
+    ingredient_lower = rewrite_truncated_chocolate_color_lists(ingredient_lower)
     ingredient_lower = rewrite_truncated_eller_compounds(ingredient_lower)
     ingredient_lower = rewrite_mince_of_alternatives(ingredient_lower)
     # Preserve the plant-based shorthand while also exposing the base dairy term
@@ -784,12 +2827,20 @@ def matches_ingredient(
     if _ingredient_requests_generic_frozen_fish_fillet(ingredient_lower):
         ingredient_lower += ' fiskfilé'
     ingredient_lower = _append_canonical_keyword_synonyms(ingredient_lower)
+    if 'breoliv' in ingredient_lower:
+        ingredient_lower += ' margarin'
+    if _ingredient_is_non_buyable_root_veg_pasta(ingredient_lower):
+        return None
 
     # STEP 1: Fast keyword matching first (most products won't match at all)
     matched_keyword = None
     for keyword in product_keywords:
+        if keyword in _RECIPE_NEVER_MATCH_KEYWORDS:
+            continue
         # Simple 'in' check first (faster than regex)
-        if keyword in ingredient_lower:
+        if _keyword_occurs_in_ingredient(keyword, ingredient_lower):
+            if keyword in _BREWED_COFFEE_BLOCKED_KEYWORDS and _is_brewed_coffee_ingredient_text(ingredient_lower):
+                continue
             # Block compound word suffix matches (e.g., "köttbullar" in "fiskköttbullar")
             if keyword in _SUFFIX_PROTECTED_KEYWORDS:
                 if not _has_word_boundary_match(keyword, ingredient_lower):
@@ -829,13 +2880,18 @@ def matches_ingredient(
             # product must contain the qualifier (prefix or suffix)
             if keyword in _COMPOUND_STRICT_KEYWORDS or keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
                 product_lower_name = fix_swedish_chars(product_name).lower() if product_name else ""
-                if keyword in _COMPOUND_STRICT_KEYWORDS:
-                    if _check_compound_strict(keyword, ingredient_lower, product_lower_name):
-                        continue
-                if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
-                    if _check_compound_strict(keyword, ingredient_lower, product_lower_name,
-                                              check_prefix=True):
-                        continue
+                if not _chili_spice_product_allowed(product_lower_name, ingredient_lower, keyword):
+                    continue
+                if not _fresh_chili_product_allowed(product_lower_name, ingredient_lower, keyword, ''):
+                    continue
+                if not _ingredient_requests_chili_spice(ingredient_lower, keyword):
+                    if keyword in _COMPOUND_STRICT_KEYWORDS:
+                        if _check_compound_strict(keyword, ingredient_lower, product_lower_name):
+                            continue
+                    if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
+                        if _check_compound_strict(keyword, ingredient_lower, product_lower_name,
+                                                  check_prefix=True):
+                            continue
             if _blocked_by_exact_compound_only(ingredient_lower, keyword):
                 continue
             # Product-name blockers are validated later per ingredient in recipe_matcher.py.
@@ -859,7 +2915,9 @@ def matches_ingredient(
     if not matched_keyword:
         for keyword in product_keywords:
             parent = INGREDIENT_PARENTS.get(keyword) or PARENT_MATCH_ONLY.get(keyword)
-            if parent and parent in ingredient_lower:
+            if parent in _RECIPE_NEVER_MATCH_KEYWORDS:
+                continue
+            if parent and _keyword_occurs_in_ingredient(parent, ingredient_lower):
                 # Apply suffix protection to parent keyword (e.g., "ris" in "grissini")
                 if parent in _SUFFIX_PROTECTED_KEYWORDS:
                     if not _has_word_boundary_match(parent, ingredient_lower):
@@ -932,6 +2990,18 @@ def matches_ingredient(
     if not matched_keyword:
         return None
 
+    product_text_for_policy = (
+        fix_swedish_chars(product_name).lower()
+        if product_name
+        else ' '.join(product_keywords)
+    )
+    if find_no_match_policy_hits(
+        ingredient_texts=(ingredient_lower,),
+        offer_keywords=product_keywords,
+        offer_text=product_text_for_policy,
+    ):
+        return None
+
     if (
         matched_keyword == 'helkyckling'
         and _ingredient_implies_whole_kyckling(ingredient_lower)
@@ -961,6 +3031,64 @@ def matches_ingredient(
         if not ingredient_wants_spirit and not product_is_roe:
             return None
     product_name_normalized = fix_swedish_chars(product_name).lower() if product_name else ' '.join(product_keywords)
+    if not _truffle_oil_requirement_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        product_name_normalized,
+        product_keywords,
+    ):
+        return None
+    if not _explicit_extra_virgin_olive_oil_requirement_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        product_name_normalized,
+    ):
+        return None
+    if not _chocolate_drink_requirement_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        product_name_normalized,
+        product_keywords,
+    ):
+        return None
+    if not _explicit_vegan_requirement_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        product_name_normalized,
+        product_keywords,
+    ):
+        return None
+    if not _explicit_vegan_cheese_variant_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        product_name_normalized,
+    ):
+        return None
+    if not _hard_tunnbrod_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        product_name_normalized,
+    ):
+        return None
+    if not _rostbiff_palagg_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        product_name_normalized,
+    ):
+        return None
+    if not _spice_mix_context_allows_component_match(
+        product_keywords,
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _spice_mix_variant_allows_product(
+        product_keywords,
+        product_name_normalized,
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
     if matched_keyword in {'jäst', 'matbrödsjäst'} and _ingredient_requests_generic_bread_yeast(ingredient_lower):
         if any(cue in product_name_normalized for cue in ('söta degar', 'sota degar', 'söt deg', 'sot deg')):
             return None
@@ -988,11 +3116,29 @@ def matches_ingredient(
         matched_keyword,
     ):
         return None
+    if not _salta_kex_allows_product(
+        product_name_normalized,
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
     if not _pimiento_product_allowed(
         product_name_normalized,
         ingredient_lower,
         matched_keyword,
     ):
+        return None
+    if not _cooked_turkey_product_allowed(product_name_normalized, ingredient_lower, matched_keyword):
+        return None
+    if not _chili_spice_product_allowed(product_name_normalized, ingredient_lower, matched_keyword):
+        return None
+    if not _fresh_chili_product_allowed(product_name_normalized, ingredient_lower, matched_keyword, ''):
+        return None
+    if not _soy_sauce_requirement_allows_product(product_name_normalized, ingredient_lower, matched_keyword):
+        return None
+    if not _whole_cardamom_seed_requirement_allows_product(product_name_normalized, ingredient_lower, matched_keyword):
+        return None
+    if not _tortilla_product_allowed(product_name_normalized, ingredient_lower, matched_keyword):
         return None
 
     # STEP 1b: Keyword suppressed by context — if ingredient text contains a context
@@ -1005,6 +3151,69 @@ def matches_ingredient(
 
     # STEP 2: Only normalize product_name if we have a potential match
     product_lower = _apply_space_normalizations(fix_swedish_chars(product_name).lower()) if product_name else ""
+
+    if not _beet_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _carrot_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _sesame_seed_product_allows_requirement(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _tofu_product_allows_requirement(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _bread_slice_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _pepparrotsvisp_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _smoked_turkey_breast_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _plain_plant_drink_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _explicit_plant_based_food_requirement_allows_product(product_lower, ingredient_lower, matched_keyword, product_keywords):
+        return None
+    if not _hjortronsylt_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _batch10_form_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _noodle_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _citrus_juice_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _aged_cheese_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _salsa_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _ketchup_type_chili_sauce_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _pistachio_salt_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _kiwi_color_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _falafel_mix_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _batch14_completion_requirement_allows_product(
+        product_lower,
+        ingredient_lower,
+        matched_keyword,
+        product_keywords,
+    ):
+        return None
+    if not _batch15_requirement_allows_product(
+        product_lower,
+        ingredient_lower,
+        matched_keyword,
+        product_keywords,
+    ):
+        return None
+    if not _pitted_olive_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _exact_pasta_shape_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _gochujang_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _raw_meat_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
+    if not _plain_tempeh_helbit_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+        return None
 
     if _steak_style_tuna_product_allowed(product_lower, ingredient_lower, matched_keyword):
         return matched_keyword
@@ -1034,6 +3243,9 @@ def matches_ingredient(
                 return None
             if not any(ind in ingredient_lower for ind in JUICE_INGREDIENT_INDICATORS):
                 return None
+    if matched_keyword in _CITRUS_ZEST_KEYWORDS and product_lower:
+        if any(ind in product_lower for ind in JUICE_PRODUCT_INDICATORS):
+            return None
 
     # STEP 2c: Whole crayfish recipes map to the frozen signalkräftor family,
     # not to shelf-stable "i lag"/tail products.
@@ -1058,7 +3270,7 @@ def matches_ingredient(
         # must also contain that qualifying word.
         for req_word in INGREDIENT_REQUIRES_IN_PRODUCT:
             if req_word in ingredient_lower and matched_keyword != req_word:
-                if req_word not in product_lower:
+                if req_word not in product_lower and req_word not in product_keywords:
                     return None
 
         # STEP 3c: Carrier-flavor specificity
@@ -1127,9 +3339,13 @@ def matches_ingredient(
                         _SPICE_AMOUNT_IMPLICIT_GROUND = frozenset({
                             'ingefära', 'ingefara',
                             'gurkmeja', 'kurkuma',
-                            'paprika',
+                            'paprika', 'chili',
                         })
-                        _GROUND_PRODUCT_INDICATORS = frozenset({'malen', 'malna', 'mald', 'malet', 'pulver', 'torkad', 'torkade'})
+                        _GROUND_PRODUCT_INDICATORS = frozenset({
+                            'malen', 'malna', 'mald', 'malet',
+                            'pulver', 'flakes', 'flingor',
+                            'torkad', 'torkade',
+                        })
                         _FRESH_INDICATORS = frozenset({'färsk', 'farsk', 'riven', 'hackad', 'pressad'})
                         if (base_word in _SPICE_AMOUNT_IMPLICIT_GROUND
                                 and any(ind in _GROUND_PRODUCT_INDICATORS for ind in expanded_indicators)
@@ -1181,7 +3397,10 @@ def matches_ingredient(
     # Keep spice-list fennel alternatives separate from fresh fennel bulbs.
     if matched_keyword == 'fänkål':
         wants_fennel_spice = _ingredient_wants_fennel_spice(ingredient_lower)
-        is_fresh_fennel_product = 'klass' in product_lower
+        is_fresh_fennel_product = (
+            'klass' in product_lower
+            or re.search(r'\bfänkål\s+ca\s+\d', product_lower) is not None
+        )
         is_fennel_spice_product = any(
             ind in product_lower for ind in (
                 'fänkålsfrö', 'fankalsfro', 'fänkålsfrön', 'fankalsfron',
@@ -1251,6 +3470,22 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
         - context_words: Set[str] - which CONTEXT_REQUIRED_WORDS this offer contains
         - specialty_qualifiers: Dict[str, Set[str]] - base_word -> found qualifiers
     """
+    # Pre-normalize early so name-conditional keyword bridges can inspect the
+    # same normalized product text the validators use later.
+    name_normalized = _apply_space_normalizations(fix_swedish_chars(offer_name).lower())
+    brand_normalized = (
+        _apply_space_normalizations(fix_swedish_chars(brand).lower())
+        if brand
+        else ""
+    )
+    context_name_normalized = name_normalized
+    if brand_normalized:
+        context_name_normalized = re.sub(
+            r'\b' + re.escape(brand_normalized) + r'\b',
+            '',
+            context_name_normalized,
+        ).strip()
+
     # Extract keywords (this was already being cached)
     keywords = extract_keywords_from_product(offer_name, offer_category, brand=brand)
     keywords = _expand_offer_keywords_for_matching(keywords, offer_name)
@@ -1259,7 +3494,7 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
     # removed by carrier detection (e.g., "citron" stripped from "Messmör Citron").
     # These must NOT be re-indexed in cache_manager's name-word inverted index,
     # otherwise they bypass the carrier mechanism entirely.
-    name_lower_simple = fix_swedish_chars(offer_name).lower()
+    name_lower_simple = context_name_normalized
     name_words_all = set(name_lower_simple.split())
     kw_set_check = set(keywords)
     # Words from the name that are potential food keywords (≥4 chars) but not in keywords
@@ -1313,6 +3548,9 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
         'spaghetti', 'spagetti', 'linguine', 'tagliatelle',
         'fettuccine', 'fettuccini', 'fettucine', 'pappardelle',
         'tagliolini', 'bucatini', 'capellini',
+        # Apple-cider ingredient forms must not be added back to every cider
+        # offer; otherwise pear/berry cider satisfies "cider äpple".
+        'äppelcider', 'applelcider',
     })
     extra_keywords = []
 
@@ -1322,6 +3560,10 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
 
     for kw in keywords:
         for child in _INGREDIENT_PARENTS_REVERSE.get(kw, ()):
+            if child in {'bifftomat', 'bifftomater'} and not any(
+                cue in name_normalized for cue in ('bifftomat', 'bifftomater')
+            ):
+                continue
             if child not in keywords and child not in _REVERSE_PARENT_EXCLUSIONS:
                 extra_keywords.append(child)
         # One-way offer-side additions (e.g., färskpotatis → potatis)
@@ -1334,14 +3576,25 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
     # by suffix-protection on 'senap' when ingredient is "skånsksenap".
     if 'senap' in keywords and 'skånsk' in offer_name.lower():
         _append_extra_keyword('skånsksenap')
+    # Fresh/frozen chili varieties such as jalapeno are acceptable for generic
+    # fresh "chili/chilifrukter" recipe lines, while jarred/sauce/snack variants
+    # must stay specific and be blocked by their own product-form rules.
+    if (
+        'chili' not in keywords
+        and any(kw in _CHILI_VARIETY_KEYWORDS for kw in keywords)
+        and _is_plain_fresh_or_frozen_chili_variety_product(name_normalized, offer_category)
+    ):
+        _append_extra_keyword('chili')
     # Flour-style durum products appear both as the compound "Durumvetemjöl" and
     # the spaced form "Mjöl Durumvete". Give the spaced form the same compound
     # keyword so measured recipe lines can match both without broadening generic
     # durumvete products.
     if 'durumvete' in keywords and 'mjöl' in keywords:
         _append_extra_keyword('durumvetemjöl')
-    # Name-conditional: "Laxfilé Färsk Back Loin" / "Mid Loin" are sushi-grade salmon
-    if 'laxfilé' in keywords and 'loin' in offer_name.lower():
+    if 'havregryn' in keywords and any(cue in name_normalized for cue in ('glutenfri', 'glutenfritt', 'glutenfria')):
+        _append_extra_keyword('glutenfrihavregryn')
+    # Name-conditional: "Lax Back Loin" / "Laxfilé Mid Loin" are sushi-grade salmon
+    if any(kw in keywords for kw in ('lax', 'laxfilé', 'laxfile')) and 'loin' in offer_name.lower():
         _append_extra_keyword('sushilax')
     # Name-conditional: "Buljong Mörk Oxe" — 'mörk' blocks space normalization
     if 'buljong' in keywords and 'oxe' in offer_name.lower().split():
@@ -1352,7 +3605,7 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
         _append_extra_keyword('formbröd')
     # Name-conditional: Quorn mince products should expose the specific mince form
     # without broadening other Quorn-branded filets/skivor/pepperoni items.
-    if brand and brand.lower() == 'quorn' and 'mince/färs' in keywords:
+    if brand and brand.lower() == 'quorn' and ({'mince/färs', 'färs', 'fars'} & set(keywords)):
         _append_extra_keyword('quornfärs')
         _append_extra_keyword('quornfars')
     # Name-conditional: Quorn pieces/bitar should satisfy explicit Quorn-piece requests
@@ -1365,6 +3618,30 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
     # when the product name explicitly says '5-minuter'.
     _offer_lower_pre = offer_name.lower()
     _offer_words_pre = set(name_lower_simple.split())
+    if (
+        offer_category == 'bread'
+        and 'toast' in _offer_words_pre
+        and not any(cue in _offer_lower_pre for cue in ('burger toast', 'cheddar'))
+    ):
+        _append_extra_keyword('formbröd')
+    if 'knippe' in _offer_words_pre and any(
+        kw in keywords for kw in ('lök', 'rödlök', 'rodlok', 'salladslök', 'salladslok')
+    ):
+        _append_extra_keyword('knipplök')
+        _append_extra_keyword('knipplok')
+    # Name-conditional: Santa Maria-style "Indian Spices <dish>" products are
+    # dry spice mixes even though the dish name (tikka/masala/etc.) is also used
+    # for ready meals and sauces. Expose the mix carrier plus the named family
+    # only for the dry "Indian Spices" wording.
+    if (
+        (offer_category or '').lower() in {'spices', 'pantry'}
+        and 'indian' in _offer_words_pre
+        and 'spices' in _offer_words_pre
+    ):
+        _append_extra_keyword('kryddmix')
+        for mix_keyword in ('tikka', 'garam', 'raita', 'tandoori', 'masala'):
+            if mix_keyword in _offer_words_pre:
+                _append_extra_keyword(mix_keyword)
     if 'sillfilé' in keywords and '5-minuter' in _offer_lower_pre:
         _append_extra_keyword('inläggningssill')
         _append_extra_keyword('5-minuterssill')
@@ -1407,11 +3684,23 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
     # chipotle spice family or nearby sauce/mayo products.
     if 'chipotle' in _offer_words_pre and ('paste' in _offer_words_pre or 'pasta' in _offer_words_pre):
         _append_extra_keyword('chipotlepasta')
-    # Name-conditional: pure Parma ham products sold as "Prosciutto di Parma"
-    # should match recipe ingredients saying "parmaskinka". Keep this narrow:
-    # add the bridge only for deli-style prosciutto products, not for prepared
-    # foods like tortellini or pinsa that merely contain prosciutto as a filling/topping.
+    # Name-conditional: air-dried ham products can be sold under origin names
+    # (prosciutto, serrano, jamon, parma). Expose the common prosciutto family
+    # only for deli products, not prepared carriers with prosciutto as filling.
     _parma_prepared_keywords = frozenset({'tortellini', 'tortelloni', 'ravioli', 'pinsa', 'pizza'})
+    _air_dried_skinka_cues = frozenset({'lufttorkad', 'lufttorkade', 'lufttorkat'})
+    _is_air_dried_ham = (
+        'prosciutto' in _offer_words_pre
+        or _offer_words_pre & {'serrano', 'jamon', 'jamón'}
+        or ('skinka' in keywords and _offer_words_pre & _air_dried_skinka_cues)
+    )
+    if (
+        _is_air_dried_ham
+        and not any(kw in keywords for kw in _parma_prepared_keywords)
+    ):
+        _append_extra_keyword('prosciutto')
+    # Pure Parma ham products sold as "Prosciutto di Parma" should also match
+    # recipe ingredients saying "parmaskinka".
     if (
         'prosciutto' in keywords
         and 'parma' in _offer_lower_pre
@@ -1485,14 +3774,13 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
 
     # Pre-compute which context words this offer contains
     # (avoid looping through 30+ words per recipe match)
-    # NOTE: Brand names with food keywords (e.g., "Jokkmokks korv & rökeri")
-    # are stripped from product names in db_saver.py via strip_brand_from_name(),
-    # so they won't interfere with context checks here.
+    # Ignore the explicit brand payload here too: some brands contain food words
+    # that should not create product context requirements.
     context_words = set()
     _is_glass_product = 'glass' in name_words_all or any(w.endswith('glass') for w in name_words_all)
     if not _is_glass_product:
         for context_word in CONTEXT_REQUIRED_WORDS:
-            if _has_word_boundary_match(context_word, name_normalized):
+            if _has_word_boundary_match(context_word, context_name_normalized):
                 context_words.add(context_word)
     # Glass products: glass normalization already handles flavor matching
     # via flavor-specific keywords. Context words like 'vanilj' would block
@@ -1532,6 +3820,14 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
                     found_in_offer.add(qualifier)
             if found_in_offer:
                 found_qualifiers[base_word] = found_in_offer
+    if (
+        'kalamataoliver' in keywords_set
+        and 'kalamata' in name_normalized
+        and 'olivolja' not in name_normalized
+        and 'tapenade' not in name_normalized
+        and 'hummus' not in name_normalized
+    ):
+        found_qualifiers.setdefault('oliver', set()).add('kalamata')
 
     # Pre-compute whether this product needs per-ingredient PROCESSED_PRODUCT_RULES check
     # Avoids looping through all rules per recipe match
@@ -1545,10 +3841,14 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
     # Pre-compute whether this product is a juice product (for JUICE_RULE_KEYWORDS check)
     is_juice_product = any(ind in name_normalized for ind in JUICE_PRODUCT_INDICATORS)
 
-    # Pre-compute cuisine context triggers for this product
+    # Pre-compute cuisine context triggers for this product. Use brand-stripped
+    # text here so brands such as "El Taco Truck" do not make plain guacamole
+    # require taco/tex-mex recipe context.
+    cuisine_name_normalized = context_name_normalized
+
     cuisine_triggers = {}
     for trigger, contexts in CUISINE_CONTEXT.items():
-        if trigger in name_normalized:
+        if trigger in cuisine_name_normalized:
             cuisine_triggers[trigger] = contexts
             break  # Only one trigger per product
 
@@ -1623,6 +3923,8 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
             _jalapeno_fresh_cues = frozenset({
                 'klass', 'kl1',
                 'färsk', 'farsk',
+                'fryst', 'frysta',
+                'hackad', 'hackade',
                 'grön', 'gron',
                 'röd', 'rod',
                 'mörk', 'mork',
@@ -1667,7 +3969,7 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
     # ingredient but NOT in the product, block the match (when matched on a different keyword)
     ingredient_context_missing = set()
     for req_word in INGREDIENT_REQUIRES_IN_PRODUCT:
-        if req_word not in name_normalized:
+        if req_word not in name_normalized and req_word not in keywords_set:
             ingredient_context_missing.add(req_word)
 
     return {
@@ -1715,13 +4017,22 @@ def _prepare_fast_ingredient_text(
     ingredient_lower = preserve_parenthetical_grouped_herb_leaves(ingredient_lower)
     ingredient_lower = preserve_non_concentrate_parenthetical(ingredient_lower)
     ingredient_lower = preserve_parenthetical_shiso_alternatives(ingredient_lower)
+    ingredient_lower = preserve_spice_mix_preference_parentheticals(ingredient_lower)
+    ingredient_lower = preserve_single_product_example_parentheticals(ingredient_lower)
     if is_subrecipe_reference_text(ingredient_lower):
         return ''
+    wants_herb_fresh_cheese = (
+        'färskost' in ingredient_lower
+        and ('örter' in ingredient_lower or 'orter' in ingredient_lower)
+    )
     ingredient_lower = strip_biff_portion_prep_phrase(ingredient_lower)
     ingredient_lower = normalize_measured_durumvete_flour(ingredient_lower)
     ingredient_lower = normalize_measured_risotto_rice(ingredient_lower)
+    ingredient_lower = rewrite_truncated_chocolate_color_lists(ingredient_lower)
     ingredient_lower = rewrite_truncated_eller_compounds(ingredient_lower)
     ingredient_lower = rewrite_mince_of_alternatives(ingredient_lower)
+    if _ingredient_is_non_buyable_root_veg_pasta(ingredient_lower):
+        return ''
     # Parenthetical "eller" segments are real ingredient alternatives and must
     # survive the later generic paren stripping.
     ingredient_lower = re.sub(r'\(\s*eller\s+([^)]*)\)', r' eller \1', ingredient_lower, flags=re.IGNORECASE)
@@ -1731,6 +4042,8 @@ def _prepare_fast_ingredient_text(
     # vego-only yoghurt matching still applies, but also expose "yoghurt" for
     # the normal keyword path.
     ingredient_lower = re.sub(r'\bgurt\b', 'gurt yoghurt', ingredient_lower)
+    if 'breoliv' in ingredient_lower:
+        ingredient_lower += ' margarin'
     ingredient_lower = re.sub(
         r'\b([a-zåäöé]+?)(sylt|marmelad)\s+eller\s+-(sylt|marmelad)\b',
         r'\1\2 eller \1\3',
@@ -1739,6 +4052,43 @@ def _prepare_fast_ingredient_text(
     if _ingredient_requests_generic_frozen_fish_fillet(ingredient_lower):
         ingredient_lower += ' fiskfilé'
     ingredient_lower = _append_canonical_keyword_synonyms(ingredient_lower)
+    if wants_herb_fresh_cheese:
+        ingredient_lower += ' örter vitlök'
+
+    if (
+        ('kesella' in ingredient_lower and 'vanilj' in ingredient_lower)
+        or re.search(r'\bvanilj\s+kvarg\b', ingredient_lower)
+        or 'vaniljkvarg' in ingredient_lower
+    ):
+        ingredient_lower += ' vaniljkvarg'
+    if any(token in ingredient_lower for token in (
+        'kanderade citrusskal', 'kanderat citrusskal',
+        'kanderade apelsinskal', 'kanderat apelsinskal',
+        'syltade apelsinskal', 'syltat apelsinskal',
+    )):
+        ingredient_lower += ' kanderatapelsinskal'
+    if (
+        ('apelsinskal' in ingredient_lower)
+        and not any(token in ingredient_lower for token in ('kanderad', 'kanderade', 'syltad', 'syltade'))
+    ):
+        ingredient_lower += ' apelsin'
+    if (
+        'sodavatten' in ingredient_lower
+        or re.search(r'\bkolsyrat\s+(?:vatten|mineralvatten)\b', ingredient_lower)
+        or re.search(r'\bmineralvatten\s+kolsyrat\b', ingredient_lower)
+    ):
+        ingredient_lower += ' sodavatten'
+    if re.search(r'\bfärska?\s+örter\b|\bfarska?\s+orter\b', ingredient_lower):
+        ingredient_lower += (
+            ' basilika persilja dill timjan gräslök rosmarin koriander'
+            ' oregano mynta salvia'
+        )
+    if 'svart böna' in ingredient_lower or 'svart bona' in ingredient_lower or 'svarta bönor' in ingredient_lower or 'svarta bonor' in ingredient_lower:
+        ingredient_lower += ' svartabönor bönor'
+    if re.search(r'\b(?:öl|ol)\b', ingredient_lower) and 'porter' not in ingredient_lower:
+        ingredient_lower += ' öl'
+    if 'surdegsbaguette' in ingredient_lower or 'surdegsbaguett' in ingredient_lower:
+        ingredient_lower += ' baguette'
 
     # Plant-based "matlagning" is recipe shorthand for cooking-cream products.
     # Mirror the ingredient extraction aliases here because the fast matcher works
@@ -1761,12 +4111,37 @@ def _prepare_fast_ingredient_text(
     if 'teriyakisås' in ingredient_lower and 'teriyaki' not in ingredient_lower:
         ingredient_lower += ' teriyaki'
     if (
+        'veganost' not in ingredient_lower
+        and re.search(
+            r'\b(?:vegansk|vegan|växtbaserad|vaxtbaserad|plant based|plant-based)\s+ost\b',
+            ingredient_lower,
+        )
+    ):
+        ingredient_lower += ' veganost'
+    if (
         'paprika' in ingredient_lower
         and 'paprikapulver' not in ingredient_lower
         and not any(fi in ingredient_lower for fi in ('färsk', 'farsk'))
         and re.search(r'\b(?:tsk|tesked|krm)\b', ingredient_lower)
     ):
         ingredient_lower += ' paprikapulver'
+    if 'crispychiliolja' in ingredient_lower:
+        ingredient_lower += ' crispychiliolja'
+    if (
+        ('majskolv' in ingredient_lower or 'majskolvar' in ingredient_lower)
+        and any(cue in ingredient_lower for cue in ('färdigkokt', 'fardigkokt', 'förkokt', 'forkokt', 'kokt'))
+    ):
+        ingredient_lower += ' förkoktmajskolv majskolv'
+    if 'rotfrukter' in ingredient_lower or 'rotfrukt' in ingredient_lower:
+        ingredient_lower += ' rotfruktsmix morot palsternacka kålrot rotselleri rödbeta'
+    if re.search(r'\bfrysta?\s+(?:örter|orter)\b', ingredient_lower):
+        ingredient_lower += ' frystaörter'
+    if re.search(r'\b(?:folköl|folkol)\b', ingredient_lower):
+        ingredient_lower += ' folköl öl'
+    if re.search(r'\b(?:läsk|lask)\b', ingredient_lower):
+        ingredient_lower += ' läsk'
+    if 'sashimi' in ingredient_lower and 'lax' in ingredient_lower:
+        ingredient_lower += ' sashimilax sushilax'
 
     # Normalize singular → plural for cherry tomatoes so offers with keyword
     # "körsbärstomater" match ingredient text with singular "körsbärstomat".
@@ -1803,6 +4178,10 @@ def _passes_precomputed_spice_fresh_rule(
 
     if svf_rule['mode'] == 'require':
         return any(ind in ingredient_lower for ind in svf_rule['indicators'])
+    if frozen_fresh_herb_form_overrides_spice_indicator(ingredient_lower, svf_key):
+        return True
+    if svf_key == 'chili' and _ingredient_requests_fresh_chili(ingredient_lower, matched_keyword):
+        return True
 
     return not ingredient_has_spice_indicator(
         set(svf_rule['indicators']),
@@ -1847,11 +4226,14 @@ def matches_ingredient_fast(
             _prenormalized=_prenormalized,
         )
     )
-
     # STEP 1: Fast keyword matching (most products won't match)
     matched_keyword = None
     for keyword in keywords:
-        if keyword in ingredient_lower:
+        if keyword in _RECIPE_NEVER_MATCH_KEYWORDS:
+            continue
+        if _keyword_occurs_in_ingredient(keyword, ingredient_lower):
+            if keyword in _BREWED_COFFEE_BLOCKED_KEYWORDS and _is_brewed_coffee_ingredient_text(ingredient_lower):
+                continue
             # Block compound word suffix matches (e.g., "köttbullar" in "fiskköttbullar")
             if keyword in _SUFFIX_PROTECTED_KEYWORDS:
                 if not _has_word_boundary_match(keyword, ingredient_lower):
@@ -1886,14 +4268,28 @@ def matches_ingredient_fast(
             # product must contain the qualifier (prefix or suffix)
             if keyword in _COMPOUND_STRICT_KEYWORDS or keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
                 pname = offer_data['name_normalized']
-                if keyword in _COMPOUND_STRICT_KEYWORDS:
-                    if _check_compound_strict(keyword, ingredient_lower, pname,
-                                              _ingredient_words):
-                        continue
-                if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
-                    if _check_compound_strict(keyword, ingredient_lower, pname,
-                                              _ingredient_words, check_prefix=True):
-                        continue
+                plain_chili_variety = (
+                    keyword in {'chili', 'chilipeppar'}
+                    and not any(sauce in ingredient_lower for sauce in ('chilisås', 'chilisas'))
+                    and _is_plain_fresh_or_frozen_chili_variety_product(
+                        pname,
+                        offer_data.get('category', ''),
+                    )
+                )
+                chili_spice_product = (
+                    keyword == 'chili'
+                    and _ingredient_requests_chili_spice(ingredient_lower, keyword)
+                    and _chili_spice_product_allowed(pname, ingredient_lower, keyword)
+                )
+                if not plain_chili_variety and not chili_spice_product:
+                    if keyword in _COMPOUND_STRICT_KEYWORDS:
+                        if _check_compound_strict(keyword, ingredient_lower, pname,
+                                                  _ingredient_words):
+                            continue
+                    if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
+                        if _check_compound_strict(keyword, ingredient_lower, pname,
+                                                  _ingredient_words, check_prefix=True):
+                            continue
             if _blocked_by_exact_compound_only(ingredient_lower, keyword):
                 continue
             # Product-name blockers are validated later per ingredient in
@@ -1909,11 +4305,48 @@ def matches_ingredient_fast(
         if qualifier_words and not any(w in ingredient_lower for w in qualifier_words):
             matched_keyword = None
 
+    if matched_keyword:
+        product_lower = offer_data['name_normalized']
+        product_keywords = set(offer_data.get('keywords', ()))
+        if not check_explicit_liquid_honey_match(matched_keyword, ingredient_lower, product_lower):
+            return None
+        if not check_plain_fresh_potato_match(
+            matched_keyword,
+            ingredient_lower,
+            product_lower,
+            offer_data.get('category', ''),
+        ):
+            return None
+        if (
+            matched_keyword in {'tunnbröd', 'tunnbrod', 'pitabröd', 'pitabrod'}
+            and any(cue in ingredient_lower for cue in ('libabröd', 'libabrod', 'liba', 'pitabröd', 'pitabrod', 'pita'))
+            and not any(cue in product_lower for cue in ('liba', 'pitabröd', 'pitabrod', 'pita', 'tunnbröd', 'tunnbrod'))
+        ):
+            return None
+        if any(cue in ingredient_lower for cue in ('sashimilax', 'sushilax')):
+            product_is_sushi_grade_lax = (
+                'sushilax' in product_keywords
+                or any(cue in product_lower for cue in ('sushilax', 'sashimi', 'loin'))
+            )
+            if matched_keyword in {'lax', 'laxfilé', 'laxfile', 'fiskfilé', 'fiskfile'} and not product_is_sushi_grade_lax:
+                return None
+        if (
+            matched_keyword in {'majonnäs', 'majonnas', 'mayo'}
+            and any(cue in ingredient_lower for cue in ('veganskmajonnäs', 'vegansk majonnäs', 'vegan mayo', 'plant based mayo', 'plant-based mayo'))
+            and not (
+                'veganskmajonnäs' in product_keywords
+                or any(cue in product_lower for cue in ('vegansk', 'vegan', 'plant based', 'plant-based'))
+            )
+        ):
+            return None
+
     # No direct match? Try parent mapping (e.g., "jasminris" → "ris")
     if not matched_keyword:
         for keyword in keywords:
             parent = INGREDIENT_PARENTS.get(keyword) or PARENT_MATCH_ONLY.get(keyword)
-            if parent and parent in ingredient_lower:
+            if parent in _RECIPE_NEVER_MATCH_KEYWORDS:
+                continue
+            if parent and _keyword_occurs_in_ingredient(parent, ingredient_lower):
                 # Apply suffix protection to parent keyword (e.g., "ris" in "grissini")
                 if parent in _SUFFIX_PROTECTED_KEYWORDS:
                     if not _has_word_boundary_match(parent, ingredient_lower):
@@ -1991,6 +4424,72 @@ def matches_ingredient_fast(
     if not matched_keyword:
         return None
 
+    if find_no_match_policy_hits(
+        ingredient_texts=(ingredient_lower,),
+        offer_keywords=keywords,
+        offer_text=offer_data.get('name_normalized', ''),
+    ):
+        return None
+
+    if not _truffle_oil_requirement_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        offer_data['name_normalized'],
+        keywords,
+    ):
+        return None
+    if not _explicit_extra_virgin_olive_oil_requirement_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        offer_data['name_normalized'],
+    ):
+        return None
+    if not _chocolate_drink_requirement_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        offer_data['name_normalized'],
+        keywords,
+    ):
+        return None
+    if not _explicit_vegan_requirement_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        offer_data['name_normalized'],
+        keywords,
+    ):
+        return None
+    if not _explicit_vegan_cheese_variant_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        offer_data['name_normalized'],
+    ):
+        return None
+    if not _hard_tunnbrod_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        offer_data['name_normalized'],
+    ):
+        return None
+    if not _rostbiff_palagg_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        offer_data['name_normalized'],
+    ):
+        return None
+    if not _spice_mix_context_allows_component_match(
+        keywords,
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _spice_mix_variant_allows_product(
+        keywords,
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+
     if (
         matched_keyword == 'helkyckling'
         and _ingredient_implies_whole_kyckling(ingredient_lower)
@@ -2009,6 +4508,196 @@ def matches_ingredient_fast(
         if any(s in ingredient_lower for s in suppressors):
             return None
     if not _pimiento_product_allowed(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _cooked_turkey_product_allowed(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _chili_spice_product_allowed(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _fresh_chili_product_allowed(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+        offer_data.get('category', ''),
+    ):
+        return None
+    if not _soy_sauce_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _whole_cardamom_seed_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _beet_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _carrot_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _sesame_seed_product_allows_requirement(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _tofu_product_allows_requirement(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _bread_slice_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _pepparrotsvisp_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _smoked_turkey_breast_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _plain_plant_drink_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _explicit_plant_based_food_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+        keywords,
+    ):
+        return None
+    if not _hjortronsylt_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _batch10_form_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _noodle_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _citrus_juice_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _aged_cheese_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _salsa_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _ketchup_type_chili_sauce_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _pistachio_salt_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _kiwi_color_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _falafel_mix_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _batch14_completion_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+        offer_data.get('keywords', ()),
+    ):
+        return None
+    if not _batch15_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+        offer_data.get('keywords', ()),
+    ):
+        return None
+    if not _pitted_olive_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _exact_pasta_shape_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _gochujang_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _raw_meat_requirement_allows_product(
+        offer_data['name_normalized'],
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _plain_tempeh_helbit_requirement_allows_product(
         offer_data['name_normalized'],
         ingredient_lower,
         matched_keyword,
@@ -2035,15 +4724,26 @@ def matches_ingredient_fast(
     # direction (blocks pickled products from fresh recipes) but only fires when the PRODUCT
     # has an indicator — fresh products (no indicator) bypass that check entirely.
     _BEET_KW = frozenset({'rödbeta', 'rödbetor', 'rodbetor'})
-    _BEET_STRONG_PRESERVED = frozenset({
+    _BEET_PICKLED_INGREDIENT = frozenset({
         'inlagd', 'inlagda',
         'konserverad', 'konserverade',
         'gammaldags', 'gammeldags',
+    })
+    _BEET_PRECOOKED = frozenset({
         'förkokt', 'förkokta',
         'forkokt', 'forkokta',
     })
+    _BEET_STRONG_PRESERVED = frozenset({
+        *_BEET_PICKLED_INGREDIENT,
+        *_BEET_PRECOOKED,
+    })
     _BEET_SLICED_WORDS = frozenset({'skivad', 'skivade', 'skivor'})
     _BEET_WHOLE_PRESERVED_PRODUCT = frozenset({'hela'})
+    _BEET_PICKLED_OR_JAR_PRODUCT = frozenset({
+        *_BEET_PICKLED_INGREDIENT,
+        *_BEET_SLICED_WORDS,
+        *_BEET_WHOLE_PRESERVED_PRODUCT,
+    })
     _BEET_PRESERVED = frozenset({
         *_BEET_STRONG_PRESERVED,
         *_BEET_SLICED_WORDS,
@@ -2059,9 +4759,15 @@ def matches_ingredient_fast(
     })
     if matched_keyword in _BEET_KW:
         has_strong_preserved = any(ind in ingredient_lower for ind in _BEET_STRONG_PRESERVED)
+        has_pickled_wording = any(ind in ingredient_lower for ind in _BEET_PICKLED_INGREDIENT)
         has_sliced_wording = any(ind in ingredient_lower for ind in _BEET_SLICED_WORDS)
         has_packaged_whole_beet_wording = _ingredient_requests_preserved_whole_beets(ingredient_lower)
         fresh_beet_prep = any(cue in ingredient_lower for cue in _BEET_FRESH_PREP_CUES)
+        ingredient_wants_pickled_or_jar = (
+            has_pickled_wording
+            or has_packaged_whole_beet_wording
+            or (has_sliced_wording and not fresh_beet_prep)
+        )
         ingredient_wants_preserved = (
             has_strong_preserved
             or has_packaged_whole_beet_wording
@@ -2071,7 +4777,10 @@ def matches_ingredient_fast(
         if has_sliced_wording and fresh_beet_prep and not has_strong_preserved:
             if any(ind in name_norm for ind in _BEET_PRESERVED):
                 return None  # fresh beets that will be sliced in the recipe, not preserved slices
-        if ingredient_wants_preserved:
+        if ingredient_wants_pickled_or_jar:
+            if not any(ind in name_norm for ind in _BEET_PICKLED_OR_JAR_PRODUCT):
+                return None  # ingredient wants inlagda/jarred beets, not merely pre-cooked beets
+        elif ingredient_wants_preserved:
             if not any(ind in name_norm for ind in _BEET_PRESERVED):
                 return None  # ingredient wants preserved beets, product is fresh
 
@@ -2141,15 +4850,25 @@ def matches_ingredient_fast(
         'marinerad', 'marinerade',
         'i olja', 'olja',
     })
+    _MAKRILL_PRESERVED_PRODUCT = frozenset({
+        'burk', 'konserv', 'konserverad', 'konserverade',
+        'tomatsås', 'tomatssås', 'sås', 'sas',
+        'portugisisk', 'portugisiskt', 'portugisiskt vis',
+        'citrontimjan',
+        'i olja',
+    })
     if matched_keyword in _MAKRILL_FILLET_KW:
-        if offer_data.get('category') == 'pantry':
+        name_norm = offer_data['name_normalized']
+        if offer_data.get('category') == 'pantry' or any(
+            ind in name_norm for ind in _MAKRILL_PRESERVED_PRODUCT
+        ):
             if not any(ind in ingredient_lower for ind in _MAKRILL_PRESERVED_INGREDIENT):
                 return None
 
     # Explicit preserved champignons should not surface fresh produce.
     # Ordinary champignon lines, including prep cues like "skivade", should stay
     # on fresh/frozen mushrooms and not fall through to preserved jar products.
-    _CHAMPIGNON_KW = frozenset({'champinjon', 'champinjoner'})
+    _CHAMPIGNON_KW = frozenset({'champinjon', 'champinjoner', 'skogschampinjoner'})
     _CHAMPIGNON_PRESERVED_INGREDIENT = frozenset({
         'burk', 'konserv', 'konserverad', 'konserverade',
         'i vatten',
@@ -2165,13 +4884,21 @@ def matches_ingredient_fast(
     })
     if matched_keyword in _CHAMPIGNON_KW:
         name_norm = offer_data['name_normalized']
+        product_is_frozen = any(ind in name_norm for ind in FROZEN_PRODUCT_INDICATORS)
+        product_is_preserved = (
+            any(ind in name_norm for ind in _CHAMPIGNON_PRESERVED_PRODUCT - {'skivad', 'skivade', 'hela'})
+            or (
+                not product_is_frozen
+                and any(ind in name_norm for ind in {'skivad', 'skivade', 'hela'})
+            )
+        )
         if any(ind in ingredient_lower for ind in _CHAMPIGNON_PRESERVED_INGREDIENT):
-            if not any(ind in name_norm for ind in _CHAMPIGNON_PRESERVED_PRODUCT):
+            if not product_is_preserved:
                 return None
         else:
             if (
                 'torkadsvamp' in offer_data.get('keywords', ())
-                or any(ind in name_norm for ind in _CHAMPIGNON_PRESERVED_PRODUCT)
+                or product_is_preserved
                 or any(ind in name_norm for ind in ('torkad', 'torkade'))
             ):
                 return None
@@ -2219,6 +4946,30 @@ def matches_ingredient_fast(
 
     if matched_keyword == 'svamp':
         name_norm = offer_data['name_normalized']
+        product_is_frozen = any(ind in name_norm for ind in FROZEN_PRODUCT_INDICATORS)
+        product_is_preserved_champignon = (
+            any(ind in offer_data.get('keywords', ()) for ind in ('champinjon', 'champinjoner'))
+            and (
+                any(ind in name_norm for ind in (
+                    'vatten',
+                    'burk',
+                    'konserv', 'konserverad', 'konserverade',
+                    'tetra',
+                    'inlagd', 'inlagda',
+                ))
+                or (
+                    not product_is_frozen
+                    and any(ind in name_norm for ind in ('skivad', 'skivade', 'hela'))
+                )
+            )
+        )
+        ingredient_allows_preserved_mushroom = any(ind in ingredient_lower for ind in (
+            'burk', 'konserv', 'konserverad', 'konserverade',
+            'i vatten',
+            'i lag',
+        ))
+        if product_is_preserved_champignon and not ingredient_allows_preserved_mushroom:
+            return None
         if any(ind in ingredient_lower for ind in ('färsk', 'farsk', 'färska', 'farska')):
             if (
                 'torkadsvamp' in offer_data.get('keywords', ())
@@ -2329,7 +5080,9 @@ def matches_ingredient_fast(
         name_norm = offer_data['name_normalized']
         fresh_sausage_like = (
             'färskkorv' in product_keywords
+            or 'färskkorvar' in product_keywords
             or 'farskkorv' in product_keywords
+            or 'farskkorvar' in product_keywords
             or 'salsiccia' in product_keywords
             or 'chorizo' in product_keywords
             or 'färsk korv' in name_norm
@@ -2355,25 +5108,25 @@ def matches_ingredient_fast(
                 return None
             if not any(ind in ingredient_lower for ind in JUICE_INGREDIENT_INDICATORS):
                 return None
+    if matched_keyword in _CITRUS_ZEST_KEYWORDS and offer_data['is_juice_product']:
+        return None
 
     # STEP 2: Context-required words check (using pre-computed set)
     # If offer contains "köttbullar", ingredient must too
     #
-    # Special case: when the matched keyword is ITSELF a context-required word
-    # (e.g., "burrata" or "mozzarella"), skip other context words that are also
-    # keywords. This lets "Burrata Mozzarella" match either "burrata" OR "mozzarella"
-    # recipes. But "Riven Ost Mozzarella" matched on "ost" (not a context word)
-    # still requires "mozzarella" in the ingredient.
+    # Special case: when the matched keyword is ITSELF a context-required word,
+    # skip that exact context word only. Related product identities that should
+    # not block each other, such as burrata/mozzarella, live in the explicit
+    # per-keyword exemptions below.
     context_words = offer_data['context_words']
     if context_words:
         matched_is_context = matched_keyword in context_words
-        offer_keywords_set = set(keywords) if matched_is_context else None
         offer_text_for_context = f"{offer_data.get('name_normalized', '')} {' '.join(keywords)}"
         # Per-keyword exemptions: e.g., 'hamburgare' exempts 'burgare' context
         # but 'grillost' in the same product still requires 'burgare'
         kw_exemptions = CONTEXT_WORD_KEYWORD_EXEMPTIONS.get(matched_keyword, _EMPTY_FROZENSET)
         for context_word in context_words:
-            if matched_is_context and context_word in offer_keywords_set:
+            if matched_is_context and context_word == matched_keyword:
                 continue
             if context_word in kw_exemptions:
                 continue
@@ -2483,6 +5236,49 @@ def matches_ingredient_fast(
             matched_keyword,
         ):
             return None
+        if not _salta_kex_allows_product(
+            offer_data.get('name_normalized', ''),
+            ingredient_lower,
+            matched_keyword,
+        ):
+            return None
+        if not _cooked_turkey_product_allowed(
+            offer_data.get('name_normalized', ''),
+            ingredient_lower,
+            matched_keyword,
+        ):
+            return None
+        if not _chili_spice_product_allowed(
+            offer_data.get('name_normalized', ''),
+            ingredient_lower,
+            matched_keyword,
+        ):
+            return None
+        if not _fresh_chili_product_allowed(
+            offer_data.get('name_normalized', ''),
+            ingredient_lower,
+            matched_keyword,
+            offer_data.get('category', ''),
+        ):
+            return None
+        if not _soy_sauce_requirement_allows_product(
+            offer_data.get('name_normalized', ''),
+            ingredient_lower,
+            matched_keyword,
+        ):
+            return None
+        if not _whole_cardamom_seed_requirement_allows_product(
+            offer_data.get('name_normalized', ''),
+            ingredient_lower,
+            matched_keyword,
+        ):
+            return None
+        if not _tortilla_product_allowed(
+            offer_data.get('name_normalized', ''),
+            ingredient_lower,
+            matched_keyword,
+        ):
+            return None
         ingredient_context_missing = offer_data.get('ingredient_context_missing', _EMPTY_FROZENSET)
         for req_word in INGREDIENT_REQUIRES_IN_PRODUCT:
             if req_word in ingredient_lower and matched_keyword != req_word:
@@ -2521,12 +5317,21 @@ def matches_ingredient_fast(
     # Direction B: bidirectional qualifiers on product must be in ingredient
     if offer_qualifiers:
         per_kw_bidir = BIDIRECTIONAL_PER_KEYWORD.get(specialty_keyword, _EMPTY_FROZENSET)
-        generic_matches_all = {'choklad', 'bakchoklad', 'blockchoklad'}
+        generic_matches_all = {
+            'choklad', 'bakchoklad', 'blockchoklad',
+            'chokladknappar', 'chokladknapp',
+        }
         ingredient_has_qualifier = any(
             q in ingredient_lower for q in SPECIALTY_QUALIFIERS.get(specialty_keyword, ())
         )
         for q in offer_qualifiers:
             if q in BIDIRECTIONAL_SPECIALTY_QUALIFIERS or q in per_kw_bidir:
+                if (
+                    specialty_keyword == 'fikon'
+                    and q in {'torkad', 'torkade'}
+                    and not ingredient_has_qualifier
+                ):
+                    continue
                 if (
                     not ingredient_has_qualifier
                     and q not in BIDIRECTIONAL_SPECIALTY_QUALIFIERS
@@ -2537,6 +5342,19 @@ def matches_ingredient_fast(
                     specialty_keyword == 'kyckling'
                     and q == 'hel'
                     and _ingredient_implies_whole_kyckling(ingredient_lower)
+                ):
+                    continue
+                if (
+                    specialty_keyword == 'färskost'
+                    and 'smaksatt' in ingredient_lower
+                    and q != 'naturell'
+                ):
+                    continue
+                if (
+                    specialty_keyword == 'chili'
+                    and q in _CHILI_COLOR_QUALIFIERS
+                    and _ingredient_requests_fresh_chili(ingredient_lower, matched_keyword)
+                    and not _ingredient_has_explicit_chili_color(ingredient_lower)
                 ):
                     continue
                 equivalents = QUALIFIER_EQUIVALENTS.get(q, {q})
@@ -2553,13 +5371,22 @@ def matches_ingredient_fast(
         _SPICE_AMOUNT_IMPLICIT_GROUND = frozenset({
             'ingefära', 'ingefara',
             'gurkmeja', 'kurkuma',
-            'paprika',
+            'paprika', 'chili',
         })
-        _GROUND_PRODUCT_INDICATORS = frozenset({'malen', 'malna', 'mald', 'malet', 'pulver', 'torkad', 'torkade'})
+        _GROUND_PRODUCT_INDICATORS = frozenset({
+            'malen', 'malna', 'mald', 'malet',
+            'pulver', 'flakes', 'flingor',
+            'torkad', 'torkade',
+        })
         _FRESH_INDICATORS_SVF = frozenset({'färsk', 'farsk', 'riven', 'hackad', 'pressad'})
+        _STRICT_GENERIC_MATCHES_ALL = frozenset({'sojabönor', 'sojabonor'})
         for check in processed_checks:
             if check[1] == 'strict':
                 if not any(ind in ingredient_lower for ind in check[2]):
+                    if check[0] in _STRICT_GENERIC_MATCHES_ALL:
+                        processed_indicators = PROCESSED_PRODUCT_RULES.get(check[0], ())
+                        if not any(ind in ingredient_lower for ind in processed_indicators):
+                            continue
                     # Spice-amount heuristic: "1 tsk ingefära" = ground/dried
                     if (check[0] in _SPICE_AMOUNT_IMPLICIT_GROUND
                             and any(ind in _GROUND_PRODUCT_INDICATORS for ind in check[2])
@@ -2585,18 +5412,18 @@ def matches_ingredient_fast(
     # Per-ingredient refinement happens in recipe_matcher.py.
     if matched_keyword in FRESH_HERB_KEYWORDS:
         product_name = offer_data['name_normalized']
-        prod_is_fresh = any(ind in product_name for ind in FRESH_PRODUCT_INDICATORS)
         prod_is_dried = any(ind in product_name for ind in DRIED_PRODUCT_INDICATORS)
         prod_is_frozen = any(ind in product_name for ind in FROZEN_PRODUCT_INDICATORS)
-        # For herbs: default to DRIED if no indicator present.
-        # Fresh herbs always have explicit indicators (kruka/bunt/kvist/färsk)
-        # or are heavy (whole roots: ingefära 100g+, gurkmeja 100g+).
+        prod_is_fresh = product_indicates_fresh_herb_form(
+            matched_keyword,
+            product_name,
+            offer_data.get('category', ''),
+        )
+        # For herbs: default to DRIED if no indicator/category points to fresh.
+        # Fresh herbs normally have explicit indicators (kruka/bunt/kvist/färsk)
+        # or live in fresh produce categories.
         if not prod_is_fresh and not prod_is_dried and not prod_is_frozen:
-            w = offer_data.get('weight_grams')
-            if w and w > 80:
-                prod_is_fresh = True   # heavy without indicator = fresh root/bunch
-            else:
-                prod_is_dried = True   # light or no weight without indicator = dried jar
+            prod_is_dried = True
         recipe_wants_fresh = (
             any(fi in ingredient_lower for fi in RECIPE_FRESH_INDICATORS)
             or any(vi in ingredient_lower for vi in RECIPE_FRESH_VOLUME_INDICATORS)
@@ -2606,6 +5433,7 @@ def matches_ingredient_fast(
         _fresh_prep_cues = (
             'finskuren', 'finskurna',
             'fint skuren', 'fint skurna',
+            'skuren', 'skurna',
             'finhackad', 'finhackade',
             'hackad', 'hackade',
             'klippt', 'klippta',
@@ -2617,9 +5445,14 @@ def matches_ingredient_fast(
             and _RE_CHILI_COUNT_FRESH.search(ingredient_lower)
         ):
             recipe_wants_fresh = True
+        if (
+            matched_keyword in {'chili', 'chilipeppar', 'chilifrukt', 'chilifrukter'}
+            and _ingredient_requests_fresh_chili(ingredient_lower, matched_keyword)
+        ):
+            recipe_wants_fresh = True
         # For herbs: "1 tsk oregano" / "2 krm timjan" = small spice measurements = wants dried
         if not recipe_wants_fresh and not recipe_wants_dried:
-            if any(m in ingredient_lower for m in ('tsk ', 'krm ', ' tsk ', ' krm ')):
+            if any(m in ingredient_lower for m in ('tsk ', 'krm ', 'msk ', ' tsk ', ' krm ', ' msk ')):
                 recipe_wants_dried = True
         # Only block on clear single-direction mismatches.
         # If recipe text has BOTH "färsk" and "torkad" (two ingredients),
@@ -2694,7 +5527,10 @@ def matches_ingredient_fast(
     if matched_keyword == 'fänkål':
         name_norm = offer_data['name_normalized']
         wants_fennel_spice = _ingredient_wants_fennel_spice(ingredient_lower)
-        is_fresh_fennel_product = 'klass' in name_norm
+        is_fresh_fennel_product = (
+            'klass' in name_norm
+            or re.search(r'\bfänkål\s+ca\s+\d', name_norm) is not None
+        )
         is_fennel_spice_product = any(
             ind in name_norm for ind in (
                 'fänkålsfrö', 'fankalsfro', 'fänkålsfrön', 'fankalsfron',

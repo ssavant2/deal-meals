@@ -160,9 +160,6 @@ def summarize_probation_history(
                 "verification_mode": entry.get("verification_mode"),
                 "ingredient_routing_mode": entry.get("ingredient_routing_mode"),
                 "ingredient_routing_effective_mode": entry.get("ingredient_routing_effective_mode"),
-                "ingredient_routing_fullscan_baseline_checked": (
-                    entry.get("ingredient_routing_fullscan_baseline_checked")
-                ),
             }
             for entry in entries[-5:]
         ],
@@ -211,15 +208,6 @@ def build_runtime_probation_history_entry(
         "ingredient_routing_mode": result.get("ingredient_routing_mode"),
         "ingredient_routing_effective_mode": result.get("ingredient_routing_effective_mode"),
         "ingredient_routing_fallback_reason": result.get("ingredient_routing_fallback_reason"),
-        "ingredient_routing_fullscan_baseline_checked": (
-            result.get("ingredient_routing_fullscan_baseline_checked")
-        ),
-        "ingredient_routing_fullscan_baseline_matches": (
-            result.get("ingredient_routing_fullscan_baseline_matches")
-        ),
-        "ingredient_routing_fullscan_baseline_mismatched_count": (
-            result.get("ingredient_routing_fullscan_baseline_mismatched_count")
-        ),
         "cached": result.get("cached"),
         "total_recipes": result.get("total_recipes"),
         "time_ms": result.get("time_ms"),

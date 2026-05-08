@@ -494,6 +494,7 @@ class RecipeMatcher:
         compiled_recipe_data: Optional[Dict] = None,
         ingredient_candidate_indices_by_offer: Optional[Dict[str, set[int]]] = None,
         ingredient_routing_mode: str = "off",
+        offer_match_context_cache: Optional[Dict[int, dict]] = None,
     ) -> Dict:
         """Dispatch recipe matching through the active language/country backend."""
         return match_recipe_to_offers_backend(
@@ -507,6 +508,7 @@ class RecipeMatcher:
             compiled_recipe_data,
             ingredient_candidate_indices_by_offer,
             ingredient_routing_mode,
+            offer_match_context_cache,
         )
 
     def _rank_and_balance(

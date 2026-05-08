@@ -428,7 +428,7 @@ Vissa ingredienser är så vanliga i recept att de skulle skapa hundratals match
 
 | Kategori | Ingredienser |
 |----------|-------------|
-| Bassmaksättning | salt, peppar, svartpeppar, vitpeppar, citronpeppar, vitlökspeppar |
+| Bassmaksättning | salt, peppar, svartpeppar |
 | Matlagningsvätskor | vatten, olja |
 | Sockertyper | socker (generiskt) |
 

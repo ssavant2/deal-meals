@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from contextlib import contextmanager
 from datetime import datetime
 from decimal import Decimal
 from hashlib import sha256
 import json
 import os
 from pathlib import Path
+import threading
 import time
 from typing import Any
 
@@ -32,20 +32,19 @@ except ModuleNotFoundError:
     from app.delta_probation_runtime import get_delta_probation_gate_status
 
 try:
-    from ingredient_routing_probation_runtime import (
-        get_configured_ingredient_routing_mode,
-        get_ingredient_routing_probation_gate_status,
-    )
+    from ingredient_routing_runtime import get_configured_ingredient_routing_mode
 except ModuleNotFoundError:
-    from app.ingredient_routing_probation_runtime import (
-        get_configured_ingredient_routing_mode,
-        get_ingredient_routing_probation_gate_status,
-    )
+    from app.ingredient_routing_runtime import get_configured_ingredient_routing_mode
 
 try:
     from cache_operation_metadata import record_cache_last_operation
 except ModuleNotFoundError:
     from app.cache_operation_metadata import record_cache_last_operation
+
+try:
+    from offer_cache_refresh_decision import set_compiled_offer_baseline_committed
+except ModuleNotFoundError:
+    from app.offer_cache_refresh_decision import set_compiled_offer_baseline_committed
 
 try:
     from models import FoundRecipe, Offer
@@ -63,6 +62,7 @@ try:
         classify_current_offer_changes,
         classify_current_recipe_changes,
         load_compiled_offer_match_map,
+        load_compiled_offer_term_manifest,
         load_compiled_recipe_payload_cache,
         load_compiled_offer_term_postings,
         load_compiled_recipe_term_postings,
@@ -74,6 +74,7 @@ try:
         refresh_compiled_offer_term_index,
         refresh_compiled_recipe_match_data,
         refresh_compiled_recipe_match_data_for_recipe_ids,
+        refresh_compiled_recipe_offer_candidates,
         refresh_compiled_recipe_term_index,
         refresh_compiled_recipe_term_index_for_recipe_ids,
     )
@@ -88,6 +89,7 @@ except ModuleNotFoundError:
         classify_current_offer_changes,
         classify_current_recipe_changes,
         load_compiled_offer_match_map,
+        load_compiled_offer_term_manifest,
         load_compiled_recipe_payload_cache,
         load_compiled_offer_term_postings,
         load_compiled_recipe_term_postings,
@@ -99,6 +101,7 @@ except ModuleNotFoundError:
         refresh_compiled_offer_term_index,
         refresh_compiled_recipe_match_data,
         refresh_compiled_recipe_match_data_for_recipe_ids,
+        refresh_compiled_recipe_offer_candidates,
         refresh_compiled_recipe_term_index,
         refresh_compiled_recipe_term_index_for_recipe_ids,
     )
@@ -116,6 +119,8 @@ except ModuleNotFoundError:
 
 
 ACTIVE_CACHE_TABLE = "recipe_offer_cache"
+_unmatched_offer_count_refresh_lock = threading.Lock()
+_unmatched_offer_count_refresh_in_progress = False
 PERSISTED_ENTRY_FIELDS = (
     "found_recipe_id",
     "recipe_category",
@@ -130,9 +135,8 @@ PERSISTED_ENTRY_FIELDS = (
 
 def _delta_verification_max_workers() -> int:
     configured_max_workers = max(1, settings.cache_delta_verification_max_workers)
-    rebuild_max_workers = max(1, settings.cache_rebuild_max_workers)
     detected_core_workers = max(1, (os.cpu_count() or 1) - 1)
-    return min(configured_max_workers, rebuild_max_workers, detected_core_workers)
+    return min(configured_max_workers, 3, detected_core_workers)
 
 
 VERSION_FIELDS = (
@@ -144,12 +148,6 @@ INGREDIENT_ROUTING_RESULT_FIELDS = (
     "ingredient_routing_mode",
     "ingredient_routing_effective_mode",
     "ingredient_routing_fallback_reason",
-    "cache_ingredient_routing_probation_ready",
-    "cache_ingredient_routing_probation_reasons",
-    "cache_ingredient_routing_probation_recommendations",
-    "cache_ingredient_routing_probation_current_ready_streak",
-    "cache_ingredient_routing_probation_current_version_ready_run_count",
-    "cache_ingredient_routing_probation_distinct_version_count",
     "estimated_fullscan_ingredient_checks",
     "estimated_hinted_ingredient_checks",
     "estimated_ingredient_check_reduction_pct",
@@ -159,26 +157,10 @@ INGREDIENT_ROUTING_RESULT_FIELDS = (
     "fullscan_fallback_count",
     "fullscan_fallback_reason_counts",
     "actual_ingredient_check_reduction_pct",
-    "shadow_pair_count",
-    "shadow_candidate_change_count",
-    "shadow_unexplained_miss_count",
-    "shadow_fallback_reason_counts",
-    "ingredient_routing_shadow_measured",
     "time_ms",
     "cached",
     "total_recipes",
 )
-
-
-@contextmanager
-def _temporary_ingredient_routing_mode(mode: str):
-    """Temporarily override ingredient routing mode inside the delta lock."""
-    previous_mode = settings.cache_ingredient_routing_mode
-    settings.cache_ingredient_routing_mode = mode
-    try:
-        yield
-    finally:
-        settings.cache_ingredient_routing_mode = previous_mode
 
 
 def _normalize_alternative_string(value: str) -> str:
@@ -679,9 +661,41 @@ def _active_cache_state() -> dict[str, Any]:
     }
 
 
-def _recipe_delta_total_recipes(full_preview: dict[str, Any] | None, cache_state: dict[str, Any]) -> int:
+def _ensure_compiled_offer_term_index_ready() -> dict[str, Any]:
+    """Refresh offer term index when matcher/offer versions moved."""
+    try:
+        _term_pairs, stats = load_compiled_offer_term_manifest()
+        if stats.get("loaded_rows") and stats.get("term_manifest_hash"):
+            return {"skipped": True, **stats}
+    except Exception as exc:
+        logger.warning(f"Could not inspect compiled offer term index; refreshing: {exc}")
+
+    compiled_offer_refresh = None
+    try:
+        offer_term_refresh = refresh_compiled_offer_term_index()
+    except RuntimeError as exc:
+        if "compiled_offer_match_data is missing or stale" not in str(exc):
+            raise
+        compiled_offer_refresh = refresh_compiled_offer_match_data()
+        offer_term_refresh = refresh_compiled_offer_term_index()
+
+    return {
+        "skipped": False,
+        "compiled_offer_refresh": compiled_offer_refresh,
+        "offer_term_refresh": offer_term_refresh,
+    }
+
+
+def _recipe_delta_total_recipes(
+    full_preview: dict[str, Any] | None,
+    cache_state: dict[str, Any],
+    *,
+    active_recipe_count: int | None = None,
+) -> int:
     if full_preview is not None and full_preview.get("total_recipes") is not None:
         return int(full_preview["total_recipes"])
+    if active_recipe_count is not None:
+        return int(active_recipe_count)
     if cache_state.get("metadata_total_recipes") is not None:
         return int(cache_state["metadata_total_recipes"])
     return _active_recipe_count_from_db()
@@ -692,12 +706,10 @@ def _refresh_unmatched_offer_count_from_db(cache_manager) -> dict[str, int]:
         total_offers = db.execute(text("SELECT COUNT(*) FROM offers")).scalar() or 0
         matched_offer_count = db.execute(text("""
             SELECT COUNT(DISTINCT offer_key)
-            FROM (
-                SELECT COALESCE(mo->>'offer_identity_key', mo->>'id') AS offer_key
-                FROM recipe_offer_cache c,
-                     jsonb_array_elements(c.match_data->'matched_offers') mo
-            ) sub
-            WHERE offer_key IS NOT NULL
+            FROM recipe_offer_cache c,
+                 jsonb_array_elements_text(
+                     jsonb_path_query_array(c.match_data, '$.matched_offers[*].offer_identity_key')
+                 ) AS offer_key
         """)).scalar() or 0
     cache_manager._total_offers = total_offers
     cache_manager._unmatched_count = max(0, total_offers - matched_offer_count)
@@ -705,6 +717,59 @@ def _refresh_unmatched_offer_count_from_db(cache_manager) -> dict[str, int]:
         "total_offers": total_offers,
         "matched_offer_ids": matched_offer_count,
         "unmatched_offer_ids": cache_manager._unmatched_count,
+    }
+
+
+def _cached_unmatched_offer_counts(cache_manager) -> dict[str, Any]:
+    with get_db_session() as db:
+        total_offers = db.execute(text("SELECT COUNT(*) FROM offers")).scalar() or 0
+
+    unmatched_count = cache_manager._unmatched_count
+    matched_offer_count = None
+    if unmatched_count is not None:
+        matched_offer_count = max(0, total_offers - int(unmatched_count))
+
+    return {
+        "total_offers": total_offers,
+        "matched_offer_ids": matched_offer_count,
+        "unmatched_offer_ids": unmatched_count,
+        "refresh_mode": "cached",
+    }
+
+
+def _schedule_unmatched_offer_count_refresh(cache_manager) -> dict[str, Any]:
+    global _unmatched_offer_count_refresh_in_progress
+
+    with _unmatched_offer_count_refresh_lock:
+        if _unmatched_offer_count_refresh_in_progress:
+            return {
+                "refresh_scheduled": False,
+                "refresh_skip_reason": "already_running",
+            }
+        _unmatched_offer_count_refresh_in_progress = True
+
+    def _worker() -> None:
+        global _unmatched_offer_count_refresh_in_progress
+        try:
+            result = _refresh_unmatched_offer_count_from_db(cache_manager)
+            logger.info(
+                "Delta unmatched-offer count refreshed in background: "
+                f"matched={result['matched_offer_ids']} total={result['total_offers']}"
+            )
+        except Exception as exc:
+            logger.warning(f"Delta unmatched-offer background refresh failed: {exc}")
+        finally:
+            with _unmatched_offer_count_refresh_lock:
+                _unmatched_offer_count_refresh_in_progress = False
+
+    threading.Thread(
+        target=_worker,
+        name="recipe-delta-unmatched-offer-refresh",
+        daemon=True,
+    ).start()
+    return {
+        "refresh_scheduled": True,
+        "refresh_mode": "background",
     }
 
 
@@ -1014,7 +1079,9 @@ def _apply_recipe_delta_unlocked(
         status_was_set = True
 
     ir_stats = None
+    offer_term_stats = None
     term_stats = None
+    candidate_stats = None
     pantry_search_term_stats = None
     full_preview = None
     patch_preview = None
@@ -1046,6 +1113,20 @@ def _apply_recipe_delta_unlocked(
                 error=exc,
                 extra={
                     "compiled_recipe_refresh": ir_stats,
+                    "offer_term_refresh": offer_term_stats,
+                    "recipe_term_refresh": term_stats,
+                    "pantry_search_term_refresh": pantry_search_term_stats,
+                },
+            )
+        try:
+            offer_term_stats = _ensure_compiled_offer_term_index_ready()
+        except Exception as exc:
+            return _fallback(
+                "offer_term_index_refresh_failed",
+                error=exc,
+                extra={
+                    "compiled_recipe_refresh": ir_stats,
+                    "offer_term_refresh": offer_term_stats,
                     "recipe_term_refresh": term_stats,
                     "pantry_search_term_refresh": pantry_search_term_stats,
                 },
@@ -1061,7 +1142,26 @@ def _apply_recipe_delta_unlocked(
                 error=exc,
                 extra={
                     "compiled_recipe_refresh": ir_stats,
+                    "offer_term_refresh": offer_term_stats,
                     "recipe_term_refresh": term_stats,
+                    "pantry_search_term_refresh": pantry_search_term_stats,
+                },
+            )
+        try:
+            candidate_stats = refresh_compiled_recipe_offer_candidates(
+                term_manifest_hash=term_stats.get("term_manifest_hash"),
+                cleanup_stale=False,
+                recipe_ids=_dedupe_recipe_delta_ids(changed_ids, removed_ids),
+            )
+        except Exception as exc:
+            return _fallback(
+                "recipe_offer_candidate_refresh_failed",
+                error=exc,
+                extra={
+                    "compiled_recipe_refresh": ir_stats,
+                    "offer_term_refresh": offer_term_stats,
+                    "recipe_term_refresh": term_stats,
+                    "recipe_offer_candidate_refresh": candidate_stats,
                     "pantry_search_term_refresh": pantry_search_term_stats,
                 },
             )
@@ -1099,6 +1199,7 @@ def _apply_recipe_delta_unlocked(
                     error=exc,
                     extra={
                         "compiled_recipe_refresh": ir_stats,
+                        "offer_term_refresh": offer_term_stats,
                         "recipe_term_refresh": term_stats,
                         "pantry_search_term_refresh": pantry_search_term_stats,
                     },
@@ -1124,6 +1225,7 @@ def _apply_recipe_delta_unlocked(
                     error=exc,
                     extra={
                         "compiled_recipe_refresh": ir_stats,
+                        "offer_term_refresh": offer_term_stats,
                         "recipe_term_refresh": term_stats,
                         "pantry_search_term_refresh": pantry_search_term_stats,
                         "full_preview_time_ms": full_preview["time_ms"] if full_preview else None,
@@ -1180,12 +1282,17 @@ def _apply_recipe_delta_unlocked(
                     changed_ids,
                     removed_recipe_ids=removed_ids,
                 )
-                unmatched_offer_counts = _refresh_unmatched_offer_count_from_db(cache_manager)
+                unmatched_offer_counts = _cached_unmatched_offer_counts(cache_manager)
+                unmatched_offer_counts.update(_schedule_unmatched_offer_count_refresh(cache_manager))
                 _set_runtime_rebuild_profile(cache_manager)
                 elapsed_ms = int((time.perf_counter() - started_at) * 1000)
                 _update_cache_metadata(
                     total_matches=patch_result["total_matches"],
-                    total_recipes=_recipe_delta_total_recipes(full_preview, cache_state),
+                    total_recipes=_recipe_delta_total_recipes(
+                        full_preview,
+                        cache_state,
+                        active_recipe_count=int(active_recipe_count or 0) or None,
+                    ),
                     time_ms=elapsed_ms,
                 )
                 status_was_set = False
@@ -1196,6 +1303,7 @@ def _apply_recipe_delta_unlocked(
                     error=exc,
                     extra={
                         "compiled_recipe_refresh": ir_stats,
+                        "offer_term_refresh": offer_term_stats,
                         "recipe_term_refresh": term_stats,
                         "pantry_search_term_refresh": pantry_search_term_stats,
                         "full_preview_time_ms": full_preview["time_ms"] if full_preview else None,
@@ -1238,7 +1346,9 @@ def _apply_recipe_delta_unlocked(
             "probation_reasons": verification_policy["probation_status"]["reasons"],
             "probation_summary": verification_policy["probation_status"]["summary"],
             "compiled_recipe_refresh": ir_stats,
+            "offer_term_refresh": offer_term_stats,
             "recipe_term_refresh": term_stats,
+            "recipe_offer_candidate_refresh": candidate_stats,
             "pantry_search_term_refresh": pantry_search_term_stats,
             "patch_result": patch_result,
             "unmatched_offer_counts": unmatched_offer_counts,
@@ -1263,7 +1373,11 @@ def _apply_recipe_delta_unlocked(
                 if patch_result
                 else cache_state["cache_rows"]
             ),
-            "total_recipes": _recipe_delta_total_recipes(full_preview, cache_state),
+            "total_recipes": _recipe_delta_total_recipes(
+                full_preview,
+                cache_state,
+                active_recipe_count=int(active_recipe_count or 0) or None,
+            ),
             "time_ms": elapsed_ms,
             "effective_rebuild_mode": "delta" if applied else "compiled",
             "matcher_version": MATCHER_VERSION,
@@ -1271,7 +1385,11 @@ def _apply_recipe_delta_unlocked(
             "offer_compiler_version": OFFER_COMPILER_VERSION,
             "offer_data_source": "compiled",
             "recipe_data_source": "compiled_payload",
-            "candidate_data_source": "term_index",
+            "candidate_data_source": (
+                patch_preview.get("candidate_data_source", "db_candidates")
+                if patch_preview is not None
+                else "db_candidates"
+            ),
             **operation_context,
         }
         if apply:
@@ -1289,7 +1407,9 @@ def _apply_recipe_delta_unlocked(
             error=exc,
             extra={
                 "compiled_recipe_refresh": ir_stats,
+                "offer_term_refresh": offer_term_stats,
                 "recipe_term_refresh": term_stats,
+                "recipe_offer_candidate_refresh": candidate_stats,
                 "pantry_search_term_refresh": pantry_search_term_stats,
                 "full_preview_time_ms": full_preview["time_ms"] if full_preview else None,
                 "patch_preview_time_ms": patch_preview["time_ms"] if patch_preview else None,
@@ -1301,14 +1421,6 @@ def _resolve_delta_verification_policy(*, verify_full_preview: bool) -> dict[str
     """Decide whether this delta run should pay the cost of a full preview."""
     probation_status = get_delta_probation_gate_status()
     ingredient_routing_mode = get_configured_ingredient_routing_mode()
-    ingredient_probation_status = get_ingredient_routing_probation_gate_status()
-    ingredient_routing_fullscan_baseline_gate_ready = (
-        probation_status["ready"] and ingredient_probation_status["ready"]
-    )
-    ingredient_routing_requires_fullscan_baseline = (
-        ingredient_routing_mode == "hint_first"
-        and not ingredient_routing_fullscan_baseline_gate_ready
-    )
 
     effective_verify_full_preview = verify_full_preview
     verification_mode = "disabled"
@@ -1320,22 +1432,12 @@ def _resolve_delta_verification_policy(*, verify_full_preview: bool) -> dict[str
                 effective_verify_full_preview = False
                 verification_mode = "probation_skip"
 
-    if ingredient_routing_requires_fullscan_baseline:
-        effective_verify_full_preview = True
-        if verification_mode in {"disabled", "probation_skip"}:
-            verification_mode = "full_preview_required_for_hint_first"
-
     return {
         "requested_verify_full_preview": verify_full_preview,
         "effective_verify_full_preview": effective_verify_full_preview,
         "verification_mode": verification_mode,
         "probation_status": probation_status,
         "ingredient_routing_mode": ingredient_routing_mode,
-        "ingredient_routing_probation_status": ingredient_probation_status,
-        "ingredient_routing_fullscan_baseline_gate_ready": (
-            ingredient_routing_fullscan_baseline_gate_ready
-        ),
-        "ingredient_routing_requires_fullscan_baseline": ingredient_routing_requires_fullscan_baseline,
     }
 
 
@@ -1343,11 +1445,13 @@ def _apply_verified_offer_delta_unlocked(
     *,
     apply: bool = True,
     verify_full_preview: bool = True,
+    operation_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Apply a verified offer-driven delta patch to the active cache table."""
     from cache_manager import cache_manager
 
     started_at = time.perf_counter()
+    operation_context = dict(operation_context or {})
 
     verification_policy = _resolve_delta_verification_policy(
         verify_full_preview=verify_full_preview,
@@ -1372,6 +1476,7 @@ def _apply_verified_offer_delta_unlocked(
             "verification_mode": verification_policy["verification_mode"],
             "offer_change_counts": offer_changes.get("counts", {}),
             "recipe_change_counts": recipe_changes.get("counts", {}),
+            **operation_context,
         }
         if apply:
             record_cache_last_operation(
@@ -1413,10 +1518,19 @@ def _apply_verified_offer_delta_unlocked(
     del baseline_entries_list
 
     # Move the compiled baseline to current before preview/apply.
+    set_compiled_offer_baseline_committed(False)
     refresh_compiled_offer_match_data()
     refresh_compiled_recipe_match_data()
-    refresh_compiled_offer_term_index()
-    refresh_compiled_recipe_term_index()
+    refreshed_offer_term_stats = refresh_compiled_offer_term_index()
+    refreshed_recipe_term_stats = refresh_compiled_recipe_term_index()
+    changed_candidate_offer_ids = sorted(set(offer_changes.get("rematch_offer_ids", ())))
+    candidate_stats = None
+    if changed_candidate_offer_ids:
+        candidate_stats = refresh_compiled_recipe_offer_candidates(
+            term_manifest_hash=refreshed_recipe_term_stats.get("term_manifest_hash"),
+            cleanup_stale=False,
+            offer_identity_keys=changed_candidate_offer_ids,
+        )
     try:
         refresh_compiled_recipe_search_term_index()
     except Exception as exc:
@@ -1429,14 +1543,6 @@ def _apply_verified_offer_delta_unlocked(
     manager = cache_manager
     full_preview = None
     full_preview_snapshot: dict[str, str] | None = None
-    fullscan_baseline_preview = None
-    ingredient_routing_fullscan_baseline_checked = False
-    ingredient_routing_fullscan_baseline_matches = True
-    ingredient_routing_fullscan_baseline_diff = {
-        "parity_ok": True,
-        "mismatched_count": 0,
-        "mismatched_sample": [],
-    }
     delta_verification_max_workers = _delta_verification_max_workers()
     if verification_policy["effective_verify_full_preview"]:
         full_preview = manager.refresh_cache(
@@ -1449,28 +1555,6 @@ def _apply_verified_offer_delta_unlocked(
         full_preview_entries = full_preview.pop("entries")
         full_preview_snapshot = _fingerprint_snapshot_from_entries(full_preview_entries)
         del full_preview_entries
-
-        if full_preview.get("ingredient_routing_effective_mode") == "hint_first":
-            with _temporary_ingredient_routing_mode("off"):
-                fullscan_baseline_preview = manager.refresh_cache(
-                    persist=False,
-                    return_entries=True,
-                    run_kind="delta_fullscan_baseline_preview",
-                    input_scope="live",
-                    max_workers=delta_verification_max_workers,
-                )
-            fullscan_baseline_entries = fullscan_baseline_preview.pop("entries")
-            fullscan_baseline_snapshot = _fingerprint_snapshot_from_entries(fullscan_baseline_entries)
-            del fullscan_baseline_entries
-            ingredient_routing_fullscan_baseline_diff = _compare_snapshots(
-                fullscan_baseline_snapshot,
-                full_preview_snapshot,
-            )
-            del fullscan_baseline_snapshot
-            ingredient_routing_fullscan_baseline_checked = True
-            ingredient_routing_fullscan_baseline_matches = (
-                ingredient_routing_fullscan_baseline_diff["parity_ok"]
-            )
 
     patch_preview = manager.refresh_cache(
         persist=False,
@@ -1517,7 +1601,6 @@ def _apply_verified_offer_delta_unlocked(
     ready_to_apply = (
         planner_covers_preview_diff
         and materialized_matches_full_preview
-        and ingredient_routing_fullscan_baseline_matches
     )
 
     fallback_reason = None
@@ -1525,21 +1608,26 @@ def _apply_verified_offer_delta_unlocked(
         fallback_reason = "planner_missed_preview_diff"
     elif not materialized_matches_full_preview:
         fallback_reason = "materialized_patch_mismatch"
-    elif not ingredient_routing_fullscan_baseline_matches:
-        fallback_reason = "ingredient_routing_fullscan_baseline_mismatch"
 
     applied = False
+    unmatched_offer_counts = None
     if apply and ready_to_apply:
         manager._save_cache_to_db(list(materialized_entries.values()))
-        manager.update_unmatched_offer_count(list(materialized_entries.values()))
+        unmatched_offer_counts = _cached_unmatched_offer_counts(manager)
+        unmatched_offer_counts.update(_schedule_unmatched_offer_count_refresh(manager))
         _set_runtime_rebuild_profile(manager)
         elapsed_ms = int((time.perf_counter() - started_at) * 1000)
-        total_recipes = full_preview["total_recipes"] if full_preview is not None else None
+        total_recipes = (
+            full_preview["total_recipes"]
+            if full_preview is not None
+            else len(recipes)
+        )
         _update_cache_metadata(
             total_matches=len(materialized_entries),
             total_recipes=total_recipes,
             time_ms=elapsed_ms,
         )
+        set_compiled_offer_baseline_committed(True)
         applied = True
 
     elapsed_ms = int((time.perf_counter() - started_at) * 1000)
@@ -1566,46 +1654,25 @@ def _apply_verified_offer_delta_unlocked(
         ),
         "ingredient_routing_effective_mode": patch_preview.get("ingredient_routing_effective_mode"),
         "ingredient_routing_fallback_reason": patch_preview.get("ingredient_routing_fallback_reason"),
-        "ingredient_routing_probation_ready": verification_policy[
-            "ingredient_routing_probation_status"
-        ]["ready"],
-        "ingredient_routing_probation_reasons": verification_policy[
-            "ingredient_routing_probation_status"
-        ]["reasons"],
-        "ingredient_routing_fullscan_baseline_required": verification_policy[
-            "ingredient_routing_requires_fullscan_baseline"
-        ],
-        "ingredient_routing_fullscan_baseline_gate_ready": verification_policy[
-            "ingredient_routing_fullscan_baseline_gate_ready"
-        ],
-        "ingredient_routing_fullscan_baseline_checked": ingredient_routing_fullscan_baseline_checked,
-        "ingredient_routing_fullscan_baseline_matches": ingredient_routing_fullscan_baseline_matches,
-        "ingredient_routing_fullscan_baseline_mismatched_count": (
-            ingredient_routing_fullscan_baseline_diff.get("mismatched_count", 0)
-        ),
-        "ingredient_routing_fullscan_baseline_mismatched_sample": (
-            ingredient_routing_fullscan_baseline_diff.get("mismatched_sample", [])
-        ),
         "full_preview_ingredient_routing": _ingredient_routing_summary_from_result(full_preview),
         "patch_preview_ingredient_routing": _ingredient_routing_summary_from_result(patch_preview),
-        "fullscan_baseline_ingredient_routing": _ingredient_routing_summary_from_result(
-            fullscan_baseline_preview
-        ),
         "offer_change_counts": offer_changes.get("counts", {}),
         "recipe_change_counts": recipe_changes.get("counts", {}),
         "combined_planner_counts": combined_planner.get("counts", {}),
+        "unmatched_offer_counts": unmatched_offer_counts,
         "patch_recipe_count": len(patch_recipe_ids),
         "actual_changed_recipes": len(actual_changed_recipe_ids),
         "planner_covers_preview_diff": planner_covers_preview_diff,
         "materialized_patch_matches_full_preview": materialized_matches_full_preview,
         "materialized_mismatched_sample": materialized_diff.get("mismatched_sample", []),
         "full_preview_time_ms": full_preview["time_ms"] if full_preview is not None else None,
-        "fullscan_baseline_time_ms": (
-            fullscan_baseline_preview["time_ms"] if fullscan_baseline_preview is not None else None
-        ),
         "patch_preview_time_ms": patch_preview["time_ms"],
         "cached": len(materialized_entries),
-        "total_recipes": full_preview["total_recipes"] if full_preview is not None else None,
+        "total_recipes": (
+            full_preview["total_recipes"]
+            if full_preview is not None
+            else len(recipes)
+        ),
         "time_ms": elapsed_ms,
         "effective_rebuild_mode": "delta" if applied else "compiled",
         "matcher_version": MATCHER_VERSION,
@@ -1613,13 +1680,17 @@ def _apply_verified_offer_delta_unlocked(
         "offer_compiler_version": OFFER_COMPILER_VERSION,
         "offer_data_source": "compiled",
         "recipe_data_source": "compiled_payload",
-        "candidate_data_source": "term_index",
+        "candidate_data_source": patch_preview.get("candidate_data_source", "db_candidates"),
         "term_index_stats": {
             "offer": offer_term_stats,
             "current_recipe": current_recipe_term_stats,
             "persisted_recipe": persisted_recipe_term_stats,
             "recipe": current_recipe_term_stats,
+            "refreshed_offer": refreshed_offer_term_stats,
+            "refreshed_recipe": refreshed_recipe_term_stats,
+            "recipe_offer_candidates": candidate_stats,
         },
+        **operation_context,
     }
     if apply:
         record_cache_last_operation(
@@ -1634,6 +1705,7 @@ def apply_verified_offer_delta(
     *,
     apply: bool = True,
     verify_full_preview: bool = True,
+    operation_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Apply offer delta through the shared cache operation lock."""
     from cache_manager import run_cache_operation
@@ -1643,6 +1715,7 @@ def apply_verified_offer_delta(
         lambda: _apply_verified_offer_delta_unlocked(
             apply=apply,
             verify_full_preview=verify_full_preview,
+            operation_context=operation_context,
         ),
     )
 

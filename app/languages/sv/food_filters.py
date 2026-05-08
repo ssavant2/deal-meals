@@ -412,7 +412,9 @@ VEG_QUALIFIER_WORDS = {
 VEG_PRODUCT_INDICATORS = {
     'veg', 'vego', 'vegetarisk', 'vegansk', 'växtbaserad',
     'växtbaserat', 'quorn', 'oumph', 'baljväxt',
+    'halloumi', 'grillost',
     'havre', 'soja', 'kokos', 'mandel',  # plant-based base ingredients
-    'alpro', 'oatly', 'oddlygood',  # plant-based brands
+    'plantgurt', 'havregurt', 'kokosgurt', 'soygurt',
+    'alpro', 'oatly', 'oddlygood', 'violife', 'greenvie',  # plant-based brands
     'formbar',  # Anamma formbar färs
 }

@@ -327,6 +327,17 @@ async def _download_images_task(batch_pause: int = IMAGE_BATCH_PAUSE_MANUAL):
     MAX_TOTAL_ATTEMPTS = 5  # Mark as permanently failed after this many total attempts
     MAX_IMAGE_SIZE = 30 * 1024 * 1024  # 30 MB - reject oversized responses
 
+    def image_too_large_message(size_bytes: int) -> str:
+        return f"Image too large ({size_bytes // 1024 // 1024} MB)"
+
+    def parse_content_length(value: str | None) -> int | None:
+        if value is None:
+            return None
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
     def get_url_hash(url: str) -> str:
         return hashlib.md5(url.encode()).hexdigest()
 
@@ -576,58 +587,75 @@ async def _download_images_task(batch_pause: int = IMAGE_BATCH_PAUSE_MANUAL):
 
                     for attempt in range(MAX_RETRIES_PER_SESSION):
                         try:
-                            response = await client.get(image_url)
+                            async with client.stream("GET", image_url) as response:
+                                if response.status_code == 200:
+                                    content_length = parse_content_length(response.headers.get("content-length"))
+                                    if content_length is not None and content_length > MAX_IMAGE_SIZE:
+                                        last_error = image_too_large_message(content_length)
+                                        logger.warning(f"Skipping {image_url}: {last_error}")
+                                        break
 
-                            if response.status_code == 200:
-                                # Reject oversized responses
-                                if len(response.content) > MAX_IMAGE_SIZE:
-                                    last_error = f"Image too large ({len(response.content) // 1024 // 1024} MB)"
-                                    logger.warning(f"Skipping {image_url}: {last_error}")
+                                    image_data = bytearray()
+                                    too_large = False
+                                    async for chunk in response.aiter_bytes():
+                                        image_data.extend(chunk)
+                                        if len(image_data) > MAX_IMAGE_SIZE:
+                                            last_error = image_too_large_message(len(image_data))
+                                            logger.warning(f"Skipping {image_url}: {last_error}")
+                                            too_large = True
+                                            break
+
+                                    if too_large:
+                                        break
+
+                                    # Compress the image before saving
+                                    compressed_data, ext = compress_image(bytes(image_data))
+                                    with open(filepath, 'wb') as f:
+                                        f.write(compressed_data)
+
+                                    # Update database with local image path
+                                    local_path = f"/static/recipe_images/{url_hash}.webp"
+                                    db.execute(text("""
+                                        UPDATE found_recipes
+                                        SET local_image_path = :local_path
+                                        WHERE id = :recipe_id
+                                    """), {"local_path": local_path, "recipe_id": recipe_id})
+                                    db.commit()
+
+                                    image_download_state["downloaded"] += 1
+                                    await clear_failure(db, recipe_id, url_hash)
+                                    success = True
                                     break
 
-                                # Compress the image before saving
-                                compressed_data, ext = compress_image(response.content)
-                                with open(filepath, 'wb') as f:
-                                    f.write(compressed_data)
+                                elif response.status_code == 429:
+                                    domain_429_count[domain] += 1
+                                    if domain_429_count[domain] >= MAX_429_PER_DOMAIN:
+                                        logger.warning(f"Domain {domain} blocked after {MAX_429_PER_DOMAIN}x 429")
+                                        blocked_domains.add(domain)
+                                        last_error = "429 Rate Limited (domain blocked)"
+                                        break
+                                    else:
+                                        logger.warning(
+                                            f"Rate limited (429) on {domain}, waiting {RATE_LIMIT_WAIT}s "
+                                            f"({domain_429_count[domain]}/{MAX_429_PER_DOMAIN})..."
+                                        )
+                                        set_message("config.images_progress_rate_limited", {
+                                            "domain": domain,
+                                            "minutes": RATE_LIMIT_WAIT // 60
+                                        })
+                                        await response.aclose()
+                                        await asyncio.sleep(RATE_LIMIT_WAIT)
+                                        last_error = "429 Rate Limited"
 
-                                # Update database with local image path
-                                local_path = f"/static/recipe_images/{url_hash}.webp"
-                                db.execute(text("""
-                                    UPDATE found_recipes
-                                    SET local_image_path = :local_path
-                                    WHERE id = :recipe_id
-                                """), {"local_path": local_path, "recipe_id": recipe_id})
-                                db.commit()
+                                elif response.status_code == 404:
+                                    last_error = "404 Not Found"
+                                    break  # No point retrying 404
 
-                                image_download_state["downloaded"] += 1
-                                await clear_failure(db, recipe_id, url_hash)
-                                success = True
-                                break
-
-                            elif response.status_code == 429:
-                                domain_429_count[domain] += 1
-                                if domain_429_count[domain] >= MAX_429_PER_DOMAIN:
-                                    logger.warning(f"Domain {domain} blocked after {MAX_429_PER_DOMAIN}x 429")
-                                    blocked_domains.add(domain)
-                                    last_error = "429 Rate Limited (domain blocked)"
-                                    break
                                 else:
-                                    logger.warning(f"Rate limited (429) on {domain}, waiting {RATE_LIMIT_WAIT}s ({domain_429_count[domain]}/{MAX_429_PER_DOMAIN})...")
-                                    set_message("config.images_progress_rate_limited", {
-                                        "domain": domain,
-                                        "minutes": RATE_LIMIT_WAIT // 60
-                                    })
-                                    await asyncio.sleep(RATE_LIMIT_WAIT)
-                                    last_error = "429 Rate Limited"
-
-                            elif response.status_code == 404:
-                                last_error = "404 Not Found"
-                                break  # No point retrying 404
-
-                            else:
-                                last_error = f"HTTP {response.status_code}"
-                                if attempt < MAX_RETRIES_PER_SESSION - 1:
-                                    await asyncio.sleep(RETRY_BACKOFF[attempt])
+                                    last_error = f"HTTP {response.status_code}"
+                                    if attempt < MAX_RETRIES_PER_SESSION - 1:
+                                        await response.aclose()
+                                        await asyncio.sleep(RETRY_BACKOFF[attempt])
 
                         except httpx.TimeoutException:
                             last_error = "Timeout"

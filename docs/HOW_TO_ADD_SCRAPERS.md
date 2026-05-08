@@ -945,7 +945,16 @@ See `app/models.py` for the complete schema including constraints and indexes.
 
 ### Ingredient Matching
 
-The ingredient matching system (how offers are matched to recipe ingredients) is documented separately in [INGREDIENT_TEMPLATE.md](INGREDIENT_TEMPLATE.md). You don't need to modify it unless your scraper introduces recipes in a new language.
+The ingredient matching system (how offers are matched to recipe ingredients) is
+documented separately in [INGREDIENT_TEMPLATE.md](INGREDIENT_TEMPLATE.md). You
+don't need to modify it unless your scraper introduces recipes in a new language
+or exposes product/ingredient wording that changes matcher semantics.
+
+When a scraper change requires a matcher rule change, promote the accepted
+positive and relevant negative cases into the active language contract under
+`app/languages/<code>/matcher_contracts/` and run the matcher parity/inventory
+checks. Local `app/tests/test_*.py` files and batch-review notes are useful for
+debugging, but they are not the permanent regression contract.
 
 ---
 

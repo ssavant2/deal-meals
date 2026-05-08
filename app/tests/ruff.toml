@@ -1,5 +1,5 @@
 # Ruff linter configuration for Deal Meals
-# Run: docker compose exec web ruff check /app/ --config /app/tests/ruff.toml --no-cache
+# Run: docker compose exec web uv tool run ruff check /app/ --config /app/tests/ruff.toml --no-cache
 # Or install locally: pip install ruff && ruff check app/ --config app/tests/ruff.toml
 
 target-version = "py314"

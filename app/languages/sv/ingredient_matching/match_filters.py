@@ -52,7 +52,10 @@ RECIPE_INGREDIENT_BLOCKERS: Dict[str, Set[str]] = {
     fix_swedish_chars(k).lower(): {fix_swedish_chars(w).lower() for w in v}
     for k, v in {
         'mango': {'balsamico', 'vinäger'},
-        'vinbär': {'gelé'},
+        'vinbär': {'gelé', 'gele'},
+        'vinbärs': {'gelé', 'gele'},
+        'vinbar': {'gelé', 'gele'},
+        'vinbars': {'gelé', 'gele'},
         'pasta': {'cannelloni'},
         'vitlök': {'färskost', 'farskost'},
         'kakao': {'granola'},

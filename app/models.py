@@ -3,7 +3,7 @@ SQLAlchemy models for Deal Meals database.
 """
 
 from sqlalchemy import Column, String, Integer, Numeric, Boolean, Text, DateTime, ForeignKey, CheckConstraint, Index, UniqueConstraint, text
-from sqlalchemy.dialects.postgresql import UUID, JSONB, TSVECTOR
+from sqlalchemy.dialects.postgresql import ARRAY, UUID, JSONB, TSVECTOR
 from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime, timezone
 
@@ -443,6 +443,64 @@ class CompiledRecipeTermIndex(Base):
         return f"<CompiledRecipeTermIndex(recipe_id={self.found_recipe_id}, term='{self.term}')>"
 
 
+class CompiledRecipeOfferCandidate(Base):
+    """Persistent recipe-offer candidate pairs derived from term postings."""
+    __tablename__ = "compiled_recipe_offer_candidates"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuidv7()"))
+    found_recipe_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("found_recipes.id", ondelete="CASCADE", name="fk_compiled_recipe_offer_candidate_recipe"),
+        nullable=False,
+    )
+    recipe_identity_key = Column(String(64), nullable=False)
+    offer_identity_key = Column(String(64), nullable=False)
+    store_id = Column(UUID(as_uuid=True), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False)
+
+    matcher_version = Column(String(64), nullable=False)
+    recipe_compiler_version = Column(String(64), nullable=False)
+    offer_compiler_version = Column(String(64), nullable=False)
+    term_manifest_hash = Column(String(64), nullable=False)
+
+    matched_terms = Column(ARRAY(Text), nullable=False, server_default=text("'{}'::text[]"))
+    candidate_reason = Column(String(40), nullable=False, server_default=text("'term_overlap'"))
+    indexed_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    __table_args__ = (
+        Index(
+            'idx_compiled_recipe_offer_candidate_chunk',
+            'matcher_version',
+            'recipe_compiler_version',
+            'offer_compiler_version',
+            'term_manifest_hash',
+            'found_recipe_id',
+        ),
+        Index(
+            'idx_compiled_recipe_offer_candidate_offer',
+            'matcher_version',
+            'offer_compiler_version',
+            'term_manifest_hash',
+            'offer_identity_key',
+        ),
+        Index('idx_compiled_recipe_offer_candidate_recipe', 'found_recipe_id'),
+        UniqueConstraint(
+            'matcher_version',
+            'recipe_compiler_version',
+            'offer_compiler_version',
+            'term_manifest_hash',
+            'found_recipe_id',
+            'offer_identity_key',
+            name='uq_compiled_recipe_offer_candidate',
+        ),
+    )
+
+    def __repr__(self):
+        return (
+            f"<CompiledRecipeOfferCandidate(recipe_id={self.found_recipe_id}, "
+            f"offer='{self.offer_identity_key}')>"
+        )
+
+
 class CompiledRecipeSearchTermIndex(Base):
     """Persistent recipe-search term postings for pantry candidate selection."""
     __tablename__ = "compiled_recipe_search_term_index"
@@ -524,6 +582,7 @@ class CacheMetadata(Base):
     error_message = Column(Text)
     last_operation = Column(JSONB, default=dict)
     operation_history = Column(JSONB, default=list)
+    compiled_offer_baseline_committed = Column(Boolean, default=True, nullable=False)
     last_background_rebuild_at = Column(DateTime(timezone=True))
     background_rebuild_source = Column(Text)
     created_at = Column(DateTime(timezone=True), default=_utcnow)

@@ -49,6 +49,7 @@ import asyncio
 import os
 import sys
 from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 # Add app directory to path
 app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
@@ -84,6 +85,26 @@ _BINARY_CONTENT_TYPES = {
     "application/x-binary",
     "application/vnd.apple.mpegurl",
 }
+
+
+def _is_playwright_request_url_allowed(
+    url: str,
+    safe_cache: Optional[Dict[str, bool]] = None,
+) -> bool:
+    """Allow browser subrequests unless an HTTP(S) target resolves internally."""
+    parsed = urlparse(url)
+    scheme = parsed.scheme.lower()
+    if scheme not in {"http", "https"}:
+        return True
+
+    cache_key = f"{scheme}://{(parsed.netloc or '').lower()}"
+    if safe_cache is not None and cache_key in safe_cache:
+        return safe_cache[cache_key]
+
+    safe = is_safe_url(url)
+    if safe_cache is not None:
+        safe_cache[cache_key] = safe
+    return safe
 
 
 def _normalize_content_type(content_type: Optional[str]) -> str:
@@ -419,13 +440,15 @@ class MyRecipesScraper:
                 page = await browser.new_page()
 
                 try:
+                    safe_request_cache: Dict[str, bool] = {}
+
                     async def _route_request(route):
                         request = route.request
-                        if request.resource_type in {"image", "media", "font"}:
+                        if not _is_playwright_request_url_allowed(request.url, safe_request_cache):
+                            logger.warning(f"Playwright blocked unsafe network request: {request.url}")
                             await route.abort()
                             return
-                        if request.resource_type == "document" and not is_safe_url(request.url):
-                            logger.warning(f"Playwright blocked unsafe document URL: {request.url}")
+                        if request.resource_type in {"image", "media", "font"}:
                             await route.abort()
                             return
                         await route.continue_()

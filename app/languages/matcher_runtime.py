@@ -105,6 +105,7 @@ ensure_compiled_offer_term_index_table = _MATCHER_PACKAGE.ensure_compiled_offer_
 ensure_compiled_recipe_term_index_table = _MATCHER_PACKAGE.ensure_compiled_recipe_term_index_table
 load_compiled_offer_term_manifest = _MATCHER_PACKAGE.load_compiled_offer_term_manifest
 load_compiled_offer_term_postings = _MATCHER_PACKAGE.load_compiled_offer_term_postings
+load_compiled_recipe_offer_candidate_map = _MATCHER_PACKAGE.load_compiled_recipe_offer_candidate_map
 load_compiled_recipe_term_postings = _MATCHER_PACKAGE.load_compiled_recipe_term_postings
 resolve_recipe_match_runtime_data = _MATCHER_PACKAGE.resolve_recipe_match_runtime_data
 classify_current_offer_changes = _MATCHER_PACKAGE.classify_current_offer_changes
@@ -116,6 +117,7 @@ refresh_compiled_offer_match_data = _MATCHER_PACKAGE.refresh_compiled_offer_matc
 refresh_compiled_recipe_match_data = _MATCHER_PACKAGE.refresh_compiled_recipe_match_data
 refresh_compiled_recipe_match_data_for_recipe_ids = _MATCHER_PACKAGE.refresh_compiled_recipe_match_data_for_recipe_ids
 refresh_compiled_offer_term_index = _MATCHER_PACKAGE.refresh_compiled_offer_term_index
+refresh_compiled_recipe_offer_candidates = _MATCHER_PACKAGE.refresh_compiled_recipe_offer_candidates
 refresh_compiled_recipe_term_index = _MATCHER_PACKAGE.refresh_compiled_recipe_term_index
 refresh_compiled_recipe_term_index_for_recipe_ids = _MATCHER_PACKAGE.refresh_compiled_recipe_term_index_for_recipe_ids
 
@@ -202,10 +204,6 @@ def select_offer_match_candidate_backend(*args, **kwargs):
 
 def validate_offer_match_candidate_backend(*args, **kwargs):
     return _RECIPE_MATCH_BACKEND.validate_offer_match_candidate(*args, **kwargs)
-
-
-def analyze_ingredient_routing_shadow_backend(*args, **kwargs):
-    return _RECIPE_MATCH_BACKEND.analyze_ingredient_routing_shadow(*args, **kwargs)
 
 
 def get_classification_keywords_backend(*args, **kwargs):

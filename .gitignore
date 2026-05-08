@@ -38,21 +38,15 @@ app/tests/batch_review_*
 app/tests/recipe_matching_review_template.md
 app/tests/test_*.py
 app/tests/scrape_*_full_sortiment.py
-
-# Local cache rollout / benchmark harnesses (keep off GitHub)
-app/tests/fixtures/cache_rebuild_benchmark/
-app/tests/cache_rebuild_fixture.py
-app/tests/cache_rebuild_parity.py
 app/tests/candidate_term_index_parity.py
-app/tests/delta_cache_materialization.py
-app/tests/delta_cache_shadow_table.py
-app/tests/delta_probation.py
-app/tests/export_cache_rebuild_benchmark.py
-app/tests/load_cache_rebuild_benchmark.py
-app/tests/offer_delta_fixture_mutations.py
-app/tests/phase2_ingredient_routing_baseline.py
-app/tests/run_delta_cache_*.py
-app/tests/run_delta_probation.py
+app/tests/import_legacy_questions.py
+app/tests/promote_legacy_confirmed_cases.py
+app/tests/refresh_matcher_legacy_inventory_line_refs.py
+app/tests/report_legacy_validator_adapter_candidates.py
+app/tests/run_matcher_legacy_inventory_checks.py
+app/tests/fixtures/matcher_layer_plan_initial_cases.json
+app/tests/fixtures/matcher_legacy_questions_*.json
+app/tests/fixtures/matcher_legacy_rule_inventory.json
 
 # AI instructions (dev-only)
 CLAUDE.md
@@ -65,6 +59,7 @@ app/scripts/
 # Dev documentation (not needed in prod)
 docs/code-review.md
 docs/context.md
+docs/MATCHER_LAYER_PARITY_PLAN.md
 docs/v1_todo.md
 
 # OS files

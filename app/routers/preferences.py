@@ -19,6 +19,36 @@ from utils.errors import friendly_error
 router = APIRouter(prefix="/api", tags=["preferences"])
 
 
+def _extract_delivery_address_payload(data) -> tuple[str | None, str | None, str | None, str | None, int]:
+    """Validate and normalize delivery address JSON."""
+    if not isinstance(data, dict):
+        return None, None, None, "error.invalid_data", 400
+
+    values = []
+    for key in ("street_address", "postal_code", "city"):
+        value = data.get(key, "")
+        if not isinstance(value, str):
+            return None, None, None, "error.invalid_data", 400
+        values.append(value.strip())
+
+    street_address, postal_code, city = values
+    if not street_address:
+        return None, None, None, "preferences.street_required", 422
+    if not postal_code:
+        return None, None, None, "preferences.postal_required", 422
+    if not city:
+        return None, None, None, "preferences.city_required", 422
+
+    return street_address, postal_code, city, None, 200
+
+
+def _extract_ui_preferences_payload(data) -> tuple[dict | None, str | None]:
+    """Validate UI preferences JSON."""
+    if not isinstance(data, dict):
+        return None, "error.invalid_data"
+    return data, None
+
+
 # ==================== DELIVERY ADDRESS ====================
 
 @router.get("/preferences/delivery-address")
@@ -63,29 +93,12 @@ async def save_delivery_address(request: Request):
 
     try:
         data = await request.json()
-
-        street_address = data.get('street_address', '').strip()
-        postal_code = data.get('postal_code', '').strip()
-        city = data.get('city', '').strip()
-
-        # Basic validation
-        if not street_address:
+        street_address, postal_code, city, message_key, status_code = _extract_delivery_address_payload(data)
+        if message_key:
             return JSONResponse({
                 "success": False,
-                "message_key": "preferences.street_required"
-            }, status_code=422)
-
-        if not postal_code:
-            return JSONResponse({
-                "success": False,
-                "message_key": "preferences.postal_required"
-            }, status_code=422)
-
-        if not city:
-            return JSONResponse({
-                "success": False,
-                "message_key": "preferences.city_required"
-            }, status_code=422)
+                "message_key": message_key
+            }, status_code=status_code)
 
         # Update in database
         with get_db_session() as db:
@@ -142,6 +155,12 @@ async def save_ui_preferences(request: Request):
     """Save UI preferences (partial update - merges with existing)."""
     try:
         data = await request.json()
+        prefs_update, message_key = _extract_ui_preferences_payload(data)
+        if message_key:
+            return JSONResponse({
+                "success": False,
+                "message_key": message_key
+            }, status_code=400)
 
         with get_db_session() as db:
             # Get existing preferences
@@ -152,7 +171,7 @@ async def save_ui_preferences(request: Request):
             existing = row['ui_preferences'] if row and row['ui_preferences'] else {}
 
             # Merge with new data
-            existing.update(data)
+            existing.update(prefs_update)
 
             db.execute(text("""
                 INSERT INTO user_preferences (ui_preferences)

@@ -343,7 +343,7 @@ class CoopStore(StorePlugin):
         For e-handel: Navigates to offers page with postal code selection
         """
         logger.info("Starting Coop scraping...")
-        logger.debug(f"Credentials received: {credentials}")
+        logger.debug("Credentials received")
 
         location_type = credentials.get("location_type", "ehandel") if credentials else "ehandel"
         failure_reason = None
@@ -377,7 +377,7 @@ class CoopStore(StorePlugin):
 
                     if result and result[0]:
                         postal_code = result[0]
-                        logger.info(f"Using postal code: {postal_code}")
+                        logger.info("Using configured postal code")
             except Exception as e:
                 logger.warning(f"Could not fetch postal code: {e}")
 
@@ -947,7 +947,7 @@ class CoopStore(StorePlugin):
     async def _handle_postal_code_popup(self, page, postal_code: str):
         """Handle the postal code selection popup."""
         try:
-            logger.info(f"Setting postal code: {postal_code}")
+            logger.info("Setting configured postal code")
 
             # Look for postal code input
             # Coop typically shows a popup asking for postal code
@@ -990,7 +990,7 @@ class CoopStore(StorePlugin):
                         if submit_btn and await submit_btn.is_visible():
                             await submit_btn.click()
                             await asyncio.sleep(2)
-                            logger.success(f"✓ Set postal code to {postal_code}")
+                            logger.success("Set configured postal code")
                             break
                     except Exception:
                         # Expected: selector not found, try next one

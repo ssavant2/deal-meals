@@ -100,6 +100,9 @@ services:
       APP_PORT: ${APP_PORT:-20080}
       UVICORN_RELOAD: "false"
       PYTHONDONTWRITEBYTECODE: "1"
+      CACHE_REBUILD_MAX_WORKERS: ${CACHE_REBUILD_MAX_WORKERS:-3}
+      CACHE_DELTA_VERIFICATION_MAX_WORKERS: ${CACHE_DELTA_VERIFICATION_MAX_WORKERS:-3}
+      CACHE_REBUILD_CANDIDATE_DATA_SOURCE: ${CACHE_REBUILD_CANDIDATE_DATA_SOURCE:-db_candidates}
       # Emergency override: set to "true" if bad SSL cert prevents startup
       # FORCE_HTTP: "true"
     ports:

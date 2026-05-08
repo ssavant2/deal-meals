@@ -106,14 +106,16 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     # Kvisttomater are regular tomatoes sold on the vine — same thing for cooking
     'kvisttomat': 'tomat',
     'kvisttomater': 'tomat',
-    # NOTE: körsbärstomater NOT mapped here — default is CANNED (burk).
-    # Direct keyword matching against products with "Körsbärstomater" in name.
-
     # Fresh small tomato variants → generic "småtomat" (interchangeable)
     # All these are essentially the same thing for cooking: small tomatoes.
     # Stefan confirmed: babyplommon, cocktail, körsbär(s), kvisttomater piccolini,
     # småtomater, romantica — all interchangeable when fresh.
-    # NOT körsbärstomater (default = canned) or kvisttomat (already → tomat, broader).
+    # Kvisttomat remains regular tomato (broader), while cherry/cocktail-sized
+    # variants stay in the small-tomato family.
+    'körsbärstomat': 'småtomat',
+    'körsbärstomater': 'småtomat',
+    'korsbarstomat': 'småtomat',
+    'korsbarstomater': 'småtomat',
     'cocktailtomat': 'småtomat',
     'cocktailtomater': 'småtomat',
     'babyplommontomat': 'småtomat',
@@ -130,6 +132,8 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     # Only babyplommon are small and in the småtomat group.
     'plommontomat': 'tomat',
     'plommontomater': 'tomat',
+    'bifftomat': 'tomat',
+    'bifftomater': 'tomat',
 
     # Fennel seeds → generic "fänkål"
     # SVF has 'frö'/'fänkålsfrö' in allowed_indicators → unlocks dried products ✓
@@ -211,6 +215,7 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     # (product "Banan ca 180g Klass 1 ICA" → recipe ingredient "bananer").
     # COMPOUND_STRICT blocks bananschalottenlök (different item).
     'bananer': 'banan',
+    'grapefrukter': 'grapefrukt',
 
     # NOTE: Swedish everyday cheeses are intentionally NOT normalized from the
     # ingredient side to generic "ost". If a recipe explicitly asks for
@@ -238,7 +243,9 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     # Pickled cucumber types → "inlagdgurka" (NOT "gurka" — fresh ≠ pickled)
     # SPACE_NORM normalizes the text first, then keyword extraction gets "inlagdgurka"
     'smörgåsgurka': 'inlagdgurka', 'smorgasgurka': 'inlagdgurka',
+    'smörgåsgurkor': 'inlagdgurka', 'smorgasgurkor': 'inlagdgurka',
     'ättiksgurka': 'inlagdgurka', 'attiksgurka': 'inlagdgurka',
+    'ättiksgurkor': 'inlagdgurka', 'attiksgurkor': 'inlagdgurka',
     'saltgurka': 'inlagdgurka',
     # NOTE: bostongurka not mapped to inlagdgurka — different product (sweet relish vs pickled cucumber)
 
@@ -275,6 +282,11 @@ INGREDIENT_PARENTS: Dict[str, str] = {
 
     # Korianderblad: "Korianderblad Burk" = dried coriander leaves → generic "koriander"
     'korianderblad': 'koriander',
+    'nötcreme': 'nötkräm',
+    'notcreme': 'nötkräm',
+    'nötkräm': 'nötkräm',
+    'notkräm': 'nötkräm',
+    'notkram': 'nötkräm',
 
     # Sardell variants → match "Sardeller" products
     'sardellfiléer': 'sardeller', 'sardellfileer': 'sardeller',
@@ -292,11 +304,19 @@ INGREDIENT_PARENTS: Dict[str, str] = {
 
     # Worcestershire sauce: Swedish stores often shorten the product name to
     # "worcestersås", while recipes frequently use the full "worcestershiresås".
+    'worcestershire': 'worcestersås',
+    'worcestershiresauce': 'worcestersås',
     'worcestershiresås': 'worcestersås',
     'worcestershiresas': 'worcestersas',
     'worchestersås': 'worcestersås',
     'worchestersas': 'worcestersas',
-
+    'hoisin': 'hoisinsås',
+    'pistaschnötter': 'pistagenötter',
+    'pistaschnotter': 'pistagenotter',
+    'pistaschkärnor': 'pistagenötter',
+    'pistaschkarnor': 'pistagenotter',
+    'pistagekärnor': 'pistagenötter',
+    'pistagekarnor': 'pistagenotter',
     # Liba bread products: recipe text often uses the branded flatbread term
     # "libabröd", while store products may expose either "liba" or "tunnbröd".
     'libabröd': 'tunnbröd',
@@ -321,7 +341,10 @@ INGREDIENT_PARENTS: Dict[str, str] = {
 
     # Romaine lettuce: recipes write "romansallat", products say "romansallad"
     'romansallat': 'romansallad',
+    'huvudsallat': 'huvudsallad',
+    'huvudsallatshuvud': 'huvudsallad',
     'krispsallad': 'krispsallat',
+    'kruksallad': 'krispsallat',
     # Little Gem / gem lettuce recipes should match the common grocery family
     # sold as hjärtsallad.
     'gemsallad': 'hjärtsallad',
@@ -364,7 +387,14 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     'salladsarta': 'salladsärtor',
     'salladsärter': 'salladsärtor',
     'salladsarter': 'salladsärtor',
+    'haricoverts': 'haricot',
     'potatisklyftor': 'klyftpotatis',  # store form → recipe form for frozen wedge potatoes
+    'polenta': 'majsmjöl',
+    'mineralvatten': 'sodavatten',
+    'wokgrönsaker': 'wokmix',
+    'wokgronsaker': 'wokmix',
+    'sommargrönsaker': 'sommargrönsaker',
+    'sommargronsaker': 'sommargrönsaker',
     'muscovadorörsocker': 'muscovadosocker',  # store spelling variant for muscovado sugar
     'muscovadororsocker': 'muscovadosocker',  # without diacritics
     'råsocker': 'rörsocker',  # common retail equivalent in Swedish grocery offers
@@ -374,6 +404,8 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     'gullök': 'lök',  # "1 gullök" (compound) → "Lök Gul Klass 1" (2 recipes)
     'gullok': 'lök',  # without diacritics
     'sashimilax': 'sushilax',  # "360 g Sashimilax" → "Sushilax" (specific raw salmon variant, 7 recipes)
+    'solroskärnor': 'solrosfrön',
+    'solroskarnor': 'solrosfrön',
     'trattkantareller': 'kantareller',  # trumpet chanterelles → chanterelles (16 recipes)
     'trattkantarell': 'kantareller',
     'polkabetor': 'polkabeta',  # plural → singular: "200 g Polkabetor" → "Polkabeta Klass 1" (20 recipes)
@@ -411,10 +443,12 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     'potatisar': 'potatis',
     'morötter': 'morot',
     'morotter': 'morot',  # without diacritics
+    'morätter': 'morot',  # common recipe typo
+    'moratter': 'morot',
     'delikatesspotatis': 'potatis',  # fancy name for firm potatoes
     'snackmorötter': 'morot',  # snack carrots = carrots
-    # NOTE: färskpotatis NOT mapped to potatis — specific type, not interchangeable.
-    # Reverse (recipe "potatis" → offer "Färskpotatis") needs one-way offer-side mapping (TODO).
+    # NOTE: färskpotatis NOT mapped to potatis on the ingredient side. Generic
+    # "potatis" can still accept fresh-potato offer variants via OFFER_EXTRA_KEYWORDS.
     'tomater': 'tomat',  # plural
     'kantareller': 'kantarell',  # plural
     'murklor': 'murkla',  # plural
@@ -422,6 +456,8 @@ INGREDIENT_PARENTS: Dict[str, str] = {
 
     # Kyckling variants → generic "kyckling"
     'kycklingar': 'kyckling',
+    'kalkonkött': 'kalkon',
+    'kalkonkott': 'kalkon',
     # kycklingbröst = kycklingbröstfilé in practice → map to kycklingfilé
     'kycklingbröst': 'kycklingfilé',
     'kycklingbrost': 'kycklingfilé',
@@ -445,9 +481,10 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     # Plant-based synonym
     'sojafärs': 'vegofärs',
     'sojafars': 'vegofärs',
-    # Quorn compound → match "Färs Mince Quorn" product
-    'quornfärs': 'quorn',  # product has keywords ['färs', 'quorn']
-    'quornfars': 'quorn',
+    # Quorn mince can use the ordinary vegetarian mince family when exact Quorn
+    # wording is absent; product-side extras keep exact Quorn mince in the same family.
+    'quornfärs': 'vegofärs',
+    'quornfars': 'vegofärs',
 
     # Squash = zucchini (squash is the older Swedish word, stores use zucchini)
     'squash': 'zucchini',
@@ -467,6 +504,7 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     'paprikor': 'paprika',
     'gurkor': 'gurka',
     'persikor': 'persika',
+    'nektariner': 'nektarin',  # plural → singular: store sells "Nektariner Klass 1", recipe says "1 nektarin"
     # Swedish -rot → -rötter plural
     'kålrötter': 'kålrot',
     'kalrotter': 'kålrot',
@@ -560,7 +598,17 @@ INGREDIENT_PARENTS: Dict[str, str] = {
     # Specific fond→fond mappings kept so fond products match their own keyword.
     'oxfond': 'köttfond',              # oxfond = beef stock, matches köttfond products
     'schalottenlökfond': 'schalottenlöksfond',
-    # NOTE: hummerfond NOT mapped — it's its own product keyword
+    # Shellfish fonds are the practical fallback family for skaldjursfond.
+    # Keep ordinary fiskfond separate: fish is not shellfish.
+    'hummerfond': 'skaldjursfond',
+    'räkfond': 'skaldjursfond',
+    'rakfond': 'skaldjursfond',
+    'kräftfond': 'skaldjursfond',
+    'kraftfond': 'skaldjursfond',
+    'krabbfond': 'skaldjursfond',
+    'musslefond': 'skaldjursfond',
+    'musselsfond': 'skaldjursfond',
+    'musslorfond': 'skaldjursfond',
 
     # Dragon (tarragon) compounds
     'dragonreduktion': 'dragon',  # tarragon reduction needs tarragon herb
@@ -630,6 +678,7 @@ KEYWORD_SYNONYMS: Dict[str, str] = {
     'drumsticks': 'kycklingben',  # "Kyckling Drumsticks" → recipes say "kycklingben"
     'burger': 'hamburgare',  # "Marrowbone Beef Burger" → recipes say "hamburgare"
     'beef': 'nötkött',  # "Beef Burger" → recipes say "nötkött"
+    'bamboo': 'bambuskott',  # "Bamboo Shoot" product wording → Swedish recipe "bambuskott"
     'philadelphia': 'färskost',  # Philadelphia brand = cream cheese (färskost)
     'pecannöt': 'pekannöt',  # product spelling variant → recipe spelling
     'pecannot': 'pekannot',
@@ -640,15 +689,28 @@ KEYWORD_SYNONYMS: Dict[str, str] = {
     'chillipeppar': 'chilipeppar',  # compound form of double-l variant
     'morötter': 'morot',  # product "Morötter Klass 1" → recipe uses "morot" (via ISK)
     'morotter': 'morot',  # without diacritics
+    'morätter': 'morot',
+    'moratter': 'morot',
+    'dillfrön': 'dillfrö',
+    'dillfron': 'dillfrö',
+    'dillfro': 'dillfrö',
     'ruccola': 'rucola',  # product "Ruccola Klass 1" → recipe says "rucola" (single c)
     'machesallad': 'machesallat',  # recipe spelling should match product "Machesallat"
+    'huvudsallat': 'huvudsallad',
+    'surdegsbaguette': 'baguette',
+    'surdegsbaguett': 'baguette',
     'cantucci': 'cantuccini',  # product/recipe spelling variant
     'biscotti': 'cantuccini',  # same Italian biscuit family in recipes
+    'tryffelmayo': 'tryffelmajonnäs',
+    'tryffelmajo': 'tryffelmajonnäs',
     'gille-drömmar': 'drömmar',  # branded cookie pack should match recipe "drömmar"
     'gille-drommar': 'drommar',
     'savoiardokex': 'savoiardikex',
+    'savoiardo': 'savoiardikex',
     'savoiarde': 'savoiardikex',  # store wording for ladyfinger biscuits
     'savoiardi': 'savoiardikex',
+    'ladyfinger': 'savoiardikex',
+    'ladyfingers': 'savoiardikex',
     'spätta': 'rödspätta',
     'spatta': 'rodspatta',
     'spättafilé': 'rödspättafilé',
@@ -669,6 +731,9 @@ KEYWORD_SYNONYMS: Dict[str, str] = {
     'muscovadosocker': 'muskovadosocker',  # product spelling variant → common recipe spelling
     # Hazelnut spread → generic nut cream keyword
     # "Hasselnötkräm Nutella" should match recipes asking for "nötkräm" (nut cream spread)
+    'nötcreme': 'nötkräm',
+    'notcreme': 'nötkräm',
+    'notkram': 'nötkräm',
     'hasselnötkräm': 'nötkräm',
     'hasselnotkram': 'nötkräm',  # without diacritics
     'karamelliseradmjolk': 'karamelliseradmjölk',
@@ -681,10 +746,38 @@ KEYWORD_SYNONYMS: Dict[str, str] = {
     'fladerblomsaft': 'fladersaft',
     # Wild-raspberry cordial is a normal substitute for generic raspberry cordial.
     'skogshallonsaft': 'hallonsaft',
+    'jordgubbsaft': 'jordgubbssaft',
+    # Recipe wording often uses "ingefärsshot"; offer extraction normalizes
+    # pressed ginger shots to the same ingefärsjuice family.
+    'ingefärsshot': 'ingefärsjuice',
+    'ingefarsshot': 'ingefärsjuice',
     # Soft caramel candy wording varies between recipe "kolakaramell" and
     # current product names like "Gräddkola" / "Gräddkaramell".
     'gräddkola': 'kolakaramell',
     'graddkola': 'kolakaramell',
     'gräddkaramell': 'kolakaramell',
     'graddkaramell': 'kolakaramell',
+    # Batch 15 recipe/product surface variants.
+    'svarpeppar': 'svartpeppar',
+    'sötströ': 'lättströ',
+    'sotstro': 'lattstro',
+    'spisbröd': 'knäckebröd',
+    'spisbrod': 'knäckebröd',
+    'burgarbröd': 'hamburgerbröd',
+    'burgarbrod': 'hamburgerbröd',
+    'glasstrut': 'våffelstrutar',
+    'glasstrutar': 'våffelstrutar',
+    'våffelstrut': 'våffelstrutar',
+    'vaffelstrut': 'våffelstrutar',
+    'vaffelstrutar': 'våffelstrutar',
+    'tzaybitar': 'vegobitar',
+    'tzaybit': 'vegobitar',
+    'smördegsark': 'smördeg',
+    'smordegsark': 'smördeg',
+    'smördegsplatta': 'smördeg',
+    'smordegsplatta': 'smördeg',
+    'smördegsplattor': 'smördeg',
+    'smordegsplattor': 'smördeg',
+    'daimchoklad': 'daim',
+    'daim': 'daim',
 }

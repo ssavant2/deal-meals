@@ -69,9 +69,15 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # Cherry tomatoes: sun-dried ≠ canned/fresh
     'körsbärstomat': {
         'soltorkad', 'soltorkade', 'solt', 'secchi',
+        'tomatjuice', 'juice',
     },
     'körsbärstomater': {
         'soltorkad', 'soltorkade', 'solt', 'secchi',
+        'tomatjuice', 'juice',
+    },
+    'småtomat': {
+        'soltorkad', 'soltorkade', 'solt', 'secchi',
+        'tomatjuice', 'juice',
     },
     # Whole/grilled chicken: "hel kyckling" or "grillad kyckling" should only
     # match products with those qualifiers, not generic chicken cuts.
@@ -101,11 +107,13 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'rökt', 'rokt',
         'kallrökt', 'kallrokt',
         'grillad', 'grillat',       # pre-grilled deli chicken
+        'grillkryddad', 'kryddad', 'kryddmarinerad', 'marinerad',
     },
     'kycklingfile': {
         'rökt', 'rokt',
         'kallrökt', 'kallrokt',
         'grillad', 'grillat',
+        'grillkryddad', 'kryddad', 'kryddmarinerad', 'marinerad',
     },
     'renstek': {
         'rökt', 'rokt',
@@ -248,8 +256,12 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # Bidirectional: product "Kallrökt Lax" requires ingredient to also say "kallrökt"
     'lax': {
         'kallrökt', 'kallrokt',  # cold-smoked salmon
+        'kallr',  # store abbreviation for kallrökt
         'varmrökt', 'varmrokt',  # hot-smoked salmon
+        'varmr',  # store abbreviation for varmrökt
         'gravad', 'gravade',  # cured salmon
+        'rimmad', 'rimmade', 'rimmat',  # salted/cured salmon
+        'najad', 'najadlax',  # cured + cold-smoked salmon style
         'rökt', 'rokt',  # generic smoked
     },
 
@@ -340,6 +352,8 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'paella', 'paellaris',  # paella rice
         'vildris', 'vild',  # wild rice (different species)
         'råris',  # brown rice (unhulled)
+        'svart', 'svarta',  # black rice
+        'röd', 'röda', 'rött', 'rod', 'roda', 'rott',  # red rice
     },
 
     # Pommes variants - "pommes strips" is a specific product, generic "pommes" should not match
@@ -455,6 +469,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # Flavor words mirror _VINEGAR_FLAVOR_WORDS in extract_keywords_from_ingredient
     'balsamvinäger': {
         'vit', 'vita',   # white balsamic ≠ dark/regular balsamic
+        'rosé', 'rose',  # rose/rosé balsamic/condimento ≠ dark/regular balsamic
         # Fruit/flavor variants (e.g., "Crema di Balsamico Hallon" from ICA)
         'hallon', 'fikon', 'äpple', 'ingefära',
         'mango', 'tryffel', 'fläder', 'körsbär',
@@ -854,6 +869,21 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'vit',
         'ljus',
     },
+    # Chocolate buttons share the same explicit-variant rule as cooking
+    # chocolate: plain "chokladknappar" can use any variant, but "vita/mörka/
+    # mjölkchokladknappar" should not cross color/type families.
+    'chokladknappar': {
+        'mörk', 'mork',
+        'vit',
+        'ljus',
+        'mjölk', 'mjolk', 'milk',
+    },
+    'chokladknapp': {
+        'mörk', 'mork',
+        'vit',
+        'ljus',
+        'mjölk', 'mjolk', 'milk',
+    },
 
     # Fresh pasta — "färsk pasta/långpasta" should only match products with "färsk" in name
     'pasta': {
@@ -861,6 +891,9 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     },
     'långpasta': {
         'färsk',  # "färsk långpasta" ≠ torkad (unlikely but consistent)
+    },
+    'lasagneplattor': {
+        'färsk',  # "färska lasagneplattor" ≠ dry shelf-stable sheets
     },
 
     # Melon types — specific melon ≠ other melons
@@ -906,7 +939,8 @@ BIDIRECTIONAL_SPECIALTY_QUALIFIERS: FrozenSet[str] = frozenset({
     # Chili sauce types are distinct - "Lime Chilisås" ≠ "sweet chilisås"
     'sweet', 'lime', 'sriracha', 'gochujang', 'go-chu-jang',
     # Smoked/cured fish preparation - "Kallrökt Lax" should NOT match plain "lax"
-    'kallrökt', 'kallrokt', 'varmrökt', 'varmrokt', 'gravad', 'gravade',
+    'kallrökt', 'kallrokt', 'kallr', 'varmrökt', 'varmrokt', 'varmr',
+    'gravad', 'gravade',
     # Dried products - "Blåbär Torkade" should NOT match fresh "blåbär",
     # but "Shiitake Torkad" SHOULD match "torkad shiitake"
     'torkad', 'torkade', 'torkat',
@@ -1004,6 +1038,18 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
         'vit',
         'ljus',
     }),
+    'chokladknappar': frozenset({
+        'mörk', 'mork',
+        'vit',
+        'ljus',
+        'mjölk', 'mjolk', 'milk',
+    }),
+    'chokladknapp': frozenset({
+        'mörk', 'mork',
+        'vit',
+        'ljus',
+        'mjölk', 'mjolk', 'milk',
+    }),
     # Pre-sliced cheese: "Herrgård Skivad" should NOT match "riven ost" or generic "ost"
     # Per-keyword because 'skivad' in other contexts (e.g., skivad lök) isn't bidirectional
     'ost': frozenset({
@@ -1011,6 +1057,10 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
         'rökt', 'rokt',  # smoked cheese — not generic "ost"
         'tärnad', 'tärnade', 'tärning', 'tärningar',  # pre-diced (ost i olja) — not generic "ost"
     }),
+    # Seasoned/marinated chicken fillet products should not satisfy plain raw
+    # kycklingfilé recipes unless the recipe asks for that preparation.
+    'kycklingfilé': frozenset({'grillkryddad', 'kryddad', 'kryddmarinerad', 'marinerad'}),
+    'kycklingfile': frozenset({'grillkryddad', 'kryddad', 'kryddmarinerad', 'marinerad'}),
     'sidfläsk': frozenset({'rökt', 'rokt', 'rimmat'}),
     'sidflask': frozenset({'rökt', 'rokt', 'rimmat'}),
     'fläsk': frozenset({'rökt', 'rokt'}),
@@ -1029,7 +1079,7 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
     'prosciutto': frozenset({'cotto'}),
     # Balsamic vinegar: flavored/colored variant should NOT match plain "balsamvinäger" recipe
     'balsamvinäger': frozenset({
-        'vit', 'vita',
+        'vit', 'vita', 'rosé', 'rose',
         'hallon', 'fikon', 'äpple', 'ingefära',
         'mango', 'tryffel', 'fläder', 'körsbär',
         'apelsin', 'granatäpple', 'honung',
@@ -1050,6 +1100,8 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
                         'karamelliserad', 'karamelliserat', 'karamelliserade'}),
     'mjolk': frozenset({'kondenserad', 'kondenserat', 'kondenserade',
                         'karamelliserad', 'karamelliserat', 'karamelliserade'}),
+    # Red/black specialty rice should not satisfy plain long-grain rice lines.
+    'ris': frozenset({'svart', 'svarta', 'röd', 'röda', 'rött', 'rod', 'roda', 'rott'}),
 }
 
 # Qualifier equivalents: if ingredient says "grekisk", product can have "turkisk" (and vice versa)
@@ -1071,6 +1123,9 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'svarta': {'svart', 'svarta', 'beluga', 'kalamata', 'gemlik'},
     'kalamata': {'svart', 'svarta', 'kalamata', 'gemlik', 'hummus'},
     'gemlik': {'svart', 'svarta', 'kalamata', 'gemlik'},
+    'mjölk': {'mjölk', 'mjolk', 'milk'},
+    'mjolk': {'mjölk', 'mjolk', 'milk'},
+    'milk': {'mjölk', 'mjolk', 'milk'},
     'grön': {'grön', 'gröna', 'green', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'genovese', 'basilico', 'mix', 'haricot', 'brytbönor', 'brytbonor'},
     'gröna': {'grön', 'gröna', 'green', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'genovese', 'basilico', 'mix', 'haricot', 'brytbönor', 'brytbonor'},
     'haricot': {'grön', 'gröna', 'haricot', 'brytbönor', 'brytbonor'},
@@ -1095,10 +1150,21 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'fryst': {'frysta', 'fryst'},
     # Cold-smoked salmon is an acceptable subtype of generic smoked salmon,
     # but hot-smoked salmon remains distinct.
-    'rökt': {'rökt', 'rokt', 'kallrökt', 'kallrokt'},
-    'rokt': {'rökt', 'rokt', 'kallrökt', 'kallrokt'},
-    'kallrökt': {'kallrökt', 'kallrokt', 'rökt', 'rokt'},
-    'kallrokt': {'kallrökt', 'kallrokt', 'rökt', 'rokt'},
+    'rökt': {'rökt', 'rokt', 'kallrökt', 'kallrokt', 'kallr', 'rimmad', 'rimmade', 'rimmat'},
+    'rokt': {'rökt', 'rokt', 'kallrökt', 'kallrokt', 'kallr', 'rimmad', 'rimmade', 'rimmat'},
+    'kallrökt': {'kallrökt', 'kallrokt', 'kallr', 'rökt', 'rokt', 'rimmad', 'rimmade', 'rimmat'},
+    'kallrokt': {'kallrökt', 'kallrokt', 'kallr', 'rökt', 'rokt', 'rimmad', 'rimmade', 'rimmat'},
+    'kallr': {'kallrökt', 'kallrokt', 'kallr', 'rökt', 'rokt', 'rimmad', 'rimmade', 'rimmat'},
+    'rimmad': {'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt', 'kallr', 'najad', 'najadlax'},
+    'rimmade': {'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt', 'kallr', 'najad', 'najadlax'},
+    'rimmat': {'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt', 'kallr', 'najad', 'najadlax'},
+    'gravad': {'gravad', 'gravade', 'rimmad', 'rimmade', 'rimmat'},
+    'gravade': {'gravad', 'gravade', 'rimmad', 'rimmade', 'rimmat'},
+    'najad': {'najad', 'najadlax', 'rimmad', 'rimmade', 'rimmat'},
+    'najadlax': {'najad', 'najadlax', 'rimmad', 'rimmade', 'rimmat'},
+    'varmrökt': {'varmrökt', 'varmrokt', 'varmr'},
+    'varmrokt': {'varmrökt', 'varmrokt', 'varmr'},
+    'varmr': {'varmrökt', 'varmrokt', 'varmr'},
     # Air-dried ham origins: a recipe saying "lufttorkad skinka" may accept the
     # named origins, but each named origin still requires itself when specified.
     'lufttorkad': {'lufttorkad', 'lufttorkade', 'lufttorkat', 'torkad', 'torkade', 'torkat', 'serrano', 'parma', 'prosciutto', 'iberico', 'pata negra', 'jamon'},
@@ -1129,6 +1195,8 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'rod': {'red', 'röd', 'röda', 'rött', 'rod', 'rott', 'rosso', 'mix'},
     'rott': {'red', 'röd', 'röda', 'rött', 'rod', 'rott', 'rosso', 'mix'},
     'rosso': {'red', 'röd', 'röda', 'rött', 'rod', 'rott', 'rosso', 'mix'},  # Italian red (pesto rosso)
+    'rosé': {'rosé', 'rose'},
+    'rose': {'rosé', 'rose'},
     # White adjective forms: wine (vitt) + beans (vita)
     'vit': {'vit', 'vita', 'vitt'},
     'vita': {'vit', 'vita', 'vitt'},

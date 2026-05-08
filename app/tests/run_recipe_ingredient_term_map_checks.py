@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 import sys
+from types import SimpleNamespace
 
 sys.path.insert(0, '/app' if os.path.exists('/app') else os.path.join(os.path.dirname(__file__), '..'))
 
@@ -14,6 +15,11 @@ from languages.matcher_runtime import build_recipe_ingredient_term_map  # noqa: 
 from languages.sv.ingredient_matching import (  # noqa: E402
     build_prepared_ingredient_match_data,
     serialize_prepared_recipe_match_runtime_data,
+)
+from languages.sv.ingredient_matching.term_indexes import (  # noqa: E402
+    build_offer_candidate_terms,
+    build_recipe_search_text_map,
+    recipe_text_contains_routing_term,
 )
 
 
@@ -76,11 +82,12 @@ compiled_payload = serialize_prepared_recipe_match_runtime_data(prepared_payload
 
 term_map = build_recipe_ingredient_term_map(
     compiled_payload,
-    {"gradde", "tomat", "arla", "saknas"},
+    {"gradde", "tomat", "arla", "mat", "saknas"},
 )
 test("parent keyword maps to expanded ingredient index", term_map["gradde"], {0})
 test("direct keyword maps to all matching expanded indices", term_map["tomat"], {1, 3})
 test("normalized text containment maps offer name words", term_map["arla"], {1})
+test("offer name words do not map by substring inside recipe words", term_map["mat"], set())
 test("missing terms stay present with empty hint sets", term_map["saknas"], set())
 
 runtime_shape_map = build_recipe_ingredient_term_map(
@@ -110,6 +117,81 @@ probe = subprocess.run(
 probe_payload = json.loads(probe.stdout)
 test("en_gb backend remains loadable", probe_payload["language"], "en_gb")
 test("en_gb skeleton returns no ingredient hints", probe_payload["hints"], {"tomat": []})
+
+search_text = "1 pkt fläsk 2 krm svartpeppar 1 dl strösocker"
+test("name_word recipe routing requires whole word", recipe_text_contains_routing_term(search_text, "läsk", "name_word"), False)
+test("name_word recipe routing does not match pepper prefix", recipe_text_contains_routing_term(search_text, "pepp", "name_word"), False)
+test("keyword recipe routing keeps compound substring behavior", recipe_text_contains_routing_term(search_text, "peppar", "keyword"), True)
+test("short keyword routing does not match inside longer words", recipe_text_contains_routing_term("1 msk vetemjöl 2 dl mellanmjölk", "öl", "keyword"), False)
+test("short keyword routing still matches standalone words", recipe_text_contains_routing_term("2 dl öl till gryta", "öl", "keyword"), True)
+
+offer_terms = build_offer_candidate_terms({
+    "keywords": ["flingsalt", "mineralvatten"],
+    "carrier_stripped": [],
+    "name_normalized": "vatten salt flingsalt mineralvatten kolsyrat zeta port färsk riven pasta",
+})
+test("offer routing keeps specific salt/water keywords", ("flingsalt", "keyword") in offer_terms and ("mineralvatten", "keyword") in offer_terms, True)
+test("offer routing keeps useful specific name words", ("kolsyrat", "name_word") in offer_terms and ("pasta", "name_word") in offer_terms, True)
+test("offer routing suppresses generic descriptor name words", any(term in offer_terms for term in {
+    ("vatten", "name_word"),
+    ("salt", "name_word"),
+    ("zeta", "name_word"),
+    ("port", "name_word"),
+    ("färsk", "name_word"),
+    ("riven", "name_word"),
+}), False)
+
+payload_with_alias = {
+    "ingredients_search_text": "340 g makaroner 3 dl soyabaserad matlagning",
+    "ingredient_match_data": [
+        {
+            "normalized_text": "340 g makaroner pasta",
+            "extracted_keywords": ["pasta"],
+        },
+        {
+            "normalized_text": "3 dl soyabaserad matlagning grädde",
+            "extracted_keywords": ["grädde", "soja"],
+        },
+    ],
+}
+routing_text = build_recipe_search_text_map(
+    [SimpleNamespace(id="recipe-1")],
+    compiled_recipe_payload_cache={"recipe-1": payload_with_alias},
+)["recipe-1"]
+test("compiled recipe routing text includes prepared canonical aliases", "pasta" in routing_text and "grädde" in routing_text, True)
+test("compiled recipe routing text does not append extracted-only keywords blindly", " soja " in f" {routing_text} ", False)
+
+whole_chicken_routing_text = build_recipe_search_text_map(
+    [SimpleNamespace(id="recipe-2")],
+    compiled_recipe_payload_cache={
+        "recipe-2": {
+            "ingredients_search_text": "1 stor kyckling i 8 bitar",
+            "ingredient_match_data": [
+                {
+                    "normalized_text": "1 stor kyckling i 8 bitar",
+                    "extracted_keywords": ["kyckling"],
+                },
+            ],
+        },
+    },
+)["recipe-2"]
+test("whole chicken recipe routing includes helkyckling alias", " helkyckling " in f" {whole_chicken_routing_text} ", True)
+
+cut_chicken_routing_text = build_recipe_search_text_map(
+    [SimpleNamespace(id="recipe-3")],
+    compiled_recipe_payload_cache={
+        "recipe-3": {
+            "ingredients_search_text": "500 g kycklingfile",
+            "ingredient_match_data": [
+                {
+                    "normalized_text": "500 g kycklingfile",
+                    "extracted_keywords": ["kycklingfilé"],
+                },
+            ],
+        },
+    },
+)["recipe-3"]
+test("cut chicken recipe routing does not include helkyckling alias", " helkyckling " in f" {cut_chicken_routing_text} ", False)
 
 
 print("\n========================================")

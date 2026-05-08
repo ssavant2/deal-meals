@@ -272,6 +272,15 @@ class ScraperScheduler:
         except Exception as e:
             logger.warning(f"Scheduled recipe batch cache refresh failed: {e}")
 
+    async def _maybe_run_cache_reconciliation(self, trigger: str) -> None:
+        """Run opportunistic cache reconciliation after scheduled background work."""
+        try:
+            from cache_reconciliation import maybe_run_scheduled_cache_reconciliation
+
+            await maybe_run_scheduled_cache_reconciliation(trigger)
+        except Exception as e:
+            logger.warning(f"Could not run scheduled cache reconciliation ({trigger}): {e}")
+
     def start(self):
         """Start the scheduler and load jobs from database."""
         if self._started:
@@ -465,16 +474,16 @@ class ScraperScheduler:
                         await self._refresh_cache_after_scheduled_batch(scraper_id)
                         has_new_recipes = self._batch_has_new_recipes
                         self._batch_has_new_recipes = False
-                        if not has_new_recipes:
-                            return
-                        try:
-                            from utils.image_auto_download import trigger_auto_download_if_enabled
-                            if await trigger_auto_download_if_enabled():
-                                logger.info(f"Auto-download triggered after scheduled batch (last scraper: {scraper_id})")
-                        except Exception as e:
-                            logger.warning(f"Could not trigger auto-download after batch: {e}")
+                        if has_new_recipes:
+                            try:
+                                from utils.image_auto_download import trigger_auto_download_if_enabled
+                                if await trigger_auto_download_if_enabled():
+                                    logger.info(f"Auto-download triggered after scheduled batch (last scraper: {scraper_id})")
+                            except Exception as e:
+                                logger.warning(f"Could not trigger auto-download after batch: {e}")
                 finally:
                     self._batch_executed_scraper_ids.clear()
+                await self._maybe_run_cache_reconciliation(f"recipe_batch:{scraper_id}")
             elif self._scrapers_waiting > 0:
                 logger.info(f"Skipping auto-download, {self._scrapers_waiting} more scrapers queued")
 
@@ -1317,6 +1326,8 @@ class ScraperScheduler:
                     await delete_active_scrape(store_id)
                 except Exception as e:
                     logger.warning(f"Failed to clear active store scrape for {store_id}: {e}")
+            if error_message is None and (product_count > 0 or verified_empty_success):
+                await self._maybe_run_cache_reconciliation(f"store:{store_id}")
 
     def _schedule_store_retry(self, store_id: str):
         """Schedule a one-time store scraper retry after RETRY_DELAY_MINUTES."""

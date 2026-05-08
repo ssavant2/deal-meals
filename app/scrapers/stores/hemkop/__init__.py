@@ -148,7 +148,7 @@ class HemkopStore(StorePlugin):
                     result['street'] = row[0]
                     result['postal_code'] = row[1]
                     result['city'] = row[2]
-                    logger.info(f"Saved delivery address: {row[0]}, {row[1]} {row[2]}")
+                    logger.info("Saved delivery address is configured")
         except Exception as e:
             logger.warning(f"Could not read delivery address: {e}")
 
@@ -174,7 +174,7 @@ class HemkopStore(StorePlugin):
         try:
             from playwright.async_api import async_playwright
 
-            logger.info(f"Resolving delivery store for: {street}")
+            logger.info("Resolving delivery store from configured address")
 
             async with async_playwright() as p:
                 browser = await p.chromium.launch(headless=True)
@@ -264,7 +264,7 @@ class HemkopStore(StorePlugin):
             return None
 
         # Step 4: Type address in input field - wait for input to appear
-        logger.info(f"Step 4: Typing address: {street}")
+        logger.info("Step 4: Typing configured delivery address")
         address_input = None
         for sel in ['input#address', 'input[name="address"]', 'input[placeholder*="adress"]']:
             try:
@@ -288,7 +288,7 @@ class HemkopStore(StorePlugin):
             suggestion = page.locator(f'li:has-text("{street}")')
             await suggestion.first.wait_for(state='visible', timeout=10000)
         except Exception:
-            logger.error(f"No autocomplete suggestion found for: {street}")
+            logger.error("No autocomplete suggestion found for configured address")
             return None
 
         await suggestion.first.click(timeout=5000)
@@ -322,7 +322,7 @@ class HemkopStore(StorePlugin):
 
         if store_data and store_data.get('promotionStoreId'):
             store_id = store_data['promotionStoreId']
-            logger.success(f"Resolved store ID: {store_id} for address: {street}")
+            logger.success(f"Resolved store ID: {store_id} for configured address")
             return store_id
 
         logger.warning("promotionStoreId not found in localStorage after address flow")

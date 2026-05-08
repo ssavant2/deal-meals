@@ -83,6 +83,21 @@ def _legacy_pantry_match(query):
     return full_match, partial_match, len(recipes)
 
 
+def _extract_raw_ingredients(data) -> tuple[str | None, str | None]:
+    """Return raw pantry input or a message_key for invalid/empty payloads."""
+    if not isinstance(data, dict):
+        return None, "error.invalid_data"
+
+    raw_ingredients = data.get('ingredients')
+    if not isinstance(raw_ingredients, str):
+        return None, "error.invalid_data"
+
+    if not raw_ingredients.strip():
+        return None, "pantry.no_ingredients"
+
+    return raw_ingredients, None
+
+
 @router.post("/pantry-match")
 @limiter.limit(settings.rate_limit_pantry)
 async def pantry_match(request: Request):
@@ -102,13 +117,13 @@ async def pantry_match(request: Request):
     """
     try:
         data = await request.json()
-        raw_ingredients = data.get('ingredients', '')
-
-        if not raw_ingredients.strip():
+        raw_ingredients, message_key = _extract_raw_ingredients(data)
+        if message_key:
+            status_code = 400 if message_key == "error.invalid_data" else 200
             return JSONResponse({
                 "success": False,
-                "message_key": "pantry.no_ingredients"
-            })
+                "message_key": message_key
+            }, status_code=status_code)
 
         query = build_pantry_query(raw_ingredients)
         if not query.user_keywords:

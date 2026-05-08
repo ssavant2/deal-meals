@@ -22,7 +22,6 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         'torkad', 'torkade', 'torkat',
         'kanderad', 'kanderade',
         'pressad', 'pressade',  # "Ingefära Pressad" = pressed paste, NOT fresh ginger
-        'riven',               # "Ingefära Riven" = pre-grated tube, NOT fresh root
     },
     'gurkmeja': {
         # Processed turmeric forms — same pattern as ingefära.
@@ -70,19 +69,16 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
     },
     'champinjon': {
         # Preserved champignons should not leak into plain fresh-mushroom recipe
-        # lines via the broader "svamp" fallback.
+        # lines via the broader "svamp" fallback. Cut descriptors are checked
+        # form-aware in matching.py so frozen sliced champignons remain allowed.
         'tetra',
         'konserverad', 'konserverade',
         'burk',
-        'skivad', 'skivade',
-        'hela',
     },
     'champinjoner': {
         'tetra',
         'konserverad', 'konserverade',
         'burk',
-        'skivad', 'skivade',
-        'hela',
     },
     'körsbärstomat': {
         # Sun-dried cherry tomatoes ≠ fresh cherry tomatoes
@@ -95,8 +91,6 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         'tomatjuice', 'juice',
         # Allow when recipe explicitly asks for canned/preserved
         'konserverade', 'konserverad', 'konserv',
-        # Allow when recipe says "körsbärstomater" (most mean canned, not fresh)
-        'körsbärstomater', 'körsbärstomat', 'korsbarstomat',
     },
     'körsbärstomater': {
         'solt', 'soltorkad', 'soltorkade',
@@ -104,7 +98,15 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         'torkad', 'torkade',
         'tomatjuice', 'juice',
         'konserverade', 'konserverad', 'konserv',
-        'körsbärstomater', 'körsbärstomat', 'korsbarstomat',
+    },
+    'småtomat': {
+        # Fresh small tomatoes may substitute each other, but preserved/in-juice
+        # cherry tomatoes are a different product form.
+        'solt', 'soltorkad', 'soltorkade',
+        'secchi',
+        'torkad', 'torkade',
+        'tomatjuice', 'juice',
+        'konserverade', 'konserverad', 'konserv',
     },
     'kalkonbröst': {
         # Charcuterie turkey breast ≠ raw turkey breast
@@ -212,7 +214,7 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         # "Tonfisk i Solrosolja" should NOT match "tonfisk, tunt skivad" (= fresh)
         # but SHOULD match "1 burk tonfisk" or "tonfisk i olja"
         'solrosolja', 'olja', 'vatten',  # product indicators (canned)
-        'burk', 'konserv',  # ingredient indicators (recipe says canned)
+        'burk', 'konserv', 'förp', 'forp', 'förpackning', 'forpackning',  # ingredient indicators (recipe says canned)
     },
     'sojabönor': {
         # "sojabönor konserv" should not fall through to frozen soybeans.
@@ -229,17 +231,20 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         # Smoked/cured salmon ≠ fresh salmon
         # "Kallrökt Laxfilé" should NOT match "300 g laxfilé utan skinn" (= fresh)
         # but SHOULD match "100 g Lax Kallrökt" (recipe wants smoked)
-        'rökt', 'gravad',
+        'rökt', 'gravad', 'rimmad', 'rimmat',
         'burgare',  # salmon burgers ≠ fresh salmon / fillet
+        'grytbitar', 'grytbit',  # stew pieces ≠ skin-on fillet/side
     },
     'laxfilé': {
-        'rökt', 'gravad',
+        'rökt', 'gravad', 'rimmad', 'rimmat',
         'sushi', 'nigiri',
         'burgare',  # salmon burgers ≠ raw fillet
+        'grytbitar', 'grytbit',
     },
     'laxfile': {
-        'rökt', 'gravad',
+        'rökt', 'gravad', 'rimmad', 'rimmat',
         'burgare',
+        'grytbitar', 'grytbit',
     },
     # Breaded/crispy fish ≠ fresh fish
     # "Sej Panerad" / "Kummel Sprödbakad" should NOT match "600 g fisk"
@@ -266,12 +271,6 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
     'mjolk': {
         'kondenserad', 'kondenserat', 'kondenserade',
         'karamelliserad', 'karamelliserat', 'karamelliserade',
-    },
-    'spiskummin': {
-        # Whole (hel) vs ground (malen) cumin are different forms
-        # "Spiskummin Malen Burk" should NOT match "1,5 msk hel spiskummin"
-        'malen', 'mald', 'malna', 'malet',
-        'hel', 'hela',
     },
     'apelsinjuice': {
         # Recipe wants juice, not whole fruit or blended juice
@@ -411,7 +410,6 @@ STRICT_PROCESSED_RULES: FrozenSet[str] = frozenset({
     'paprika',     # "Rökt Paprika" should only match "rökt paprikapulver", not plain
     # NOTE: kummin REMOVED — whole/ground kummin are interchangeable for cooking.
     # Strict mode blocked ALL kummin matches when recipe just says "1 tsk kummin".
-    'spiskummin',  # "Spiskummin Malen" ≠ "hel spiskummin" (different forms)
     'chili',       # "Sweet Chili Sauce" ≠ "chiliflakes" — strict to prevent cross-indicator bleed
     'saffran',     # "Basmati Saffran" has indicator 'basmati' — must match exactly, not via 'ris' substring
     'ingefära',    # "Ingefära Pressad" ≠ "malen ingefära" — pressed/ground/dried not interchangeable
@@ -602,7 +600,7 @@ _SPICE_VS_FRESH_RULES_RAW: Dict[str, Dict[str, Set[str]]] = {
         # Check A: block ground spice unless recipe asks for spice
         'allowed_indicators': {
             'malen', 'mald', 'malda', 'malna',   # ground → unlocks Malen Burk
-            'tsk', 'tesked', 'krm',                # measurement → likely spice
+            'tsk', 'tesked', 'krm', 'msk', 'matsked',  # measurement → likely spice
             'torkad', 'torkade',                    # dried → unlocks dried products
         },
         'blocked_product_words': {
@@ -619,7 +617,7 @@ _SPICE_VS_FRESH_RULES_RAW: Dict[str, Dict[str, Set[str]]] = {
         'dried_indicators': {
             'torkad', 'torkade',                    # "torkad koriander"
             'malen', 'mald', 'malda', 'malna',     # "malen koriander"
-            'tsk', 'tesked', 'krm',                 # spice measurement
+            'tsk', 'tesked', 'krm',                    # spice measurement
             'frö', 'korianderfrö', 'fro',           # seeds
             'korianderfrön', 'korianderfron',        # "stötta korianderfrön" — INGREDIENT_PARENTS maps to 'koriander'
         },
@@ -668,31 +666,8 @@ _SPICE_VS_FRESH_RULES_RAW: Dict[str, Dict[str, Set[str]]] = {
         'ground_indicators': {'malen', 'mald', 'malna', 'malet'},
         'blocked_whole_product_words': {'karnor', 'hel', 'hela'},
     },
-    'svartpeppar': {
-        # "svartpepparkorn" = whole peppercorns → block ground pepper products
-        # "malen/nymalen svartpeppar" = ground → block whole peppercorn products
-        'spice_indicators': {'korn', 'hel', 'hela'},
-        'blocked_product_words': {
-            'malen', 'grovmalen',  # ground pepper products
-        },
-        'ground_indicators': {'malen', 'mald', 'malna', 'malet', 'nymalen'},
-        'blocked_whole_product_words': {'hel', 'hela'},
-    },
-    'spiskummin': {
-        # "hel spiskummin" = whole cumin seeds → block ground products
-        # "Spiskummin 33g" without "hel" = ground by default.
-        # spice_indicators mode: if ingredient has 'hel' → block products with 'burk'/'malen'
-        'spice_indicators': {'hel', 'hela'},
-        'blocked_product_words': {
-            'burk',   # "Spiskummin Burk" — ground (no "hel" qualifier)
-            'malen',  # "Spiskummin Malen" — explicitly ground
-            'malna',
-            'mald',
-        },
-        # When recipe says "hel", REQUIRE product to also say "hel"/"hela".
-        # "Spiskummin 33g Santa Maria" (no qualifier) = malen by default → blocked.
-        'required_whole_product_words': {'hel', 'hela'},
-    },
+    # Spiskummin is intentionally broad by project policy: whole and ground are
+    # acceptable grocery substitutes for ordinary recipe lines.
     'lime': {
         # "Torkad Lime Påse" = dried lime spice, "Lime Blad" = kaffir lime leaves
         # Should NOT match recipe wanting fresh lime ("2 limefrukter")
@@ -726,6 +701,7 @@ _SPICE_VS_FRESH_RULES_RAW: Dict[str, Dict[str, Set[str]]] = {
             'pressad',  # "Vitlök Pressad" — pressed garlic paste, not fresh cloves
             'krossad', 'krossade',  # "Vitlök Krossad 210g" — jarred crushed garlic, not fresh cloves
             'finhackad', # "Vitlök Finhackad Burk" — jarred minced garlic
+            'hackad', 'hackade',  # "Vitlök Hackad Fryst" — prepared pieces, not a whole bulb/clove
             'marinerad', 'marinerade',  # "Vitlöksklyftor Marinerade" — preserved, not fresh
             'chili',    # "Vitlöksklyftor Chili" — marinated with chili, not fresh
         },

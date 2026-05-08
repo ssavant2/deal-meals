@@ -119,10 +119,7 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                     location_type = config_context.location_type
 
                     if credentials.get('postal_code'):
-                        logger.debug(
-                            f"Using delivery address for e-handel: {credentials.get('delivery_street')}, "
-                            f"{credentials['postal_code']} {credentials.get('delivery_city')}"
-                        )
+                        logger.debug("Using configured delivery address for e-handel")
 
                     # Use stored duration for current location_type, otherwise plugin default
                     if location_type == 'butik':

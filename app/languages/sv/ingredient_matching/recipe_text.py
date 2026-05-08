@@ -34,6 +34,12 @@ _FRESH_PASTA_PAREN_RE = re.compile(
     r')\s*\(\s*färsk\s*\)',
     re.IGNORECASE,
 )
+_SPICE_MIX_HINT_PAREN_RE = re.compile(
+    r'\(([^)]*(?:gärna|garna|helst)[^)]*'
+    r'(?:spice|spices|kryddmix|krydda|korean|koreansk|bulgogi|asian|asiatisk|tikka|garam|tandoori|taco)'
+    r'[^)]*)\)',
+    re.IGNORECASE,
+)
 _SHISO_HERB_ALT_PAREN_RE = re.compile(
     r'\bshisoblad\s*\(([^)]*?\beller\b[^)]*)\)',
     re.IGNORECASE,
@@ -43,7 +49,7 @@ _GROUPED_HERB_LEAF_PAREN_RE = re.compile(
     re.IGNORECASE,
 )
 _BIFF_PORTION_PREP_RE = re.compile(
-    r',\s*delad(?:e|t)?\s+i\s+\d+\s+biffar?\b.*$',
+    r'(?:^|,)\s*delad(?:e|t)?\s+i\s+\d+\s+biffar?\b.*$',
     re.IGNORECASE,
 )
 _SUBRECIPE_REFERENCE_RE = re.compile(
@@ -61,6 +67,10 @@ _EXAMPLE_SIGNAL_RE = re.compile(r'(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s+(
 _EXAMPLE_BASE_RE = re.compile(r'(.+?)\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s', re.IGNORECASE)
 _PAREN_EXAMPLE_RE = re.compile(
     r'^(.*?)\(\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s+([^)]*)\)\s*$',
+    re.IGNORECASE,
+)
+_SINGLE_PRODUCT_EXAMPLE_PAREN_RE = re.compile(
+    r'\(\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s+(bostongurka|bostongurkor)\s*\)',
     re.IGNORECASE,
 )
 _MEASURE_PREFIX_ALT_RE = re.compile(
@@ -85,6 +95,11 @@ _TRUNCATED_ELLER_SUFFIXES = tuple(sorted((
 ), key=len, reverse=True))
 _TRUNCATED_ELLER_COMPOUND_RE = re.compile(
     rf'\b([a-zåäöé]+)-\s+eller\s+([a-zåäöé]+?)({"|".join(re.escape(s) for s in _TRUNCATED_ELLER_SUFFIXES)})\b',
+    re.IGNORECASE,
+)
+_CHOCOLATE_COLOR_WORD = r'(?:vit|mörk|mork|ljus)'
+_TRUNCATED_CHOCOLATE_COLOR_OCH_RE = re.compile(
+    rf'\b({_CHOCOLATE_COLOR_WORD})-\s+(?:och|&)\s+({_CHOCOLATE_COLOR_WORD})\s+choklad\b',
     re.IGNORECASE,
 )
 _MINCE_OF_ALT_RE = re.compile(
@@ -125,11 +140,23 @@ _MINCE_ANIMAL_TO_COMPOUND = {
 _HERB_WORDS = (
     'timjan', 'rosmarin', 'persilja', 'dill', 'koriander',
     'gräslök', 'graslok', 'basilika', 'oregano', 'dragon', 'mynta',
+    'rucola', 'ruccola',
 )
 _SHORT_LEAF_ALTS = frozenset({
     'vit', 'vita', 'röd', 'rod', 'röda', 'roda',
     'grön', 'gron', 'gröna', 'grona', 'spets',
 })
+
+
+def _single_example_item_is_purchasable_alternative(base: str, item: str) -> bool:
+    """Allow narrow one-item examples when they name a concrete store family."""
+
+    base_lower = base.lower()
+    item_lower = item.lower()
+    return (
+        'gurka' in base_lower
+        and item_lower in {'bostongurka', 'bostongurkor'}
+    )
 
 def rewrite_buljong_eller_fond(text: str) -> str:
     """Rewrite generic stock alternatives to specific ones in both directions.
@@ -213,6 +240,29 @@ def preserve_fresh_pasta_parenthetical(text: str) -> str:
     return _FRESH_PASTA_PAREN_RE.sub(lambda m: f"{m.group(1)} färsk", text)
 
 
+def preserve_spice_mix_preference_parentheticals(text: str) -> str:
+    """Keep explicit spice-mix product/variant hints from preference parens.
+
+    Example:
+    - "kryddmix (gärna Asian Spices Korean BBQ Bulgogi)"
+      -> "kryddmix gärna Asian Spices Korean BBQ Bulgogi"
+    """
+
+    lowered = text.lower()
+    if not any(cue in lowered for cue in ('kryddmix', 'krydda', 'spice', 'spices')):
+        return text
+
+    return _SPICE_MIX_HINT_PAREN_RE.sub(lambda m: f" {m.group(1).strip()} ", text)
+
+
+def preserve_single_product_example_parentheticals(text: str) -> str:
+    """Keep narrow one-item product examples before generic paren stripping."""
+
+    if 'bostongurk' not in text.lower():
+        return text
+    return _SINGLE_PRODUCT_EXAMPLE_PAREN_RE.sub(lambda m: f" {m.group(1).strip()} ", text)
+
+
 def preserve_parenthetical_shiso_alternatives(text: str) -> str:
     """Lift stated herb fallbacks out of shiso parentheticals.
 
@@ -277,7 +327,7 @@ def strip_biff_portion_prep_phrase(text: str) -> str:
     Example:
     - "800 g högrev, delad i 4 biffar" -> "800 g högrev"
 
-    Keep this narrow to the explicit ", delad i X biffar" wording so real
+    Keep this narrow to the explicit "delad i X biffar" wording so real
     steak/biff ingredients continue to match as before.
     """
 
@@ -306,6 +356,14 @@ def rewrite_truncated_eller_compounds(text: str) -> str:
     """
     return _TRUNCATED_ELLER_COMPOUND_RE.sub(
         lambda m: f"{m.group(1)}{m.group(3)} eller {m.group(2)}{m.group(3)}",
+        text,
+    )
+
+
+def rewrite_truncated_chocolate_color_lists(text: str) -> str:
+    """Expand shorthand like "vit- och mörk choklad" into both chocolate families."""
+    return _TRUNCATED_CHOCOLATE_COLOR_OCH_RE.sub(
+        lambda m: f"{m.group(1)} choklad och {m.group(2)} choklad",
         text,
     )
 
@@ -384,14 +442,19 @@ def expand_grouped_ingredient_text(ingredient_text: str) -> List[str]:
         'örter' in lowered or 'orter' in lowered
         or 'örtblad' in lowered or 'ortblad' in lowered
     ):
-        found = []
+        found_with_pos = []
         for herb in _HERB_WORDS:
             pattern = r'\b' + re.escape(herb) + r'\b'
-            if re.search(pattern, lowered):
-                if herb not in found:
-                    found.append(herb)
+            match = re.search(pattern, lowered)
+            if match:
+                if herb not in [item[1] for item in found_with_pos]:
+                    found_with_pos.append((match.start(), herb))
+        found = [herb for _, herb in sorted(found_with_pos)]
         if len(found) >= 2:
-            wants_fresh = any(word in lowered for word in ('färsk', 'farsk', 'färska', 'farska'))
+            wants_fresh = (
+                any(word in lowered for word in ('färsk', 'farsk', 'färska', 'farska'))
+                or any(herb in found for herb in ('rucola', 'ruccola'))
+            )
             expanded = []
             for herb in found:
                 herb_text = herb.replace('graslok', 'gräslök')
@@ -437,7 +500,9 @@ def parse_eller_alternatives(ingredient_text: str) -> List[str]:
         base = paren_example_match.group(1).strip().rstrip(',').strip()
         items = re.split(r'\s*,\s*|\s+och\s+', paren_example_match.group(2))
         items = [item.strip().rstrip('.').strip('()') for item in items if item.strip()]
-        if len(items) >= 2:
+        if len(items) >= 2 or (
+            len(items) == 1 and base and _single_example_item_is_purchasable_alternative(base, items[0])
+        ):
             alternatives = []
             if base:
                 alternatives.append(base)
@@ -451,14 +516,15 @@ def parse_eller_alternatives(ingredient_text: str) -> List[str]:
         # Split on comma and "och"/"and"
         items = re.split(r'\s*,\s*|\s+och\s+', examples_part)
         items = [item.strip().rstrip('.').strip('()') for item in items if item.strip()]
-        if len(items) >= 2:
+        base_match = _EXAMPLE_BASE_RE.match(text_outside_parens)
+        base = base_match.group(1).strip().rstrip(',').strip().rstrip('(').strip() if base_match else ''
+        if len(items) >= 2 or (
+            len(items) == 1 and base and _single_example_item_is_purchasable_alternative(base, items[0])
+        ):
             # Include the base ingredient (part before signal word) + all examples
-            base_match = _EXAMPLE_BASE_RE.match(text_outside_parens)
             alternatives = []
-            if base_match:
-                base = base_match.group(1).strip().rstrip(',').strip().rstrip('(').strip()
-                if base:
-                    alternatives.append(base)
+            if base:
+                alternatives.append(base)
             alternatives.extend(items)
             return alternatives
 

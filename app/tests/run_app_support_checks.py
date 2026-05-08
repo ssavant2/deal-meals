@@ -16,14 +16,16 @@ CHECKS = [
     "run_sanity_checks.py",
     "run_frontend_smoke.py",
     "run_cache_doctor_checks.py",
+    "run_cache_reconciliation_checks.py",
     "run_recipe_cache_refresh_decision_checks.py",
+    "run_offer_cache_refresh_decision_checks.py",
     "run_recipe_delta_patch_checks.py",
     "run_pantry_search_index_checks.py",
     "run_candidate_term_detail_checks.py",
+    "run_candidate_refresh_guard_checks.py",
     "run_recipe_ingredient_term_map_checks.py",
     "run_recipe_url_discovery_checks.py",
-    "run_shadow_candidate_selection_checks.py",
-    "run_ingredient_routing_probation_checks.py",
+    "run_ingredient_routing_mode_checks.py",
     "run_delta_ingredient_routing_policy_checks.py",
 ]
 

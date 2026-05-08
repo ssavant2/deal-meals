@@ -34,6 +34,7 @@ app/
 │   │   ├── spell_check.py     # Spell-check exclusions and inflection data
 │   │   ├── store_units.py     # Store unit aliases/default unit
 │   │   ├── ingredient_matching_audit.py   # Audit tooling (not part of runtime)
+│   │   ├── matcher_contracts/ # Read-only matcher regression contracts
 │   │   └── ingredient_matching/
 │   │       ├── engine.py               # Pipeline orchestrator + MATCHER_VERSION
 │   │       ├── matching.py             # matches_ingredient() / matches_ingredient_fast()
@@ -95,6 +96,7 @@ This is useful as a smoke-test path, not as a production-ready UK matcher.
 | File | Purpose | Effort |
 |------|---------|--------|
 | `ingredient_matching/` | The big one: keyword extraction, matching rules, all constants | **High** |
+| `matcher_contracts/` | Read-only matcher regression cases and rule/source inventory | Medium |
 | `recipe_filters.py` | Boring recipe patterns, junk food keywords, kitchen tools | Low |
 | `recipe_matcher_backend.py` | Adapter that imports the country-specific matching functions | Medium |
 
@@ -163,6 +165,19 @@ The Swedish implementation is heavily commented — use it as reference when bui
 a new language package. Start with `ingredient_data.py` (the `INGREDIENTS` dict) and
 `engine.py` to understand the pipeline entry point.
 
+### `matcher_contracts/`
+This directory contains the permanent matcher regression contract for a language:
+
+- `matcher_regression_cases.json` — accepted positive and relevant negative
+  recipe/offer cases.
+- `matcher_rule_inventory.json` — rule/source ownership, fixture refs, line refs,
+  risk classification, and migration status.
+
+These files are read-only inputs in production-style environments. Runtime code
+does not update them. For Swedish, the maintenance/check scripts read them from
+`app/languages/sv/matcher_contracts/`; future production languages should keep
+the same shape under their own `app/languages/<code>/matcher_contracts/`.
+
 ### `category_utils.py`
 - `guess_category()` — product name → category string
 - Brand detection, meat keyword lists, lactose-free detection
@@ -182,7 +197,10 @@ a new language package. Start with `ingredient_data.py` (the `INGREDIENTS` dict)
    - Start with the constants (keyword lists, regex components)
    - Then the `INGREDIENTS` dict (largest single piece)
    - Then the matching functions
-9. **Set recipe full-text search config** — set `RECIPE_FTS_CONFIG` in `.env`
+9. **Create `matcher_contracts/`** — add a small, permanent regression corpus:
+   positive cases, relevant negative sibling cases, and rule/source inventory
+   refs for the rules you are shipping.
+10. **Set recipe full-text search config** — set `RECIPE_FTS_CONFIG` in `.env`
    to the PostgreSQL text search config used by your recipe language
    (`swedish`, `english`, etc.) and keep `recipe_matcher_backend.RECIPE_FTS_CONFIG`
    aligned with it.
@@ -197,6 +215,9 @@ loads. A real country backend should pass this checklist first:
 - `app/languages/<code>/ingredient_matching/` contains real extraction,
   ingredient data, blocker, synonym, and validation rules for the local recipe
   and product language.
+- `app/languages/<code>/matcher_contracts/` contains the permanent regression
+  cases and inventory for the rules you are enabling. Local diagnostics and
+  batch-review notes are not enough by themselves.
 - `MATCHER_LANGUAGE` and `RECIPE_FTS_CONFIG` are set together. For example, a
   UK backend would normally pair `MATCHER_LANGUAGE=en_gb` with PostgreSQL's
   `english` full-text search config.
@@ -204,8 +225,8 @@ loads. A real country backend should pass this checklist first:
   before relying on recipe search or cache rebuild results.
 - Rebuild compiled recipe/offer data and the cache after switching language or
   matcher rules.
-- Run a language smoke test, a cache rebuild, and a matching preview before
-  exposing the country to users.
+- Run a language smoke test, matcher contract checks, a cache rebuild, and a
+  matching preview before exposing the country to users.
 
 Unknown or incomplete languages should fail softly: the runtime can load a
 scaffold or fall back to the Swedish default, but that only proves the app does
@@ -254,6 +275,9 @@ the selected profile rather than being Swedish-only.
 - The Swedish `ingredient_matching/` package is heavily commented — use it as reference
 - Start small: get basic matching working with 50-100 ingredients, then expand
 - The `INGREDIENTS` dict is the most important piece — start there
+- Keep accepted matcher semantics in `app/languages/<code>/matcher_contracts/`;
+  local `app/tests/test_*.py` files are useful workbenches, not the durable
+  regression contract.
 - From the project root, run `docker compose exec -T web python tests/dev_reload.py` after changes to verify the cache builds correctly
 - Run `docker compose exec -T -w /app web python tests/run_sanity_checks.py` for the tracked app-support sanity checks
 - Keep broader local sanity/regression scripts private unless they become small deterministic `run_*_checks.py` support checks
