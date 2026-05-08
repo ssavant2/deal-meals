@@ -78,9 +78,25 @@ is naturally much lower.
 ## FIKA Engine and Cache Warm-Up
 
 Recipe suggestions are powered by **FIKA** - the Fast Inverted Keyword
-Architecture. In less caffeinated information-retrieval terms, it uses compiled
-recipe and offer data, inverted keyword indexes for candidate retrieval, and a
-final validation/scoring pass before recipes are shown.
+Architecture. It is the matching and cache engine that turns scraped Swedish
+recipes and weekly store offers into ranked meal suggestions.
+
+In less caffeinated information-retrieval terms, FIKA does a few things before a
+recipe ever reaches the home page:
+
+- Compiles recipes and offers into normalized matcher payloads instead of
+  repeatedly parsing raw scraped text.
+- Builds term indexes for recipe and offer wording, so rebuilds can start from
+  plausible recipe-offer candidates instead of comparing everything with
+  everything.
+- Stores versioned candidate rows in PostgreSQL, which lets small recipe or
+  offer changes update the affected cache rows with a delta path.
+- Runs the real ingredient/product matcher as the final gate, then scores the
+  surviving matches by savings, coverage and usefulness.
+
+The result is deliberately practical: the broad term-index stage is allowed to
+be generous, but the final matcher is still responsible for rejecting misleading
+ingredient matches before suggestions are shown.
 
 There are two warm-up levels:
 
