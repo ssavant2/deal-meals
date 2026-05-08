@@ -1189,6 +1189,14 @@ async function loadRecipeSuggestions() {
     await loadMoreSuggestions(true);
 }
 
+function removeCacheErrorBanner() {
+    document.querySelectorAll('.cache-error-alert, .alert-warning').forEach(el => {
+        if (el.classList.contains('cache-error-alert') || el.textContent.includes(i18n['home.cache_error_title'])) {
+            el.remove();
+        }
+    });
+}
+
 /// Refresh visible suggestions, rebuilding the server cache only if settings require it.
 async function refreshRecipeSuggestions() {
     // Clear client-side state so the next request starts from the first page
@@ -1260,6 +1268,7 @@ async function loadMoreSuggestions(isInitialLoad = false) {
     const loadMoreBtn = document.getElementById('load-more-suggestions-btn');
 
     if (isInitialLoad) {
+        removeCacheErrorBanner();
         loading.style.display = 'block';
         empty.style.display = 'none';
         results.style.display = 'none';
@@ -1280,8 +1289,9 @@ async function loadMoreSuggestions(isInitialLoad = false) {
                     const freshness = cacheStatus.cache_freshness || {};
                     if (cacheStatus.status === 'error' && freshness.servable !== true) {
                         loading.style.display = 'none';
+                        removeCacheErrorBanner();
                         const warnDiv = document.createElement('div');
-                        warnDiv.className = 'alert alert-warning fade show mx-3 mt-2';
+                        warnDiv.className = 'alert alert-warning cache-error-alert fade show mx-3 mt-2';
                         warnDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> <strong>${i18n['home.cache_error_title']}:</strong> ${i18n['home.cache_error_text']}`;
                         const container = document.getElementById('suggestions-results')?.parentNode;
                         if (container) container.insertBefore(warnDiv, container.firstChild);
@@ -1304,6 +1314,7 @@ async function loadMoreSuggestions(isInitialLoad = false) {
         loading.style.display = 'none';
 
         if (data.success && data.recipes && data.recipes.length > 0) {
+            removeCacheErrorBanner();
             // Check if server cache was rebuilt (different generation than what we have stored)
             const storedGeneration = sessionStorage.getItem('cacheGeneration');
             const serverGeneration = data.cache_generation;
@@ -2235,10 +2246,7 @@ async function handleCacheEvent(event) {
     // won't show a duplicate "scrape complete" popup
     localStorage.removeItem('deal_meals_active_scrapes');
 
-    // Remove cache error banner if present (cache just recovered)
-    document.querySelectorAll('.alert-warning').forEach(el => {
-        if (el.textContent.includes(i18n['home.cache_error_title'])) el.remove();
-    });
+    removeCacheErrorBanner();
 
     // Soft refresh: update data without losing user state
     sessionStorage.removeItem('recipeSuggestions');

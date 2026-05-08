@@ -21,10 +21,12 @@ function fetchedProductsText(data, displayName) {
     if (data.message_key === 'ws.fetch_empty_success') {
         return t(data.message_key, { ...(data.message_params || {}), store: displayName });
     }
-    if (data.base !== undefined && data.variants !== undefined && data.variants > 0) {
-        return t('fetched_products_with_variants', { base: data.base, variants: data.variants, store: displayName });
-    }
-    return t('fetched_products', { count: data.count, store: displayName });
+    const totalCount = data.count ?? (
+        data.base !== undefined && data.variants !== undefined
+            ? Number(data.base || 0) + Number(data.variants || 0)
+            : undefined
+    );
+    return t('fetched_products', { count: totalCount, store: displayName });
 }
 
 // Format store name for display (ICA stays uppercase, others get capitalized)

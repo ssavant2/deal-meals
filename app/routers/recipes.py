@@ -802,6 +802,7 @@ async def reset_recipe_cache(request: Request):
 
         freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=False)
         if freshness_status.get("state") == "fresh" and not freshness_status.get("rebuild_recommended"):
+            logger.info("Cache refresh not needed (cache_fresh)")
             return JSONResponse({
                 "success": True,
                 "skipped": True,

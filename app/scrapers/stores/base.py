@@ -255,6 +255,50 @@ class StorePlugin(ABC):
     """
 
     LOCATION_SEARCH_CACHE_TTL_SECONDS = 1800
+
+    def set_progress_callback(
+        self,
+        callback: Callable[[Dict[str, Any]], Awaitable[None]] | None,
+    ) -> None:
+        """Attach an optional async callback for scrape progress updates."""
+        self._progress_callback = callback
+
+    async def _report_progress(
+        self,
+        *,
+        progress: int | None = None,
+        message_key: str | None = None,
+        message_params: Optional[Dict[str, Any]] = None,
+        message: str | None = None,
+        est_time: int | None = None,
+    ) -> None:
+        callback = getattr(self, "_progress_callback", None)
+        if not callback:
+            return
+
+        payload: Dict[str, Any] = {}
+        if progress is not None:
+            payload["progress"] = progress
+        if message_key:
+            payload["message_key"] = message_key
+        if message_params is not None:
+            payload["message_params"] = message_params
+        if message:
+            payload["message"] = message
+        if est_time is not None:
+            payload["est_time"] = est_time
+
+        await callback(payload)
+
+    @staticmethod
+    def _format_progress_eta(seconds: float | None) -> str:
+        if seconds is None or seconds < 0:
+            return "n/a"
+        seconds = int(round(seconds))
+        if seconds < 60:
+            return f"{seconds} s"
+        minutes = max(1, int(round(seconds / 60)))
+        return f"{minutes} min"
     
     @property
     @abstractmethod

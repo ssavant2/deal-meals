@@ -672,6 +672,11 @@ def build_offer_refresh_metrics(
 
 def _cache_profile_mismatch_reason(snapshot: OfferCacheStatusSnapshot) -> str | None:
     operation = snapshot.last_operation or {}
+    expected_candidate_data_source = (
+        settings.cache_rebuild_candidate_data_source or "term_index"
+    ).strip().lower()
+    if expected_candidate_data_source not in {"term_index", "db_candidates"}:
+        expected_candidate_data_source = "term_index"
     expected = {
         "matcher_version": MATCHER_VERSION,
         "recipe_compiler_version": RECIPE_COMPILER_VERSION,
@@ -682,7 +687,7 @@ def _cache_profile_mismatch_reason(snapshot: OfferCacheStatusSnapshot) -> str | 
         if actual_value != expected_value:
             return "cache_profile_mismatch"
 
-    if operation.get("candidate_data_source") not in (None, "term_index"):
+    if operation.get("candidate_data_source") not in (None, expected_candidate_data_source):
         return "cache_profile_mismatch"
     if operation.get("recipe_data_source") not in (None, "compiled_payload"):
         return "cache_profile_mismatch"

@@ -66,18 +66,13 @@ def get_offer_status():
 
             stores = []
             for row in result:
-                config = row.store_config or {}
-                display_count = row.offer_count or 0
-                if row.location_type == "butik":
-                    display_count = config.get("last_display_count_butik", display_count)
-                elif row.location_type == "ehandel":
-                    display_count = config.get("last_display_count_ehandel", display_count)
+                offer_count = row.offer_count or 0
                 stores.append({
                     "store_name": row.store_name,
                     "location_type": row.location_type or "okänd",
                     "location_name": row.location_name,
-                    "offer_count": display_count,
-                    "actual_offer_count": row.offer_count or 0,
+                    "offer_count": offer_count,
+                    "actual_offer_count": offer_count,
                     "last_scraped_at": row.last_scraped_at.isoformat() if row.last_scraped_at else None
                 })
 

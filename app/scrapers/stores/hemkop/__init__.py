@@ -125,6 +125,11 @@ class HemkopStore(StorePlugin):
 
             products = await self._scrape_online_campaigns(store_id)
 
+        await self._report_progress(
+            progress=65,
+            message_key="ws.fetched_products",
+            message_params={"count": len(products)},
+        )
         logger.success(f"Scraped {len(products)} products from Hemköp ({location_type})")
         return self._scrape_result_from_products(
             products,
@@ -473,8 +478,15 @@ class HemkopStore(StorePlugin):
                 logger.error(f"Online API 'results' is not a list: {type(results)}")
                 return []
             total = data.get('pagination', {}).get('totalNumberOfResults', len(results))
+            page_size = max(1, int(params.get('size') or len(results) or 1))
+            total_pages = max(1, min(50, (int(total) + page_size - 1) // page_size))
 
             logger.info(f"Found {len(results)} online campaign products (total: {total})")
+            await self._report_progress(
+                progress=20,
+                message_key="ws.fetching_product_progress",
+                message_params={"done": 1, "total": total_pages, "count": len(results)},
+            )
 
             # Paginate if there are more results
             if total > len(results):
@@ -503,6 +515,16 @@ class HemkopStore(StorePlugin):
                         if not isinstance(page_results, list) or not page_results:
                             break
                         results.extend(page_results)
+                        done_pages = min(page + 1, total_pages)
+                        await self._report_progress(
+                            progress=min(60, 20 + int((done_pages / total_pages) * 40)),
+                            message_key="ws.fetching_product_progress",
+                            message_params={
+                                "done": done_pages,
+                                "total": total_pages,
+                                "count": len(results),
+                            },
+                        )
                         page += 1
 
                 logger.info(f"Total after pagination: {len(results)} products")

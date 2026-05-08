@@ -20,6 +20,7 @@ from languages.matcher_runtime import (  # noqa: E402
     RECIPE_COMPILER_VERSION,
     plan_offer_delta_recipe_impacts,
 )
+from config import settings  # noqa: E402
 from offer_cache_refresh_decision import (  # noqa: E402
     OfferCacheStatusSnapshot,
     OfferRefreshMetrics,
@@ -56,7 +57,7 @@ def snapshot(**overrides):
             "offer_compiler_version": OFFER_COMPILER_VERSION,
             "offer_data_source": "compiled",
             "recipe_data_source": "compiled_payload",
-            "candidate_data_source": "term_index",
+            "candidate_data_source": settings.cache_rebuild_candidate_data_source,
         },
         "baseline_column_available": True,
     }

@@ -523,6 +523,11 @@ class ICAStore(StorePlugin):
                     product['category'] = new_cat
                     reclassified += 1
 
+        await self._report_progress(
+            progress=65,
+            message_key="ws.fetched_products",
+            message_params={"count": len(products)},
+        )
         logger.success(f"Scraped {len(products)} products from ICA ({reclassified} reclassified to non-food)")
         return self._scrape_result_from_products(
             products,
@@ -1639,8 +1644,10 @@ class ICAStore(StorePlugin):
                     # post-hydration; API has all ~900 products, DOM dedup collapses to ~224).
                     api_total = len(self._api_product_map)
                     dom_total = len(all_extracted_products)
+                    progress_count = api_total or dom_total
+                    api_grew = api_total > last_total
 
-                    if api_total > last_total:
+                    if api_grew:
                         api_new = api_total - last_total
                         logger.info(f"Scroll {scroll_attempt + 1}: API +{api_new} (total {api_total}), DOM +{new_count} (total {dom_total})")
                         last_total = api_total
@@ -1648,6 +1655,13 @@ class ICAStore(StorePlugin):
                     else:
                         no_new_products_count += 1
                         logger.debug(f"Scroll {scroll_attempt + 1}: no new API products ({no_new_products_count}/5), API={api_total} DOM={dom_total}")
+
+                    if api_grew or scroll_attempt == 0 or scroll_attempt % 5 == 0:
+                        await self._report_progress(
+                            progress=min(60, 10 + int(((scroll_attempt + 1) / max_scroll_attempts) * 50)),
+                            message_key="ws.fetching_product_progress",
+                            message_params={"count": progress_count},
+                        )
 
                     # Check if we've reached the true end of products
                     # Footer detection is only valid if NO skeleton placeholders are visible

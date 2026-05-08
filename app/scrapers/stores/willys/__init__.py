@@ -18,6 +18,7 @@ from languages.sv.normalization import fix_swedish_chars
 from constants_timeouts import HTTP_TIMEOUT, PAGE_LOAD_TIMEOUT, PAGE_NETWORK_IDLE_TIMEOUT
 import httpx
 import re
+import time
 from datetime import datetime, timezone
 from utils.security import ssrf_safe_event_hook
 from pathlib import Path
@@ -250,6 +251,11 @@ class WillysStore(StorePlugin):
                 if not products and getattr(self, "_maintenance_detected", False):
                     return self._maintenance_result("ehandel_playwright")
 
+        await self._report_progress(
+            progress=65,
+            message_key="ws.fetched_products",
+            message_params={"count": len(products)},
+        )
         logger.success(f"Scraped {len(products)} products from Willys ({location_type})")
         return self._scrape_result_from_products(
             products,
@@ -1325,6 +1331,17 @@ class WillysStore(StorePlugin):
     # Polite delay between variant API calls (seconds).
     # Hemköp uses 10s; we use 1.5s since each call is lightweight.
     VARIANT_API_DELAY = 1.5
+    VARIANT_API_PROGRESS_EVERY = 10
+
+    @staticmethod
+    def _format_eta(seconds: Optional[float]) -> str:
+        if seconds is None or seconds < 0:
+            return "n/a"
+        seconds = int(round(seconds))
+        if seconds < 60:
+            return f"{seconds} s"
+        minutes = max(1, int(round(seconds / 60)))
+        return f"{minutes} min"
 
     async def _scrape_ehandel_via_api(
         self,
@@ -1382,11 +1399,16 @@ class WillysStore(StorePlugin):
 
                 base_count = len(products)
                 logger.info(f"Parsed {base_count} base products, {len(promo_variants_to_fetch)} promotions have hidden variants")
+                await self._report_progress(
+                    progress=15,
+                    message_key="ws.fetched_products",
+                    message_params={"count": base_count},
+                )
 
                 # Expand "Visa fler sorter" variants via promotions API
                 if promo_variants_to_fetch:
                     variant_products = await self._fetch_promotion_variants(
-                        client, promo_variants_to_fetch, seen_codes
+                        client, promo_variants_to_fetch, seen_codes, base_count=base_count
                     )
                     products.extend(variant_products)
                     logger.info(f"Expanded {len(variant_products)} variant products from {len(promo_variants_to_fetch)} promotions")
@@ -1400,14 +1422,36 @@ class WillysStore(StorePlugin):
 
         return products
 
-    async def _fetch_promotion_variants(self, client: httpx.AsyncClient, promo_codes: List[str],
-                                        seen_codes: set) -> List[Dict]:
+    async def _fetch_promotion_variants(
+        self,
+        client: httpx.AsyncClient,
+        promo_codes: List[str],
+        seen_codes: set,
+        *,
+        base_count: int = 0,
+    ) -> List[Dict]:
         """Fetch variant products from the promotions API.
 
         For each promotion code, calls /axfood/rest/promotions/{code}/products
         and parses products not already seen in the main campaign results.
         """
         variant_products = []
+        total = len(promo_codes)
+        started_at = time.perf_counter()
+
+        if total:
+            logger.info(f"Fetching hidden Willys variants: {total} promotions")
+            await self._report_progress(
+                progress=20,
+                message_key="ws.fetching_product_variants",
+                message_params={
+                    "base": base_count,
+                    "done": 0,
+                    "total": total,
+                    "variants": 0,
+                    "eta": self._format_eta(total * self.VARIANT_API_DELAY),
+                },
+            )
 
         for i, promo_code in enumerate(promo_codes):
             try:
@@ -1442,6 +1486,28 @@ class WillysStore(StorePlugin):
             # Polite delay between API calls
             if i < len(promo_codes) - 1:
                 await asyncio.sleep(self.VARIANT_API_DELAY)
+
+            done = i + 1
+            if done == 1 or done % self.VARIANT_API_PROGRESS_EVERY == 0 or done == total:
+                elapsed = max(time.perf_counter() - started_at, 0.001)
+                remaining = ((total - done) * elapsed / done) if done else None
+                progress = min(68, 20 + int((done / total) * 45)) if total else 68
+                eta = self._format_eta(remaining)
+                logger.info(
+                    f"Willys hidden variants progress: {done}/{total} promotions, "
+                    f"variants={len(variant_products)}, eta={eta}"
+                )
+                await self._report_progress(
+                    progress=progress,
+                    message_key="ws.fetching_product_variants",
+                    message_params={
+                        "base": base_count,
+                        "done": done,
+                        "total": total,
+                        "variants": len(variant_products),
+                        "eta": eta,
+                    },
+                )
 
         return variant_products
 

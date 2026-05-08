@@ -462,7 +462,7 @@ _CACHE_COPY_COLUMNS = (
     "total_savings, coverage_pct, num_matches, "
     "is_starred, match_data, computed_at"
 )
-_STREAMING_CACHE_TABLE = "tmp_recipe_offer_cache_write"
+_CACHE_TABLE = "recipe_offer_cache"
 OFFICIAL_REBUILD_PROFILE = {
     "mode": "compiled",
     "offer_data_source": "compiled",
@@ -2834,9 +2834,9 @@ class CacheManager:
             # old data is preserved (rollback restores the TRUNCATE).
             # TRUNCATE is faster than DELETE and prevents TOAST bloat
             # from accumulating across weekly rebuilds.
-            cursor.execute("TRUNCATE recipe_offer_cache")
+            cursor.execute(f"TRUNCATE {_CACHE_TABLE}")
 
-            self._copy_cache_entries(cursor, entries, table_name="recipe_offer_cache", now=now)
+            self._copy_cache_entries(cursor, entries, table_name=_CACHE_TABLE, now=now)
 
             # Commit everything at once — DELETE + all COPYs
             raw_conn.commit()
@@ -2879,16 +2879,16 @@ class CacheManager:
             del buf, batch
 
     def _begin_streaming_cache_write(self):
-        """Open a temp-table cache writer so Python can release match batches."""
+        """Open a transactional cache writer so Python can release match batches."""
         from datetime import datetime, timezone
 
         raw_conn = engine.raw_connection()
         cursor = raw_conn.cursor()
         try:
-            cursor.execute(
-                f"CREATE TEMP TABLE {_STREAMING_CACHE_TABLE} "
-                "(LIKE recipe_offer_cache INCLUDING DEFAULTS) ON COMMIT DROP"
-            )
+            # TRUNCATE is transactional in PostgreSQL. Readers keep seeing the old
+            # committed cache until this writer commits, and rollback restores it
+            # if a later COPY batch fails.
+            cursor.execute(f"TRUNCATE {_CACHE_TABLE}")
             now = datetime.now(timezone.utc).isoformat()
             return raw_conn, cursor, now
         except Exception:
@@ -2897,19 +2897,14 @@ class CacheManager:
             raise
 
     def _append_streaming_cache_entries(self, writer, entries: List[Dict]) -> None:
-        """Append one computed batch to the temp-table cache writer."""
+        """Append one computed batch to the transactional cache writer."""
         _, cursor, now = writer
-        self._copy_cache_entries(cursor, entries, table_name=_STREAMING_CACHE_TABLE, now=now)
+        self._copy_cache_entries(cursor, entries, table_name=_CACHE_TABLE, now=now)
 
     def _finish_streaming_cache_write(self, writer) -> None:
-        """Atomically replace the active cache with streamed temp-table rows."""
-        raw_conn, cursor, _ = writer
+        """Commit all streamed rows at once."""
+        raw_conn, _, _ = writer
         try:
-            cursor.execute("TRUNCATE recipe_offer_cache")
-            cursor.execute(
-                f"INSERT INTO recipe_offer_cache ({_CACHE_COPY_COLUMNS}) "
-                f"SELECT {_CACHE_COPY_COLUMNS} FROM {_STREAMING_CACHE_TABLE}"
-            )
             raw_conn.commit()
         except Exception:
             raw_conn.rollback()
@@ -2918,7 +2913,7 @@ class CacheManager:
             raw_conn.close()
 
     def _abort_streaming_cache_write(self, writer) -> None:
-        """Drop any uncommitted temp-table rows and keep the previous cache."""
+        """Rollback uncommitted streamed rows and keep the previous cache."""
         raw_conn, _, _ = writer
         try:
             raw_conn.rollback()

@@ -419,6 +419,11 @@ class CoopStore(StorePlugin):
                     f"CSS class '{self.BRAND_CSS_CLASS}' may have changed — check coop.se HTML."
                 )
 
+        await self._report_progress(
+            progress=65,
+            message_key="ws.fetched_products",
+            message_params={"count": len(products)},
+        )
         logger.success(f"Scraped {len(products)} products from Coop ({location_type})")
         return self._scrape_result_from_products(
             products,
@@ -543,6 +548,11 @@ class CoopStore(StorePlugin):
                 # Determine total number of pages
                 max_pages = min(await self._get_total_pages(page), 100)  # Safety cap
                 logger.info(f"E-commerce has {max_pages} pages to scrape")
+                await self._report_progress(
+                    progress=10,
+                    message_key="ws.fetching_product_progress",
+                    message_params={"done": 0, "total": max_pages, "count": 0},
+                )
 
                 total_cards = 0
 
@@ -573,6 +583,15 @@ class CoopStore(StorePlugin):
                     total_variants += page_variants
 
                     logger.info(f"Page {page_num}: extracted {len(page_products)} products (total: {len(all_products)})")
+                    await self._report_progress(
+                        progress=min(60, 10 + int((page_num / max_pages) * 50)),
+                        message_key="ws.fetching_product_progress",
+                        message_params={
+                            "done": page_num,
+                            "total": max_pages,
+                            "count": len(all_products),
+                        },
+                    )
 
                 await context.close()
                 await browser.close()
@@ -646,10 +665,24 @@ class CoopStore(StorePlugin):
                     continue
 
             base_count = len(products)
+            variant_total = len(variant_indices)
+            variant_started_at = asyncio.get_event_loop().time()
+
+            if variant_total:
+                await self._report_progress(
+                    message_key="ws.fetching_product_variants",
+                    message_params={
+                        "base": base_count,
+                        "done": 0,
+                        "total": variant_total,
+                        "variants": 0,
+                        "eta": "n/a",
+                    },
+                )
 
             # Phase 2: Process variant modals (re-query articles each time
             # because React re-renders the DOM after modal open/close)
-            for idx in variant_indices:
+            for variant_pos, idx in enumerate(variant_indices, 1):
                 try:
                     # Re-query all articles to get fresh DOM references
                     fresh_articles = await page.query_selector_all('article')
@@ -665,6 +698,19 @@ class CoopStore(StorePlugin):
                         page, variant_btn, article
                     )
                     products.extend(variant_products)
+                    if variant_pos == 1 or variant_pos % 5 == 0 or variant_pos == variant_total:
+                        elapsed = max(asyncio.get_event_loop().time() - variant_started_at, 0.001)
+                        remaining = ((variant_total - variant_pos) * elapsed / variant_pos)
+                        await self._report_progress(
+                            message_key="ws.fetching_product_variants",
+                            message_params={
+                                "base": base_count,
+                                "done": variant_pos,
+                                "total": variant_total,
+                                "variants": len(products) - base_count,
+                                "eta": self._format_progress_eta(remaining),
+                            },
+                        )
 
                 except Exception as e:
                     logger.debug(f"Error extracting e-commerce variant at index {idx}: {e}")

@@ -151,6 +151,33 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                     "max_time": est_time
                 })
 
+                async def report_plugin_progress(payload: dict):
+                    progress = payload.get("progress")
+                    message_key = payload.get("message_key")
+                    message_params = payload.get("message_params") or {}
+                    message = payload.get("message")
+                    existing_progress = (await get_active_scrape(store_id) or {}).get("progress", 0)
+                    progress_value = int(progress) if progress is not None else int(existing_progress or 0)
+                    await update_scrape_status(
+                        progress_value,
+                        message_key or "ws.fetching_products",
+                        message_params,
+                        est_time=payload.get("est_time") or est_time,
+                    )
+                    try:
+                        await websocket.send_json({
+                            "status": "scraping",
+                            "message_key": message_key,
+                            "message_params": message_params,
+                            "message": message,
+                            "progress": progress_value,
+                        })
+                    except Exception:
+                        logger.debug(f"WebSocket closed during scrape progress update for {store_id}")
+
+                if hasattr(store_plugin, "set_progress_callback"):
+                    store_plugin.set_progress_callback(report_plugin_progress)
+
                 # Scrape with plugin (wrapped in task for cancellation support)
                 scrape_task = asyncio.create_task(
                     store_plugin.scrape_offers(credentials)
@@ -171,6 +198,8 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                         pass
                     return False
                 finally:
+                    if hasattr(store_plugin, "set_progress_callback"):
+                        store_plugin.set_progress_callback(None)
                     await delete_scrape_task(store_id)
 
                 scrape_result = normalize_store_scrape_result(
@@ -239,7 +268,12 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                 else:
                     stats = await asyncio.to_thread(save_offers, store_id, products)
 
-                if stats.get('stale_existing_offers') or stats.get('created', 0) <= 0:
+                created_count = int(stats.get('created') or 0)
+                unchanged_count = int(stats.get('unchanged_count') or 0)
+                result_count = created_count or unchanged_count
+                is_unchanged = bool(stats.get('unchanged'))
+
+                if stats.get('stale_existing_offers') or (created_count <= 0 and not is_unchanged):
                     if scrape_result.is_empty_success and stats.get('verified_empty'):
                         pass
                     else:
@@ -263,9 +297,6 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                 # Use max(1, ...) to ensure at least 1 second (very fast scrapes shouldn't be 0)
                 scrape_duration = max(1, int((datetime.now(timezone.utc) - scrape_start_time).total_seconds()))
                 location_type = credentials.get('location_type', 'ehandel')
-                display_count = stats['created']
-                if scrape_meta and scrape_meta.get('variant_count', 0) > 0:
-                    display_count = int(scrape_meta.get('base_count') or display_count)
                 try:
                     with get_db_session() as db:
                         # Get or create db_store_id if not already set
@@ -278,27 +309,16 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
 
                         if db_store_id:
                             # Update scrape duration on stores table
-                            # Uses CASE to avoid f-string column interpolation
                             db.execute(text("""
                                 UPDATE stores SET
                                     last_scrape_duration_butik = CASE WHEN :loc = 'butik' THEN :duration ELSE last_scrape_duration_butik END,
                                     last_scrape_duration_ehandel = CASE WHEN :loc != 'butik' THEN :duration ELSE last_scrape_duration_ehandel END,
-                                    config = jsonb_set(
-                                        COALESCE(config, '{}'::jsonb),
-                                        CASE WHEN :loc = 'butik'
-                                             THEN ARRAY['last_display_count_butik']
-                                             ELSE ARRAY['last_display_count_ehandel']
-                                        END,
-                                        to_jsonb(CAST(:display_count AS int)),
-                                        true
-                                    ),
                                     last_scrape_at = NOW()
                                 WHERE id = :store_id
                             """), {
                                 "store_id": db_store_id,
                                 "duration": scrape_duration,
                                 "loc": location_type,
-                                "display_count": int(display_count),
                             })
                             db.commit()
                             logger.info(f"Saved scrape duration for {store_name} ({location_type}): {scrape_duration}s (store_id={db_store_id})")
@@ -312,31 +332,29 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                 else:
                     location_display = credentials.get('location_name') or 'Butik'
 
-                # Notify SSE subscribers (home page) that cache was rebuilt
-                from state import event_bus
-                event_bus.publish({
-                    "type": "cache_rebuilt",
-                    "source": location_display,
-                    "count": stats['created'],
-                })
+                # Notify SSE subscribers only when active offer/cache state changed.
+                if not is_unchanged:
+                    from state import event_bus
+                    event_bus.publish({
+                        "type": "cache_rebuilt",
+                        "source": location_display,
+                        "count": result_count,
+                    })
 
                 # Try to send completion via WebSocket
                 if scrape_result.is_empty_success:
                     complete_key = "ws.fetch_empty_success"
                     complete_params = {"store": store_name}
-                elif scrape_meta and scrape_meta.get('variant_count', 0) > 0:
-                    complete_key = "ws.fetch_complete_with_variants"
-                    complete_params = {"base": scrape_meta['base_count'], "variants": scrape_meta['variant_count']}
                 else:
                     complete_key = "ws.fetch_complete"
-                    complete_params = {"count": stats['created']}
+                    complete_params = {"count": result_count}
                 try:
                     completion_msg = {
                         "status": "complete",
                         "message_key": complete_key,
                         "message_params": complete_params,
                         "progress": 100,
-                        "count": stats['created'],
+                        "count": result_count,
                         "location_name": location_display
                     }
                     if scrape_meta and scrape_meta.get('variant_count', 0) > 0:
@@ -348,14 +366,14 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                 except Exception as _ws_err:
                     # WebSocket closed (user switched tabs/changed theme)
                     # Keep completed state for polling clients
-                    logger.info(f"WebSocket closed for {store_id}, saving completed state for polling (count={stats['created']})")
+                    logger.info(f"WebSocket closed for {store_id}, saving completed state for polling (count={result_count})")
                     polling_state = {
                         "active": False,
                         "completed": True,
                         "progress": 100,
                         "message_key": complete_key,
                         "message_params": complete_params,
-                        "count": stats['created'],
+                        "count": result_count,
                         "location_name": location_display,
                         "completed_at": datetime.now(timezone.utc)
                     }

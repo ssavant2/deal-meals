@@ -89,6 +89,11 @@ class MathemStore(StorePlugin):
 
         products = await self._scrape_discounts_playwright()
 
+        await self._report_progress(
+            progress=65,
+            message_key="ws.fetched_products",
+            message_params={"count": len(products)},
+        )
         logger.success(f"Scraped {len(products)} products from Mathem")
         return self._scrape_result_from_products(
             products,
@@ -141,6 +146,11 @@ class MathemStore(StorePlugin):
 
                         if i % 5 == 0:
                             logger.debug(f"  Scroll {i}: {count} products loaded")
+                            await self._report_progress(
+                                progress=min(45, 10 + i),
+                                message_key="ws.fetching_product_progress",
+                                message_params={"count": count},
+                            )
 
                     total_tiles = await page.locator('[data-testid="product-tile"]').count()
                     logger.info(f"Found {total_tiles} product tiles on page")
@@ -148,6 +158,11 @@ class MathemStore(StorePlugin):
                     # Extract product data from DOM
                     raw_products = await self._extract_products_from_dom(page)
                     logger.info(f"Extracted {len(raw_products)} raw products from DOM")
+                    await self._report_progress(
+                        progress=50,
+                        message_key="ws.fetched_products",
+                        message_params={"count": len(raw_products)},
+                    )
 
                     # Convert to standard product format
                     for raw in raw_products:
@@ -315,6 +330,16 @@ class MathemStore(StorePlugin):
             )
 
         enriched_count = 0
+        started_at = asyncio.get_event_loop().time()
+        await self._report_progress(
+            progress=50,
+            message_key="ws.enriching_products",
+            message_params={
+                "done": 0,
+                "total": len(to_enrich),
+                "eta": self._format_progress_eta(len(to_enrich) * self.ENRICH_DELAY),
+            },
+        )
 
         for idx, (product_idx, product) in enumerate(to_enrich):
             try:
@@ -397,6 +422,18 @@ class MathemStore(StorePlugin):
                 # Progress logging
                 if (idx + 1) % 10 == 0:
                     logger.debug(f"  Enriched {idx + 1}/{len(to_enrich)} products...")
+                    elapsed = max(asyncio.get_event_loop().time() - started_at, 0.001)
+                    done = idx + 1
+                    remaining = (len(to_enrich) - done) * elapsed / done
+                    await self._report_progress(
+                        progress=min(64, 50 + int((done / len(to_enrich)) * 14)),
+                        message_key="ws.enriching_products",
+                        message_params={
+                            "done": done,
+                            "total": len(to_enrich),
+                            "eta": self._format_progress_eta(remaining),
+                        },
+                    )
 
             except Exception as e:
                 logger.debug(f"Failed to enrich product {product.get('name', 'unknown')}: {e}")
@@ -404,6 +441,15 @@ class MathemStore(StorePlugin):
                 continue
 
         logger.info(f"Enriched {enriched_count} products with JSON-LD data")
+        await self._report_progress(
+            progress=64,
+            message_key="ws.enriching_products",
+            message_params={
+                "done": len(to_enrich),
+                "total": len(to_enrich),
+                "eta": "0 s",
+            },
+        )
         return products
 
     def _select_products_to_enrich(

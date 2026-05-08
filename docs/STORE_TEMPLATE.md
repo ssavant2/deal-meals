@@ -114,6 +114,11 @@ class YourStoreStore(StorePlugin):
         # TODO: Implement your scraping logic here
         # See "Scraping Strategies" below
 
+        await self._report_progress(
+            progress=65,
+            message_key="ws.fetched_products",
+            message_params={"count": len(products)},
+        )
         logger.success(f"Scraped {len(products)} products from {self.config.name}")
         return StoreScrapeResult.success(products)
 ```
@@ -530,6 +535,71 @@ def estimated_scrape_time(self) -> int:
     return 120  # This store is fast (~2 min)
 ```
 
+## Progress Updates
+
+The Stores UI attaches a progress callback to every `StorePlugin`. Call
+`await self._report_progress(...)` inside long-running steps so the UI and the
+active scrape polling state stay readable while scraping runs.
+
+Use it for pagination, infinite scroll, variant expansion, product-page
+enrichment, or any loop that can take more than a few seconds. Product gathering
+should use `ws.fetching_product_progress` so every store shows the same status
+text even when the underlying scraper uses pages, API batches, or infinite
+scroll:
+
+```python
+await self._report_progress(
+    progress=35,
+    message_key="ws.fetching_product_progress",
+    message_params={"done": page_num, "total": max_pages, "count": len(products)},
+)
+
+await self._report_progress(
+    progress=50,
+    message_key="ws.fetching_product_progress",
+    message_params={"count": len(products)},
+)
+
+await self._report_progress(
+    progress=55,
+    message_key="ws.fetching_product_variants",
+    message_params={
+        "base": base_count,
+        "done": done,
+        "total": total,
+        "variants": variant_count,
+        "eta": self._format_progress_eta(remaining_seconds),
+    },
+)
+
+await self._report_progress(
+    progress=60,
+    message_key="ws.enriching_products",
+    message_params={
+        "done": done,
+        "total": total,
+        "eta": self._format_progress_eta(remaining_seconds),
+    },
+)
+```
+
+Keep `0-60` for scraper work and use `65` for "products fetched". The shared
+websocket save/complete flow owns `70+`. Do not report every item; report per
+page, first/final iteration, or every 5-10 iterations in long loops.
+
+Known store progress keys:
+
+- `ws.fetching_products`
+- `ws.fetched_products`
+- `ws.fetching_product_progress`
+- `ws.fetching_product_pages`
+- `ws.scanning_products`
+- `ws.fetching_product_variants`
+- `ws.enriching_products`
+
+If you add a new `message_key`, add it to `app/languages/*/ui.py` and
+`app/templates/stores.html`.
+
 ## Invalidate on Postal Change (optional)
 
 Whether you need this depends on how the store works in reality:
@@ -573,6 +643,7 @@ Your scraper doesn't need to implement this check — it's handled by the websoc
 - [ ] Categories use standard names from the list above (via `languages.sv.category_utils`)
 - [ ] Swedish characters (åäö) are handled correctly (via `languages.sv.normalization`)
 - [ ] Weight extraction returns `weight_grams` when possible (via `scrapers.stores.weight_utils`)
+- [ ] Long-running scrape steps report UI progress via `await self._report_progress(...)`
 - [ ] SSRF protection via `ssrf_safe_event_hook` on httpx clients (recommended)
 - [ ] Error handling with try/except and logging
 - [ ] Tested that scraping works

@@ -112,6 +112,11 @@ class YourStore(StorePlugin):
         # Your scraping logic here (httpx, Playwright, API calls, etc.)
         # ...
 
+        await self._report_progress(
+            progress=65,
+            message_key="ws.fetched_products",
+            message_params={"count": len(products)},
+        )
         logger.success(f"Scraped {len(products)} products from {self.config.name}")
         return StoreScrapeResult.success(products)
 ```
@@ -207,6 +212,68 @@ The user's configuration is passed to `scrape_offers()` via `credentials` dict (
 | `test_connection()` | Attempts a full scrape | You want a faster health check (e.g., just ping the URL) |
 | `verify_credentials()` | Returns "not supported" | Your store requires login (see section 1.8) |
 | `_filter_food_items()` | Built-in filter | Your store sells mixed food/non-food (call from `scrape_offers()`) |
+
+### Store Progress Callbacks
+
+The websocket router attaches a progress callback to every `StorePlugin`. Use
+`await self._report_progress(...)` inside any step that can take more than a
+few seconds, such as pagination, infinite scroll, variant expansion, or product
+enrichment. This keeps the Stores UI from looking stuck during long scrapes.
+
+`_report_progress()` is safe to call from all store plugins. It is a no-op when
+the scraper is run from a CLI/test context without a UI callback.
+
+Use existing message keys when possible. Product gathering should use
+`ws.fetching_product_progress` so every store shows the same status text even
+when the underlying scraper uses pages, API batches, or infinite scroll:
+
+```python
+await self._report_progress(
+    progress=35,
+    message_key="ws.fetching_product_progress",
+    message_params={"done": page_num, "total": max_pages, "count": len(products)},
+)
+
+await self._report_progress(
+    progress=50,
+    message_key="ws.fetching_product_progress",
+    message_params={"count": len(products)},
+)
+
+await self._report_progress(
+    progress=55,
+    message_key="ws.fetching_product_variants",
+    message_params={
+        "base": base_count,
+        "done": done,
+        "total": total,
+        "variants": variant_count,
+        "eta": self._format_progress_eta(remaining_seconds),
+    },
+)
+
+await self._report_progress(
+    progress=60,
+    message_key="ws.enriching_products",
+    message_params={
+        "done": done,
+        "total": total,
+        "eta": self._format_progress_eta(remaining_seconds),
+    },
+)
+```
+
+Recommended progress ranges:
+
+- `0-10`: startup, address/store resolution, opening browser/API session
+- `10-60`: scraping work (pages, scroll, variants, enrichment)
+- `65`: products fetched, before the shared save step
+- `70+`: reserved for the websocket router's save/complete flow
+
+Do not emit progress for every single product. Report per page, first/final
+iteration, or every 5-10 iterations in long loops. If you add a new
+`message_key`, also add translations in `app/languages/*/ui.py` and expose it in
+`app/templates/stores.html` so the frontend can render it.
 
 ### 1.6 Food Filtering
 

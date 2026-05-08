@@ -10,6 +10,8 @@ from sqlalchemy import text, func
 from loguru import logger
 from typing import List, Dict, Any
 import asyncio
+from decimal import Decimal
+import json
 import sys
 import os
 import time
@@ -113,7 +115,7 @@ def _run_offer_cache_refresh_unlocked(
     trigger: str = "offer_refresh_sync",
 ) -> Dict[str, Any]:
     """Run offer-triggered cache refresh while the cache operation lock is held."""
-    from cache_manager import cache_manager
+    from cache_manager import cache_manager, _cache_affecting_preferences_hash
     from cache_delta import (
         _apply_verified_offer_delta_unlocked,
         _refresh_unmatched_offer_count_from_db,
@@ -133,6 +135,7 @@ def _run_offer_cache_refresh_unlocked(
         refresh_compiled_recipe_match_data,
         refresh_compiled_recipe_term_index,
     )
+    from recipe_matcher import get_effective_matching_preferences
     from pantry_search_index import refresh_compiled_recipe_search_term_index
 
     source = _offer_refresh_source(store_name)
@@ -228,6 +231,11 @@ def _run_offer_cache_refresh_unlocked(
 
     if decision.strategy == "skip":
         started_at = time.perf_counter()
+        candidate_data_source = (
+            settings.cache_rebuild_candidate_data_source or "term_index"
+        ).strip().lower()
+        if candidate_data_source not in {"term_index", "db_candidates"}:
+            candidate_data_source = "term_index"
         set_compiled_offer_baseline_committed(False)
         refresh_compiled_offer_match_data()
         refresh_compiled_offer_term_index()
@@ -250,7 +258,10 @@ def _run_offer_cache_refresh_unlocked(
             "offer_compiler_version": OFFER_COMPILER_VERSION,
             "offer_data_source": "compiled",
             "recipe_data_source": "compiled_payload",
-            "candidate_data_source": "term_index",
+            "candidate_data_source": candidate_data_source,
+            "cache_affecting_preferences_hash": _cache_affecting_preferences_hash(
+                get_effective_matching_preferences()
+            ),
             **unmatched_counts,
             **operation_context,
         }
@@ -384,6 +395,71 @@ def _build_offer_insert_mapping(
         'location_type': location_type,
         'location_name': location_name,
     }
+
+
+_OFFER_CONTENT_FIELDS = (
+    'store_id',
+    'name',
+    'price',
+    'original_price',
+    'savings',
+    'unit',
+    'category',
+    'brand',
+    'weight_grams',
+    'is_multi_buy',
+    'multi_buy_quantity',
+    'multi_buy_total_price',
+    'image_url',
+    'product_url',
+    'location_type',
+    'location_name',
+)
+
+
+def _normalize_offer_content_value(value: Any) -> Any:
+    if isinstance(value, Decimal):
+        normalized = value.normalize()
+        if normalized == normalized.to_integral():
+            return str(normalized.quantize(Decimal("1")))
+        return format(normalized, "f")
+    if isinstance(value, float):
+        normalized = Decimal(str(value)).normalize()
+        if normalized == normalized.to_integral():
+            return str(normalized.quantize(Decimal("1")))
+        return format(normalized, "f")
+    if hasattr(value, "hex") and value.__class__.__name__ == "UUID":
+        return str(value)
+    return value
+
+
+def _offer_content_signature(row: Dict[str, Any]) -> str:
+    payload = {
+        field: _normalize_offer_content_value(row.get(field))
+        for field in _OFFER_CONTENT_FIELDS
+    }
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _offer_model_content_signature(offer: Offer) -> str:
+    return _offer_content_signature({
+        field: getattr(offer, field)
+        for field in _OFFER_CONTENT_FIELDS
+    })
+
+
+def _offer_rows_have_same_content_as_existing_offers(
+    session,
+    offer_rows: List[Dict[str, Any]],
+) -> bool:
+    """Compare the full active offer set, not just row counts."""
+    existing_offers = session.query(Offer).all()
+    if len(existing_offers) != len(offer_rows):
+        return False
+
+    current_signatures = sorted(_offer_content_signature(row) for row in offer_rows)
+    existing_signatures = sorted(_offer_model_content_signature(offer) for offer in existing_offers)
+    return current_signatures == existing_signatures
 
 
 def ensure_store_exists(store_id: str, store_name: str, store_url: str = None) -> None:
@@ -525,6 +601,8 @@ def save_offers(store_name: str, products: List[Dict]) -> Dict[str, Any]:
         'created': 0,
         'errors': 0,
         'skipped': 0,
+        'unchanged': False,
+        'unchanged_count': 0,
         'empty_input': False,
         'stale_existing_offers': False,
     }
@@ -642,6 +720,15 @@ def save_offers(store_name: str, products: List[Dict]) -> Dict[str, Any]:
                     "keeping existing offers and cache"
                 )
                 stats['stale_existing_offers'] = True
+                return stats
+
+            if _offer_rows_have_same_content_as_existing_offers(session, offer_rows):
+                stats['unchanged'] = True
+                stats['unchanged_count'] = len(offer_rows)
+                logger.info(
+                    f"Offer content signatures for {store_name} are unchanged; "
+                    f"keeping {len(offer_rows)} existing rows and cache"
+                )
                 return stats
 
             # Insert prepared rows. Bulk insert is much faster than row-by-row
