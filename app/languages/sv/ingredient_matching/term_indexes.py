@@ -328,12 +328,75 @@ def _candidate_offer_scope_hash(offer_identity_keys: list[str] | set[str] | tupl
     return sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _coerce_metadata_dict(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return {}
+        return parsed if isinstance(parsed, dict) else {}
+    return {}
+
+
+def _load_cache_metadata_last_operation(cursor, cache_name: str) -> dict[str, Any]:
+    cursor.execute(
+        """
+        SELECT last_operation
+        FROM cache_metadata
+        WHERE cache_name = %s
+        """,
+        (cache_name,),
+    )
+    row = cursor.fetchone()
+    return _coerce_metadata_dict(row[0] if row else {})
+
+
+def _recipe_term_index_metadata_is_complete(
+    metadata: dict[str, Any],
+    *,
+    active_recipe_count: int,
+    term_manifest_hash: str | None,
+) -> bool:
+    if not metadata:
+        return False
+    if not bool(metadata.get("complete")):
+        return False
+    expected = {
+        "matcher_version": MATCHER_VERSION,
+        "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+    }
+    if term_manifest_hash:
+        expected["term_manifest_hash"] = term_manifest_hash
+    for key, value in expected.items():
+        if metadata.get(key) != value:
+            return False
+    try:
+        metadata_active_count = int(metadata.get("active_recipe_count") or -1)
+        metadata_indexed_count = int(metadata.get("indexed_recipes") or 0)
+    except (TypeError, ValueError):
+        return False
+    return (
+        metadata_active_count == active_recipe_count
+        and metadata_indexed_count >= active_recipe_count
+    )
+
+
 def _validate_full_candidate_recipe_scope(
     *,
     indexed_recipe_count: int,
     active_recipe_count: int,
+    recipe_term_metadata: dict[str, Any] | None = None,
+    term_manifest_hash: str | None = None,
 ) -> None:
     """Refuse full candidate refresh from a scoped/incomplete recipe term index."""
+    if _recipe_term_index_metadata_is_complete(
+        recipe_term_metadata or {},
+        active_recipe_count=active_recipe_count,
+        term_manifest_hash=term_manifest_hash,
+    ):
+        return
     if indexed_recipe_count < active_recipe_count:
         raise RuntimeError(
             "compiled_recipe_term_index is incomplete for current active "
@@ -397,7 +460,15 @@ def _begin_recipe_term_stream():
         raise
 
 
-def _finish_recipe_term_stream(writer, *, recipe_ids: list[str] | None = None) -> str:
+def _finish_recipe_term_stream(
+    writer,
+    *,
+    recipe_ids: list[str] | None = None,
+    metadata_payload: dict[str, Any] | None = None,
+    metadata_time_ms: int = 0,
+    metadata_total_recipes: int = 0,
+    metadata_total_matches: int = 0,
+) -> str:
     raw_conn, cursor = writer
     try:
         if recipe_ids is None:
@@ -415,6 +486,44 @@ def _finish_recipe_term_stream(writer, *, recipe_ids: list[str] | None = None) -
             f"INSERT INTO compiled_recipe_term_index ({_RECIPE_TERM_COPY_COLUMNS}) "
             f"SELECT {_RECIPE_TERM_COPY_COLUMNS} FROM {_RECIPE_TERM_STREAM_TABLE}"
         )
+        if metadata_payload is not None:
+            cursor.execute(
+                """
+                INSERT INTO cache_metadata (
+                    cache_name,
+                    last_computed_at,
+                    computation_time_ms,
+                    total_recipes,
+                    total_matches,
+                    status,
+                    error_message,
+                    last_operation
+                ) VALUES (
+                    'compiled_recipe_term_index',
+                    NOW(),
+                    %s,
+                    %s,
+                    %s,
+                    'ready',
+                    NULL,
+                    %s::jsonb
+                )
+                ON CONFLICT (cache_name) DO UPDATE SET
+                    last_computed_at = EXCLUDED.last_computed_at,
+                    computation_time_ms = EXCLUDED.computation_time_ms,
+                    total_recipes = EXCLUDED.total_recipes,
+                    total_matches = EXCLUDED.total_matches,
+                    status = EXCLUDED.status,
+                    error_message = EXCLUDED.error_message,
+                    last_operation = EXCLUDED.last_operation
+                """,
+                (
+                    metadata_time_ms,
+                    metadata_total_recipes,
+                    metadata_total_matches,
+                    json.dumps(metadata_payload, sort_keys=True),
+                ),
+            )
         raw_conn.commit()
         return replace_mode
     except Exception:
@@ -758,22 +867,14 @@ def refresh_compiled_recipe_offer_candidates(
         if offer_term_rows == 0:
             raise RuntimeError("compiled_offer_term_index is empty for current matcher/offer compiler")
 
-        cursor.execute(
-            """
-            SELECT last_operation
-            FROM cache_metadata
-            WHERE cache_name = 'compiled_recipe_offer_candidates'
-            """,
+        candidate_metadata = _load_cache_metadata_last_operation(
+            cursor,
+            "compiled_recipe_offer_candidates",
         )
-        metadata_row = cursor.fetchone()
-        candidate_metadata = metadata_row[0] if metadata_row else {}
-        if isinstance(candidate_metadata, str):
-            try:
-                candidate_metadata = json.loads(candidate_metadata)
-            except json.JSONDecodeError:
-                candidate_metadata = {}
-        if not isinstance(candidate_metadata, dict):
-            candidate_metadata = {}
+        recipe_term_metadata = _load_cache_metadata_last_operation(
+            cursor,
+            "compiled_recipe_term_index",
+        )
         has_complete_candidate_metadata = (
             bool(candidate_metadata.get("complete"))
             and candidate_metadata.get("matcher_version") == MATCHER_VERSION
@@ -833,6 +934,8 @@ def refresh_compiled_recipe_offer_candidates(
             _validate_full_candidate_recipe_scope(
                 indexed_recipe_count=len(target_recipe_ids),
                 active_recipe_count=active_recipe_count,
+                recipe_term_metadata=recipe_term_metadata,
+                term_manifest_hash=term_manifest_hash,
             )
 
         progress_state: dict[str, Any] = {}
@@ -1574,7 +1677,25 @@ def refresh_compiled_recipe_term_index(
             )
             row_buffer.clear()
 
-        replace_mode = _finish_recipe_term_stream(writer)
+        metadata_payload = {
+            "complete": True,
+            "last_refresh_scope": "full" if recipes is None else "provided_recipes",
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "term_manifest_hash": term_manifest_hash,
+            "indexed_recipes": indexed_recipe_count,
+            "active_recipe_count": total_recipe_count,
+            "index_rows": row_count,
+            "distinct_terms": len(term_pairs),
+            "distinct_routing_terms": len(routing_term_types),
+        }
+        replace_mode = _finish_recipe_term_stream(
+            writer,
+            metadata_payload=metadata_payload,
+            metadata_time_ms=int((time.perf_counter() - progress_started_at) * 1000),
+            metadata_total_recipes=total_recipe_count,
+            metadata_total_matches=row_count,
+        )
         writer = None
         _log_recipe_term_index_progress(
             completed=indexed_recipe_count,

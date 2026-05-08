@@ -75,9 +75,9 @@ UI = {
     'home.ingredients': 'Antal',
 
     # Suggestions
-    'home.creating_cache': 'Skapar om cache...',
-    'home.calculating_matches': 'Beräknar receptmatchningar på nytt',
-    'home.takes_seconds': 'Detta tar några sekunder...',
+    'home.creating_cache': 'Uppdaterar förslag...',
+    'home.calculating_matches': 'Hämtar första receptsidan med aktuella inställningar',
+    'home.takes_seconds': 'Cachen byggs om vid behov.',
     'home.matching_recipes': 'Matchar recept mot erbjudanden...',
     'home.no_matches': 'Inga recept matchade med aktuella erbjudanden.',
     'home.try_fetch': 'Prova att hämta erbjudanden från',
@@ -120,12 +120,12 @@ UI = {
     'home.hide_confirm': 'Ja, dölj',
     'home.hide_cancel': 'Avbryt',
 
-    # Cache rebuild dialog
-    'home.rebuild_title': 'Skapar om cache...',
-    'home.rebuild_text': 'Beräknar receptmatchningar på nytt',
-    'home.rebuild_wait': 'Detta tar några sekunder...',
+    # Suggestions refresh dialog
+    'home.rebuild_title': 'Uppdaterar förslag...',
+    'home.rebuild_text': 'Uppdaterar förslag utifrån aktuella inställningar',
+    'home.rebuild_wait': 'Bygger om servercachen vid behov.',
     'home.cache_error_title': 'Cache-fel',
-    'home.cache_error_text': 'Receptmatchningen kunde inte beräknas. Prova att klicka <strong>Uppdatera</strong>. Om felet kvarstår, starta om webben.',
+    'home.cache_error_text': 'Receptmatchningen kunde inte läsas från servercachen. Kör en manuell cacheuppdatering om felet kvarstår.',
 
     # Recipe card
     'home.save_approx': 'Spara ~{amount} kr',
@@ -742,6 +742,7 @@ UI = {
     'recipes.source_not_found': 'Källa hittades inte i databasen',
     'recipes.not_available': 'Recepthanteraren är inte tillgänglig',
     'recipes.cache_rebuild_started': 'Cache-ombyggnad startad',
+    'recipes.cache_refresh_not_needed': 'Förslagen är redan uppdaterade',
     'recipes.invalid_mode': 'Ogiltigt läge: {mode}. Använd test, incremental eller full',
     'recipes.config_title': 'Inställningar för {name}',
     'recipes.config_full_label': 'Full hämtning',

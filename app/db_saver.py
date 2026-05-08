@@ -140,11 +140,24 @@ def _run_offer_cache_refresh_unlocked(
     def refresh_compiled_baselines_for_full_offer_refresh(*, include_recipes: bool = False) -> None:
         set_compiled_offer_baseline_committed(False)
         refresh_compiled_offer_match_data()
+        recipe_ir_refreshed = False
         if include_recipes:
             refresh_compiled_recipe_match_data()
+            recipe_ir_refreshed = True
         refresh_compiled_offer_term_index()
-        refresh_compiled_recipe_term_index()
-        if include_recipes:
+        try:
+            refresh_compiled_recipe_term_index()
+        except RuntimeError as exc:
+            if include_recipes or "compiled_recipe_match_data is missing" not in str(exc):
+                raise
+            logger.warning(
+                "Recipe term index refresh needs current compiled recipe IR "
+                f"({exc}); refreshing recipe IR and retrying"
+            )
+            refresh_compiled_recipe_match_data()
+            recipe_ir_refreshed = True
+            refresh_compiled_recipe_term_index()
+        if recipe_ir_refreshed:
             try:
                 refresh_compiled_recipe_search_term_index()
             except Exception as exc:

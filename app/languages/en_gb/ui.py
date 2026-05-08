@@ -75,9 +75,9 @@ UI = {
     'home.ingredients': 'Count',
 
     # Suggestions
-    'home.creating_cache': 'Rebuilding cache...',
-    'home.calculating_matches': 'Recalculating recipe matches',
-    'home.takes_seconds': 'This takes a few seconds...',
+    'home.creating_cache': 'Refreshing suggestions...',
+    'home.calculating_matches': 'Loading the first recipe page with current settings',
+    'home.takes_seconds': 'The server cache rebuilds only if needed.',
     'home.matching_recipes': 'Matching recipes with offers...',
     'home.no_matches': 'No recipes matched current offers.',
     'home.try_fetch': 'Try fetching offers from',
@@ -120,12 +120,12 @@ UI = {
     'home.hide_confirm': 'Yes, hide',
     'home.hide_cancel': 'Cancel',
 
-    # Cache rebuild dialog
-    'home.rebuild_title': 'Rebuilding cache...',
-    'home.rebuild_text': 'Recalculating recipe matches',
-    'home.rebuild_wait': 'This takes a few seconds...',
+    # Suggestions refresh dialog
+    'home.rebuild_title': 'Refreshing suggestions...',
+    'home.rebuild_text': 'Refreshing suggestions with current settings',
+    'home.rebuild_wait': 'The server cache rebuilds only if needed.',
     'home.cache_error_title': 'Cache error',
-    'home.cache_error_text': 'Recipe matching could not be calculated. Try clicking <strong>Refresh</strong>. If the problem persists, restart the web server.',
+    'home.cache_error_text': 'Recipe matches could not be read from the server cache. Run a manual cache refresh if the problem persists.',
 
     # Recipe card
     'home.save_approx': 'Save ~{amount} kr',
@@ -743,6 +743,7 @@ UI = {
     'recipes.source_not_found': 'Source not found in database',
     'recipes.not_available': 'Recipe scraper manager not available',
     'recipes.cache_rebuild_started': 'Cache rebuild started',
+    'recipes.cache_refresh_not_needed': 'Suggestions are already up to date',
     'recipes.invalid_mode': 'Invalid mode: {mode}. Use test, incremental, or full',
     'recipes.config_title': 'Settings for {name}',
     'recipes.config_full_label': 'Full fetch',

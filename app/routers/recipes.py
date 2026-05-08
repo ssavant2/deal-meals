@@ -781,23 +781,57 @@ async def cache_events():
 @router.post("/cache/reset")
 @limiter.limit(settings.rate_limit_heavy_compute)
 async def reset_recipe_cache(request: Request):
-    """Reset the recipe-offer cache by rebuilding it from scratch."""
+    """Refresh recipe suggestions, rebuilding the cache only when needed."""
     try:
-        from cache_manager import compute_cache_async
+        from cache_manager import cache_manager, compute_cache_async
 
-        logger.info("Cache reset requested - starting rebuild...")
+        logger.info("Cache refresh requested")
+        with get_db_session() as db:
+            status_row = db.execute(text("""
+                SELECT status
+                FROM cache_metadata
+                WHERE cache_name = 'recipe_offer_matches'
+            """)).fetchone()
+        if status_row and status_row.status == "computing":
+            return JSONResponse({
+                "success": True,
+                "rebuild_started": True,
+                "already_running": True,
+                "message_key": "recipes.cache_rebuild_started",
+            })
+
+        freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=False)
+        if freshness_status.get("state") == "fresh" and not freshness_status.get("rebuild_recommended"):
+            return JSONResponse({
+                "success": True,
+                "skipped": True,
+                "rebuild_started": False,
+                "reason": "cache_fresh",
+                "cache_freshness": freshness_status,
+                "message_key": "recipes.cache_refresh_not_needed",
+            })
+
+        logger.info(
+            "Cache refresh needs rebuild "
+            f"({', '.join(freshness_status.get('reasons') or ['unknown'])})"
+        )
         # Set status to 'computing' BEFORE starting background task
         # to prevent race condition where first poll sees old 'ready' status
         with get_db_session() as db:
             db.execute(text("""
-                UPDATE cache_metadata SET status = 'computing'
-                WHERE cache_name = 'recipe_offer_matches'
+                INSERT INTO cache_metadata (cache_name, status, error_message)
+                VALUES ('recipe_offer_matches', 'computing', NULL)
+                ON CONFLICT (cache_name) DO UPDATE SET
+                    status = 'computing',
+                    error_message = NULL
             """))
             db.commit()
         create_background_task(compute_cache_async(), name="cache-reset")
 
         return JSONResponse({
             "success": True,
+            "rebuild_started": True,
+            "cache_freshness": freshness_status,
             "message_key": "recipes.cache_rebuild_started"
         })
 

@@ -1189,7 +1189,7 @@ async function loadRecipeSuggestions() {
     await loadMoreSuggestions(true);
 }
 
-/// Refresh visible suggestions from the current server cache.
+/// Refresh visible suggestions, rebuilding the server cache only if settings require it.
 async function refreshRecipeSuggestions() {
     // Clear client-side state so the next request starts from the first page
     // and uses the latest saved preferences/source settings.
@@ -1200,6 +1200,55 @@ async function refreshRecipeSuggestions() {
     allSuggestions = [];
     renderedRecipeIds = new Set();
 
+    Swal.fire({
+        title: i18n['home.rebuild_title'],
+        html: `<div class="mb-2">${i18n['home.rebuild_text']}</div><small class="text-muted">${i18n['home.rebuild_wait']}</small>`,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        const refreshResponse = await fetch('/api/cache/reset', { method: 'POST' });
+        const refreshData = await refreshResponse.json().catch(() => ({}));
+        if (!refreshResponse.ok || refreshData.success === false) {
+            throw new Error(t(refreshData.message_key || 'common.error', refreshData.message_params));
+        }
+
+        const rebuildStarted = refreshData.rebuild_started !== false && !refreshData.skipped;
+        if (rebuildStarted) {
+            const maxWait = 300000;
+            const pollInterval = 500;
+            const startTime = Date.now();
+
+            while (Date.now() - startTime < maxWait) {
+                await new Promise(resolve => setTimeout(resolve, pollInterval));
+
+                try {
+                    const statusResponse = await fetch('/api/cache/status');
+                    if (!statusResponse.ok) continue;
+                    const status = await statusResponse.json();
+                    const freshness = status.cache_freshness || {};
+
+                    if (status.ready || (status.status === 'error' && freshness.servable)) {
+                        dbg.log(`[Cache] Refresh finished in ${Date.now() - startTime}ms, ${status.total_matches || freshness.cached_rows || 0} recipes`);
+                        break;
+                    }
+                } catch (e) {
+                    // Ignore transient polling errors, keep waiting.
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Cache refresh failed:', e);
+        Swal.fire({ icon: 'error', title: i18n['common.error'], text: e.message });
+        return;
+    }
+
+    Swal.close();
     await loadMoreSuggestions(true);
 }
 
@@ -1228,7 +1277,8 @@ async function loadMoreSuggestions(isInitialLoad = false) {
                 const statusResp = await fetch('/api/cache/status');
                 if (statusResp.ok) {
                     const cacheStatus = await statusResp.json();
-                    if (cacheStatus.status === 'error') {
+                    const freshness = cacheStatus.cache_freshness || {};
+                    if (cacheStatus.status === 'error' && freshness.servable !== true) {
                         loading.style.display = 'none';
                         const warnDiv = document.createElement('div');
                         warnDiv.className = 'alert alert-warning fade show mx-3 mt-2';

@@ -138,6 +138,7 @@ def build_cache_last_operation(
         "offer_data_source",
         "recipe_data_source",
         "candidate_data_source",
+        "cache_affecting_preferences_hash",
         "ingredient_routing_effective_mode",
         "ingredient_routing_fallback_reason",
     )

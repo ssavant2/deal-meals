@@ -11,6 +11,8 @@ if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
 from languages.sv.ingredient_matching.term_indexes import (  # noqa: E402
+    MATCHER_VERSION,
+    RECIPE_COMPILER_VERSION,
     _candidate_offer_scope_hash,
     _validate_full_candidate_recipe_scope,
 )
@@ -49,6 +51,23 @@ def test_full_refresh_accepts_complete_recipe_term_index() -> None:
     print("OK complete recipe-term index accepted")
 
 
+def test_full_refresh_accepts_termless_recipes_with_complete_metadata() -> None:
+    _validate_full_candidate_recipe_scope(
+        indexed_recipe_count=10474,
+        active_recipe_count=11326,
+        recipe_term_metadata={
+            "complete": True,
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "term_manifest_hash": "term-hash",
+            "indexed_recipes": 11326,
+            "active_recipe_count": 11326,
+        },
+        term_manifest_hash="term-hash",
+    )
+    print("OK termless recipes accepted with complete recipe-term metadata")
+
+
 def test_offer_scope_hash_is_stable() -> None:
     first = _candidate_offer_scope_hash(["offer-b", "offer-a", "offer-a"])
     second = _candidate_offer_scope_hash(["offer-a", "offer-b"])
@@ -58,6 +77,7 @@ def test_offer_scope_hash_is_stable() -> None:
 def main() -> int:
     test_full_refresh_rejects_partial_recipe_term_index()
     test_full_refresh_accepts_complete_recipe_term_index()
+    test_full_refresh_accepts_termless_recipes_with_complete_metadata()
     test_offer_scope_hash_is_stable()
     print("ALL CANDIDATE REFRESH GUARD CHECKS PASSED")
     return 0

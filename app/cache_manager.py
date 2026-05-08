@@ -139,6 +139,49 @@ def _extract_stable_matched_offer_key(offer_data: Dict[str, Any]) -> str | None:
     return str(value)
 
 
+def _normalized_text_list(value: Any, *, uppercase: bool = False) -> list[str]:
+    if not isinstance(value, (list, tuple, set)):
+        return []
+    normalized: set[str] = set()
+    for item in value:
+        if not isinstance(item, str):
+            continue
+        text_value = item.strip()
+        if not text_value:
+            continue
+        normalized.add(text_value.upper() if uppercase else text_value.lower())
+    return sorted(normalized)
+
+
+def _cache_affecting_preferences_snapshot(preferences: Dict[str, Any] | None) -> dict[str, Any]:
+    """Return the preference subset that changes persisted match contents."""
+    preferences = preferences or {}
+    return {
+        "exclude_categories": sorted(
+            str(category)
+            for category in preferences.get("exclude_categories", [])
+            if category
+        ),
+        "exclude_keywords": _normalized_text_list(preferences.get("exclude_keywords")),
+        "filtered_products": _normalized_text_list(preferences.get("filtered_products")),
+        "excluded_brands": _normalized_text_list(
+            preferences.get("excluded_brands"),
+            uppercase=True,
+        ),
+        "local_meat_only": bool(preferences.get("local_meat_only", True)),
+    }
+
+
+def _cache_affecting_preferences_hash(preferences: Dict[str, Any] | None) -> str:
+    payload = json.dumps(
+        _cache_affecting_preferences_snapshot(preferences),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    )
+    return sha256(payload.encode("utf-8")).hexdigest()
+
+
 def _select_indexable_offer_identity_keys(
     offers: List[Any],
     offer_data_cache: Dict[int, Dict[str, Any]],
@@ -932,6 +975,9 @@ class CacheManager:
 
         try:
             enabled_sources = sorted(get_enabled_recipe_sources() or [])
+            current_preferences_hash = _cache_affecting_preferences_hash(
+                get_effective_matching_preferences()
+            )
             with get_db_session() as db:
                 metadata_row = db.execute(text("""
                     SELECT status,
@@ -1039,6 +1085,12 @@ class CacheManager:
                     and candidate_source != configured_profile["candidate_data_source"]
                 ):
                     reasons.append("last_operation_candidate_source_differs")
+                last_preferences_hash = last_operation.get("cache_affecting_preferences_hash")
+                if last_preferences_hash:
+                    if last_preferences_hash != current_preferences_hash:
+                        reasons.append("cache_affecting_preferences_changed")
+                elif metadata.get("status") == "ready":
+                    reasons.append("cache_affecting_preferences_unknown")
 
             last_computed_at_raw = metadata_row.get("last_computed_at") if metadata_row else None
             freshness_reference_at = last_computed_at_raw
@@ -1079,6 +1131,7 @@ class CacheManager:
                 "version_groups": version_groups if include_version_scan else [],
                 "version_scan_included": include_version_scan,
                 "configured_candidate_data_source": configured_profile["candidate_data_source"],
+                "current_cache_affecting_preferences_hash": current_preferences_hash,
                 "metadata": metadata,
                 "last_operation": {
                     key: last_operation.get(key)
@@ -1092,6 +1145,7 @@ class CacheManager:
                         "recipe_compiler_version",
                         "offer_compiler_version",
                         "candidate_data_source",
+                        "cache_affecting_preferences_hash",
                         "effective_rebuild_mode",
                     )
                     if key in last_operation
@@ -1286,6 +1340,7 @@ class CacheManager:
         recipe_selection_mode = "not_selected"
         recipe_selection_scope_count = 0
         fts_filtered_count: Optional[int] = None
+        cache_affecting_preferences_hash: Optional[str] = None
         progress = _CacheRebuildProgress(run_kind=run_kind)
         logger.info(
             "🔄 Starting cache computation... "
@@ -1307,6 +1362,7 @@ class CacheManager:
             # Load preferences
             if not preferences:
                 preferences = get_effective_matching_preferences()
+            cache_affecting_preferences_hash = _cache_affecting_preferences_hash(preferences)
 
             # Get enabled recipe sources
             enabled_sources = get_enabled_recipe_sources()
@@ -1349,6 +1405,7 @@ class CacheManager:
                     'offer_data_source': offer_data_source,
                     'recipe_data_source': recipe_data_source,
                     'candidate_data_source': candidate_data_source,
+                    'cache_affecting_preferences_hash': cache_affecting_preferences_hash,
                     'run_kind': run_kind,
                     'source': source,
                     'input_scope': input_scope,
@@ -1374,6 +1431,7 @@ class CacheManager:
                     'offer_data_source': offer_data_source,
                     'recipe_data_source': recipe_data_source,
                     'candidate_data_source': candidate_data_source,
+                    'cache_affecting_preferences_hash': cache_affecting_preferences_hash,
                     **operation_context,
                     **ingredient_routing_fields,
                     'phase_timings_ms': phase_timings,
@@ -2526,6 +2584,7 @@ class CacheManager:
                 'offer_data_source': offer_data_source,
                 'recipe_data_source': recipe_data_source,
                 'candidate_data_source': candidate_data_source,
+                'cache_affecting_preferences_hash': cache_affecting_preferences_hash,
                 'run_kind': run_kind,
                 'source': source,
                 'input_scope': input_scope,
@@ -2576,6 +2635,7 @@ class CacheManager:
                 'offer_data_source': offer_data_source,
                 'recipe_data_source': recipe_data_source,
                 'candidate_data_source': candidate_data_source,
+                'cache_affecting_preferences_hash': cache_affecting_preferences_hash,
                 **operation_context,
                 **ingredient_routing_summary_fields,
                 **worker_fields,
@@ -2614,6 +2674,7 @@ class CacheManager:
                 'offer_data_source': offer_data_source,
                 'recipe_data_source': recipe_data_source,
                 'candidate_data_source': candidate_data_source,
+                'cache_affecting_preferences_hash': cache_affecting_preferences_hash,
                 **operation_context,
                 **ingredient_routing_fields,
                 **worker_fields,
@@ -2642,6 +2703,7 @@ class CacheManager:
                         "offer_data_source": offer_data_source,
                         "recipe_data_source": recipe_data_source,
                         "candidate_data_source": candidate_data_source,
+                        "cache_affecting_preferences_hash": cache_affecting_preferences_hash,
                         **ingredient_routing_fields,
                         **worker_fields,
                         **operation_context,
@@ -2788,10 +2850,17 @@ class CacheManager:
 
         # Check cache status (metadata always in DB)
         with get_db_session() as db:
-            status = db.execute(text(
-                "SELECT status FROM cache_metadata WHERE cache_name = :name"
-            ), {"name": self.CACHE_NAME}).scalar()
-            if not status or status not in ('ready', 'computing'):
+            row = db.execute(text("""
+                SELECT
+                    (SELECT status FROM cache_metadata WHERE cache_name = :name) AS status,
+                    (SELECT COUNT(*) FROM recipe_offer_cache) AS cached_rows
+            """), {"name": self.CACHE_NAME}).fetchone()
+            status = row.status if row else None
+            cached_rows = int((row.cached_rows if row else 0) or 0)
+            if not status or (
+                status not in ('ready', 'computing')
+                and not (status == 'error' and cached_rows > 0)
+            ):
                 logger.warning("Cache not ready - falling back to live computation")
                 return None
 
@@ -3072,7 +3141,15 @@ class CacheManager:
                     WHERE cache_name = :name
                 """), {"name": self.CACHE_NAME}).scalar()
                 # Stale-while-revalidate: use old cache during rebuild
-                return status in ('ready', 'computing')
+                if status in ('ready', 'computing'):
+                    return True
+                if status == 'error':
+                    cached_rows = int(
+                        db.execute(text("SELECT COUNT(*) FROM recipe_offer_cache")).scalar()
+                        or 0
+                    )
+                    return cached_rows > 0
+                return False
         except Exception as e:
             logger.debug(f"Cache validity check failed: {e}")
             return False

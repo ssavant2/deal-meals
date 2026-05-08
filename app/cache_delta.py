@@ -919,10 +919,39 @@ def _format_recipe_delta_summary_line(summary: dict[str, Any]) -> str:
 
 
 def _emit_recipe_delta_summary(summary: dict[str, Any], *, level: str = "info") -> None:
-    payload = json.dumps(summary, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     log_fn = logger.error if level == "error" else logger.warning if level == "warning" else logger.info
     log_fn(_format_recipe_delta_summary_line(summary))
+    patch_result = summary.get("patch_result") or {}
+    candidate_refresh = summary.get("recipe_offer_candidate_refresh") or {}
+    compact_summary = {
+        "success": summary.get("success"),
+        "applied": summary.get("applied"),
+        "source": summary.get("source"),
+        "mode": summary.get("effective_rebuild_mode"),
+        "verification": summary.get("verification_mode"),
+        "changed": _recipe_delta_count(summary, "changed_recipe_count", "changed_recipe_ids"),
+        "removed": _recipe_delta_count(summary, "removed_recipe_count", "removed_recipe_ids"),
+        "affected": summary.get("affected_recipe_count"),
+        "affected_pct": summary.get("affected_ratio_pct"),
+        "inserted": patch_result.get("inserted_count"),
+        "deleted": patch_result.get("deleted_count"),
+        "cache_rows": patch_result.get("total_matches", summary.get("cached")),
+        "candidate_rows": candidate_refresh.get("candidate_rows"),
+        "candidate_source": summary.get("candidate_data_source"),
+        "preview_ms": summary.get("patch_preview_time_ms"),
+        "full_preview_ms": summary.get("full_preview_time_ms"),
+        "total_ms": summary.get("time_ms"),
+        "fallback": summary.get("fallback_reason"),
+    }
+    payload = json.dumps(
+        compact_summary,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
     log_fn(f"CACHE_RECIPE_DELTA_SUMMARY {payload}")
+    debug_payload = json.dumps(summary, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    logger.debug(f"CACHE_RECIPE_DELTA_DEBUG {debug_payload}")
 
 
 def _set_runtime_rebuild_profile(cache_manager) -> None:
