@@ -454,6 +454,9 @@ MIN_RECIPES_FOR_PARALLEL = 500
 CACHE_REBUILD_STREAM_CHUNK_SIZE = 500
 CACHE_COPY_BATCH_SIZE = 1000
 CACHE_REBUILD_MAX_PENDING_CHUNKS_PER_WORKER = 2
+CGROUP_V2_CPU_MAX_PATH = Path("/sys/fs/cgroup/cpu.max")
+CGROUP_V1_CPU_QUOTA_PATH = Path("/sys/fs/cgroup/cpu/cpu.cfs_quota_us")
+CGROUP_V1_CPU_PERIOD_PATH = Path("/sys/fs/cgroup/cpu/cpu.cfs_period_us")
 _CACHE_COPY_COLUMNS = (
     "found_recipe_id, recipe_category, budget_score, "
     "total_savings, coverage_pct, num_matches, "
@@ -467,6 +470,91 @@ OFFICIAL_REBUILD_PROFILE = {
     "candidate_data_source": "term_index",
 }
 SUPPORTED_REBUILD_CANDIDATE_DATA_SOURCES = {"term_index", "db_candidates"}
+
+
+def _cpu_quota_to_count(quota_us: int, period_us: int) -> int | None:
+    if quota_us <= 0 or period_us <= 0:
+        return None
+    return max(1, quota_us // period_us)
+
+
+def _parse_cgroup_v2_cpu_max(value: str) -> int | None:
+    parts = value.strip().split()
+    if len(parts) < 2 or parts[0] == "max":
+        return None
+    try:
+        return _cpu_quota_to_count(int(parts[0]), int(parts[1]))
+    except ValueError:
+        return None
+
+
+def _read_int_file(path: Path) -> int | None:
+    try:
+        return int(path.read_text(encoding="utf-8").strip())
+    except (OSError, ValueError):
+        return None
+
+
+def _detect_cgroup_cpu_count(
+    *,
+    cpu_max_path: Path = CGROUP_V2_CPU_MAX_PATH,
+    cpu_quota_path: Path = CGROUP_V1_CPU_QUOTA_PATH,
+    cpu_period_path: Path = CGROUP_V1_CPU_PERIOD_PATH,
+) -> int | None:
+    try:
+        cpu_max = cpu_max_path.read_text(encoding="utf-8")
+    except OSError:
+        cpu_max = None
+    if cpu_max:
+        count = _parse_cgroup_v2_cpu_max(cpu_max)
+        if count is not None:
+            return count
+
+    quota = _read_int_file(cpu_quota_path)
+    period = _read_int_file(cpu_period_path)
+    if quota is None or period is None:
+        return None
+    return _cpu_quota_to_count(quota, period)
+
+
+def _detect_effective_cpu_count() -> int:
+    candidates: list[int] = []
+    cgroup_count = _detect_cgroup_cpu_count()
+    if cgroup_count:
+        candidates.append(cgroup_count)
+
+    if hasattr(os, "sched_getaffinity"):
+        try:
+            affinity_count = len(os.sched_getaffinity(0))
+        except OSError:
+            affinity_count = 0
+        if affinity_count > 0:
+            candidates.append(affinity_count)
+
+    process_cpu_count = getattr(os, "process_cpu_count", None)
+    if callable(process_cpu_count):
+        count = process_cpu_count()
+        if count:
+            candidates.append(int(count))
+
+    raw_count = os.cpu_count()
+    if raw_count:
+        candidates.append(int(raw_count))
+
+    return max(1, min(candidates) if candidates else 1)
+
+
+def _select_cache_rebuild_worker_count(
+    *,
+    effective_cpu_count: int,
+    configured_max_workers: int,
+    call_max_workers: int | None = None,
+) -> int:
+    workers = max(1, effective_cpu_count - 1)
+    workers = min(workers, max(1, configured_max_workers))
+    if call_max_workers is not None:
+        workers = max(1, min(workers, call_max_workers))
+    return workers
 
 
 def _summary_ms(value: Any) -> str:
@@ -1671,14 +1759,17 @@ class CacheManager:
                 force=True,
             )
 
-            num_cores = os.cpu_count() or 1
-            num_workers = max(1, num_cores - 1)
+            raw_cpu_count = os.cpu_count() or 1
+            num_cores = _detect_effective_cpu_count()
             configured_max_workers = max(1, settings.cache_rebuild_max_workers)
-            num_workers = min(num_workers, configured_max_workers)
-            if max_workers is not None:
-                num_workers = max(1, min(num_workers, max_workers))
+            num_workers = _select_cache_rebuild_worker_count(
+                effective_cpu_count=num_cores,
+                configured_max_workers=configured_max_workers,
+                call_max_workers=max_workers,
+            )
             worker_fields = {
                 "cache_rebuild_detected_cores": num_cores,
+                "cache_rebuild_raw_cpu_count": raw_cpu_count,
                 "cache_rebuild_max_workers": configured_max_workers,
                 "cache_rebuild_call_max_workers": max_workers,
                 "cache_rebuild_worker_count": num_workers,

@@ -81,58 +81,30 @@ There are two warm-up levels:
 1. **Recommendation warm-up:** after recipes and store offers exist, Deal Meals
    needs one successful cache rebuild before the home page can show the full
    set of current suggestions.
-2. **Fast-path warm-up:** the optimized delta/hint-first path is deliberately
-   probation-gated. With the default settings, recipe-delta can skip its full
-   preview after **2 clean verified recipe deltas** for the current
-   matcher/compiler setup; broader offer and ingredient-routing gates use
-   **3 consecutive clean verified cache refreshes**.
+2. **Fast-path warm-up:** the app verifies its faster incremental cache paths a
+   few times before relying on them fully.
 
 Until warm-up finishes, the app still works. It may show fewer suggestions, old
-suggestions, or no suggestions before the first rebuild completes; later, during
-fast-path probation, it simply keeps doing extra safety verification and can be
-slower. Scheduling recipe and store fetches lets these refreshes happen in the
-background.
+suggestions, or no suggestions before the first rebuild completes. Later, while
+the faster paths are warming up, refreshes can simply be a little slower.
+Scheduling recipe and store fetches lets these refreshes happen in the
+background. See the user manual for the practical cache refresh behavior.
 
 ## Requirements
 
 - Docker with Compose v2
-- ~2 GB RAM for a normal install with the bundled container limits.
+- About 2 GB RAM for a normal install with the bundled container limits.
+- 2 CPU cores recommended. A single-core host works, but large refreshes take
+  longer and can make the web UI less responsive while they run.
 
-Large recipe libraries need more memory during cache rebuilds and verified delta
-previews. Startup does not run a full rebuild by default: the app serves any
-existing cache immediately, and cache refreshes are triggered by scrapes or a
-manual cache reset. Persistent rebuilds stream their result batches through
-PostgreSQL instead of keeping every cache row in Python memory. Async rebuilds
-also run in a separate Python subprocess by default; that keeps the web event
-loop responsive and makes the memory budget apply to the rebuild job instead of
-permanently bloating the web process.
+The release compose file uses conservative container limits: 1536 MiB for the
+web container and 512 MiB for PostgreSQL. Very large recipe libraries or custom
+worker settings may need more headroom, so measure on your own data if you tune
+those settings.
 
-The standalone compose defaults full rebuilds and delta verification to at most
-3 workers and uses the database-backed candidate path. The bundled 1536 MiB web
-container is the target memory budget for the default Swedish data shape. If you
-raise worker caps for faster local or high-memory installs, raise the web memory
-limit too and measure it on your own recipe/store data. The development compose
-override also defaults `web` to 1536 MiB; set `DEV_WEB_MEM_LIMIT` locally if you
-need a larger one-off ceiling.
-
-Rebuild logs include `CACHE_REBUILD_PROGRESS` lines for the long phases, with a
-text progress bar, percent, elapsed time and ETA. The ingredient routing
-optimization currently defaults to the quality-preserving full ingredient scan
-inside already-routed candidate offers; the experimental `hint_first` mode is
-kept as an opt-in diagnostics path until it beats the default on real data. The
-longer-term rebuild pipeline work is tracked in
-[Cache Rebuild Architecture Plan](docs/CACHE_REBUILD_ARCHITECTURE_PLAN.md).
-
-```env
-# Normal rebuilds use at most 3 workers by default.
-CACHE_REBUILD_MAX_WORKERS=3
-
-# Delta verification previews use their own cap: min(n-1 cores, 3 workers).
-CACHE_DELTA_VERIFICATION_MAX_WORKERS=3
-
-# Optional diagnostics/fallback only. Leave unset for normal production.
-# CACHE_REBUILD_CANDIDATE_DATA_SOURCE=term_index
-```
+Cache refreshes, full rebuilds and progress logging are covered in the user
+manuals: [Swedish](docs/USER_MANUAL_SVENSKA.md#vad-händer-vid-cacheuppdateringar)
+and [English](docs/USER_MANUAL_ENGLISH.md#what-happens-during-cache-refreshes).
 
 ## Network Security
 

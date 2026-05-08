@@ -33,6 +33,7 @@ services:
     command: >
       postgres
       -c shared_buffers=${PG_SHARED_BUFFERS:-128MB}
+      -c temp_buffers=128MB
       -c work_mem=4MB
       -c effective_cache_size=256MB
       -c maintenance_work_mem=64MB

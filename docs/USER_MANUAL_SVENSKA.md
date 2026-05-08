@@ -517,6 +517,31 @@ Starta sedan om web-containern med `docker compose up -d web` (restart laddar IN
 
 Du kan köra hämtningar manuellt också — men då får du vänta medan erbjudandena laddas ner och matchningen beräknas om.
 
+### Vad händer vid cacheuppdateringar?
+
+Deal Meals försöker undvika fulla ombyggnader när bara en liten del av datat har
+ändrats. Små inkrementella recepthämtningar uppdaterar normalt bara de recept
+som påverkats. Första körningen, stora importer, matcher-/versionsändringar
+eller misslyckade säkerhetskontroller kan fortfarande trigga en full ombyggnad
+av receptmatchningen.
+
+Vid omstart visar appen befintlig cache direkt; den startar inte en full
+ombyggnad bara för att web-containern startats om. Längre ombyggnader körs som
+standard i en separat Python-process, så webben kan fortsätta svara medan
+cachen räknas om. På maskiner med flera CPU-kärnor använder ombyggnaden upp
+till antal tillgängliga kärnor minus en, max 3 workers. På en enkärnig maskin
+kör den med en worker.
+
+Release-composefilen är dimensionerad för den svenska standarddatan med 1536
+MiB till web-containern och 512 MiB till PostgreSQL. Om du höjer
+worker-inställningar för en större lokal installation bör du också höja
+web-containerns minnesgräns och mäta på ditt eget recept- och butiksdata.
+
+Under längre ombyggnadsfaser skriver loggen `CACHE_REBUILD_PROGRESS` med
+procent, förfluten tid och uppskattad återstående tid. Om en ombyggnad
+misslyckas försöker Deal Meals fortsätta visa den tidigare cachen där det är
+möjligt, och Cache Doctor visar vad som behöver åtgärdas.
+
 ### Hur ofta bör jag hämta erbjudanden?
 
 Butikserbjudanden ändras vanligtvis varje vecka. Att ställa in ett **veckoschema** är idealiskt. Välj en dag då din butik brukar uppdatera sina erbjudanden (ofta måndag eller onsdag).

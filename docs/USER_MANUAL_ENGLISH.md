@@ -516,6 +516,30 @@ Then recreate the web container with `docker compose up -d web` (restart does NO
 
 You can run fetches manually too — but you'll need to wait while the offers download and the matching recalculates.
 
+### What happens during cache refreshes?
+
+Deal Meals tries to avoid full rebuilds when only a small part of the data has
+changed. Small incremental recipe fetches normally update only the affected
+recipes. First runs, large imports, matcher/version changes, or failed safety
+checks can still trigger a full recipe matching rebuild.
+
+Startup serves any existing cache immediately; it does not start a full rebuild
+just because the web container restarted. Long rebuilds run in a separate
+Python process by default, so the web UI can keep serving requests while the
+cache is recalculated. On multi-core hosts rebuild work uses up to the available
+CPU count minus one, capped at 3 workers. On a single-core host it stays on one
+worker.
+
+The release compose file is sized for the default Swedish data shape with 1536
+MiB for the web container and 512 MiB for PostgreSQL. If you increase cache
+worker settings for a larger local install, increase the web memory limit too
+and measure it on your own recipe and store data.
+
+During longer rebuild phases, the logs include `CACHE_REBUILD_PROGRESS` lines
+with percentage, elapsed time and ETA. If a rebuild fails, Deal Meals keeps
+serving the previous cache where possible and the Cache Doctor can show what
+needs attention.
+
 ### How often should I fetch offers?
 
 Store offers typically change weekly. Setting up a **weekly schedule** is ideal. Pick a day when your store usually updates their offers (often Monday or Wednesday).

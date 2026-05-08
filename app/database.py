@@ -8,6 +8,7 @@ Think of it like Entity Framework in .NET
 """
 
 from sqlalchemy import create_engine, text
+from sqlalchemy import event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
 from contextlib import contextmanager
@@ -15,6 +16,9 @@ from loguru import logger
 
 from config import settings
 from models import Base  # Import from models.py to ensure single source of truth
+
+
+SESSION_TEMP_BUFFERS = "128MB"
 
 
 # ===== ENGINE SETUP =====
@@ -33,6 +37,16 @@ engine = create_engine(
     # Logging (set True to see all SQL queries)
     echo=settings.debug,
 )
+
+
+@event.listens_for(engine, "connect")
+def _configure_connection(dbapi_connection, _connection_record):
+    """Set DB session defaults needed by the streaming cache writer."""
+    cursor = dbapi_connection.cursor()
+    try:
+        cursor.execute(f"SET temp_buffers = '{SESSION_TEMP_BUFFERS}'")
+    finally:
+        cursor.close()
 
 # ===== SESSION FACTORY =====
 # SessionLocal = factory for creating database sessions
