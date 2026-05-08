@@ -1189,9 +1189,10 @@ async function loadRecipeSuggestions() {
     await loadMoreSuggestions(true);
 }
 
-/// Force refresh: rebuild cache and reload from scratch
+/// Refresh visible suggestions from the current server cache.
 async function refreshRecipeSuggestions() {
-    // Clear local state
+    // Clear client-side state so the next request starts from the first page
+    // and uses the latest saved preferences/source settings.
     sessionStorage.removeItem('recipeSuggestions');
     sessionStorage.removeItem('recipeBalance');
     sessionStorage.removeItem('cacheGeneration');
@@ -1199,51 +1200,7 @@ async function refreshRecipeSuggestions() {
     allSuggestions = [];
     renderedRecipeIds = new Set();
 
-    // Show loading popup while cache rebuilds
-    Swal.fire({
-        title: i18n['home.rebuild_title'],
-        html: `<div class="mb-2">${i18n['home.rebuild_text']}</div><small class="text-muted">${i18n['home.rebuild_wait']}</small>`,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
-    try {
-        // Trigger cache rebuild
-        await fetch('/api/cache/reset', { method: 'POST' });
-
-        // Poll for completion (max 5 minutes — large DBs take 2-3 min)
-        const maxWait = 300000;
-        const pollInterval = 500;
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < maxWait) {
-            await new Promise(resolve => setTimeout(resolve, pollInterval));
-
-            try {
-                const statusResponse = await fetch('/api/cache/status');
-                if (!statusResponse.ok) continue;
-                const status = await statusResponse.json();
-
-                if (status.ready) {
-                    dbg.log(`[Cache] Rebuilt in ${Date.now() - startTime}ms, ${status.total_matches} recipes`);
-                    break;
-                }
-            } catch (e) {
-                // Ignore polling errors, keep waiting
-            }
-        }
-    } catch (e) {
-        console.error('Cache reset failed:', e);
-    }
-
-    // Close popup and load fresh recipes
-    Swal.close();
-    cacheResetTriggered = false;  // Reset flag so page-leave will trigger again
-    loadMoreSuggestions(true);
+    await loadMoreSuggestions(true);
 }
 
 async function loadMoreSuggestions(isInitialLoad = false) {
