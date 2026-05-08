@@ -87,6 +87,36 @@ def get_all_schedules():
     })
 
 
+@router.get("/schedules/recipe-run/status")
+def get_recipe_schedule_run_status():
+    """Get the currently running scheduled recipe scrape status."""
+    if not SCHEDULER_AVAILABLE:
+        return JSONResponse({"success": False, "message_key": "scheduler.not_available"}, status_code=500)
+
+    return JSONResponse({
+        "success": True,
+        **scraper_scheduler.get_recipe_schedule_status(),
+    })
+
+
+@router.post("/schedules/recipe-run/cancel")
+def cancel_recipe_schedule_run():
+    """Cancel the currently running scheduled recipe scrape."""
+    if not SCHEDULER_AVAILABLE:
+        return JSONResponse({"success": False, "message_key": "scheduler.not_available"}, status_code=500)
+
+    if not scraper_scheduler.cancel_recipe_schedule():
+        return JSONResponse({
+            "success": False,
+            "message_key": "recipes.no_active_fetch",
+        }, status_code=404)
+
+    return JSONResponse({
+        "success": True,
+        "message_key": "recipes.fetch_cancelled",
+    })
+
+
 @router.get("/schedules/{scraper_id}")
 def get_schedule(scraper_id: str):
     """Get schedule for a specific scraper."""

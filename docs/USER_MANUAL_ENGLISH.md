@@ -311,6 +311,9 @@ Just like store schedules, you can automate recipe fetching.
 
 The scheduling section works the same way as on the Stores page: pick a source, set frequency and time, and save. Choose **All active** to run every currently enabled recipe source as one sequential scheduled batch. The active source list is checked when the schedule runs, so sources enabled or disabled later are included or skipped automatically. The overview table shows all recipe schedules with last run results.
 
+When a scheduled recipe fetch is running while the Recipes page is open, it uses
+the same progress panel and cancel button as a manual fetch.
+
 ### 4.5 My Recipes — Add Your Own Recipes via URL
 
 In addition to the built-in recipe sources, you can add individual recipes from **any recipe website** that supports the schema.org/Recipe standard (most major recipe sites do).
@@ -512,7 +515,17 @@ Then recreate the web container with `docker compose up -d web` (restart does NO
 
 ### Should I schedule or run manually?
 
-**Scheduling is recommended.** When offers or recipes are fetched, the recipe matching cache is updated automatically. Small incremental recipe fetches can usually patch the cache with a fast delta, while offer fetches, large full recipe fetches, and fallback cases may run a full rebuild. If you schedule your fetches (e.g. overnight or early morning), everything happens in the background and your suggestions are ready when you open the app.
+**Scheduling is strongly recommended.** When offers or recipes are fetched, the
+recipe matching cache is updated automatically. Small incremental recipe
+fetches can usually patch the cache with a fast delta, which is the normal
+day-to-day path. Offer fetches, large full recipe fetches, first runs,
+matcher/version changes and fallback cases may still run a full rebuild. A full
+rebuild can take several minutes and uses noticeable CPU and memory, especially
+on smaller servers.
+
+For normal home use, schedule offer and recipe fetches outside active usage,
+for example overnight or early in the morning. Then any heavier rebuild happens
+in the background and your suggestions are ready when you open the app.
 
 You can run fetches manually too — but you'll need to wait while the offers download and the matching recalculates.
 
@@ -521,7 +534,9 @@ You can run fetches manually too — but you'll need to wait while the offers do
 Deal Meals tries to avoid full rebuilds when only a small part of the data has
 changed. Small incremental recipe fetches normally update only the affected
 recipes. First runs, large imports, matcher/version changes, or failed safety
-checks can still trigger a full recipe matching rebuild.
+checks can still trigger a full recipe matching rebuild. This is expected, but
+it is best treated as background maintenance rather than something you start
+while you are actively using the app on a small machine.
 
 Startup serves any existing cache immediately; it does not start a full rebuild
 just because the web container restarted. Long rebuilds run in a separate
@@ -531,9 +546,12 @@ CPU count minus one, capped at 3 workers. On a single-core host it stays on one
 worker.
 
 The release compose file is sized for the default Swedish data shape with 1536
-MiB for the web container and 512 MiB for PostgreSQL. If you increase cache
-worker settings for a larger local install, increase the web memory limit too
-and measure it on your own recipe and store data.
+MiB for the web container and 512 MiB for PostgreSQL. As a rule of thumb, the
+web container needs about 1 GiB per 10,000 active recipes. The default 1536 MiB
+limit is therefore meant for roughly 15,000 active recipes with the bundled
+Swedish data shape and cache settings. If you increase cache worker settings
+for a larger local install, increase the web memory limit too and measure it on
+your own recipe and store data.
 
 During longer rebuild phases, the logs include `CACHE_REBUILD_PROGRESS` lines
 with percentage, elapsed time and ETA. If a rebuild fails, Deal Meals keeps
@@ -582,11 +600,14 @@ Recipes that are buffets, multi-course dinners, or large party menus (30+ ingred
 Matching is intentionally broad — the goal is to show which store offers are relevant, not to provide a perfect shopping list. A few things to know:
 
 **Generic product categories:** Some ingredients are matched as a group rather than exactly:
-- **Pasta** — "penne", "tagliatelle", "fusilli" etc. all match any pasta product. Reason: most recipes work with any pasta type, and you want to see that pasta is on sale regardless of shape. Exception: "spaghetti" only matches long pasta (not e.g. farfalle).
+- **Pasta** — "penne", "fusilli", "rigatoni" etc. all match any pasta product. Reason: most recipes work with any pasta type, and you want to see that pasta is on sale regardless of shape. Exception: "spaghetti" only matches long pasta, meaning long strand or ribbon shapes such as spaghetti, linguine, tagliatelle, fettuccine and pappardelle, not short pasta such as farfalle.
 - **Rice** — "basmati rice" and "jasmine rice" match all rice products, since most dishes work with any rice type. Exception: "arborio rice" only matches itself — it's specific to risotto and not interchangeable.
 - **Cheese** — "ost" (cheese) matches all cheese types. Specific cheeses like "västerbottensost" or "mozzarella" match more precisely.
+- **Halloumi and grill cheese** — halloumi, Swedish "grillost" and branded variants such as grilloumi, eldost or norrloumi are treated as one cooking family. They are not always identical products, but they are often used in the same kind of recipes.
+- **Chicken fillet** — breast fillet, thigh fillet and generic or unspecified chicken fillet are treated as one cooking family. Drumsticks, wings, whole chicken and ready-cooked chicken products are not part of that broader fillet matching.
+- **Minced meat** — a recipe that says "nötfärs" (minced beef) may sometimes show nearby mince variants such as "blandfärs" (mixed beef/pork mince). This is intentionally pragmatic: many mince dishes work with several plain mince types, and the offer shows which variant happens to be discounted. You still choose the exact mince you want in the store.
 
-**Noise matches:** An ingredient like "garlic" may match products like "Bruschetta Garlic & Parsley" — a product *containing* garlic, not garlic itself. These appear to give a complete picture, but you're expected to pick the appropriate product.
+**Noise matches and flavour wording:** Deal Meals tries hard to keep false matches rare, but store product names change, new products appear, and names are not always very descriptive. That means an ingredient can sometimes accidentally match a product that only contains the ingredient or uses it as a flavour, such as "Bruschetta Garlic & Parsley" when the recipe wants plain garlic, or "Ginger Balsamic Vinegar" when the recipe wants ginger. These matches are not shown intentionally; they are noise the matcher tries to filter out.
 
 ### Can I find seasonal recipes out of season?
 
@@ -622,7 +643,7 @@ The matching is meant to be practical, not magical. For Swedish recipes and Swed
 
 100% accuracy is not realistic. Stores rename products, recipes can use vague wording, package names include brands and marketing text, and some ingredients simply do not map cleanly to this week's offers. The aim is "good enough to be useful" while keeping obviously wrong matches rare.
 
-Some simplifications are intentional. For example, pasta is grouped into broad families such as regular pasta and long pasta, some common rice varieties are treated as interchangeable, cheese is often grouped broadly, and the matcher is usually not overly strict about everyday variants of products such as cream cheese or mustard.
+Some simplifications are intentional. For example, pasta is grouped into broad families such as regular pasta and long pasta, some common rice varieties are treated as interchangeable, cheese is often grouped broadly, and the matcher is usually not overly strict about everyday variants of products such as halloumi/grill cheese, chicken fillet, mince, cream cheese or mustard.
 
 This gives you room to choose the exact product you prefer, and it increases the chance that a real offer is shown for the ingredient family instead of hiding useful deals because the recipe wording and the store wording were slightly different.
 

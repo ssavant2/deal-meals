@@ -237,7 +237,11 @@ def get_image_status():
 
 # NOTE: image_download_state is imported from state.py
 
-async def _download_images_task(batch_pause: int = IMAGE_BATCH_PAUSE_MANUAL):
+async def _download_images_task(
+    batch_pause: int = IMAGE_BATCH_PAUSE_MANUAL,
+    recipe_ids: list[str] | None = None,
+    source_names: list[str] | None = None,
+):
     """Background task to download recipe images with safe rate limiting.
 
     Rate limiting strategy:
@@ -253,8 +257,10 @@ async def _download_images_task(batch_pause: int = IMAGE_BATCH_PAUSE_MANUAL):
 
     Args:
         batch_pause: Seconds to pause after every 50 images.
-                     - 15s for manual download
-                     - 20s for auto-download after scraping
+            - 15s for manual download
+            - 20s for auto-download after scraping
+        recipe_ids: Optional explicit recipe ids to include.
+        source_names: Optional recipe sources whose missing-image backlog to include.
     """
     try:
         from PIL import Image
@@ -412,12 +418,40 @@ async def _download_images_task(batch_pause: int = IMAGE_BATCH_PAUSE_MANUAL):
         image_download_state["batch_pause"] = batch_pause
         set_message("config.images_progress_analyzing")
 
+        scoped_recipe_ids = [str(recipe_id) for recipe_id in (recipe_ids or []) if recipe_id]
+        scoped_source_names = [str(source_name) for source_name in (source_names or []) if source_name]
+        scope_requested = recipe_ids is not None or source_names is not None
+        scope_clauses = []
+        scope_params = {}
+        if scoped_recipe_ids:
+            scope_clauses.append("id::text = ANY(:recipe_ids)")
+            scope_params["recipe_ids"] = scoped_recipe_ids
+        if scoped_source_names:
+            scope_clauses.append("source_name = ANY(:source_names)")
+            scope_params["source_names"] = scoped_source_names
+
+        if scope_clauses:
+            scope_sql = " AND (" + " OR ".join(scope_clauses) + ")"
+            scope_label = []
+            if scoped_source_names:
+                scope_label.append(f"sources={scoped_source_names}")
+            if scoped_recipe_ids:
+                scope_label.append(f"recipes={len(scoped_recipe_ids)}")
+            logger.info(f"Image download scope: {', '.join(scope_label)}")
+        elif scope_requested:
+            scope_sql = " AND FALSE"
+            logger.info("Image download scope: empty")
+        else:
+            scope_sql = ""
+            logger.info("Image download scope: global")
+
         with get_db_session() as db:
             # Get all recipes with images
-            result = db.execute(text("""
+            result = db.execute(text(f"""
                 SELECT id, image_url FROM found_recipes
                 WHERE image_url IS NOT NULL AND image_url != ''
-            """)).fetchall()
+                {scope_sql}
+            """), scope_params).fetchall()
 
             # Get permanently failed images to skip
             permanently_failed = set()
@@ -477,12 +511,13 @@ async def _download_images_task(batch_pause: int = IMAGE_BATCH_PAUSE_MANUAL):
                 images_to_download.append((row.id, image_url, url_hash, filepath))
 
             # Set no_image.svg for recipes without any image_url
-            no_image_count = db.execute(text("""
+            no_image_count = db.execute(text(f"""
                 UPDATE found_recipes
                 SET local_image_path = '/static/no_image.svg'
                 WHERE (image_url IS NULL OR image_url = '')
                   AND (local_image_path IS NULL OR local_image_path = '')
-            """)).rowcount
+                  {scope_sql}
+            """), scope_params).rowcount
             if no_image_count:
                 logger.info(f"Set no_image.svg for {no_image_count} recipes without source image")
 

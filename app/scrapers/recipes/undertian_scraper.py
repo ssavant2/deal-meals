@@ -349,7 +349,7 @@ class UndertianScraper:
             if force_all:
                 candidate_urls = [url for url, _ in all_urls[:max_recipes or MAX_RECIPES]]
                 urls_to_scrape = candidate_urls
-                logger.info(f"OVERWRITE MODE: Scraping {len(urls_to_scrape)} recipes")
+                logger.info(f"OVERWRITE MODE: Trying {len(urls_to_scrape)} URLs")
             else:
                 # Incremental: skip already-saved URLs
                 existing_urls = self._get_existing_urls()
@@ -387,7 +387,7 @@ class UndertianScraper:
                         ]
 
                 logger.info(
-                    f"INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape "
+                    f"INCREMENTAL: {len(urls_to_scrape)} candidate URLs to try "
                     f"(target {max_recipes or 'auto'})"
                 )
 

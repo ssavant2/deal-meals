@@ -10,9 +10,19 @@ from sqlalchemy import text
 try:
     from config import settings
     from database import get_db_session
+    from languages.matcher_runtime import (
+        MATCHER_VERSION,
+        OFFER_COMPILER_VERSION,
+        RECIPE_COMPILER_VERSION,
+    )
 except ModuleNotFoundError:
     from app.config import settings
     from app.database import get_db_session
+    from app.languages.matcher_runtime import (
+        MATCHER_VERSION,
+        OFFER_COMPILER_VERSION,
+        RECIPE_COMPILER_VERSION,
+    )
 
 
 CACHE_NAME = "recipe_offer_matches"
@@ -28,6 +38,7 @@ class RecipeCacheStatusSnapshot:
     active_recipe_count: int
     metadata_total_matches: int | None = None
     metadata_total_recipes: int | None = None
+    cache_entry_version_mismatch_rows: int = 0
 
     def to_cache_state(self) -> dict[str, Any]:
         return {
@@ -36,6 +47,7 @@ class RecipeCacheStatusSnapshot:
             "offer_rows": self.offer_rows,
             "metadata_total_matches": self.metadata_total_matches,
             "metadata_total_recipes": self.metadata_total_recipes,
+            "cache_entry_version_mismatch_rows": self.cache_entry_version_mismatch_rows,
         }
 
 
@@ -104,6 +116,7 @@ def _coerce_snapshot(value: RecipeCacheStatusSnapshot | Mapping[str, Any]) -> Re
         active_recipe_count=int(value.get("active_recipe_count") or 0),
         metadata_total_matches=value.get("metadata_total_matches"),
         metadata_total_recipes=value.get("metadata_total_recipes"),
+        cache_entry_version_mismatch_rows=int(value.get("cache_entry_version_mismatch_rows") or 0),
     )
 
 
@@ -116,6 +129,17 @@ def load_recipe_cache_status_snapshot() -> RecipeCacheStatusSnapshot:
             WHERE cache_name = :cache_name
         """), {"cache_name": CACHE_NAME}).mappings().fetchone()
         cache_rows = db.execute(text("SELECT COUNT(*) FROM recipe_offer_cache")).scalar() or 0
+        cache_entry_version_mismatch_rows = db.execute(text("""
+            SELECT COUNT(*)
+            FROM recipe_offer_cache
+            WHERE COALESCE(match_data->>'matcher_version', '<missing>') <> :matcher_version
+               OR COALESCE(match_data->>'recipe_compiler_version', '<missing>') <> :recipe_compiler_version
+               OR COALESCE(match_data->>'offer_compiler_version', '<missing>') <> :offer_compiler_version
+        """), {
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "offer_compiler_version": OFFER_COMPILER_VERSION,
+        }).scalar() or 0
         offer_rows = db.execute(text("SELECT COUNT(*) FROM offers")).scalar() or 0
         active_recipe_count = db.execute(text("""
             SELECT COUNT(*)
@@ -130,6 +154,7 @@ def load_recipe_cache_status_snapshot() -> RecipeCacheStatusSnapshot:
         active_recipe_count=int(active_recipe_count),
         metadata_total_matches=metadata["total_matches"] if metadata else None,
         metadata_total_recipes=metadata["total_recipes"] if metadata else None,
+        cache_entry_version_mismatch_rows=int(cache_entry_version_mismatch_rows),
     )
 
 
@@ -178,6 +203,8 @@ def decide_recipe_cache_refresh_strategy(
         return decision("full", "active_recipe_count_empty")
     if snapshot.cache_rows <= 0:
         return decision("full", "active_cache_empty")
+    if snapshot.cache_entry_version_mismatch_rows > 0:
+        return decision("full", "cache_entry_version_mismatch")
     if ratio is not None and ratio <= threshold:
         return decision("delta", "ratio_within_threshold")
     return decision("full", "ratio_above_threshold")

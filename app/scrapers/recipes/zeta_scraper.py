@@ -606,7 +606,7 @@ class ZetaScraper:
 
         if force_all:
             urls_to_scrape = all_urls[:max_recipes] if max_recipes else all_urls
-            logger.info(f"FULL MODE: Scraping {len(urls_to_scrape)} recipes")
+            logger.info(f"FULL MODE: Trying {len(urls_to_scrape)} URLs")
             return urls_to_scrape
 
         existing_urls = await self.get_existing_urls()
@@ -627,7 +627,7 @@ class ZetaScraper:
             urls_to_scrape = urls_to_scrape[:attempt_limit]
 
         logger.info(f"Existing in DB: {len(existing_urls)}")
-        logger.info(f"New to scrape: {len(urls_to_scrape)} (target {max_recipes or 'auto'})")
+        logger.info(f"Candidate URLs to try: {len(urls_to_scrape)} (target {max_recipes or 'auto'})")
         return urls_to_scrape
 
     async def scrape_and_save(
@@ -778,7 +778,7 @@ class ZetaScraper:
             )
 
         # Scrape recipes with concurrency
-        logger.info(f"\nScraping {len(urls_to_scrape)} recipes ({CONCURRENT_REQUESTS} concurrent)...")
+        logger.info(f"\nTrying {len(urls_to_scrape)} URLs ({CONCURRENT_REQUESTS} concurrent)...")
 
         recipes = []
         semaphore = asyncio.Semaphore(CONCURRENT_REQUESTS)

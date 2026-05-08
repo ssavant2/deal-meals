@@ -117,6 +117,16 @@ def main() -> int:
         check("empty cache uses full", empty_cache.strategy, "full")
         check("empty cache reason", empty_cache.reason, "active_cache_empty")
 
+        version_mismatch = decide(["a"], snapshot=RecipeCacheStatusSnapshot(
+            status="ready",
+            cache_rows=8_000,
+            offer_rows=135,
+            active_recipe_count=13_000,
+            cache_entry_version_mismatch_rows=1,
+        ))
+        check("version mismatch uses full", version_mismatch.strategy, "full")
+        check("version mismatch reason", version_mismatch.reason, "cache_entry_version_mismatch")
+
         context = small.to_operation_context()
         check("context decision", context["recipe_delta_decision"], "delta")
         check("context reason", context["recipe_delta_reason"], "ratio_within_threshold")

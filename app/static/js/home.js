@@ -41,6 +41,13 @@ const CATEGORY_INFO = {
     'vegetarian': { name: i18n['category.vegetarian'], icon: 'bi-tree' },
     'smart_buy': { name: i18n['category.smart_buy'], icon: 'bi-piggy-bank' }
 };
+const SUGGESTIONS_UPDATE_POLL_MS = 2500;
+const SUGGESTIONS_UPDATE_RECENT_MS = 24 * 60 * 60 * 1000;
+const SUGGESTIONS_UPDATE_ACK_KEY = 'dealMealsSuggestionsAcknowledgedGeneration';
+let suggestionsUpdatePollInterval = null;
+let suggestionsUpdateWasComputing = false;
+let suggestionsUpdateReadyPending = false;
+let suggestionsUpdatePendingGeneration = null;
 
 // Encode JSON for use in HTML attributes (escapes double quotes)
 function encodeJsonAttr(jsonStr) {
@@ -88,6 +95,8 @@ function closeAllSections() {
 
     // Stop listening for background scrape events (not needed on search/pantry)
     disconnectCacheEvents();
+    stopSuggestionsUpdateStatusPolling();
+    hideSuggestionsUpdateStatus();
 
     // Remove active state from all nav buttons
     document.querySelectorAll('#quick-actions-row .main-nav-active').forEach(
@@ -116,16 +125,187 @@ function toggleSuggestions() {
     closeAllSections();
 
     bootstrap.Collapse.getOrCreateInstance(suggestionsSection).show();
-    suggestionsHeader.style.display = 'flex';
+    suggestionsHeader.style.display = '';
     stickyBlock.classList.add('has-shadow');
     document.getElementById('btn-suggestions').classList.add('main-nav-active');
     localStorage.setItem('activeSection', 'suggestions');
 
     // Listen for background scrape completions while viewing suggestions
     connectCacheEvents();
+    startSuggestionsUpdateStatusPolling();
 
     // Category headers will be shown by renderSuggestions() after content is ready
     loadRecipeSuggestions();
+}
+
+function hideSuggestionsUpdateStatus() {
+    const statusEl = document.getElementById('suggestions-update-status');
+    if (!statusEl) return;
+    statusEl.classList.remove('visible', 'is-complete');
+    const icon = statusEl.querySelector('.status-icon');
+    if (icon) icon.classList.remove('spin-animation');
+    const textEl = statusEl.querySelector('.status-text');
+    if (textEl) textEl.textContent = '';
+}
+
+function showSuggestionsUpdateStatus(kind) {
+    const statusEl = document.getElementById('suggestions-update-status');
+    if (!statusEl) return;
+    const icon = statusEl.querySelector('.status-icon');
+    const textEl = statusEl.querySelector('.status-text');
+    statusEl.classList.add('visible');
+    statusEl.classList.toggle('is-complete', kind === 'complete');
+    if (icon) icon.classList.toggle('spin-animation', kind === 'updating');
+    if (textEl) {
+        textEl.textContent = kind === 'complete'
+            ? i18n['home.update_ready_refresh']
+            : i18n['home.update_in_progress'];
+    }
+}
+
+function getCacheGenerationFromStatus(cacheStatus) {
+    if (!cacheStatus) return '';
+    return String(
+        cacheStatus.cache_generation
+        || cacheStatus.cache_freshness?.metadata?.last_computed_at
+        || ''
+    );
+}
+
+function hasStoredSuggestionsGenerationChanged(serverGeneration) {
+    const storedGeneration = sessionStorage.getItem('cacheGeneration');
+    const hasVisibleOrStoredSuggestions = suggestionsLoaded
+        || allSuggestions.length > 0
+        || Boolean(sessionStorage.getItem('recipeSuggestions'));
+    return Boolean(
+        hasVisibleOrStoredSuggestions
+        && storedGeneration
+        && serverGeneration
+        && storedGeneration !== String(serverGeneration)
+    );
+}
+
+function getSuggestionsUpdateSource(cacheStatus) {
+    return String(
+        cacheStatus?.cache_freshness?.last_operation?.source
+        || cacheStatus?.background_rebuild_source
+        || ''
+    );
+}
+
+function isRecipeSuggestionsUpdate(cacheStatus) {
+    const source = getSuggestionsUpdateSource(cacheStatus);
+    return source.startsWith('recipe_scrape:')
+        || source === 'recipe_run_all'
+        || source.startsWith('scheduled_recipe_batch:');
+}
+
+function getSuggestionsUpdateGeneratedAt(cacheStatus) {
+    return String(
+        cacheStatus?.cache_freshness?.last_operation?.generated_at
+        || cacheStatus?.cache_freshness?.metadata?.last_computed_at
+        || cacheStatus?.cache_generation
+        || ''
+    );
+}
+
+function isRecentSuggestionsUpdate(cacheStatus) {
+    const generatedAt = getSuggestionsUpdateGeneratedAt(cacheStatus);
+    if (!generatedAt) return false;
+    const timestamp = Date.parse(generatedAt);
+    return Number.isFinite(timestamp) && Date.now() - timestamp <= SUGGESTIONS_UPDATE_RECENT_MS;
+}
+
+function isSuggestionsUpdateAcknowledged(serverGeneration) {
+    return Boolean(serverGeneration && localStorage.getItem(SUGGESTIONS_UPDATE_ACK_KEY) === String(serverGeneration));
+}
+
+function acknowledgeSuggestionsUpdate(cacheGeneration = null) {
+    const generation = cacheGeneration
+        || sessionStorage.getItem('cacheGeneration')
+        || suggestionsUpdatePendingGeneration
+        || pageConfig.cacheGeneration;
+    if (generation) {
+        localStorage.setItem(SUGGESTIONS_UPDATE_ACK_KEY, String(generation));
+    }
+}
+
+function markSuggestionsUpdateStarted() {
+    suggestionsUpdateWasComputing = true;
+    suggestionsUpdateReadyPending = false;
+    suggestionsUpdatePendingGeneration = null;
+    if (isSuggestionsOpen()) showSuggestionsUpdateStatus('updating');
+    startSuggestionsUpdateStatusPolling();
+}
+
+function markSuggestionsUpdateReady(cacheGeneration = null) {
+    suggestionsUpdateWasComputing = false;
+    suggestionsUpdateReadyPending = true;
+    suggestionsUpdatePendingGeneration = cacheGeneration || suggestionsUpdatePendingGeneration;
+    if (isSuggestionsOpen()) showSuggestionsUpdateStatus('complete');
+    stopSuggestionsUpdateStatusPolling();
+}
+
+function clearSuggestionsUpdateState() {
+    suggestionsUpdateWasComputing = false;
+    suggestionsUpdateReadyPending = false;
+    suggestionsUpdatePendingGeneration = null;
+    hideSuggestionsUpdateStatus();
+}
+
+function applySuggestionsCacheStatus(cacheStatus) {
+    if (!cacheStatus || !isSuggestionsOpen()) return;
+    const serverGeneration = getCacheGenerationFromStatus(cacheStatus);
+    if (cacheStatus.status === 'computing') {
+        markSuggestionsUpdateStarted();
+        return;
+    }
+    const shouldShowReady = suggestionsUpdateWasComputing
+        || hasStoredSuggestionsGenerationChanged(serverGeneration)
+        || (
+            cacheStatus.ready
+            && isRecipeSuggestionsUpdate(cacheStatus)
+            && isRecentSuggestionsUpdate(cacheStatus)
+            && !isSuggestionsUpdateAcknowledged(serverGeneration)
+        );
+    if (cacheStatus.ready && shouldShowReady) {
+        markSuggestionsUpdateReady(serverGeneration);
+        return;
+    }
+    if (cacheStatus.ready) {
+        stopSuggestionsUpdateStatusPolling();
+    }
+    if (cacheStatus.status === 'error') {
+        clearSuggestionsUpdateState();
+        stopSuggestionsUpdateStatusPolling();
+    }
+}
+
+async function refreshSuggestionsUpdateStatus() {
+    if (!isSuggestionsOpen()) return;
+    try {
+        const response = await fetch('/api/cache/status');
+        if (!response.ok) return;
+        applySuggestionsCacheStatus(await response.json());
+    } catch (error) {
+        if (dbg.debug) dbg.debug('Could not refresh suggestion update status:', error);
+    }
+}
+
+function startSuggestionsUpdateStatusPolling() {
+    if (suggestionsUpdateReadyPending) {
+        if (isSuggestionsOpen()) showSuggestionsUpdateStatus('complete');
+        return;
+    }
+    if (suggestionsUpdatePollInterval) return;
+    suggestionsUpdatePollInterval = setInterval(refreshSuggestionsUpdateStatus, SUGGESTIONS_UPDATE_POLL_MS);
+    refreshSuggestionsUpdateStatus();
+}
+
+function stopSuggestionsUpdateStatusPolling() {
+    if (!suggestionsUpdatePollInterval) return;
+    clearInterval(suggestionsUpdatePollInterval);
+    suggestionsUpdatePollInterval = null;
 }
 
 function toggleSearch() {
@@ -239,12 +419,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const sugHeader = document.getElementById('suggestions-header-sticky');
             const stickyBlock = document.getElementById('sticky-header-block');
             sugSection.classList.add('show');
-            if (sugHeader) sugHeader.style.display = 'flex';
+            if (sugHeader) sugHeader.style.display = '';
             if (stickyBlock) stickyBlock.classList.add('has-shadow');
             loadRecipeSuggestions();
         }
         // Listen for background scrape completions
         connectCacheEvents();
+        startSuggestionsUpdateStatusPolling();
     } else if (saved === 'search') {
         document.getElementById('search-section').classList.add('show');
         document.getElementById('btn-search').classList.add('main-nav-active');
@@ -1099,13 +1280,7 @@ async function excludeCurrentRecipe() {
     // Auto-invalidate if server cache was rebuilt since last load
     const serverGeneration = pageConfig.cacheGeneration == null ? '' : String(pageConfig.cacheGeneration);
     const storedGeneration = sessionStorage.getItem('cacheGeneration');
-    if (serverGeneration && storedGeneration && serverGeneration !== storedGeneration) {
-        sessionStorage.removeItem('recipeSuggestions');
-        sessionStorage.removeItem('recipeBalance');
-        sessionStorage.removeItem('cacheGeneration');
-        dbg.log(`[Suggestions] Server cache rebuilt (${storedGeneration} → ${serverGeneration}), auto-cleared`);
-        return;
-    }
+    const generationChangedOnLoad = Boolean(serverGeneration && storedGeneration && serverGeneration !== storedGeneration);
 
     const cached = sessionStorage.getItem('recipeSuggestions');
     const cachedBalance = sessionStorage.getItem('recipeBalance');
@@ -1118,6 +1293,11 @@ async function excludeCurrentRecipe() {
             allSuggestions = data.recipes || [];
             if (allSuggestions.length > 0) {
                 suggestionsLoaded = true;
+                if (generationChangedOnLoad) {
+                    suggestionsUpdateReadyPending = true;
+                    suggestionsUpdatePendingGeneration = serverGeneration;
+                    dbg.log(`[Suggestions] Server suggestions updated (${storedGeneration} → ${serverGeneration}), keeping visible suggestions until refresh`);
+                }
 
                 // Only auto-expand if suggestions is the active section (or no section saved)
                 const activeSection = localStorage.getItem('activeSection');
@@ -1144,7 +1324,7 @@ async function excludeCurrentRecipe() {
                         if (pantrySection) pantrySection.classList.remove('show');
 
                         // Show sticky header elements
-                        if (suggestionsHeader) suggestionsHeader.style.display = 'flex';
+                        if (suggestionsHeader) suggestionsHeader.style.display = '';
                         if (stickyBlock) stickyBlock.classList.add('has-shadow');
 
                         // Mark button active
@@ -1155,6 +1335,9 @@ async function excludeCurrentRecipe() {
                         results.style.display = 'block';
                         if (loadMoreDiv) loadMoreDiv.style.display = 'block';
                         renderSuggestions(allSuggestions);
+                        if (suggestionsUpdateReadyPending) {
+                            showSuggestionsUpdateStatus('complete');
+                        }
                         // Update button state
                         if (loadMoreBtn && data.noMore) {
                             loadMoreBtn.innerHTML = `<i class="bi bi-check-circle"></i> ${i18n['home.no_more']}`;
@@ -1258,6 +1441,8 @@ async function refreshRecipeSuggestions() {
 
     Swal.close();
     await loadMoreSuggestions(true);
+    acknowledgeSuggestionsUpdate();
+    clearSuggestionsUpdateState();
 }
 
 async function loadMoreSuggestions(isInitialLoad = false) {
@@ -1286,6 +1471,7 @@ async function loadMoreSuggestions(isInitialLoad = false) {
                 const statusResp = await fetch('/api/cache/status');
                 if (statusResp.ok) {
                     const cacheStatus = await statusResp.json();
+                    applySuggestionsCacheStatus(cacheStatus);
                     const freshness = cacheStatus.cache_freshness || {};
                     if (cacheStatus.status === 'error' && freshness.servable !== true) {
                         loading.style.display = 'none';
@@ -1321,10 +1507,15 @@ async function loadMoreSuggestions(isInitialLoad = false) {
             let generationChanged = false;
 
             if (storedGeneration && serverGeneration && storedGeneration !== serverGeneration) {
-                // Cache was rebuilt on server - clear client state and start fresh
-                dbg.log(`[Suggestions] Cache rebuilt on server (${storedGeneration} → ${serverGeneration}), clearing client state`);
-                allSuggestions = [];
-                renderedRecipeIds.clear();
+                if (allSuggestions.length > 0) {
+                    dbg.log(`[Suggestions] Server suggestions updated (${storedGeneration} → ${serverGeneration}), waiting for manual refresh`);
+                    markSuggestionsUpdateReady(serverGeneration);
+                    if (loadMoreBtn) {
+                        loadMoreBtn.innerHTML = `<i class="bi bi-plus-circle"></i> ${i18n['home.load_more']}`;
+                        loadMoreBtn.disabled = false;
+                    }
+                    return;
+                }
                 generationChanged = true;
             }
 
@@ -2213,12 +2404,18 @@ let cacheEventSource = null;
 async function handleCacheEvent(event) {
     const data = JSON.parse(event.data);
 
-    // Silent invalidation (e.g. new recipes scraped) — just clear client cache
-    if (data.type === 'cache_invalidated') {
-        dbg.log('[SSE] Cache invalidated (silent) — will refresh on next load');
-        sessionStorage.removeItem('recipeSuggestions');
-        sessionStorage.removeItem('recipeBalance');
-        sessionStorage.removeItem('cacheGeneration');
+    // Recipe suggestions are being recalculated. Keep the visible list stable
+    // until the user refreshes it, so cards do not reshuffle mid-read.
+    if (data.type === 'cache_invalidated' || data.type === 'suggestions_update_started') {
+        dbg.log('[SSE] Suggestions update started');
+        markSuggestionsUpdateStarted();
+        return;
+    }
+
+    if (data.type === 'suggestions_update_ready') {
+        dbg.log('[SSE] Suggestions update ready');
+        markSuggestionsUpdateReady(data.cache_generation);
+        loadRecipeStatus();
         return;
     }
 
@@ -2298,6 +2495,7 @@ document.addEventListener('visibilitychange', () => {
         disconnectCacheEvents();
     } else if (isSuggestionsOpen()) {
         connectCacheEvents();
+        startSuggestionsUpdateStatusPolling();
     }
 });
 

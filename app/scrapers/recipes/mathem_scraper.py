@@ -395,6 +395,8 @@ class MathemScraper:
             # Process in batches for progress logging
             batch_size = 10
             for i in range(0, len(urls), batch_size):
+                if self._cancel_flag:
+                    break
                 if recipe_target_reached(
                     max_recipes=max_recipes,
                     recipes=recipes,
@@ -405,7 +407,7 @@ class MathemScraper:
                 batch_num = i // batch_size + 1
                 total_batches = (len(urls) + batch_size - 1) // batch_size
 
-                logger.info(f"   Batch {batch_num}/{total_batches}: scraping {len(batch)} recipes...")
+                logger.info(f"   Batch {batch_num}/{total_batches}: trying {len(batch)} URLs...")
 
                 tasks = [scrape_with_semaphore(client, url) for url in batch]
                 results = await asyncio.gather(*tasks)
@@ -456,6 +458,8 @@ class MathemScraper:
                 if i + batch_size < len(urls):
                     await asyncio.sleep(1.0)
 
+        if self._cancel_flag:
+            logger.info("Mathem scrape cancelled")
         if failed_count > 0:
             logger.info(f"   ({failed_count} recipes failed/skipped)")
         if record_discovery:
@@ -507,7 +511,7 @@ class MathemScraper:
         if force_all:
             # Full mode - scrape everything
             urls_to_scrape = all_urls[:max_recipes] if max_recipes else all_urls
-            logger.info(f"FULL MODE: Scraping {len(urls_to_scrape)} recipes")
+            logger.info(f"FULL MODE: Trying {len(urls_to_scrape)} URLs")
         else:
             # Incremental mode - only new recipes
             existing = await self.get_existing_recipes()
@@ -530,7 +534,7 @@ class MathemScraper:
                 urls_to_scrape = urls_to_scrape[:attempt_limit]
 
             logger.info(
-                f"INCREMENTAL MODE: {len(urls_to_scrape)} new recipes to scrape "
+                f"INCREMENTAL MODE: {len(urls_to_scrape)} candidate URLs to try "
                 f"(target {max_recipes or 'auto'})"
             )
 
@@ -551,6 +555,14 @@ class MathemScraper:
         )
         found_count = stream_saver.seen_count if stream_saver else len(recipes)
         logger.info(f"\nScraped {found_count} recipes successfully")
+        if self._cancel_flag:
+            return make_recipe_scrape_result(
+                recipes,
+                force_all=force_all,
+                max_recipes=max_recipes,
+                cancelled=True,
+                reason="cancelled",
+            )
 
         return make_recipe_scrape_result(
             recipes,

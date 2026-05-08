@@ -123,7 +123,9 @@ UI = {
     # Suggestions refresh dialog
     'home.rebuild_title': 'Uppdaterar förslag...',
     'home.rebuild_text': 'Uppdaterar förslag utifrån aktuella inställningar',
-    'home.rebuild_wait': 'Bygger om servercachen vid behov.',
+    'home.rebuild_wait': 'Det kan ta en liten stund om förslagen behöver räknas om.',
+    'home.update_in_progress': 'uppdatering pågår, visar senaste färdiga förslag',
+    'home.update_ready_refresh': 'uppdatering klar - klicka på Uppdatera\nför att inkludera senaste hämtningen',
     'home.cache_error_title': 'Cache-fel',
     'home.cache_error_text': 'Receptmatchningen kunde inte läsas från servercachen. Kör en manuell cacheuppdatering om felet kvarstår.',
 
@@ -333,6 +335,8 @@ UI = {
     'recipes.select_source_placeholder': '-- Välj en källa --',
     'recipes.all_active_sources': 'Samtliga aktiva',
     'recipes.running_all_progress': 'Hämtar {name} ({current}/{total})...',
+    'recipes.scheduled_fetch_source': 'Hämtar recept från {source}',
+    'recipes.scheduled_fetch_source_active': 'Hämtar recept från {source} - {active}',
     'recipes.all_complete': 'Alla {count} källor hämtade',
     'recipes.all_complete_summary': 'Totalt {total} nya recept',
     'recipes.run_all_confirm_title': 'Hämta alla {count} källor?',

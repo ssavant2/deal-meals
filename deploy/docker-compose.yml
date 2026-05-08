@@ -53,6 +53,8 @@ services:
   web:
     container_name: deal-meals-web
     image: ghcr.io/ssavant2/deal-meals:${DEAL_MEALS_VERSION:-latest}
+    # Sized for roughly 15,000 active recipes. Rule of thumb:
+    # about 1 GiB web memory per 10,000 active recipes.
     mem_limit: 1536m
     pids_limit: 200
     cpu_shares: 1024

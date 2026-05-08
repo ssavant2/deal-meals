@@ -84,6 +84,11 @@ the live app behavior:
   Reconciliation is opportunistic: after scheduled recipe/store jobs it should
   run only when the cache is ready, the app has been idle long enough, and the
   last full rebuild is old or enough delta/skip operations have accumulated.
+- For scheduled recipe scraper limit/status/cancel changes, run
+  `docker compose exec -T -w /app web python tests/run_scheduler_recipe_limit_checks.py`.
+  Scheduled incremental runs should use the same effective per-source
+  `max_recipes_incremental` setting as the manual UI path and expose a
+  cancellable running state to the recipes page.
 - For store-offer cache refresh changes, run the same store twice in dev. The
   first run may choose `offer_refresh_strategy=full` to establish a compatible
   baseline; the second identical run should choose `offer_refresh_strategy=skip`

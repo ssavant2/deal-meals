@@ -64,6 +64,12 @@ among this week's offers. The goal is practical usefulness: good enough to help
 you find real meal ideas from current deals, while keeping misleading matches
 as low as possible.
 
+Some everyday product families are intentionally matched pragmatically. Pasta
+families such as regular pasta and long pasta, rice, cheese, halloumi/grill
+cheese, plain chicken fillet variants and mince variants may be grouped where
+recipes are usually flexible, so a useful discounted alternative is not hidden
+just because the store and recipe use slightly different wording.
+
 For best results, download several thousand recipes from multiple sources. A
 small recipe database can still be useful for search, but with only a few
 hundred recipes the chance of finding a recipe with several strong current deals
@@ -90,6 +96,13 @@ the faster paths are warming up, refreshes can simply be a little slower.
 Scheduling recipe and store fetches lets these refreshes happen in the
 background. See the user manual for the practical cache refresh behavior.
 
+The incremental delta path is the normal day-to-day path, but full rebuilds can
+still happen after first setup, larger imports, offer updates, matcher/version
+changes or safety fallbacks. Full rebuilds may take several minutes and use
+noticeable CPU and memory, especially on smaller servers. For normal use,
+schedule recipe and store fetches overnight or at another quiet time so any
+heavier rebuild runs while the app is not being actively used.
+
 ## Requirements
 
 - Docker with Compose v2
@@ -98,13 +111,18 @@ background. See the user manual for the practical cache refresh behavior.
   longer and can make the web UI less responsive while they run.
 
 The release compose file uses conservative container limits: 1536 MiB for the
-web container and 512 MiB for PostgreSQL. Very large recipe libraries or custom
-worker settings may need more headroom, so measure on your own data if you tune
-those settings.
+web container and 512 MiB for PostgreSQL. As a practical sizing rule, budget
+about 1 GiB of web-container memory per 10,000 active recipes. The bundled
+1536 MiB web limit is therefore intended for roughly 15,000 active recipes with
+the default Swedish data shape and cache settings. Very large recipe libraries
+or custom worker settings may need more headroom, so measure on your own data
+if you tune those settings.
 
 Cache refreshes, full rebuilds and progress logging are covered in the user
 manuals: [Swedish](docs/USER_MANUAL_SVENSKA.md#vad-händer-vid-cacheuppdateringar)
 and [English](docs/USER_MANUAL_ENGLISH.md#what-happens-during-cache-refreshes).
+For smaller hosts, scheduled overnight fetches are strongly recommended so full
+rebuilds do not compete with interactive use.
 
 ## Network Security
 

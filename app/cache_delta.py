@@ -651,12 +651,24 @@ def _active_cache_state() -> dict[str, Any]:
             WHERE cache_name = 'recipe_offer_matches'
         """)).mappings().fetchone()
         cache_rows = db.execute(text("SELECT COUNT(*) FROM recipe_offer_cache")).scalar() or 0
+        cache_entry_version_mismatch_rows = db.execute(text("""
+            SELECT COUNT(*)
+            FROM recipe_offer_cache
+            WHERE COALESCE(match_data->>'matcher_version', '<missing>') <> :matcher_version
+               OR COALESCE(match_data->>'recipe_compiler_version', '<missing>') <> :recipe_compiler_version
+               OR COALESCE(match_data->>'offer_compiler_version', '<missing>') <> :offer_compiler_version
+        """), {
+            "matcher_version": MATCHER_VERSION,
+            "recipe_compiler_version": RECIPE_COMPILER_VERSION,
+            "offer_compiler_version": OFFER_COMPILER_VERSION,
+        }).scalar() or 0
         offer_rows = db.execute(text("SELECT COUNT(*) FROM offers")).scalar() or 0
     return {
         "status": metadata["status"] if metadata else None,
         "metadata_total_matches": metadata["total_matches"] if metadata else None,
         "metadata_total_recipes": metadata["total_recipes"] if metadata else None,
         "cache_rows": cache_rows,
+        "cache_entry_version_mismatch_rows": int(cache_entry_version_mismatch_rows),
         "offer_rows": offer_rows,
     }
 
@@ -965,6 +977,24 @@ def _set_runtime_rebuild_profile(cache_manager) -> None:
     }
 
 
+def _ensure_cache_affecting_preferences_context(operation_context: dict[str, Any]) -> None:
+    """Attach the same preference hash full rebuilds write to cache metadata."""
+    if operation_context.get("cache_affecting_preferences_hash"):
+        return
+    try:
+        from cache_manager import _cache_affecting_preferences_hash
+        from recipe_matcher import get_effective_matching_preferences
+    except ModuleNotFoundError:
+        from app.cache_manager import _cache_affecting_preferences_hash
+        from app.recipe_matcher import get_effective_matching_preferences
+    try:
+        operation_context["cache_affecting_preferences_hash"] = _cache_affecting_preferences_hash(
+            get_effective_matching_preferences()
+        )
+    except Exception as exc:
+        logger.debug(f"Could not attach cache-affecting preference hash to delta metadata: {exc}")
+
+
 def _recipe_delta_fallback_result(
     *,
     changed_recipe_ids: list[str],
@@ -1028,6 +1058,7 @@ def _apply_recipe_delta_unlocked(
     ]
     status_was_set = False
     operation_context = dict(operation_context or {})
+    _ensure_cache_affecting_preferences_context(operation_context)
 
     verification_policy = _resolve_recipe_delta_verification_policy(
         verify_full_preview=verify_full_preview,
@@ -1092,6 +1123,8 @@ def _apply_recipe_delta_unlocked(
         return _fallback("cache_not_ready", extra={"cache_state": cache_state})
     if cache_state["cache_rows"] == 0 and cache_state["offer_rows"] > 0:
         return _fallback("active_cache_empty", extra={"cache_state": cache_state})
+    if int(cache_state.get("cache_entry_version_mismatch_rows") or 0) > 0:
+        return _fallback("cache_entry_version_mismatch", extra={"cache_state": cache_state})
     active_recipe_count = operation_context.get("active_recipe_count")
     if active_recipe_count is None:
         active_recipe_count = cache_state.get("metadata_total_recipes")
@@ -1481,10 +1514,31 @@ def _apply_verified_offer_delta_unlocked(
 
     started_at = time.perf_counter()
     operation_context = dict(operation_context or {})
+    _ensure_cache_affecting_preferences_context(operation_context)
 
     verification_policy = _resolve_delta_verification_policy(
         verify_full_preview=verify_full_preview,
     )
+
+    cache_state = _active_cache_state()
+    if int(cache_state.get("cache_entry_version_mismatch_rows") or 0) > 0:
+        result = {
+            "success": False,
+            "applied": False,
+            "fallback_reason": "cache_entry_version_mismatch",
+            "verify_full_preview": verification_policy["requested_verify_full_preview"],
+            "effective_verify_full_preview": verification_policy["effective_verify_full_preview"],
+            "verification_mode": verification_policy["verification_mode"],
+            "cache_state": cache_state,
+            **operation_context,
+        }
+        if apply:
+            record_cache_last_operation(
+                result,
+                operation_type="offer_delta",
+                status="fallback",
+            )
+        return result
 
     with get_db_session() as db:
         offers = db.query(Offer).order_by(Offer.id).all()

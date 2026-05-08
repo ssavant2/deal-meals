@@ -33,6 +33,8 @@ function formatDuration(seconds) {
 let scrapers = [];
 let pollingInterval = null;
 let currentScraperId = null;
+let scheduledRecipeRunActive = false;
+let scheduledRecipeRunWatchInterval = null;
 let completedScrapes = 0;
 let runAllQueue = null;  // { scrapers: [], index: 0, totalNew: 0 } when running all active
 let imageDownloadRunning = Boolean(pageConfig.image_download_running);
@@ -56,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initRecipeRunButtonState();
     refreshImageAutoDownloadPreference();
     refreshImageDownloadLock();
+    startScheduledRecipeRunWatch();
     document.addEventListener('visibilitychange', function() {
         if (document.hidden) {
             stopImageDownloadLockPolling();
@@ -76,6 +79,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function startScheduledRecipeRunWatch() {
+    if (scheduledRecipeRunWatchInterval) return;
+    scheduledRecipeRunWatchInterval = setInterval(async () => {
+        if (pollingInterval || scheduledRecipeRunActive || runButtonRecipeLocked) return;
+        try {
+            const response = await fetch('/api/schedules/recipe-run/status');
+            const data = await response.json();
+            if (data.success && data.running) {
+                showScheduledRecipeRun(data);
+                startScheduledRecipePolling();
+            }
+        } catch (error) {
+            console.debug('Could not check scheduled recipe run status:', error);
+        }
+    }, 10000);
+}
 
 function initRecipeRunButtonState() {
     const btn = document.getElementById('run-scraper-btn');
@@ -146,6 +166,50 @@ function setProgressPanelRecipeMode() {
         progressBar.setAttribute('aria-valuenow', '0');
     }
     setProgressCancelAction('cancelScraper');
+}
+
+function getRecipeSourceDisplayName(scraperId) {
+    if (scraperId === ALL_ACTIVE_RECIPE_SCRAPERS_ID) {
+        return i18n.all_active_sources;
+    }
+    const scraper = scrapers.find(s => s.id === scraperId);
+    return scraper ? scraper.name : scraperId;
+}
+
+function formatScheduledRecipeMessage(data) {
+    let source = getRecipeSourceDisplayName(data.root_scraper_id || data.current_scraper_id);
+    if (data.root_scraper_id === ALL_ACTIVE_RECIPE_SCRAPERS_ID) {
+        source = source.toLocaleLowerCase(RECIPE_LOCALE);
+    }
+    const active = getRecipeSourceDisplayName(data.current_scraper_id) || data.current_scraper_name;
+    const isAllActive = data.root_scraper_id === ALL_ACTIVE_RECIPE_SCRAPERS_ID;
+    const prefix = isAllActive
+        ? t('scheduled_fetch_source_active', { source: source, active: active })
+        : t('scheduled_fetch_source', { source: active || source });
+
+    let detail = '';
+    if (data.message_key === 'recipes.fetching_progress') {
+        detail = t(data.message_key, data.message_params || {});
+    } else if (data.message_key && !['recipes.starting_fetch', 'recipes.fetching_recipes'].includes(data.message_key)) {
+        detail = t(data.message_key, data.message_params || {});
+    }
+
+    return detail && detail !== data.message_key ? `${prefix} - ${detail}` : prefix;
+}
+
+function showScheduledRecipeRun(data) {
+    scheduledRecipeRunActive = true;
+    currentScraperId = data.current_scraper_id || data.root_scraper_id || null;
+    setRecipeRunButtonLocked(true);
+    setProgressPanelRecipeMode();
+
+    const progressContainer = document.getElementById('progress-container');
+    const resultContainer = document.getElementById('result-container');
+    progressContainer.classList.add('active');
+    resultContainer.style.display = 'none';
+
+    document.getElementById('progress-title').textContent = i18n.fetching;
+    document.getElementById('progress-message').textContent = formatScheduledRecipeMessage(data);
 }
 
 function setPendingAutoImageCompletion(pending) {
@@ -402,12 +466,14 @@ async function cancelImageDownloadFromRecipes() {
 async function checkRunningScrapers() {
     try {
         // Check queue first — if a "run all" was active it takes priority
-        const [runningResp, queueResp] = await Promise.all([
+        const [runningResp, queueResp, scheduledResp] = await Promise.all([
             fetch('/api/recipe-scrapers/running'),
             fetch('/api/recipe-scrapers/queue'),
+            fetch('/api/schedules/recipe-run/status'),
         ]);
         const runningData = await runningResp.json();
         const queueData = await queueResp.json();
+        const scheduledData = await scheduledResp.json();
 
         if (queueData.success && queueData.active) {
             // Restore the run-all queue from server state
@@ -458,6 +524,13 @@ async function checkRunningScrapers() {
                 dbg.log(`Restored run-all queue at index ${queueData.index}, starting next`);
                 runNextInQueue();
             }
+            return;
+        }
+
+        if (scheduledData.success && scheduledData.running) {
+            showScheduledRecipeRun(scheduledData);
+            startScheduledRecipePolling();
+            dbg.log(`Resumed scheduled recipe run: ${scheduledData.root_scraper_id}`);
             return;
         }
 
@@ -1397,7 +1470,104 @@ function startPolling(scraperId, onComplete) {
     pollingInterval = intervalId;
 }
 
+function startScheduledRecipePolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+
+    let pollFailCount = 0;
+    const intervalId = setInterval(async () => {
+        try {
+            const response = await fetch('/api/schedules/recipe-run/status');
+            if (!response.ok) {
+                if (++pollFailCount >= 5) {
+                    clearInterval(intervalId);
+                    if (pollingInterval === intervalId) pollingInterval = null;
+                    scheduledRecipeRunActive = false;
+                    currentScraperId = null;
+                    document.getElementById('progress-container').classList.remove('active');
+                    setRecipeRunButtonLocked(false);
+                    showResult('error', i18n.could_not_load);
+                }
+                return;
+            }
+
+            pollFailCount = 0;
+            const data = await response.json();
+            if (!data.success) return;
+
+            if (data.running) {
+                showScheduledRecipeRun(data);
+                return;
+            }
+
+            clearInterval(intervalId);
+            if (pollingInterval === intervalId) pollingInterval = null;
+            scheduledRecipeRunActive = false;
+            currentScraperId = null;
+            document.getElementById('progress-container').classList.remove('active');
+            setRecipeRunButtonLocked(false);
+            loadScrapers();
+            loadAllSchedules();
+
+            if (data.status === 'cancelled') {
+                Swal.fire({
+                    icon: 'info',
+                    title: i18n.cancelled,
+                    text: i18n.fetch_cancelled,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else if (data.status === 'error') {
+                showResult('error', t(data.message_key, data.message_params) || data.message || i18n.error);
+            }
+        } catch (error) {
+            console.error('Scheduled recipe polling error:', error);
+            if (++pollFailCount >= 5) {
+                clearInterval(intervalId);
+                if (pollingInterval === intervalId) pollingInterval = null;
+                scheduledRecipeRunActive = false;
+                currentScraperId = null;
+                document.getElementById('progress-container').classList.remove('active');
+                setRecipeRunButtonLocked(false);
+                showResult('error', i18n.could_not_load);
+            }
+        }
+    }, 2000);
+    pollingInterval = intervalId;
+}
+
+async function cancelScheduledRecipeRun() {
+    const cancelBtn = document.getElementById('cancel-scraper-btn');
+    cancelBtn.disabled = true;
+    cancelBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>' + i18n.cancelling;
+    document.getElementById('progress-message').textContent = i18n.cancelling;
+
+    try {
+        const response = await fetch('/api/schedules/recipe-run/cancel', {
+            method: 'POST'
+        });
+        const data = await response.json();
+
+        if (!data.success) {
+            showError(t(data.message_key, data.message_params) || data.message);
+            cancelBtn.disabled = false;
+            cancelBtn.innerHTML = '<i class="bi bi-x-circle me-1"></i>' + i18n.cancel;
+        }
+    } catch (error) {
+        showError(i18n.error_cancel + ': ' + error.message);
+        cancelBtn.disabled = false;
+        cancelBtn.innerHTML = '<i class="bi bi-x-circle me-1"></i>' + i18n.cancel;
+    }
+}
+
 async function cancelScraper() {
+    if (scheduledRecipeRunActive) {
+        await cancelScheduledRecipeRun();
+        return;
+    }
+
     // Stop the "run all" queue — both in memory and on server
     if (runAllQueue) {
         runAllQueue = null;

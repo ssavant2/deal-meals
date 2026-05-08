@@ -3443,7 +3443,7 @@ def _run_refresh_cache_subprocess(
 
     if process.stdout is not None:
         for raw_line in process.stdout:
-            line = raw_line.rstrip()
+            line = raw_line.rstrip("\r\n")
             if not line:
                 continue
             if line.startswith("CACHE_REBUILD_SUBPROCESS_RESULT "):
@@ -3452,7 +3452,8 @@ def _run_refresh_cache_subprocess(
             log_tail.append(line)
             if len(log_tail) > 20:
                 del log_tail[0]
-            logger.info(f"cache rebuild subprocess: {line}")
+            sys.stdout.write(f"{line}\n")
+            sys.stdout.flush()
 
     returncode = process.wait()
     if returncode != 0:

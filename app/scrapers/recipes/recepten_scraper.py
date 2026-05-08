@@ -445,6 +445,8 @@ class ReceptenScraper:
             batch_size = 10
 
             for i in range(0, total, batch_size):
+                if self._cancel_flag:
+                    break
                 if recipe_target_reached(
                     max_recipes=max_recipes,
                     recipes=recipes,
@@ -502,6 +504,8 @@ class ReceptenScraper:
                 # Delay between batches to be nice
                 await asyncio.sleep(1.0)
 
+        if self._cancel_flag:
+            logger.info("Recepten scrape cancelled")
         if record_discovery:
             logger.info(f"   URL discovery: recorded_non_recipe={self._discovery_recorded_non_recipe}")
 
@@ -557,7 +561,7 @@ class ReceptenScraper:
         else:
             urls_to_scrape = urls_only
             record_discovery = False
-            logger.info(f"   Force mode: scraping ALL {len(urls_to_scrape)} recipes")
+            logger.info(f"   Force mode: trying ALL {len(urls_to_scrape)} URLs")
 
         if force_all:
             if max_recipes:
@@ -589,7 +593,7 @@ class ReceptenScraper:
                     reason="no_new_recipes",
                 )
 
-        logger.info(f"📄 Scraping {len(urls_to_scrape)} recipes...")
+        logger.info(f"📄 Trying {len(urls_to_scrape)} URLs...")
 
         # Scrape concurrently
         recipes = await self.scrape_recipes_concurrent(
@@ -602,6 +606,14 @@ class ReceptenScraper:
 
         found_count = stream_saver.seen_count if stream_saver else len(recipes)
         logger.success(f"✅ Successfully scraped {found_count} recipes!")
+        if self._cancel_flag:
+            return make_recipe_scrape_result(
+                recipes,
+                force_all=force_all,
+                max_recipes=max_recipes,
+                cancelled=True,
+                reason="cancelled",
+            )
         return make_recipe_scrape_result(
             recipes,
             force_all=force_all,

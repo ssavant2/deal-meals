@@ -607,7 +607,7 @@ class ArlaScraper:
             record_discovery = bool(stream_saver is not None and not force_all)
             if force_all:
                 urls_to_scrape = all_urls[:max_recipes or MAX_RECIPES]
-                logger.info(f"OVERWRITE MODE: Scraping {len(urls_to_scrape)} recipes")
+                logger.info(f"OVERWRITE MODE: Trying {len(urls_to_scrape)} URLs")
             else:
                 # Incremental: only new URLs not in database
                 existing_urls = self._get_existing_urls()
@@ -644,7 +644,7 @@ class ArlaScraper:
                         ]
 
                 logger.info(
-                    f"INCREMENTAL: {len(urls_to_scrape)} new recipes to scrape "
+                    f"INCREMENTAL: {len(urls_to_scrape)} candidate URLs to try "
                     f"(target {max_recipes or 'auto'}, {len(existing_urls)} already in DB)"
                 )
 

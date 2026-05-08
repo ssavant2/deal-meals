@@ -312,6 +312,9 @@ Precis som butiksscheman kan du automatisera recepthämtning.
 
 Schemasektionen fungerar på samma sätt som på Butikssidan: välj en källa, ställ in frekvens och tid, och spara. Välj **Alla aktiva** för att köra alla receptkällor som är aktiva just då som en sekventiell schemalagd batch. Listan över aktiva källor kontrolleras när schemat körs, så källor som aktiveras eller inaktiveras senare inkluderas eller hoppas över automatiskt. Översiktstabellen visar alla receptscheman med senaste körningsresultat.
 
+När en schemalagd recepthämtning kör medan Recept-sidan är öppen använder den
+samma progressruta och avbryt-knapp som en manuell hämtning.
+
 ### 4.5 Mina Recept — Lägg till egna recept via URL
 
 Utöver de inbyggda receptkällorna kan du lägga till enskilda recept från **vilken recept-webbsida som helst** som stöder schema.org/Recipe-standarden (de flesta stora recept-webbsidor gör det).
@@ -513,7 +516,18 @@ Starta sedan om web-containern med `docker compose up -d web` (restart laddar IN
 
 ### Bör jag schemalägga eller köra manuellt?
 
-**Schemalägga är rekommenderat.** När erbjudanden eller recept hämtas uppdateras receptmatchningen automatiskt. Små inkrementella recepthämtningar kan oftast patcha cachen med ett snabbt delta, medan erbjudandehämtningar, stora fullhämtningar och fallback-lägen kan göra en full ombyggnad. Om du schemalägger hämtningarna (t.ex. på natten eller tidigt på morgonen) sker allt i bakgrunden och dina förslag är klara när du öppnar appen.
+**Schemaläggning rekommenderas varmt.** När erbjudanden eller recept hämtas
+uppdateras receptmatchningen automatiskt. Små inkrementella recepthämtningar
+kan oftast patcha cachen med ett snabbt delta, vilket är det normala
+vardagsflödet. Erbjudandehämtningar, stora fullhämtningar, första körningar,
+matcher-/versionsändringar och fallback-lägen kan fortfarande göra en full
+ombyggnad. En full ombyggnad kan ta flera minuter och använder märkbart med
+CPU och minne, särskilt på enklare servrar.
+
+För normal hemmakörning är det bäst att schemalägga erbjudande- och
+recepthämtningar när systemet inte används, till exempel på natten eller tidigt
+på morgonen. Då sker även en eventuell tyngre ombyggnad i bakgrunden och dina
+förslag är klara när du öppnar appen.
 
 Du kan köra hämtningar manuellt också — men då får du vänta medan erbjudandena laddas ner och matchningen beräknas om.
 
@@ -523,7 +537,9 @@ Deal Meals försöker undvika fulla ombyggnader när bara en liten del av datat 
 ändrats. Små inkrementella recepthämtningar uppdaterar normalt bara de recept
 som påverkats. Första körningen, stora importer, matcher-/versionsändringar
 eller misslyckade säkerhetskontroller kan fortfarande trigga en full ombyggnad
-av receptmatchningen.
+av receptmatchningen. Det är förväntat, men bör ses som bakgrundsunderhåll
+snarare än något man startar medan man aktivt använder appen på en mindre
+maskin.
 
 Vid omstart visar appen befintlig cache direkt; den startar inte en full
 ombyggnad bara för att web-containern startats om. Längre ombyggnader körs som
@@ -533,7 +549,10 @@ till antal tillgängliga kärnor minus en, max 3 workers. På en enkärnig maski
 kör den med en worker.
 
 Release-composefilen är dimensionerad för den svenska standarddatan med 1536
-MiB till web-containern och 512 MiB till PostgreSQL. Om du höjer
+MiB till web-containern och 512 MiB till PostgreSQL. Som tumregel behöver
+web-containern cirka 1 GiB per 10 000 aktiva recept. Standardgränsen på 1536
+MiB är därför tänkt för ungefär 15 000 aktiva recept med den svenska
+standarddatan och de medföljande cacheinställningarna. Om du höjer
 worker-inställningar för en större lokal installation bör du också höja
 web-containerns minnesgräns och mäta på ditt eget recept- och butiksdata.
 
@@ -584,13 +603,14 @@ Recept som är bufféer, trerättersmiddagar eller storkalas (30+ ingredienser) 
 Matchningen är medvetet bred — målet är att visa vilka butikserbjudanden som är relevanta, inte att ge en perfekt inköpslista. Några saker att veta:
 
 **Generella produktkategorier:** Vissa ingredienser matchas som grupp snarare än exakt:
-- **Pasta** — "penne", "tagliatelle", "fusilli" och liknande matchar alla pastaprodukter. Anledning: de flesta recept fungerar med valfri pastatyp, och du vill se att pasta är på rea oavsett sort. Undantag: "spaghetti" matchar bara långpasta (inte t.ex. farfalle).
+- **Pasta** — "penne", "fusilli", "rigatoni" och liknande matchar alla pastaprodukter. Anledning: de flesta recept fungerar med valfri pastatyp, och du vill se att pasta är på rea oavsett sort. Undantag: "spaghetti" matchar bara långpasta, alltså långa pastaformer som spaghetti, linguine, tagliatelle, fettuccine och pappardelle, inte kort pasta som farfalle.
 - **Ris** — "basmatiris" och "jasminris" matchar alla risprodukter, eftersom de flesta rätter fungerar med valfri ristyp. Undantag: "arborioris" matchar bara sig själv — det är specifikt för risotto och går inte att byta ut.
 - **Ost** — "ost" matchar alla ostar. Receptet säger kanske "riven ost" men du vill se alla osttyper som är på extrapris. Specifika ostar som "västerbottensost" eller "mozzarella" matchar dock mer exakt.
+- **Halloumi och grillost** — halloumi, grillost och varianter som grilloumi, eldost eller norrloumi behandlas som samma användningsfamilj. De är inte alltid identiska produkter, men används ofta på samma sätt i recept.
+- **Kycklingfilé** — bröstfilé, lårfilé och generisk eller okänd kycklingfilé behandlas som samma användningsfamilj. Däremot blandas inte klubbor, vingar, hel kyckling eller färdiglagade kycklingprodukter in i den bredare filématchningen.
+- **Färs** — recept som säger "nötfärs" kan ibland visa närliggande färsvarianter, till exempel blandfärs. Det är ett medvetet pragmatiskt val: många färsrätter fungerar med flera rena färstyper, och erbjudandet visar vilken variant som råkar vara billigast just nu. Du väljer själv exakt färs i butiken.
 
-**Brusmatchningar:** En ingrediens som "vitlök" kan matcha produkter som "Bruschetta Vitlök & Persilja" — det är en produkt som *innehåller* vitlök, inte vitlök i sig. Dessa visas för att ge en komplett bild, men du förväntas välja den produkt som passar.
-
-**Smaknyanser:** Produkter med en ingrediens som smaksättning (t.ex. "Balsamvinäger Ingefära") kan dyka upp när receptet vill ha ren ingefära. Matchningen fångar att produkten har med ingrediensen att göra, men du väljer själv.
+**Brusmatchningar och smaknyanser:** Vi försöker hålla felträffar så få som möjligt, men butikernas produktnamn ändras, nya varor tillkommer och namnen är inte alltid särskilt tydliga. Därför kan en ingrediens ibland råka matcha en produkt som bara innehåller eller smaksatts med ingrediensen, till exempel "Bruschetta Vitlök & Persilja" när receptet egentligen vill ha ren vitlök, eller "Balsamvinäger Ingefära" när receptet vill ha ingefära. Sådana träffar visas inte medvetet; de är brus som matchningen försöker filtrera bort.
 
 ### Kan jag hitta säsongsrecept utanför säsong?
 
@@ -626,7 +646,7 @@ Matchningen är tänkt att vara praktiskt användbar, inte magisk. För svenska 
 
 100% träffsäkerhet går inte att uppnå i praktiken. Butiker byter namn på produkter, recept kan vara vaga, produktnamn innehåller varumärken och reklamtext, och vissa ingredienser går helt enkelt inte att koppla rent till veckans erbjudanden. Målet är "tillräckligt bra för att vara användbart", samtidigt som uppenbart felaktiga matchningar hålls nere.
 
-Vissa förenklingar är medvetna. Till exempel klumpar systemet ihop pasta i breda familjer som pasta och långpasta, skiljer inte alltid på några vanliga rissorter, grupperar ofta ost ganska brett och är generellt inte superpetigt med vardagsvarianter av till exempel färskost eller senap.
+Vissa förenklingar är medvetna. Till exempel klumpar systemet ihop pasta i breda familjer som pasta och långpasta, skiljer inte alltid på några vanliga rissorter, grupperar ofta ost ganska brett och är generellt inte superpetigt med vardagsvarianter av till exempel halloumi/grillost, kycklingfilé, färs, färskost eller senap.
 
 Det gör att du själv kan välja exakt vilken variant du vill köpa, och det ökar chansen att ett faktiskt extrapris visas för ingrediensfamiljen istället för att ett användbart erbjudande döljs bara för att receptet och butiken råkar använda lite olika ord.
 

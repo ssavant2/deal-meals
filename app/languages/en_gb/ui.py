@@ -123,7 +123,9 @@ UI = {
     # Suggestions refresh dialog
     'home.rebuild_title': 'Refreshing suggestions...',
     'home.rebuild_text': 'Refreshing suggestions with current settings',
-    'home.rebuild_wait': 'The server cache rebuilds only if needed.',
+    'home.rebuild_wait': 'This can take a moment if suggestions need to be recalculated.',
+    'home.update_in_progress': 'update in progress, showing latest ready suggestions',
+    'home.update_ready_refresh': 'update complete - click Refresh\nto include the latest fetch',
     'home.cache_error_title': 'Cache error',
     'home.cache_error_text': 'Recipe matches could not be read from the server cache. Run a manual cache refresh if the problem persists.',
 
@@ -333,6 +335,8 @@ UI = {
     'recipes.select_source_placeholder': '-- Select a source --',
     'recipes.all_active_sources': 'All active',
     'recipes.running_all_progress': 'Fetching {name} ({current}/{total})...',
+    'recipes.scheduled_fetch_source': 'Fetching recipes from {source}',
+    'recipes.scheduled_fetch_source_active': 'Fetching recipes from {source} - {active}',
     'recipes.all_complete': 'All {count} sources fetched',
     'recipes.all_complete_summary': 'Total {total} new recipes',
     'recipes.run_all_confirm_title': 'Fetch all {count} sources?',

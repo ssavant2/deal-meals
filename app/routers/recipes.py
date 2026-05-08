@@ -31,6 +31,10 @@ from recipe_cache_refresh_decision import (
     decide_recipe_cache_refresh_strategy,
     load_recipe_cache_status_snapshot,
 )
+from recipe_scraper_limits import (
+    get_effective_config as _get_effective_config,
+    get_scraper_configs as _get_scraper_configs,
+)
 from scrapers.recipes._common import normalize_recipe_scrape_result
 from utils.errors import friendly_error, is_valid_uuid
 from utils.recipe_image_cleanup import (
@@ -160,43 +164,7 @@ def _get_time_estimates(scraper_id: str, target_attempts: dict | None = None) ->
     return estimates
 
 
-DEFAULT_MAX_RECIPES = 50        # Default fetch limit for new/unconfigured scrapers
-UNLIMITED_SCRAPERS = {'myrecipes'}  # These scrapers default to "all" (no limit)
 SCRAPER_INACTIVITY_TIMEOUT_SECONDS = 5 * 60
-
-# Sentinel: scraper has a config row → respect its values (even if NULL = "all")
-_HAS_CONFIG = object()
-
-
-def _get_scraper_configs() -> dict:
-    """Get all scraper configs from DB. Returns {scraper_id: {max_recipes_full, max_recipes_incremental}}."""
-    try:
-        with get_db_session() as db:
-            result = db.execute(text("SELECT scraper_id, max_recipes_full, max_recipes_incremental FROM scraper_config"))
-            return {
-                row.scraper_id: {
-                    "max_recipes_full": row.max_recipes_full,
-                    "max_recipes_incremental": row.max_recipes_incremental,
-                    "_has_config": True,
-                }
-                for row in result
-            }
-    except Exception as e:
-        # Table might not exist yet — silently return empty
-        logger.debug(f"Could not fetch scraper configs (table may not exist): {e}")
-        return {}
-
-
-def _get_effective_config(scraper_id: str, configs: dict) -> tuple:
-    """Return (max_full, max_incr) applying defaults for unconfigured scrapers."""
-    config = configs.get(scraper_id, {})
-    if config.get("_has_config"):
-        # Explicit config row exists — use its values (NULL = user chose "all")
-        return config.get("max_recipes_full"), config.get("max_recipes_incremental")
-    if scraper_id in UNLIMITED_SCRAPERS:
-        return None, None
-    return DEFAULT_MAX_RECIPES, DEFAULT_MAX_RECIPES
-
 
 def _format_duration(seconds: int) -> str:
     """Format duration in seconds to human-readable string (language-neutral)."""
@@ -226,6 +194,27 @@ def _get_cache_generation() -> str | None:
     except Exception:
         pass  # Don't fail preview requests if metadata is temporarily unavailable.
     return None
+
+
+def _publish_suggestions_update_started(*, source: str, strategy: str | None = None, reason: str | None = None) -> None:
+    event_bus.publish({
+        "type": "suggestions_update_started",
+        "source": source,
+        "strategy": strategy,
+        "reason": reason,
+    })
+
+
+def _publish_suggestions_update_ready(*, source: str, result: dict | None = None) -> None:
+    result = result or {}
+    event_bus.publish({
+        "type": "suggestions_update_ready",
+        "source": source,
+        "cache_generation": _get_cache_generation(),
+        "mode": result.get("effective_rebuild_mode") or result.get("mode"),
+        "cached": result.get("cached"),
+        "time_ms": result.get("time_ms") or result.get("total_ms"),
+    })
 
 
 def _build_matching_preview_payload(max_results: int, parsed_exclude: list[str]) -> dict:
@@ -691,7 +680,7 @@ def get_cache_status():
         freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=False)
         with get_db_session() as db:
             result = db.execute(text("""
-                SELECT status, total_matches, computation_time_ms,
+                SELECT status, total_matches, computation_time_ms, last_computed_at,
                        last_background_rebuild_at, background_rebuild_source
                 FROM cache_metadata
                 WHERE cache_name = 'recipe_offer_matches'
@@ -704,6 +693,7 @@ def get_cache_status():
                     "ready": result.status == 'ready',
                     "total_matches": result.total_matches,
                     "time_ms": result.computation_time_ms,
+                    "cache_generation": result.last_computed_at.isoformat() if result.last_computed_at else None,
                     "last_background_rebuild_at": result.last_background_rebuild_at.isoformat() if result.last_background_rebuild_at else None,
                     "background_rebuild_source": result.background_rebuild_source,
                     "cache_freshness": freshness_status,
@@ -800,7 +790,7 @@ async def reset_recipe_cache(request: Request):
                 "message_key": "recipes.cache_rebuild_started",
             })
 
-        freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=False)
+        freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=True)
         if freshness_status.get("state") == "fresh" and not freshness_status.get("rebuild_recommended"):
             logger.info("Cache refresh not needed (cache_fresh)")
             return JSONResponse({
@@ -1361,6 +1351,26 @@ def _extract_recipe_delta_ids(save_result: dict | None) -> tuple[list[str], list
     return changed_ids, removed_ids
 
 
+def _recipe_source_name_for_scraper(scraper_id: str | None) -> str | None:
+    if not scraper_id or not scraper_manager:
+        return None
+    scraper_info = scraper_manager.get_scraper(scraper_id)
+    if not scraper_info:
+        return None
+    return scraper_info.db_source_name or scraper_info.name
+
+
+def _recipe_source_names_for_scrapers(scraper_ids) -> list[str]:
+    source_names: list[str] = []
+    seen: set[str] = set()
+    for scraper_id in scraper_ids or []:
+        source_name = _recipe_source_name_for_scraper(scraper_id)
+        if source_name and source_name not in seen:
+            source_names.append(source_name)
+            seen.add(source_name)
+    return source_names
+
+
 def _save_result_has_cache_changes(save_result: dict | None) -> bool:
     if not isinstance(save_result, dict):
         return False
@@ -1522,6 +1532,13 @@ async def _refresh_cache_after_recipe_scrape(
 
     delta_result = None
     result = None
+    if decision.requires_cache_refresh:
+        _publish_suggestions_update_started(
+            source=source,
+            strategy=decision.strategy,
+            reason=decision.reason,
+        )
+
     if decision.uses_delta:
         try:
             from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
@@ -1613,6 +1630,7 @@ async def _refresh_cache_after_recipe_scrape(
         logger.info(f"Recipe scrape cache refresh skipped: {result.get('reason')}")
     else:
         logger.success(_format_recipe_cache_refresh_complete("Recipe scrape", result))
+        _publish_suggestions_update_ready(source=source, result=result)
     return result
 
 
@@ -1700,6 +1718,7 @@ async def _refresh_cache_after_run_all_queue(
             logger.info(f"Run-all cache refresh skipped: {result.get('reason')}")
         else:
             logger.success(_format_recipe_cache_refresh_complete("Run-all", result))
+            _publish_suggestions_update_ready(source=source, result=result)
         return result
     except Exception as exc:
         try:
@@ -1788,10 +1807,11 @@ async def _finish_run_all_queue(total_new: int) -> dict:
                     ),
                     name="cache-refresh-run-all-recipes",
                 )
-                event_bus.publish({
-                    "type": "cache_invalidated",
-                    "source": "recipes-run-all",
-                })
+                _publish_suggestions_update_started(
+                    source="recipes-run-all",
+                    strategy=decision.strategy,
+                    reason=decision.reason,
+                )
                 cache_rebuild_started = True
                 cache_rebuild_kind = decision.strategy
                 logger.info(
@@ -1811,9 +1831,16 @@ async def _finish_run_all_queue(total_new: int) -> dict:
         try:
             from utils.image_auto_download import trigger_auto_download_if_enabled
 
-            auto_image_download_started = await trigger_auto_download_if_enabled()
+            source_names = _recipe_source_names_for_scrapers(queue_state.get("scraper_ids"))
+            auto_image_download_started = await trigger_auto_download_if_enabled(
+                source_names=source_names,
+                recipe_ids=changed_ids if not source_names else None,
+            )
             if auto_image_download_started:
-                logger.info("Started auto image download after run-all recipe scrape finished")
+                logger.info(
+                    "Started auto image download after run-all recipe scrape finished "
+                    f"(sources={source_names or 'changed recipes only'})"
+                )
         except Exception as e:
             logger.warning(f"Could not start final run-all image download: {e}")
 
@@ -2455,7 +2482,12 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 logger.info(f"Started cache refresh after {scraper_id} scrape ({recipes_found} new recipes)")
 
                 from utils.image_auto_download import trigger_auto_download_if_enabled
-                await trigger_auto_download_if_enabled()
+                changed_ids, _ = _extract_recipe_delta_ids(save_result_for_cache)
+                source_name = db_source_name or _recipe_source_name_for_scraper(scraper_id)
+                await trigger_auto_download_if_enabled(
+                    source_names=[source_name] if source_name else None,
+                    recipe_ids=changed_ids if not source_name else None,
+                )
 
         if mode == "incremental":
             queue_state = await get_run_all_queue()

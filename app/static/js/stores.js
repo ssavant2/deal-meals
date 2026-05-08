@@ -526,11 +526,22 @@ function setBackendScrapeLock(status) {
                 continue;
             }
 
-            btn.disabled = true;
-            btn.textContent = i18n.scrape_in_progress;
-            btn.classList.remove('btn-success', 'btn-danger');
-            btn.classList.add('btn-secondary');
-            btn.onclick = null;
+            if (storeId === runningStore) {
+                btn.disabled = false;
+                btn.textContent = i18n['stores.cancel_scrape'];
+                btn.classList.remove('btn-success', 'btn-secondary');
+                btn.classList.add('btn-danger');
+                btn.onclick = (event) => {
+                    event.stopPropagation();
+                    cancelScrape(storeId);
+                };
+            } else {
+                btn.disabled = true;
+                btn.textContent = i18n.scrape_in_progress;
+                btn.classList.remove('btn-success', 'btn-danger');
+                btn.classList.add('btn-secondary');
+                btn.onclick = null;
+            }
 
             if (storeId === runningStore && progressDiv && progressBar && progressText) {
                 const progress = backendRunningScrape.progress || 0;

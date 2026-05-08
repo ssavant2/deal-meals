@@ -24,7 +24,9 @@ from recipe_cache_refresh_decision import (
     decide_recipe_cache_refresh_strategy,
     load_recipe_cache_status_snapshot,
 )
+from recipe_scraper_limits import get_effective_config, get_scraper_configs
 from scrapers.recipes._common import normalize_recipe_scrape_result
+from state import event_bus
 from utils.scraper_history import save_run_history
 
 
@@ -71,6 +73,10 @@ class ScraperScheduler:
         self._batch_removed_recipe_ids: list[str] = []
         self._batch_cache_delta_ids_missing = False
         self._batch_executed_scraper_ids: set[str] = set()
+        self._recipe_schedule_status: dict = {"running": False, "status": "idle"}
+        self._recipe_schedule_cancel_requested = False
+        self._current_recipe_schedule_task = None
+        self._current_recipe_scraper = None
 
     @staticmethod
     def _extend_unique_id_list(target: list[str], values) -> None:
@@ -135,6 +141,94 @@ class ScraperScheduler:
         ]
         self._batch_has_cache_changes = True
 
+    def _set_recipe_schedule_status(self, **updates) -> None:
+        self._recipe_schedule_status.update(updates)
+
+    def _begin_recipe_schedule_run(self, scraper_id: str) -> None:
+        self._recipe_schedule_cancel_requested = False
+        self._current_recipe_schedule_task = asyncio.current_task()
+        self._recipe_schedule_status = {
+            "running": True,
+            "status": "running",
+            "root_scraper_id": scraper_id,
+            "current_scraper_id": scraper_id,
+            "current_scraper_name": None,
+            "current_index": 1,
+            "total_sources": 1,
+            "total_new": 0,
+            "progress_current": 0,
+            "progress_total": 0,
+            "progress_success": 0,
+            "message_key": "recipes.starting_fetch",
+            "message_params": {},
+            "started_at": datetime.now(ZoneInfo("UTC")).isoformat(),
+            "cancelling": False,
+        }
+
+    def _finish_recipe_schedule_run(self, status: str = "complete", message_key: str | None = None) -> None:
+        self._recipe_schedule_status.update({
+            "running": False,
+            "status": status,
+            "message_key": message_key or self._recipe_schedule_status.get("message_key"),
+            "finished_at": datetime.now(ZoneInfo("UTC")).isoformat(),
+            "cancelling": False,
+        })
+        self._current_recipe_schedule_task = None
+        self._current_recipe_scraper = None
+        self._recipe_schedule_cancel_requested = False
+
+    def get_recipe_schedule_status(self) -> dict:
+        """Return current scheduled recipe scrape state for the UI."""
+        return self._recipe_schedule_status.copy()
+
+    def cancel_recipe_schedule(self) -> bool:
+        """Request cancellation of the currently running scheduled recipe scrape."""
+        if not self._recipe_schedule_status.get("running"):
+            return False
+
+        self._recipe_schedule_cancel_requested = True
+        self._set_recipe_schedule_status(
+            status="cancelling",
+            cancelling=True,
+            message_key="recipes.cancelling",
+        )
+
+        scraper = self._current_recipe_scraper
+        if scraper and hasattr(scraper, "cancel"):
+            try:
+                scraper.cancel()
+            except Exception as e:
+                logger.warning(f"Could not signal scheduled recipe scraper cancellation: {e}")
+        return True
+
+    @staticmethod
+    def _get_incremental_recipe_limit(scraper_id: str, scraper_configs: dict | None = None) -> int | None:
+        _, max_incremental = get_effective_config(
+            scraper_id,
+            scraper_configs if scraper_configs is not None else get_scraper_configs(),
+        )
+        return max_incremental
+
+    @staticmethod
+    def _recipe_source_names_for_scrapers(scraper_ids) -> list[str]:
+        try:
+            from recipe_scraper_manager import scraper_manager
+        except Exception as e:
+            logger.debug(f"Could not load recipe scraper manager for image scope: {e}")
+            return []
+
+        source_names: list[str] = []
+        seen: set[str] = set()
+        for scraper_id in scraper_ids or []:
+            scraper_info = scraper_manager.get_scraper(scraper_id)
+            if not scraper_info:
+                continue
+            source_name = scraper_info.db_source_name or scraper_info.name
+            if source_name and source_name not in seen:
+                source_names.append(source_name)
+                seen.add(source_name)
+        return source_names
+
     def recipe_batch_active(self) -> bool:
         """Return True while scheduled recipe scrapers or their batch cache refresh run."""
         lock_busy = bool(self._scraper_lock and self._scraper_lock.locked())
@@ -155,6 +249,41 @@ class ScraperScheduler:
         except Exception as e:
             logger.warning(f"Could not load enabled recipe scrapers for all-active schedule: {e}")
             return []
+
+    @staticmethod
+    def _get_cache_generation() -> str | None:
+        try:
+            with get_db_session() as db:
+                result = db.execute(text("""
+                    SELECT last_computed_at
+                    FROM cache_metadata
+                    WHERE cache_name = 'recipe_offer_matches'
+                """)).fetchone()
+                if result and result.last_computed_at:
+                    return result.last_computed_at.isoformat()
+        except Exception:
+            pass
+        return None
+
+    @staticmethod
+    def _publish_suggestions_update_started(*, source: str, strategy: str | None, reason: str | None) -> None:
+        event_bus.publish({
+            "type": "suggestions_update_started",
+            "source": source,
+            "strategy": strategy,
+            "reason": reason,
+        })
+
+    def _publish_suggestions_update_ready(self, *, source: str, result: dict | None = None) -> None:
+        result = result or {}
+        event_bus.publish({
+            "type": "suggestions_update_ready",
+            "source": source,
+            "cache_generation": self._get_cache_generation(),
+            "mode": result.get("effective_rebuild_mode") or result.get("mode"),
+            "cached": result.get("cached"),
+            "time_ms": result.get("time_ms") or result.get("total_ms"),
+        })
 
     async def _refresh_cache_after_scheduled_batch(self, last_scraper_id: str) -> None:
         """Refresh recipe-offer cache once after a scheduled recipe batch."""
@@ -184,6 +313,12 @@ class ScraperScheduler:
             source = f"scheduled_recipe_batch:{last_scraper_id}"
             operation_context = decision.to_operation_context()
             logger.info(decision.log_summary(label="Scheduled recipe batch cache decision"))
+            if decision.requires_cache_refresh:
+                self._publish_suggestions_update_started(
+                    source=source,
+                    strategy=decision.strategy,
+                    reason=decision.reason,
+                )
 
             if decision.uses_delta:
                 from cache_delta import apply_recipe_delta, _recipe_delta_probation_history_path
@@ -221,6 +356,7 @@ class ScraperScheduler:
                         f"(delta): {delta_result.get('cached', delta_result.get('patch_result', {}).get('total_matches', 0))} "
                         f"recipes in {delta_result.get('time_ms', 0)}ms"
                     )
+                    self._publish_suggestions_update_ready(source=source, result=delta_result)
                     return
 
                 logger.warning(
@@ -269,6 +405,7 @@ class ScraperScheduler:
                         time_ms=result.get("time_ms", 0),
                     )
                 )
+                self._publish_suggestions_update_ready(source=source, result=result)
         except Exception as e:
             logger.warning(f"Scheduled recipe batch cache refresh failed: {e}")
 
@@ -456,36 +593,62 @@ class ScraperScheduler:
         self._scrapers_waiting += 1
         logger.info(f"Scheduled scraper {scraper_id} queued ({self._scrapers_waiting} waiting)")
 
+        cancelled = False
+        failed = False
         async with self._scraper_lock:
-            self._scrapers_waiting -= 1
-            if scraper_id == ALL_ACTIVE_RECIPE_SCRAPERS_ID:
-                await self._execute_all_active_recipe_scrapers()
-            else:
-                await self._execute_scraper(scraper_id)
+            try:
+                self._scrapers_waiting -= 1
+                self._begin_recipe_schedule_run(scraper_id)
+                if self._recipe_schedule_cancel_requested:
+                    cancelled = True
+                    return
 
-            # Grace period: let other same-time scrapers register (increment above)
-            # before checking if we're the last one in the batch.
-            await _asyncio.sleep(self._BATCH_GRACE_SECONDS)
+                if scraper_id == ALL_ACTIVE_RECIPE_SCRAPERS_ID:
+                    await self._execute_all_active_recipe_scrapers()
+                else:
+                    await self._execute_scraper(scraper_id)
 
-            if self._scrapers_waiting == 0:
-                try:
-                    if self._batch_has_cache_changes or self._batch_has_new_recipes:
-                        # Last scraper in batch — refresh cache once, then trigger one combined image download
-                        await self._refresh_cache_after_scheduled_batch(scraper_id)
-                        has_new_recipes = self._batch_has_new_recipes
-                        self._batch_has_new_recipes = False
-                        if has_new_recipes:
-                            try:
-                                from utils.image_auto_download import trigger_auto_download_if_enabled
-                                if await trigger_auto_download_if_enabled():
-                                    logger.info(f"Auto-download triggered after scheduled batch (last scraper: {scraper_id})")
-                            except Exception as e:
-                                logger.warning(f"Could not trigger auto-download after batch: {e}")
-                finally:
-                    self._batch_executed_scraper_ids.clear()
-                await self._maybe_run_cache_reconciliation(f"recipe_batch:{scraper_id}")
-            elif self._scrapers_waiting > 0:
-                logger.info(f"Skipping auto-download, {self._scrapers_waiting} more scrapers queued")
+                cancelled = self._recipe_schedule_cancel_requested
+
+                # Grace period: let other same-time scrapers register (increment above)
+                # before checking if we're the last one in the batch.
+                await _asyncio.sleep(self._BATCH_GRACE_SECONDS)
+
+                if self._scrapers_waiting == 0:
+                    try:
+                        if self._batch_has_cache_changes or self._batch_has_new_recipes:
+                            # Last scraper in batch — refresh cache once, then trigger one combined image download
+                            await self._refresh_cache_after_scheduled_batch(scraper_id)
+                            has_new_recipes = self._batch_has_new_recipes
+                            self._batch_has_new_recipes = False
+                            if has_new_recipes:
+                                try:
+                                    from utils.image_auto_download import trigger_auto_download_if_enabled
+                                    source_names = self._recipe_source_names_for_scrapers(
+                                        self._batch_executed_scraper_ids
+                                    )
+                                    if await trigger_auto_download_if_enabled(source_names=source_names):
+                                        logger.info(
+                                            "Auto-download triggered after scheduled batch "
+                                            f"(last scraper: {scraper_id}, sources={source_names})"
+                                        )
+                                except Exception as e:
+                                    logger.warning(f"Could not trigger auto-download after batch: {e}")
+                    finally:
+                        self._batch_executed_scraper_ids.clear()
+                    await self._maybe_run_cache_reconciliation(f"recipe_batch:{scraper_id}")
+                elif self._scrapers_waiting > 0:
+                    logger.info(f"Skipping auto-download, {self._scrapers_waiting} more scrapers queued")
+            except Exception:
+                failed = True
+                raise
+            finally:
+                if cancelled:
+                    self._finish_recipe_schedule_run("cancelled", "recipes.fetch_cancelled")
+                elif failed:
+                    self._finish_recipe_schedule_run("error", "recipes.fetch_failed")
+                else:
+                    self._finish_recipe_schedule_run("complete", "recipes.fetch_complete")
 
     async def _execute_all_active_recipe_scrapers(self):
         """Run all currently enabled recipe scrapers as one scheduled batch."""
@@ -514,8 +677,19 @@ class ScraperScheduler:
             "Running scheduled all-active recipe scrape "
             f"({len(enabled_scraper_ids)} sources)"
         )
+        self._set_recipe_schedule_status(
+            root_scraper_id=ALL_ACTIVE_RECIPE_SCRAPERS_ID,
+            current_index=1,
+            total_sources=len(enabled_scraper_ids),
+            total_new=0,
+            message_key="recipes.fetching_recipes",
+            message_params={},
+        )
         try:
+            scraper_configs = get_scraper_configs()
             for index, source_scraper_id in enumerate(enabled_scraper_ids, start=1):
+                if self._recipe_schedule_cancel_requested:
+                    break
                 if source_scraper_id in self._batch_executed_scraper_ids:
                     logger.info(
                         "Scheduled all-active recipe scrape skipping "
@@ -526,7 +700,41 @@ class ScraperScheduler:
                     "Scheduled all-active recipe scrape: "
                     f"{source_scraper_id} ({index}/{len(enabled_scraper_ids)})"
                 )
-                total_recipes_found += await self._execute_scraper(source_scraper_id)
+                self._set_recipe_schedule_status(
+                    current_scraper_id=source_scraper_id,
+                    current_scraper_name=None,
+                    current_index=index,
+                    total_sources=len(enabled_scraper_ids),
+                    progress_current=0,
+                    progress_total=0,
+                    progress_success=0,
+                    total_new=total_recipes_found,
+                    message_key="recipes.fetching_recipes",
+                    message_params={},
+                )
+                total_recipes_found += await self._execute_scraper(
+                    source_scraper_id,
+                    scraper_configs=scraper_configs,
+                    schedule_index=index,
+                    schedule_total=len(enabled_scraper_ids),
+                )
+                self._set_recipe_schedule_status(total_new=total_recipes_found)
+
+            if self._recipe_schedule_cancel_requested:
+                duration = int(time.time() - start_time)
+                save_run_history(
+                    ALL_ACTIVE_RECIPE_SCRAPERS_ID,
+                    "incremental",
+                    duration,
+                    total_recipes_found,
+                    success=False,
+                    error_message="cancelled",
+                )
+                logger.info(
+                    "Scheduled all-active recipe scrape cancelled: "
+                    f"{total_recipes_found} new recipes before cancellation"
+                )
+                return
 
             duration = int(time.time() - start_time)
             self._update_last_run(ALL_ACTIVE_RECIPE_SCRAPERS_ID)
@@ -555,7 +763,14 @@ class ScraperScheduler:
                 error_message=str(e),
             )
 
-    async def _execute_scraper(self, scraper_id: str):
+    async def _execute_scraper(
+        self,
+        scraper_id: str,
+        scraper_configs: dict | None = None,
+        *,
+        schedule_index: int = 1,
+        schedule_total: int = 1,
+    ):
         """Run the actual scraper logic (called under lock)."""
         import time
         start_time = time.time()
@@ -568,7 +783,19 @@ class ScraperScheduler:
             return 0
         self._batch_executed_scraper_ids.add(scraper_id)
 
-        logger.info(f"Running scheduled scraper: {scraper_id}")
+        max_incremental = self._get_incremental_recipe_limit(scraper_id, scraper_configs)
+        limit_label = str(max_incremental) if max_incremental is not None else "all"
+        logger.info(f"Running scheduled scraper: {scraper_id} (incremental limit={limit_label})")
+        self._set_recipe_schedule_status(
+            current_scraper_id=scraper_id,
+            current_index=schedule_index,
+            total_sources=schedule_total,
+            progress_current=0,
+            progress_total=0,
+            progress_success=0,
+            message_key="recipes.fetching_recipes",
+            message_params={},
+        )
 
         try:
             from recipe_scraper_manager import scraper_manager
@@ -580,6 +807,7 @@ class ScraperScheduler:
 
             # Run incremental scrape
             scraper = scraper_class()
+            self._current_recipe_scraper = scraper
             async def progress_callback(data: dict):
                 nonlocal attempted_count
                 if data.get("activity_only"):
@@ -589,6 +817,22 @@ class ScraperScheduler:
                 except (TypeError, ValueError):
                     current = 0
                 attempted_count = max(attempted_count, current)
+                try:
+                    total = int(data.get("total") or 0)
+                except (TypeError, ValueError):
+                    total = 0
+                try:
+                    success = int(data.get("success") or 0)
+                except (TypeError, ValueError):
+                    success = 0
+                percent = int(round((current / total) * 100)) if total > 0 else 0
+                self._set_recipe_schedule_status(
+                    progress_current=current,
+                    progress_total=total,
+                    progress_success=success,
+                    message_key="recipes.fetching_progress" if total > 0 else "recipes.fetching_recipes",
+                    message_params={"current": current, "total": total, "percent": percent},
+                )
 
             if hasattr(scraper, 'set_progress_callback'):
                 scraper.set_progress_callback(progress_callback)
@@ -606,7 +850,47 @@ class ScraperScheduler:
 
             scraper_info = scraper_manager.get_scraper(scraper_id)
             db_source_name = (scraper_info.db_source_name or scraper_info.name) if scraper_info else None
-            if hasattr(scraper, 'scrape_incremental'):
+            self._set_recipe_schedule_status(
+                current_scraper_name=scraper_info.name if scraper_info else scraper_id,
+            )
+            if hasattr(scraper, 'scrape_and_save'):
+                result = await scraper.scrape_and_save(
+                    overwrite=False,
+                    max_recipes=max_incremental,
+                )
+                save_result_for_cache = result if isinstance(result, dict) else {}
+                scrape_status = save_result_for_cache.get("scrape_status")
+                if scrape_status == "failed":
+                    raise RuntimeError(
+                        save_result_for_cache.get("scrape_reason") or "recipe_scrape_failed"
+                    )
+                if scrape_status == "cancelled":
+                    logger.info(f"Scheduled scrape cancelled for {scraper_id}")
+                    self._record_batch_cache_changes(save_result_for_cache)
+                    if self._save_result_has_cache_changes(save_result_for_cache):
+                        self._batch_has_new_recipes = bool(save_result_for_cache.get("created", 0))
+                    return 0
+                recipes_found = save_result_for_cache.get("created", 0)
+                logger.info(f"Scheduled scrape complete for {scraper_id}: {recipes_found} new recipes")
+            elif max_incremental and hasattr(scraper, 'scrape_all_recipes'):
+                scrape_result = normalize_recipe_scrape_result(
+                    await scraper.scrape_all_recipes(max_recipes=max_incremental),
+                    mode="incremental",
+                    source_name=db_source_name,
+                )
+                if scrape_result.status == "failed":
+                    raise RuntimeError(scrape_result.reason or "recipe_scrape_failed")
+                if scrape_result.status == "cancelled":
+                    logger.info(f"Scheduled scrape cancelled for {scraper_id}")
+                    return 0
+                scraper_module = importlib.import_module(f"scrapers.recipes.{scraper_id}_scraper")
+                save_to_database = getattr(scraper_module, 'save_to_database')
+                if scrape_result.should_save:
+                    result = save_to_database(scrape_result, clear_old=False)
+                    save_result_for_cache = result if isinstance(result, dict) else {}
+                    recipes_found = result.get("created", 0) if isinstance(result, dict) else 0
+                logger.info(f"Scheduled scrape complete for {scraper_id}: {recipes_found} new recipes")
+            elif hasattr(scraper, 'scrape_incremental'):
                 scrape_result = normalize_recipe_scrape_result(
                     await scraper.scrape_incremental(),
                     mode="incremental",
@@ -624,11 +908,6 @@ class ScraperScheduler:
                     save_result_for_cache = result if isinstance(result, dict) else {}
                     recipes_found = result.get("created", 0) if isinstance(result, dict) else 0
                 logger.info(f"Scheduled scrape complete for {scraper_id}: {recipes_found} new recipes")
-            elif hasattr(scraper, 'scrape_and_save'):
-                result = await scraper.scrape_and_save(overwrite=False)
-                save_result_for_cache = result if isinstance(result, dict) else {}
-                recipes_found = result.get("created", 0) if isinstance(result, dict) else 0
-                logger.info(f"Scheduled scrape complete for {scraper_id}: {result}")
             else:
                 scrape_result = normalize_recipe_scrape_result(
                     await scraper.scrape_all_recipes(),
@@ -684,6 +963,8 @@ class ScraperScheduler:
                 error_message=str(e),
             )
             return 0
+        finally:
+            self._current_recipe_scraper = None
 
     def _update_last_run(self, scraper_id: str):
         """Update last_run_at in database."""
@@ -1126,7 +1407,12 @@ class ScraperScheduler:
         try:
             # Import store plugin system (same as app.py)
             from scrapers.stores import get_store, normalize_store_scrape_result
-            from state import try_start_active_scrape, update_active_scrape
+            from state import (
+                try_start_active_scrape,
+                update_active_scrape,
+                set_scrape_task,
+                delete_scrape_task,
+            )
             from utils.store_scrape_config import build_store_scrape_config_context
 
             store_plugin = get_store(store_id)
@@ -1230,9 +1516,59 @@ class ScraperScheduler:
                 "message_params": {"store": display_name},
             })
 
+            async def report_plugin_progress(payload: dict):
+                progress = payload.get("progress")
+                try:
+                    progress_value = int(progress) if progress is not None else None
+                except (TypeError, ValueError):
+                    progress_value = None
+
+                update_payload = {
+                    "message_key": payload.get("message_key") or "ws.fetching_products",
+                    "message_params": payload.get("message_params") or {},
+                }
+                if progress_value is not None:
+                    update_payload["progress"] = progress_value
+                if payload.get("est_time"):
+                    update_payload["est_time"] = payload.get("est_time")
+                await update_active_scrape(store_id, update_payload)
+
+            if hasattr(store_plugin, "set_progress_callback"):
+                store_plugin.set_progress_callback(report_plugin_progress)
+
             # Run the store scraper
+            scrape_task = asyncio.create_task(store_plugin.scrape_offers(credentials))
+            await set_scrape_task(store_id, scrape_task)
+            try:
+                raw_scrape_result = await scrape_task
+            except asyncio.CancelledError:
+                logger.info(f"{run_label.capitalize()} store scrape cancelled for {store_id}")
+                error_message = f"{run_label} store scrape cancelled"
+                await update_active_scrape(store_id, {
+                    "completed": True,
+                    "status": "cancelled",
+                    "progress": 0,
+                    "message_key": "stores.scrape_cancelled",
+                    "message_params": {},
+                    "count": 0,
+                })
+                duration = int(time.time() - start_time)
+                save_run_history(
+                    f"store_{store_id}",
+                    "scheduled",
+                    duration,
+                    0,
+                    success=False,
+                    error_message=error_message,
+                )
+                return
+            finally:
+                if hasattr(store_plugin, "set_progress_callback"):
+                    store_plugin.set_progress_callback(None)
+                await delete_scrape_task(store_id)
+
             scrape_result = normalize_store_scrape_result(
-                await store_plugin.scrape_offers(credentials),
+                raw_scrape_result,
                 store_name=store_id,
             )
             products = scrape_result.products

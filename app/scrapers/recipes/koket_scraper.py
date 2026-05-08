@@ -668,7 +668,7 @@ class KoketScraper:
             if force_all:
                 # Full overwrite mode: top MAX_URLS by lastmod
                 urls_to_scrape = [url for url, _ in all_urls[:max_recipes or MAX_URLS]]
-                logger.info(f"OVERWRITE MODE: Scraping {len(urls_to_scrape)} recipes")
+                logger.info(f"OVERWRITE MODE: Trying {len(urls_to_scrape)} URLs")
             else:
                 # Incremental: only new URLs not in database
                 existing_urls = self._get_existing_urls()

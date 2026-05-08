@@ -751,9 +751,11 @@ If you write custom save logic, you must handle excluded URLs and spell checking
 
 ### 2.8 Recommended: `scrape_and_save()` Method
 
-The web route prefers `scrape_and_save()` for full and incremental modes when
-the method exists. Implement it with `StreamingRecipeSaver` for any scraper that
-can return hundreds or thousands of recipes.
+The web route and scheduler prefer `scrape_and_save()` for full and incremental
+modes when the method exists. Scheduled incremental runs pass the same effective
+`max_recipes` setting as the manual UI path. Implement it with
+`StreamingRecipeSaver` for any scraper that can return hundreds or thousands of
+recipes.
 
 ```python
 from scrapers.recipes._common import StreamingRecipeSaver
