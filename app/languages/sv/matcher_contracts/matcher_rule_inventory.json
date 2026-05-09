@@ -385,10 +385,10 @@
     "kind": "legacy_backend_allowance",
     "line_refs": [
       {
-        "anchor": "if not pressed_ginger_juice_allowed and not check_processed_product_rules(product_lower, ing_norm):",
-        "end": 1529,
+        "anchor": "not pressed_ginger_juice_allowed",
+        "end": 1709,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 1529
+        "start": 1704
       }
     ],
     "notes": "Backend validation explicitly allows pressed ginger juice products through processed-product checks.",
@@ -14379,5 +14379,405 @@
       }
     ],
     "notes": "Persiljekvistar follows the fresh/frozen parsley policy while prepared parsley-flavored carriers and standalone synthetic terms stay negative. Auto-promoted confirmed legacy staging cases passed fixture diagnostics before promotion."
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_tomatpesto_not_green_pesto",
+    "canonical": "tomatpesto_green_pesto_no_match",
+    "fixture_refs": [
+      "track_a_tomatpesto_green_pesto_negative"
+    ],
+    "id": "legacy_no_match_tomatpesto_green_pesto",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_tomatpesto_not_green_pesto",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Tomato pesto should not fall through to green, basil, or genovese pesto products.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_bufala_mozzarella_not_vegan_mozzarella_flavour",
+    "canonical": "bufala_mozzarella_vegan_flavour_no_match",
+    "fixture_refs": [
+      "track_a_bufala_mozzarella_vegan_negative"
+    ],
+    "id": "legacy_no_match_bufala_mozzarella_vegan",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_bufala_mozzarella_not_vegan_mozzarella_flavour",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Explicit bufala mozzarella should not match vegan mozzarella-flavour substitutes.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_sill_not_ansjoviskrydda_carrier",
+    "canonical": "sill_ansjoviskrydda_carrier_no_match",
+    "fixture_refs": [
+      "track_a_5_minuterssill_ansjoviskrydda_negative"
+    ],
+    "id": "legacy_no_match_sill_ansjoviskrydda_carrier",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_sill_not_ansjoviskrydda_carrier",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Sill and 5-minuterssill ingredients should not match herring-seasoning spice carriers.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_sushi_fish_not_generic_white_fish",
+    "canonical": "sushi_fish_white_fish_no_match",
+    "fixture_refs": [
+      "track_a_sushi_fish_white_fish_negative"
+    ],
+    "id": "legacy_no_match_sushi_fish_generic_white_fish",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_sushi_fish_not_generic_white_fish",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Sushi fish context should not fall back to generic white fish products.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_hushallsfars_not_chicken_mince",
+    "canonical": "hushallsfars_chicken_mince_no_match",
+    "fixture_refs": [
+      "track_a_hushallsfars_chicken_mince_negative"
+    ],
+    "id": "legacy_no_match_hushallsfars_chicken_mince",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_hushallsfars_not_chicken_mince",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Household mince or beef mince alternatives should not match chicken or vegetarian mince.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_plain_havregurt_not_fruit_flavored",
+    "canonical": "plain_havregurt_fruit_flavored_no_match",
+    "fixture_refs": [
+      "track_a_plain_havregurt_fruit_negative"
+    ],
+    "id": "legacy_no_match_plain_havregurt_fruit",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_plain_havregurt_not_fruit_flavored",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Plain or savory havregurt should not match fruit-flavored havregurt rows.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_kalkonbrostfile_not_thigh",
+    "canonical": "kalkonbrostfile_thigh_no_match",
+    "fixture_refs": [
+      "track_a_kalkonbrostfile_thigh_negative"
+    ],
+    "id": "legacy_no_match_kalkonbrostfile_thigh",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_kalkonbrostfile_not_thigh",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Turkey breast fillet should not match turkey thigh fillet products.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_mjukt_tunnbrod_not_hard_tunnbrod",
+    "canonical": "mjukt_tunnbrod_hard_tunnbrod_no_match",
+    "fixture_refs": [
+      "track_a_mjukt_tunnbrod_hard_negative"
+    ],
+    "id": "legacy_no_match_mjukt_tunnbrod_hard",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_mjukt_tunnbrod_not_hard_tunnbrod",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Soft tunnbrod should not match hard crisp tunnbrod products.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_low_fat_hard_cheese_not_high_fat",
+    "canonical": "hardost_max_17_high_fat_no_match",
+    "fixture_refs": [
+      "track_a_hardost_max_17_high_fat_negative"
+    ],
+    "id": "legacy_no_match_hardost_max_17_high_fat",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_low_fat_hard_cheese_not_high_fat",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Hard cheese capped at max 17 percent fat should not match higher-fat cheese rows.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_storkornskaviar_not_tube_kaviar",
+    "canonical": "storkornskaviar_tube_kaviar_no_match",
+    "fixture_refs": [
+      "track_a_storkornskaviar_tube_kaviar_negative"
+    ],
+    "id": "legacy_no_match_storkornskaviar_tube_kaviar",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_storkornskaviar_not_tube_kaviar",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Large-grain red roe should not match Kalles or Svennes tube-style kaviar spreads.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_habanero_hot_sauce_not_fresh_chili",
+    "canonical": "habanero_hot_sauce_fresh_chili_no_match",
+    "fixture_refs": [
+      "track_a_tabasco_habanero_fresh_chili_negative"
+    ],
+    "id": "legacy_no_match_habanero_hot_sauce_fresh_chili",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_habanero_hot_sauce_not_fresh_chili",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Habanero hot-sauce wording should not match fresh habanero chili produce.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_rokextrakt_not_smoke_flavored_carriers",
+    "canonical": "rokextrakt_smoke_carrier_no_match",
+    "fixture_refs": [
+      "track_a_rokextrakt_smoke_carrier_negative"
+    ],
+    "id": "legacy_no_match_rokextrakt_smoke_carrier",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_rokextrakt_not_smoke_flavored_carriers",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Liquid-smoke extract wording should not match smoke-flavored crackers or bread carriers.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_measured_spirit_rom_not_fish_roe",
+    "canonical": "measured_spirit_rom_fish_roe_no_match",
+    "fixture_refs": [
+      "track_a_measured_spirit_rom_fish_roe_negative"
+    ],
+    "id": "legacy_no_match_measured_rom_fish_roe",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_measured_spirit_rom_not_fish_roe",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Measured cooking or cocktail rum should not match fish roe products.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_tryffelburrata_not_plain_burrata",
+    "canonical": "tryffelburrata_plain_burrata_no_match",
+    "fixture_refs": [
+      "track_a_tryffelburrata_plain_burrata_negative"
+    ],
+    "id": "legacy_no_match_tryffelburrata_plain_burrata",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_tryffelburrata_not_plain_burrata",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Truffle burrata should not fall back to plain burrata rows.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_riven_veganost_not_spread",
+    "canonical": "riven_veganost_spread_no_match",
+    "fixture_refs": [
+      "track_a_riven_veganost_spread_negative"
+    ],
+    "id": "legacy_no_match_riven_veganost_spread",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_riven_veganost_not_spread",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Grated vegan cheese should not match creamy or spreadable vegan cheese products.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_morotssylt_not_other_jams",
+    "canonical": "morotssylt_other_jams_no_match",
+    "fixture_refs": [
+      "track_a_morotssylt_other_jam_negative"
+    ],
+    "id": "legacy_no_match_morotssylt_other_jam",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "policy_morotssylt_not_other_jams",
+        "end": 2303,
+        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
+        "start": 2028
+      }
+    ],
+    "notes": "Carrot jam should not fall back to non-carrot jams or marmalades.",
+    "owner": "matcher",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "current_review:track_a_batch_4_15_no_match_policy_contracts"
+    ],
+    "status": "wrapped_adapter"
   }
 ]

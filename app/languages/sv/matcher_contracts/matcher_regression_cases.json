@@ -1670,7 +1670,14 @@
       "name": "Smördeg Plattor Fryst Garant",
       "category": "bread"
     },
-    "expected": 0
+    "expected": 1,
+    "expected_matches": [
+      {
+        "ingredient_index": 0,
+        "canonical": "smördeg",
+        "must_match_keyword": "smördeg"
+      }
+    ]
   },
   {
     "id": "matcher_regression_veganost_positive",
@@ -32596,6 +32603,230 @@
     ],
     "offer": {
       "name": "Kalkon Bröstfilé"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_tomatpesto_green_pesto_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "tomatpesto"
+    ],
+    "offer": {
+      "name": "Pesto Genovese Zeta",
+      "category": "pantry"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_bufala_mozzarella_vegan_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "Zeta Mozzarella Di Bufala Campana"
+    ],
+    "offer": {
+      "name": "Mozzarella Flavour Vegansk Greenvie",
+      "category": "dairy"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_5_minuterssill_ansjoviskrydda_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "5-minuterssill"
+    ],
+    "offer": {
+      "name": "Ansjoviskrydda Sill Garant",
+      "category": "fish"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_sushi_fish_white_fish_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "fiskfilé gärna lax eller färsk tonfisk"
+    ],
+    "offer": {
+      "name": "Torskfilé Fryst Garant",
+      "category": "fish"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_hushallsfars_chicken_mince_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "hushållsfärs eller nötfärs"
+    ],
+    "offer": {
+      "name": "Kycklingfärs 500g Kronfågel",
+      "category": "meat"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_plain_havregurt_fruit_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "turkisk havregurt"
+    ],
+    "offer": {
+      "name": "Baked Äpple Havregurt Low Fat Oddlygood",
+      "category": "dairy"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_kalkonbrostfile_thigh_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "kalkonbröstfilé"
+    ],
+    "offer": {
+      "name": "Kalkonlårfilé Strimlad Fryst Ingelstakalkon",
+      "category": "meat"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_mjukt_tunnbrod_hard_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "mjukt tunnbröd"
+    ],
+    "offer": {
+      "name": "Tunnbröd Hårt Gene",
+      "category": "bread"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_hardost_max_17_high_fat_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "riven hårdost max 17%"
+    ],
+    "offer": {
+      "name": "Riven Ost 28% Arla",
+      "category": "dairy"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_storkornskaviar_tube_kaviar_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "storkornskaviar röd"
+    ],
+    "offer": {
+      "name": "Kaviar Original Kalles",
+      "category": "fish"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_tabasco_habanero_fresh_chili_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "Tabasco Habanero"
+    ],
+    "offer": {
+      "name": "Chilli Habanero Garant",
+      "category": "fruit"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_rokextrakt_smoke_carrier_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "rökextrakt"
+    ],
+    "offer": {
+      "name": "Kex Hickory Smoke",
+      "category": "bread"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_measured_spirit_rom_fish_roe_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "2 msk rom"
+    ],
+    "offer": {
+      "name": "Stenbitsrom Röd",
+      "category": "fish"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_tryffelburrata_plain_burrata_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "tryffelburrata"
+    ],
+    "offer": {
+      "name": "Burrata Zeta",
+      "category": "dairy"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_riven_veganost_spread_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "riven veganost"
+    ],
+    "offer": {
+      "name": "Vegansk Färskost Violife",
+      "category": "dairy"
+    },
+    "expected": 0
+  },
+  {
+    "id": "track_a_morotssylt_other_jam_negative",
+    "policy_ref": "track_a_batch_4_15_wave_2",
+    "source_ref": "current_review:track_a_batch_4_15_no_match_policy_contracts",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "morotssylt"
+    ],
+    "offer": {
+      "name": "Jordgubbssylt Bob",
+      "category": "pantry"
     },
     "expected": 0
   }
