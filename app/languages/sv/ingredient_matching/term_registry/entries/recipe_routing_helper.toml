@@ -1,0 +1,206 @@
+[[entries]]
+entry_id = "sv-se.family.baguette.recipe_routing_helper"
+language = "sv"
+market = "SE"
+canonical = "baguette"
+status = "active"
+variants = ["baguette"]
+route_terms = ["baguette"]
+source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned recipe routing extra alias migrated in R5."
+
+[[entries.coverage]]
+source_family = "recipe_routing_helper"
+canonical = "baguette"
+variant = "baguette"
+layer_role = "recipe_routing_extra_alias"
+
+[[entries.positive_examples]]
+ingredient = "baguetter"
+offer_name = "Baguette"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.helkyckling.recipe_routing_helper"
+language = "sv"
+market = "SE"
+canonical = "helkyckling"
+status = "active"
+variants = ["helkyckling"]
+route_terms = ["helkyckling"]
+source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned recipe routing extra alias migrated in R5."
+
+[[entries.coverage]]
+source_family = "recipe_routing_helper"
+canonical = "helkyckling"
+variant = "helkyckling"
+layer_role = "recipe_routing_extra_alias"
+
+[[entries.positive_examples]]
+ingredient = "hel kyckling"
+offer_name = "Hel Kyckling"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kyckling.recipe_routing_helper"
+language = "sv"
+market = "SE"
+canonical = "kyckling"
+status = "active"
+variants = ["kyckling"]
+route_terms = ["kyckling"]
+source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned recipe routing extra alias migrated in R5."
+
+[[entries.coverage]]
+source_family = "recipe_routing_helper"
+canonical = "kyckling"
+variant = "kyckling"
+layer_role = "recipe_routing_extra_alias"
+
+[[entries.positive_examples]]
+ingredient = "kycklinginnerfilé"
+offer_name = "Kycklinginnerfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.oreo.recipe_routing_helper"
+language = "sv"
+market = "SE"
+canonical = "oreo"
+status = "active"
+variants = ["oreo"]
+route_terms = ["oreo"]
+source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned recipe routing extra alias migrated in R5."
+
+[[entries.coverage]]
+source_family = "recipe_routing_helper"
+canonical = "oreo"
+variant = "oreo"
+layer_role = "recipe_routing_extra_alias"
+
+[[entries.positive_examples]]
+ingredient = "oreokakor"
+offer_name = "Oreokakor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.ost.recipe_routing_helper"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["ost"]
+route_terms = ["ost"]
+source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned recipe routing extra alias migrated in R5."
+
+[[entries.coverage]]
+source_family = "recipe_routing_helper"
+canonical = "ost"
+variant = "ost"
+layer_role = "recipe_routing_extra_alias"
+
+[[entries.positive_examples]]
+ingredient = "prästost"
+offer_name = "Prästost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.schnitzel.recipe_routing_helper"
+language = "sv"
+market = "SE"
+canonical = "schnitzel"
+status = "active"
+variants = ["schnitzel"]
+route_terms = ["schnitzel"]
+source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned recipe routing extra alias migrated in R5."
+
+[[entries.coverage]]
+source_family = "recipe_routing_helper"
+canonical = "schnitzel"
+variant = "schnitzel"
+layer_role = "recipe_routing_extra_alias"
+
+[[entries.positive_examples]]
+ingredient = "kycklingschnitzel"
+offer_name = "Kycklingschnitzel"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.snabbkaffe.recipe_routing_helper"
+language = "sv"
+market = "SE"
+canonical = "snabbkaffe"
+status = "active"
+variants = ["snabbkaffe"]
+route_terms = ["snabbkaffe"]
+source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned recipe routing extra alias migrated in R5."
+
+[[entries.coverage]]
+source_family = "recipe_routing_helper"
+canonical = "snabbkaffe"
+variant = "snabbkaffe"
+layer_role = "recipe_routing_extra_alias"
+
+[[entries.positive_examples]]
+ingredient = "snabbkaffepulver"
+offer_name = "Snabbkaffe"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.svamp.recipe_routing_helper"
+language = "sv"
+market = "SE"
+canonical = "svamp"
+status = "active"
+variants = ["svamp"]
+route_terms = ["svamp"]
+source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned recipe routing extra alias migrated in R5."
+
+[[entries.coverage]]
+source_family = "recipe_routing_helper"
+canonical = "svamp"
+variant = "svamp"
+layer_role = "recipe_routing_extra_alias"
+
+[[entries.positive_examples]]
+ingredient = "skogssvamp"
+offer_name = "Skogssvamp"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.tortilla.recipe_routing_helper"
+language = "sv"
+market = "SE"
+canonical = "tortilla"
+status = "active"
+variants = ["tortilla"]
+route_terms = ["tortilla"]
+source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned recipe routing extra alias migrated in R5."
+
+[[entries.coverage]]
+source_family = "recipe_routing_helper"
+canonical = "tortilla"
+variant = "tortilla"
+layer_role = "recipe_routing_extra_alias"
+
+[[entries.positive_examples]]
+ingredient = "tortillabröd"
+offer_name = "Tortillabröd"
+expected = 1

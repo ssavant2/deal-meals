@@ -43,6 +43,7 @@ from .normalization import _SPACE_NORMALIZATIONS, _apply_space_normalizations
 from .parent_maps import PARENT_MATCH_ONLY
 from .recipe_text import expand_grouped_ingredient_text, rewrite_buljong_eller_fond
 from .synonyms import INGREDIENT_PARENTS
+from .term_registry.exports import RECIPE_ROUTING_EXTRA_ALIASES as _REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES
 from .versioning import MATCHER_VERSION, OFFER_COMPILER_VERSION, RECIPE_COMPILER_VERSION
 from .compound_text import _WORD_PATTERN
 
@@ -690,7 +691,6 @@ def _build_recipe_routing_search_text_from_payload(payload: dict[str, Any]) -> s
             parts.extend(_recipe_routing_extra_aliases(normalized_text))
     return " ".join(part for part in parts if part).strip()
 
-
 def _recipe_routing_extra_aliases(normalized_text: str) -> tuple[str, ...]:
     text_value = normalized_text.lower()
     aliases: list[str] = []
@@ -703,27 +703,27 @@ def _recipe_routing_extra_aliases(normalized_text: str) -> tuple[str, ...]:
             or "stor kyckling" in text_value
         )
     ):
-        aliases.append("helkyckling")
+        aliases.append(_REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES["helkyckling"])
     if "oreokaka" in text_value or "oreokakor" in text_value:
-        aliases.append("oreo")
+        aliases.append(_REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES["oreo"])
     if "kycklingschnitzel" in text_value:
-        aliases.append("schnitzel")
+        aliases.append(_REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES["schnitzel"])
     if "kycklinginnerfil" in text_value or "kycklinginnerfile" in text_value:
-        aliases.append("kyckling")
+        aliases.append(_REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES["kyckling"])
     if "prästost" in text_value or "prastost" in text_value:
-        aliases.append("ost")
+        aliases.append(_REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES["ost"])
     if "johansvamp" in text_value or "skogssvamp" in text_value:
-        aliases.append("svamp")
+        aliases.append(_REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES["svamp"])
     if (
         "snabbkaffepulver" in text_value
         or "kaffepulver" in text_value
         or "pulverkaffe" in text_value
     ):
-        aliases.append("snabbkaffe")
+        aliases.append(_REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES["snabbkaffe"])
     if "baguetter" in text_value:
-        aliases.append("baguette")
+        aliases.append(_REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES["baguette"])
     if "tortillabröd" in text_value or "tortillabrod" in text_value:
-        aliases.append("tortilla")
+        aliases.append(_REGISTRY_RECIPE_ROUTING_EXTRA_ALIASES["tortilla"])
     return tuple(aliases)
 
 

@@ -1661,9 +1661,9 @@
     "line_refs": [
       {
         "anchor": "'seaweed': 'alger',",
-        "end": 98,
+        "end": 81,
         "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 98
+        "start": 81
       },
       {
         "anchor": "'nori', 'alger',  # seaweed sheets/generic algae — \"Sushi Nori Roasted Seeweed\"",
@@ -1766,9 +1766,9 @@
     "line_refs": [
       {
         "anchor": "'körsbärstomater': 'småtomat',",
-        "end": 94,
+        "end": 77,
         "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 94
+        "start": 77
       },
       {
         "anchor": "# Fresh small tomatoes may substitute each other, but preserved/in-juice",
@@ -2231,10 +2231,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "\"kalamataoliver\": \"oliver\",",
-        "end": 17,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 17
+        "anchor": "variant = \"kalamataoliver\"",
+        "end": 206,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 206
       },
       {
         "anchor": "# lines asking for Kalamata olives. Keep olive oil, hummus, and tapenade out.",
@@ -2326,10 +2326,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "# matching. Expose the same family term for compiled route pairing without",
-        "end": 15,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 15
+        "anchor": "variant = \"svartvinbärsgele\"",
+        "end": 525,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 525
       },
       {
         "anchor": "return ['svartvinbärsgele']",
@@ -4864,10 +4864,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "\"oreokakor\": \"oreo\",",
-        "end": 23,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 23
+        "anchor": "variant = \"oreokakor\"",
+        "end": 235,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 235
       },
       {
         "anchor": "if \"oreokaka\" in text_value or \"oreokakor\" in text_value:",
@@ -4903,10 +4903,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "\"kycklingschnitzel\": \"schnitzel\",",
-        "end": 24,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 24
+        "anchor": "variant = \"kycklingschnitzel\"",
+        "end": 345,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 345
       },
       {
         "anchor": "if \"kycklingschnitzel\" in text_value:",
@@ -4944,10 +4944,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "\"johansvamp\": \"svamp\",",
-        "end": 27,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 27
+        "anchor": "variant = \"johansvamp\"",
+        "end": 432,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 432
       },
       {
         "anchor": "if \"johansvamp\" in text_value or \"skogssvamp\" in text_value:",
@@ -4984,10 +4984,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "\"prästost\": \"ost\",",
-        "end": 25,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 25
+        "anchor": "variant = \"prästost\"",
+        "end": 264,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 264
       },
       {
         "anchor": "if \"prästost\" in text_value or \"prastost\" in text_value:",
@@ -5253,10 +5253,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "\"kycklinginnerfiléer\": \"kyckling\",",
-        "end": 30,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 30
+        "anchor": "variant = \"kycklinginnerfiléer\"",
+        "end": 160,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 160
       },
       {
         "anchor": "if \"kycklinginnerfil\" in text_value or \"kycklinginnerfile\" in text_value:",
@@ -5731,16 +5731,16 @@
         "start": 3357
       },
       {
-        "anchor": "\"snabbkaffepulver\": \"snabbkaffe\",",
-        "end": 33,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 33
+        "anchor": "variant = \"snabbkaffepulver\"",
+        "end": 380,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 380
       },
       {
-        "anchor": "aliases.append(\"snabbkaffe\")",
-        "end": 342,
-        "path": "app/languages/sv/ingredient_matching/term_indexes.py",
-        "start": 342
+        "anchor": "variant = \"snabbkaffe\"",
+        "end": 154,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/recipe_routing_helper.toml",
+        "start": 154
       }
     ],
     "notes": "Snabbkaffepulver shares the instant-coffee route term with plain snabbkaffe products while flavored cappuccino/latte mixes stay blocked.",
@@ -5999,16 +5999,16 @@
         "start": 757
       },
       {
-        "anchor": "\"baguetter\": \"baguette\",",
-        "end": 36,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 36
+        "anchor": "variant = \"baguetter\"",
+        "end": 68,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 68
       },
       {
-        "anchor": "aliases.append(\"baguette\")",
-        "end": 344,
-        "path": "app/languages/sv/ingredient_matching/term_indexes.py",
-        "start": 344
+        "anchor": "variant = \"baguette\"",
+        "end": 16,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/recipe_routing_helper.toml",
+        "start": 16
       }
     ],
     "notes": "Baugette/surdegsbaugette typo and plural baguetter route to baguette products, while garlic baguettes remain a flavored/prepared negative.",
@@ -6388,16 +6388,16 @@
     "kind": "legacy_prepared_text_expansion",
     "line_refs": [
       {
-        "anchor": "\"tortillabröd\": \"tortilla\",",
-        "end": 37,
-        "path": "app/languages/sv/ingredient_matching/ingredient_routing.py",
-        "start": 37
+        "anchor": "variant = \"tortillabröd\"",
+        "end": 467,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_routing_parent.toml",
+        "start": 467
       },
       {
-        "anchor": "aliases.append(\"tortilla\")",
-        "end": 346,
-        "path": "app/languages/sv/ingredient_matching/term_indexes.py",
-        "start": 346
+        "anchor": "variant = \"tortilla\"",
+        "end": 200,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/recipe_routing_helper.toml",
+        "start": 200
       }
     ],
     "notes": "Tortillabröd/wrap wording routes to tortilla bread offers while Spanish tortilla omelette products remain outside the bread family.",
@@ -6645,9 +6645,9 @@
     "line_refs": [
       {
         "anchor": "'lammracks': ['lamm', 'lammkött'],",
-        "end": 61,
+        "end": 44,
         "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 61
+        "start": 44
       },
       {
         "anchor": "'lammracks',  # explicit lamb racks should not fall back to other lamb cuts",
@@ -6885,9 +6885,9 @@
       },
       {
         "anchor": "'matbrödsjäst': 'jäst',",
-        "end": 42,
+        "end": 25,
         "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 42
+        "start": 25
       },
       {
         "anchor": "if matched_keyword in {'jäst', 'matbrödsjäst'} and _ingredient_requests_generic_bread_yeast(ingredient_lower):",
@@ -7597,9 +7597,9 @@
     "line_refs": [
       {
         "anchor": "'kycklingfärs': 'färs',",
-        "end": 72,
+        "end": 55,
         "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 72
+        "start": 55
       },
       {
         "anchor": "_MEAT_MINCE_PREFIXES: Set[str] = {",

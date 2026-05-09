@@ -1,0 +1,531 @@
+[[entries]]
+entry_id = "sv-se.family.ansjovis.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "ansjovis"
+status = "active"
+variants = ["ansjovisfileer", "ansjovisfiléer"]
+route_terms = ["ansjovis"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "ansjovis"
+variant = "ansjovisfileer"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "ansjovis"
+variant = "ansjovisfiléer"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ansjovis"
+offer_name = "Ansjovisfiléer"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.aprikos.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "aprikos"
+status = "active"
+variants = ["aprikoser"]
+route_terms = ["aprikos"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "aprikos"
+variant = "aprikoser"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "aprikos"
+offer_name = "Aprikoser"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.baguette.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "baguette"
+status = "active"
+variants = ["baguetter"]
+route_terms = ["baguette"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "baguette"
+variant = "baguetter"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "baguette"
+offer_name = "Baguetter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.champinjon.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "champinjon"
+status = "active"
+variants = ["champinjoner"]
+route_terms = ["champinjon"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "champinjon"
+variant = "champinjoner"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "champinjon"
+offer_name = "Champinjoner"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.champinjoner.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "champinjoner"
+status = "active"
+variants = ["skogschampinjoner"]
+route_terms = ["champinjoner"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "champinjoner"
+variant = "skogschampinjoner"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "champinjoner"
+offer_name = "Skogschampinjoner"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kyckling.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "kyckling"
+status = "active"
+variants = [
+  "kycklinginnerfile",
+  "kycklinginnerfileer",
+  "kycklinginnerfilé",
+  "kycklinginnerfiléer",
+]
+route_terms = ["kyckling"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "kyckling"
+variant = "kycklinginnerfile"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "kyckling"
+variant = "kycklinginnerfileer"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "kyckling"
+variant = "kycklinginnerfilé"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "kyckling"
+variant = "kycklinginnerfiléer"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kyckling"
+offer_name = "Kycklinginnerfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lammkotlett.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "lammkotlett"
+status = "active"
+variants = ["lammkotletter"]
+route_terms = ["lammkotlett"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "lammkotlett"
+variant = "lammkotletter"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammkotlett"
+offer_name = "Lammkotletter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.oliver.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "oliver"
+status = "active"
+variants = ["kalamataoliver"]
+route_terms = ["oliver"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "oliver"
+variant = "kalamataoliver"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "oliver"
+offer_name = "Kalamataoliver"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.oreo.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "oreo"
+status = "active"
+variants = ["oreokaka", "oreokakor"]
+route_terms = ["oreo"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "oreo"
+variant = "oreokaka"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "oreo"
+variant = "oreokakor"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "oreo"
+offer_name = "Oreokaka"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.ost.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["prastost", "prästost"]
+route_terms = ["ost"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "ost"
+variant = "prastost"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "ost"
+variant = "prästost"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Prästost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.potatischips.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "potatischips"
+status = "active"
+variants = ["lantchips", "mandelpotatischips"]
+route_terms = ["potatischips"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "potatischips"
+variant = "lantchips"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "potatischips"
+variant = "mandelpotatischips"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "potatischips"
+offer_name = "Mandelpotatischips"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.rodspatta.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "rödspätta"
+status = "active"
+variants = ["rodspattafile", "rödspättafilé"]
+route_terms = ["rödspätta"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "rödspätta"
+variant = "rodspattafile"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "rödspätta"
+variant = "rödspättafilé"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rödspätta"
+offer_name = "Rödspättafilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.schnitzel.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "schnitzel"
+status = "active"
+variants = ["kycklingschnitzel"]
+route_terms = ["schnitzel"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "schnitzel"
+variant = "kycklingschnitzel"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "schnitzel"
+offer_name = "Kycklingschnitzel"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.snabbkaffe.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "snabbkaffe"
+status = "active"
+variants = ["kaffepulver", "pulverkaffe", "snabbkaffepulver"]
+route_terms = ["snabbkaffe"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "snabbkaffe"
+variant = "kaffepulver"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "snabbkaffe"
+variant = "pulverkaffe"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "snabbkaffe"
+variant = "snabbkaffepulver"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "snabbkaffe"
+offer_name = "Snabbkaffepulver"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.spenat.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "spenat"
+status = "active"
+variants = ["babyspenat", "bladspenat"]
+route_terms = ["spenat"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "spenat"
+variant = "babyspenat"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "spenat"
+variant = "bladspenat"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "spenat"
+offer_name = "Babyspenat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.svamp.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "svamp"
+status = "active"
+variants = ["johansvamp", "skogssvamp"]
+route_terms = ["svamp"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "svamp"
+variant = "johansvamp"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "svamp"
+variant = "skogssvamp"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "svamp"
+offer_name = "Skogssvamp"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.tortilla.ingredient_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "tortilla"
+status = "active"
+variants = ["tortillabrod", "tortillabröd"]
+route_terms = ["tortilla"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "tortilla"
+variant = "tortillabrod"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "tortilla"
+variant = "tortillabröd"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tortilla"
+offer_name = "Tortillabröd"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.vinbarsgele.ascii_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "vinbarsgele"
+status = "active"
+variants = ["rodvinbarsgele", "svartvinbarsgele"]
+route_terms = ["vinbarsgele"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "vinbarsgele"
+variant = "rodvinbarsgele"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "vinbarsgele"
+variant = "svartvinbarsgele"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vinbarsgele"
+offer_name = "Svartvinbarsgele"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.vinbarsgele.native_routing_parent"
+language = "sv"
+market = "SE"
+canonical = "vinbärsgele"
+status = "active"
+variants = ["rödvinbärsgele", "svartvinbärsgele"]
+route_terms = ["vinbärsgele"]
+source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned ingredient routing parent terms migrated in R5."
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "vinbärsgele"
+variant = "rödvinbärsgele"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_routing_parent"
+canonical = "vinbärsgele"
+variant = "svartvinbärsgele"
+layer_role = "ingredient_routing_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vinbärsgele"
+offer_name = "Svartvinbärsgele"
+expected = 1

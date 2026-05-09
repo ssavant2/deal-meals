@@ -13,6 +13,17 @@ from pathlib import Path
 PACKAGE_DIR = Path(__file__).resolve().parent
 REPO_ROOT = PACKAGE_DIR.parents[3]
 
+TERM_REGISTRY_HASH_FILES = (
+    "app/languages/term_registry/models.py",
+    "app/languages/sv/ingredient_matching/term_registry/registry.py",
+    "app/languages/sv/ingredient_matching/term_registry/exports.py",
+    *tuple(
+        sorted(
+            str(path.relative_to(REPO_ROOT))
+            for path in (PACKAGE_DIR / "term_registry" / "entries").glob("*.toml")
+        )
+    ),
+)
 
 MATCHER_HASH_FILES = (
     "app/cache_manager.py",
@@ -48,6 +59,7 @@ MATCHER_HASH_FILES = (
     "app/languages/sv/ingredient_matching/offer_identity.py",
     "app/languages/sv/ingredient_matching/offer_data.py",
     "app/languages/sv/ingredient_matching/parent_maps.py",
+    *TERM_REGISTRY_HASH_FILES,
     "app/languages/sv/ingredient_matching/processed_rules.py",
     "app/languages/sv/ingredient_matching/recipe_context.py",
     "app/languages/sv/ingredient_matching/recipe_identity.py",
@@ -78,6 +90,7 @@ RECIPE_COMPILER_HASH_FILES = (
     "app/languages/sv/ingredient_matching/normalization.py",
     "app/languages/sv/ingredient_matching/offer_identity.py",
     "app/languages/sv/ingredient_matching/parent_maps.py",
+    *TERM_REGISTRY_HASH_FILES,
     "app/languages/sv/ingredient_matching/processed_rules.py",
     "app/languages/sv/ingredient_matching/recipe_context.py",
     "app/languages/sv/ingredient_matching/recipe_identity.py",
@@ -110,6 +123,7 @@ OFFER_COMPILER_HASH_FILES = (
     "app/languages/sv/ingredient_matching/offer_identity.py",
     "app/languages/sv/ingredient_matching/offer_data.py",
     "app/languages/sv/ingredient_matching/parent_maps.py",
+    *TERM_REGISTRY_HASH_FILES,
     "app/languages/sv/ingredient_matching/processed_rules.py",
     "app/languages/sv/ingredient_matching/recipe_context.py",
     "app/languages/sv/ingredient_matching/recipe_matcher_support.py",

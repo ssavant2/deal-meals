@@ -1,0 +1,156 @@
+[[entries]]
+entry_id = "sv-se.family.kalkon.parent_match_only"
+language = "sv"
+market = "SE"
+canonical = "kalkon"
+status = "active"
+variants = [
+  "kalkonbröst",
+  "kalkonbröstfil",
+  "kalkonfärs",
+  "kalkonlårfilé",
+  "kalkonlarfile",
+  "kalkonklubba",
+]
+route_terms = ["kalkon"]
+source_refs = ["code:term_registry_entries:parent_match_only.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned parent-match-only turkey compounds migrated in R5."
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "kalkon"
+variant = "kalkonbröst"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "kalkon"
+variant = "kalkonbröstfil"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "kalkon"
+variant = "kalkonfärs"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "kalkon"
+variant = "kalkonlårfilé"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "kalkon"
+variant = "kalkonlarfile"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "kalkon"
+variant = "kalkonklubba"
+layer_role = "parent_match_only_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalkon"
+offer_name = "Kalkonbröst Rökt Skivad"
+offer_category = "meat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.salami.parent_match_only"
+language = "sv"
+market = "SE"
+canonical = "salami"
+status = "active"
+variants = [
+  "pepparsalami",
+  "tryffelsalami",
+  "fänkålssalami",
+  "vitlökssalami",
+  "chilisalami",
+  "chorizosalami",
+  "guldsalami",
+  "lammsalami",
+  "lindösalami",
+  "kycklingsalami",
+  "pizzasalami",
+]
+route_terms = ["salami"]
+source_refs = ["code:term_registry_entries:parent_match_only.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned parent-match-only salami compounds migrated in R5."
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "pepparsalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "tryffelsalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "fänkålssalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "vitlökssalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "chilisalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "chorizosalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "guldsalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "lammsalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "lindösalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "kycklingsalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.coverage]]
+source_family = "parent_match_only"
+canonical = "salami"
+variant = "pizzasalami"
+layer_role = "parent_match_only_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salami"
+offer_name = "Salami Milano Tunna Skivor"
+offer_category = "meat"
+expected = 1

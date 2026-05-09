@@ -2,26 +2,9 @@
 
 from typing import Dict, List, Union
 
+from .term_registry.exports import PARENT_MATCH_ONLY as _REGISTRY_PARENT_MATCH_ONLY
 
-PARENT_MATCH_ONLY: Dict[str, str] = {
-    'kalkonbröst': 'kalkon',
-    'kalkonbröstfil': 'kalkon',
-    'kalkonfärs': 'kalkon',
-    'kalkonlårfilé': 'kalkon',
-    'kalkonlarfile': 'kalkon',
-    'kalkonklubba': 'kalkon',
-    'pepparsalami': 'salami',
-    'tryffelsalami': 'salami',
-    'fänkålssalami': 'salami',
-    'vitlökssalami': 'salami',
-    'chilisalami': 'salami',
-    'chorizosalami': 'salami',
-    'guldsalami': 'salami',
-    'lammsalami': 'salami',
-    'lindösalami': 'salami',
-    'kycklingsalami': 'salami',
-    'pizzasalami': 'salami',
-}
+PARENT_MATCH_ONLY: Dict[str, str] = _REGISTRY_PARENT_MATCH_ONLY
 
 
 KEYWORD_EXTRA_PARENTS: Dict[str, Union[str, List[str]]] = {

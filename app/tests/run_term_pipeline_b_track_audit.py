@@ -144,6 +144,8 @@ def _literal_strings(node: ast.AST | None) -> list[str]:
     elif isinstance(node, ast.BinOp):
         values.extend(_literal_strings(node.left))
         values.extend(_literal_strings(node.right))
+    elif isinstance(node, ast.Subscript):
+        values.extend(_literal_strings(node.slice))
     return values
 
 

@@ -8,47 +8,10 @@ from typing import Any
 from .compiled_recipes import resolve_recipe_match_runtime_data
 from .compound_text import _WORD_PATTERN
 from .synonyms import INGREDIENT_PARENTS
+from .term_registry.exports import INGREDIENT_ROUTING_PARENT_TERMS as _REGISTRY_ROUTING_PARENT_TERMS
 
 
-_ROUTING_PARENT_TERMS = {
-    # Fullscan accepts these compound recipe words through substring/family
-    # matching. Expose the same family term for compiled route pairing without
-    # adding reverse offer keywords to every generic product in the family.
-    "kalamataoliver": "oliver",
-    "svartvinbärsgele": "vinbärsgele",
-    "svartvinbarsgele": "vinbarsgele",
-    "rödvinbärsgele": "vinbärsgele",
-    "rodvinbarsgele": "vinbarsgele",
-    "oreokaka": "oreo",
-    "oreokakor": "oreo",
-    "kycklingschnitzel": "schnitzel",
-    "prästost": "ost",
-    "prastost": "ost",
-    "johansvamp": "svamp",
-    "skogssvamp": "svamp",
-    "kycklinginnerfilé": "kyckling",
-    "kycklinginnerfiléer": "kyckling",
-    "kycklinginnerfile": "kyckling",
-    "kycklinginnerfileer": "kyckling",
-    "snabbkaffepulver": "snabbkaffe",
-    "kaffepulver": "snabbkaffe",
-    "pulverkaffe": "snabbkaffe",
-    "baguetter": "baguette",
-    "tortillabröd": "tortilla",
-    "tortillabrod": "tortilla",
-    "bladspenat": "spenat",
-    "babyspenat": "spenat",
-    "rödspättafilé": "rödspätta",
-    "rodspattafile": "rödspätta",
-    "ansjovisfiléer": "ansjovis",
-    "ansjovisfileer": "ansjovis",
-    "mandelpotatischips": "potatischips",
-    "lantchips": "potatischips",
-    "aprikoser": "aprikos",
-    "champinjoner": "champinjon",
-    "skogschampinjoner": "champinjoner",
-    "lammkotletter": "lammkotlett",
-}
+_ROUTING_PARENT_TERMS = _REGISTRY_ROUTING_PARENT_TERMS
 
 
 def build_recipe_ingredient_term_map(

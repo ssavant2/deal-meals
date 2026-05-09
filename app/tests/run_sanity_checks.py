@@ -415,6 +415,30 @@ def _run_myrecipes_playwright_security_checks() -> None:
         myrecipes_scraper.is_safe_url = original_is_safe_url
 
 
+def _run_term_registry_gate_checks() -> None:
+    print("\n--- term registry R4 gate ---", flush=True)
+    from tests.run_term_registry_contract_checks import (  # noqa: E402
+        DEFAULT_B_TRACK_DIR,
+        DEFAULT_BASELINE_JSON,
+        DEFAULT_SHARED_REGISTRY_DIR,
+        run_checks,
+    )
+
+    payload, issues = run_checks(SimpleNamespace(
+        language="sv",
+        market="SE",
+        batch_size=60,
+        baseline_json=DEFAULT_BASELINE_JSON,
+        b_track_report_dir=DEFAULT_B_TRACK_DIR,
+        shared_registry_dir=DEFAULT_SHARED_REGISTRY_DIR,
+    ))
+    error_codes = [issue.code for issue in issues if issue.severity == "error"]
+    new_term_gate = payload["summary"].get("new_term_gate", {})
+    test("term registry contract check passes", error_codes, [])
+    test("term registry new legacy key count", new_term_gate.get("new_legacy_coverage_keys"), 0)
+    test("term registry R4 failure probe", new_term_gate.get("failure_probe_passed"), True)
+
+
 _run_matching_sanity_checks()
 _run_store_discovery_sanity_checks()
 _run_store_registry_sanity_checks()
@@ -422,6 +446,7 @@ _run_recipe_source_registry_sanity_checks()
 _run_pantry_input_validation_checks()
 _run_json_payload_validation_checks()
 _run_myrecipes_playwright_security_checks()
+_run_term_registry_gate_checks()
 
 print("\n========================================", flush=True)
 print(f"TOTAL: {passed}/{passed + failed} checks passed", flush=True)
