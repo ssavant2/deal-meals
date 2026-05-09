@@ -9,6 +9,7 @@ dev-only working table that later B waves can update as variants are audited.
 from __future__ import annotations
 
 import argparse
+import ast
 from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -45,6 +46,8 @@ DEFAULT_BATCH_SIZE = 60
 DEFAULT_REPORT_DIR = APP_DIR / "tests" / "reports" / "term_pipeline_b_track"
 RULE_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
 REGRESSION_CASES_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+EXTRACTION_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "extraction.py"
+TERM_INDEXES_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_indexes.py"
 WORKING_TABLE = "tmp_term_pipeline_b_audit_variants"
 KNOWN_DIAGNOSTIC_ADAPTER_PREFIXES = (
     "backend_validation.events:",
@@ -129,6 +132,118 @@ def _load_json_list(path: Path) -> list[dict[str, Any]]:
     if not isinstance(payload, list):
         raise ValueError(f"Expected list payload in {path}")
     return payload
+
+
+def _literal_strings(node: ast.AST | None) -> list[str]:
+    values: list[str] = []
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        values.append(node.value)
+    elif isinstance(node, (ast.List, ast.Tuple, ast.Set)):
+        for child in node.elts:
+            values.extend(_literal_strings(child))
+    elif isinstance(node, ast.BinOp):
+        values.extend(_literal_strings(node.left))
+        values.extend(_literal_strings(node.right))
+    return values
+
+
+def _function_defs(path: Path, names: set[str]) -> dict[str, ast.FunctionDef]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    return {
+        node.name: node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name in names
+    }
+
+
+def _iter_return_literal_keyword_variants(
+    *,
+    path: Path,
+    function_names: set[str],
+    source_order: int,
+    source_type: str,
+    role_prefix: str,
+) -> Iterable[AuditVariant]:
+    rel_path = _repo_rel(path)
+    outputs: dict[tuple[str, str], list[int]] = {}
+    for function_name, function_node in _function_defs(path, function_names).items():
+        for node in ast.walk(function_node):
+            if not isinstance(node, ast.Return):
+                continue
+            for value in _literal_strings(node.value):
+                value = value.strip()
+                if value:
+                    outputs.setdefault((function_name, value), []).append(node.lineno)
+
+    for (function_name, value), lines in sorted(outputs.items()):
+        first_line = min(lines)
+        yield AuditVariant(
+            source_order=source_order,
+            source_type=source_type,
+            source_file=rel_path,
+            source_ref=f"{rel_path}:{function_name}:{first_line}",
+            source_id=f"{function_name}:{value}",
+            variant_role=f"{role_prefix}:{function_name}",
+            variant_text=value,
+            canonical=value,
+            expected_family=value,
+            expected=1,
+            metadata={
+                "function": function_name,
+                "lines": sorted(set(lines)),
+                "output": value,
+            },
+        )
+
+
+def _iter_append_literal_keyword_variants(
+    *,
+    path: Path,
+    function_name: str,
+    target_name: str,
+    source_order: int,
+    source_type: str,
+    variant_role: str,
+) -> Iterable[AuditVariant]:
+    rel_path = _repo_rel(path)
+    function_node = _function_defs(path, {function_name}).get(function_name)
+    if function_node is None:
+        return
+
+    outputs: dict[str, list[int]] = {}
+    for node in ast.walk(function_node):
+        if not isinstance(node, ast.Call):
+            continue
+        if not isinstance(node.func, ast.Attribute) or node.func.attr != "append":
+            continue
+        if not isinstance(node.func.value, ast.Name) or node.func.value.id != target_name:
+            continue
+        for arg in node.args:
+            for value in _literal_strings(arg):
+                value = value.strip()
+                if value:
+                    outputs.setdefault(value, []).append(node.lineno)
+
+    for value, lines in sorted(outputs.items()):
+        first_line = min(lines)
+        yield AuditVariant(
+            source_order=source_order,
+            source_type=source_type,
+            source_file=rel_path,
+            source_ref=f"{rel_path}:{function_name}:{first_line}",
+            source_id=f"{function_name}:{value}",
+            variant_role=variant_role,
+            variant_text=value,
+            canonical=value,
+            expected_family=value,
+            expected=1,
+            metadata={
+                "function": function_name,
+                "lines": sorted(set(lines)),
+                "output": value,
+                "target": target_name,
+            },
+        )
 
 
 def _source_ref(entry: dict[str, Any]) -> str:
@@ -392,6 +507,21 @@ def build_variants(batch_size: int) -> list[AuditVariant]:
         source_type="ingredient_routing_parent",
         source_file="app/languages/sv/ingredient_matching/ingredient_routing.py",
         variant_role="ingredient_routing_parent_mapping",
+    ))
+    variants.extend(_iter_return_literal_keyword_variants(
+        path=EXTRACTION_FILE,
+        function_names={"extract_keywords_from_product", "extract_keywords_from_ingredient"},
+        source_order=90,
+        source_type="extraction_helper",
+        role_prefix="hardcoded_keyword_output",
+    ))
+    variants.extend(_iter_append_literal_keyword_variants(
+        path=TERM_INDEXES_FILE,
+        function_name="_recipe_routing_extra_aliases",
+        target_name="aliases",
+        source_order=91,
+        source_type="recipe_routing_helper",
+        variant_role="recipe_routing_extra_alias",
     ))
 
     variants = sorted(
