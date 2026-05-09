@@ -865,7 +865,10 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     'kaviar': {'tångkaviar', 'tangkaviar'},
     # "pastasås chili" / "tapenade med chili" / "pinsasås chili" — chili is a flavor modifier,
     # not a standalone ingredient. Suppress 'chili' keyword when these context words are present.
-    'chili': {'tapenade', 'pinsasås', 'pinsasas', 'salsiccia', 'glaze', 'sriracha', 'chipotle'},  # flavor/heat word inside another condiment family
+    'chili': {
+        'tapenade', 'pinsasås', 'pinsasas', 'salsiccia', 'glaze', 'sriracha', 'chipotle',
+        'chili oil', 'chiliolja', 'crispychiliolja',
+    },  # flavor/heat word inside another condiment family
     # "Philadelphia cream cheese sweet chili" = flavored cream cheese, not chili sauce.
     # Suppress 'chilisås' when ingredient mentions 'färskost' or 'cream cheese'.
     'chilisås': {'färskost', 'cream cheese'},
@@ -963,7 +966,7 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # "nudlar (glas, ris eller ägg)" — ris here means rice NOODLE type, not cooking rice.
     # Suppress 'ris' when ingredient says "glas, ris" (noodle-type qualifier in parentheses).
     # Does NOT affect "ris eller nudlar" (standalone rice as alternative) since that lacks "glas, ris".
-    'ris': {'blomsteris', 'paris', 'puffat', 'glas, ris'},
+    'ris': {'blomsteris', 'paris', 'puffat', 'puffat ris', 'puffatris', 'rispuffar', 'glas, ris'},
     # "basilikaolja" = oil infused with basil, not dried basil herb
     'basilika': {'basilikaolja', 'basilikapesto'},
     # "fänkålsdill" means fennel fronds, not separate dill herb products.

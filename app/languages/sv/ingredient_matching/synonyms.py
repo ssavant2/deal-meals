@@ -751,6 +751,8 @@ KEYWORD_SYNONYMS: Dict[str, str] = {
     # pressed ginger shots to the same ingefärsjuice family.
     'ingefärsshot': 'ingefärsjuice',
     'ingefarsshot': 'ingefärsjuice',
+    'tranbärsdryck': 'tranbärsjuice',
+    'tranbarsdryck': 'tranbärsjuice',
     # Soft caramel candy wording varies between recipe "kolakaramell" and
     # current product names like "Gräddkola" / "Gräddkaramell".
     'gräddkola': 'kolakaramell',
@@ -759,12 +761,20 @@ KEYWORD_SYNONYMS: Dict[str, str] = {
     'graddkaramell': 'kolakaramell',
     # Batch 15 recipe/product surface variants.
     'svarpeppar': 'svartpeppar',
+    'apelsinsaft': 'apelsinjuice',
+    'matjesill': 'matjessill',
+    'pistasch': 'pistagenötter',
+    'rökextrakt': 'rökarom',
+    'rokextrakt': 'rökarom',
+    'smörgåspickles': 'inlagdgurka',
+    'smorgaspickles': 'inlagdgurka',
     'sötströ': 'lättströ',
     'sotstro': 'lattstro',
     'spisbröd': 'knäckebröd',
     'spisbrod': 'knäckebröd',
     'burgarbröd': 'hamburgerbröd',
     'burgarbrod': 'hamburgerbröd',
+    'svejkon': 'vegobacon',
     'glasstrut': 'våffelstrutar',
     'glasstrutar': 'våffelstrutar',
     'våffelstrut': 'våffelstrutar',
@@ -772,6 +782,7 @@ KEYWORD_SYNONYMS: Dict[str, str] = {
     'vaffelstrutar': 'våffelstrutar',
     'tzaybitar': 'vegobitar',
     'tzaybit': 'vegobitar',
+    'kebabfeferoni': 'feferoni',
     'smördegsark': 'smördeg',
     'smordegsark': 'smördeg',
     'smördegsplatta': 'smördeg',

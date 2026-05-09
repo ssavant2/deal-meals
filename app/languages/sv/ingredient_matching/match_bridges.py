@@ -2140,7 +2140,7 @@ MATCH_BRIDGES = (
         rule_version=1,
         canonical="feferoni",
         ingredient_patterns=(r"\bfeferoni\b",),
-        offer_patterns=(r"\bfeferoni\b.*\bkebab\b",),
+        offer_patterns=(r"\bfeferoni\b.*\bkebab\b", r"\bkebabfeferoni\b"),
         fixture_refs=frozenset({"matcher_regression_feferoni_kebab_positive"}),
         supersedes=frozenset({"legacy_extra_keyword_feferoni_kebab_variant"}),
     ),

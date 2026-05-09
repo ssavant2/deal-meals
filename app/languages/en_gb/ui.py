@@ -124,7 +124,7 @@ UI = {
     'home.rebuild_title': 'Refreshing suggestions...',
     'home.rebuild_text': 'Refreshing suggestions with current settings',
     'home.rebuild_wait': 'This can take a moment if suggestions need to be recalculated.',
-    'home.update_in_progress': 'update in progress, showing latest ready suggestions',
+    'home.update_in_progress': 'update in progress',
     'home.update_ready_refresh': 'update complete - click Refresh\nto include the latest fetch',
     'home.cache_error_title': 'Cache error',
     'home.cache_error_text': 'Recipe matches could not be read from the server cache. Run a manual cache refresh if the problem persists.',

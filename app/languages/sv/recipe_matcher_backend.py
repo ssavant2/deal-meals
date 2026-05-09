@@ -81,7 +81,12 @@ try:
     from languages.sv.ingredient_matching.extraction import extract_keywords_from_ingredient
     from languages.sv.ingredient_matching.extraction import is_non_food_product
     from languages.sv.ingredient_matching.extraction import _is_plain_sparkling_water_product_text
-    from languages.sv.ingredient_matching.matching import matches_ingredient_fast, precompute_offer_data
+    from languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
+    from languages.sv.ingredient_matching.matching import (
+        matches_ingredient_fast,
+        precompute_offer_data,
+        _vegan_smordeg_product_allowed,
+    )
     from languages.sv.ingredient_matching.engine import (
         build_precomputed_offer_match_data,
     )
@@ -201,7 +206,12 @@ except ModuleNotFoundError:
     from app.languages.sv.ingredient_matching.extraction import extract_keywords_from_ingredient
     from app.languages.sv.ingredient_matching.extraction import is_non_food_product
     from app.languages.sv.ingredient_matching.extraction import _is_plain_sparkling_water_product_text
-    from app.languages.sv.ingredient_matching.matching import matches_ingredient_fast, precompute_offer_data
+    from app.languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
+    from app.languages.sv.ingredient_matching.matching import (
+        matches_ingredient_fast,
+        precompute_offer_data,
+        _vegan_smordeg_product_allowed,
+    )
     from app.languages.sv.ingredient_matching.engine import (
         build_precomputed_offer_match_data,
     )
@@ -318,6 +328,10 @@ _RECIPE_CANDY_INGREDIENT_KEYWORDS = frozenset({
     'nougatsås',
     'maräng',
     'marängdroppar',
+    # Microwave popcorn is categorized as candy/snacks by stores, but it is a
+    # named recipe ingredient and should still reach the matcher/cache.
+    'micropop',
+    'micropopcorn',
 })
 
 
@@ -854,6 +868,7 @@ def get_filtered_offers(preferences: Dict) -> List[Offer]:
             if (
                 guess_category(offer.name, offer.category) in beverage_food_categories
                 or _is_plain_sparkling_water_product_text(offer_lower, offer.category)
+                or _is_plain_instant_coffee_product_text(offer_lower, offer.category)
             ):
                 all_offers.append(offer)
 
@@ -1411,6 +1426,40 @@ def select_offer_match_candidate(
     }
 
 
+def prefer_carrier_flavor_candidate(
+    selection: dict[str, Any],
+    ingredient_match_data_per_ing,
+    offer_precomputed,
+) -> dict[str, Any]:
+    """Prefer the ingredient that names a stripped carrier flavor, if present."""
+    carrier_stripped = set((offer_precomputed or {}).get('carrier_stripped') or ())
+    if not carrier_stripped or not selection.get('matched_candidates'):
+        return selection
+    matched_keyword = selection.get('matched_keyword')
+    selected_idx = selection.get('matched_ing_idx')
+    if matched_keyword is None or selected_idx is None:
+        return selection
+
+    selected_text = ingredient_match_data_per_ing[selected_idx].normalized_text
+    if any(word in selected_text for word in carrier_stripped):
+        return selection
+
+    for candidate_ing_idx, candidate_keyword in selection['matched_candidates']:
+        if candidate_keyword != matched_keyword:
+            continue
+        candidate_text = ingredient_match_data_per_ing[candidate_ing_idx].normalized_text
+        if any(word in candidate_text for word in carrier_stripped):
+            return {
+                **selection,
+                'matched_keyword': candidate_keyword,
+                'matched_ing_idx': candidate_ing_idx,
+                'selected_keyword': candidate_keyword,
+                'selected_ing_idx': candidate_ing_idx,
+                'selected_by_carrier_flavor': True,
+            }
+    return selection
+
+
 def prepare_offer_match_candidate(
     offer: Offer,
     offer_id: int,
@@ -1444,6 +1493,11 @@ def prepare_offer_match_candidate(
             normalized_indices,
         ),
         ingredient_match_data_per_ing,
+    )
+    selection = prefer_carrier_flavor_candidate(
+        selection,
+        ingredient_match_data_per_ing,
+        context.get('offer_precomputed'),
     )
     return {
         **context,
@@ -1549,6 +1603,45 @@ def _chili_spice_product_allowed(product_lower: str, ingredient_lower: str, matc
     return any(cue in product_lower for cue in _CHILI_SPICE_PRODUCT_CUES)
 
 
+_OLIVE_OIL_MATCH_KEYWORDS = frozenset({'olivolja', 'jungfruolivolja', 'tryffelolja'})
+_OLIVE_OIL_TEXT_CUES = ('olivolja', 'olive oil')
+_CHILI_OIL_MATCH_KEYWORDS = frozenset({'chiliolja', 'crispychiliolja'})
+_CHILI_OIL_TEXT_CUES = ('chili oil', 'chiliolja', 'crispychiliolja')
+
+
+def _flavored_olive_oil_process_check_allowed(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: str,
+    processed_checks,
+) -> bool:
+    """Allow a flavor word such as chili when both sides are that olive oil."""
+    if matched_keyword not in _OLIVE_OIL_MATCH_KEYWORDS:
+        return False
+    if not any(cue in product_lower for cue in _OLIVE_OIL_TEXT_CUES):
+        return False
+    if not any(cue in ingredient_lower for cue in _OLIVE_OIL_TEXT_CUES):
+        return False
+    for check in processed_checks or ():
+        base_word = check[0] if check else ''
+        if base_word and base_word in product_lower and base_word in ingredient_lower:
+            return True
+    return False
+
+
+def _chili_oil_process_check_allowed(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: str,
+) -> bool:
+    if matched_keyword not in _CHILI_OIL_MATCH_KEYWORDS:
+        return False
+    return (
+        any(cue in product_lower for cue in _CHILI_OIL_TEXT_CUES)
+        and any(cue in ingredient_lower for cue in _CHILI_OIL_TEXT_CUES)
+    )
+
+
 def validate_offer_match_candidate(
     offer: Offer,
     offer_id: int,
@@ -1597,7 +1690,23 @@ def validate_offer_match_candidate(
             and 'ingefärsjuice' in ing_norm
             and any(cue in product_lower for cue in ('pressad', 'juice', 'shot'))
         )
-        if not pressed_ginger_juice_allowed and not check_processed_product_rules(product_lower, ing_norm):
+        flavored_olive_oil_allowed = _flavored_olive_oil_process_check_allowed(
+            product_lower,
+            ing_norm,
+            matched_keyword,
+            processed_checks,
+        )
+        chili_oil_allowed = _chili_oil_process_check_allowed(
+            product_lower,
+            ing_norm,
+            matched_keyword,
+        )
+        if (
+            not pressed_ginger_juice_allowed
+            and not flavored_olive_oil_allowed
+            and not chili_oil_allowed
+            and not check_processed_product_rules(product_lower, ing_norm)
+        ):
             _record_validation_event(
                 validation_events,
                 'validation_reject',
@@ -2345,6 +2454,7 @@ def validate_offer_match_candidate(
             matched_keyword = None
 
     if matched_keyword and matched_ing_idx is not None and matched_keyword in PRODUCT_NAME_BLOCKERS:
+        matched_kw_lower = matched_keyword.lower()
         product_lower = (
             offer_precomputed['name_normalized']
             if offer_precomputed is not None
@@ -2355,7 +2465,27 @@ def validate_offer_match_candidate(
             and ('stjärn' in product_lower or 'stjarn' in product_lower)
         ):
             blocker_words = PRODUCT_NAME_BLOCKERS[matched_keyword]
-            product_blockers = [b for b in blocker_words if b in product_lower]
+            product_blockers = []
+            for blocker in blocker_words:
+                if blocker not in product_lower:
+                    continue
+                if (
+                    matched_kw_lower == 'hamburgerbröd'
+                    and blocker in {'korvbröd', 'korvbrod'}
+                    and 'korvbrödbagarn' in product_lower
+                ):
+                    continue
+                if (
+                    matched_kw_lower == 'chiliolja'
+                    and blocker == 'laoganma'
+                    and any(cue in product_lower for cue in (
+                        'crispychiliolja',
+                        'crispy chili',
+                        'crispy chilli',
+                    ))
+                ):
+                    continue
+                product_blockers.append(blocker)
             if product_blockers:
                 ing_norm = ingredients_normalized[matched_ing_idx]
                 if _vegan_context_allows_plant_based_product_blockers(
@@ -2481,7 +2611,12 @@ def validate_offer_match_candidate(
                         veg_scope = segment
                         break
             ing_words = set(veg_scope.split())
-            if ing_words & VEG_QUALIFIER_WORDS:
+            vegan_smordeg_allowed = (
+                matched_kw_lower in {'smördeg', 'smordeg'}
+                and any(cue in veg_scope for cue in ('smördeg', 'smordeg'))
+                and _vegan_smordeg_product_allowed(prod_lower, offer_match_keywords)
+            )
+            if ing_words & VEG_QUALIFIER_WORDS and not vegan_smordeg_allowed:
                 _record_validation_event(
                     validation_events,
                     'validation_reject',
@@ -2517,7 +2652,19 @@ def validate_offer_match_candidate(
                     and any(cue in ing_norm for cue in ('mörk chokladkaka', 'mork chokladkaka'))
                     and _is_plain_dark_chocolate_product(carrier_product_lower)
                 )
-                if not contextual_cheese_use_case and not dark_chocolate_bar_use_case:
+                preserved_mushroom_in_water_use_case = (
+                    matched_kw_lower in {
+                        'kantarell', 'kantareller',
+                        'champinjon', 'champinjoner',
+                    }
+                    and 'i vatten' in ing_norm
+                    and 'vatten' in carrier_product_lower
+                )
+                if (
+                    not contextual_cheese_use_case
+                    and not dark_chocolate_bar_use_case
+                    and not preserved_mushroom_in_water_use_case
+                ):
                     carrier_blocked = _flavor_keyword_blocked_by_carrier_text(
                         ing_norm,
                         matched_kw_lower,

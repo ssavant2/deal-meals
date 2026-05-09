@@ -124,7 +124,7 @@ UI = {
     'home.rebuild_title': 'Uppdaterar förslag...',
     'home.rebuild_text': 'Uppdaterar förslag utifrån aktuella inställningar',
     'home.rebuild_wait': 'Det kan ta en liten stund om förslagen behöver räknas om.',
-    'home.update_in_progress': 'uppdatering pågår, visar senaste färdiga förslag',
+    'home.update_in_progress': 'uppdatering pågår',
     'home.update_ready_refresh': 'uppdatering klar - klicka på Uppdatera\nför att inkludera senaste hämtningen',
     'home.cache_error_title': 'Cache-fel',
     'home.cache_error_text': 'Receptmatchningen kunde inte läsas från servercachen. Kör en manuell cacheuppdatering om felet kvarstår.',

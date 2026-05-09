@@ -199,6 +199,7 @@ def prepare_recipe_match_runtime_data(recipe: FoundRecipe) -> dict[str, Any]:
 
     recipe_name_norm = fix_swedish_chars(recipe.name or "").lower()
     recipe_is_rice_porridge = "risgrynsgröt" in recipe_name_norm or "risgrynsgrot" in recipe_name_norm
+    recipe_is_burger_context = re.search(r"\b(?:burgare|hamburgare|burger|sliders?)\b", recipe_name_norm) is not None
 
     ingredients_normalized: list[str] = []
     for ingredient in merged_ingredients:
@@ -241,6 +242,13 @@ def prepare_recipe_match_runtime_data(recipe: FoundRecipe) -> dict[str, Any]:
             ingredient_norm += " micropop popcorn"
         if "surdegsbaguette" in ingredient_norm or "surdegsbaguett" in ingredient_norm:
             ingredient_norm += " baguette"
+        if (
+            recipe_is_burger_context
+            and re.search(r"\b(?:bröd|brod)\b", ingredient_norm)
+            and "hamburgerbröd" not in ingredient_norm
+            and "hamburgerbrod" not in ingredient_norm
+        ):
+            ingredient_norm += " hamburgerbröd"
 
         if (
             not any(cue in ingredient_norm for cue in ("kålrotsspaghetti", "kalrotsspaghetti", "morotsspaghetti"))

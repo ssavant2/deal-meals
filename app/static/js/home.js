@@ -44,14 +44,35 @@ const CATEGORY_INFO = {
 const SUGGESTIONS_UPDATE_POLL_MS = 2500;
 const SUGGESTIONS_UPDATE_RECENT_MS = 24 * 60 * 60 * 1000;
 const SUGGESTIONS_UPDATE_ACK_KEY = 'dealMealsSuggestionsAcknowledgedGeneration';
+const SUGGESTIONS_PREFERENCES_HASH_KEY = 'dealMealsSuggestionsPreferencesHash';
 let suggestionsUpdatePollInterval = null;
 let suggestionsUpdateWasComputing = false;
 let suggestionsUpdateReadyPending = false;
 let suggestionsUpdatePendingGeneration = null;
 
-// Encode JSON for use in HTML attributes (escapes double quotes)
-function encodeJsonAttr(jsonStr) {
-    return jsonStr.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+let recipeModalDataCounter = 0;
+const recipeModalDataByKey = new Map();
+
+function registerRecipeModalData(recipe, matchedOffers, ingredients, servings) {
+    recipeModalDataCounter += 1;
+    const recipeId = recipe && recipe.id ? String(recipe.id) : 'recipe';
+    const modalKey = `${recipeId}:${recipeModalDataCounter}`;
+    recipeModalDataByKey.set(modalKey, {
+        matchedOffers: matchedOffers || [],
+        ingredients: ingredients || [],
+        servings: servings || 0
+    });
+    return modalKey;
+}
+
+function getRecipeModalData(card) {
+    const modalData = recipeModalDataByKey.get(card.dataset.modalKey || '');
+    if (modalData) return modalData;
+    return {
+        matchedOffers: JSON.parse(card.dataset.matchedOffers || '[]'),
+        ingredients: JSON.parse(card.dataset.ingredients || '[]'),
+        servings: parseInt(card.dataset.servings) || 0
+    };
 }
 
 function formatPrepTime(minutes) {
@@ -143,7 +164,7 @@ function hideSuggestionsUpdateStatus() {
     if (!statusEl) return;
     statusEl.classList.remove('visible', 'is-complete');
     const icon = statusEl.querySelector('.status-icon');
-    if (icon) icon.classList.remove('spin-animation');
+    if (icon) icon.className = 'spinner-border spinner-border-sm status-icon';
     const textEl = statusEl.querySelector('.status-text');
     if (textEl) textEl.textContent = '';
 }
@@ -155,7 +176,11 @@ function showSuggestionsUpdateStatus(kind) {
     const textEl = statusEl.querySelector('.status-text');
     statusEl.classList.add('visible');
     statusEl.classList.toggle('is-complete', kind === 'complete');
-    if (icon) icon.classList.toggle('spin-animation', kind === 'updating');
+    if (icon) {
+        icon.className = kind === 'complete'
+            ? 'bi bi-check-circle-fill status-icon'
+            : 'spinner-border spinner-border-sm status-icon';
+    }
     if (textEl) {
         textEl.textContent = kind === 'complete'
             ? i18n['home.update_ready_refresh']
@@ -170,6 +195,10 @@ function getCacheGenerationFromStatus(cacheStatus) {
         || cacheStatus.cache_freshness?.metadata?.last_computed_at
         || ''
     );
+}
+
+function getPreferencesHashFromStatus(cacheStatus) {
+    return String(cacheStatus?.cache_freshness?.current_cache_affecting_preferences_hash || '');
 }
 
 function hasStoredSuggestionsGenerationChanged(serverGeneration) {
@@ -253,6 +282,26 @@ function clearSuggestionsUpdateState() {
     hideSuggestionsUpdateStatus();
 }
 
+async function canSkipRecipeSuggestionsRefresh() {
+    if (!suggestionsLoaded || allSuggestions.length === 0) return false;
+    if (suggestionsUpdateReadyPending || suggestionsUpdateWasComputing) return false;
+
+    const response = await fetch('/api/cache/status');
+    if (!response.ok) return false;
+    const cacheStatus = await response.json();
+    applySuggestionsCacheStatus(cacheStatus);
+    if (!cacheStatus.ready || cacheStatus.status === 'computing') return false;
+
+    const serverGeneration = getCacheGenerationFromStatus(cacheStatus);
+    const storedGeneration = sessionStorage.getItem('cacheGeneration') || '';
+    if (!serverGeneration || !storedGeneration || serverGeneration !== storedGeneration) return false;
+
+    const serverPreferencesHash = getPreferencesHashFromStatus(cacheStatus);
+    const storedPreferencesHash = sessionStorage.getItem(SUGGESTIONS_PREFERENCES_HASH_KEY) || '';
+    if (!serverPreferencesHash || !storedPreferencesHash) return false;
+    return serverPreferencesHash === storedPreferencesHash;
+}
+
 function applySuggestionsCacheStatus(cacheStatus) {
     if (!cacheStatus || !isSuggestionsOpen()) return;
     const serverGeneration = getCacheGenerationFromStatus(cacheStatus);
@@ -261,7 +310,10 @@ function applySuggestionsCacheStatus(cacheStatus) {
         return;
     }
     const shouldShowReady = suggestionsUpdateWasComputing
-        || hasStoredSuggestionsGenerationChanged(serverGeneration)
+        || (
+            hasStoredSuggestionsGenerationChanged(serverGeneration)
+            && !isSuggestionsUpdateAcknowledged(serverGeneration)
+        )
         || (
             cacheStatus.ready
             && isRecipeSuggestionsUpdate(cacheStatus)
@@ -695,12 +747,18 @@ async function searchPantryRecipes() {
                     e.preventDefault();
                     const recipeId = card.dataset.recipeId;
                     const recipeName = card.dataset.recipeName;
-                    const matchedOffers = JSON.parse(card.dataset.matchedOffers || '[]');
-                    const ingredients = JSON.parse(card.dataset.ingredients || '[]');
-                    const servings = parseInt(card.dataset.servings) || 0;
+                    const modalData = getRecipeModalData(card);
                     const cardIsCapped = card.dataset.isCapped === 'true';
                     const cardCappedSavings = parseInt(card.dataset.cappedSavings) || 0;
-                    showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, servings, cardIsCapped, cardCappedSavings);
+                    showMatchedOffers(
+                        recipeId,
+                        recipeName,
+                        modalData.matchedOffers,
+                        modalData.ingredients,
+                        modalData.servings,
+                        cardIsCapped,
+                        cardCappedSavings
+                    );
                     return;
                 }
                 const url = card.dataset.recipeUrl;
@@ -942,12 +1000,18 @@ async function searchRecipes(isLoadMore = false) {
                     e.preventDefault();
                     const recipeId = card.dataset.recipeId;
                     const recipeName = card.dataset.recipeName;
-                    const matchedOffers = JSON.parse(card.dataset.matchedOffers || '[]');
-                    const ingredients = JSON.parse(card.dataset.ingredients || '[]');
-                    const servings = parseInt(card.dataset.servings) || 0;
+                    const modalData = getRecipeModalData(card);
                     const cardIsCapped = card.dataset.isCapped === 'true';
                     const cardCappedSavings = parseInt(card.dataset.cappedSavings) || 0;
-                    showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, servings, cardIsCapped, cardCappedSavings);
+                    showMatchedOffers(
+                        recipeId,
+                        recipeName,
+                        modalData.matchedOffers,
+                        modalData.ingredients,
+                        modalData.servings,
+                        cardIsCapped,
+                        cardCappedSavings
+                    );
                     return;
                 }
                 const url = card.dataset.recipeUrl;
@@ -1140,18 +1204,16 @@ function renderPantryRecipeCard(recipe, colorClass) {
         `<span class="badge bg-${colorClass} text-dark">${i18n['home.pantry_missing']} ${recipe.missing_preview.map(m => escapeHtml(m)).join(', ')}</span>` :
         `<span class="badge bg-success">${i18n['home.pantry_complete']}</span>`;
 
-    // Store data for popup
-    const offersData = JSON.stringify(matchedOffers);
-    const ingredientsData = JSON.stringify(recipe.ingredients || []);
+    const ingredients = recipe.ingredients || [];
     const servings = recipe.servings || 0;
+    const modalDataKey = registerRecipeModalData(recipe, matchedOffers, ingredients, servings);
 
     return `
         <div class="recipe-card"
              data-recipe-id="${escapeAttr(recipe.id || '')}"
              data-recipe-url="${recipeUrlAttr}"
              data-recipe-name="${recipeNameAttr}"
-             data-matched-offers="${encodeJsonAttr(offersData)}"
-             data-ingredients="${encodeJsonAttr(ingredientsData)}"
+             data-modal-key="${escapeAttr(modalDataKey)}"
              data-servings="${servings}"
              data-capped-savings="${Math.round(cappedSavings)}"
              data-is-capped="${isCapped}">
@@ -1293,7 +1355,7 @@ async function excludeCurrentRecipe() {
             allSuggestions = data.recipes || [];
             if (allSuggestions.length > 0) {
                 suggestionsLoaded = true;
-                if (generationChangedOnLoad) {
+                if (generationChangedOnLoad && !isSuggestionsUpdateAcknowledged(serverGeneration)) {
                     suggestionsUpdateReadyPending = true;
                     suggestionsUpdatePendingGeneration = serverGeneration;
                     dbg.log(`[Suggestions] Server suggestions updated (${storedGeneration} → ${serverGeneration}), keeping visible suggestions until refresh`);
@@ -1382,11 +1444,22 @@ function removeCacheErrorBanner() {
 
 /// Refresh visible suggestions, rebuilding the server cache only if settings require it.
 async function refreshRecipeSuggestions() {
+    try {
+        if (await canSkipRecipeSuggestionsRefresh()) {
+            acknowledgeSuggestionsUpdate();
+            clearSuggestionsUpdateState();
+            return;
+        }
+    } catch (e) {
+        // Fall through to the normal refresh path if the lightweight check fails.
+    }
+
     // Clear client-side state so the next request starts from the first page
     // and uses the latest saved preferences/source settings.
     sessionStorage.removeItem('recipeSuggestions');
     sessionStorage.removeItem('recipeBalance');
     sessionStorage.removeItem('cacheGeneration');
+    sessionStorage.removeItem(SUGGESTIONS_PREFERENCES_HASH_KEY);
     suggestionsLoaded = false;
     allSuggestions = [];
     renderedRecipeIds = new Set();
@@ -1403,7 +1476,7 @@ async function refreshRecipeSuggestions() {
     });
 
     try {
-        const refreshResponse = await fetch('/api/cache/reset', { method: 'POST' });
+        const refreshResponse = await fetch('/api/cache/reset?fast=1', { method: 'POST' });
         const refreshData = await refreshResponse.json().catch(() => ({}));
         if (!refreshResponse.ok || refreshData.success === false) {
             throw new Error(t(refreshData.message_key || 'common.error', refreshData.message_params));
@@ -1522,6 +1595,13 @@ async function loadMoreSuggestions(isInitialLoad = false) {
             // Store the current cache generation
             if (serverGeneration) {
                 safeSessionSet('cacheGeneration', serverGeneration);
+                if (isInitialLoad) {
+                    acknowledgeSuggestionsUpdate(serverGeneration);
+                    clearSuggestionsUpdateState();
+                }
+            }
+            if (data.preferences_hash) {
+                safeSessionSet(SUGGESTIONS_PREFERENCES_HASH_KEY, data.preferences_hash);
             }
 
             // Deduplicate: only add recipes we don't already have
@@ -1755,17 +1835,23 @@ function renderSuggestions(recipes, appendOnly = false) {
             // Don't open URL if clicking the "show offers" button
             if (e.target.closest('.show-offers-btn')) {
                 e.stopPropagation();
-                e.preventDefault();
-                const recipeId = card.dataset.recipeId;
-                const recipeName = card.dataset.recipeName;
-                const matchedOffers = JSON.parse(card.dataset.matchedOffers || '[]');
-                const ingredients = JSON.parse(card.dataset.ingredients || '[]');
-                const servings = parseInt(card.dataset.servings) || 0;
-                const cardIsCapped = card.dataset.isCapped === 'true';
-                const cardCappedSavings = parseInt(card.dataset.cappedSavings) || 0;
-                showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, servings, cardIsCapped, cardCappedSavings);
-                return;
-            }
+                    e.preventDefault();
+                    const recipeId = card.dataset.recipeId;
+                    const recipeName = card.dataset.recipeName;
+                    const modalData = getRecipeModalData(card);
+                    const cardIsCapped = card.dataset.isCapped === 'true';
+                    const cardCappedSavings = parseInt(card.dataset.cappedSavings) || 0;
+                    showMatchedOffers(
+                        recipeId,
+                        recipeName,
+                        modalData.matchedOffers,
+                        modalData.ingredients,
+                        modalData.servings,
+                        cardIsCapped,
+                        cardCappedSavings
+                    );
+                    return;
+                }
             const url = card.dataset.recipeUrl;
             if (url) window.open(url, '_blank');
         });
@@ -1898,18 +1984,16 @@ function renderRecipeCard(recipe) {
         }
     }
 
-    // Store matched_offers, ingredients and servings as data attributes
-    const offersData = JSON.stringify(matchedOffers);
-    const ingredientsData = JSON.stringify(recipe.ingredients || []);
+    const ingredients = recipe.ingredients || [];
     const servings = recipe.servings || 0;
+    const modalDataKey = registerRecipeModalData(recipe, matchedOffers, ingredients, servings);
 
     return `
         <div class="recipe-card"
              data-recipe-id="${escapeAttr(recipe.id || '')}"
              data-recipe-url="${recipeUrlAttr}"
              data-recipe-name="${recipeNameAttr}"
-             data-matched-offers="${encodeJsonAttr(offersData)}"
-             data-ingredients="${encodeJsonAttr(ingredientsData)}"
+             data-modal-key="${escapeAttr(modalDataKey)}"
              data-servings="${servings}"
              data-capped-savings="${Math.round(cappedSavings)}"
              data-is-capped="${isCapped}">

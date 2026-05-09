@@ -68,8 +68,13 @@ def is_buffet_or_party_recipe(recipe_name: str, num_ingredients: int = 0) -> boo
     """
     name_lower = recipe_name.lower()
 
-    # Check simple patterns
+    # Check simple patterns. Keep "kalas" word-scoped: otherwise ordinary
+    # recipe names such as "Paprikalasagne" get treated as party menus.
     for pattern in _BUFFET_PATTERNS:
+        if pattern == 'kalas':
+            if re.search(r'\bkalas\b', name_lower):
+                return True
+            continue
         if pattern in name_lower:
             return True
 

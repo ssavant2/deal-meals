@@ -56,6 +56,25 @@ from languages.categories import (
     POULTRY, DELI
 )
 
+MATCHING_PREVIEW_OFFER_FIELDS = (
+    "_matched_ing_idx",
+    "matched_keyword",
+    "display_keyword",
+    "qualifier_specificity_rank",
+    "qualifier_match",
+    "context_match",
+    "name",
+    "store_name",
+    "price",
+    "original_price",
+    "savings",
+    "product_url",
+    "is_multi_buy",
+    "multi_buy_quantity",
+    "weight_grams",
+    "category",
+)
+
 # Import recipe scraper manager
 try:
     from recipe_scraper_manager import scraper_manager
@@ -220,14 +239,27 @@ def _publish_suggestions_update_ready(*, source: str, result: dict | None = None
 def _build_matching_preview_payload(max_results: int, parsed_exclude: list[str]) -> dict:
     """Run sync DB/cache/matching work outside the async request handler."""
     from recipe_matcher import RecipeMatcher, get_effective_matching_preferences
+    from cache_manager import _cache_affecting_preferences_hash
 
     prefs = get_effective_matching_preferences()
+    preferences_hash = _cache_affecting_preferences_hash(prefs)
     matcher = RecipeMatcher()
     recipes = matcher.match_all_recipes(
         prefs,
         max_results=max_results,
         exclude_ids=parsed_exclude,
     )
+    for recipe in recipes:
+        recipe.pop("ingredient_groups", None)
+        compact_offers = []
+        for offer in recipe.get("matched_offers") or []:
+            if isinstance(offer, dict):
+                compact_offers.append({
+                    key: offer[key]
+                    for key in MATCHING_PREVIEW_OFFER_FIELDS
+                    if key in offer
+                })
+        recipe["matched_offers"] = compact_offers
 
     balance = prefs.get('balance', {
         MEAT: 3,
@@ -248,7 +280,8 @@ def _build_matching_preview_payload(max_results: int, parsed_exclude: list[str])
         "recipes": recipes,
         "count": len(recipes),
         "balance": balance,
-        "cache_generation": _get_cache_generation()
+        "cache_generation": _get_cache_generation(),
+        "preferences_hash": preferences_hash,
     }
 
 
@@ -775,6 +808,11 @@ async def reset_recipe_cache(request: Request):
     try:
         from cache_manager import cache_manager, compute_cache_async
 
+        fast_param = request.query_params.get("fast")
+        deep_check = str(request.query_params.get("deep", "")).lower() in {"1", "true", "yes"}
+        fast_check = not deep_check
+        if fast_param is not None:
+            fast_check = str(fast_param).lower() in {"1", "true", "yes"}
         logger.info("Cache refresh requested")
         with get_db_session() as db:
             status_row = db.execute(text("""
@@ -790,7 +828,7 @@ async def reset_recipe_cache(request: Request):
                 "message_key": "recipes.cache_rebuild_started",
             })
 
-        freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=True)
+        freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=not fast_check)
         if freshness_status.get("state") == "fresh" and not freshness_status.get("rebuild_recommended"):
             logger.info("Cache refresh not needed (cache_fresh)")
             return JSONResponse({

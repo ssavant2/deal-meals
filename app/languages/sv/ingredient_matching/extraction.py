@@ -247,6 +247,14 @@ def is_non_food_product(product_name: str, category: Optional[str] = None) -> bo
     ):
         return False
 
+    # Explicit recipe ingredients that otherwise look like snack/non-food noise.
+    # They are only exposed through exact product keywords later, so flavor words
+    # such as paprika from "Tuc Paprika" do not leak into ordinary ingredients.
+    if re.search(r'\btuc\b', name_normalized):
+        return False
+    if re.search(r'\bpuffat\s+ris\b|\bris\s+puffat\b', name_normalized):
+        return False
+
     # Check against non-food keywords using pre-compiled combined pattern
     # This is ~50x faster than looping through each keyword
     if _NON_FOOD_PATTERN and _NON_FOOD_PATTERN.search(name_normalized):
@@ -336,6 +344,8 @@ def extract_keywords_from_product(
                 return ['grenadine']
         if brand_lower in _DRINK_BRANDS:
             _drink_name = fix_swedish_chars(product_name).lower()
+            if re.search(r'\b(?:apelsin\s*juice|apelsinjuice)\b', _drink_name):
+                return ['apelsinjuice']
             _soft_drink_brands = frozenset({
                 'jarritos', 'sprite', 'pepsi', 'coca-cola', 'fanta',
                 'trocadero', 'zingo',
@@ -413,6 +423,45 @@ def extract_keywords_from_product(
 
     if _is_plain_instant_coffee_product_text(original_name_lower, category):
         return ['snabbkaffe']
+
+    if 'ansjoviskrydda' in original_name_lower or 'anjoviskr' in original_name_lower:
+        return ['ansjoviskrydda']
+
+    if 'dadelsirap' in original_name_lower:
+        return ['dadelsirap']
+
+    if re.search(r'\b5\s*-?\s*minuters\s+sill\b|\b5minuters\s+sill\b|\b5\s*-?\s*minuterssill\b', original_name_lower):
+        return ['inläggningssill', 'sill']
+
+    if re.search(r'\bgyoza\s+skin\b', original_name_lower):
+        return ['dumplingdeg']
+
+    if re.search(r'\bafter\s+eight\b', original_name_lower):
+        return ['aftereight']
+
+    if re.search(r'\btuc\b', original_name_lower):
+        return ['tuc']
+
+    if re.search(r'\bfish\s*(?:&|and)\s*crisp\b', original_name_lower):
+        return ['fish&crisp']
+
+    if re.search(r'\bpuffat\s+ris\b|\bris\s+puffat\b', original_name_lower):
+        return ['rispuffar']
+
+    if (
+        re.search(r'\b(?:tranbär|tranbar|cranberry)\b', original_name_lower)
+        and re.search(r'\b(?:juice|dryck|bärdryck|bardryck|måltidsdryck|maltidsdryck)\b', original_name_lower)
+    ):
+        return ['tranbärsjuice']
+
+    if (
+        'habanero' in original_name_lower
+        and re.search(r'\b(?:chilisås|chilisas|hot\s+sauce|salsa|tabasco)\b', original_name_lower)
+    ):
+        return ['habanerochilisås', 'pepparsås']
+
+    if re.search(r'\bpesto\b', original_name_lower) and any(cue in original_name_lower for cue in ('rosso', 'röd', 'rod', 'tomat')):
+        return ['tomatpesto', 'pesto']
 
     if re.search(r'\bcitron\s*juice\b|\bcitronjuice\b', original_name_lower):
         return ['citron', 'citronjuice']
@@ -1664,8 +1713,64 @@ def extract_keywords_from_ingredient(
     name = _apply_space_normalizations(name)
     name = rewrite_truncated_chocolate_color_lists(name)
 
+    if 'dadelsirap' in name:
+        return ['dadelsirap']
+
+    if re.search(r'\bgyoza\s+skin\b|\bdumplingdeg\b', name):
+        return ['dumplingdeg']
+
+    if re.search(r'\bafter\s+eight\b', name):
+        return ['aftereight']
+
+    if re.search(r'\btuc\b', name):
+        return ['tuc']
+
+    if re.search(r'\bfish\s*(?:&|and)\s*crisp\b|\bfish&crisp\b', name):
+        return ['fish&crisp']
+
+    if re.search(r'\b5\s*-?\s*minuterssill\b|\b5\s*-?\s*minuters\s+sill\b|\b5minuters\s+sill\b', name):
+        return ['inläggningssill']
+
+    if 'surdegskakor' in name:
+        return ['surdegsbröd']
+
+    if re.search(r'\bpuffat\s+ris\b|\bris\s+puffat\b', name):
+        return ['rispuffar']
+
     if 'crispychiliolja' in name:
         return ['crispychiliolja']
+
+    if re.search(r'\bchili\s+oil\b|\bchiliolja\b', name):
+        return ['chiliolja']
+
+    if (
+        'habanero' in name
+        and (
+            'tabasco' in name
+            or any(cue in name for cue in ('chilisås', 'chilisas', 'pepparsås', 'pepparsas', 'hot sauce'))
+        )
+    ):
+        return ['habanerochilisås', 'pepparsås']
+
+    if (
+        'chiliflakes' in name
+        or 'chili flakes' in name
+        or 'chiliflingor' in name
+        or 'chili flingor' in name
+    ):
+        return ['chiliflakes', 'chili']
+
+    if (
+        ('tomatsås' in name or 'tomatsas' in name)
+        and 'pizza' in name
+    ):
+        return ['pizzasås', 'tomatsås']
+
+    if (
+        'arrabbiata' in name
+        and ('tomatsås' in name or 'tomatsas' in name)
+    ):
+        return ['pastasås', 'arrabbiata', 'tomatsås']
 
     if (
         ('majskolv' in name or 'majskolvar' in name)

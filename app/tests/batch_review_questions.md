@@ -1875,3 +1875,130 @@ Batch 15 implementation follow-up - 2026-05-04:
   Batch 15 decisions and updated the older neutral/generic oil expectations to
   the corrected policy. Verification passed: ruff F-rules, `git diff --check`,
   and full sanity `1889/1889`.
+
+Batch 2-3 re-verification - 2026-05-09:
+- Re-checked the previous Batch 2 and Batch 3 findings against the current
+  prepared `recipe_offer_cache` after the Willys full-assortment scrape and a
+  full matcher/cache rebuild. The batch queue now reflects current findings:
+  Batch 2 has 0 issues left and Batch 3 has 0 issues left. Stefan confirmed
+  that generic/specific `svartpeppar` should remain intentionally unmatched and
+  that Fanta/läsk being filtered from cache by current categories is
+  acceptable. No real Stefan questions were found.
+- Fixed and verified the previous Batch 2 direct-fix/cache candidates:
+  `Vegansk Sparristarte` `vegansk smördeg` now matches neutral/vegan-compatible
+  smördeg rows; `Falafel` `Feferoni` now matches `Kebabfeferoni`; and
+  `Teaterbrons Paprikalasagne` now has a cache row after the `kalas` buffet
+  detector was word-scoped so `Paprikalasagne` is not treated as a party menu.
+- Fixed and verified the previous Batch 3 cache candidate:
+  `Frappé och islatte` `snabbkaffepulver` now matches plain instant coffee
+  rows while flavored cappuccino/3-in-1 mixes remain blocked. `Grillade
+  lammkotletter` `Lammracks` matches when the current cache/preference scope
+  allows non-Swedish meat; with `local_meat_only` enabled the current New
+  Zealand lammracks rows are intentionally filtered.
+- Rejected/stale from the old Batch 3 notes: `björnbärssaft`,
+  `grapefrukter`, and exact `Beyondburgare` zeros were not counted because the
+  current Willys offer table has no relevant exact product rows; the two missing
+  cache rows in Batch 3 are accepted buffet/party exclusions. Raw chicken,
+  bread/tortilla, milk, hard tunnbröd, havregryn, Violife, vegobacon,
+  baguette, rostbiff-pålägg/raw rostbiff, coriander, huvudsallad, and the other
+  previously logged families spot-checked cleanly.
+
+Batch 4-6 Track A term-pipeline audit - 2026-05-09:
+- Ran the first read-only term-pipeline sweep for Batch 4, Batch 5, and Batch 6
+  review references. Cache/index freshness was ready before the audit:
+  `recipe_offer_matches`, recipe/offer term indexes, and
+  `compiled_recipe_offer_candidates` all matched the current matcher/compiler
+  versions.
+- Checked 135 positive/negative variants with synthetic pair diagnostics:
+  81 pass, 6 `ambiguous_canonical`, 18 `route_pair_missing`, 9
+  `fast_match_missing`, 3 `recipe_signal_missing`, 1
+  `backend_validation_rejected`, and 17 `unexpected_positive`.
+- Current-offer retests confirmed high-confidence gaps for `dadelsirap`,
+  `pizzasås`, `apelsinsaft`, `gyoza skin`, `After Eight`, `chiliflakes`,
+  `Liquid Smoke`/`rökextrakt`, `arrabbiata`, and sliced/soft sourdough wording.
+  `majsvälling` retested clean with the current Willys row.
+- No matcher edits, DB queue edits, or cache rebuild were performed in this
+  read-only pass. Detailed local report:
+  `app/tests/batch_review_term_pipeline_audit_batch_4_6.md`.
+
+Batch 7-15 Track A term-pipeline audit - 2026-05-09:
+- Ran the same read-only sweep for Batch 7 through Batch 15 references. Cache
+  and compiled index freshness was still ready.
+- Checked 177 positive/negative variants with synthetic pair diagnostics:
+  147 pass, 13 `route_pair_missing`, 7 `unexpected_positive`, 6
+  `fast_match_missing`, 2 `recipe_signal_missing`, and 2
+  `backend_validation_rejected`.
+- Current-offer retests confirmed remaining high-confidence gaps for
+  `pistasch`, `kantareller i vatten`, `TUC`, `matjesill`, `smörgåspickles`,
+  `puffat ris`, `Crispy Chili In Oil`, `Fish&Crisp`, raw pork/ham wording
+  versus cooked ham, and `Burgarbröd`/hamburger bun blocker behavior.
+- Current-offer retests were clean for `körvel`, `tikka masala spice mix`, and
+  `Mörk chokladkaka` with current rows. `Pesto Basilika` and `Tzaybitar` need
+  historical/current product text before being treated as live-catalog gaps.
+- No matcher edits, DB queue edits, or cache rebuild were performed in this
+  read-only pass. Detailed local report:
+  `app/tests/batch_review_term_pipeline_audit_batch_7_15.md`.
+
+Track A current-offer fix wave 1 - 2026-05-09:
+- Implemented and verified the first grouped fix wave from the Batch 4-15
+  Track A audit. Covered current/live product-text positives for `dadelsirap`,
+  `tomatsås till pizza`/`pizzasås`, `apelsinsaft`, `dumplingdeg`/`gyoza skin`,
+  `After Eight`, `chiliflakes`, `rökextrakt`/`Liquid Smoke`, `tomatsås
+  arrabbiata`, `pistasch`, `kantareller i vatten`, `TUC`, `matjesill`,
+  `smörgåspickles`, `puffat ris`, `chili oil`/`Crispy Chili In Oil`,
+  `Fish&Crisp`, and `Burgarbröd`.
+- Added narrow negative guards/filters for the same wave: `puffat ris` no
+  longer routes to ordinary rice, `chili oil` does not route to fresh chili,
+  `Tuc Paprika` does not leak `paprika`, raw `fläskkött ... skinka` blocks
+  cooked sliced ham, and `Korvbrödbagarn` is treated as a hamburger-bun brand
+  tail rather than hot-dog-bread context.
+- Cache filtering had to be fixed as part of the wave: exact ingredient
+  families `dadelsirap`, `puffat ris`, `TUC`, and `Crispy Chili In Oil` were
+  previously excluded as processed products, and `Apelsinjuice Bravo` lost its
+  keyword through the drink-brand guard. After the filter fix, all affected
+  Willys rows were present in `get_filtered_offers`.
+- Verification passed: full sanity `1929/1929`, cache freshness `fresh`, and a
+  full compiled rebuild completed ready with 13,538 cached recipes, 3,797 of
+  10,427 offer rows, 2,779,066 candidate rows, matcher
+  `matcher-ead4f6ddaa91`, recipe compiler `recipe-compiler-e8936359618a`, and
+  offer compiler `offer-compiler-264ba483aa51`.
+- Cache spotchecks found live cached matches for the rows with current recipe
+  text in DB (`dadelsirap`, `pizzasås`, `apelsinsaft`, `dumplingdeg`,
+  `After Eight`, `chiliflakes`, `rökextrakt`, `arrabbiata`, `matjesill`,
+  `puffat ris`, `chili oil`, and `Burgarbröd`). Synthetic pair tests cover the
+  live product rows whose exact batch ingredient text is not currently present
+  in the recipe DB (`kantareller i vatten`, `TUC`, `smörgåspickles`,
+  `Fish&Crisp`, and bare `pistasch`).
+
+Track A follow-up fix wave 2 - 2026-05-09:
+- Implemented and verified the remaining high-confidence Batch 4-15 Track A
+  terms with current or synthetic product text: `surdegskakor` ->
+  `surdegsbröd`, `Svejkon` -> `vegobacon`, `tranbärsjuice` ->
+  cranberry drink/juice rows, `5-minuterssill` -> inläggningssill/sill rows,
+  `Tabasco Habanero` -> habanero hot-sauce rows, and `tomatpesto` -> red
+  pesto/pesto rosso rows.
+- Added narrow negative guards for the documented false positives:
+  `tomatpesto` blocks green/genovese pesto, bufala mozzarella blocks vegan
+  mozzarella-flavour substitutes, `5-minuterssill` blocks `Ansjoviskrydda
+  Sill`, sushi-fish context blocks generic white fish, `hushållsfärs eller
+  nötfärs` blocks chicken/vegetarian mince, plain `turkisk havregurt` blocks
+  fruit havregurt, `kalkonbröstfilé` blocks turkey thigh fillet, `mjukt
+  tunnbröd` blocks hard tunnbröd, `riven hårdost max 17%` blocks higher-fat
+  cheese, `storkornskaviar röd` blocks Kalles/Svennes-style tube kaviar,
+  `Tabasco Habanero` blocks fresh habanero, `rökextrakt` blocks smoke-flavored
+  crackers/bread carriers, measured spirit `rom` blocks fish roe,
+  `tryffelburrata` blocks plain burrata, `riven veganost` blocks creamy/spread
+  vegan cheese, and `morotssylt` blocks non-carrot jams.
+- Verification passed: targeted diagnostics for the wave returned expected
+  results, full sanity is `1952/1952`, cache freshness is `fresh`, and a full
+  compiled rebuild completed ready with 13,538 cached recipes, 3,801 of 10,427
+  offer rows, 2,778,862 candidate rows, matcher `matcher-8d9c9bac71b5`, recipe
+  compiler `recipe-compiler-6a658126ab7c`, and offer compiler
+  `offer-compiler-faeec6e913c6`.
+- Cache spotchecks found materialized rows for the current/live positives:
+  `Kärnsund Surdegsbröd`, `Vegobacon`, cranberry drink rows, `5minuters Sill`,
+  `Chilisås Original Habanero`, `Pesto Rosso`, and burger-title generic `Bröd`
+  to hamburger bun rows. Representative forbidden cache rows for green pesto as
+  `tomatpesto`, `Ansjoviskrydda` as `sill`, fresh habanero as habanero sauce,
+  tube kaviar as `storkornskaviar`, and strawberry jam as `morotssylt` were
+  absent.

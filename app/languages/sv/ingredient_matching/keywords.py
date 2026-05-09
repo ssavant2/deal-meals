@@ -1444,8 +1444,13 @@ PROCESSED_FOOD_SUFFIXES: FrozenSet[str] = frozenset({
 })
 
 PROCESSED_FOODS_EXEMPTIONS: FrozenSet[str] = frozenset({
+    'dadelsirap',
     'dumpling',
     'dumplings',
+    'puffat ris',
+    'tuc',
+    'crispy chili',
+    'crispychiliolja',
     'dulce de leche',  # exact cooking ingredient; keep the phrase alive until space-normalized
     'chokladägg',  # explicit candy ingredient in some dessert recipes; keep exact compound alive
     'vaniljsås', 'vaniljsas',  # explicit dessert sauce ingredient; should survive processed-food filtering
@@ -2226,6 +2231,7 @@ OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = {
     'gulcurrypasta': ['gulcurry'],
     # Measured generic chili spice lines can use flakes or powder; fresh-chili
     # contexts are still gated by spice/fresh form rules.
+    'crispychiliolja': ['chiliolja'],
     'chiliflakes': ['chili'],
     'chiliflingor': ['chili'],
     # Turkey compound products → generic base keyword (direction 1 only, no reverse mapping)

@@ -296,6 +296,9 @@ _PLANT_BASED_RECIPE_BASE_REQUIREMENTS: tuple[tuple[FrozenSet[str], FrozenSet[str
 )
 _VEGAN_CHEESE_MATCH_KEYWORDS = frozenset({'ost', 'veganost', 'violife', 'greenvie'})
 _SMORDEG_MATCH_KEYWORDS = frozenset({'smördeg', 'smordeg'})
+_SMORDEG_NON_VEGAN_PRODUCT_RE = re.compile(
+    r'\b(?:smör|butter|mjölk|mjolk|ägg|agg|egg|grädde|gradde|mejeri)\b'
+)
 _RE_ANIS_WORD = re.compile(r'\banis\b')
 _RE_KUMMIN_WORD = re.compile(r'\bkummin\b')
 _COOKED_KYCKLINGKLUBBA_INGREDIENT_CUES = frozenset({
@@ -664,6 +667,12 @@ _RAW_MEAT_PREPARED_PRODUCT_CUES = frozenset({
     'sweet',
     'chili',
     'souvlaki', 'grillspett', 'spett',
+})
+_RAW_PORK_HAM_PREPARED_PRODUCT_CUES = _RAW_MEAT_PREPARED_PRODUCT_CUES | frozenset({
+    'kokt', 'kokta',
+    'skivad', 'skivat', 'skivor',
+    'pålägg', 'palagg',
+    'deliskivor',
 })
 _TUNA_STEAK_FAMILY_INGREDIENT_CUES = frozenset({
     'färsk', 'farsk',
@@ -2282,6 +2291,11 @@ def _raw_meat_requirement_allows_product(
     ):
         if not any(cue in ingredient_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES):
             return not any(cue in product_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES)
+    if matched_keyword == 'skinka' and any(
+        cue in ingredient_lower for cue in ('fläskkött', 'flaskkott', 'bog eller skinka')
+    ):
+        if not any(cue in ingredient_lower for cue in _RAW_PORK_HAM_PREPARED_PRODUCT_CUES):
+            return not any(cue in product_lower for cue in _RAW_PORK_HAM_PREPARED_PRODUCT_CUES)
     if matched_keyword in {'revbensspjäll', 'revbensspjall', 'ribs'} and 'revbensspjäll' in ingredient_lower:
         if not any(cue in ingredient_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES):
             return not any(cue in product_lower for cue in _RAW_MEAT_PREPARED_PRODUCT_CUES)
@@ -2631,6 +2645,12 @@ def _product_is_explicit_vegan(product_lower: str, product_keywords: Iterable[st
     return any(cue in product_lower or cue in keyword_set for cue in _PLANT_BASED_PRODUCT_CUES)
 
 
+def _vegan_smordeg_product_allowed(product_lower: str, product_keywords: Iterable[str]) -> bool:
+    if _product_is_explicit_vegan(product_lower, product_keywords):
+        return True
+    return _SMORDEG_NON_VEGAN_PRODUCT_RE.search(product_lower) is None
+
+
 def _product_satisfies_recipe_label(
     product_lower: str,
     product_keywords: Iterable[str],
@@ -2682,6 +2702,11 @@ def _explicit_vegan_requirement_allows_product(
         ):
             return False
     if (
+        matched_keyword in _SMORDEG_MATCH_KEYWORDS
+        and _ingredient_requests_vegan_smordeg(ingredient_lower)
+    ):
+        return _vegan_smordeg_product_allowed(product_lower, product_keywords)
+    if (
         any(cue in scoped_ingredient for cue in _VEGAN_RECIPE_CUES)
         and not _product_satisfies_recipe_label(product_lower, product_keywords, _PLANT_BASED_PRODUCT_CUES)
     ):
@@ -2701,11 +2726,6 @@ def _explicit_vegan_requirement_allows_product(
         and not _product_satisfies_recipe_label(product_lower, product_keywords, _GLUTEN_FREE_PRODUCT_CUES)
     ):
         return False
-    if (
-        matched_keyword in _SMORDEG_MATCH_KEYWORDS
-        and _ingredient_requests_vegan_smordeg(ingredient_lower)
-    ):
-        return _product_is_explicit_vegan(product_lower, product_keywords)
     if (
         matched_keyword in _VEGAN_CHEESE_MATCH_KEYWORDS
         and _ingredient_requests_vegan_cheese(ingredient_lower)
@@ -3791,6 +3811,8 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
     # non-pastasås ingredients (e.g., "2 kvistar basilika").
     if _carrier_ctx_hits:
         context_words.update(_carrier_ctx_hits)
+    if 'hamburgerbröd' in keywords and 'korvbrödbagarn' in name_normalized:
+        context_words.discard('korv')
 
     # NOTE: Context word exemptions (CONTEXT_WORD_KEYWORD_EXEMPTIONS) are now
     # checked per-keyword at match time in matches_ingredient_fast(), not here.
@@ -4033,6 +4055,12 @@ def _prepare_fast_ingredient_text(
     ingredient_lower = rewrite_mince_of_alternatives(ingredient_lower)
     if _ingredient_is_non_buyable_root_veg_pasta(ingredient_lower):
         return ''
+    had_chiliflakes = (
+        'chiliflakes' in ingredient_lower
+        or 'chili flakes' in ingredient_lower
+        or 'chiliflingor' in ingredient_lower
+        or 'chili flingor' in ingredient_lower
+    )
     # Parenthetical "eller" segments are real ingredient alternatives and must
     # survive the later generic paren stripping.
     ingredient_lower = re.sub(r'\(\s*eller\s+([^)]*)\)', r' eller \1', ingredient_lower, flags=re.IGNORECASE)
@@ -4089,6 +4117,8 @@ def _prepare_fast_ingredient_text(
         ingredient_lower += ' öl'
     if 'surdegsbaguette' in ingredient_lower or 'surdegsbaguett' in ingredient_lower:
         ingredient_lower += ' baguette'
+    if 'surdegskakor' in ingredient_lower:
+        ingredient_lower += ' surdegsbröd'
 
     # Plant-based "matlagning" is recipe shorthand for cooking-cream products.
     # Mirror the ingredient extraction aliases here because the fast matcher works
@@ -4142,6 +4172,34 @@ def _prepare_fast_ingredient_text(
         ingredient_lower += ' läsk'
     if 'sashimi' in ingredient_lower and 'lax' in ingredient_lower:
         ingredient_lower += ' sashimilax sushilax'
+    if had_chiliflakes and 'chiliflakes' not in ingredient_lower:
+        ingredient_lower += ' chiliflakes chili'
+    if re.search(r'\bafter\s+eight\b', ingredient_lower):
+        ingredient_lower += ' aftereight'
+    if re.search(r'\bfish\s*(?:&|and)\s*crisp\b|\bfish&crisp\b', ingredient_lower):
+        ingredient_lower += ' fish&crisp'
+    if re.search(r'\bpuffat\s+ris\b|\bris\s+puffat\b', ingredient_lower):
+        ingredient_lower += ' rispuffar'
+    if re.search(r'\bchili\s+oil\b|\bchiliolja\b', ingredient_lower):
+        ingredient_lower += ' chiliolja'
+    if (
+        'habanero' in ingredient_lower
+        and (
+            'tabasco' in ingredient_lower
+            or any(cue in ingredient_lower for cue in ('chilisås', 'chilisas', 'pepparsås', 'pepparsas', 'hot sauce'))
+        )
+    ):
+        ingredient_lower += ' habanerochilisås pepparsås'
+    if (
+        ('tomatsås' in ingredient_lower or 'tomatsas' in ingredient_lower)
+        and 'pizza' in ingredient_lower
+    ):
+        ingredient_lower += ' pizzasås'
+    if (
+        'arrabbiata' in ingredient_lower
+        and ('tomatsås' in ingredient_lower or 'tomatsas' in ingredient_lower)
+    ):
+        ingredient_lower += ' pastasås'
 
     # Normalize singular → plural for cherry tomatoes so offers with keyword
     # "körsbärstomater" match ingredient text with singular "körsbärstomat".
