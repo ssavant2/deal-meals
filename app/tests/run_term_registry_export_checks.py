@@ -26,15 +26,41 @@ sys.path.insert(0, "/app" if os.path.exists("/app") else str(APP_DIR))
 from languages.term_registry.models import CheckIssue, RegistryVariant  # noqa: E402
 from languages.term_registry.reports import write_json_and_markdown_report  # noqa: E402
 from languages.sv.ingredient_matching.ingredient_routing import _ROUTING_PARENT_TERMS as PUBLIC_INGREDIENT_ROUTING_PARENT_TERMS  # noqa: E402
-from languages.sv.ingredient_matching.parent_maps import PARENT_MATCH_ONLY as PUBLIC_PARENT_MATCH_ONLY  # noqa: E402
+from languages.sv.ingredient_matching.keywords import OFFER_EXTRA_KEYWORDS as PUBLIC_OFFER_EXTRA_KEYWORDS  # noqa: E402
+from languages.sv.ingredient_matching.match_bridges import MATCH_BRIDGES as PUBLIC_MATCH_BRIDGES  # noqa: E402
+from languages.sv.ingredient_matching.no_match_policies import NO_MATCH_POLICIES as PUBLIC_NO_MATCH_POLICIES  # noqa: E402
+from languages.sv.ingredient_matching.parent_maps import (  # noqa: E402
+    KEYWORD_EXTRA_PARENTS as PUBLIC_KEYWORD_EXTRA_PARENTS,
+    PARENT_MATCH_ONLY as PUBLIC_PARENT_MATCH_ONLY,
+)
+from languages.sv.ingredient_matching.synonyms import (  # noqa: E402
+    INGREDIENT_PARENTS as PUBLIC_INGREDIENT_PARENTS,
+    KEYWORD_SYNONYMS as PUBLIC_KEYWORD_SYNONYMS,
+)
 from languages.sv.ingredient_matching.term_registry.exports import (  # noqa: E402
+    INGREDIENT_PARENT_SOURCE_FAMILY,
+    INGREDIENT_PARENTS as GENERATED_INGREDIENT_PARENTS,
     INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY,
     INGREDIENT_ROUTING_PARENT_TERMS as GENERATED_INGREDIENT_ROUTING_PARENT_TERMS,
+    KEYWORD_EXTRA_PARENT_SOURCE_FAMILY,
+    KEYWORD_EXTRA_PARENTS as GENERATED_KEYWORD_EXTRA_PARENTS,
+    KEYWORD_SYNONYM_SOURCE_FAMILY,
+    KEYWORD_SYNONYMS as GENERATED_KEYWORD_SYNONYMS,
+    MATCH_BRIDGES as GENERATED_MATCH_BRIDGES,
+    MATCH_BRIDGE_SOURCE_FAMILY,
+    NO_MATCH_POLICIES as GENERATED_NO_MATCH_POLICIES,
+    NO_MATCH_POLICY_SOURCE_FAMILY,
+    OFFER_EXTRA_KEYWORD_SOURCE_FAMILY,
+    OFFER_EXTRA_KEYWORDS as GENERATED_OFFER_EXTRA_KEYWORDS,
     PARENT_MATCH_ONLY as GENERATED_PARENT_MATCH_ONLY,
     PARENT_MATCH_ONLY_SOURCE_FAMILY,
     RECIPE_ROUTING_EXTRA_ALIASES as GENERATED_RECIPE_ROUTING_EXTRA_ALIASES,
     RECIPE_ROUTING_HELPER_SOURCE_FAMILY,
+    build_ingredient_parents_export,
     build_ingredient_routing_parent_export,
+    build_keyword_extra_parents_export,
+    build_keyword_synonyms_export,
+    build_offer_extra_keywords_export,
     build_parent_match_only_export,
     build_recipe_routing_extra_alias_export,
 )
@@ -47,7 +73,11 @@ from languages.sv.ingredient_matching.term_registry.legacy_inventory import (  #
 DEFAULT_REPORT_ROOT = APP_DIR / "tests" / "reports" / "term_registry"
 DEFAULT_B_TRACK_BASELINE_JSON = APP_DIR / "tests" / "reports" / "term_pipeline_b_track" / "term_pipeline_audit.json"
 INGREDIENT_ROUTING_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "ingredient_routing.py"
+KEYWORDS_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "keywords.py"
+MATCH_BRIDGES_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "match_bridges.py"
+NO_MATCH_POLICIES_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "no_match_policies.py"
 PARENT_MAPS_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "parent_maps.py"
+SYNONYMS_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "synonyms.py"
 TERM_INDEXES_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_indexes.py"
 EXPORTS_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_registry" / "exports.py"
 
@@ -69,18 +99,60 @@ def _issue(
     )
 
 
-def _normalize_str_mapping(mapping: dict[str, Any]) -> dict[str, str]:
-    return dict(sorted((str(key), str(value)) for key, value in mapping.items()))
+def _normalize_mapping(mapping: dict[str, Any]) -> dict[str, str | list[str]]:
+    normalized: dict[str, str | list[str]] = {}
+    for key, value in mapping.items():
+        if isinstance(value, (list, tuple, set, frozenset)):
+            normalized[str(key)] = [str(item) for item in value]
+        else:
+            normalized[str(key)] = str(value)
+    return dict(sorted(normalized.items()))
 
 
-def _mapping_diff(generated: dict[str, str], reference: dict[str, str]) -> dict[str, Any]:
+def _mapping_targets(value: str | list[str]) -> tuple[str, ...]:
+    if isinstance(value, list):
+        return tuple(value)
+    return (value,)
+
+
+def _mapping_target_set(value: str | list[str]) -> tuple[str, ...]:
+    return tuple(sorted(_mapping_targets(value)))
+
+
+def _expanded_mapping_count(mapping: dict[str, str | list[str]]) -> int:
+    return sum(len(_mapping_targets(value)) for value in mapping.values())
+
+
+def _unique_variant_target_count(variants: list[RegistryVariant]) -> int:
+    return len({
+        (variant.variant, variant.canonical)
+        for variant in variants
+    })
+
+
+def _mapping_from_pairs(pairs) -> dict[str, str | list[str]]:
+    grouped: dict[str, list[str]] = {}
+    for source, target in pairs:
+        targets = grouped.setdefault(source, [])
+        if target not in targets:
+            targets.append(target)
+    return {
+        source: targets[0] if len(targets) == 1 else sorted(targets)
+        for source, targets in sorted(grouped.items())
+    }
+
+
+def _mapping_diff(
+    generated: dict[str, str | list[str]],
+    reference: dict[str, str | list[str]],
+) -> dict[str, Any]:
     generated_keys = set(generated)
     reference_keys = set(reference)
     shared_keys = generated_keys & reference_keys
     changed = {
         key: {"generated": generated[key], "reference": reference[key]}
         for key in sorted(shared_keys)
-        if generated[key] != reference[key]
+        if _mapping_target_set(generated[key]) != _mapping_target_set(reference[key])
     }
     return {
         "missing_count": len(reference_keys - generated_keys),
@@ -92,11 +164,134 @@ def _mapping_diff(generated: dict[str, str], reference: dict[str, str]) -> dict[
     }
 
 
+def _mappings_semantically_equal(
+    generated: dict[str, str | list[str]],
+    reference: dict[str, str | list[str]],
+) -> bool:
+    if set(generated) != set(reference):
+        return False
+    return all(
+        _mapping_target_set(generated[key]) == _mapping_target_set(reference[key])
+        for key in generated
+    )
+
+
+def _build_no_match_policy_coverage_from_policies(policies) -> dict[str, str]:
+    exported: dict[str, str] = {}
+    for policy in policies:
+        for keyword in sorted(policy.blocked_offer_keywords):
+            exported[f"{policy.canonical} ! {keyword}"] = policy.canonical
+        for pattern in policy.blocked_offer_patterns:
+            exported[f"{policy.canonical} ! {pattern}"] = policy.canonical
+    return dict(sorted(exported.items()))
+
+
+def _build_no_match_policy_coverage_from_variants(
+    variants: list[RegistryVariant],
+) -> dict[str, str]:
+    return dict(sorted(
+        (variant.variant, variant.canonical)
+        for variant in variants
+        if variant.source_family == NO_MATCH_POLICY_SOURCE_FAMILY
+    ))
+
+
+def _build_match_bridge_coverage_from_bridges(bridges) -> dict[str, str | list[str]]:
+    pairs: list[tuple[str, str]] = []
+    for bridge in bridges:
+        for ingredient_pattern in bridge.ingredient_patterns:
+            for offer_pattern in bridge.offer_patterns:
+                pairs.append((f"{ingredient_pattern} -> {offer_pattern}", bridge.canonical))
+        for negative_pattern in bridge.negative_offer_patterns:
+            pairs.append((f"{bridge.canonical} ! {negative_pattern}", bridge.canonical))
+    return _mapping_from_pairs(pairs)
+
+
+def _build_match_bridge_coverage_from_variants(
+    variants: list[RegistryVariant],
+) -> dict[str, str | list[str]]:
+    return _mapping_from_pairs(
+        (variant.variant, variant.canonical)
+        for variant in variants
+        if variant.source_family == MATCH_BRIDGE_SOURCE_FAMILY
+    )
+
+
+def _policy_signature(policy) -> dict[str, Any]:
+    return {
+        "id": policy.id,
+        "rule_schema_version": policy.rule_schema_version,
+        "rule_version": policy.rule_version,
+        "canonical": policy.canonical,
+        "ingredient_patterns": list(policy.ingredient_patterns),
+        "blocked_offer_keywords": sorted(policy.blocked_offer_keywords),
+        "blocked_offer_patterns": list(policy.blocked_offer_patterns),
+        "allowed_specifics": sorted(policy.allowed_specifics),
+        "reason": policy.reason,
+        "policy_ref": policy.policy_ref,
+        "fixture_refs": sorted(policy.fixture_refs),
+        "supersedes": sorted(policy.supersedes),
+    }
+
+
+def _blocker_signature(blocker) -> dict[str, Any]:
+    return {
+        "id": blocker.id,
+        "rule_schema_version": blocker.rule_schema_version,
+        "rule_version": blocker.rule_version,
+        "side": blocker.side,
+        "code": blocker.code,
+        "reason": blocker.reason,
+        "policy_ref": blocker.policy_ref,
+        "fixture_refs": sorted(blocker.fixture_refs),
+    }
+
+
+def _backend_allowance_signature(allowance) -> dict[str, Any]:
+    return {
+        "id": allowance.id,
+        "rule_schema_version": allowance.rule_schema_version,
+        "rule_version": allowance.rule_version,
+        "code": allowance.code,
+        "reason": allowance.reason,
+        "policy_ref": allowance.policy_ref,
+        "fixture_refs": sorted(allowance.fixture_refs),
+    }
+
+
+def _bridge_signature(bridge) -> dict[str, Any]:
+    return {
+        "id": bridge.id,
+        "rule_schema_version": bridge.rule_schema_version,
+        "rule_version": bridge.rule_version,
+        "canonical": bridge.canonical,
+        "ingredient_patterns": list(bridge.ingredient_patterns),
+        "offer_patterns": list(bridge.offer_patterns),
+        "negative_offer_patterns": list(bridge.negative_offer_patterns),
+        "aliases": sorted(bridge.aliases),
+        "fixture_refs": sorted(bridge.fixture_refs),
+        "precedence": bridge.precedence,
+        "supersedes": sorted(bridge.supersedes),
+        "ingredient_form_signals": sorted(bridge.ingredient_form_signals),
+        "offer_form_signals": sorted(bridge.offer_form_signals),
+        "required_offer_form_signals": sorted(bridge.required_offer_form_signals),
+        "forbidden_offer_form_signals": sorted(bridge.forbidden_offer_form_signals),
+        "blockers": sorted(
+            (_blocker_signature(blocker) for blocker in bridge.blockers),
+            key=lambda item: item["id"],
+        ),
+        "backend_allowances": sorted(
+            (_backend_allowance_signature(allowance) for allowance in bridge.backend_allowances),
+            key=lambda item: item["id"],
+        ),
+    }
+
+
 def _load_b2_mapping_baseline(
     path: Path,
     *,
     source_family: str,
-) -> tuple[dict[str, str], list[CheckIssue]]:
+) -> tuple[dict[str, str | list[str]], list[CheckIssue]]:
     if not path.exists():
         return {}, [_issue(
             "error",
@@ -114,7 +309,7 @@ def _load_b2_mapping_baseline(
             item_id=str(path),
         )]
 
-    baseline: dict[str, str] = {}
+    baseline_targets: dict[str, list[str]] = {}
     issues: list[CheckIssue] = []
     for variant in variants:
         if not isinstance(variant, dict):
@@ -131,30 +326,27 @@ def _load_b2_mapping_baseline(
                 item_id=str(variant.get("variant_id") or ""),
             ))
             continue
-        previous = baseline.get(source)
-        if previous is not None and previous != target:
-            issues.append(_issue(
-                "error",
-                "conflicting_mapping_baseline_row",
-                f"B2 {source_family} baseline maps one source to multiple targets",
-                item_id=source,
-                details={"previous": previous, "target": target},
-            ))
-        baseline[source] = target
-    if not baseline:
+        targets = baseline_targets.setdefault(source, [])
+        if target not in targets:
+            targets.append(target)
+    if not baseline_targets:
         issues.append(_issue(
             "error",
             "missing_mapping_baseline_rows",
             f"B2 baseline contains no {source_family} rows",
             item_id=str(path),
         ))
-    return dict(sorted(baseline.items())), issues
+    baseline = {
+        source: targets[0] if len(targets) == 1 else targets
+        for source, targets in sorted(baseline_targets.items())
+    }
+    return baseline, issues
 
 
 def _compare_mapping_export(
     *,
-    generated: dict[str, str],
-    baseline: dict[str, str],
+    generated: dict[str, str | list[str]],
+    baseline: dict[str, str | list[str]],
     selected_variants: list[RegistryVariant],
     item_id: str,
     source_family: str,
@@ -168,15 +360,21 @@ def _compare_mapping_export(
             item_id=item_id,
             details={"source_family": source_family},
         ))
-    if len(generated) != len(selected_variants):
+    generated_variant_count = _expanded_mapping_count(generated)
+    selected_variant_count = _unique_variant_target_count(selected_variants)
+    if generated_variant_count != selected_variant_count:
         issues.append(_issue(
             "error",
             "export_variant_count_mismatch",
-            "generated export count does not match selected registry variant count",
+            "generated export count does not match selected registry variant-target count",
             item_id=item_id,
-            details={"generated": len(generated), "selected_variants": len(selected_variants)},
+            details={
+                "generated": generated_variant_count,
+                "selected_variant_targets": selected_variant_count,
+                "selected_variant_rows": len(selected_variants),
+            },
         ))
-    if generated != baseline:
+    if not _mappings_semantically_equal(generated, baseline):
         issues.append(_issue(
             "error",
             "export_b2_baseline_mismatch",
@@ -190,7 +388,7 @@ def _compare_mapping_export(
 def _run_required_layer_failure_probe(
     *,
     variants: list[RegistryVariant],
-    baseline: dict[str, str],
+    baseline: dict[str, str | list[str]],
     source_family: str,
     item_id: str,
     build_export,
@@ -229,7 +427,11 @@ def _imported_modules(path: Path) -> list[str]:
 def _run_runtime_import_boundary_check() -> list[CheckIssue]:
     issues: list[CheckIssue] = []
     ingredient_routing_imports = _imported_modules(INGREDIENT_ROUTING_RUNTIME_FILE)
+    keywords_imports = _imported_modules(KEYWORDS_RUNTIME_FILE)
+    match_bridge_imports = _imported_modules(MATCH_BRIDGES_RUNTIME_FILE)
+    no_match_policy_imports = _imported_modules(NO_MATCH_POLICIES_RUNTIME_FILE)
     parent_imports = _imported_modules(PARENT_MAPS_RUNTIME_FILE)
+    synonyms_imports = _imported_modules(SYNONYMS_RUNTIME_FILE)
     term_indexes_imports = _imported_modules(TERM_INDEXES_RUNTIME_FILE)
     export_imports = _imported_modules(EXPORTS_RUNTIME_FILE)
     if ".term_registry.exports" not in ingredient_routing_imports:
@@ -240,6 +442,30 @@ def _run_runtime_import_boundary_check() -> list[CheckIssue]:
             item_id=str(INGREDIENT_ROUTING_RUNTIME_FILE.relative_to(REPO_DIR)),
             details={"imports": ingredient_routing_imports},
         ))
+    if ".term_registry.exports" not in keywords_imports:
+        issues.append(_issue(
+            "error",
+            "runtime_export_import_missing",
+            "keywords.py must import the selected mapping from term_registry.exports",
+            item_id=str(KEYWORDS_RUNTIME_FILE.relative_to(REPO_DIR)),
+            details={"imports": keywords_imports},
+        ))
+    if ".term_registry.exports" not in match_bridge_imports:
+        issues.append(_issue(
+            "error",
+            "runtime_export_import_missing",
+            "match_bridges.py must import the selected rules from term_registry.exports",
+            item_id=str(MATCH_BRIDGES_RUNTIME_FILE.relative_to(REPO_DIR)),
+            details={"imports": match_bridge_imports},
+        ))
+    if ".term_registry.exports" not in no_match_policy_imports:
+        issues.append(_issue(
+            "error",
+            "runtime_export_import_missing",
+            "no_match_policies.py must import the selected rules from term_registry.exports",
+            item_id=str(NO_MATCH_POLICIES_RUNTIME_FILE.relative_to(REPO_DIR)),
+            details={"imports": no_match_policy_imports},
+        ))
     if ".term_registry.exports" not in parent_imports:
         issues.append(_issue(
             "error",
@@ -247,6 +473,14 @@ def _run_runtime_import_boundary_check() -> list[CheckIssue]:
             "parent_maps.py must import the selected mapping from term_registry.exports",
             item_id=str(PARENT_MAPS_RUNTIME_FILE.relative_to(REPO_DIR)),
             details={"imports": parent_imports},
+        ))
+    if ".term_registry.exports" not in synonyms_imports:
+        issues.append(_issue(
+            "error",
+            "runtime_export_import_missing",
+            "synonyms.py must import the selected mapping from term_registry.exports",
+            item_id=str(SYNONYMS_RUNTIME_FILE.relative_to(REPO_DIR)),
+            details={"imports": synonyms_imports},
         ))
     if ".term_registry.exports" not in term_indexes_imports:
         issues.append(_issue(
@@ -269,7 +503,11 @@ def _run_runtime_import_boundary_check() -> list[CheckIssue]:
     )
     for path, imports in (
         (INGREDIENT_ROUTING_RUNTIME_FILE, ingredient_routing_imports),
+        (KEYWORDS_RUNTIME_FILE, keywords_imports),
+        (MATCH_BRIDGES_RUNTIME_FILE, match_bridge_imports),
+        (NO_MATCH_POLICIES_RUNTIME_FILE, no_match_policy_imports),
         (PARENT_MAPS_RUNTIME_FILE, parent_imports),
+        (SYNONYMS_RUNTIME_FILE, synonyms_imports),
         (EXPORTS_RUNTIME_FILE, export_imports),
     ):
         forbidden = [
@@ -285,6 +523,29 @@ def _run_runtime_import_boundary_check() -> list[CheckIssue]:
                 item_id=str(path.relative_to(REPO_DIR)),
                 details={"imports": forbidden},
             ))
+    export_forbidden_markers = (
+        "ingredient_matching.keywords",
+        ".keywords",
+        "ingredient_matching.match_bridges",
+        ".match_bridges",
+        "ingredient_matching.no_match_policies",
+        ".no_match_policies",
+        "ingredient_matching.synonyms",
+        ".synonyms",
+    )
+    export_forbidden = [
+        module
+        for module in export_imports
+        if any(marker in module for marker in export_forbidden_markers)
+    ]
+    if export_forbidden:
+        issues.append(_issue(
+            "error",
+            "runtime_import_boundary_violation",
+            "registry exports must not import the synonyms runtime source module",
+            item_id=str(EXPORTS_RUNTIME_FILE.relative_to(REPO_DIR)),
+            details={"imports": export_forbidden},
+        ))
     return issues
 
 
@@ -311,6 +572,62 @@ def _run_targeted_runtime_sanity() -> list[CheckIssue]:
                     "expected": expected,
                     "actual": actual,
                 },
+            ))
+    keyword_extra_cases = [
+        ("matbrödsjäst routes to jäst", "matbrödsjäst", "jäst"),
+        ("lammracks keeps lamb and lamb meat routes", "lammracks", ["lamm", "lammkött"]),
+    ]
+    for name, variant, expected in keyword_extra_cases:
+        actual = PUBLIC_KEYWORD_EXTRA_PARENTS.get(variant)
+        if actual != expected:
+            issues.append(_issue(
+                "error",
+                "targeted_runtime_sanity_failed",
+                "selected keyword extra parent mapping no longer exposes the expected parent",
+                item_id=name,
+                details={"variant": variant, "expected": expected, "actual": actual},
+            ))
+    offer_extra_cases = [
+        ("bryggkaffe exposes bryggkaffe/kokkaffe", "bryggkaffe", ["bryggkaffe", "kokkaffe"]),
+        ("körsbärstomater exposes singular tomato", "körsbärstomater", ["körsbärstomater", "körsbärstomat"]),
+    ]
+    for name, variant, expected in offer_extra_cases:
+        actual = PUBLIC_OFFER_EXTRA_KEYWORDS.get(variant)
+        if actual != expected:
+            issues.append(_issue(
+                "error",
+                "targeted_runtime_sanity_failed",
+                "selected offer extra keyword mapping no longer exposes the expected extra keywords",
+                item_id=name,
+                details={"variant": variant, "expected": expected, "actual": actual},
+            ))
+    ingredient_parent_cases = [
+        ("körsbärstomat maps to småtomat", "körsbärstomat", "småtomat"),
+        ("blockchoklad maps to bakchoklad", "blockchoklad", "bakchoklad"),
+    ]
+    for name, variant, expected in ingredient_parent_cases:
+        actual = PUBLIC_INGREDIENT_PARENTS.get(variant)
+        if actual != expected:
+            issues.append(_issue(
+                "error",
+                "targeted_runtime_sanity_failed",
+                "selected ingredient parent mapping no longer exposes the expected parent",
+                item_id=name,
+                details={"variant": variant, "expected": expected, "actual": actual},
+            ))
+    keyword_synonym_cases = [
+        ("fries normalizes to pommes", "fries", "pommes"),
+        ("tzaybitar normalizes to vegobitar", "tzaybitar", "vegobitar"),
+    ]
+    for name, variant, expected in keyword_synonym_cases:
+        actual = PUBLIC_KEYWORD_SYNONYMS.get(variant)
+        if actual != expected:
+            issues.append(_issue(
+                "error",
+                "targeted_runtime_sanity_failed",
+                "selected keyword synonym mapping no longer exposes the expected canonical",
+                item_id=name,
+                details={"variant": variant, "expected": expected, "actual": actual},
             ))
     routing_cases = [
         ("snabbkaffepulver routes to snabbkaffe", "snabbkaffepulver", "snabbkaffe"),
@@ -356,16 +673,46 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         args.baseline_json,
         source_family=PARENT_MATCH_ONLY_SOURCE_FAMILY,
     )
+    keyword_synonym_b2_baseline, keyword_synonym_baseline_issues = _load_b2_mapping_baseline(
+        args.baseline_json,
+        source_family=KEYWORD_SYNONYM_SOURCE_FAMILY,
+    )
+    ingredient_parent_b2_baseline, ingredient_parent_baseline_issues = _load_b2_mapping_baseline(
+        args.baseline_json,
+        source_family=INGREDIENT_PARENT_SOURCE_FAMILY,
+    )
     routing_b2_baseline, routing_baseline_issues = _load_b2_mapping_baseline(
         args.baseline_json,
         source_family=INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY,
+    )
+    keyword_extra_b2_baseline, keyword_extra_baseline_issues = _load_b2_mapping_baseline(
+        args.baseline_json,
+        source_family=KEYWORD_EXTRA_PARENT_SOURCE_FAMILY,
+    )
+    offer_extra_b2_baseline, offer_extra_baseline_issues = _load_b2_mapping_baseline(
+        args.baseline_json,
+        source_family=OFFER_EXTRA_KEYWORD_SOURCE_FAMILY,
+    )
+    no_match_policy_b2_baseline, no_match_policy_baseline_issues = _load_b2_mapping_baseline(
+        args.baseline_json,
+        source_family=NO_MATCH_POLICY_SOURCE_FAMILY,
+    )
+    match_bridge_b2_baseline, match_bridge_baseline_issues = _load_b2_mapping_baseline(
+        args.baseline_json,
+        source_family=MATCH_BRIDGE_SOURCE_FAMILY,
     )
     recipe_routing_b2_baseline, recipe_routing_baseline_issues = _load_b2_mapping_baseline(
         args.baseline_json,
         source_family=RECIPE_ROUTING_HELPER_SOURCE_FAMILY,
     )
     issues.extend(parent_baseline_issues)
+    issues.extend(keyword_synonym_baseline_issues)
+    issues.extend(ingredient_parent_baseline_issues)
     issues.extend(routing_baseline_issues)
+    issues.extend(keyword_extra_baseline_issues)
+    issues.extend(offer_extra_baseline_issues)
+    issues.extend(no_match_policy_baseline_issues)
+    issues.extend(match_bridge_baseline_issues)
     issues.extend(recipe_routing_baseline_issues)
     variants = _load_language_variants(args.language, args.batch_size)
     selected_parent_variants = [
@@ -373,10 +720,40 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         for variant in variants
         if variant.source_family == PARENT_MATCH_ONLY_SOURCE_FAMILY
     ]
+    selected_keyword_synonym_variants = [
+        variant
+        for variant in variants
+        if variant.source_family == KEYWORD_SYNONYM_SOURCE_FAMILY
+    ]
+    selected_ingredient_parent_variants = [
+        variant
+        for variant in variants
+        if variant.source_family == INGREDIENT_PARENT_SOURCE_FAMILY
+    ]
     selected_routing_variants = [
         variant
         for variant in variants
         if variant.source_family == INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY
+    ]
+    selected_keyword_extra_variants = [
+        variant
+        for variant in variants
+        if variant.source_family == KEYWORD_EXTRA_PARENT_SOURCE_FAMILY
+    ]
+    selected_offer_extra_variants = [
+        variant
+        for variant in variants
+        if variant.source_family == OFFER_EXTRA_KEYWORD_SOURCE_FAMILY
+    ]
+    selected_no_match_policy_variants = [
+        variant
+        for variant in variants
+        if variant.source_family == NO_MATCH_POLICY_SOURCE_FAMILY
+    ]
+    selected_match_bridge_variants = [
+        variant
+        for variant in variants
+        if variant.source_family == MATCH_BRIDGE_SOURCE_FAMILY
     ]
     selected_recipe_routing_variants = [
         variant
@@ -384,13 +761,37 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         if variant.source_family == RECIPE_ROUTING_HELPER_SOURCE_FAMILY
     ]
     generated_parent_from_variants = build_parent_match_only_export(variants)
-    generated_parent_static = _normalize_str_mapping(GENERATED_PARENT_MATCH_ONLY)
-    public_parent_runtime = _normalize_str_mapping(PUBLIC_PARENT_MATCH_ONLY)
+    generated_parent_static = _normalize_mapping(GENERATED_PARENT_MATCH_ONLY)
+    public_parent_runtime = _normalize_mapping(PUBLIC_PARENT_MATCH_ONLY)
+    generated_keyword_synonym_from_variants = build_keyword_synonyms_export(variants)
+    generated_keyword_synonym_static = _normalize_mapping(GENERATED_KEYWORD_SYNONYMS)
+    public_keyword_synonym_runtime = _normalize_mapping(PUBLIC_KEYWORD_SYNONYMS)
+    generated_ingredient_parent_from_variants = build_ingredient_parents_export(variants)
+    generated_ingredient_parent_static = _normalize_mapping(GENERATED_INGREDIENT_PARENTS)
+    public_ingredient_parent_runtime = _normalize_mapping(PUBLIC_INGREDIENT_PARENTS)
     generated_routing_from_variants = build_ingredient_routing_parent_export(variants)
-    generated_routing_static = _normalize_str_mapping(GENERATED_INGREDIENT_ROUTING_PARENT_TERMS)
-    public_routing_runtime = _normalize_str_mapping(PUBLIC_INGREDIENT_ROUTING_PARENT_TERMS)
+    generated_routing_static = _normalize_mapping(GENERATED_INGREDIENT_ROUTING_PARENT_TERMS)
+    public_routing_runtime = _normalize_mapping(PUBLIC_INGREDIENT_ROUTING_PARENT_TERMS)
+    generated_keyword_extra_from_variants = build_keyword_extra_parents_export(variants)
+    generated_keyword_extra_static = _normalize_mapping(GENERATED_KEYWORD_EXTRA_PARENTS)
+    public_keyword_extra_runtime = _normalize_mapping(PUBLIC_KEYWORD_EXTRA_PARENTS)
+    generated_offer_extra_from_variants = build_offer_extra_keywords_export(variants)
+    generated_offer_extra_static = _normalize_mapping(GENERATED_OFFER_EXTRA_KEYWORDS)
+    public_offer_extra_runtime = _normalize_mapping(PUBLIC_OFFER_EXTRA_KEYWORDS)
+    generated_no_match_policy_static = _build_no_match_policy_coverage_from_policies(
+        GENERATED_NO_MATCH_POLICIES
+    )
+    public_no_match_policy_runtime = _build_no_match_policy_coverage_from_policies(
+        PUBLIC_NO_MATCH_POLICIES
+    )
+    generated_match_bridge_static = _build_match_bridge_coverage_from_bridges(
+        GENERATED_MATCH_BRIDGES
+    )
+    public_match_bridge_runtime = _build_match_bridge_coverage_from_bridges(
+        PUBLIC_MATCH_BRIDGES
+    )
     generated_recipe_routing_from_variants = build_recipe_routing_extra_alias_export(variants)
-    generated_recipe_routing_static = _normalize_str_mapping(GENERATED_RECIPE_ROUTING_EXTRA_ALIASES)
+    generated_recipe_routing_static = _normalize_mapping(GENERATED_RECIPE_ROUTING_EXTRA_ALIASES)
 
     issues.extend(_compare_mapping_export(
         generated=generated_parent_static,
@@ -399,7 +800,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         item_id="PARENT_MATCH_ONLY",
         source_family=PARENT_MATCH_ONLY_SOURCE_FAMILY,
     ))
-    if generated_parent_from_variants != generated_parent_static:
+    if not _mappings_semantically_equal(generated_parent_from_variants, generated_parent_static):
         issues.append(_issue(
             "error",
             "generated_export_builder_mismatch",
@@ -407,7 +808,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
             item_id="PARENT_MATCH_ONLY",
             details=_mapping_diff(generated_parent_from_variants, generated_parent_static),
         ))
-    if public_parent_runtime != generated_parent_static:
+    if not _mappings_semantically_equal(public_parent_runtime, generated_parent_static):
         issues.append(_issue(
             "error",
             "public_runtime_export_mismatch",
@@ -417,13 +818,67 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         ))
 
     issues.extend(_compare_mapping_export(
+        generated=generated_keyword_synonym_static,
+        baseline=keyword_synonym_b2_baseline,
+        selected_variants=selected_keyword_synonym_variants,
+        item_id="KEYWORD_SYNONYMS",
+        source_family=KEYWORD_SYNONYM_SOURCE_FAMILY,
+    ))
+    if not _mappings_semantically_equal(generated_keyword_synonym_from_variants, generated_keyword_synonym_static):
+        issues.append(_issue(
+            "error",
+            "generated_export_builder_mismatch",
+            "builder output from current registry view differs from the static runtime export",
+            item_id="KEYWORD_SYNONYMS",
+            details=_mapping_diff(generated_keyword_synonym_from_variants, generated_keyword_synonym_static),
+        ))
+    if not _mappings_semantically_equal(public_keyword_synonym_runtime, generated_keyword_synonym_static):
+        issues.append(_issue(
+            "error",
+            "public_runtime_export_mismatch",
+            "synonyms.KEYWORD_SYNONYMS differs from the generated registry export",
+            item_id="KEYWORD_SYNONYMS",
+            details=_mapping_diff(public_keyword_synonym_runtime, generated_keyword_synonym_static),
+        ))
+
+    issues.extend(_compare_mapping_export(
+        generated=generated_ingredient_parent_static,
+        baseline=ingredient_parent_b2_baseline,
+        selected_variants=selected_ingredient_parent_variants,
+        item_id="INGREDIENT_PARENTS",
+        source_family=INGREDIENT_PARENT_SOURCE_FAMILY,
+    ))
+    if not _mappings_semantically_equal(
+        generated_ingredient_parent_from_variants,
+        generated_ingredient_parent_static,
+    ):
+        issues.append(_issue(
+            "error",
+            "generated_export_builder_mismatch",
+            "builder output from current registry view differs from the static runtime export",
+            item_id="INGREDIENT_PARENTS",
+            details=_mapping_diff(
+                generated_ingredient_parent_from_variants,
+                generated_ingredient_parent_static,
+            ),
+        ))
+    if not _mappings_semantically_equal(public_ingredient_parent_runtime, generated_ingredient_parent_static):
+        issues.append(_issue(
+            "error",
+            "public_runtime_export_mismatch",
+            "synonyms.INGREDIENT_PARENTS differs from the generated registry export",
+            item_id="INGREDIENT_PARENTS",
+            details=_mapping_diff(public_ingredient_parent_runtime, generated_ingredient_parent_static),
+        ))
+
+    issues.extend(_compare_mapping_export(
         generated=generated_routing_static,
         baseline=routing_b2_baseline,
         selected_variants=selected_routing_variants,
         item_id="INGREDIENT_ROUTING_PARENT_TERMS",
         source_family=INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY,
     ))
-    if generated_routing_from_variants != generated_routing_static:
+    if not _mappings_semantically_equal(generated_routing_from_variants, generated_routing_static):
         issues.append(_issue(
             "error",
             "generated_export_builder_mismatch",
@@ -431,7 +886,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
             item_id="INGREDIENT_ROUTING_PARENT_TERMS",
             details=_mapping_diff(generated_routing_from_variants, generated_routing_static),
         ))
-    if public_routing_runtime != generated_routing_static:
+    if not _mappings_semantically_equal(public_routing_runtime, generated_routing_static):
         issues.append(_issue(
             "error",
             "public_runtime_export_mismatch",
@@ -441,13 +896,119 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         ))
 
     issues.extend(_compare_mapping_export(
+        generated=generated_keyword_extra_static,
+        baseline=keyword_extra_b2_baseline,
+        selected_variants=selected_keyword_extra_variants,
+        item_id="KEYWORD_EXTRA_PARENTS",
+        source_family=KEYWORD_EXTRA_PARENT_SOURCE_FAMILY,
+    ))
+    if not _mappings_semantically_equal(generated_keyword_extra_from_variants, generated_keyword_extra_static):
+        issues.append(_issue(
+            "error",
+            "generated_export_builder_mismatch",
+            "builder output from current registry view differs from the static runtime export",
+            item_id="KEYWORD_EXTRA_PARENTS",
+            details=_mapping_diff(generated_keyword_extra_from_variants, generated_keyword_extra_static),
+        ))
+    if not _mappings_semantically_equal(public_keyword_extra_runtime, generated_keyword_extra_static):
+        issues.append(_issue(
+            "error",
+            "public_runtime_export_mismatch",
+            "parent_maps.KEYWORD_EXTRA_PARENTS differs from the generated registry export",
+            item_id="KEYWORD_EXTRA_PARENTS",
+            details=_mapping_diff(public_keyword_extra_runtime, generated_keyword_extra_static),
+        ))
+
+    issues.extend(_compare_mapping_export(
+        generated=generated_offer_extra_static,
+        baseline=offer_extra_b2_baseline,
+        selected_variants=selected_offer_extra_variants,
+        item_id="OFFER_EXTRA_KEYWORDS",
+        source_family=OFFER_EXTRA_KEYWORD_SOURCE_FAMILY,
+    ))
+    if not _mappings_semantically_equal(generated_offer_extra_from_variants, generated_offer_extra_static):
+        issues.append(_issue(
+            "error",
+            "generated_export_builder_mismatch",
+            "builder output from current registry view differs from the static runtime export",
+            item_id="OFFER_EXTRA_KEYWORDS",
+            details=_mapping_diff(generated_offer_extra_from_variants, generated_offer_extra_static),
+        ))
+    if not _mappings_semantically_equal(public_offer_extra_runtime, generated_offer_extra_static):
+        issues.append(_issue(
+            "error",
+            "public_runtime_export_mismatch",
+            "keywords.OFFER_EXTRA_KEYWORDS differs from the generated registry export",
+            item_id="OFFER_EXTRA_KEYWORDS",
+            details=_mapping_diff(public_offer_extra_runtime, generated_offer_extra_static),
+        ))
+
+    issues.extend(_compare_mapping_export(
+        generated=generated_no_match_policy_static,
+        baseline=no_match_policy_b2_baseline,
+        selected_variants=selected_no_match_policy_variants,
+        item_id="NO_MATCH_POLICIES",
+        source_family=NO_MATCH_POLICY_SOURCE_FAMILY,
+    ))
+    if not _mappings_semantically_equal(public_no_match_policy_runtime, generated_no_match_policy_static):
+        issues.append(_issue(
+            "error",
+            "public_runtime_export_mismatch",
+            "no_match_policies.NO_MATCH_POLICIES differs from the generated registry export",
+            item_id="NO_MATCH_POLICIES",
+            details=_mapping_diff(public_no_match_policy_runtime, generated_no_match_policy_static),
+        ))
+    generated_policy_signatures = [_policy_signature(policy) for policy in GENERATED_NO_MATCH_POLICIES]
+    public_policy_signatures = [_policy_signature(policy) for policy in PUBLIC_NO_MATCH_POLICIES]
+    if public_policy_signatures != generated_policy_signatures:
+        issues.append(_issue(
+            "error",
+            "public_runtime_export_mismatch",
+            "no_match_policies.NO_MATCH_POLICIES object payload differs from the generated registry export",
+            item_id="NO_MATCH_POLICIES",
+            details={
+                "generated_count": len(generated_policy_signatures),
+                "public_count": len(public_policy_signatures),
+            },
+        ))
+
+    issues.extend(_compare_mapping_export(
+        generated=generated_match_bridge_static,
+        baseline=match_bridge_b2_baseline,
+        selected_variants=selected_match_bridge_variants,
+        item_id="MATCH_BRIDGES",
+        source_family=MATCH_BRIDGE_SOURCE_FAMILY,
+    ))
+    if not _mappings_semantically_equal(public_match_bridge_runtime, generated_match_bridge_static):
+        issues.append(_issue(
+            "error",
+            "public_runtime_export_mismatch",
+            "match_bridges.MATCH_BRIDGES coverage differs from the generated registry export",
+            item_id="MATCH_BRIDGES",
+            details=_mapping_diff(public_match_bridge_runtime, generated_match_bridge_static),
+        ))
+    generated_bridge_signatures = [_bridge_signature(bridge) for bridge in GENERATED_MATCH_BRIDGES]
+    public_bridge_signatures = [_bridge_signature(bridge) for bridge in PUBLIC_MATCH_BRIDGES]
+    if public_bridge_signatures != generated_bridge_signatures:
+        issues.append(_issue(
+            "error",
+            "public_runtime_export_mismatch",
+            "match_bridges.MATCH_BRIDGES object payload differs from the generated registry export",
+            item_id="MATCH_BRIDGES",
+            details={
+                "generated_count": len(generated_bridge_signatures),
+                "public_count": len(public_bridge_signatures),
+            },
+        ))
+
+    issues.extend(_compare_mapping_export(
         generated=generated_recipe_routing_static,
         baseline=recipe_routing_b2_baseline,
         selected_variants=selected_recipe_routing_variants,
         item_id="RECIPE_ROUTING_EXTRA_ALIASES",
         source_family=RECIPE_ROUTING_HELPER_SOURCE_FAMILY,
     ))
-    if generated_recipe_routing_from_variants != generated_recipe_routing_static:
+    if not _mappings_semantically_equal(generated_recipe_routing_from_variants, generated_recipe_routing_static):
         issues.append(_issue(
             "error",
             "generated_export_builder_mismatch",
@@ -463,12 +1024,66 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         item_id="PARENT_MATCH_ONLY",
         build_export=build_parent_match_only_export,
     )
+    keyword_synonym_failure_probe_passed, keyword_synonym_failure_probe_error_codes = (
+        _run_required_layer_failure_probe(
+            variants=variants,
+            baseline=keyword_synonym_b2_baseline,
+            source_family=KEYWORD_SYNONYM_SOURCE_FAMILY,
+            item_id="KEYWORD_SYNONYMS",
+            build_export=build_keyword_synonyms_export,
+        )
+    )
+    ingredient_parent_failure_probe_passed, ingredient_parent_failure_probe_error_codes = (
+        _run_required_layer_failure_probe(
+            variants=variants,
+            baseline=ingredient_parent_b2_baseline,
+            source_family=INGREDIENT_PARENT_SOURCE_FAMILY,
+            item_id="INGREDIENT_PARENTS",
+            build_export=build_ingredient_parents_export,
+        )
+    )
     routing_failure_probe_passed, routing_failure_probe_error_codes = _run_required_layer_failure_probe(
         variants=variants,
         baseline=routing_b2_baseline,
         source_family=INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY,
         item_id="INGREDIENT_ROUTING_PARENT_TERMS",
         build_export=build_ingredient_routing_parent_export,
+    )
+    keyword_extra_failure_probe_passed, keyword_extra_failure_probe_error_codes = (
+        _run_required_layer_failure_probe(
+            variants=variants,
+            baseline=keyword_extra_b2_baseline,
+            source_family=KEYWORD_EXTRA_PARENT_SOURCE_FAMILY,
+            item_id="KEYWORD_EXTRA_PARENTS",
+            build_export=build_keyword_extra_parents_export,
+        )
+    )
+    offer_extra_failure_probe_passed, offer_extra_failure_probe_error_codes = (
+        _run_required_layer_failure_probe(
+            variants=variants,
+            baseline=offer_extra_b2_baseline,
+            source_family=OFFER_EXTRA_KEYWORD_SOURCE_FAMILY,
+            item_id="OFFER_EXTRA_KEYWORDS",
+            build_export=build_offer_extra_keywords_export,
+        )
+    )
+    no_match_policy_failure_probe_passed, no_match_policy_failure_probe_error_codes = (
+        _run_required_layer_failure_probe(
+            variants=variants,
+            baseline=no_match_policy_b2_baseline,
+            source_family=NO_MATCH_POLICY_SOURCE_FAMILY,
+            item_id="NO_MATCH_POLICIES",
+            build_export=_build_no_match_policy_coverage_from_variants,
+        )
+    )
+    match_bridge_failure_probe_passed, match_bridge_failure_probe_error_codes = (
+        _run_required_layer_failure_probe(
+            variants=variants,
+            baseline=match_bridge_b2_baseline,
+            source_family=MATCH_BRIDGE_SOURCE_FAMILY,
+            item_id="MATCH_BRIDGES",
+            build_export=_build_match_bridge_coverage_from_variants,
+        )
     )
     recipe_routing_failure_probe_passed, recipe_routing_failure_probe_error_codes = (
         _run_required_layer_failure_probe(
@@ -481,7 +1096,13 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     )
     for item_id, passed in (
         ("PARENT_MATCH_ONLY", parent_failure_probe_passed),
+        ("KEYWORD_SYNONYMS", keyword_synonym_failure_probe_passed),
+        ("INGREDIENT_PARENTS", ingredient_parent_failure_probe_passed),
         ("INGREDIENT_ROUTING_PARENT_TERMS", routing_failure_probe_passed),
+        ("KEYWORD_EXTRA_PARENTS", keyword_extra_failure_probe_passed),
+        ("OFFER_EXTRA_KEYWORDS", offer_extra_failure_probe_passed),
+        ("NO_MATCH_POLICIES", no_match_policy_failure_probe_passed),
+        ("MATCH_BRIDGES", match_bridge_failure_probe_passed),
         ("RECIPE_ROUTING_EXTRA_ALIASES", recipe_routing_failure_probe_passed),
     ):
         if not passed:
@@ -504,11 +1125,23 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         "market": args.market,
         "selected_exports": [
             "PARENT_MATCH_ONLY",
+            "KEYWORD_SYNONYMS",
+            "INGREDIENT_PARENTS",
+            "KEYWORD_EXTRA_PARENTS",
+            "OFFER_EXTRA_KEYWORDS",
+            "NO_MATCH_POLICIES",
+            "MATCH_BRIDGES",
             "INGREDIENT_ROUTING_PARENT_TERMS",
             "RECIPE_ROUTING_EXTRA_ALIASES",
         ],
         "selected_source_families": [
             PARENT_MATCH_ONLY_SOURCE_FAMILY,
+            KEYWORD_SYNONYM_SOURCE_FAMILY,
+            INGREDIENT_PARENT_SOURCE_FAMILY,
+            KEYWORD_EXTRA_PARENT_SOURCE_FAMILY,
+            OFFER_EXTRA_KEYWORD_SOURCE_FAMILY,
+            NO_MATCH_POLICY_SOURCE_FAMILY,
+            MATCH_BRIDGE_SOURCE_FAMILY,
             INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY,
             RECIPE_ROUTING_HELPER_SOURCE_FAMILY,
         ],
@@ -516,31 +1149,67 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         "registry_variant_count": len(variants),
         "selected_variant_counts": {
             "PARENT_MATCH_ONLY": len(selected_parent_variants),
+            "KEYWORD_SYNONYMS": len(selected_keyword_synonym_variants),
+            "INGREDIENT_PARENTS": len(selected_ingredient_parent_variants),
+            "KEYWORD_EXTRA_PARENTS": len(selected_keyword_extra_variants),
+            "OFFER_EXTRA_KEYWORDS": len(selected_offer_extra_variants),
+            "NO_MATCH_POLICIES": len(selected_no_match_policy_variants),
+            "MATCH_BRIDGES": len(selected_match_bridge_variants),
             "INGREDIENT_ROUTING_PARENT_TERMS": len(selected_routing_variants),
             "RECIPE_ROUTING_EXTRA_ALIASES": len(selected_recipe_routing_variants),
         },
         "generated_export_counts": {
-            "PARENT_MATCH_ONLY": len(generated_parent_static),
-            "INGREDIENT_ROUTING_PARENT_TERMS": len(generated_routing_static),
-            "RECIPE_ROUTING_EXTRA_ALIASES": len(generated_recipe_routing_static),
+            "PARENT_MATCH_ONLY": _expanded_mapping_count(generated_parent_static),
+            "KEYWORD_SYNONYMS": _expanded_mapping_count(generated_keyword_synonym_static),
+            "INGREDIENT_PARENTS": _expanded_mapping_count(generated_ingredient_parent_static),
+            "KEYWORD_EXTRA_PARENTS": _expanded_mapping_count(generated_keyword_extra_static),
+            "OFFER_EXTRA_KEYWORDS": _expanded_mapping_count(generated_offer_extra_static),
+            "NO_MATCH_POLICIES": _expanded_mapping_count(generated_no_match_policy_static),
+            "MATCH_BRIDGES": _expanded_mapping_count(generated_match_bridge_static),
+            "INGREDIENT_ROUTING_PARENT_TERMS": _expanded_mapping_count(generated_routing_static),
+            "RECIPE_ROUTING_EXTRA_ALIASES": _expanded_mapping_count(generated_recipe_routing_static),
         },
         "b2_baseline_export_counts": {
-            "PARENT_MATCH_ONLY": len(parent_b2_baseline),
-            "INGREDIENT_ROUTING_PARENT_TERMS": len(routing_b2_baseline),
-            "RECIPE_ROUTING_EXTRA_ALIASES": len(recipe_routing_b2_baseline),
+            "PARENT_MATCH_ONLY": _expanded_mapping_count(parent_b2_baseline),
+            "KEYWORD_SYNONYMS": _expanded_mapping_count(keyword_synonym_b2_baseline),
+            "INGREDIENT_PARENTS": _expanded_mapping_count(ingredient_parent_b2_baseline),
+            "KEYWORD_EXTRA_PARENTS": _expanded_mapping_count(keyword_extra_b2_baseline),
+            "OFFER_EXTRA_KEYWORDS": _expanded_mapping_count(offer_extra_b2_baseline),
+            "NO_MATCH_POLICIES": _expanded_mapping_count(no_match_policy_b2_baseline),
+            "MATCH_BRIDGES": _expanded_mapping_count(match_bridge_b2_baseline),
+            "INGREDIENT_ROUTING_PARENT_TERMS": _expanded_mapping_count(routing_b2_baseline),
+            "RECIPE_ROUTING_EXTRA_ALIASES": _expanded_mapping_count(recipe_routing_b2_baseline),
         },
         "public_runtime_export_counts": {
-            "PARENT_MATCH_ONLY": len(public_parent_runtime),
-            "INGREDIENT_ROUTING_PARENT_TERMS": len(public_routing_runtime),
-            "RECIPE_ROUTING_EXTRA_ALIASES": len(generated_recipe_routing_static),
+            "PARENT_MATCH_ONLY": _expanded_mapping_count(public_parent_runtime),
+            "KEYWORD_SYNONYMS": _expanded_mapping_count(public_keyword_synonym_runtime),
+            "INGREDIENT_PARENTS": _expanded_mapping_count(public_ingredient_parent_runtime),
+            "KEYWORD_EXTRA_PARENTS": _expanded_mapping_count(public_keyword_extra_runtime),
+            "OFFER_EXTRA_KEYWORDS": _expanded_mapping_count(public_offer_extra_runtime),
+            "NO_MATCH_POLICIES": _expanded_mapping_count(public_no_match_policy_runtime),
+            "MATCH_BRIDGES": _expanded_mapping_count(public_match_bridge_runtime),
+            "INGREDIENT_ROUTING_PARENT_TERMS": _expanded_mapping_count(public_routing_runtime),
+            "RECIPE_ROUTING_EXTRA_ALIASES": _expanded_mapping_count(generated_recipe_routing_static),
         },
         "failure_probe_passed": {
             "PARENT_MATCH_ONLY": parent_failure_probe_passed,
+            "KEYWORD_SYNONYMS": keyword_synonym_failure_probe_passed,
+            "INGREDIENT_PARENTS": ingredient_parent_failure_probe_passed,
+            "KEYWORD_EXTRA_PARENTS": keyword_extra_failure_probe_passed,
+            "OFFER_EXTRA_KEYWORDS": offer_extra_failure_probe_passed,
+            "NO_MATCH_POLICIES": no_match_policy_failure_probe_passed,
+            "MATCH_BRIDGES": match_bridge_failure_probe_passed,
             "INGREDIENT_ROUTING_PARENT_TERMS": routing_failure_probe_passed,
             "RECIPE_ROUTING_EXTRA_ALIASES": recipe_routing_failure_probe_passed,
         },
         "failure_probe_error_codes": {
             "PARENT_MATCH_ONLY": parent_failure_probe_error_codes,
+            "KEYWORD_SYNONYMS": keyword_synonym_failure_probe_error_codes,
+            "INGREDIENT_PARENTS": ingredient_parent_failure_probe_error_codes,
+            "KEYWORD_EXTRA_PARENTS": keyword_extra_failure_probe_error_codes,
+            "OFFER_EXTRA_KEYWORDS": offer_extra_failure_probe_error_codes,
+            "NO_MATCH_POLICIES": no_match_policy_failure_probe_error_codes,
+            "MATCH_BRIDGES": match_bridge_failure_probe_error_codes,
             "INGREDIENT_ROUTING_PARENT_TERMS": routing_failure_probe_error_codes,
             "RECIPE_ROUTING_EXTRA_ALIASES": recipe_routing_failure_probe_error_codes,
         },
@@ -556,16 +1225,34 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         "source_counts": dict(sorted(source_counts.items())),
         "generated_exports": {
             "PARENT_MATCH_ONLY": generated_parent_static,
+            "KEYWORD_SYNONYMS": generated_keyword_synonym_static,
+            "INGREDIENT_PARENTS": generated_ingredient_parent_static,
+            "KEYWORD_EXTRA_PARENTS": generated_keyword_extra_static,
+            "OFFER_EXTRA_KEYWORDS": generated_offer_extra_static,
+            "NO_MATCH_POLICIES": generated_no_match_policy_static,
+            "MATCH_BRIDGES": generated_match_bridge_static,
             "INGREDIENT_ROUTING_PARENT_TERMS": generated_routing_static,
             "RECIPE_ROUTING_EXTRA_ALIASES": generated_recipe_routing_static,
         },
         "b2_baseline_exports": {
             "PARENT_MATCH_ONLY": parent_b2_baseline,
+            "KEYWORD_SYNONYMS": keyword_synonym_b2_baseline,
+            "INGREDIENT_PARENTS": ingredient_parent_b2_baseline,
+            "KEYWORD_EXTRA_PARENTS": keyword_extra_b2_baseline,
+            "OFFER_EXTRA_KEYWORDS": offer_extra_b2_baseline,
+            "NO_MATCH_POLICIES": no_match_policy_b2_baseline,
+            "MATCH_BRIDGES": match_bridge_b2_baseline,
             "INGREDIENT_ROUTING_PARENT_TERMS": routing_b2_baseline,
             "RECIPE_ROUTING_EXTRA_ALIASES": recipe_routing_b2_baseline,
         },
         "public_runtime_exports": {
             "PARENT_MATCH_ONLY": public_parent_runtime,
+            "KEYWORD_SYNONYMS": public_keyword_synonym_runtime,
+            "INGREDIENT_PARENTS": public_ingredient_parent_runtime,
+            "KEYWORD_EXTRA_PARENTS": public_keyword_extra_runtime,
+            "OFFER_EXTRA_KEYWORDS": public_offer_extra_runtime,
+            "NO_MATCH_POLICIES": public_no_match_policy_runtime,
+            "MATCH_BRIDGES": public_match_bridge_runtime,
             "INGREDIENT_ROUTING_PARENT_TERMS": public_routing_runtime,
             "RECIPE_ROUTING_EXTRA_ALIASES": generated_recipe_routing_static,
         },

@@ -1,0 +1,2529 @@
+[[entries]]
+entry_id = "sv-se.alias.artor.arter_001"
+language = "sv"
+market = "SE"
+canonical = "ärtor"
+status = "active"
+variants = ["ärter"]
+offer_terms = ["ärtor"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "ärtor"
+variant = "ärter"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ärtor"
+offer_name = "Ärter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kabanoss.cabanossy_002"
+language = "sv"
+market = "SE"
+canonical = "kabanoss"
+status = "active"
+variants = ["cabanossy"]
+offer_terms = ["kabanoss"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "kabanoss"
+variant = "cabanossy"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kabanoss"
+offer_name = "Cabanossy"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pommes.fries_003"
+language = "sv"
+market = "SE"
+canonical = "pommes"
+status = "active"
+variants = ["fries"]
+offer_terms = ["pommes"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "pommes"
+variant = "fries"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pommes"
+offer_name = "Fries"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pommes.frites_004"
+language = "sv"
+market = "SE"
+canonical = "pommes"
+status = "active"
+variants = ["frites"]
+offer_terms = ["pommes"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "pommes"
+variant = "frites"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pommes"
+offer_name = "Frites"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.senap.mustard_005"
+language = "sv"
+market = "SE"
+canonical = "senap"
+status = "active"
+variants = ["mustard"]
+offer_terms = ["senap"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "senap"
+variant = "mustard"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "senap"
+offer_name = "Mustard"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tandoori.tandori_006"
+language = "sv"
+market = "SE"
+canonical = "tandoori"
+status = "active"
+variants = ["tandori"]
+offer_terms = ["tandoori"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "tandoori"
+variant = "tandori"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tandoori"
+offer_name = "Tandori"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kycklingben.drumsticks_007"
+language = "sv"
+market = "SE"
+canonical = "kycklingben"
+status = "active"
+variants = ["drumsticks"]
+offer_terms = ["kycklingben"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "kycklingben"
+variant = "drumsticks"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklingben"
+offer_name = "Drumsticks"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hamburgare.burger_008"
+language = "sv"
+market = "SE"
+canonical = "hamburgare"
+status = "active"
+variants = ["burger"]
+offer_terms = ["hamburgare"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "hamburgare"
+variant = "burger"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hamburgare"
+offer_name = "Burger"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.notkott.beef_009"
+language = "sv"
+market = "SE"
+canonical = "nötkött"
+status = "active"
+variants = ["beef"]
+offer_terms = ["nötkött"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "nötkött"
+variant = "beef"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötkött"
+offer_name = "Beef"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bambuskott.bamboo_010"
+language = "sv"
+market = "SE"
+canonical = "bambuskott"
+status = "active"
+variants = ["bamboo"]
+offer_terms = ["bambuskott"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "bambuskott"
+variant = "bamboo"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "bambuskott"
+offer_name = "Bamboo"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.farskost.philadelphia_011"
+language = "sv"
+market = "SE"
+canonical = "färskost"
+status = "active"
+variants = ["philadelphia"]
+offer_terms = ["färskost"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "färskost"
+variant = "philadelphia"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "färskost"
+offer_name = "Philadelphia"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pekannot.pecannot_012"
+language = "sv"
+market = "SE"
+canonical = "pekannöt"
+status = "active"
+variants = ["pecannöt"]
+offer_terms = ["pekannöt"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "pekannöt"
+variant = "pecannöt"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pekannöt"
+offer_name = "Pecannöt"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pekannot.pecannot_013"
+language = "sv"
+market = "SE"
+canonical = "pekannot"
+status = "active"
+variants = ["pecannot"]
+offer_terms = ["pekannot"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "pekannot"
+variant = "pecannot"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pekannot"
+offer_name = "Pecannot"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pekannotter.pecannotter_014"
+language = "sv"
+market = "SE"
+canonical = "pekannötter"
+status = "active"
+variants = ["pecannötter"]
+offer_terms = ["pekannötter"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "pekannötter"
+variant = "pecannötter"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pekannötter"
+offer_name = "Pecannötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pekannotter.pecannotter_015"
+language = "sv"
+market = "SE"
+canonical = "pekannotter"
+status = "active"
+variants = ["pecannotter"]
+offer_terms = ["pekannotter"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "pekannotter"
+variant = "pecannotter"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pekannotter"
+offer_name = "Pecannotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.haricot.haricots_016"
+language = "sv"
+market = "SE"
+canonical = "haricot"
+status = "active"
+variants = ["haricots"]
+offer_terms = ["haricot"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "haricot"
+variant = "haricots"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "haricot"
+offer_name = "Haricots"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.chili.chilli_017"
+language = "sv"
+market = "SE"
+canonical = "chili"
+status = "active"
+variants = ["chilli"]
+offer_terms = ["chili"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "chili"
+variant = "chilli"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "chili"
+offer_name = "Chilli"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.chilipeppar.chillipeppar_018"
+language = "sv"
+market = "SE"
+canonical = "chilipeppar"
+status = "active"
+variants = ["chillipeppar"]
+offer_terms = ["chilipeppar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "chilipeppar"
+variant = "chillipeppar"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "chilipeppar"
+offer_name = "Chillipeppar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.morot.morotter_019"
+language = "sv"
+market = "SE"
+canonical = "morot"
+status = "active"
+variants = ["morötter"]
+offer_terms = ["morot"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "morot"
+variant = "morötter"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "morot"
+offer_name = "Morötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.morot.morotter_020"
+language = "sv"
+market = "SE"
+canonical = "morot"
+status = "active"
+variants = ["morotter"]
+offer_terms = ["morot"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "morot"
+variant = "morotter"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "morot"
+offer_name = "Morotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.morot.moratter_021"
+language = "sv"
+market = "SE"
+canonical = "morot"
+status = "active"
+variants = ["morätter"]
+offer_terms = ["morot"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "morot"
+variant = "morätter"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "morot"
+offer_name = "Morätter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.morot.moratter_022"
+language = "sv"
+market = "SE"
+canonical = "morot"
+status = "active"
+variants = ["moratter"]
+offer_terms = ["morot"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "morot"
+variant = "moratter"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "morot"
+offer_name = "Moratter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.dillfro.dillfron_023"
+language = "sv"
+market = "SE"
+canonical = "dillfrö"
+status = "active"
+variants = ["dillfrön"]
+offer_terms = ["dillfrö"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "dillfrö"
+variant = "dillfrön"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "dillfrö"
+offer_name = "Dillfrön"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.dillfro.dillfron_024"
+language = "sv"
+market = "SE"
+canonical = "dillfrö"
+status = "active"
+variants = ["dillfron"]
+offer_terms = ["dillfrö"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "dillfrö"
+variant = "dillfron"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "dillfrö"
+offer_name = "Dillfron"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.dillfro.dillfro_025"
+language = "sv"
+market = "SE"
+canonical = "dillfrö"
+status = "active"
+variants = ["dillfro"]
+offer_terms = ["dillfrö"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "dillfrö"
+variant = "dillfro"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "dillfrö"
+offer_name = "Dillfro"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rucola.ruccola_026"
+language = "sv"
+market = "SE"
+canonical = "rucola"
+status = "active"
+variants = ["ruccola"]
+offer_terms = ["rucola"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "rucola"
+variant = "ruccola"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rucola"
+offer_name = "Ruccola"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.machesallat.machesallad_027"
+language = "sv"
+market = "SE"
+canonical = "machesallat"
+status = "active"
+variants = ["machesallad"]
+offer_terms = ["machesallat"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "machesallat"
+variant = "machesallad"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "machesallat"
+offer_name = "Machesallad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.huvudsallad.huvudsallat_028"
+language = "sv"
+market = "SE"
+canonical = "huvudsallad"
+status = "active"
+variants = ["huvudsallat"]
+offer_terms = ["huvudsallad"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "huvudsallad"
+variant = "huvudsallat"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "huvudsallad"
+offer_name = "Huvudsallat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.baguette.surdegsbaguette_029"
+language = "sv"
+market = "SE"
+canonical = "baguette"
+status = "active"
+variants = ["surdegsbaguette"]
+offer_terms = ["baguette"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "baguette"
+variant = "surdegsbaguette"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "baguette"
+offer_name = "Surdegsbaguette"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.baguette.surdegsbaguett_030"
+language = "sv"
+market = "SE"
+canonical = "baguette"
+status = "active"
+variants = ["surdegsbaguett"]
+offer_terms = ["baguette"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "baguette"
+variant = "surdegsbaguett"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "baguette"
+offer_name = "Surdegsbaguett"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cantuccini.cantucci_031"
+language = "sv"
+market = "SE"
+canonical = "cantuccini"
+status = "active"
+variants = ["cantucci"]
+offer_terms = ["cantuccini"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "cantuccini"
+variant = "cantucci"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "cantuccini"
+offer_name = "Cantucci"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cantuccini.biscotti_032"
+language = "sv"
+market = "SE"
+canonical = "cantuccini"
+status = "active"
+variants = ["biscotti"]
+offer_terms = ["cantuccini"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "cantuccini"
+variant = "biscotti"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "cantuccini"
+offer_name = "Biscotti"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tryffelmajonnas.tryffelmayo_033"
+language = "sv"
+market = "SE"
+canonical = "tryffelmajonnäs"
+status = "active"
+variants = ["tryffelmayo"]
+offer_terms = ["tryffelmajonnäs"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "tryffelmajonnäs"
+variant = "tryffelmayo"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tryffelmajonnäs"
+offer_name = "Tryffelmayo"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tryffelmajonnas.tryffelmajo_034"
+language = "sv"
+market = "SE"
+canonical = "tryffelmajonnäs"
+status = "active"
+variants = ["tryffelmajo"]
+offer_terms = ["tryffelmajonnäs"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "tryffelmajonnäs"
+variant = "tryffelmajo"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tryffelmajonnäs"
+offer_name = "Tryffelmajo"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.drommar.gille_drommar_035"
+language = "sv"
+market = "SE"
+canonical = "drömmar"
+status = "active"
+variants = ["gille-drömmar"]
+offer_terms = ["drömmar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "drömmar"
+variant = "gille-drömmar"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "drömmar"
+offer_name = "Gille-drömmar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.drommar.gille_drommar_036"
+language = "sv"
+market = "SE"
+canonical = "drommar"
+status = "active"
+variants = ["gille-drommar"]
+offer_terms = ["drommar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "drommar"
+variant = "gille-drommar"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "drommar"
+offer_name = "Gille-drommar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.savoiardikex.savoiardokex_037"
+language = "sv"
+market = "SE"
+canonical = "savoiardikex"
+status = "active"
+variants = ["savoiardokex"]
+offer_terms = ["savoiardikex"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "savoiardikex"
+variant = "savoiardokex"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "savoiardikex"
+offer_name = "Savoiardokex"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.savoiardikex.savoiardo_038"
+language = "sv"
+market = "SE"
+canonical = "savoiardikex"
+status = "active"
+variants = ["savoiardo"]
+offer_terms = ["savoiardikex"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "savoiardikex"
+variant = "savoiardo"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "savoiardikex"
+offer_name = "Savoiardo"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.savoiardikex.savoiarde_039"
+language = "sv"
+market = "SE"
+canonical = "savoiardikex"
+status = "active"
+variants = ["savoiarde"]
+offer_terms = ["savoiardikex"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "savoiardikex"
+variant = "savoiarde"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "savoiardikex"
+offer_name = "Savoiarde"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.savoiardikex.savoiardi_040"
+language = "sv"
+market = "SE"
+canonical = "savoiardikex"
+status = "active"
+variants = ["savoiardi"]
+offer_terms = ["savoiardikex"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "savoiardikex"
+variant = "savoiardi"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "savoiardikex"
+offer_name = "Savoiardi"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.savoiardikex.ladyfinger_041"
+language = "sv"
+market = "SE"
+canonical = "savoiardikex"
+status = "active"
+variants = ["ladyfinger"]
+offer_terms = ["savoiardikex"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "savoiardikex"
+variant = "ladyfinger"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "savoiardikex"
+offer_name = "Ladyfinger"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.savoiardikex.ladyfingers_042"
+language = "sv"
+market = "SE"
+canonical = "savoiardikex"
+status = "active"
+variants = ["ladyfingers"]
+offer_terms = ["savoiardikex"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "savoiardikex"
+variant = "ladyfingers"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "savoiardikex"
+offer_name = "Ladyfingers"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspatta.spatta_043"
+language = "sv"
+market = "SE"
+canonical = "rödspätta"
+status = "active"
+variants = ["spätta"]
+offer_terms = ["rödspätta"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "rödspätta"
+variant = "spätta"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rödspätta"
+offer_name = "Spätta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspatta.spatta_044"
+language = "sv"
+market = "SE"
+canonical = "rodspatta"
+status = "active"
+variants = ["spatta"]
+offer_terms = ["rodspatta"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "rodspatta"
+variant = "spatta"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rodspatta"
+offer_name = "Spatta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspattafil.spattafil_045"
+language = "sv"
+market = "SE"
+canonical = "rödspättafilé"
+status = "active"
+variants = ["spättafilé"]
+offer_terms = ["rödspättafilé"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "rödspättafilé"
+variant = "spättafilé"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rödspättafilé"
+offer_name = "Spättafilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspattafile.spattafile_046"
+language = "sv"
+market = "SE"
+canonical = "rodspattafile"
+status = "active"
+variants = ["spättafile"]
+offer_terms = ["rodspattafile"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "rodspattafile"
+variant = "spättafile"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rodspattafile"
+offer_name = "Spättafile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspattafil.spattafil_er_047"
+language = "sv"
+market = "SE"
+canonical = "rödspättafilé"
+status = "active"
+variants = ["spättafiléer"]
+offer_terms = ["rödspättafilé"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "rödspättafilé"
+variant = "spättafiléer"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rödspättafilé"
+offer_name = "Spättafiléer"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspattafile.spattafileer_048"
+language = "sv"
+market = "SE"
+canonical = "rodspattafile"
+status = "active"
+variants = ["spattafileer"]
+offer_terms = ["rodspattafile"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "rodspattafile"
+variant = "spattafileer"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rodspattafile"
+offer_name = "Spattafileer"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vasterbottensost.vasterbottens_049"
+language = "sv"
+market = "SE"
+canonical = "västerbottensost"
+status = "active"
+variants = ["västerbottens"]
+offer_terms = ["västerbottensost"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "västerbottensost"
+variant = "västerbottens"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "västerbottensost"
+offer_name = "Västerbottens"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vasterbottensost.vasterbottens_050"
+language = "sv"
+market = "SE"
+canonical = "västerbottensost"
+status = "active"
+variants = ["vasterbottens"]
+offer_terms = ["västerbottensost"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "västerbottensost"
+variant = "vasterbottens"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "västerbottensost"
+offer_name = "Vasterbottens"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hummer.humrar_051"
+language = "sv"
+market = "SE"
+canonical = "hummer"
+status = "active"
+variants = ["humrar"]
+offer_terms = ["hummer"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "hummer"
+variant = "humrar"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hummer"
+offer_name = "Humrar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.balsamico.balsamica_052"
+language = "sv"
+market = "SE"
+canonical = "balsamico"
+status = "active"
+variants = ["balsamica"]
+offer_terms = ["balsamico"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "balsamico"
+variant = "balsamica"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "balsamico"
+offer_name = "Balsamica"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.naringsjast.bjast_053"
+language = "sv"
+market = "SE"
+canonical = "näringsjäst"
+status = "active"
+variants = ["bjäst"]
+offer_terms = ["näringsjäst"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "näringsjäst"
+variant = "bjäst"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "näringsjäst"
+offer_name = "Bjäst"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.adelost.blamogelost_054"
+language = "sv"
+market = "SE"
+canonical = "ädelost"
+status = "active"
+variants = ["blåmögelost"]
+offer_terms = ["ädelost"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "ädelost"
+variant = "blåmögelost"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ädelost"
+offer_name = "Blåmögelost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.adelost.blamogelost_055"
+language = "sv"
+market = "SE"
+canonical = "adelost"
+status = "active"
+variants = ["blamogelost"]
+offer_terms = ["adelost"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "adelost"
+variant = "blamogelost"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "adelost"
+offer_name = "Blamogelost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.adelost.gronmogelost_056"
+language = "sv"
+market = "SE"
+canonical = "ädelost"
+status = "active"
+variants = ["grönmögelost"]
+offer_terms = ["ädelost"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "ädelost"
+variant = "grönmögelost"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ädelost"
+offer_name = "Grönmögelost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.adelost.gronmogelost_057"
+language = "sv"
+market = "SE"
+canonical = "adelost"
+status = "active"
+variants = ["gronmogelost"]
+offer_terms = ["adelost"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "adelost"
+variant = "gronmogelost"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "adelost"
+offer_name = "Gronmogelost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.muskovadosocker.muscovadosocker_058"
+language = "sv"
+market = "SE"
+canonical = "muskovadosocker"
+status = "active"
+variants = ["muscovadosocker"]
+offer_terms = ["muskovadosocker"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "muskovadosocker"
+variant = "muscovadosocker"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "muskovadosocker"
+offer_name = "Muscovadosocker"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.notkram.notcreme_059"
+language = "sv"
+market = "SE"
+canonical = "nötkräm"
+status = "active"
+variants = ["nötcreme"]
+offer_terms = ["nötkräm"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "nötkräm"
+variant = "nötcreme"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötkräm"
+offer_name = "Nötcreme"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.notkram.notcreme_060"
+language = "sv"
+market = "SE"
+canonical = "nötkräm"
+status = "active"
+variants = ["notcreme"]
+offer_terms = ["nötkräm"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "nötkräm"
+variant = "notcreme"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötkräm"
+offer_name = "Notcreme"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.notkram.notkram_061"
+language = "sv"
+market = "SE"
+canonical = "nötkräm"
+status = "active"
+variants = ["notkram"]
+offer_terms = ["nötkräm"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "nötkräm"
+variant = "notkram"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötkräm"
+offer_name = "Notkram"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.notkram.hasselnotkram_062"
+language = "sv"
+market = "SE"
+canonical = "nötkräm"
+status = "active"
+variants = ["hasselnötkräm"]
+offer_terms = ["nötkräm"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "nötkräm"
+variant = "hasselnötkräm"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötkräm"
+offer_name = "Hasselnötkräm"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.notkram.hasselnotkram_063"
+language = "sv"
+market = "SE"
+canonical = "nötkräm"
+status = "active"
+variants = ["hasselnotkram"]
+offer_terms = ["nötkräm"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "nötkräm"
+variant = "hasselnotkram"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötkräm"
+offer_name = "Hasselnotkram"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.karamelliseradmjolk.karamelliseradmjolk_064"
+language = "sv"
+market = "SE"
+canonical = "karamelliseradmjölk"
+status = "active"
+variants = ["karamelliseradmjolk"]
+offer_terms = ["karamelliseradmjölk"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "karamelliseradmjölk"
+variant = "karamelliseradmjolk"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "karamelliseradmjölk"
+offer_name = "Karamelliseradmjolk"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kondenseradmjolk.kondenseradmjolk_065"
+language = "sv"
+market = "SE"
+canonical = "kondenseradmjölk"
+status = "active"
+variants = ["kondenseradmjolk"]
+offer_terms = ["kondenseradmjölk"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "kondenseradmjölk"
+variant = "kondenseradmjolk"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kondenseradmjölk"
+offer_name = "Kondenseradmjolk"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fladersaft.fladerblomssaft_066"
+language = "sv"
+market = "SE"
+canonical = "flädersaft"
+status = "active"
+variants = ["fläderblomssaft"]
+offer_terms = ["flädersaft"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "flädersaft"
+variant = "fläderblomssaft"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "flädersaft"
+offer_name = "Fläderblomssaft"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fladersaft.fladerblomsaft_067"
+language = "sv"
+market = "SE"
+canonical = "flädersaft"
+status = "active"
+variants = ["fläderblomsaft"]
+offer_terms = ["flädersaft"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "flädersaft"
+variant = "fläderblomsaft"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "flädersaft"
+offer_name = "Fläderblomsaft"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fladersaft.fladerblomssaft_068"
+language = "sv"
+market = "SE"
+canonical = "fladersaft"
+status = "active"
+variants = ["fladerblomssaft"]
+offer_terms = ["fladersaft"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "fladersaft"
+variant = "fladerblomssaft"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fladersaft"
+offer_name = "Fladerblomssaft"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fladersaft.fladerblomsaft_069"
+language = "sv"
+market = "SE"
+canonical = "fladersaft"
+status = "active"
+variants = ["fladerblomsaft"]
+offer_terms = ["fladersaft"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "fladersaft"
+variant = "fladerblomsaft"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fladersaft"
+offer_name = "Fladerblomsaft"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hallonsaft.skogshallonsaft_070"
+language = "sv"
+market = "SE"
+canonical = "hallonsaft"
+status = "active"
+variants = ["skogshallonsaft"]
+offer_terms = ["hallonsaft"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "hallonsaft"
+variant = "skogshallonsaft"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hallonsaft"
+offer_name = "Skogshallonsaft"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.jordgubbssaft.jordgubbsaft_071"
+language = "sv"
+market = "SE"
+canonical = "jordgubbssaft"
+status = "active"
+variants = ["jordgubbsaft"]
+offer_terms = ["jordgubbssaft"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "jordgubbssaft"
+variant = "jordgubbsaft"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "jordgubbssaft"
+offer_name = "Jordgubbsaft"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.ingefarsjuice.ingefarsshot_072"
+language = "sv"
+market = "SE"
+canonical = "ingefärsjuice"
+status = "active"
+variants = ["ingefärsshot"]
+offer_terms = ["ingefärsjuice"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "ingefärsjuice"
+variant = "ingefärsshot"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ingefärsjuice"
+offer_name = "Ingefärsshot"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.ingefarsjuice.ingefarsshot_073"
+language = "sv"
+market = "SE"
+canonical = "ingefärsjuice"
+status = "active"
+variants = ["ingefarsshot"]
+offer_terms = ["ingefärsjuice"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "ingefärsjuice"
+variant = "ingefarsshot"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ingefärsjuice"
+offer_name = "Ingefarsshot"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tranbarsjuice.tranbarsdryck_074"
+language = "sv"
+market = "SE"
+canonical = "tranbärsjuice"
+status = "active"
+variants = ["tranbärsdryck"]
+offer_terms = ["tranbärsjuice"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "tranbärsjuice"
+variant = "tranbärsdryck"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tranbärsjuice"
+offer_name = "Tranbärsdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tranbarsjuice.tranbarsdryck_075"
+language = "sv"
+market = "SE"
+canonical = "tranbärsjuice"
+status = "active"
+variants = ["tranbarsdryck"]
+offer_terms = ["tranbärsjuice"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "tranbärsjuice"
+variant = "tranbarsdryck"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tranbärsjuice"
+offer_name = "Tranbarsdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kolakaramell.graddkola_076"
+language = "sv"
+market = "SE"
+canonical = "kolakaramell"
+status = "active"
+variants = ["gräddkola"]
+offer_terms = ["kolakaramell"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "kolakaramell"
+variant = "gräddkola"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kolakaramell"
+offer_name = "Gräddkola"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kolakaramell.graddkola_077"
+language = "sv"
+market = "SE"
+canonical = "kolakaramell"
+status = "active"
+variants = ["graddkola"]
+offer_terms = ["kolakaramell"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "kolakaramell"
+variant = "graddkola"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kolakaramell"
+offer_name = "Graddkola"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kolakaramell.graddkaramell_078"
+language = "sv"
+market = "SE"
+canonical = "kolakaramell"
+status = "active"
+variants = ["gräddkaramell"]
+offer_terms = ["kolakaramell"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "kolakaramell"
+variant = "gräddkaramell"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kolakaramell"
+offer_name = "Gräddkaramell"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kolakaramell.graddkaramell_079"
+language = "sv"
+market = "SE"
+canonical = "kolakaramell"
+status = "active"
+variants = ["graddkaramell"]
+offer_terms = ["kolakaramell"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "kolakaramell"
+variant = "graddkaramell"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kolakaramell"
+offer_name = "Graddkaramell"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.svartpeppar.svarpeppar_080"
+language = "sv"
+market = "SE"
+canonical = "svartpeppar"
+status = "active"
+variants = ["svarpeppar"]
+offer_terms = ["svartpeppar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "svartpeppar"
+variant = "svarpeppar"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "svartpeppar"
+offer_name = "Svarpeppar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.apelsinjuice.apelsinsaft_081"
+language = "sv"
+market = "SE"
+canonical = "apelsinjuice"
+status = "active"
+variants = ["apelsinsaft"]
+offer_terms = ["apelsinjuice"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "apelsinjuice"
+variant = "apelsinsaft"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "apelsinjuice"
+offer_name = "Apelsinsaft"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.matjessill.matjesill_082"
+language = "sv"
+market = "SE"
+canonical = "matjessill"
+status = "active"
+variants = ["matjesill"]
+offer_terms = ["matjessill"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "matjessill"
+variant = "matjesill"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "matjessill"
+offer_name = "Matjesill"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pistagenotter.pistasch_083"
+language = "sv"
+market = "SE"
+canonical = "pistagenötter"
+status = "active"
+variants = ["pistasch"]
+offer_terms = ["pistagenötter"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "pistagenötter"
+variant = "pistasch"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pistagenötter"
+offer_name = "Pistasch"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rokarom.rokextrakt_084"
+language = "sv"
+market = "SE"
+canonical = "rökarom"
+status = "active"
+variants = ["rökextrakt"]
+offer_terms = ["rökarom"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "rökarom"
+variant = "rökextrakt"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rökarom"
+offer_name = "Rökextrakt"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rokarom.rokextrakt_085"
+language = "sv"
+market = "SE"
+canonical = "rökarom"
+status = "active"
+variants = ["rokextrakt"]
+offer_terms = ["rökarom"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "rökarom"
+variant = "rokextrakt"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rökarom"
+offer_name = "Rokextrakt"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.inlagdgurka.smorgaspickles_086"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["smörgåspickles"]
+offer_terms = ["inlagdgurka"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "inlagdgurka"
+variant = "smörgåspickles"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Smörgåspickles"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.inlagdgurka.smorgaspickles_087"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["smorgaspickles"]
+offer_terms = ["inlagdgurka"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "inlagdgurka"
+variant = "smorgaspickles"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Smorgaspickles"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.lattstro.sotstro_088"
+language = "sv"
+market = "SE"
+canonical = "lättströ"
+status = "active"
+variants = ["sötströ"]
+offer_terms = ["lättströ"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "lättströ"
+variant = "sötströ"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lättströ"
+offer_name = "Sötströ"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.lattstro.sotstro_089"
+language = "sv"
+market = "SE"
+canonical = "lattstro"
+status = "active"
+variants = ["sotstro"]
+offer_terms = ["lattstro"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "lattstro"
+variant = "sotstro"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lattstro"
+offer_name = "Sotstro"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.knackebrod.spisbrod_090"
+language = "sv"
+market = "SE"
+canonical = "knäckebröd"
+status = "active"
+variants = ["spisbröd"]
+offer_terms = ["knäckebröd"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "knäckebröd"
+variant = "spisbröd"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "knäckebröd"
+offer_name = "Spisbröd"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.knackebrod.spisbrod_091"
+language = "sv"
+market = "SE"
+canonical = "knäckebröd"
+status = "active"
+variants = ["spisbrod"]
+offer_terms = ["knäckebröd"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "knäckebröd"
+variant = "spisbrod"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "knäckebröd"
+offer_name = "Spisbrod"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hamburgerbrod.burgarbrod_092"
+language = "sv"
+market = "SE"
+canonical = "hamburgerbröd"
+status = "active"
+variants = ["burgarbröd"]
+offer_terms = ["hamburgerbröd"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "hamburgerbröd"
+variant = "burgarbröd"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hamburgerbröd"
+offer_name = "Burgarbröd"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hamburgerbrod.burgarbrod_093"
+language = "sv"
+market = "SE"
+canonical = "hamburgerbröd"
+status = "active"
+variants = ["burgarbrod"]
+offer_terms = ["hamburgerbröd"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "hamburgerbröd"
+variant = "burgarbrod"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hamburgerbröd"
+offer_name = "Burgarbrod"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vegobacon.svejkon_094"
+language = "sv"
+market = "SE"
+canonical = "vegobacon"
+status = "active"
+variants = ["svejkon"]
+offer_terms = ["vegobacon"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "vegobacon"
+variant = "svejkon"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegobacon"
+offer_name = "Svejkon"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vaffelstrutar.glasstrut_095"
+language = "sv"
+market = "SE"
+canonical = "våffelstrutar"
+status = "active"
+variants = ["glasstrut"]
+offer_terms = ["våffelstrutar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "våffelstrutar"
+variant = "glasstrut"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "våffelstrutar"
+offer_name = "Glasstrut"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vaffelstrutar.glasstrutar_096"
+language = "sv"
+market = "SE"
+canonical = "våffelstrutar"
+status = "active"
+variants = ["glasstrutar"]
+offer_terms = ["våffelstrutar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "våffelstrutar"
+variant = "glasstrutar"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "våffelstrutar"
+offer_name = "Glasstrutar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vaffelstrutar.vaffelstrut_097"
+language = "sv"
+market = "SE"
+canonical = "våffelstrutar"
+status = "active"
+variants = ["våffelstrut"]
+offer_terms = ["våffelstrutar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "våffelstrutar"
+variant = "våffelstrut"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "våffelstrutar"
+offer_name = "Våffelstrut"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vaffelstrutar.vaffelstrut_098"
+language = "sv"
+market = "SE"
+canonical = "våffelstrutar"
+status = "active"
+variants = ["vaffelstrut"]
+offer_terms = ["våffelstrutar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "våffelstrutar"
+variant = "vaffelstrut"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "våffelstrutar"
+offer_name = "Vaffelstrut"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vaffelstrutar.vaffelstrutar_099"
+language = "sv"
+market = "SE"
+canonical = "våffelstrutar"
+status = "active"
+variants = ["vaffelstrutar"]
+offer_terms = ["våffelstrutar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "våffelstrutar"
+variant = "vaffelstrutar"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "våffelstrutar"
+offer_name = "Vaffelstrutar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vegobitar.tzaybitar_100"
+language = "sv"
+market = "SE"
+canonical = "vegobitar"
+status = "active"
+variants = ["tzaybitar"]
+offer_terms = ["vegobitar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "vegobitar"
+variant = "tzaybitar"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegobitar"
+offer_name = "Tzaybitar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vegobitar.tzaybit_101"
+language = "sv"
+market = "SE"
+canonical = "vegobitar"
+status = "active"
+variants = ["tzaybit"]
+offer_terms = ["vegobitar"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "vegobitar"
+variant = "tzaybit"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegobitar"
+offer_name = "Tzaybit"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.feferoni.kebabfeferoni_102"
+language = "sv"
+market = "SE"
+canonical = "feferoni"
+status = "active"
+variants = ["kebabfeferoni"]
+offer_terms = ["feferoni"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "feferoni"
+variant = "kebabfeferoni"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "feferoni"
+offer_name = "Kebabfeferoni"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smordeg.smordegsark_103"
+language = "sv"
+market = "SE"
+canonical = "smördeg"
+status = "active"
+variants = ["smördegsark"]
+offer_terms = ["smördeg"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "smördeg"
+variant = "smördegsark"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "smördeg"
+offer_name = "Smördegsark"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smordeg.smordegsark_104"
+language = "sv"
+market = "SE"
+canonical = "smördeg"
+status = "active"
+variants = ["smordegsark"]
+offer_terms = ["smördeg"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "smördeg"
+variant = "smordegsark"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "smördeg"
+offer_name = "Smordegsark"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smordeg.smordegsplatta_105"
+language = "sv"
+market = "SE"
+canonical = "smördeg"
+status = "active"
+variants = ["smördegsplatta"]
+offer_terms = ["smördeg"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "smördeg"
+variant = "smördegsplatta"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "smördeg"
+offer_name = "Smördegsplatta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smordeg.smordegsplatta_106"
+language = "sv"
+market = "SE"
+canonical = "smördeg"
+status = "active"
+variants = ["smordegsplatta"]
+offer_terms = ["smördeg"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "smördeg"
+variant = "smordegsplatta"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "smördeg"
+offer_name = "Smordegsplatta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smordeg.smordegsplattor_107"
+language = "sv"
+market = "SE"
+canonical = "smördeg"
+status = "active"
+variants = ["smördegsplattor"]
+offer_terms = ["smördeg"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "smördeg"
+variant = "smördegsplattor"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "smördeg"
+offer_name = "Smördegsplattor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smordeg.smordegsplattor_108"
+language = "sv"
+market = "SE"
+canonical = "smördeg"
+status = "active"
+variants = ["smordegsplattor"]
+offer_terms = ["smördeg"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "smördeg"
+variant = "smordegsplattor"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "smördeg"
+offer_name = "Smordegsplattor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.daim.daimchoklad_109"
+language = "sv"
+market = "SE"
+canonical = "daim"
+status = "active"
+variants = ["daimchoklad"]
+offer_terms = ["daim"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "daim"
+variant = "daimchoklad"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "daim"
+offer_name = "Daimchoklad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.daim.daim_110"
+language = "sv"
+market = "SE"
+canonical = "daim"
+status = "active"
+variants = ["daim"]
+offer_terms = ["daim"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned keyword synonym mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "daim"
+variant = "daim"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "daim"
+offer_name = "Daim"
+expected = 1

@@ -38,10 +38,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'jordgubbsaft': 'jordgubbssaft',",
-        "end": 749,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 749
+        "anchor": "variant = \"jordgubbsaft\"",
+        "end": 1626,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 1626
       }
     ],
     "notes": "Keeps the single-s spelling variant in the same canonical saft family.",
@@ -64,10 +64,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'ingefärsshot': 'ingefärsjuice',",
-        "end": 752,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 752
+        "anchor": "variant = \"ingefärsshot\"",
+        "end": 1649,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 1649
       }
     ],
     "notes": "Recipe-side ingefärsshot wording joins the ingefärsjuice canonical used by ginger-shot offer extraction.",
@@ -244,10 +244,10 @@
     "kind": "legacy_extra_keyword",
     "line_refs": [
       {
-        "anchor": "'strösocker': ['socker'],",
-        "end": 2125,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2125
+        "anchor": "variant = \"strösocker\"",
+        "end": 2954,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 2954
       }
     ],
     "notes": "Explicit strösocker remains buyable and matches on its exact keyword even though generic socker is ignored.",
@@ -300,10 +300,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "'applelcider': 'cider',  # without diacritics",
-        "end": 668,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 668
+        "anchor": "variant = \"applelcider\"",
+        "end": 9032,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 9032
       }
     ],
     "notes": "Parent mapping lets apple cider route through cider while validators keep flavor-specific asks narrow.",
@@ -717,10 +717,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'sötströ': 'lättströ',",
-        "end": 762,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 762
+        "anchor": "variant = \"sötströ\"",
+        "end": 2017,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 2017
       }
     ],
     "notes": "Sötströ recipe wording aliases to the practical lättströ sweetener family without falling back to ordinary strösocker.",
@@ -744,10 +744,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'glasstrutar': 'våffelstrutar',",
-        "end": 769,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 769
+        "anchor": "variant = \"glasstrutar\"",
+        "end": 2201,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 2201
       }
     ],
     "notes": "Empty ice-cream-cone wording maps to våffelstrutar while ordinary ice cream must stay separate.",
@@ -771,10 +771,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'spisbröd': 'knäckebröd',",
-        "end": 764,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 764
+        "anchor": "variant = \"spisbröd\"",
+        "end": 2063,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 2063
       }
     ],
     "notes": "Spisbröd aliases to the crispbread family and should not broaden to soft hamburger bread.",
@@ -798,10 +798,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'burgarbröd': 'hamburgerbröd',",
-        "end": 766,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 766
+        "anchor": "variant = \"burgarbröd\"",
+        "end": 2109,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 2109
       }
     ],
     "notes": "Burgarbröd aliases to hamburger buns and stays distinct from hot-dog buns.",
@@ -885,10 +885,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'daimchoklad': 'daim',",
-        "end": 781,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 781
+        "anchor": "variant = \"daimchoklad\"",
+        "end": 2500,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 2500
       }
     ],
     "notes": "Daim and Daimchoklad stay in the exact Daim candy family instead of broadening to ordinary chocolate.",
@@ -1228,10 +1228,10 @@
         "start": 729
       },
       {
-        "anchor": "# SPECIALTY_QUALIFIERS prevents matgrädde matching \"vispgrädde\" recipes.",
-        "end": 236,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 236
+        "anchor": "variant = \"vispgrädde\"",
+        "end": 2937,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 2937
       }
     ],
     "notes": "Explicit 30-40% cream behaves like whipping cream and rejects low-fat/cooking cream, while plain grädde keeps the broader dairy-cream route.",
@@ -1284,10 +1284,10 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'fänkålsfrön': 'fänkålsfrö',",
-        "end": 141,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 141
+        "anchor": "variant = \"fänkålsfrön\"",
+        "end": 1948,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 1948
       },
       {
         "anchor": "'malen',  # \"Fänkål Malen Påse\" — ground fennel spice",
@@ -1476,10 +1476,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'tzaybitar': 'vegobitar',",
-        "end": 773,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 773
+        "anchor": "variant = \"tzaybitar\"",
+        "end": 2293,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 2293
       }
     ],
     "notes": "Tzaybitar joins the plant-based vegobitar family while remaining separate from ordinary chicken pieces.",
@@ -1515,10 +1515,10 @@
         "start": 849
       },
       {
-        "anchor": "# NOTE: chokladglass, jordgubbsglass, kanelglass, sojaglass, lakritsglass",
-        "end": 661,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 661
+        "anchor": "variant = \"glass\"",
+        "end": 8940,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 8940
       }
     ],
     "notes": "Kanelglass stays as the ice-cream flavor canonical and does not leak to the standalone kanel spice family.",
@@ -1634,10 +1634,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'bamboo': 'bambuskott',  # \"Bamboo Shoot\" product wording → Swedish recipe \"bambuskott\"",
-        "end": 681,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 681
+        "anchor": "variant = \"bamboo\"",
+        "end": 223,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 223
       }
     ],
     "notes": "English Bamboo Shoot product wording is bridged to the Swedish bambuskott recipe family.",
@@ -1660,10 +1660,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "'seaweed': 'alger',",
-        "end": 81,
-        "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 81
+        "anchor": "variant = \"seaweed\"",
+        "end": 1692,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_extra_parent.toml",
+        "start": 1692
       },
       {
         "anchor": "'nori', 'alger',  # seaweed sheets/generic algae — \"Sushi Nori Roasted Seeweed\"",
@@ -1765,10 +1765,10 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'körsbärstomater': 'småtomat',",
-        "end": 77,
-        "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 77
+        "anchor": "variant = \"körsbärstomater\"",
+        "end": 1600,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_extra_parent.toml",
+        "start": 1600
       },
       {
         "anchor": "# Fresh small tomatoes may substitute each other, but preserved/in-juice",
@@ -1969,10 +1969,10 @@
         "start": 411
       },
       {
-        "anchor": "'hoisin': 'hoisinsås',",
-        "end": 313,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 313
+        "anchor": "variant = \"hoisin\"",
+        "end": 4179,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 4179
       },
       {
         "anchor": "scoped_ingredient = _ingredient_label_scope(ingredient_lower, matched_keyword)",
@@ -2076,16 +2076,16 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'standardmjolk': 'mjölk',  # without diacritics",
-        "end": 546,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 546
+        "anchor": "variant = \"standardmjolk\"",
+        "end": 7652,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 7652
       },
       {
-        "anchor": "# \"mjölk\", so bridge it back to the ordinary milk recipe wording.",
-        "end": 2163,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2163
+        "anchor": "variant = \"mjölkdryck\"",
+        "end": 3558,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 3558
       },
       {
         "anchor": "# Flavored/protein milk drinks are not plain cooking milk.",
@@ -2153,10 +2153,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "# Keep ordinary fiskfond separate: fish is not shellfish.",
-        "end": 602,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 602
+        "anchor": "variant = \"hummerfond\"",
+        "end": 8273,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 8273
       },
       {
         "anchor": "_SPECIFIC_STOCK_KEYWORDS = {'hummerfond', 'kalvfond', 'fiskfond', 'kycklingfond',",
@@ -2186,10 +2186,10 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'kantareller': 'kantarell',  # plural",
-        "end": 453,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 453
+        "anchor": "variant = \"kantareller\"",
+        "end": 6456,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 6456
       },
       {
         "anchor": "# \"kantareller, på burk, avrunna\" should only surface preserved chanterelle",
@@ -2281,10 +2281,10 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'rödbetor': 'rödbeta',",
-        "end": 497,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 497
+        "anchor": "variant = \"rödbetor\"",
+        "end": 6985,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 6985
       },
       {
         "anchor": "'skivad', 'skivade', 'skivor',       # sliced = always preserved (no pre-sliced fresh beets)",
@@ -2344,10 +2344,10 @@
         "start": 790
       },
       {
-        "anchor": "# Space norms convert \"Gele Svartvinbär\" → compound \"svartvinbärsgele\" so carrier doesn't strip it",
-        "end": 2337,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2337
+        "anchor": "variant = \"svartvinbärsgele\"",
+        "end": 6685,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 6685
       },
       {
         "anchor": "('gele svartvinbär', 'svartvinbärsgele'),",
@@ -2496,16 +2496,16 @@
         "start": 206
       },
       {
-        "anchor": "# Plant milk: consumer term \"havremjölk\" → legal product term \"havredryck\"",
-        "end": 548,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 548
+        "anchor": "variant = \"havremjölk\"",
+        "end": 7675,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 7675
       },
       {
-        "anchor": "'sojadryck': ['växtdryck'],",
-        "end": 2156,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2156
+        "anchor": "variant = \"sojadryck\"",
+        "end": 3414,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 3414
       },
       {
         "anchor": "'växtbaserad mjölkdryck', 'vaxtbaserad mjolkdryck',",
@@ -2551,22 +2551,22 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'körsbärstomater': 'småtomat',",
-        "end": 116,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 116
+        "anchor": "variant = \"körsbärstomater\"",
+        "end": 1511,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 1511
       },
       {
-        "anchor": "'squash': 'zucchini',",
-        "end": 490,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 490
+        "anchor": "variant = \"squash\"",
+        "end": 6916,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 6916
       },
       {
-        "anchor": "'persikor': 'persika',",
-        "end": 506,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 506
+        "anchor": "variant = \"persikor\"",
+        "end": 7146,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 7146
       },
       {
         "anchor": "ingredient_wants_green = any(cue in ingredient_lower for cue in ('grön zucchini', 'gron zucchini', 'grön squash', 'gron squash'))",
@@ -2623,10 +2623,10 @@
         "start": 104
       },
       {
-        "anchor": "'ramennudlar': ['nudlar'],",
-        "end": 2008,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2008
+        "anchor": "variant = \"ramennudlar\"",
+        "end": 777,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 777
       },
       {
         "anchor": "if any(cue in ingredient_lower for cue in ('snabbnudlar', 'instantnudlar')):",
@@ -3248,16 +3248,16 @@
         "start": 856
       },
       {
-        "anchor": "# Elderflower cordial products are commonly labeled \"fläderblomssaft\"/\"fläderblomsaft\"",
-        "end": 741,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 741
+        "anchor": "variant = \"fläderblomssaft\"",
+        "end": 1511,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 1511
       },
       {
-        "anchor": "# drink/cordial families sold as either ready drink or saft.",
-        "end": 2170,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2170
+        "anchor": "variant = \"fläderblomsdryck\"",
+        "end": 3656,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 3656
       }
     ],
     "notes": "Spaced cordial labels such as Fläderblom Saft and Rabarber Saft emit exact fläder-/rabarbersaft families.",
@@ -3354,10 +3354,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'dillfrön': 'dillfrö',",
-        "end": 694,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 694
+        "anchor": "variant = \"dillfrön\"",
+        "end": 522,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 522
       }
     ],
     "notes": "Dillfrö and dillfrön share the same seed-spice family without broadening to fresh dill herb.",
@@ -3496,10 +3496,10 @@
         "start": 456
       },
       {
-        "anchor": "# Ruccola/rucola spelling variants: recipes often say \"ruccola\" while",
-        "end": 2131,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2131
+        "anchor": "variant = \"rucola\"",
+        "end": 3046,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 3046
       }
     ],
     "notes": "Mixed-herb examples expand to fresh herb/salad-leaf alternatives such as basil and rucola while blocking dried spice jars.",
@@ -3598,10 +3598,10 @@
         "start": 833
       },
       {
-        "anchor": "# Product \"Rosta\" (Pågen bread) won't match recipes, but Frasrost/Ostrost/Rostbröd cover formbröd",
-        "end": 2257,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2257
+        "anchor": "variant = \"rostbröd\"",
+        "end": 4996,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 4996
       },
       {
         "anchor": "# so it extracts no keywords. Add 'formbröd' directly for this bread product.",
@@ -3786,10 +3786,10 @@
         "start": 1662
       },
       {
-        "anchor": "'pistagenötter': ['nötter'],",
-        "end": 2194,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2194
+        "anchor": "variant = \"pistagenötter\"",
+        "end": 4139,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 4139
       },
       {
         "anchor": "# Product keyword \"pistage\" matches \"pistagenötter\" via substring",
@@ -3897,10 +3897,10 @@
         "start": 1950
       },
       {
-        "anchor": "'mineralvatten': 'sodavatten',",
-        "end": 393,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 393
+        "anchor": "variant = \"mineralvatten\"",
+        "end": 5536,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 5536
       },
       {
         "anchor": "or re.search(r'\\bkolsyrat\\s+(?:vatten|mineralvatten)\\b', ingredient_lower)",
@@ -3977,16 +3977,16 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'majsmjöl': ['polenta'],",
-        "end": 1999,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 1999
+        "anchor": "variant = \"majsmjöl\"",
+        "end": 570,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 570
       },
       {
-        "anchor": "'polenta': 'majsmjöl',",
-        "end": 392,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 392
+        "anchor": "variant = \"polenta\"",
+        "end": 5513,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 5513
       },
       {
         "anchor": "# Corn flour is an ingredient; breadcrumb products made with corn flour are",
@@ -4173,10 +4173,10 @@
         "start": 2099
       },
       {
-        "anchor": "'wokgrönsaker': 'wokmix',",
-        "end": 394,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 394
+        "anchor": "variant = \"wokgrönsaker\"",
+        "end": 5559,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 5559
       }
     ],
     "notes": "Ordinary wokgrönsaker accepts wokmix/wok-vegetable products and blocks wok sauces; explicit canned/brine wording accepts brine products and blocks frozen wokmixes.",
@@ -4361,10 +4361,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'persiljesmör': ['aromsmör'],",
-        "end": 2002,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2002
+        "anchor": "variant = \"persiljesmör\"",
+        "end": 639,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 639
       },
       {
         "anchor": "'aromsmör', 'aromsmor',  # flavored compound butter ≠ plain butter",
@@ -4450,10 +4450,10 @@
         "start": 1806
       },
       {
-        "anchor": "'sommargrönsaker': 'sommargrönsaker',",
-        "end": 396,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 396
+        "anchor": "variant = \"sommargrönsaker\"",
+        "end": 5605,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 5605
       }
     ],
     "notes": "Apetit/frysta sommargrönsaker wording routes to the summer-vegetables family.",
@@ -4520,16 +4520,16 @@
         "start": 1818
       },
       {
-        "anchor": "'kruksallad': 'krispsallat',",
-        "end": 347,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 347
+        "anchor": "variant = \"kruksallad\"",
+        "end": 4823,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 4823
       },
       {
-        "anchor": "'krispsallat': ['plocksallat', 'salladsblad', 'grönsallad'],",
-        "end": 2325,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2325
+        "anchor": "variant = \"krispsallat\"",
+        "end": 6390,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 6390
       }
     ],
     "notes": "Kruksallad routes to current krispsallat-in-pot products while staying in the leafy salad family.",
@@ -4603,10 +4603,10 @@
         "start": 288
       },
       {
-        "anchor": "# Ice cream: generic/type descriptors → 'vaniljglass' (vanilla is the default)",
-        "end": 654,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 654
+        "anchor": "variant = \"glass\"",
+        "end": 8940,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 8940
       },
       {
         "anchor": "if matched_keyword == 'vaniljglass' and 'vaniljglass' in ingredient_lower:",
@@ -4636,10 +4636,10 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'kryddnejlika': 'nejlikor',  # product form → recipe form (\"Kryddnejlikor Hela\" = cloves spice)",
-        "end": 377,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 377
+        "anchor": "variant = \"kryddnejlika\"",
+        "end": 5168,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 5168
       },
       {
         "anchor": "if not any(cue in product_lower for cue in ('malen', 'malda', 'mald')):",
@@ -4714,10 +4714,10 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'kottfars': 'färs',  # without diacritics",
-        "end": 474,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 474
+        "anchor": "variant = \"kottfars\"",
+        "end": 6709,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 6709
       },
       {
         "anchor": "if any(cue in product_lower for cue in _GENERIC_MINCE_FLAVORED_PRODUCT_CUES):",
@@ -4759,10 +4759,10 @@
         "start": 2134
       },
       {
-        "anchor": "'vegoburgare': ['vegetariskhamburgare', 'hamburgare', 'burgare'],",
-        "end": 1982,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 1982
+        "anchor": "variant = \"vegoburgare\"",
+        "end": 143,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 143
       },
       {
         "anchor": "'vego', 'vegansk', 'växtbaserad',  # vegan burger ≠ meat burger",
@@ -4792,10 +4792,10 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'tagliatelle': 'långpasta',",
-        "end": 48,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 48
+        "anchor": "variant = \"tagliatelle\"",
+        "end": 729,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 729
       },
       {
         "anchor": "if matched_keyword in {'långpasta', 'langpasta', 'tagliatelle', 'pasta'}:",
@@ -4831,10 +4831,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'blomkålshuvud': 'blomkål',  # whole cauliflower head",
-        "end": 87,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 87
+        "anchor": "variant = \"blomkålshuvud\"",
+        "end": 1235,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 1235
       },
       {
         "anchor": "'ostbiff',  # \"Broccoli blomkål och ostbiff\" — processed patty, not fresh cauliflower",
@@ -5220,10 +5220,10 @@
         "start": 78
       },
       {
-        "anchor": "'anchochili': 'ancho',",
-        "end": 432,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 432
+        "anchor": "variant = \"anchochili\"",
+        "end": 6134,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 6134
       },
       {
         "anchor": "if 'ancho' in ingredient_lower and matched_keyword in {'ancho', 'chili', 'chiliflakes', 'chilipulver'}:",
@@ -5298,10 +5298,10 @@
         "start": 129
       },
       {
-        "anchor": "'smörgåspickles': ['inlagdgurka', 'cornichons'],",
-        "end": 1993,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 1993
+        "anchor": "variant = \"smörgåspickles\"",
+        "end": 426,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 426
       }
     ],
     "notes": "English pickles wording normalizes to the pickled cucumber family without accepting ordinary fresh cucumber.",
@@ -5325,16 +5325,16 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'polenta': 'majsmjöl',",
-        "end": 392,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 392
+        "anchor": "variant = \"polenta\"",
+        "end": 5513,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 5513
       },
       {
-        "anchor": "'majsmjöl': ['polenta'],",
-        "end": 1999,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 1999
+        "anchor": "variant = \"majsmjöl\"",
+        "end": 570,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 570
       }
     ],
     "notes": "Polenta can route through majsmjöl/cornmeal products, while popcorn stays outside the flour/meal family.",
@@ -5363,10 +5363,10 @@
         "start": 131
       },
       {
-        "anchor": "'krustader': ['minikrustader'],",
-        "end": 2032,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2032
+        "anchor": "variant = \"krustader\"",
+        "end": 1353,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 1353
       }
     ],
     "notes": "Mini krustader and English/French croustades wording share the krustader pastry-shell family.",
@@ -5391,16 +5391,16 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'sugarsnaps': 'sockerärtor',  # common Swedish loanword for sugar snap peas",
-        "end": 384,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 384
+        "anchor": "variant = \"sugarsnaps\"",
+        "end": 5329,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 5329
       },
       {
-        "anchor": "'sockerärtor': ['salladsärtor'],",
-        "end": 1995,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 1995
+        "anchor": "variant = \"sockerärtor\"",
+        "end": 478,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 478
       }
     ],
     "notes": "Salladsärtor and sockerärtor/sugar snaps share a practical pod-pea family, separate from ordinary green peas.",
@@ -5424,10 +5424,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'haricoverts': 'haricot',",
-        "end": 390,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 390
+        "anchor": "variant = \"haricoverts\"",
+        "end": 5467,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 5467
       },
       {
         "anchor": "('haricoverts', 'haricot'),",
@@ -5458,10 +5458,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "# wording is absent; product-side extras keep exact Quorn mince in the same family.",
-        "end": 485,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 485
+        "anchor": "variant = \"quornfärs\"",
+        "end": 6870,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 6870
       },
       {
         "anchor": "# Name-conditional: Quorn mince products should expose the specific mince form",
@@ -5497,16 +5497,16 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'maränger': 'maräng',",
-        "end": 571,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 571
+        "anchor": "variant = \"maränger\"",
+        "end": 7882,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 7882
       },
       {
-        "anchor": "'marängtoppar': ['maräng'],",
-        "end": 2033,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2033
+        "anchor": "variant = \"marängtoppar\"",
+        "end": 1376,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 1376
       },
       {
         "anchor": "# Flavored meringues ≠ plain maräng/maränger",
@@ -5575,10 +5575,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'savoiardo': 'savoiardikex',",
-        "end": 709,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 709
+        "anchor": "variant = \"savoiardo\"",
+        "end": 867,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 867
       },
       {
         "anchor": "'savoiardikex': frozenset({'kex'}),",
@@ -5647,10 +5647,10 @@
         "start": 4079
       },
       {
-        "anchor": "'mineralvatten': 'sodavatten',",
-        "end": 393,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 393
+        "anchor": "variant = \"mineralvatten\"",
+        "end": 5536,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 5536
       },
       {
         "anchor": "'sodavatten': {'citron', 'lime', 'citrus', 'apelsin', 'jordgubb', 'hallon', 'mango', 'päron', 'paron', 'äpple', 'apple'},",
@@ -5763,10 +5763,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'hasselnötkräm': 'nötkräm',",
-        "end": 737,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 737
+        "anchor": "variant = \"hasselnötkräm\"",
+        "end": 1419,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 1419
       },
       {
         "anchor": "'hasselnötkräm', 'hasselnotkram',  # hazelnut spread (Nutella) ≠ cocoa powder",
@@ -5804,10 +5804,10 @@
         "start": 159
       },
       {
-        "anchor": "'sliders': ['hamburgerbröd'],",
-        "end": 2262,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2262
+        "anchor": "variant = \"sliders\"",
+        "end": 5295,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 5295
       },
       {
         "anchor": "'hamburgerbröd': {'korvbröd', 'korvbrod', 'fries', 'soup', 'soppa', 'hamburgare', 'burgare'},",
@@ -5953,10 +5953,10 @@
     "kind": "legacy_extra_keyword",
     "line_refs": [
       {
-        "anchor": "'kantarellfond': ['fond', 'svampfond'],",
-        "end": 2244,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2244
+        "anchor": "variant = \"kantarellfond\"",
+        "end": 4973,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 4973
       }
     ],
     "notes": "Concentrated mushroom-fond wording can match kantarellfond/svampfond products without falling back to loose mushrooms.",
@@ -5987,10 +5987,10 @@
         "start": 488
       },
       {
-        "anchor": "'surdegsbaguette': 'baguette',",
-        "end": 700,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 700
+        "anchor": "variant = \"surdegsbaguette\"",
+        "end": 660,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 660
       },
       {
         "anchor": "return ['baguette']",
@@ -6206,10 +6206,10 @@
         "start": 208
       },
       {
-        "anchor": "'havredryck': ['växtdryck'],",
-        "end": 2155,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2155
+        "anchor": "variant = \"havredryck\"",
+        "end": 3391,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 3391
       },
       {
         "anchor": "_PLANT_BASED_RECIPE_BASE_REQUIREMENTS: tuple[tuple[FrozenSet[str], FrozenSet[str]], ...] = (",
@@ -6421,10 +6421,10 @@
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "'huvudsallat': 'huvudsallad',",
-        "end": 344,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 344
+        "anchor": "variant = \"huvudsallat\"",
+        "end": 4754,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 4754
       },
       {
         "anchor": "'salladsmix',  # pre-mixed bag ≠ head of lettuce/generic sallad",
@@ -6551,10 +6551,10 @@
         "start": 2742
       },
       {
-        "anchor": "'liba': ['tunnbröd'],  # Liba Original Tunnbröd",
-        "end": 2272,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2272
+        "anchor": "variant = \"liba\"",
+        "end": 5468,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 5468
       }
     ],
     "notes": "Explicit hard tunnbröd accepts hard/Gene-style flatbread and rejects soft Liba-style tunnbröd.",
@@ -6584,10 +6584,10 @@
         "start": 475
       },
       {
-        "anchor": "'fröfralla': ['styckbröd'],",
-        "end": 2274,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2274
+        "anchor": "variant = \"fröfralla\"",
+        "end": 5514,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 5514
       }
     ],
     "notes": "Bread-category roll words such as fralla/fröfralla expose the styckbröd route term, while pantry products with generic bröd wording remain outside the route.",
@@ -6617,10 +6617,10 @@
         "start": 488
       },
       {
-        "anchor": "'kokosflingor': ['kokos'],",
-        "end": 2305,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2305
+        "anchor": "variant = \"kokosflingor\"",
+        "end": 6112,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 6112
       }
     ],
     "notes": "Riven kokos/kokosflingor products expose the flakes canonical, while coconut milk stays separated by its product family.",
@@ -6644,10 +6644,10 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'lammracks': ['lamm', 'lammkött'],",
-        "end": 44,
-        "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 44
+        "anchor": "variant = \"lammracks\"",
+        "end": 811,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_extra_parent.toml",
+        "start": 811
       },
       {
         "anchor": "'lammracks',  # explicit lamb racks should not fall back to other lamb cuts",
@@ -6728,10 +6728,10 @@
         "start": 399
       },
       {
-        "anchor": "'grapefrukter': 'grapefrukt',",
-        "end": 218,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 218
+        "anchor": "variant = \"grapefrukter\"",
+        "end": 2891,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 2891
       },
       {
         "anchor": "# Juice product ≠ whole blodgrape fruit",
@@ -6884,10 +6884,10 @@
         "start": 741
       },
       {
-        "anchor": "'matbrödsjäst': 'jäst',",
-        "end": 25,
-        "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 25
+        "anchor": "variant = \"matbrödsjäst\"",
+        "end": 338,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_extra_parent.toml",
+        "start": 338
       },
       {
         "anchor": "if matched_keyword in {'jäst', 'matbrödsjäst'} and _ingredient_requests_generic_bread_yeast(ingredient_lower):",
@@ -7054,10 +7054,10 @@
         "start": 341
       },
       {
-        "anchor": "'karamelliseradmjolk': 'karamelliseradmjölk',",
-        "end": 739,
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 739
+        "anchor": "variant = \"karamelliseradmjolk\"",
+        "end": 1465,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_synonym.toml",
+        "start": 1465
       },
       {
         "anchor": "Direction A: ingredient \"karamelliserad mjölk\"",
@@ -7098,10 +7098,10 @@
         "start": 1734
       },
       {
-        "anchor": "'kokosdryck': ['växtdryck'],",
-        "end": 2161,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2161
+        "anchor": "variant = \"kokosdryck\"",
+        "end": 3529,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 3529
       }
     ],
     "notes": "Kokosnötsdryck normalizes to the coconut-drink family so drink products match, while whole coconut produce stays out despite the shared coconut base word.",
@@ -7250,10 +7250,10 @@
     "kind": "legacy_extra_keyword",
     "line_refs": [
       {
-        "anchor": "'cottage cheese': ['keso'],",
-        "end": 2351,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2351
+        "anchor": "variant = \"cottage cheese\"",
+        "end": 6829,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 6829
       },
       {
         "anchor": "'keso': frozenset({'cottage'}),",
@@ -7376,10 +7376,10 @@
         "start": 204
       },
       {
-        "anchor": "'havredryck': ['växtdryck'],",
-        "end": 2155,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2155
+        "anchor": "variant = \"havredryck\"",
+        "end": 3391,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 3391
       },
       {
         "anchor": "_PLAIN_PLANT_DRINK_KEYWORDS = frozenset({",
@@ -7596,10 +7596,10 @@
     "kind": "legacy_parent",
     "line_refs": [
       {
-        "anchor": "'kycklingfärs': 'färs',",
-        "end": 55,
-        "path": "app/languages/sv/ingredient_matching/parent_maps.py",
-        "start": 55
+        "anchor": "variant = \"kycklingfärs\"",
+        "end": 1094,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_extra_parent.toml",
+        "start": 1094
       },
       {
         "anchor": "_MEAT_MINCE_PREFIXES: Set[str] = {",
@@ -7799,10 +7799,10 @@
     "kind": "legacy_extra_keyword",
     "line_refs": [
       {
-        "anchor": "'kabanoss': ['korv'],",
-        "end": 2213,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2213
+        "anchor": "variant = \"kabanoss\"",
+        "end": 4484,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 4484
       },
       {
         "anchor": "\"korvar, gärna lamm\" should keep to sausage products.",
@@ -7833,10 +7833,10 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "'sillfilé': ['sillfileer', 'strömmingsfileer'],",
-        "end": 2092,
-        "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2092
+        "anchor": "variant = \"sillfilé\"",
+        "end": 2419,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml",
+        "start": 2419
       },
       {
         "anchor": "_HERRING_FILLET_INGREDIENT_CUES = frozenset({",
@@ -14354,10 +14354,10 @@
     "risk": "backend_guard",
     "line_refs": [
       {
-        "path": "app/languages/sv/ingredient_matching/synonyms.py",
-        "start": 635,
-        "end": 636,
-        "anchor": "'persiljekvistar': 'persilja',"
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml",
+        "start": 8779,
+        "end": 8779,
+        "anchor": "variant = \"persiljekvistar\""
       },
       {
         "path": "app/languages/sv/ingredient_matching/form_rules.py",
@@ -14390,10 +14390,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_tomatpesto_not_green_pesto",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_tomatpesto_not_green_pesto\"",
+        "end": 4846,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 4846
       }
     ],
     "notes": "Tomato pesto should not fall through to green, basil, or genovese pesto products.",
@@ -14415,10 +14415,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_bufala_mozzarella_not_vegan_mozzarella_flavour",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_bufala_mozzarella_not_vegan_mozzarella_flavour\"",
+        "end": 4889,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 4889
       }
     ],
     "notes": "Explicit bufala mozzarella should not match vegan mozzarella-flavour substitutes.",
@@ -14440,10 +14440,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_sill_not_ansjoviskrydda_carrier",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_sill_not_ansjoviskrydda_carrier\"",
+        "end": 4926,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 4926
       }
     ],
     "notes": "Sill and 5-minuterssill ingredients should not match herring-seasoning spice carriers.",
@@ -14465,10 +14465,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_sushi_fish_not_generic_white_fish",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_sushi_fish_not_generic_white_fish\"",
+        "end": 4969,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 4969
       }
     ],
     "notes": "Sushi fish context should not fall back to generic white fish products.",
@@ -14490,10 +14490,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_hushallsfars_not_chicken_mince",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_hushallsfars_not_chicken_mince\"",
+        "end": 5024,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5024
       }
     ],
     "notes": "Household mince or beef mince alternatives should not match chicken or vegetarian mince.",
@@ -14515,10 +14515,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_plain_havregurt_not_fruit_flavored",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_plain_havregurt_not_fruit_flavored\"",
+        "end": 5085,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5085
       }
     ],
     "notes": "Plain or savory havregurt should not match fruit-flavored havregurt rows.",
@@ -14540,10 +14540,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_kalkonbrostfile_not_thigh",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_kalkonbrostfile_not_thigh\"",
+        "end": 5122,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5122
       }
     ],
     "notes": "Turkey breast fillet should not match turkey thigh fillet products.",
@@ -14565,10 +14565,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_mjukt_tunnbrod_not_hard_tunnbrod",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_mjukt_tunnbrod_not_hard_tunnbrod\"",
+        "end": 5177,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5177
       }
     ],
     "notes": "Soft tunnbrod should not match hard crisp tunnbrod products.",
@@ -14590,10 +14590,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_low_fat_hard_cheese_not_high_fat",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_low_fat_hard_cheese_not_high_fat\"",
+        "end": 5232,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5232
       }
     ],
     "notes": "Hard cheese capped at max 17 percent fat should not match higher-fat cheese rows.",
@@ -14615,10 +14615,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_storkornskaviar_not_tube_kaviar",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_storkornskaviar_not_tube_kaviar\"",
+        "end": 5269,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5269
       }
     ],
     "notes": "Large-grain red roe should not match Kalles or Svennes tube-style kaviar spreads.",
@@ -14640,10 +14640,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_habanero_hot_sauce_not_fresh_chili",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_habanero_hot_sauce_not_fresh_chili\"",
+        "end": 5318,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5318
       }
     ],
     "notes": "Habanero hot-sauce wording should not match fresh habanero chili produce.",
@@ -14665,10 +14665,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_rokextrakt_not_smoke_flavored_carriers",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_rokextrakt_not_smoke_flavored_carriers\"",
+        "end": 5361,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5361
       }
     ],
     "notes": "Liquid-smoke extract wording should not match smoke-flavored crackers or bread carriers.",
@@ -14690,10 +14690,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_measured_spirit_rom_not_fish_roe",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_measured_spirit_rom_not_fish_roe\"",
+        "end": 5428,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5428
       }
     ],
     "notes": "Measured cooking or cocktail rum should not match fish roe products.",
@@ -14715,10 +14715,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_tryffelburrata_not_plain_burrata",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_tryffelburrata_not_plain_burrata\"",
+        "end": 5495,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5495
       }
     ],
     "notes": "Truffle burrata should not fall back to plain burrata rows.",
@@ -14740,10 +14740,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_riven_veganost_not_spread",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_riven_veganost_not_spread\"",
+        "end": 5532,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5532
       }
     ],
     "notes": "Grated vegan cheese should not match creamy or spreadable vegan cheese products.",
@@ -14765,10 +14765,10 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "policy_morotssylt_not_other_jams",
-        "end": 2303,
-        "path": "app/languages/sv/ingredient_matching/no_match_policies.py",
-        "start": 2028
+        "anchor": "id = \"policy_morotssylt_not_other_jams\"",
+        "end": 5593,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5593
       }
     ],
     "notes": "Carrot jam should not fall back to non-carrot jams or marmalades.",

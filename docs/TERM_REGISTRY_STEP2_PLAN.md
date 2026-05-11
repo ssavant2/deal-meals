@@ -456,8 +456,10 @@ Recommended first target:
 
 Batch size:
 
-- 25 registry entries per migration wave, or one tightly related source family,
-  whichever is smaller
+- default to 25 registry entries per manual migration wave
+- a full source family may move in one wave when the migration is mechanical,
+  the runtime export is generated from the registry, and an export equivalence
+  check covers the whole family
 
 Done when:
 
@@ -535,9 +537,12 @@ Done when:
 
 ### R5 - Cleanup Legacy Side Lists
 
-Status: three cleanup waves implemented locally for `parent_match_only`,
-`ingredient_routing_parent`, and `recipe_routing_helper`; broader cleanup waits
-until more source families are registry-owned.
+Status: twelve cleanup/coverage waves implemented locally for `parent_match_only`,
+`keyword_synonym`, `ingredient_parent`, `keyword_extra_parent`,
+`offer_extra_keyword`, `no_match_policy`, `match_bridge`,
+`ingredient_routing_parent`, `recipe_routing_helper`, and
+`extraction_helper`, `matcher_rule_inventory`, and `matcher_regression_case`.
+All B2 source families are now TOML-owned or TOML-covered locally.
 
 Remove or shrink legacy-only side lists after enough families are registry-owned.
 This is cleanup, not a prerequisite for the safety gate.
@@ -642,7 +647,7 @@ Full removal of all legacy structures is not required for Step 2 completion.
 
 | Field | Value |
 | --- | --- |
-| Overall status | R5 three cleanup waves complete locally; broader cleanup waits for more migrated families |
+| Overall status | R5 twelve cleanup/coverage waves complete locally; all B2 source families are TOML-owned or TOML-covered |
 | Baseline | B2 static audit, 5,472 variants, 0 `needs_fix` |
 | First implementation wave | R0 registry view and checks complete |
 | First export wave | R1 `PARENT_MATCH_ONLY` no-behavior export check complete |
@@ -652,10 +657,28 @@ Full removal of all legacy structures is not required for Step 2 completion.
 | First cleanup wave | R5 `parent_match_only` is TOML-owned with 2 active entries and 17 coverage keys |
 | Second cleanup wave | R5 `ingredient_routing_parent` is TOML-owned with 19 active entries and 34 coverage keys |
 | Third cleanup wave | R5 `recipe_routing_helper` is TOML-owned with 9 active entries and 9 coverage keys |
+| Fourth cleanup wave | R5 `keyword_extra_parent` is TOML-owned with 82 active entries and 93 coverage keys |
+| Fifth cleanup wave | R5 `keyword_synonym` is TOML-owned with 110 active entries and 110 coverage keys |
+| Sixth cleanup wave | R5 `offer_extra_keyword` is TOML-owned with 309 active entries and 361 coverage keys |
+| Seventh cleanup wave | R5 `ingredient_parent` is TOML-owned with 393 active entries and 393 coverage keys |
+| Eighth cleanup wave | R5 `no_match_policy` is TOML-owned with 114 active entries and 346 unique coverage keys; TOML preserves 347 rows because one legacy duplicate pattern remains in the runtime policy payload |
+| Ninth cleanup wave | R5 `match_bridge` is TOML-owned with 282 active entries and 1,967 unique coverage keys; TOML preserves 1,970 rows because three legacy duplicate variant rows remain in the runtime bridge payload |
+| Tenth cleanup wave | R5 `extraction_helper` is TOML-covered with 155 active entries and 204 coverage keys; runtime extraction conditions remain code-owned |
+| Eleventh cleanup wave | R5 `matcher_rule_inventory` is TOML-covered with 456 active entries and 320 unique coverage keys; inventory JSON remains the diagnostic contract source |
+| Twelfth cleanup wave | R5 `matcher_regression_case` is TOML-covered with 1,479 active entries and 1,479 coverage keys; fixture JSON remains the executable regression source |
+| Next implementation point | Build a registry export/add-a-term function that can take a central TOML entry and produce or validate the required runtime-layer exports for the selected language/market, so future terms do not need repeated manual edits across matcher files |
 | First language/market | `sv-SE` |
 | Multi-language status | architecture required; only Swedish inventory exists today |
 | Generated reports | `app/tests/reports/term_registry/sv/term_registry_contract_report.{json,md}`, `app/tests/reports/term_registry/sv/term_registry_export_report.{json,md}`, and `app/tests/reports/term_registry/sv/term_registry_guard_bridge_report.{json,md}` |
 | Cache rebuild required | no |
+
+## Next Step
+
+Build the registry export/add-a-term function as the next implementation point.
+It should be language/market-aware, start with `sv-SE`, and make a central
+registry entry the normal source for future matcher vocabulary changes. The
+function should either generate the required runtime exports or fail with a
+clear checklist of missing layer coverage, source refs, examples, or guards.
 
 ## Open Decisions
 
@@ -665,5 +688,5 @@ Full removal of all legacy structures is not required for Step 2 completion.
 | Authoring format | TOML files first. Python typed records are not the primary manual edit surface. |
 | Shared core location | `app/languages/term_registry/`, with per-language adapters under each matcher package. |
 | First migrated source family | Small alias/parent family with existing fixtures and no negative guards. |
-| Migration batch size | 25 registry entries per wave, or one source family, whichever is smaller. |
+| Migration batch size | Default 25 registry entries for manual waves; full source-family waves are acceptable when export equivalence covers the whole family. |
 | CI/local gate timing | After R0 and R1 are stable. |

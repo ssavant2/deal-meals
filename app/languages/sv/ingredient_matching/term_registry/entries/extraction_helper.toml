@@ -1,0 +1,3397 @@
+# Registry coverage for targeted hardcoded keyword outputs in extraction.py.
+# The runtime extraction conditions remain code-owned; these entries make
+# each accepted literal output visible to the term-registry gate.
+
+[[entries]]
+entry_id = "sv-se.family.aftereight"
+language = "sv"
+market = "SE"
+canonical = "aftereight"
+status = "active"
+variants = ["aftereight"]
+ingredient_terms = ["aftereight"]
+offer_terms = ["aftereight"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1723", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:440"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "aftereight"
+variant = "aftereight"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "aftereight"
+variant = "aftereight"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.alkoholfriol"
+language = "sv"
+market = "SE"
+canonical = "alkoholfriöl"
+status = "active"
+variants = ["alkoholfriöl"]
+ingredient_terms = ["alkoholfriöl"]
+offer_terms = ["alkoholfriöl"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2095", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:597"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "alkoholfriöl"
+variant = "alkoholfriöl"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "alkoholfriöl"
+variant = "alkoholfriöl"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.ansjoviskrydda"
+language = "sv"
+market = "SE"
+canonical = "ansjoviskrydda"
+status = "active"
+variants = ["ansjoviskrydda"]
+ingredient_terms = []
+offer_terms = ["ansjoviskrydda"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:428"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "ansjoviskrydda"
+variant = "ansjoviskrydda"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.apelsin"
+language = "sv"
+market = "SE"
+canonical = "apelsin"
+status = "active"
+variants = ["apelsin"]
+ingredient_terms = ["apelsin"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2048"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "apelsin"
+variant = "apelsin"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.apelsinjuice"
+language = "sv"
+market = "SE"
+canonical = "apelsinjuice"
+status = "active"
+variants = ["apelsinjuice"]
+ingredient_terms = []
+offer_terms = ["apelsinjuice"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:348"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "apelsinjuice"
+variant = "apelsinjuice"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.apelsinskal"
+language = "sv"
+market = "SE"
+canonical = "apelsinskal"
+status = "active"
+variants = ["apelsinskal"]
+ingredient_terms = []
+offer_terms = ["apelsinskal"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:402"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "apelsinskal"
+variant = "apelsinskal"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.appelcider"
+language = "sv"
+market = "SE"
+canonical = "äppelcider"
+status = "active"
+variants = ["äppelcider"]
+ingredient_terms = []
+offer_terms = ["äppelcider"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:494"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "äppelcider"
+variant = "äppelcider"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.arrabbiata"
+language = "sv"
+market = "SE"
+canonical = "arrabbiata"
+status = "active"
+variants = ["arrabbiata"]
+ingredient_terms = ["arrabbiata"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1773"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "arrabbiata"
+variant = "arrabbiata"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.baguette"
+language = "sv"
+market = "SE"
+canonical = "baguette"
+status = "active"
+variants = ["baguette"]
+ingredient_terms = []
+offer_terms = ["baguette"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:806"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "baguette"
+variant = "baguette"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.balsamvinager"
+language = "sv"
+market = "SE"
+canonical = "balsamvinäger"
+status = "active"
+variants = ["balsamvinäger"]
+ingredient_terms = []
+offer_terms = ["balsamvinäger"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:921"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "balsamvinäger"
+variant = "balsamvinäger"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.barcider"
+language = "sv"
+market = "SE"
+canonical = "bärcider"
+status = "active"
+variants = ["bärcider"]
+ingredient_terms = []
+offer_terms = ["bärcider"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:500"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "bärcider"
+variant = "bärcider"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.basilika"
+language = "sv"
+market = "SE"
+canonical = "basilika"
+status = "active"
+variants = ["basilika"]
+ingredient_terms = ["basilika"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "basilika"
+variant = "basilika"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.bjornbar"
+language = "sv"
+market = "SE"
+canonical = "björnbär"
+status = "active"
+variants = ["björnbär"]
+ingredient_terms = ["björnbär"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2080"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "björnbär"
+variant = "björnbär"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.blabar"
+language = "sv"
+market = "SE"
+canonical = "blåbär"
+status = "active"
+variants = ["blåbär"]
+ingredient_terms = ["blåbär"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2080"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "blåbär"
+variant = "blåbär"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.bonor"
+language = "sv"
+market = "SE"
+canonical = "bönor"
+status = "active"
+variants = ["bönor"]
+ingredient_terms = ["bönor"]
+offer_terms = ["bönor"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1921", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:712"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "bönor"
+variant = "bönor"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "bönor"
+variant = "bönor"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.bostongurka"
+language = "sv"
+market = "SE"
+canonical = "bostongurka"
+status = "active"
+variants = ["bostongurka"]
+ingredient_terms = ["bostongurka"]
+offer_terms = ["bostongurka"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1944", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:727"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "bostongurka"
+variant = "bostongurka"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "bostongurka"
+variant = "bostongurka"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.chili"
+language = "sv"
+market = "SE"
+canonical = "chili"
+status = "active"
+variants = ["chili"]
+ingredient_terms = ["chili"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1761"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chili"
+variant = "chili"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.chiliflakes"
+language = "sv"
+market = "SE"
+canonical = "chiliflakes"
+status = "active"
+variants = ["chiliflakes"]
+ingredient_terms = ["chiliflakes"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1761"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chiliflakes"
+variant = "chiliflakes"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.chilimajo"
+language = "sv"
+market = "SE"
+canonical = "chilimajo"
+status = "active"
+variants = ["chilimajo"]
+ingredient_terms = ["chilimajo"]
+offer_terms = ["chilimajo"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1918", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:703"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chilimajo"
+variant = "chilimajo"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chilimajo"
+variant = "chilimajo"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.chiliolja"
+language = "sv"
+market = "SE"
+canonical = "chiliolja"
+status = "active"
+variants = ["chiliolja"]
+ingredient_terms = ["chiliolja"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1744"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chiliolja"
+variant = "chiliolja"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.chipotle"
+language = "sv"
+market = "SE"
+canonical = "chipotle"
+status = "active"
+variants = ["chipotle"]
+ingredient_terms = []
+offer_terms = ["chipotle"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:782"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chipotle"
+variant = "chipotle"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.chipotlepasta"
+language = "sv"
+market = "SE"
+canonical = "chipotlepasta"
+status = "active"
+variants = ["chipotlepasta"]
+ingredient_terms = ["chipotlepasta"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1852"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chipotlepasta"
+variant = "chipotlepasta"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.chipotlepulver"
+language = "sv"
+market = "SE"
+canonical = "chipotlepulver"
+status = "active"
+variants = ["chipotlepulver"]
+ingredient_terms = ["chipotlepulver"]
+offer_terms = ["chipotlepulver"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1852", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:782"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chipotlepulver"
+variant = "chipotlepulver"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chipotlepulver"
+variant = "chipotlepulver"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.choklad"
+language = "sv"
+market = "SE"
+canonical = "choklad"
+status = "active"
+variants = ["choklad"]
+ingredient_terms = []
+offer_terms = ["choklad"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:1049"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "choklad"
+variant = "choklad"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.chokladagg"
+language = "sv"
+market = "SE"
+canonical = "chokladägg"
+status = "active"
+variants = ["chokladägg"]
+ingredient_terms = ["chokladägg"]
+offer_terms = ["chokladägg"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1897", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:668"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chokladägg"
+variant = "chokladägg"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chokladägg"
+variant = "chokladägg"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.chokladdryck"
+language = "sv"
+market = "SE"
+canonical = "chokladdryck"
+status = "active"
+variants = ["chokladdryck"]
+ingredient_terms = ["chokladdryck"]
+offer_terms = ["chokladdryck"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1843", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:902"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chokladdryck"
+variant = "chokladdryck"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "chokladdryck"
+variant = "chokladdryck"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.cider"
+language = "sv"
+market = "SE"
+canonical = "cider"
+status = "active"
+variants = ["cider"]
+ingredient_terms = []
+offer_terms = ["cider"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:494"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "cider"
+variant = "cider"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.citron"
+language = "sv"
+market = "SE"
+canonical = "citron"
+status = "active"
+variants = ["citron"]
+ingredient_terms = []
+offer_terms = ["citron"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:467"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "citron"
+variant = "citron"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.citronjuice"
+language = "sv"
+market = "SE"
+canonical = "citronjuice"
+status = "active"
+variants = ["citronjuice"]
+ingredient_terms = []
+offer_terms = ["citronjuice"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:467"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "citronjuice"
+variant = "citronjuice"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.crispychiliolja"
+language = "sv"
+market = "SE"
+canonical = "crispychiliolja"
+status = "active"
+variants = ["crispychiliolja"]
+ingredient_terms = ["crispychiliolja"]
+offer_terms = ["crispychiliolja"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1741", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:579"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "crispychiliolja"
+variant = "crispychiliolja"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "crispychiliolja"
+variant = "crispychiliolja"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.dadelsirap"
+language = "sv"
+market = "SE"
+canonical = "dadelsirap"
+status = "active"
+variants = ["dadelsirap"]
+ingredient_terms = ["dadelsirap"]
+offer_terms = ["dadelsirap"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1717", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:431"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "dadelsirap"
+variant = "dadelsirap"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "dadelsirap"
+variant = "dadelsirap"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.dill"
+language = "sv"
+market = "SE"
+canonical = "dill"
+status = "active"
+variants = ["dill"]
+ingredient_terms = ["dill"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "dill"
+variant = "dill"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.dumplingdeg"
+language = "sv"
+market = "SE"
+canonical = "dumplingdeg"
+status = "active"
+variants = ["dumplingdeg"]
+ingredient_terms = ["dumplingdeg"]
+offer_terms = ["dumplingdeg"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1720", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:437"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "dumplingdeg"
+variant = "dumplingdeg"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "dumplingdeg"
+variant = "dumplingdeg"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.falafel"
+language = "sv"
+market = "SE"
+canonical = "falafel"
+status = "active"
+variants = ["falafel"]
+ingredient_terms = []
+offer_terms = ["falafel"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:422"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "falafel"
+variant = "falafel"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.falafelmix"
+language = "sv"
+market = "SE"
+canonical = "falafelmix"
+status = "active"
+variants = ["falafelmix"]
+ingredient_terms = ["falafelmix"]
+offer_terms = ["falafelmix"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2051", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:422"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "falafelmix"
+variant = "falafelmix"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "falafelmix"
+variant = "falafelmix"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.farskost"
+language = "sv"
+market = "SE"
+canonical = "färskost"
+status = "active"
+variants = ["färskost"]
+ingredient_terms = ["färskost"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1941"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "färskost"
+variant = "färskost"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.fish_crisp"
+language = "sv"
+market = "SE"
+canonical = "fish&crisp"
+status = "active"
+variants = ["fish&crisp"]
+ingredient_terms = ["fish&crisp"]
+offer_terms = ["fish&crisp"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1729", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:446"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "fish&crisp"
+variant = "fish&crisp"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "fish&crisp"
+variant = "fish&crisp"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.fiskfil"
+language = "sv"
+market = "SE"
+canonical = "fiskfilé"
+status = "active"
+variants = ["fiskfilé"]
+ingredient_terms = ["fiskfilé"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1867"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "fiskfilé"
+variant = "fiskfilé"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.fitnessflingor"
+language = "sv"
+market = "SE"
+canonical = "fitnessflingor"
+status = "active"
+variants = ["fitnessflingor"]
+ingredient_terms = []
+offer_terms = ["fitnessflingor"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:975"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "fitnessflingor"
+variant = "fitnessflingor"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.fladercider"
+language = "sv"
+market = "SE"
+canonical = "flädercider"
+status = "active"
+variants = ["flädercider"]
+ingredient_terms = []
+offer_terms = ["flädercider"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:498"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "flädercider"
+variant = "flädercider"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.flytandesmor"
+language = "sv"
+market = "SE"
+canonical = "flytandesmör"
+status = "active"
+variants = ["flytandesmör"]
+ingredient_terms = []
+offer_terms = ["flytandesmör"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:983"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "flytandesmör"
+variant = "flytandesmör"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.folkol"
+language = "sv"
+market = "SE"
+canonical = "folköl"
+status = "active"
+variants = ["folköl"]
+ingredient_terms = ["folköl"]
+offer_terms = ["folköl"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2087", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:477"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "folköl"
+variant = "folköl"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "folköl"
+variant = "folköl"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.forkoktmajskolv"
+language = "sv"
+market = "SE"
+canonical = "förkoktmajskolv"
+status = "active"
+variants = ["förkoktmajskolv"]
+ingredient_terms = ["förkoktmajskolv"]
+offer_terms = ["förkoktmajskolv"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1779", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:543"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "förkoktmajskolv"
+variant = "förkoktmajskolv"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "förkoktmajskolv"
+variant = "förkoktmajskolv"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.formbrod"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["formbröd"]
+ingredient_terms = []
+offer_terms = ["formbröd"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:531"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "formbröd"
+variant = "formbröd"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.frystaorter"
+language = "sv"
+market = "SE"
+canonical = "frystaörter"
+status = "active"
+variants = ["frystaörter"]
+ingredient_terms = ["frystaörter"]
+offer_terms = ["frystaörter"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1785", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:697"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "frystaörter"
+variant = "frystaörter"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "frystaörter"
+variant = "frystaörter"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.gradde"
+language = "sv"
+market = "SE"
+canonical = "grädde"
+status = "active"
+variants = ["grädde"]
+ingredient_terms = ["grädde"]
+offer_terms = ["grädde"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2064", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:816"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "grädde"
+variant = "grädde"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "grädde"
+variant = "grädde"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.grapefrukt"
+language = "sv"
+market = "SE"
+canonical = "grapefrukt"
+status = "active"
+variants = ["grapefrukt"]
+ingredient_terms = []
+offer_terms = ["grapefrukt"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:409"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "grapefrukt"
+variant = "grapefrukt"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.graslok"
+language = "sv"
+market = "SE"
+canonical = "gräslök"
+status = "active"
+variants = ["gräslök"]
+ingredient_terms = ["gräslök"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "gräslök"
+variant = "gräslök"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.grenadine"
+language = "sv"
+market = "SE"
+canonical = "grenadine"
+status = "active"
+variants = ["grenadine"]
+ingredient_terms = []
+offer_terms = ["grenadine"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:344"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "grenadine"
+variant = "grenadine"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.groncurrypasta"
+language = "sv"
+market = "SE"
+canonical = "gröncurrypasta"
+status = "active"
+variants = ["gröncurrypasta"]
+ingredient_terms = []
+offer_terms = ["gröncurrypasta"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:571"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "gröncurrypasta"
+variant = "gröncurrypasta"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.gulcurrypasta"
+language = "sv"
+market = "SE"
+canonical = "gulcurrypasta"
+status = "active"
+variants = ["gulcurrypasta"]
+ingredient_terms = []
+offer_terms = ["gulcurrypasta"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:575"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "gulcurrypasta"
+variant = "gulcurrypasta"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.gurka"
+language = "sv"
+market = "SE"
+canonical = "gurka"
+status = "active"
+variants = ["gurka"]
+ingredient_terms = ["gurka"]
+offer_terms = ["gurka"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1944", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:727"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "gurka"
+variant = "gurka"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "gurka"
+variant = "gurka"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.habanerochilisas"
+language = "sv"
+market = "SE"
+canonical = "habanerochilisås"
+status = "active"
+variants = ["habanerochilisås"]
+ingredient_terms = ["habanerochilisås"]
+offer_terms = ["habanerochilisås"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1753", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:461"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "habanerochilisås"
+variant = "habanerochilisås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "habanerochilisås"
+variant = "habanerochilisås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.hallon"
+language = "sv"
+market = "SE"
+canonical = "hallon"
+status = "active"
+variants = ["hallon"]
+ingredient_terms = ["hallon"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2080"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "hallon"
+variant = "hallon"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.havregradde"
+language = "sv"
+market = "SE"
+canonical = "havregrädde"
+status = "active"
+variants = ["havregrädde"]
+ingredient_terms = ["havregrädde"]
+offer_terms = ["havregrädde"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2064", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:816"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "havregrädde"
+variant = "havregrädde"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "havregrädde"
+variant = "havregrädde"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.havssalt"
+language = "sv"
+market = "SE"
+canonical = "havssalt"
+status = "active"
+variants = ["havssalt"]
+ingredient_terms = ["havssalt"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1857"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "havssalt"
+variant = "havssalt"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.ingefarsjuice"
+language = "sv"
+market = "SE"
+canonical = "ingefärsjuice"
+status = "active"
+variants = ["ingefärsjuice"]
+ingredient_terms = []
+offer_terms = ["ingefärsjuice"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:559"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "ingefärsjuice"
+variant = "ingefärsjuice"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.inlaggningssill"
+language = "sv"
+market = "SE"
+canonical = "inläggningssill"
+status = "active"
+variants = ["inläggningssill"]
+ingredient_terms = ["inläggningssill"]
+offer_terms = ["inläggningssill"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1732", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:434"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "inläggningssill"
+variant = "inläggningssill"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "inläggningssill"
+variant = "inläggningssill"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.jast"
+language = "sv"
+market = "SE"
+canonical = "jäst"
+status = "active"
+variants = ["jäst"]
+ingredient_terms = ["jäst"]
+offer_terms = ["jäst"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1814", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:790"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "jäst"
+variant = "jäst"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "jäst"
+variant = "jäst"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.jordgubbar"
+language = "sv"
+market = "SE"
+canonical = "jordgubbar"
+status = "active"
+variants = ["jordgubbar"]
+ingredient_terms = ["jordgubbar"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2080"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "jordgubbar"
+variant = "jordgubbar"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.kalrot"
+language = "sv"
+market = "SE"
+canonical = "kålrot"
+status = "active"
+variants = ["kålrot"]
+ingredient_terms = ["kålrot"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1782"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kålrot"
+variant = "kålrot"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.kanderatapelsinskal"
+language = "sv"
+market = "SE"
+canonical = "kanderatapelsinskal"
+status = "active"
+variants = ["kanderatapelsinskal"]
+ingredient_terms = ["kanderatapelsinskal"]
+offer_terms = ["kanderatapelsinskal"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2046", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:402"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kanderatapelsinskal"
+variant = "kanderatapelsinskal"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kanderatapelsinskal"
+variant = "kanderatapelsinskal"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.kantarellpesto"
+language = "sv"
+market = "SE"
+canonical = "kantarellpesto"
+status = "active"
+variants = ["kantarellpesto"]
+ingredient_terms = ["kantarellpesto"]
+offer_terms = ["kantarellpesto"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1953", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:950"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kantarellpesto"
+variant = "kantarellpesto"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kantarellpesto"
+variant = "kantarellpesto"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.kardemummayoghurt"
+language = "sv"
+market = "SE"
+canonical = "kardemummayoghurt"
+status = "active"
+variants = ["kardemummayoghurt"]
+ingredient_terms = []
+offer_terms = ["kardemummayoghurt"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:835"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kardemummayoghurt"
+variant = "kardemummayoghurt"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.kokos"
+language = "sv"
+market = "SE"
+canonical = "kokos"
+status = "active"
+variants = ["kokos"]
+ingredient_terms = []
+offer_terms = ["kokos"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:537"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kokos"
+variant = "kokos"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.kokosdryck"
+language = "sv"
+market = "SE"
+canonical = "kokosdryck"
+status = "active"
+variants = ["kokosdryck"]
+ingredient_terms = ["kokosdryck"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1840"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kokosdryck"
+variant = "kokosdryck"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.kokosflingor"
+language = "sv"
+market = "SE"
+canonical = "kokosflingor"
+status = "active"
+variants = ["kokosflingor"]
+ingredient_terms = []
+offer_terms = ["kokosflingor"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:537"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kokosflingor"
+variant = "kokosflingor"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.koriander"
+language = "sv"
+market = "SE"
+canonical = "koriander"
+status = "active"
+variants = ["koriander"]
+ingredient_terms = ["koriander"]
+offer_terms = ["koriander"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:507"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "koriander"
+variant = "koriander"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "koriander"
+variant = "koriander"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.krispsallat"
+language = "sv"
+market = "SE"
+canonical = "krispsallat"
+status = "active"
+variants = ["krispsallat"]
+ingredient_terms = ["krispsallat"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1924"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "krispsallat"
+variant = "krispsallat"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.kronartskockspesto"
+language = "sv"
+market = "SE"
+canonical = "kronärtskockspesto"
+status = "active"
+variants = ["kronärtskockspesto"]
+ingredient_terms = ["kronärtskockspesto"]
+offer_terms = ["kronärtskockspesto"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1955", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:952"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kronärtskockspesto"
+variant = "kronärtskockspesto"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kronärtskockspesto"
+variant = "kronärtskockspesto"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.krusbar"
+language = "sv"
+market = "SE"
+canonical = "krusbär"
+status = "active"
+variants = ["krusbär"]
+ingredient_terms = ["krusbär"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2080"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "krusbär"
+variant = "krusbär"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.kryddmix"
+language = "sv"
+market = "SE"
+canonical = "kryddmix"
+status = "active"
+variants = ["kryddmix"]
+ingredient_terms = []
+offer_terms = ["kryddmix"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:700"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kryddmix"
+variant = "kryddmix"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.kyckling"
+language = "sv"
+market = "SE"
+canonical = "kyckling"
+status = "active"
+variants = ["kyckling"]
+ingredient_terms = ["kyckling"]
+offer_terms = ["kyckling"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1803", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:663"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kyckling"
+variant = "kyckling"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kyckling"
+variant = "kyckling"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklingfilé"]
+ingredient_terms = []
+offer_terms = ["kycklingfilé"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:663"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kycklingfilé"
+variant = "kycklingfilé"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.kycklingsteak"
+language = "sv"
+market = "SE"
+canonical = "kycklingsteak"
+status = "active"
+variants = ["kycklingsteak"]
+ingredient_terms = ["kycklingsteak"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1803"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "kycklingsteak"
+variant = "kycklingsteak"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.lask"
+language = "sv"
+market = "SE"
+canonical = "läsk"
+status = "active"
+variants = ["läsk"]
+ingredient_terms = ["läsk"]
+offer_terms = ["läsk"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2091", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:357"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "läsk"
+variant = "läsk"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "läsk"
+variant = "läsk"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.lax"
+language = "sv"
+market = "SE"
+canonical = "lax"
+status = "active"
+variants = ["lax"]
+ingredient_terms = ["lax"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1788"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "lax"
+variant = "lax"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.lime"
+language = "sv"
+market = "SE"
+canonical = "lime"
+status = "active"
+variants = ["lime"]
+ingredient_terms = []
+offer_terms = ["lime"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:470"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "lime"
+variant = "lime"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.limejuice"
+language = "sv"
+market = "SE"
+canonical = "limejuice"
+status = "active"
+variants = ["limejuice"]
+ingredient_terms = []
+offer_terms = ["limejuice"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:470"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "limejuice"
+variant = "limejuice"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.limepepper"
+language = "sv"
+market = "SE"
+canonical = "limepepper"
+status = "active"
+variants = ["limepepper"]
+ingredient_terms = ["limepepper"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1903"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "limepepper"
+variant = "limepepper"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.majonnas"
+language = "sv"
+market = "SE"
+canonical = "majonnäs"
+status = "active"
+variants = ["majonnäs"]
+ingredient_terms = []
+offer_terms = ["majonnäs"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:851"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "majonnäs"
+variant = "majonnäs"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.majskolv"
+language = "sv"
+market = "SE"
+canonical = "majskolv"
+status = "active"
+variants = ["majskolv"]
+ingredient_terms = ["majskolv"]
+offer_terms = ["majskolv"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1779", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:543"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "majskolv"
+variant = "majskolv"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "majskolv"
+variant = "majskolv"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.margarin"
+language = "sv"
+market = "SE"
+canonical = "margarin"
+status = "active"
+variants = ["margarin"]
+ingredient_terms = ["margarin"]
+offer_terms = ["margarin"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1832", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:798"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "margarin"
+variant = "margarin"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "margarin"
+variant = "margarin"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.marinad"
+language = "sv"
+market = "SE"
+canonical = "marinad"
+status = "active"
+variants = ["marinad"]
+ingredient_terms = []
+offer_terms = ["marinad"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:732"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "marinad"
+variant = "marinad"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.matbrodsjast"
+language = "sv"
+market = "SE"
+canonical = "matbrödsjäst"
+status = "active"
+variants = ["matbrödsjäst"]
+ingredient_terms = ["matbrödsjäst"]
+offer_terms = ["matbrödsjäst"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1814", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:790"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "matbrödsjäst"
+variant = "matbrödsjäst"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "matbrödsjäst"
+variant = "matbrödsjäst"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.matlagningsbas"
+language = "sv"
+market = "SE"
+canonical = "matlagningsbas"
+status = "active"
+variants = ["matlagningsbas"]
+ingredient_terms = []
+offer_terms = ["matlagningsbas"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:816"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "matlagningsbas"
+variant = "matlagningsbas"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.morot"
+language = "sv"
+market = "SE"
+canonical = "morot"
+status = "active"
+variants = ["morot"]
+ingredient_terms = ["morot"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1782"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "morot"
+variant = "morot"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.mousserandevin"
+language = "sv"
+market = "SE"
+canonical = "mousserandevin"
+status = "active"
+variants = ["mousserandevin"]
+ingredient_terms = []
+offer_terms = ["mousserandevin"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:945"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "mousserandevin"
+variant = "mousserandevin"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.mynta"
+language = "sv"
+market = "SE"
+canonical = "mynta"
+status = "active"
+variants = ["mynta"]
+ingredient_terms = ["mynta"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "mynta"
+variant = "mynta"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.ol"
+language = "sv"
+market = "SE"
+canonical = "öl"
+status = "active"
+variants = ["öl"]
+ingredient_terms = ["öl"]
+offer_terms = ["öl"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2087", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:477"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "öl"
+variant = "öl"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "öl"
+variant = "öl"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.olivolja"
+language = "sv"
+market = "SE"
+canonical = "olivolja"
+status = "active"
+variants = ["olivolja"]
+ingredient_terms = []
+offer_terms = ["olivolja"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:927"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "olivolja"
+variant = "olivolja"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.oregano"
+language = "sv"
+market = "SE"
+canonical = "oregano"
+status = "active"
+variants = ["oregano"]
+ingredient_terms = ["oregano"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "oregano"
+variant = "oregano"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.oreo"
+language = "sv"
+market = "SE"
+canonical = "oreo"
+status = "active"
+variants = ["oreo"]
+ingredient_terms = ["oreo"]
+offer_terms = ["oreo"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1947", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:748"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "oreo"
+variant = "oreo"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "oreo"
+variant = "oreo"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.palsternacka"
+language = "sv"
+market = "SE"
+canonical = "palsternacka"
+status = "active"
+variants = ["palsternacka"]
+ingredient_terms = ["palsternacka"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1782"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "palsternacka"
+variant = "palsternacka"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.paprikapulver"
+language = "sv"
+market = "SE"
+canonical = "paprikapulver"
+status = "active"
+variants = ["paprikapulver"]
+ingredient_terms = []
+offer_terms = ["paprikapulver"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:776"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "paprikapulver"
+variant = "paprikapulver"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.paroncider"
+language = "sv"
+market = "SE"
+canonical = "päroncider"
+status = "active"
+variants = ["päroncider"]
+ingredient_terms = []
+offer_terms = ["päroncider"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:496"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "päroncider"
+variant = "päroncider"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.pastasas"
+language = "sv"
+market = "SE"
+canonical = "pastasås"
+status = "active"
+variants = ["pastasås"]
+ingredient_terms = ["pastasås"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1773"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "pastasås"
+variant = "pastasås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.pepparsas"
+language = "sv"
+market = "SE"
+canonical = "pepparsås"
+status = "active"
+variants = ["pepparsås"]
+ingredient_terms = ["pepparsås"]
+offer_terms = ["pepparsås"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1753", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:461"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "pepparsås"
+variant = "pepparsås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "pepparsås"
+variant = "pepparsås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.persilja"
+language = "sv"
+market = "SE"
+canonical = "persilja"
+status = "active"
+variants = ["persilja"]
+ingredient_terms = ["persilja"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "persilja"
+variant = "persilja"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.pesto"
+language = "sv"
+market = "SE"
+canonical = "pesto"
+status = "active"
+variants = ["pesto"]
+ingredient_terms = []
+offer_terms = ["pesto"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:464"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "pesto"
+variant = "pesto"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.pizzasas"
+language = "sv"
+market = "SE"
+canonical = "pizzasås"
+status = "active"
+variants = ["pizzasås"]
+ingredient_terms = ["pizzasås"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1767"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "pizzasås"
+variant = "pizzasås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.polly"
+language = "sv"
+market = "SE"
+canonical = "polly"
+status = "active"
+variants = ["polly"]
+ingredient_terms = ["polly"]
+offer_terms = ["polly"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1900", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:671"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "polly"
+variant = "polly"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "polly"
+variant = "polly"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.porter"
+language = "sv"
+market = "SE"
+canonical = "porter"
+status = "active"
+variants = ["porter"]
+ingredient_terms = ["porter"]
+offer_terms = ["porter"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2085", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:603"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "porter"
+variant = "porter"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "porter"
+variant = "porter"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.potatismos"
+language = "sv"
+market = "SE"
+canonical = "potatismos"
+status = "active"
+variants = ["potatismos"]
+ingredient_terms = []
+offer_terms = ["potatismos"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:740"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "potatismos"
+variant = "potatismos"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.rimmatflask"
+language = "sv"
+market = "SE"
+canonical = "rimmatfläsk"
+status = "active"
+variants = ["rimmatfläsk"]
+ingredient_terms = ["rimmatfläsk"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1892"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rimmatfläsk"
+variant = "rimmatfläsk"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.rispuffar"
+language = "sv"
+market = "SE"
+canonical = "rispuffar"
+status = "active"
+variants = ["rispuffar"]
+ingredient_terms = ["rispuffar"]
+offer_terms = ["rispuffar"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1738", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:449"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rispuffar"
+variant = "rispuffar"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rispuffar"
+variant = "rispuffar"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.rodbeta"
+language = "sv"
+market = "SE"
+canonical = "rödbeta"
+status = "active"
+variants = ["rödbeta"]
+ingredient_terms = ["rödbeta"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1782"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rödbeta"
+variant = "rödbeta"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.rodcurrypasta"
+language = "sv"
+market = "SE"
+canonical = "rödcurrypasta"
+status = "active"
+variants = ["rödcurrypasta"]
+ingredient_terms = []
+offer_terms = ["rödcurrypasta"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:573"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rödcurrypasta"
+variant = "rödcurrypasta"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.rodvinbarsgele"
+language = "sv"
+market = "SE"
+canonical = "rödvinbärsgele"
+status = "active"
+variants = ["rödvinbärsgele"]
+ingredient_terms = []
+offer_terms = ["rödvinbärsgele"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:592"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rödvinbärsgele"
+variant = "rödvinbärsgele"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.ros_balsamvinager"
+language = "sv"
+market = "SE"
+canonical = "rosébalsamvinäger"
+status = "active"
+variants = ["rosébalsamvinäger"]
+ingredient_terms = []
+offer_terms = ["rosébalsamvinäger"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:921"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rosébalsamvinäger"
+variant = "rosébalsamvinäger"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.rosmarin"
+language = "sv"
+market = "SE"
+canonical = "rosmarin"
+status = "active"
+variants = ["rosmarin"]
+ingredient_terms = ["rosmarin"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rosmarin"
+variant = "rosmarin"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.rotfruktsmix"
+language = "sv"
+market = "SE"
+canonical = "rotfruktsmix"
+status = "active"
+variants = ["rotfruktsmix"]
+ingredient_terms = ["rotfruktsmix"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1782"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rotfruktsmix"
+variant = "rotfruktsmix"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.rotselleri"
+language = "sv"
+market = "SE"
+canonical = "rotselleri"
+status = "active"
+variants = ["rotselleri"]
+ingredient_terms = ["rotselleri"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1782"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "rotselleri"
+variant = "rotselleri"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.salvia"
+language = "sv"
+market = "SE"
+canonical = "salvia"
+status = "active"
+variants = ["salvia"]
+ingredient_terms = ["salvia"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "salvia"
+variant = "salvia"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.sill"
+language = "sv"
+market = "SE"
+canonical = "sill"
+status = "active"
+variants = ["sill"]
+ingredient_terms = []
+offer_terms = ["sill"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:434"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sill"
+variant = "sill"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.smorrapsolja"
+language = "sv"
+market = "SE"
+canonical = "smörrapsolja"
+status = "active"
+variants = ["smörrapsolja"]
+ingredient_terms = ["smörrapsolja"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1915"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "smörrapsolja"
+variant = "smörrapsolja"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.smultron"
+language = "sv"
+market = "SE"
+canonical = "smultron"
+status = "active"
+variants = ["smultron"]
+ingredient_terms = ["smultron"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2080"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "smultron"
+variant = "smultron"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.snabbkaffe"
+language = "sv"
+market = "SE"
+canonical = "snabbkaffe"
+status = "active"
+variants = ["snabbkaffe"]
+ingredient_terms = []
+offer_terms = ["snabbkaffe"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:425"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "snabbkaffe"
+variant = "snabbkaffe"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.sodavatten"
+language = "sv"
+market = "SE"
+canonical = "sodavatten"
+status = "active"
+variants = ["sodavatten"]
+ingredient_terms = ["sodavatten"]
+offer_terms = ["sodavatten"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1927", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:412"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sodavatten"
+variant = "sodavatten"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sodavatten"
+variant = "sodavatten"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.soja"
+language = "sv"
+market = "SE"
+canonical = "soja"
+status = "active"
+variants = ["soja"]
+ingredient_terms = ["soja"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2066"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "soja"
+variant = "soja"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.sojamajonnas"
+language = "sv"
+market = "SE"
+canonical = "sojamajonnäs"
+status = "active"
+variants = ["sojamajonnäs"]
+ingredient_terms = []
+offer_terms = ["sojamajonnäs"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:843"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sojamajonnäs"
+variant = "sojamajonnäs"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.soltorkadetomatcreme"
+language = "sv"
+market = "SE"
+canonical = "soltorkadetomatcreme"
+status = "active"
+variants = ["soltorkadetomatcreme"]
+ingredient_terms = ["soltorkadetomatcreme"]
+offer_terms = ["soltorkadetomatcreme"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1963", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:613"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "soltorkadetomatcreme"
+variant = "soltorkadetomatcreme"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "soltorkadetomatcreme"
+variant = "soltorkadetomatcreme"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.sommargronsaker"
+language = "sv"
+market = "SE"
+canonical = "sommargrönsaker"
+status = "active"
+variants = ["sommargrönsaker"]
+ingredient_terms = ["sommargrönsaker"]
+offer_terms = ["sommargrönsaker"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1912", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:691"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sommargrönsaker"
+variant = "sommargrönsaker"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sommargrönsaker"
+variant = "sommargrönsaker"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.sotsursas"
+language = "sv"
+market = "SE"
+canonical = "sötsursås"
+status = "active"
+variants = ["sötsursås"]
+ingredient_terms = ["sötsursås"]
+offer_terms = ["sötsursås"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2093", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:577"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sötsursås"
+variant = "sötsursås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sötsursås"
+variant = "sötsursås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.srirachamajonnas"
+language = "sv"
+market = "SE"
+canonical = "srirachamajonnäs"
+status = "active"
+variants = ["srirachamajonnäs"]
+ingredient_terms = []
+offer_terms = ["srirachamajonnäs"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:888"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "srirachamajonnäs"
+variant = "srirachamajonnäs"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.steambuns"
+language = "sv"
+market = "SE"
+canonical = "steambuns"
+status = "active"
+variants = ["steambuns"]
+ingredient_terms = ["steambuns"]
+offer_terms = ["steambuns"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1824", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:803"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "steambuns"
+variant = "steambuns"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "steambuns"
+variant = "steambuns"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.strossel"
+language = "sv"
+market = "SE"
+canonical = "strössel"
+status = "active"
+variants = ["strössel"]
+ingredient_terms = []
+offer_terms = ["strössel"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:674"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "strössel"
+variant = "strössel"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.styckbrod"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["styckbröd"]
+ingredient_terms = []
+offer_terms = ["styckbröd"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:524"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "styckbröd"
+variant = "styckbröd"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.surdegsbrod"
+language = "sv"
+market = "SE"
+canonical = "surdegsbröd"
+status = "active"
+variants = ["surdegsbröd"]
+ingredient_terms = ["surdegsbröd"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1735"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "surdegsbröd"
+variant = "surdegsbröd"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.surkal"
+language = "sv"
+market = "SE"
+canonical = "surkål"
+status = "active"
+variants = ["surkål"]
+ingredient_terms = ["surkål"]
+offer_terms = ["surkål"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1846", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:1002"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "surkål"
+variant = "surkål"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "surkål"
+variant = "surkål"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.sushilax"
+language = "sv"
+market = "SE"
+canonical = "sushilax"
+status = "active"
+variants = ["sushilax"]
+ingredient_terms = ["sushilax"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1788"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sushilax"
+variant = "sushilax"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.svartabonor"
+language = "sv"
+market = "SE"
+canonical = "svartabönor"
+status = "active"
+variants = ["svartabönor"]
+ingredient_terms = ["svartabönor"]
+offer_terms = ["svartabönor"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1921", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:712"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "svartabönor"
+variant = "svartabönor"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "svartabönor"
+variant = "svartabönor"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.svartvinbarsgele"
+language = "sv"
+market = "SE"
+canonical = "svartvinbärsgele"
+status = "active"
+variants = ["svartvinbärsgele"]
+ingredient_terms = []
+offer_terms = ["svartvinbärsgele"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:584"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "svartvinbärsgele"
+variant = "svartvinbärsgele"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.svartvinbarssaft"
+language = "sv"
+market = "SE"
+canonical = "svartvinbärssaft"
+status = "active"
+variants = ["svartvinbärssaft"]
+ingredient_terms = []
+offer_terms = ["svartvinbärssaft"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:549"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "svartvinbärssaft"
+variant = "svartvinbärssaft"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.sylt"
+language = "sv"
+market = "SE"
+canonical = "sylt"
+status = "active"
+variants = ["sylt"]
+ingredient_terms = ["sylt"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1872"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "sylt"
+variant = "sylt"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.syltadingefara"
+language = "sv"
+market = "SE"
+canonical = "syltadingefära"
+status = "active"
+variants = ["syltadingefära"]
+ingredient_terms = []
+offer_terms = ["syltadingefära"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:622"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "syltadingefära"
+variant = "syltadingefära"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.tacoskal"
+language = "sv"
+market = "SE"
+canonical = "tacoskal"
+status = "active"
+variants = ["tacoskal"]
+ingredient_terms = []
+offer_terms = ["tacoskal"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:959"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tacoskal"
+variant = "tacoskal"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.timjan"
+language = "sv"
+market = "SE"
+canonical = "timjan"
+status = "active"
+variants = ["timjan"]
+ingredient_terms = ["timjan"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1930"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "timjan"
+variant = "timjan"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.tomatpesto"
+language = "sv"
+market = "SE"
+canonical = "tomatpesto"
+status = "active"
+variants = ["tomatpesto"]
+ingredient_terms = []
+offer_terms = ["tomatpesto"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:464"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tomatpesto"
+variant = "tomatpesto"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.tomatsas"
+language = "sv"
+market = "SE"
+canonical = "tomatsås"
+status = "active"
+variants = ["tomatsås"]
+ingredient_terms = ["tomatsås"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1767"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tomatsås"
+variant = "tomatsås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.tomkha"
+language = "sv"
+market = "SE"
+canonical = "tomkha"
+status = "active"
+variants = ["tomkha"]
+ingredient_terms = ["tomkha"]
+offer_terms = ["tomkha"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1906", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:700"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tomkha"
+variant = "tomkha"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tomkha"
+variant = "tomkha"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.torkadsvamp"
+language = "sv"
+market = "SE"
+canonical = "torkadsvamp"
+status = "active"
+variants = ["torkadsvamp"]
+ingredient_terms = ["torkadsvamp"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1829"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "torkadsvamp"
+variant = "torkadsvamp"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.tranbarsjuice"
+language = "sv"
+market = "SE"
+canonical = "tranbärsjuice"
+status = "active"
+variants = ["tranbärsjuice"]
+ingredient_terms = []
+offer_terms = ["tranbärsjuice"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:455"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tranbärsjuice"
+variant = "tranbärsjuice"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.trattkantarell"
+language = "sv"
+market = "SE"
+canonical = "trattkantarell"
+status = "active"
+variants = ["trattkantarell"]
+ingredient_terms = ["trattkantarell"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1888"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "trattkantarell"
+variant = "trattkantarell"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.tryffelmajonnas"
+language = "sv"
+market = "SE"
+canonical = "tryffelmajonnäs"
+status = "active"
+variants = ["tryffelmajonnäs"]
+ingredient_terms = []
+offer_terms = ["tryffelmajonnäs"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:897"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tryffelmajonnäs"
+variant = "tryffelmajonnäs"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.tryffelolja"
+language = "sv"
+market = "SE"
+canonical = "tryffelolja"
+status = "active"
+variants = ["tryffelolja"]
+ingredient_terms = ["tryffelolja"]
+offer_terms = ["tryffelolja"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1800", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:927"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tryffelolja"
+variant = "tryffelolja"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tryffelolja"
+variant = "tryffelolja"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.tuc"
+language = "sv"
+market = "SE"
+canonical = "tuc"
+status = "active"
+variants = ["tuc"]
+ingredient_terms = ["tuc"]
+offer_terms = ["tuc"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1726", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:443"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tuc"
+variant = "tuc"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "tuc"
+variant = "tuc"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.vaniljkvarg"
+language = "sv"
+market = "SE"
+canonical = "vaniljkvarg"
+status = "active"
+variants = ["vaniljkvarg"]
+ingredient_terms = ["vaniljkvarg"]
+offer_terms = ["vaniljkvarg"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2039", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:399"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "vaniljkvarg"
+variant = "vaniljkvarg"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "vaniljkvarg"
+variant = "vaniljkvarg"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.vaniljsas"
+language = "sv"
+market = "SE"
+canonical = "vaniljsås"
+status = "active"
+variants = ["vaniljsås"]
+ingredient_terms = []
+offer_terms = ["vaniljsås"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:753"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "vaniljsås"
+variant = "vaniljsås"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.veganskmajonnas"
+language = "sv"
+market = "SE"
+canonical = "veganskmajonnäs"
+status = "active"
+variants = ["veganskmajonnäs"]
+ingredient_terms = []
+offer_terms = ["veganskmajonnäs"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:851"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "veganskmajonnäs"
+variant = "veganskmajonnäs"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.vetesurdegsgrund"
+language = "sv"
+market = "SE"
+canonical = "vetesurdegsgrund"
+status = "active"
+variants = ["vetesurdegsgrund"]
+ingredient_terms = []
+offer_terms = ["vetesurdegsgrund"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:811"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "vetesurdegsgrund"
+variant = "vetesurdegsgrund"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.vinbar"
+language = "sv"
+market = "SE"
+canonical = "vinbär"
+status = "active"
+variants = ["vinbär"]
+ingredient_terms = ["vinbär"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2080"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "vinbär"
+variant = "vinbär"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.vitlok"
+language = "sv"
+market = "SE"
+canonical = "vitlök"
+status = "active"
+variants = ["vitlök"]
+ingredient_terms = ["vitlök"]
+offer_terms = []
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1941"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "vitlök"
+variant = "vitlök"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries]]
+entry_id = "sv-se.family.vitloksmarinad"
+language = "sv"
+market = "SE"
+canonical = "vitlöksmarinad"
+status = "active"
+variants = ["vitlöksmarinad"]
+ingredient_terms = []
+offer_terms = ["vitlöksmarinad"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:732"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "vitlöksmarinad"
+variant = "vitlöksmarinad"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.wokmix"
+language = "sv"
+market = "SE"
+canonical = "wokmix"
+status = "active"
+variants = ["wokmix"]
+ingredient_terms = ["wokmix"]
+offer_terms = ["wokmix"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:1909", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:685"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "wokmix"
+variant = "wokmix"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "wokmix"
+variant = "wokmix"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"

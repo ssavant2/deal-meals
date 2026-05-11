@@ -1,0 +1,7418 @@
+[[entries]]
+entry_id = "sv-se.alias.farskpotatis_001"
+language = "sv"
+market = "SE"
+canonical = "potatis"
+status = "active"
+variants = ["färskpotatis"]
+offer_terms = ["potatis"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "potatis"
+variant = "färskpotatis"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "potatis"
+offer_name = "Färskpotatis"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.farskpotatis_002_2"
+language = "sv"
+market = "SE"
+canonical = "potatis"
+status = "active"
+variants = ["farskpotatis"]
+offer_terms = ["potatis"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "potatis"
+variant = "farskpotatis"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "potatis"
+offer_name = "Farskpotatis"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bakpotatis_003"
+language = "sv"
+market = "SE"
+canonical = "potatis"
+status = "active"
+variants = ["bakpotatis"]
+offer_terms = ["potatis"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "potatis"
+variant = "bakpotatis"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "potatis"
+offer_name = "Bakpotatis"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sparrispotatis_004"
+language = "sv"
+market = "SE"
+canonical = "potatis"
+status = "active"
+variants = ["sparrispotatis"]
+offer_terms = ["potatis"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "potatis"
+variant = "sparrispotatis"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "potatis"
+offer_name = "Sparrispotatis"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.glutenfrihavregryn_005"
+language = "sv"
+market = "SE"
+canonical = "havregryn"
+status = "active"
+variants = ["glutenfrihavregryn"]
+offer_terms = ["havregryn"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "havregryn"
+variant = "glutenfrihavregryn"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "havregryn"
+offer_name = "Glutenfrihavregryn"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vegoburgare_006"
+language = "sv"
+market = "SE"
+canonical = "vegetariskhamburgare"
+status = "active"
+variants = ["vegoburgare"]
+offer_terms = ["vegetariskhamburgare", "hamburgare", "burgare"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "vegetariskhamburgare"
+variant = "vegoburgare"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "hamburgare"
+variant = "vegoburgare"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "burgare"
+variant = "vegoburgare"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegetariskhamburgare"
+offer_name = "Vegoburgare"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.veggoburgare_007"
+language = "sv"
+market = "SE"
+canonical = "vegetariskhamburgare"
+status = "active"
+variants = ["veggoburgare"]
+offer_terms = ["vegetariskhamburgare", "hamburgare", "burgare"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "vegetariskhamburgare"
+variant = "veggoburgare"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "hamburgare"
+variant = "veggoburgare"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "burgare"
+variant = "veggoburgare"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegetariskhamburgare"
+offer_name = "Veggoburgare"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.halloumiburgare_008"
+language = "sv"
+market = "SE"
+canonical = "vegetariskhamburgare"
+status = "active"
+variants = ["halloumiburgare"]
+offer_terms = ["vegetariskhamburgare"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "vegetariskhamburgare"
+variant = "halloumiburgare"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegetariskhamburgare"
+offer_name = "Halloumiburgare"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.grillostburgare_009"
+language = "sv"
+market = "SE"
+canonical = "vegetariskhamburgare"
+status = "active"
+variants = ["grillostburgare"]
+offer_terms = ["vegetariskhamburgare"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "vegetariskhamburgare"
+variant = "grillostburgare"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegetariskhamburgare"
+offer_name = "Grillostburgare"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.adelost_010"
+language = "sv"
+market = "SE"
+canonical = "ädel"
+status = "active"
+variants = ["ädelost"]
+offer_terms = ["ädel"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ädel"
+variant = "ädelost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ädel"
+offer_name = "Ädelost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.adelost_011_2"
+language = "sv"
+market = "SE"
+canonical = "adel"
+status = "active"
+variants = ["adelost"]
+offer_terms = ["adel"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "adel"
+variant = "adelost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "adel"
+offer_name = "Adelost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mjolkpulver_012"
+language = "sv"
+market = "SE"
+canonical = "torrmjölk"
+status = "active"
+variants = ["mjölkpulver"]
+offer_terms = ["torrmjölk"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "torrmjölk"
+variant = "mjölkpulver"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "torrmjölk"
+offer_name = "Mjölkpulver"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mjolkpulver_013_2"
+language = "sv"
+market = "SE"
+canonical = "torrmjölk"
+status = "active"
+variants = ["mjolkpulver"]
+offer_terms = ["torrmjölk"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "torrmjölk"
+variant = "mjolkpulver"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "torrmjölk"
+offer_name = "Mjolkpulver"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.basilico_014"
+language = "sv"
+market = "SE"
+canonical = "basilikapesto"
+status = "active"
+variants = ["basilico"]
+offer_terms = ["basilikapesto"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "basilikapesto"
+variant = "basilico"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "basilikapesto"
+offer_name = "Basilico"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cornichons_015"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["cornichons"]
+offer_terms = ["inlagdgurka", "cornichoner"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "inlagdgurka"
+variant = "cornichons"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "cornichoner"
+variant = "cornichons"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Cornichons"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cornichoner_016"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["cornichoner"]
+offer_terms = ["inlagdgurka", "cornichons"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "inlagdgurka"
+variant = "cornichoner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "cornichons"
+variant = "cornichoner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Cornichoner"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smorgaspickles_017"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["smörgåspickles"]
+offer_terms = ["inlagdgurka", "cornichons"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "inlagdgurka"
+variant = "smörgåspickles"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "cornichons"
+variant = "smörgåspickles"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Smörgåspickles"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smorgaspickles_018_2"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["smorgaspickles"]
+offer_terms = ["inlagdgurka", "cornichons"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "inlagdgurka"
+variant = "smorgaspickles"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "cornichons"
+variant = "smorgaspickles"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Smorgaspickles"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sockerartor_019"
+language = "sv"
+market = "SE"
+canonical = "salladsärtor"
+status = "active"
+variants = ["sockerärtor"]
+offer_terms = ["salladsärtor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsärtor"
+variant = "sockerärtor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsärtor"
+offer_name = "Sockerärtor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sockerartor_020_2"
+language = "sv"
+market = "SE"
+canonical = "salladsärtor"
+status = "active"
+variants = ["sockerartor"]
+offer_terms = ["salladsärtor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsärtor"
+variant = "sockerartor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsärtor"
+offer_name = "Sockerartor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.salladsartor_021"
+language = "sv"
+market = "SE"
+canonical = "sockerärtor"
+status = "active"
+variants = ["salladsärtor"]
+offer_terms = ["sockerärtor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "sockerärtor"
+variant = "salladsärtor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "sockerärtor"
+offer_name = "Salladsärtor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.salladsartor_022_2"
+language = "sv"
+market = "SE"
+canonical = "sockerärtor"
+status = "active"
+variants = ["salladsartor"]
+offer_terms = ["sockerärtor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "sockerärtor"
+variant = "salladsartor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "sockerärtor"
+offer_name = "Salladsartor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.majsmjol_023"
+language = "sv"
+market = "SE"
+canonical = "polenta"
+status = "active"
+variants = ["majsmjöl"]
+offer_terms = ["polenta"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "polenta"
+variant = "majsmjöl"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "polenta"
+offer_name = "Majsmjöl"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.majsmjol_024_2"
+language = "sv"
+market = "SE"
+canonical = "polenta"
+status = "active"
+variants = ["majsmjol"]
+offer_terms = ["polenta"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "polenta"
+variant = "majsmjol"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "polenta"
+offer_name = "Majsmjol"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.polenta_025"
+language = "sv"
+market = "SE"
+canonical = "majsmjöl"
+status = "active"
+variants = ["polenta"]
+offer_terms = ["majsmjöl"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "majsmjöl"
+variant = "polenta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "majsmjöl"
+offer_name = "Polenta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.persiljesmor_026"
+language = "sv"
+market = "SE"
+canonical = "aromsmör"
+status = "active"
+variants = ["persiljesmör"]
+offer_terms = ["aromsmör"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "aromsmör"
+variant = "persiljesmör"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "aromsmör"
+offer_name = "Persiljesmör"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.persiljesmor_027_2"
+language = "sv"
+market = "SE"
+canonical = "aromsmör"
+status = "active"
+variants = ["persiljesmor"]
+offer_terms = ["aromsmör"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "aromsmör"
+variant = "persiljesmor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "aromsmör"
+offer_name = "Persiljesmor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vitlokssmor_028"
+language = "sv"
+market = "SE"
+canonical = "aromsmör"
+status = "active"
+variants = ["vitlökssmör"]
+offer_terms = ["aromsmör"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "aromsmör"
+variant = "vitlökssmör"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "aromsmör"
+offer_name = "Vitlökssmör"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vitlokssmor_029_2"
+language = "sv"
+market = "SE"
+canonical = "aromsmör"
+status = "active"
+variants = ["vitlokssmor"]
+offer_terms = ["aromsmör"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "aromsmör"
+variant = "vitlokssmor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "aromsmör"
+offer_name = "Vitlokssmor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sobanudlar_030"
+language = "sv"
+market = "SE"
+canonical = "nudlar"
+status = "active"
+variants = ["sobanudlar"]
+offer_terms = ["nudlar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nudlar"
+variant = "sobanudlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nudlar"
+offer_name = "Sobanudlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.udonnudlar_031"
+language = "sv"
+market = "SE"
+canonical = "nudlar"
+status = "active"
+variants = ["udonnudlar"]
+offer_terms = ["nudlar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nudlar"
+variant = "udonnudlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nudlar"
+offer_name = "Udonnudlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.ramennudlar_032"
+language = "sv"
+market = "SE"
+canonical = "nudlar"
+status = "active"
+variants = ["ramennudlar"]
+offer_terms = ["nudlar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nudlar"
+variant = "ramennudlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nudlar"
+offer_name = "Ramennudlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.somennudlar_033"
+language = "sv"
+market = "SE"
+canonical = "nudlar"
+status = "active"
+variants = ["somennudlar"]
+offer_terms = ["nudlar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nudlar"
+variant = "somennudlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nudlar"
+offer_name = "Somennudlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.aggnudlar_034"
+language = "sv"
+market = "SE"
+canonical = "nudlar"
+status = "active"
+variants = ["äggnudlar"]
+offer_terms = ["nudlar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nudlar"
+variant = "äggnudlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nudlar"
+offer_name = "Äggnudlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.aggnudlar_035_2"
+language = "sv"
+market = "SE"
+canonical = "nudlar"
+status = "active"
+variants = ["aggnudlar"]
+offer_terms = ["nudlar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nudlar"
+variant = "aggnudlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nudlar"
+offer_name = "Aggnudlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.risnudlar_036"
+language = "sv"
+market = "SE"
+canonical = "nudlar"
+status = "active"
+variants = ["risnudlar"]
+offer_terms = ["nudlar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nudlar"
+variant = "risnudlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nudlar"
+offer_name = "Risnudlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.glasnudlar_037"
+language = "sv"
+market = "SE"
+canonical = "nudlar"
+status = "active"
+variants = ["glasnudlar"]
+offer_terms = ["nudlar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nudlar"
+variant = "glasnudlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nudlar"
+offer_name = "Glasnudlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vetenudlar_038"
+language = "sv"
+market = "SE"
+canonical = "nudlar"
+status = "active"
+variants = ["vetenudlar"]
+offer_terms = ["nudlar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nudlar"
+variant = "vetenudlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nudlar"
+offer_name = "Vetenudlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.ananasskivor_039"
+language = "sv"
+market = "SE"
+canonical = "ananas"
+status = "active"
+variants = ["ananasskivor"]
+offer_terms = ["ananas"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ananas"
+variant = "ananasskivor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ananas"
+offer_name = "Ananasskivor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.chiafron_040"
+language = "sv"
+market = "SE"
+canonical = "frön"
+status = "active"
+variants = ["chiafrön"]
+offer_terms = ["frön"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "frön"
+variant = "chiafrön"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "frön"
+offer_name = "Chiafrön"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.chiafron_041_2"
+language = "sv"
+market = "SE"
+canonical = "fron"
+status = "active"
+variants = ["chiafron"]
+offer_terms = ["fron"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fron"
+variant = "chiafron"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fron"
+offer_name = "Chiafron"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bockhornsklover_042"
+language = "sv"
+market = "SE"
+canonical = "frön"
+status = "active"
+variants = ["bockhornsklöver"]
+offer_terms = ["frön"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "frön"
+variant = "bockhornsklöver"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "frön"
+offer_name = "Bockhornsklöver"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bockhornsklover_043_2"
+language = "sv"
+market = "SE"
+canonical = "fron"
+status = "active"
+variants = ["bockhornsklover"]
+offer_terms = ["fron"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fron"
+variant = "bockhornsklover"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fron"
+offer_name = "Bockhornsklover"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pumpakarnor_044"
+language = "sv"
+market = "SE"
+canonical = "frön"
+status = "active"
+variants = ["pumpakärnor"]
+offer_terms = ["frön"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "frön"
+variant = "pumpakärnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "frön"
+offer_name = "Pumpakärnor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pumpakarnor_045_2"
+language = "sv"
+market = "SE"
+canonical = "fron"
+status = "active"
+variants = ["pumpakarnor"]
+offer_terms = ["fron"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fron"
+variant = "pumpakarnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fron"
+offer_name = "Pumpakarnor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pumpafron_046"
+language = "sv"
+market = "SE"
+canonical = "frön"
+status = "active"
+variants = ["pumpafrön"]
+offer_terms = ["frön"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "frön"
+variant = "pumpafrön"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "frön"
+offer_name = "Pumpafrön"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pumpafron_047_2"
+language = "sv"
+market = "SE"
+canonical = "fron"
+status = "active"
+variants = ["pumpafron"]
+offer_terms = ["fron"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fron"
+variant = "pumpafron"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fron"
+offer_name = "Pumpafron"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sesamfron_048"
+language = "sv"
+market = "SE"
+canonical = "frön"
+status = "active"
+variants = ["sesamfrön"]
+offer_terms = ["frön"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "frön"
+variant = "sesamfrön"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "frön"
+offer_name = "Sesamfrön"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sesamfron_049_2"
+language = "sv"
+market = "SE"
+canonical = "fron"
+status = "active"
+variants = ["sesamfron"]
+offer_terms = ["fron"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fron"
+variant = "sesamfron"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fron"
+offer_name = "Sesamfron"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.solrosfron_050"
+language = "sv"
+market = "SE"
+canonical = "solroskärnor"
+status = "active"
+variants = ["solrosfrön"]
+offer_terms = ["solroskärnor", "frön"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "solroskärnor"
+variant = "solrosfrön"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "frön"
+variant = "solrosfrön"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "solroskärnor"
+offer_name = "Solrosfrön"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.solrosfron_051_2"
+language = "sv"
+market = "SE"
+canonical = "solroskarnor"
+status = "active"
+variants = ["solrosfron"]
+offer_terms = ["solroskarnor", "fron"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "solroskarnor"
+variant = "solrosfron"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fron"
+variant = "solrosfron"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "solroskarnor"
+offer_name = "Solrosfron"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.solroskarnor_052"
+language = "sv"
+market = "SE"
+canonical = "solrosfrön"
+status = "active"
+variants = ["solroskärnor"]
+offer_terms = ["solrosfrön", "frön"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "solrosfrön"
+variant = "solroskärnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "frön"
+variant = "solroskärnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "solrosfrön"
+offer_name = "Solroskärnor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.solroskarnor_053_2"
+language = "sv"
+market = "SE"
+canonical = "solrosfron"
+status = "active"
+variants = ["solroskarnor"]
+offer_terms = ["solrosfron", "fron"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "solrosfron"
+variant = "solroskarnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fron"
+variant = "solroskarnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "solrosfron"
+offer_name = "Solroskarnor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.linfro_054"
+language = "sv"
+market = "SE"
+canonical = "frön"
+status = "active"
+variants = ["linfrö"]
+offer_terms = ["frön"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "frön"
+variant = "linfrö"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "frön"
+offer_name = "Linfrö"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.linfro_055_2"
+language = "sv"
+market = "SE"
+canonical = "fron"
+status = "active"
+variants = ["linfro"]
+offer_terms = ["fron"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fron"
+variant = "linfro"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fron"
+offer_name = "Linfro"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.krustader_056"
+language = "sv"
+market = "SE"
+canonical = "minikrustader"
+status = "active"
+variants = ["krustader"]
+offer_terms = ["minikrustader"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "minikrustader"
+variant = "krustader"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "minikrustader"
+offer_name = "Krustader"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.marangtoppar_057"
+language = "sv"
+market = "SE"
+canonical = "maräng"
+status = "active"
+variants = ["marängtoppar"]
+offer_terms = ["maräng"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "maräng"
+variant = "marängtoppar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "maräng"
+offer_name = "Marängtoppar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.marangtoppar_058_2"
+language = "sv"
+market = "SE"
+canonical = "marang"
+status = "active"
+variants = ["marangtoppar"]
+offer_terms = ["marang"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "marang"
+variant = "marangtoppar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "marang"
+offer_name = "Marangtoppar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.marangdroppar_059"
+language = "sv"
+market = "SE"
+canonical = "maräng"
+status = "active"
+variants = ["marängdroppar"]
+offer_terms = ["maräng"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "maräng"
+variant = "marängdroppar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "maräng"
+offer_name = "Marängdroppar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.marangdroppar_060_2"
+language = "sv"
+market = "SE"
+canonical = "marang"
+status = "active"
+variants = ["marangdroppar"]
+offer_terms = ["marang"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "marang"
+variant = "marangdroppar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "marang"
+offer_name = "Marangdroppar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.quornfars_061"
+language = "sv"
+market = "SE"
+canonical = "vegofärs"
+status = "active"
+variants = ["quornfärs"]
+offer_terms = ["vegofärs"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "vegofärs"
+variant = "quornfärs"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegofärs"
+offer_name = "Quornfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.quornfars_062_2"
+language = "sv"
+market = "SE"
+canonical = "vegofärs"
+status = "active"
+variants = ["quornfars"]
+offer_terms = ["vegofärs"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "vegofärs"
+variant = "quornfars"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegofärs"
+offer_name = "Quornfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvhogrev_063"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvhögrev"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvhögrev"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvhögrev"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvhogrev_064_2"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvhogrev"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvhogrev"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvhogrev"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvbiff_065"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvbiff"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvbiff"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvbiff"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalventrecote_066"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalventrecote"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalventrecote"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalventrecote"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvschnitzel_067"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvschnitzel"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvschnitzel"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvschnitzel"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvstek_068"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvstek"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvstek"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvstek"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvfile_069"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvfilé"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvfile_070_2"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvfile"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvytterfile_071"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvytterfilé"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvytterfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvytterfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvytterfile_072_2"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvytterfile"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvytterfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvytterfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvinnanlar_073"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvinnanlår"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvinnanlår"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvinnanlår"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvinnanlar_074_2"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvinnanlar"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvinnanlar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvinnanlar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvlagg_075"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvlägg"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvlägg"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvlägg"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvlagg_076_2"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvlagg"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvlagg"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvlagg"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvbog_077"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvbog"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvbog"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvbog"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvbringa_078"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvbringa"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvbringa"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvbringa"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvkotlett_079"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvkotlett"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvkotlett"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvkotlett"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalvrygg_080"
+language = "sv"
+market = "SE"
+canonical = "kalvkött"
+status = "active"
+variants = ["kalvrygg"]
+offer_terms = ["kalvkött"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kalvkött"
+variant = "kalvrygg"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvkött"
+offer_name = "Kalvrygg"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.laxfile_081"
+language = "sv"
+market = "SE"
+canonical = "lax"
+status = "active"
+variants = ["laxfilé"]
+offer_terms = ["lax", "fiskfilé"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "lax"
+variant = "laxfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fiskfilé"
+variant = "laxfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lax"
+offer_name = "Laxfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.laxfile_082_2"
+language = "sv"
+market = "SE"
+canonical = "lax"
+status = "active"
+variants = ["laxfile"]
+offer_terms = ["lax", "fiskfilé"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "lax"
+variant = "laxfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fiskfilé"
+variant = "laxfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lax"
+offer_name = "Laxfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.torsk_083"
+language = "sv"
+market = "SE"
+canonical = "fiskfilé"
+status = "active"
+variants = ["torsk"]
+offer_terms = ["fiskfilé"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fiskfilé"
+variant = "torsk"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fiskfilé"
+offer_name = "Torsk"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.stillahavstorsk_084"
+language = "sv"
+market = "SE"
+canonical = "fiskfilé"
+status = "active"
+variants = ["stillahavstorsk"]
+offer_terms = ["fiskfilé"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fiskfilé"
+variant = "stillahavstorsk"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fiskfilé"
+offer_name = "Stillahavstorsk"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kolja_085"
+language = "sv"
+market = "SE"
+canonical = "fiskfilé"
+status = "active"
+variants = ["kolja"]
+offer_terms = ["fiskfilé"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fiskfilé"
+variant = "kolja"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fiskfilé"
+offer_name = "Kolja"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sej_086"
+language = "sv"
+market = "SE"
+canonical = "fiskfilé"
+status = "active"
+variants = ["sej"]
+offer_terms = ["fiskfilé"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fiskfilé"
+variant = "sej"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fiskfilé"
+offer_name = "Sej"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspatta_087"
+language = "sv"
+market = "SE"
+canonical = "fiskfilé"
+status = "active"
+variants = ["rödspätta"]
+offer_terms = ["fiskfilé"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fiskfilé"
+variant = "rödspätta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fiskfilé"
+offer_name = "Rödspätta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspatta_088_2"
+language = "sv"
+market = "SE"
+canonical = "fiskfilé"
+status = "active"
+variants = ["rodspatta"]
+offer_terms = ["fiskfilé"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fiskfilé"
+variant = "rodspatta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fiskfilé"
+offer_name = "Rodspatta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.najadlax_089"
+language = "sv"
+market = "SE"
+canonical = "lax"
+status = "active"
+variants = ["najadlax"]
+offer_terms = ["lax"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "lax"
+variant = "najadlax"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lax"
+offer_name = "Najadlax"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.blamusslor_090"
+language = "sv"
+market = "SE"
+canonical = "musslor"
+status = "active"
+variants = ["blåmusslor"]
+offer_terms = ["musslor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "musslor"
+variant = "blåmusslor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "musslor"
+offer_name = "Blåmusslor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.blamusslor_091_2"
+language = "sv"
+market = "SE"
+canonical = "musslor"
+status = "active"
+variants = ["blamusslor"]
+offer_terms = ["musslor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "musslor"
+variant = "blamusslor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "musslor"
+offer_name = "Blamusslor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.gronmusslor_092"
+language = "sv"
+market = "SE"
+canonical = "musslor"
+status = "active"
+variants = ["grönmusslor"]
+offer_terms = ["musslor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "musslor"
+variant = "grönmusslor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "musslor"
+offer_name = "Grönmusslor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.gronmusslor_093_2"
+language = "sv"
+market = "SE"
+canonical = "musslor"
+status = "active"
+variants = ["gronmusslor"]
+offer_terms = ["musslor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "musslor"
+variant = "gronmusslor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "musslor"
+offer_name = "Gronmusslor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kammusslor_094"
+language = "sv"
+market = "SE"
+canonical = "kammussla"
+status = "active"
+variants = ["kammusslor"]
+offer_terms = ["kammussla", "pilgrimsmussla"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kammussla"
+variant = "kammusslor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "pilgrimsmussla"
+variant = "kammusslor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kammussla"
+offer_name = "Kammusslor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pilgrimsmusslor_095"
+language = "sv"
+market = "SE"
+canonical = "kammussla"
+status = "active"
+variants = ["pilgrimsmusslor"]
+offer_terms = ["kammussla", "pilgrimsmussla"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kammussla"
+variant = "pilgrimsmusslor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "pilgrimsmussla"
+variant = "pilgrimsmusslor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kammussla"
+offer_name = "Pilgrimsmusslor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.chokladtartbotten_096"
+language = "sv"
+market = "SE"
+canonical = "tårtbottnar"
+status = "active"
+variants = ["chokladtårtbotten"]
+offer_terms = ["tårtbottnar", "tårtbotten"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tårtbottnar"
+variant = "chokladtårtbotten"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tårtbotten"
+variant = "chokladtårtbotten"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tårtbottnar"
+offer_name = "Chokladtårtbotten"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.chokladtartbotten_097_2"
+language = "sv"
+market = "SE"
+canonical = "tårtbottnar"
+status = "active"
+variants = ["chokladtartbotten"]
+offer_terms = ["tårtbottnar", "tårtbotten"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tårtbottnar"
+variant = "chokladtartbotten"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tårtbotten"
+variant = "chokladtartbotten"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tårtbottnar"
+offer_name = "Chokladtartbotten"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vaniljtartbotten_098"
+language = "sv"
+market = "SE"
+canonical = "tårtbottnar"
+status = "active"
+variants = ["vaniljtårtbotten"]
+offer_terms = ["tårtbottnar", "tårtbotten"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tårtbottnar"
+variant = "vaniljtårtbotten"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tårtbotten"
+variant = "vaniljtårtbotten"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tårtbottnar"
+offer_name = "Vaniljtårtbotten"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vaniljtartbotten_099_2"
+language = "sv"
+market = "SE"
+canonical = "tårtbottnar"
+status = "active"
+variants = ["vaniljtartbotten"]
+offer_terms = ["tårtbottnar", "tårtbotten"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tårtbottnar"
+variant = "vaniljtartbotten"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tårtbotten"
+variant = "vaniljtartbotten"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tårtbottnar"
+offer_name = "Vaniljtartbotten"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sillfile_100"
+language = "sv"
+market = "SE"
+canonical = "sillfileer"
+status = "active"
+variants = ["sillfilé"]
+offer_terms = ["sillfileer", "strömmingsfileer"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "sillfileer"
+variant = "sillfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "strömmingsfileer"
+variant = "sillfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "sillfileer"
+offer_name = "Sillfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sillfile_101_2"
+language = "sv"
+market = "SE"
+canonical = "sillfileer"
+status = "active"
+variants = ["sillfile"]
+offer_terms = ["sillfileer", "strömmingsfileer"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "sillfileer"
+variant = "sillfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "strömmingsfileer"
+variant = "sillfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "sillfileer"
+offer_name = "Sillfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.strommingsfileer_102"
+language = "sv"
+market = "SE"
+canonical = "sillfileer"
+status = "active"
+variants = ["strömmingsfileer"]
+offer_terms = ["sillfileer"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "sillfileer"
+variant = "strömmingsfileer"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "sillfileer"
+offer_name = "Strömmingsfileer"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.antipastitallrik_103"
+language = "sv"
+market = "SE"
+canonical = "charkbricka"
+status = "active"
+variants = ["antipastitallrik"]
+offer_terms = ["charkbricka"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "charkbricka"
+variant = "antipastitallrik"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "charkbricka"
+offer_name = "Antipastitallrik"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tapastallrik_104"
+language = "sv"
+market = "SE"
+canonical = "charkbricka"
+status = "active"
+variants = ["tapastallrik"]
+offer_terms = ["charkbricka"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "charkbricka"
+variant = "tapastallrik"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "charkbricka"
+offer_name = "Tapastallrik"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tapasmix_105"
+language = "sv"
+market = "SE"
+canonical = "charkbricka"
+status = "active"
+variants = ["tapasmix"]
+offer_terms = ["charkbricka"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "charkbricka"
+variant = "tapasmix"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "charkbricka"
+offer_name = "Tapasmix"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pepparsalami_106"
+language = "sv"
+market = "SE"
+canonical = "salami"
+status = "active"
+variants = ["pepparsalami"]
+offer_terms = ["salami"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salami"
+variant = "pepparsalami"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salami"
+offer_name = "Pepparsalami"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cocktailbar_107"
+language = "sv"
+market = "SE"
+canonical = "maraschinokörsbär"
+status = "active"
+variants = ["cocktailbär"]
+offer_terms = ["maraschinokörsbär"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "maraschinokörsbär"
+variant = "cocktailbär"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "maraschinokörsbär"
+offer_name = "Cocktailbär"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cocktailbar_108_2"
+language = "sv"
+market = "SE"
+canonical = "maraschinokörsbär"
+status = "active"
+variants = ["cocktailbar"]
+offer_terms = ["maraschinokörsbär"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "maraschinokörsbär"
+variant = "cocktailbar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "maraschinokörsbär"
+offer_name = "Cocktailbar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.torskfile_109"
+language = "sv"
+market = "SE"
+canonical = "torsk"
+status = "active"
+variants = ["torskfilé"]
+offer_terms = ["torsk"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "torsk"
+variant = "torskfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "torsk"
+offer_name = "Torskfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.torskfile_110_2"
+language = "sv"
+market = "SE"
+canonical = "torsk"
+status = "active"
+variants = ["torskfile"]
+offer_terms = ["torsk"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "torsk"
+variant = "torskfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "torsk"
+offer_name = "Torskfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.torskrygg_111"
+language = "sv"
+market = "SE"
+canonical = "torsk"
+status = "active"
+variants = ["torskrygg"]
+offer_terms = ["torsk"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "torsk"
+variant = "torskrygg"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "torsk"
+offer_name = "Torskrygg"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sejfile_112"
+language = "sv"
+market = "SE"
+canonical = "sej"
+status = "active"
+variants = ["sejfilé"]
+offer_terms = ["sej"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "sej"
+variant = "sejfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "sej"
+offer_name = "Sejfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sejfile_113_2"
+language = "sv"
+market = "SE"
+canonical = "sej"
+status = "active"
+variants = ["sejfile"]
+offer_terms = ["sej"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "sej"
+variant = "sejfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "sej"
+offer_name = "Sejfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.koljafile_114"
+language = "sv"
+market = "SE"
+canonical = "kolja"
+status = "active"
+variants = ["koljafilé"]
+offer_terms = ["kolja"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kolja"
+variant = "koljafilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kolja"
+offer_name = "Koljafilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.koljafile_115_2"
+language = "sv"
+market = "SE"
+canonical = "kolja"
+status = "active"
+variants = ["koljafile"]
+offer_terms = ["kolja"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kolja"
+variant = "koljafile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kolja"
+offer_name = "Koljafile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspattafile_116"
+language = "sv"
+market = "SE"
+canonical = "rödspätta"
+status = "active"
+variants = ["rödspättafilé"]
+offer_terms = ["rödspätta"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "rödspätta"
+variant = "rödspättafilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rödspätta"
+offer_name = "Rödspättafilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodspattafile_117_2"
+language = "sv"
+market = "SE"
+canonical = "rödspätta"
+status = "active"
+variants = ["rodspattafile"]
+offer_terms = ["rödspätta"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "rödspätta"
+variant = "rodspattafile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rödspätta"
+offer_name = "Rodspattafile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.parmigiano_reggiano_118"
+language = "sv"
+market = "SE"
+canonical = "parmigiano"
+status = "active"
+variants = ["parmigiano reggiano"]
+offer_terms = ["parmigiano"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "parmigiano"
+variant = "parmigiano reggiano"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "parmigiano"
+offer_name = "Parmigiano Reggiano"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.babyspenat_119"
+language = "sv"
+market = "SE"
+canonical = "spenat"
+status = "active"
+variants = ["babyspenat"]
+offer_terms = ["spenat"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "spenat"
+variant = "babyspenat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "spenat"
+offer_name = "Babyspenat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bladspenat_120"
+language = "sv"
+market = "SE"
+canonical = "spenat"
+status = "active"
+variants = ["bladspenat"]
+offer_terms = ["spenat"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "spenat"
+variant = "bladspenat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "spenat"
+offer_name = "Bladspenat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kronartskocka_121"
+language = "sv"
+market = "SE"
+canonical = "kronärtskockshjärta"
+status = "active"
+variants = ["kronärtskocka"]
+offer_terms = ["kronärtskockshjärta"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kronärtskockshjärta"
+variant = "kronärtskocka"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kronärtskockshjärta"
+offer_name = "Kronärtskocka"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kronartskocka_122_2"
+language = "sv"
+market = "SE"
+canonical = "kronärtskockshjärta"
+status = "active"
+variants = ["kronartskocka"]
+offer_terms = ["kronärtskockshjärta"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kronärtskockshjärta"
+variant = "kronartskocka"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kronärtskockshjärta"
+offer_name = "Kronartskocka"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.strosocker_123"
+language = "sv"
+market = "SE"
+canonical = "socker"
+status = "active"
+variants = ["strösocker"]
+offer_terms = ["socker"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "socker"
+variant = "strösocker"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "socker"
+offer_name = "Strösocker"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.strosocker_124_2"
+language = "sv"
+market = "SE"
+canonical = "socker"
+status = "active"
+variants = ["strosocker"]
+offer_terms = ["socker"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "socker"
+variant = "strosocker"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "socker"
+offer_name = "Strosocker"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.majskorn_125"
+language = "sv"
+market = "SE"
+canonical = "majs"
+status = "active"
+variants = ["majskorn"]
+offer_terms = ["majs"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "majs"
+variant = "majskorn"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "majs"
+offer_name = "Majskorn"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.balsamico_126"
+language = "sv"
+market = "SE"
+canonical = "balsamvinäger"
+status = "active"
+variants = ["balsamico"]
+offer_terms = ["balsamvinäger"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "balsamvinäger"
+variant = "balsamico"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "balsamvinäger"
+offer_name = "Balsamico"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rucola_127"
+language = "sv"
+market = "SE"
+canonical = "ruccola"
+status = "active"
+variants = ["rucola"]
+offer_terms = ["ruccola"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ruccola"
+variant = "rucola"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ruccola"
+offer_name = "Rucola"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.gruyere_128"
+language = "sv"
+market = "SE"
+canonical = "gruyere"
+status = "active"
+variants = ["gruyère"]
+offer_terms = ["gruyere"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "gruyere"
+variant = "gruyère"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "gruyere"
+offer_name = "Gruyère"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.gruyere_129_2"
+language = "sv"
+market = "SE"
+canonical = "gruyere"
+status = "active"
+variants = ["gruyére"]
+offer_terms = ["gruyere"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "gruyere"
+variant = "gruyére"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "gruyere"
+offer_name = "Gruyére"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.prastost_130"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["prästost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "prästost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Prästost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.prastost_131_2"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["prastost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "prastost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Prastost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.herrgardsost_132"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["herrgårdsost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "herrgårdsost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Herrgårdsost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.herrgardost_133"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["herrgardost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "herrgardost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Herrgardost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.greveost_134"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["grevéost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "grevéost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Grevéost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.greveost_135_2"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["greveost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "greveost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Greveost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hushallsost_136"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["hushållsost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "hushållsost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Hushållsost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hushallsost_137_2"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["hushallsost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "hushallsost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Hushallsost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.edamerost_138"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["edamerost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "edamerost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Edamerost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sveciaost_139"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["sveciaost"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "sveciaost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Sveciaost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cashewnotter_140"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["cashewnötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "cashewnötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Cashewnötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cashewnotter_141_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["cashewnotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "cashewnotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Cashewnotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.havredryck_142"
+language = "sv"
+market = "SE"
+canonical = "växtdryck"
+status = "active"
+variants = ["havredryck"]
+offer_terms = ["växtdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "växtdryck"
+variant = "havredryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "växtdryck"
+offer_name = "Havredryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sojadryck_143"
+language = "sv"
+market = "SE"
+canonical = "växtdryck"
+status = "active"
+variants = ["sojadryck"]
+offer_terms = ["växtdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "växtdryck"
+variant = "sojadryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "växtdryck"
+offer_name = "Sojadryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mandeldryck_144"
+language = "sv"
+market = "SE"
+canonical = "växtdryck"
+status = "active"
+variants = ["mandeldryck"]
+offer_terms = ["växtdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "växtdryck"
+variant = "mandeldryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "växtdryck"
+offer_name = "Mandeldryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.artdryck_145"
+language = "sv"
+market = "SE"
+canonical = "växtdryck"
+status = "active"
+variants = ["ärtdryck"]
+offer_terms = ["växtdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "växtdryck"
+variant = "ärtdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "växtdryck"
+offer_name = "Ärtdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.artdryck_146_2"
+language = "sv"
+market = "SE"
+canonical = "växtdryck"
+status = "active"
+variants = ["artdryck"]
+offer_terms = ["växtdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "växtdryck"
+variant = "artdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "växtdryck"
+offer_name = "Artdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.risdryck_147"
+language = "sv"
+market = "SE"
+canonical = "växtdryck"
+status = "active"
+variants = ["risdryck"]
+offer_terms = ["växtdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "växtdryck"
+variant = "risdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "växtdryck"
+offer_name = "Risdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kokosdryck_148"
+language = "sv"
+market = "SE"
+canonical = "växtdryck"
+status = "active"
+variants = ["kokosdryck"]
+offer_terms = ["växtdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "växtdryck"
+variant = "kokosdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "växtdryck"
+offer_name = "Kokosdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mjolkdryck_149"
+language = "sv"
+market = "SE"
+canonical = "mjölk"
+status = "active"
+variants = ["mjölkdryck"]
+offer_terms = ["mjölk", "mellanmjölk"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "mjölk"
+variant = "mjölkdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "mellanmjölk"
+variant = "mjölkdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "mjölk"
+offer_name = "Mjölkdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mjolkdryck_150_2"
+language = "sv"
+market = "SE"
+canonical = "mjölk"
+status = "active"
+variants = ["mjolkdryck"]
+offer_terms = ["mjölk", "mellanmjölk"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "mjölk"
+variant = "mjolkdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "mellanmjölk"
+variant = "mjolkdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "mjölk"
+offer_name = "Mjolkdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sojasas_151"
+language = "sv"
+market = "SE"
+canonical = "soja"
+status = "active"
+variants = ["sojasås"]
+offer_terms = ["soja"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "soja"
+variant = "sojasås"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "soja"
+offer_name = "Sojasås"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sojasas_152_2"
+language = "sv"
+market = "SE"
+canonical = "soja"
+status = "active"
+variants = ["sojasas"]
+offer_terms = ["soja"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "soja"
+variant = "sojasas"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "soja"
+offer_name = "Sojasas"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fladerblomsdryck_153"
+language = "sv"
+market = "SE"
+canonical = "fläderdryck"
+status = "active"
+variants = ["fläderblomsdryck"]
+offer_terms = ["fläderdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fläderdryck"
+variant = "fläderblomsdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fläderdryck"
+offer_name = "Fläderblomsdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fladerblomsdryck_154_2"
+language = "sv"
+market = "SE"
+canonical = "fladerdryck"
+status = "active"
+variants = ["fladerblomsdryck"]
+offer_terms = ["fladerdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fladerdryck"
+variant = "fladerblomsdryck"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fladerdryck"
+offer_name = "Fladerblomsdryck"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fladersaft_155"
+language = "sv"
+market = "SE"
+canonical = "fläderdryck"
+status = "active"
+variants = ["flädersaft"]
+offer_terms = ["fläderdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fläderdryck"
+variant = "flädersaft"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fläderdryck"
+offer_name = "Flädersaft"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fladersaft_156_2"
+language = "sv"
+market = "SE"
+canonical = "fladerdryck"
+status = "active"
+variants = ["fladersaft"]
+offer_terms = ["fladerdryck"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fladerdryck"
+variant = "fladersaft"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fladerdryck"
+offer_name = "Fladersaft"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.krispies_157"
+language = "sv"
+market = "SE"
+canonical = "rispuffar"
+status = "active"
+variants = ["krispies"]
+offer_terms = ["rispuffar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "rispuffar"
+variant = "krispies"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rispuffar"
+offer_name = "Krispies"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hasselnotter_158"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["hasselnötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "hasselnötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Hasselnötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hasselnotter_159_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["hasselnotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "hasselnotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Hasselnotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hasselnotskarnor_160"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["hasselnötskärnor"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "hasselnötskärnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Hasselnötskärnor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hasselnotskarnor_161_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["hasselnotskarnor"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "hasselnotskarnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Hasselnotskarnor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.jordnotter_162"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["jordnötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "jordnötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Jordnötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.jordnotter_163_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["jordnotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "jordnotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Jordnotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.macadamianotter_164"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["macadamianötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "macadamianötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Macadamianötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.macadamianotter_165_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["macadamianotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "macadamianotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Macadamianotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.paranotter_166"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["paranötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "paranötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Paranötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.paranotter_167_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["paranotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "paranotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Paranotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pekannotter_168"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pekannötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pekannötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pekannötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pekannotter_169_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pekannotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pekannotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pekannotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pecannotter_170"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pecannötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pecannötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pecannötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pecannotter_171_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pecannotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pecannotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pecannotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pinjenotter_172"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pinjenötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pinjenötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pinjenötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pinjenotter_173_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pinjenotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pinjenotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pinjenotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pistagenotter_174"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pistagenötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pistagenötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pistagenötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pistagenotter_175_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pistagenotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pistagenotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pistagenotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pistaschnotter_176"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pistaschnötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pistaschnötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pistaschnötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pistaschnotter_177_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["pistaschnotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "pistaschnotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Pistaschnotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.valnotter_178"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["valnötter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "valnötter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Valnötter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.valnotter_179_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["valnotter"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "valnotter"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Valnotter"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.valnotskarnor_180"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["valnötskärnor"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "valnötskärnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Valnötskärnor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.valnotskarnor_181_2"
+language = "sv"
+market = "SE"
+canonical = "nötter"
+status = "active"
+variants = ["valnotskarnor"]
+offer_terms = ["nötter"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötter"
+variant = "valnotskarnor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötter"
+offer_name = "Valnotskarnor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.makrillbitar_182"
+language = "sv"
+market = "SE"
+canonical = "makrill"
+status = "active"
+variants = ["makrillbitar"]
+offer_terms = ["makrill"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "makrill"
+variant = "makrillbitar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "makrill"
+offer_name = "Makrillbitar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.makrillfile_183"
+language = "sv"
+market = "SE"
+canonical = "makrill"
+status = "active"
+variants = ["makrillfilé"]
+offer_terms = ["makrill"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "makrill"
+variant = "makrillfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "makrill"
+offer_name = "Makrillfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.makrillfile_184_2"
+language = "sv"
+market = "SE"
+canonical = "makrill"
+status = "active"
+variants = ["makrillfile"]
+offer_terms = ["makrill"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "makrill"
+variant = "makrillfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "makrill"
+offer_name = "Makrillfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mandarinklyftor_185"
+language = "sv"
+market = "SE"
+canonical = "mandariner"
+status = "active"
+variants = ["mandarinklyftor"]
+offer_terms = ["mandariner"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "mandariner"
+variant = "mandarinklyftor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "mandariner"
+offer_name = "Mandarinklyftor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vegochorizo_186"
+language = "sv"
+market = "SE"
+canonical = "chorizo"
+status = "active"
+variants = ["vegochorizo"]
+offer_terms = ["chorizo"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "chorizo"
+variant = "vegochorizo"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "chorizo"
+offer_name = "Vegochorizo"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.chorizo_187"
+language = "sv"
+market = "SE"
+canonical = "korv"
+status = "active"
+variants = ["chorizo"]
+offer_terms = ["korv"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "korv"
+variant = "chorizo"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korv"
+offer_name = "Chorizo"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.salsiccia_188"
+language = "sv"
+market = "SE"
+canonical = "korv"
+status = "active"
+variants = ["salsiccia"]
+offer_terms = ["korv"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "korv"
+variant = "salsiccia"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korv"
+offer_name = "Salsiccia"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kabanoss_189"
+language = "sv"
+market = "SE"
+canonical = "korv"
+status = "active"
+variants = ["kabanoss"]
+offer_terms = ["korv"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "korv"
+variant = "kabanoss"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korv"
+offer_name = "Kabanoss"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cabanossy_190"
+language = "sv"
+market = "SE"
+canonical = "korv"
+status = "active"
+variants = ["cabanossy"]
+offer_terms = ["korv"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "korv"
+variant = "cabanossy"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korv"
+offer_name = "Cabanossy"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bratwurst_191"
+language = "sv"
+market = "SE"
+canonical = "korv"
+status = "active"
+variants = ["bratwurst"]
+offer_terms = ["korv"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "korv"
+variant = "bratwurst"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korv"
+offer_name = "Bratwurst"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.isterband_192"
+language = "sv"
+market = "SE"
+canonical = "korv"
+status = "active"
+variants = ["isterband"]
+offer_terms = ["korv"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "korv"
+variant = "isterband"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korv"
+offer_name = "Isterband"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.medister_193"
+language = "sv"
+market = "SE"
+canonical = "korv"
+status = "active"
+variants = ["medister"]
+offer_terms = ["korv"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "korv"
+variant = "medister"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korv"
+offer_name = "Medister"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.merguez_194"
+language = "sv"
+market = "SE"
+canonical = "korv"
+status = "active"
+variants = ["merguez"]
+offer_terms = ["korv"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "korv"
+variant = "merguez"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korv"
+offer_name = "Merguez"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.idealmakaroner_195"
+language = "sv"
+market = "SE"
+canonical = "pasta"
+status = "active"
+variants = ["idealmakaroner"]
+offer_terms = ["pasta"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "pasta"
+variant = "idealmakaroner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pasta"
+offer_name = "Idealmakaroner"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodcurrypasta_196"
+language = "sv"
+market = "SE"
+canonical = "rödcurry"
+status = "active"
+variants = ["rödcurrypasta"]
+offer_terms = ["rödcurry"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "rödcurry"
+variant = "rödcurrypasta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rödcurry"
+offer_name = "Rödcurrypasta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodcurrypasta_197_2"
+language = "sv"
+market = "SE"
+canonical = "rodcurry"
+status = "active"
+variants = ["rodcurrypasta"]
+offer_terms = ["rodcurry"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "rodcurry"
+variant = "rodcurrypasta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rodcurry"
+offer_name = "Rodcurrypasta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.groncurrypasta_198"
+language = "sv"
+market = "SE"
+canonical = "gröncurry"
+status = "active"
+variants = ["gröncurrypasta"]
+offer_terms = ["gröncurry"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "gröncurry"
+variant = "gröncurrypasta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "gröncurry"
+offer_name = "Gröncurrypasta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.groncurrypasta_199_2"
+language = "sv"
+market = "SE"
+canonical = "groncurry"
+status = "active"
+variants = ["groncurrypasta"]
+offer_terms = ["groncurry"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "groncurry"
+variant = "groncurrypasta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "groncurry"
+offer_name = "Groncurrypasta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.gulcurrypasta_200"
+language = "sv"
+market = "SE"
+canonical = "gulcurry"
+status = "active"
+variants = ["gulcurrypasta"]
+offer_terms = ["gulcurry"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "gulcurry"
+variant = "gulcurrypasta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "gulcurry"
+offer_name = "Gulcurrypasta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.crispychiliolja_201"
+language = "sv"
+market = "SE"
+canonical = "chiliolja"
+status = "active"
+variants = ["crispychiliolja"]
+offer_terms = ["chiliolja"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "chiliolja"
+variant = "crispychiliolja"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "chiliolja"
+offer_name = "Crispychiliolja"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.chiliflakes_202"
+language = "sv"
+market = "SE"
+canonical = "chili"
+status = "active"
+variants = ["chiliflakes"]
+offer_terms = ["chili"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "chili"
+variant = "chiliflakes"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "chili"
+offer_name = "Chiliflakes"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.chiliflingor_203"
+language = "sv"
+market = "SE"
+canonical = "chili"
+status = "active"
+variants = ["chiliflingor"]
+offer_terms = ["chili"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "chili"
+variant = "chiliflingor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "chili"
+offer_name = "Chiliflingor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalkonbacon_204"
+language = "sv"
+market = "SE"
+canonical = "bacon"
+status = "active"
+variants = ["kalkonbacon"]
+offer_terms = ["bacon"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "bacon"
+variant = "kalkonbacon"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "bacon"
+offer_name = "Kalkonbacon"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalkonkorv_205"
+language = "sv"
+market = "SE"
+canonical = "korv"
+status = "active"
+variants = ["kalkonkorv"]
+offer_terms = ["korv"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "korv"
+variant = "kalkonkorv"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korv"
+offer_name = "Kalkonkorv"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kalkonkottbullar_206"
+language = "sv"
+market = "SE"
+canonical = "köttbullar"
+status = "active"
+variants = ["kalkonköttbullar"]
+offer_terms = ["köttbullar"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "köttbullar"
+variant = "kalkonköttbullar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "köttbullar"
+offer_name = "Kalkonköttbullar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.baconost_207"
+language = "sv"
+market = "SE"
+canonical = "baconmjukost"
+status = "active"
+variants = ["baconost"]
+offer_terms = ["baconmjukost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "baconmjukost"
+variant = "baconost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "baconmjukost"
+offer_name = "Baconost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.langpasta_208"
+language = "sv"
+market = "SE"
+canonical = "pasta"
+status = "active"
+variants = ["långpasta"]
+offer_terms = ["pasta"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "pasta"
+variant = "långpasta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pasta"
+offer_name = "Långpasta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.langpasta_209_2"
+language = "sv"
+market = "SE"
+canonical = "pasta"
+status = "active"
+variants = ["langpasta"]
+offer_terms = ["pasta"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "pasta"
+variant = "langpasta"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pasta"
+offer_name = "Langpasta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kantarellfond_210"
+language = "sv"
+market = "SE"
+canonical = "fond"
+status = "active"
+variants = ["kantarellfond"]
+offer_terms = ["fond", "svampfond"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "fond"
+variant = "kantarellfond"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "svampfond"
+variant = "kantarellfond"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fond"
+offer_name = "Kantarellfond"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rostbrod_211"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["rostbröd"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "rostbröd"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Rostbröd"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rostbrod_212_2"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["rostbrod"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "rostbrod"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Rostbrod"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.frasrost_213"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["frasrost"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "frasrost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Frasrost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.ostrost_214"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["ostrost"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "ostrost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Ostrost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fiberrost_215"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["fiberrost"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "fiberrost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Fiberrost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.originalrost_216"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["originalrost"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "originalrost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Originalrost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.frorost_217"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["frörost"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "frörost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Frörost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.frorost_218_2"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["frorost"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "frorost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Frorost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vallmorost_219"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["vallmorost"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "vallmorost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Vallmorost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.levainrost_220"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["levainrost"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "levainrost"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Levainrost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.roast_n_221"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["roast'n"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "roast'n"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Roast'N"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.brioche_222"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["brioche"]
+offer_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "brioche"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Brioche"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.slider_223"
+language = "sv"
+market = "SE"
+canonical = "hamburgerbröd"
+status = "active"
+variants = ["slider"]
+offer_terms = ["hamburgerbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "hamburgerbröd"
+variant = "slider"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hamburgerbröd"
+offer_name = "Slider"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sliders_224"
+language = "sv"
+market = "SE"
+canonical = "hamburgerbröd"
+status = "active"
+variants = ["sliders"]
+offer_terms = ["hamburgerbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "hamburgerbröd"
+variant = "sliders"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hamburgerbröd"
+offer_name = "Sliders"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.jattefranska_225"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["jättefranska"]
+offer_terms = ["formbröd", "formfranska"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "jättefranska"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formfranska"
+variant = "jättefranska"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Jättefranska"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.jattefranska_226_2"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["jattefranska"]
+offer_terms = ["formbröd", "formfranska"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formbröd"
+variant = "jattefranska"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formfranska"
+variant = "jattefranska"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formbröd"
+offer_name = "Jattefranska"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.formbrod_227"
+language = "sv"
+market = "SE"
+canonical = "formfranska"
+status = "active"
+variants = ["formbröd"]
+offer_terms = ["formfranska"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "formfranska"
+variant = "formbröd"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "formfranska"
+offer_name = "Formbröd"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sarek_228"
+language = "sv"
+market = "SE"
+canonical = "tunnbröd"
+status = "active"
+variants = ["sarek"]
+offer_terms = ["tunnbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tunnbröd"
+variant = "sarek"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tunnbröd"
+offer_name = "Sarek"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.abisko_229"
+language = "sv"
+market = "SE"
+canonical = "tunnbröd"
+status = "active"
+variants = ["abisko"]
+offer_terms = ["tunnbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tunnbröd"
+variant = "abisko"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tunnbröd"
+offer_name = "Abisko"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.njalla_230"
+language = "sv"
+market = "SE"
+canonical = "tunnbröd"
+status = "active"
+variants = ["njalla"]
+offer_terms = ["tunnbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tunnbröd"
+variant = "njalla"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tunnbröd"
+offer_name = "Njalla"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.liba_231"
+language = "sv"
+market = "SE"
+canonical = "tunnbröd"
+status = "active"
+variants = ["liba"]
+offer_terms = ["tunnbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tunnbröd"
+variant = "liba"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tunnbröd"
+offer_name = "Liba"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fralla_232"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["fralla"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "fralla"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Fralla"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.frofralla_233"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["fröfralla"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "fröfralla"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Fröfralla"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.frofralla_234_2"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["frofralla"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "frofralla"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Frofralla"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.grotfralla_235"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["grötfralla"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "grötfralla"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Grötfralla"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.grotfralla_236_2"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["grotfralla"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "grotfralla"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Grotfralla"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.surdegsfralla_237"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["surdegsfralla"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "surdegsfralla"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Surdegsfralla"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smabrod_238"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["småbröd"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "småbröd"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Småbröd"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smabrod_239_2"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["smabrod"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "smabrod"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Smabrod"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smafranska_240"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["småfranska"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "småfranska"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Småfranska"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smafranska_241_2"
+language = "sv"
+market = "SE"
+canonical = "styckbröd"
+status = "active"
+variants = ["smafranska"]
+offer_terms = ["styckbröd"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "styckbröd"
+variant = "smafranska"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "styckbröd"
+offer_name = "Smafranska"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.minibaguette_242"
+language = "sv"
+market = "SE"
+canonical = "baguette"
+status = "active"
+variants = ["minibaguette"]
+offer_terms = ["baguette"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "baguette"
+variant = "minibaguette"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "baguette"
+offer_name = "Minibaguette"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sportbaguette_243"
+language = "sv"
+market = "SE"
+canonical = "baguette"
+status = "active"
+variants = ["sportbaguette"]
+offer_terms = ["baguette"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "baguette"
+variant = "sportbaguette"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "baguette"
+offer_name = "Sportbaguette"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mayo_244"
+language = "sv"
+market = "SE"
+canonical = "majonnäs"
+status = "active"
+variants = ["mayo"]
+offer_terms = ["majonnäs"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "majonnäs"
+variant = "mayo"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "majonnäs"
+offer_name = "Mayo"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.digestivekex_245"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["digestivekex"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "digestivekex"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Digestivekex"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.digestive_246"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["digestive"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "digestive"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Digestive"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.aperitivokex_247"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["aperitivokex"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "aperitivokex"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Aperitivokex"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mariekex_248"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["mariekex"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "mariekex"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Mariekex"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smorgaskex_249"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["smörgåskex"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "smörgåskex"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Smörgåskex"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.smorgaskex_250_2"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["smorgaskex"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "smorgaskex"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Smorgaskex"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.matkex_251"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["matkex"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "matkex"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Matkex"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bokstavskex_252"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["bokstavskex"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "bokstavskex"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Bokstavskex"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.breton_253"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["breton"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "breton"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Breton"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.saltiner_254"
+language = "sv"
+market = "SE"
+canonical = "kex"
+status = "active"
+variants = ["saltiner"]
+offer_terms = ["kex"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kex"
+variant = "saltiner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kex"
+offer_name = "Saltiner"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mandelsmor_255"
+language = "sv"
+market = "SE"
+canonical = "nötsmör"
+status = "active"
+variants = ["mandelsmör"]
+offer_terms = ["nötsmör"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötsmör"
+variant = "mandelsmör"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötsmör"
+offer_name = "Mandelsmör"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.mandelsmor_256_2"
+language = "sv"
+market = "SE"
+canonical = "nötsmör"
+status = "active"
+variants = ["mandelsmor"]
+offer_terms = ["nötsmör"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötsmör"
+variant = "mandelsmor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötsmör"
+offer_name = "Mandelsmor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.jordnotssmor_257"
+language = "sv"
+market = "SE"
+canonical = "nötsmör"
+status = "active"
+variants = ["jordnötssmör"]
+offer_terms = ["nötsmör"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötsmör"
+variant = "jordnötssmör"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötsmör"
+offer_name = "Jordnötssmör"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.jordnotssmor_258_2"
+language = "sv"
+market = "SE"
+canonical = "nötsmör"
+status = "active"
+variants = ["jordnotssmor"]
+offer_terms = ["nötsmör"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "nötsmör"
+variant = "jordnotssmor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötsmör"
+offer_name = "Jordnotssmor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kokosflingor_259"
+language = "sv"
+market = "SE"
+canonical = "kokos"
+status = "active"
+variants = ["kokosflingor"]
+offer_terms = ["kokos"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kokos"
+variant = "kokosflingor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kokos"
+offer_name = "Kokosflingor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kokoschips_260"
+language = "sv"
+market = "SE"
+canonical = "kokos"
+status = "active"
+variants = ["kokoschips"]
+offer_terms = ["kokos", "kokosflingor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kokos"
+variant = "kokoschips"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kokosflingor"
+variant = "kokoschips"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kokos"
+offer_name = "Kokoschips"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.gurkailag_261"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["gurkailag"]
+offer_terms = ["inlagdgurka"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "inlagdgurka"
+variant = "gurkailag"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Gurkailag"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tunnskivadgurka_262"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["tunnskivadgurka"]
+offer_terms = ["inlagdgurka"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "inlagdgurka"
+variant = "tunnskivadgurka"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Tunnskivadgurka"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.saltgurka_263"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["saltgurka"]
+offer_terms = ["inlagdgurka"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "inlagdgurka"
+variant = "saltgurka"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Saltgurka"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.5_minuterssill_264"
+language = "sv"
+market = "SE"
+canonical = "inläggningssill"
+status = "active"
+variants = ["5-minuterssill"]
+offer_terms = ["inläggningssill"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "inläggningssill"
+variant = "5-minuterssill"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inläggningssill"
+offer_name = "5-Minuterssill"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.salladsblad_265"
+language = "sv"
+market = "SE"
+canonical = "grönsallad"
+status = "active"
+variants = ["salladsblad"]
+offer_terms = ["grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "salladsblad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "grönsallad"
+offer_name = "Salladsblad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.sallat_266"
+language = "sv"
+market = "SE"
+canonical = "plocksallat"
+status = "active"
+variants = ["sallat"]
+offer_terms = ["plocksallat", "salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "plocksallat"
+variant = "sallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "sallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "sallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "plocksallat"
+offer_name = "Sallat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.plocksallat_267"
+language = "sv"
+market = "SE"
+canonical = "salladsblad"
+status = "active"
+variants = ["plocksallat"]
+offer_terms = ["salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "plocksallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "plocksallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsblad"
+offer_name = "Plocksallat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kruksallat_268"
+language = "sv"
+market = "SE"
+canonical = "plocksallat"
+status = "active"
+variants = ["kruksallat"]
+offer_terms = ["plocksallat", "salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "plocksallat"
+variant = "kruksallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "kruksallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "kruksallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "plocksallat"
+offer_name = "Kruksallat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.krispsallat_269"
+language = "sv"
+market = "SE"
+canonical = "plocksallat"
+status = "active"
+variants = ["krispsallat"]
+offer_terms = ["plocksallat", "salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "plocksallat"
+variant = "krispsallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "krispsallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "krispsallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "plocksallat"
+offer_name = "Krispsallat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.isbergssallat_270"
+language = "sv"
+market = "SE"
+canonical = "salladsblad"
+status = "active"
+variants = ["isbergssallat"]
+offer_terms = ["salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "isbergssallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "isbergssallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsblad"
+offer_name = "Isbergssallat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hjartsallad_271"
+language = "sv"
+market = "SE"
+canonical = "salladsblad"
+status = "active"
+variants = ["hjärtsallad"]
+offer_terms = ["salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "hjärtsallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "hjärtsallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsblad"
+offer_name = "Hjärtsallad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hjartsallad_272_2"
+language = "sv"
+market = "SE"
+canonical = "salladsblad"
+status = "active"
+variants = ["hjartsallad"]
+offer_terms = ["salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "hjartsallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "hjartsallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsblad"
+offer_name = "Hjartsallad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hjartbergsallad_273"
+language = "sv"
+market = "SE"
+canonical = "grönsallad"
+status = "active"
+variants = ["hjärtbergsallad"]
+offer_terms = ["grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "hjärtbergsallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "grönsallad"
+offer_name = "Hjärtbergsallad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hjartbergsallad_274_2"
+language = "sv"
+market = "SE"
+canonical = "grönsallad"
+status = "active"
+variants = ["hjartbergsallad"]
+offer_terms = ["grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "hjartbergsallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "grönsallad"
+offer_name = "Hjartbergsallad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bistrosallad_275"
+language = "sv"
+market = "SE"
+canonical = "salladsblad"
+status = "active"
+variants = ["bistrosallad"]
+offer_terms = ["salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "bistrosallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "bistrosallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsblad"
+offer_name = "Bistrosallad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.romansallad_276"
+language = "sv"
+market = "SE"
+canonical = "salladsblad"
+status = "active"
+variants = ["romansallad"]
+offer_terms = ["salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "romansallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "romansallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsblad"
+offer_name = "Romansallad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.romanasallad_277"
+language = "sv"
+market = "SE"
+canonical = "grönsallad"
+status = "active"
+variants = ["romanasallad"]
+offer_terms = ["grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "romanasallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "grönsallad"
+offer_name = "Romanasallad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.miniromansallat_278"
+language = "sv"
+market = "SE"
+canonical = "salladsblad"
+status = "active"
+variants = ["miniromansallat"]
+offer_terms = ["salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "miniromansallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "miniromansallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsblad"
+offer_name = "Miniromansallat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.machesallat_279"
+language = "sv"
+market = "SE"
+canonical = "salladsblad"
+status = "active"
+variants = ["machesallat"]
+offer_terms = ["salladsblad", "grönsallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "machesallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "machesallat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "salladsblad"
+offer_name = "Machesallat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.svartvinbarsgele_280"
+language = "sv"
+market = "SE"
+canonical = "vinbärsgele"
+status = "active"
+variants = ["svartvinbärsgele"]
+offer_terms = ["vinbärsgele"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "vinbärsgele"
+variant = "svartvinbärsgele"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vinbärsgele"
+offer_name = "Svartvinbärsgele"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rodvinbarsgele_281"
+language = "sv"
+market = "SE"
+canonical = "vinbärsgele"
+status = "active"
+variants = ["rödvinbärsgele"]
+offer_terms = ["vinbärsgele"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "vinbärsgele"
+variant = "rödvinbärsgele"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vinbärsgele"
+offer_name = "Rödvinbärsgele"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bordsgurka_282"
+language = "sv"
+market = "SE"
+canonical = "inlagdgurka"
+status = "active"
+variants = ["bordsgurka"]
+offer_terms = ["inlagdgurka"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "inlagdgurka"
+variant = "bordsgurka"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "inlagdgurka"
+offer_name = "Bordsgurka"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bryggkaffe_283"
+language = "sv"
+market = "SE"
+canonical = "bryggkaffe"
+status = "active"
+variants = ["bryggkaffe"]
+offer_terms = ["bryggkaffe", "kokkaffe"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "bryggkaffe"
+variant = "bryggkaffe"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kokkaffe"
+variant = "bryggkaffe"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "bryggkaffe"
+offer_name = "Bryggkaffe"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kaffebonor_284"
+language = "sv"
+market = "SE"
+canonical = "kaffebönor"
+status = "active"
+variants = ["kaffebönor"]
+offer_terms = ["kaffebönor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kaffebönor"
+variant = "kaffebönor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kaffebönor"
+offer_name = "Kaffebönor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kaffebona_285"
+language = "sv"
+market = "SE"
+canonical = "kaffebönor"
+status = "active"
+variants = ["kaffeböna"]
+offer_terms = ["kaffebönor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kaffebönor"
+variant = "kaffeböna"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kaffebönor"
+offer_name = "Kaffeböna"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cottage_cheese_286"
+language = "sv"
+market = "SE"
+canonical = "keso"
+status = "active"
+variants = ["cottage cheese"]
+offer_terms = ["keso"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "keso"
+variant = "cottage cheese"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "keso"
+offer_name = "Cottage Cheese"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tomatsas_287"
+language = "sv"
+market = "SE"
+canonical = "tomatsås"
+status = "active"
+variants = ["tomatsås"]
+offer_terms = ["tomatsås"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tomatsås"
+variant = "tomatsås"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tomatsås"
+offer_name = "Tomatsås"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.ostar_288"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["ostar"]
+offer_terms = ["ost"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "ost"
+variant = "ostar"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "ost"
+offer_name = "Ostar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.champinjoner_289"
+language = "sv"
+market = "SE"
+canonical = "svamp"
+status = "active"
+variants = ["champinjoner"]
+offer_terms = ["svamp"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "svamp"
+variant = "champinjoner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "svamp"
+offer_name = "Champinjoner"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.skogschampinjoner_290"
+language = "sv"
+market = "SE"
+canonical = "skogschampinjoner"
+status = "active"
+variants = ["skogschampinjoner"]
+offer_terms = ["skogschampinjoner", "champinjoner", "svamp"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "skogschampinjoner"
+variant = "skogschampinjoner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "champinjoner"
+variant = "skogschampinjoner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "svamp"
+variant = "skogschampinjoner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "skogschampinjoner"
+offer_name = "Skogschampinjoner"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.babychampinjoner_291"
+language = "sv"
+market = "SE"
+canonical = "babychampinjoner"
+status = "active"
+variants = ["babychampinjoner"]
+offer_terms = ["babychampinjoner", "champinjoner", "svamp"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "babychampinjoner"
+variant = "babychampinjoner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "champinjoner"
+variant = "babychampinjoner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "svamp"
+variant = "babychampinjoner"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "babychampinjoner"
+offer_name = "Babychampinjoner"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kantarell_292"
+language = "sv"
+market = "SE"
+canonical = "svamp"
+status = "active"
+variants = ["kantarell"]
+offer_terms = ["svamp"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "svamp"
+variant = "kantarell"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "svamp"
+offer_name = "Kantarell"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kantareller_293"
+language = "sv"
+market = "SE"
+canonical = "svamp"
+status = "active"
+variants = ["kantareller"]
+offer_terms = ["svamp"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "svamp"
+variant = "kantareller"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "svamp"
+offer_name = "Kantareller"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.ostronskivling_294"
+language = "sv"
+market = "SE"
+canonical = "svamp"
+status = "active"
+variants = ["ostronskivling"]
+offer_terms = ["svamp"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "svamp"
+variant = "ostronskivling"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "svamp"
+offer_name = "Ostronskivling"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.karljohansvamp_295"
+language = "sv"
+market = "SE"
+canonical = "svamp"
+status = "active"
+variants = ["karljohansvamp"]
+offer_terms = ["svamp"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "svamp"
+variant = "karljohansvamp"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "svamp"
+offer_name = "Karljohansvamp"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bonmix_296"
+language = "sv"
+market = "SE"
+canonical = "bönor"
+status = "active"
+variants = ["bönmix"]
+offer_terms = ["bönor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "bönor"
+variant = "bönmix"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "bönor"
+offer_name = "Bönmix"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.haricot_297"
+language = "sv"
+market = "SE"
+canonical = "bönor"
+status = "active"
+variants = ["haricot"]
+offer_terms = ["bönor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "bönor"
+variant = "haricot"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "bönor"
+offer_name = "Haricot"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.brytbonor_298"
+language = "sv"
+market = "SE"
+canonical = "bönor"
+status = "active"
+variants = ["brytbönor"]
+offer_terms = ["bönor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "bönor"
+variant = "brytbönor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "bönor"
+offer_name = "Brytbönor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.brytbonor_299_2"
+language = "sv"
+market = "SE"
+canonical = "bönor"
+status = "active"
+variants = ["brytbonor"]
+offer_terms = ["bönor"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "bönor"
+variant = "brytbonor"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "bönor"
+offer_name = "Brytbonor"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.silkesmjuk_300"
+language = "sv"
+market = "SE"
+canonical = "silkestofu"
+status = "active"
+variants = ["silkesmjuk"]
+offer_terms = ["silkestofu"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "silkestofu"
+variant = "silkesmjuk"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "silkestofu"
+offer_name = "Silkesmjuk"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.regnbagslaxrom_301"
+language = "sv"
+market = "SE"
+canonical = "laxrom"
+status = "active"
+variants = ["regnbågslaxrom"]
+offer_terms = ["laxrom"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "laxrom"
+variant = "regnbågslaxrom"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "laxrom"
+offer_name = "Regnbågslaxrom"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fjallrodingfile_302"
+language = "sv"
+market = "SE"
+canonical = "röding"
+status = "active"
+variants = ["fjällrödingfilé"]
+offer_terms = ["röding"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "röding"
+variant = "fjällrödingfilé"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "röding"
+offer_name = "Fjällrödingfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.fjallrodingfile_303_2"
+language = "sv"
+market = "SE"
+canonical = "röding"
+status = "active"
+variants = ["fjallrodingfile"]
+offer_terms = ["röding"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "röding"
+variant = "fjallrodingfile"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "röding"
+offer_name = "Fjallrodingfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.plantgurt_304"
+language = "sv"
+market = "SE"
+canonical = "plantgurt"
+status = "active"
+variants = ["plantgurt"]
+offer_terms = ["plantgurt", "yoghurt"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "plantgurt"
+variant = "plantgurt"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "yoghurt"
+variant = "plantgurt"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "plantgurt"
+offer_name = "Plantgurt"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.havregurt_305"
+language = "sv"
+market = "SE"
+canonical = "havregurt"
+status = "active"
+variants = ["havregurt"]
+offer_terms = ["havregurt", "yoghurt"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "havregurt"
+variant = "havregurt"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "yoghurt"
+variant = "havregurt"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "havregurt"
+offer_name = "Havregurt"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.kokosgurt_306"
+language = "sv"
+market = "SE"
+canonical = "kokosgurt"
+status = "active"
+variants = ["kokosgurt"]
+offer_terms = ["kokosgurt", "yoghurt"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "kokosgurt"
+variant = "kokosgurt"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "yoghurt"
+variant = "kokosgurt"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kokosgurt"
+offer_name = "Kokosgurt"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.soygurt_307"
+language = "sv"
+market = "SE"
+canonical = "soygurt"
+status = "active"
+variants = ["soygurt"]
+offer_terms = ["soygurt", "yoghurt"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "soygurt"
+variant = "soygurt"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "yoghurt"
+variant = "soygurt"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "soygurt"
+offer_name = "Soygurt"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.korsbarstomater_308"
+language = "sv"
+market = "SE"
+canonical = "körsbärstomater"
+status = "active"
+variants = ["körsbärstomater"]
+offer_terms = ["körsbärstomater", "körsbärstomat"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "körsbärstomater"
+variant = "körsbärstomater"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "körsbärstomat"
+variant = "körsbärstomater"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "körsbärstomater"
+offer_name = "Körsbärstomater"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.korsbarstomat_309"
+language = "sv"
+market = "SE"
+canonical = "körsbärstomat"
+status = "active"
+variants = ["korsbarstomat"]
+offer_terms = ["körsbärstomat"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "körsbärstomat"
+variant = "korsbarstomat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "körsbärstomat"
+offer_name = "Korsbarstomat"
+expected = 1

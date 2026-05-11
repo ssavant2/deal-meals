@@ -1,0 +1,1951 @@
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklingbrostfil_001"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklingbröstfilé"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklingbröstfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklingbröstfilé"
+offer_name = "Kycklingbröstfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklingbrostfile_002"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklingbröstfile"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklingbröstfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklingbröstfile"
+offer_name = "Kycklingbröstfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklinginnerfil_003"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklinginnerfilé"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklinginnerfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklinginnerfilé"
+offer_name = "Kycklinginnerfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklinginnerfile_004"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklinginnerfile"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklinginnerfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklinginnerfile"
+offer_name = "Kycklinginnerfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklinglarfil_005"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklinglårfilé"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklinglårfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklinglårfilé"
+offer_name = "Kycklinglårfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklinglarfile_006"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklinglårfile"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklinglårfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklinglårfile"
+offer_name = "Kycklinglårfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklinglarfil_007"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklinglarfilé"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklinglarfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklinglarfilé"
+offer_name = "Kycklinglarfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklinglarfile_008"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklinglarfile"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklinglarfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklinglarfile"
+offer_name = "Kycklinglarfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kyckling.kycklingfil_009"
+language = "sv"
+market = "SE"
+canonical = "kyckling"
+status = "active"
+variants = ["kycklingfilé"]
+route_terms = ["kyckling"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kyckling"
+variant = "kycklingfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklingfilé"
+offer_name = "Kycklingfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kyckling.kycklingfile_010"
+language = "sv"
+market = "SE"
+canonical = "kyckling"
+status = "active"
+variants = ["kycklingfile"]
+route_terms = ["kyckling"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kyckling"
+variant = "kycklingfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklingfile"
+offer_name = "Kycklingfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kyckling.kycklingbrost_011"
+language = "sv"
+market = "SE"
+canonical = "kyckling"
+status = "active"
+variants = ["kycklingbröst"]
+route_terms = ["kyckling"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kyckling"
+variant = "kycklingbröst"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklingbröst"
+offer_name = "Kycklingbröst"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kyckling.kycklingbrost_012"
+language = "sv"
+market = "SE"
+canonical = "kyckling"
+status = "active"
+variants = ["kycklingbrost"]
+route_terms = ["kyckling"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kyckling"
+variant = "kycklingbrost"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklingbrost"
+offer_name = "Kycklingbrost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklinglar_013"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklinglår"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklinglår"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklinglår"
+offer_name = "Kycklinglår"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kycklingfil.kycklinglar_014"
+language = "sv"
+market = "SE"
+canonical = "kycklingfilé"
+status = "active"
+variants = ["kycklinglar"]
+route_terms = ["kycklingfilé"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kycklingfilé"
+variant = "kycklinglar"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklinglar"
+offer_name = "Kycklinglar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.jast.matbrodsjast_015"
+language = "sv"
+market = "SE"
+canonical = "jäst"
+status = "active"
+variants = ["matbrödsjäst"]
+route_terms = ["jäst"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "jäst"
+variant = "matbrödsjäst"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "matbrödsjäst"
+offer_name = "Matbrödsjäst"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.jast.matbrodsjast_016"
+language = "sv"
+market = "SE"
+canonical = "jäst"
+status = "active"
+variants = ["matbrodsjast"]
+route_terms = ["jäst"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "jäst"
+variant = "matbrodsjast"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "matbrodsjast"
+offer_name = "Matbrodsjast"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flaskkott.flask_017"
+language = "sv"
+market = "SE"
+canonical = "fläskkött"
+status = "active"
+variants = ["fläsk"]
+route_terms = ["fläskkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläskkött"
+variant = "fläsk"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fläsk"
+offer_name = "Fläsk"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskfil_018"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["fläskfilé"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "fläskfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fläskfilé"
+offer_name = "Fläskfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskfil_019"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["flaskfilé"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "flaskfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "flaskfilé"
+offer_name = "Flaskfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskfile_020"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["fläskfile"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "fläskfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fläskfile"
+offer_name = "Fläskfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskfile_021"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["flaskfile"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "flaskfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "flaskfile"
+offer_name = "Flaskfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskkarr_022"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["fläskkarré"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "fläskkarré"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fläskkarré"
+offer_name = "Fläskkarré"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskkarre_023"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["flaskkarre"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "flaskkarre"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "flaskkarre"
+offer_name = "Flaskkarre"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskytterfil_024"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["fläskytterfilé"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "fläskytterfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fläskytterfilé"
+offer_name = "Fläskytterfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskytterfil_025"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["flaskytterfilé"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "flaskytterfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "flaskytterfilé"
+offer_name = "Flaskytterfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskytterfile_026"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["fläskytterfile"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "fläskytterfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fläskytterfile"
+offer_name = "Fläskytterfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.flask.flaskytterfile_027"
+language = "sv"
+market = "SE"
+canonical = "fläsk"
+status = "active"
+variants = ["flaskytterfile"]
+route_terms = ["fläsk"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "fläsk"
+variant = "flaskytterfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "flaskytterfile"
+offer_name = "Flaskytterfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammfil_028"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammfilé"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammfilé"
+offer_name = "Lammfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammfile_029"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammfile"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammfile"
+offer_name = "Lammfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammstek_030"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammstek"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammstek"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammstek"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammstek"
+offer_name = "Lammstek"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammytterfil_031"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammytterfilé"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammytterfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammytterfilé"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammytterfilé"
+offer_name = "Lammytterfilé"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammytterfile_032"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammytterfile"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammytterfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammytterfile"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammytterfile"
+offer_name = "Lammytterfile"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammgrytbitar_033"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammgrytbitar"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammgrytbitar"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammgrytbitar"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammgrytbitar"
+offer_name = "Lammgrytbitar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammracks_034"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammracks"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammracks"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammracks"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammracks"
+offer_name = "Lammracks"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammrostbiff_035"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammrostbiff"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammrostbiff"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammrostbiff"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammrostbiff"
+offer_name = "Lammrostbiff"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammframdel_036"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammframdel"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammframdel"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammframdel"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammframdel"
+offer_name = "Lammframdel"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammburgare_037"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammburgare"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammburgare"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammburgare"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammburgare"
+offer_name = "Lammburgare"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.lamm.lammkorv_038"
+language = "sv"
+market = "SE"
+canonical = "lamm"
+status = "active"
+variants = ["lammkorv"]
+route_terms = ["lamm", "lammkött"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lamm"
+variant = "lammkorv"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "lammkött"
+variant = "lammkorv"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammkorv"
+offer_name = "Lammkorv"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.notfars_039"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["nötfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "nötfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nötfärs"
+offer_name = "Nötfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.notfars_040"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["notfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "notfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "notfars"
+offer_name = "Notfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.lammfars_041"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["lammfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "lammfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammfärs"
+offer_name = "Lammfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.lammfars_042"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["lammfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "lammfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "lammfars"
+offer_name = "Lammfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.flaskfars_043"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["fläskfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "fläskfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fläskfärs"
+offer_name = "Fläskfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.flaskfars_044"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["flaskfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "flaskfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "flaskfars"
+offer_name = "Flaskfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.kycklingfars_045"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["kycklingfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "kycklingfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklingfärs"
+offer_name = "Kycklingfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.kycklingfars_046"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["kycklingfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "kycklingfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kycklingfars"
+offer_name = "Kycklingfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.blandfars_047"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["blandfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "blandfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "blandfärs"
+offer_name = "Blandfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.blandfars_048"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["blandfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "blandfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "blandfars"
+offer_name = "Blandfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.kalkonfars_049"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["kalkonfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "kalkonfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalkonfärs"
+offer_name = "Kalkonfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.kalkonfars_050"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["kalkonfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "kalkonfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalkonfars"
+offer_name = "Kalkonfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.kalvfars_051"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["kalvfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "kalvfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvfärs"
+offer_name = "Kalvfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.kalvfars_052"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["kalvfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "kalvfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kalvfars"
+offer_name = "Kalvfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.farfars_053"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["fårfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "fårfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fårfärs"
+offer_name = "Fårfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.farfars_054"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["farfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "farfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "farfars"
+offer_name = "Farfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.vegofars_055"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["vegofärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "vegofärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegofärs"
+offer_name = "Vegofärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.vegofars_056"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["vegofars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "vegofars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "vegofars"
+offer_name = "Vegofars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.hogrevsfars_057"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["högrevsfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "högrevsfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "högrevsfärs"
+offer_name = "Högrevsfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.hogrevsfars_058"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["hogrevsfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "hogrevsfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hogrevsfars"
+offer_name = "Hogrevsfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.baljvaxtfars_059"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["baljväxtfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "baljväxtfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "baljväxtfärs"
+offer_name = "Baljväxtfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.baljvaxtfars_060"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["baljvaxtfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "baljvaxtfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "baljvaxtfars"
+offer_name = "Baljvaxtfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.honsfars_061"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["hönsfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "hönsfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hönsfärs"
+offer_name = "Hönsfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.honsfars_062"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["honsfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "honsfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "honsfars"
+offer_name = "Honsfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.hushallsfars_063"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["hushållsfärs"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "hushållsfärs"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hushållsfärs"
+offer_name = "Hushållsfärs"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.fars.hushallsfars_064"
+language = "sv"
+market = "SE"
+canonical = "färs"
+status = "active"
+variants = ["hushallsfars"]
+route_terms = ["färs"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "färs"
+variant = "hushallsfars"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hushallsfars"
+offer_name = "Hushallsfars"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.ris.fullkornsris_065"
+language = "sv"
+market = "SE"
+canonical = "ris"
+status = "active"
+variants = ["fullkornsris"]
+route_terms = ["ris"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "ris"
+variant = "fullkornsris"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "fullkornsris"
+offer_name = "Fullkornsris"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.smatomat.korsbarstomat_066"
+language = "sv"
+market = "SE"
+canonical = "småtomat"
+status = "active"
+variants = ["körsbärstomat"]
+route_terms = ["småtomat"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "småtomat"
+variant = "körsbärstomat"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "körsbärstomat"
+offer_name = "Körsbärstomat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.smatomat.korsbarstomater_067"
+language = "sv"
+market = "SE"
+canonical = "småtomat"
+status = "active"
+variants = ["körsbärstomater"]
+route_terms = ["småtomat"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "småtomat"
+variant = "körsbärstomater"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "körsbärstomater"
+offer_name = "Körsbärstomater"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.smatomat.korsbarstomat_068"
+language = "sv"
+market = "SE"
+canonical = "småtomat"
+status = "active"
+variants = ["korsbarstomat"]
+route_terms = ["småtomat"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "småtomat"
+variant = "korsbarstomat"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korsbarstomat"
+offer_name = "Korsbarstomat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.smatomat.korsbarstomater_069"
+language = "sv"
+market = "SE"
+canonical = "småtomat"
+status = "active"
+variants = ["korsbarstomater"]
+route_terms = ["småtomat"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "småtomat"
+variant = "korsbarstomater"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "korsbarstomater"
+offer_name = "Korsbarstomater"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.alger.nori_070"
+language = "sv"
+market = "SE"
+canonical = "alger"
+status = "active"
+variants = ["nori"]
+route_terms = ["alger"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "alger"
+variant = "nori"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "nori"
+offer_name = "Nori"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.alger.seaweed_071"
+language = "sv"
+market = "SE"
+canonical = "alger"
+status = "active"
+variants = ["seaweed"]
+route_terms = ["alger"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "alger"
+variant = "seaweed"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "seaweed"
+offer_name = "Seaweed"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.alger.seeweed_072"
+language = "sv"
+market = "SE"
+canonical = "alger"
+status = "active"
+variants = ["seeweed"]
+route_terms = ["alger"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "alger"
+variant = "seeweed"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "seeweed"
+offer_name = "Seeweed"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.groddar.alfalfagroddar_073"
+language = "sv"
+market = "SE"
+canonical = "groddar"
+status = "active"
+variants = ["alfalfagroddar"]
+route_terms = ["groddar"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "groddar"
+variant = "alfalfagroddar"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "alfalfagroddar"
+offer_name = "Alfalfagroddar"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.choklad.bakchoklad_074"
+language = "sv"
+market = "SE"
+canonical = "choklad"
+status = "active"
+variants = ["bakchoklad"]
+route_terms = ["choklad"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "choklad"
+variant = "bakchoklad"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "bakchoklad"
+offer_name = "Bakchoklad"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.ost.gratangost_075"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["gratängost"]
+route_terms = ["ost"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "ost"
+variant = "gratängost"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "gratängost"
+offer_name = "Gratängost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.ost.gratangost_076"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["gratangost"]
+route_terms = ["ost"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "ost"
+variant = "gratangost"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "gratangost"
+offer_name = "Gratangost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.ost.texmexost_077"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["texmexost"]
+route_terms = ["ost"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "ost"
+variant = "texmexost"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "texmexost"
+offer_name = "Texmexost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.ost.tacoost_078"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["tacoost"]
+route_terms = ["ost"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "ost"
+variant = "tacoost"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tacoost"
+offer_name = "Tacoost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.ost.pizzaost_079"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["pizzaost"]
+route_terms = ["ost"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "ost"
+variant = "pizzaost"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "pizzaost"
+offer_name = "Pizzaost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.ost.hamburgerost_080"
+language = "sv"
+market = "SE"
+canonical = "ost"
+status = "active"
+variants = ["hamburgerost"]
+route_terms = ["ost"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "ost"
+variant = "hamburgerost"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hamburgerost"
+offer_name = "Hamburgerost"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kronartskocka.kronartskockshjarta_081"
+language = "sv"
+market = "SE"
+canonical = "kronärtskocka"
+status = "active"
+variants = ["kronärtskockshjärta"]
+route_terms = ["kronärtskocka"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kronärtskocka"
+variant = "kronärtskockshjärta"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kronärtskockshjärta"
+offer_name = "Kronärtskockshjärta"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.kronartskocka.kronartskockshjarta_082"
+language = "sv"
+market = "SE"
+canonical = "kronärtskocka"
+status = "active"
+variants = ["kronartskockshjarta"]
+route_terms = ["kronärtskocka"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping migrated in R5."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "kronärtskocka"
+variant = "kronartskockshjarta"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "kronartskockshjarta"
+offer_name = "Kronartskockshjarta"
+expected = 1
