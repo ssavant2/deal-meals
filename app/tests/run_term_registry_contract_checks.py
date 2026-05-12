@@ -33,14 +33,23 @@ from languages.term_registry.models import CheckIssue, RegistryEntry, RegistryVa
 from languages.term_registry.reports import write_json_and_markdown_report  # noqa: E402
 
 
-DEFAULT_B_TRACK_DIR = APP_DIR / "tests" / "reports" / "term_pipeline_b_track"
-DEFAULT_BASELINE_JSON = DEFAULT_B_TRACK_DIR / "term_pipeline_audit.json"
+DEFAULT_VERIFIED_TERMS_BASELINE_JSON = (
+    APP_DIR
+    / "languages"
+    / "sv"
+    / "ingredient_matching"
+    / "term_registry"
+    / "baselines"
+    / "verified_matcher_terms.json"
+)
+DEFAULT_BASELINE_JSON = DEFAULT_VERIFIED_TERMS_BASELINE_JSON
 DEFAULT_REPORT_ROOT = APP_DIR / "tests" / "reports" / "term_registry"
 DEFAULT_SHARED_REGISTRY_DIR = APP_DIR / "languages" / "term_registry"
 DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
 DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
 EXPECTED_B2_VARIANT_COUNT = 5472
 EXPECTED_B2_LAST_BATCH = "B092"
+EXPECTED_B2_BATCH_COUNT = 92
 CoverageKey = tuple[str, str, str, str, str, str]
 
 
@@ -119,8 +128,9 @@ def _load_b2_baseline(
             item_id=str(path),
             details={
                 "hint": (
-                    "Recover or regenerate app/tests/reports/term_pipeline_b_track/"
-                    "term_pipeline_audit.json before running R0."
+                    "Recover or regenerate app/languages/sv/ingredient_matching/"
+                    "term_registry/baselines/verified_matcher_terms.json "
+                    "before running R0."
                 )
             },
         )]
@@ -198,69 +208,103 @@ def _load_b2_baseline(
     return payload, baseline_ids, baseline_coverage_keys, issues
 
 
-def _aggregate_b_track_static_reports(report_dir: Path) -> tuple[dict[str, Any], list[CheckIssue]]:
+def _load_verification_summary(
+    payload: dict[str, Any],
+    *,
+    baseline_path: Path,
+) -> tuple[dict[str, Any], list[CheckIssue]]:
     issues: list[CheckIssue] = []
-    report_paths = sorted(report_dir.glob("b[0-9][0-9][0-9]_static_audit.json"))
-    if not report_paths:
+    verification = payload.get("verification")
+    if not isinstance(verification, dict):
         return {}, [_issue(
             "error",
-            "missing_b_track_static_reports",
-            "B-track static audit batch reports are required to prove needs_fix=0",
-            item_id=str(report_dir),
+            "missing_verified_terms_verification_summary",
+            "Verified matcher terms baseline must include the final audit summary",
+            item_id=str(baseline_path),
         )]
 
-    classification_counts: Counter[str] = Counter()
-    problem_counts: Counter[str] = Counter()
-    status_counts: Counter[str] = Counter()
-    source_counts: Counter[str] = Counter()
-    variant_count = 0
-    applied_count = 0
-
-    for path in report_paths:
-        payload = _load_json(path)
-        variant_count += int(payload.get("variant_count") or 0)
-        classification_counts.update(payload.get("classification_counts") or {})
-        problem_counts.update(payload.get("problem_counts") or {})
-        status_counts.update(payload.get("status_counts") or {})
-        source_counts.update(payload.get("source_counts") or {})
-        if payload.get("applied"):
-            applied_count += 1
+    classification_counts = Counter(verification.get("classification_counts") or {})
+    problem_counts = Counter(verification.get("problem_counts") or {})
+    status_counts = Counter(verification.get("status_counts") or {})
+    source_counts = Counter(verification.get("source_counts") or {})
+    variant_count = int(verification.get("variant_count") or 0)
+    applied_batch_count = int(verification.get("applied_batch_count") or 0)
+    batch_report_count = int(verification.get("batch_report_count") or 0)
 
     if variant_count != EXPECTED_B2_VARIANT_COUNT:
         issues.append(_issue(
             "error",
-            "b_track_static_report_count_mismatch",
-            "Aggregated B-track static reports do not cover the frozen B2 baseline",
-            item_id=str(report_dir),
+            "verified_terms_variant_count_mismatch",
+            "Verified matcher terms summary does not cover the frozen baseline",
+            item_id=str(baseline_path),
             details={"expected": EXPECTED_B2_VARIANT_COUNT, "actual": variant_count},
+        ))
+    if batch_report_count != EXPECTED_B2_BATCH_COUNT:
+        issues.append(_issue(
+            "error",
+            "verified_terms_batch_count_mismatch",
+            "Verified matcher terms summary does not include every final audit batch",
+            item_id=str(baseline_path),
+            details={"expected": EXPECTED_B2_BATCH_COUNT, "actual": batch_report_count},
+        ))
+    if applied_batch_count != EXPECTED_B2_BATCH_COUNT:
+        issues.append(_issue(
+            "error",
+            "verified_terms_applied_batch_count_mismatch",
+            "Verified matcher terms summary was not applied for every final audit batch",
+            item_id=str(baseline_path),
+            details={"expected": EXPECTED_B2_BATCH_COUNT, "actual": applied_batch_count},
+        ))
+    if str(verification.get("last_batch_id") or "") != EXPECTED_B2_LAST_BATCH:
+        issues.append(_issue(
+            "error",
+            "verified_terms_last_batch_mismatch",
+            "Verified matcher terms summary does not end at the frozen final batch",
+            item_id=str(baseline_path),
+            details={
+                "expected": EXPECTED_B2_LAST_BATCH,
+                "actual": verification.get("last_batch_id"),
+            },
+        ))
+    if int(status_counts.get("audited") or 0) != EXPECTED_B2_VARIANT_COUNT:
+        issues.append(_issue(
+            "error",
+            "verified_terms_audited_count_mismatch",
+            "Verified matcher terms summary does not mark every baseline variant as audited",
+            item_id=str(baseline_path),
+            details={
+                "expected": EXPECTED_B2_VARIANT_COUNT,
+                "actual": int(status_counts.get("audited") or 0),
+            },
         ))
     if problem_counts:
         issues.append(_issue(
             "error",
-            "b_track_problem_counts_present",
-            "B-track static reports still contain problem counts",
-            item_id=str(report_dir),
+            "verified_terms_problem_counts_present",
+            "Verified matcher terms summary still contains problem counts",
+            item_id=str(baseline_path),
             details={"problem_counts": dict(sorted(problem_counts.items()))},
         ))
     if classification_counts.get("needs_fix", 0):
         issues.append(_issue(
             "error",
-            "b_track_needs_fix_present",
-            "B-track static reports still contain needs_fix variants",
-            item_id=str(report_dir),
+            "verified_terms_needs_fix_present",
+            "Verified matcher terms summary still contains needs_fix variants",
+            item_id=str(baseline_path),
             details={"needs_fix": classification_counts["needs_fix"]},
         ))
 
     return {
-        "report_count": len(report_paths),
-        "applied_report_count": applied_count,
+        "method": verification.get("method"),
+        "batch_report_count": batch_report_count,
+        "applied_batch_count": applied_batch_count,
         "variant_count": variant_count,
         "classification_counts": dict(sorted(classification_counts.items())),
         "problem_counts": dict(sorted(problem_counts.items())),
         "status_counts": dict(sorted(status_counts.items())),
         "source_counts": dict(sorted(source_counts.items())),
-        "first_report": report_paths[0].name,
-        "last_report": report_paths[-1].name,
+        "first_batch_id": verification.get("first_batch_id"),
+        "last_batch_id": verification.get("last_batch_id"),
     }, issues
 
 
@@ -683,8 +727,11 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     else:
         new_term_gate_summary = {"enabled": False, "reason": "missing B2 baseline coverage keys"}
 
-    b_track_summary, b_track_issues = _aggregate_b_track_static_reports(args.b_track_report_dir)
-    issues.extend(b_track_issues)
+    verification_summary, verification_issues = _load_verification_summary(
+        baseline_payload,
+        baseline_path=args.baseline_json,
+    )
+    issues.extend(verification_issues)
     issues.extend(check_shared_core_import_boundaries(args.shared_registry_dir))
 
     issue_counts = Counter(issue.severity for issue in issues)
@@ -698,7 +745,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         "baseline_coverage_key_count": len(baseline_coverage_keys),
         "b2_expected_variant_count": EXPECTED_B2_VARIANT_COUNT,
         "b2_baseline_file": str(args.baseline_json.relative_to(REPO_DIR)),
-        "b_track_static_reports": b_track_summary,
+        "verified_terms_summary": verification_summary,
         "new_term_gate": new_term_gate_summary,
         "migration_exceptions_file": str(exception_path.relative_to(REPO_DIR)),
         "issue_counts": dict(sorted(issue_counts.items())),
@@ -721,7 +768,6 @@ def main() -> int:
     parser.add_argument("--market", default="SE")
     parser.add_argument("--batch-size", type=int, default=60)
     parser.add_argument("--baseline-json", type=Path, default=DEFAULT_BASELINE_JSON)
-    parser.add_argument("--b-track-report-dir", type=Path, default=DEFAULT_B_TRACK_DIR)
     parser.add_argument("--shared-registry-dir", type=Path, default=DEFAULT_SHARED_REGISTRY_DIR)
     parser.add_argument("--report-dir", type=Path, default=None)
     args = parser.parse_args()

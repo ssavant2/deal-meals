@@ -502,6 +502,21 @@ def build_match_bridges_export_from_entries(
     return tuple(bridges)
 
 
+def build_runtime_exports_from_entries(entries: Iterable[RegistryEntry]) -> dict[str, object]:
+    entries = list(entries)
+    return {
+        "PARENT_MATCH_ONLY": build_parent_match_only_export_from_entries(entries),
+        "KEYWORD_SYNONYMS": build_keyword_synonyms_export_from_entries(entries),
+        "INGREDIENT_PARENTS": build_ingredient_parents_export_from_entries(entries),
+        "KEYWORD_EXTRA_PARENTS": build_keyword_extra_parents_export_from_entries(entries),
+        "OFFER_EXTRA_KEYWORDS": build_offer_extra_keywords_export_from_entries(entries),
+        "NO_MATCH_POLICIES": build_no_match_policies_export_from_entries(entries),
+        "MATCH_BRIDGES": build_match_bridges_export_from_entries(entries),
+        "INGREDIENT_ROUTING_PARENT_TERMS": build_ingredient_routing_parent_export_from_entries(entries),
+        "RECIPE_ROUTING_EXTRA_ALIASES": build_recipe_routing_extra_alias_export_from_entries(entries),
+    }
+
+
 _REGISTRY_ENTRIES = load_registry_entries()
 
 PARENT_MATCH_ONLY: dict[str, str] = build_parent_match_only_export_from_entries(_REGISTRY_ENTRIES)

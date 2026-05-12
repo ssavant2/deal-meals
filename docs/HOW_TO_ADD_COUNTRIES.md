@@ -59,7 +59,8 @@ app/
 │   │       ├── recipe_text.py          # Buljong/fond text parsing
 │   │       ├── recipe_context.py       # Recipe ingredient text parsing helpers
 │   │       ├── recipe_matcher_support.py  # FOND_TYPE_CONTEXT, classification constants
-│   │       └── seasonal.py             # Seasonal/buffet filtering
+│   │       ├── seasonal.py             # Seasonal/buffet filtering
+│   │       └── term_registry/          # TOML vocabulary coverage + exports
 │   └── en_gb/                 # UK scaffold (UI/address + starter helpers)
 │       ├── ui.py
 │       ├── normalization.py
@@ -97,6 +98,7 @@ This is useful as a smoke-test path, not as a production-ready UK matcher.
 |------|---------|--------|
 | `ingredient_matching/` | The big one: keyword extraction, matching rules, all constants | **High** |
 | `matcher_contracts/` | Read-only matcher regression cases and rule/source inventory | Medium |
+| `ingredient_matching/term_registry/` | TOML vocabulary coverage, export specs, add-term checks | Medium |
 | `recipe_filters.py` | Boring recipe patterns, junk food keywords, kitchen tools | Low |
 | `recipe_matcher_backend.py` | Adapter that imports the country-specific matching functions | Medium |
 
@@ -178,6 +180,33 @@ does not update them. For Swedish, the maintenance/check scripts read them from
 `app/languages/sv/matcher_contracts/`; future production languages should keep
 the same shape under their own `app/languages/<code>/matcher_contracts/`.
 
+### `ingredient_matching/term_registry/`
+The term registry is the source-of-truth layer for matcher vocabulary coverage.
+For Swedish it already covers all audited matcher source families and generates
+runtime exports for migrated matcher side lists.
+
+A production language should add its own registry package when its matcher
+vocabulary becomes more than a tiny scaffold:
+
+- `entries/*.toml` — canonical families, aliases, guards, coverage rows, and
+  proof examples scoped to that language/market.
+- `registry.py` — loads authored TOML entries.
+- `legacy_inventory.py` — normalizes current matcher sources into registry
+  variants for contract checks.
+- `exports.py` — builds runtime exports consumed by matcher modules.
+- `add_term.py` — maps language-specific coverage rows to known export/check
+  layers and powers add-term validation.
+- `migration_exceptions.toml` — temporary narrow exceptions for legacy-only
+  terms during migration.
+- `baselines/*.json` — optional frozen vocabulary-audit baselines used by
+  contract/export checks once a production matcher has been audited.
+
+Do not copy Swedish canonicals blindly. Canonical terms are language/market
+scoped, and a new country should build its own TOML coverage and examples from
+local recipe/product text. If the language is still only a smoke-test scaffold,
+it can omit full registry coverage, but it should not be considered production
+matching until the registry/contracts cover the vocabulary being enabled.
+
 ### `category_utils.py`
 - `guess_category()` — product name → category string
 - Brand detection, meat keyword lists, lactose-free detection
@@ -200,7 +229,10 @@ the same shape under their own `app/languages/<code>/matcher_contracts/`.
 9. **Create `matcher_contracts/`** — add a small, permanent regression corpus:
    positive cases, relevant negative sibling cases, and rule/source inventory
    refs for the rules you are shipping.
-10. **Set recipe full-text search config** — set `RECIPE_FTS_CONFIG` in `.env`
+10. **Create `ingredient_matching/term_registry/`** once the matcher has real
+    vocabulary: TOML entries, registry loader, legacy inventory adapter, runtime
+    exports, add-term export specs, and migration exceptions.
+11. **Set recipe full-text search config** — set `RECIPE_FTS_CONFIG` in `.env`
    to the PostgreSQL text search config used by your recipe language
    (`swedish`, `english`, etc.) and keep `recipe_matcher_backend.RECIPE_FTS_CONFIG`
    aligned with it.
@@ -218,6 +250,9 @@ loads. A real country backend should pass this checklist first:
 - `app/languages/<code>/matcher_contracts/` contains the permanent regression
   cases and inventory for the rules you are enabling. Local diagnostics and
   batch-review notes are not enough by themselves.
+- `app/languages/<code>/ingredient_matching/term_registry/` covers the matcher
+  vocabulary being enabled, and its contract/export/add-term checks pass for the
+  language/market.
 - `MATCHER_LANGUAGE` and `RECIPE_FTS_CONFIG` are set together. For example, a
   UK backend would normally pair `MATCHER_LANGUAGE=en_gb` with PostgreSQL's
   `english` full-text search config.

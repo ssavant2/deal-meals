@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 import os
+from pathlib import Path
 import sys
 from types import SimpleNamespace
 
@@ -418,7 +419,6 @@ def _run_myrecipes_playwright_security_checks() -> None:
 def _run_term_registry_gate_checks() -> None:
     print("\n--- term registry R4 gate ---", flush=True)
     from tests.run_term_registry_contract_checks import (  # noqa: E402
-        DEFAULT_B_TRACK_DIR,
         DEFAULT_BASELINE_JSON,
         DEFAULT_SHARED_REGISTRY_DIR,
         run_checks,
@@ -429,7 +429,6 @@ def _run_term_registry_gate_checks() -> None:
         market="SE",
         batch_size=60,
         baseline_json=DEFAULT_BASELINE_JSON,
-        b_track_report_dir=DEFAULT_B_TRACK_DIR,
         shared_registry_dir=DEFAULT_SHARED_REGISTRY_DIR,
     ))
     error_codes = [issue.code for issue in issues if issue.severity == "error"]
@@ -437,6 +436,22 @@ def _run_term_registry_gate_checks() -> None:
     test("term registry contract check passes", error_codes, [])
     test("term registry new legacy key count", new_term_gate.get("new_legacy_coverage_keys"), 0)
     test("term registry R4 failure probe", new_term_gate.get("failure_probe_passed"), True)
+
+
+def _run_term_registry_add_term_checks() -> None:
+    print("\n--- term registry add-term export plan ---", flush=True)
+    from tests.run_term_registry_add_term_checks import run_checks  # noqa: E402
+
+    payload, issues = run_checks(SimpleNamespace(
+        language="sv",
+        market="SE",
+        report_dir=Path("/tmp/term_registry_add_term_sanity"),
+    ))
+    error_codes = [issue.code for issue in issues if issue.severity == "error"]
+    summary = payload["summary"]
+    test("term registry add-term check passes", error_codes, [])
+    test("term registry add-term coverage count", summary.get("unique_coverage_key_count"), 5333)
+    test("term registry add-term layer count", summary.get("known_export_layer_count"), 25)
 
 
 _run_matching_sanity_checks()
@@ -447,6 +462,7 @@ _run_pantry_input_validation_checks()
 _run_json_payload_validation_checks()
 _run_myrecipes_playwright_security_checks()
 _run_term_registry_gate_checks()
+_run_term_registry_add_term_checks()
 
 print("\n========================================", flush=True)
 print(f"TOTAL: {passed}/{passed + failed} checks passed", flush=True)

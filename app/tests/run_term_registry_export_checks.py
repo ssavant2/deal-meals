@@ -71,7 +71,15 @@ from languages.sv.ingredient_matching.term_registry.legacy_inventory import (  #
 
 
 DEFAULT_REPORT_ROOT = APP_DIR / "tests" / "reports" / "term_registry"
-DEFAULT_B_TRACK_BASELINE_JSON = APP_DIR / "tests" / "reports" / "term_pipeline_b_track" / "term_pipeline_audit.json"
+DEFAULT_B_TRACK_BASELINE_JSON = (
+    APP_DIR
+    / "languages"
+    / "sv"
+    / "ingredient_matching"
+    / "term_registry"
+    / "baselines"
+    / "verified_matcher_terms.json"
+)
 INGREDIENT_ROUTING_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "ingredient_routing.py"
 KEYWORDS_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "keywords.py"
 MATCH_BRIDGES_RUNTIME_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "match_bridges.py"

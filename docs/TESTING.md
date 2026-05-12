@@ -27,6 +27,7 @@ The sanity check covers:
   recipe matching
 - store plugin discovery import/initialization errors
 - fail-safe store registry startup cleanup when plugin discovery fails
+- the term-registry R4 gate and add-term/export-plan checks
 
 It does not scrape websites, use live product data, or require a database.
 
@@ -149,6 +150,35 @@ These JSON files are read-only contract inputs in production-style environments.
 Runtime code does not update them. The only writer is the manual dev maintenance
 script `tests/refresh_matcher_rule_inventory_line_refs.py --write`, which should
 not be run against a read-only production filesystem.
+
+The Swedish term registry is now the vocabulary coverage surface for matcher
+terms. After adding or changing a registry TOML entry, run:
+
+```bash
+docker compose exec -T -w /app web python tests/run_term_registry_contract_checks.py --language sv
+docker compose exec -T -w /app web python tests/run_term_registry_add_term_checks.py --language sv
+docker compose exec -T -w /app web python tests/run_term_registry_export_checks.py --language sv
+docker compose exec -T -w /app web python tests/run_term_registry_guard_bridge_checks.py --language sv
+```
+
+These checks do not scrape, rebuild cache, or require live product data. The
+add-term check verifies that central TOML entries map to known export/check
+layers and fail clearly when manual entries omit exact coverage or proof
+examples.
+
+The frozen Swedish vocabulary baseline used by these checks lives at
+`app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json`.
+It is a retained matcher contract input, not generated test output. It
+consolidates the completed static audit: 5,472 variants across 92 audit batches,
+all audited, with 0 `needs_fix`. The baseline includes historical multi-store
+vocabulary; absence from the current Willys or ICA assortment is not a failure
+unless a future check explicitly targets current-catalog materialization.
+
+Do not keep regenerated debug reports under `app/tests/reports/`. If a new
+matcher vocabulary baseline is intentionally started, rebuild the local audit
+ledger with `tests/run_term_pipeline_b_track_audit.py --rebuild-table`, promote
+only the consolidated JSON needed by the registry checks, and drop the dev-only
+`tmp_term_pipeline_b_audit_variants` table when finished.
 
 ## Matcher/Cache Full DB Diff
 
