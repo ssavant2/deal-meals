@@ -233,6 +233,42 @@ def _chocolate_drink_requirement_allows_product(
     if not _is_chocolate_drink_text(ingredient_lower):
         return True
     return 'chokladdryck' in set(product_keywords) or _is_chocolate_drink_text(product_lower)
+
+
+def _named_must_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: str,
+) -> bool:
+    """Keep named must drinks from falling back to generic apple/berry must."""
+    if matched_keyword != 'must':
+        return True
+    if 'julmust' in ingredient_lower:
+        return 'julmust' in product_lower
+    if 'äppelmust' in ingredient_lower or 'appelmust' in ingredient_lower:
+        return (
+            'äppelmust' in product_lower
+            or 'appelmust' in product_lower
+            or 'äpple' in product_lower
+            or 'apple' in product_lower
+        )
+    return True
+
+
+def _generic_sugar_requirement_allows_product(
+    product_lower: str,
+    product_keywords: set[str],
+    matched_keyword: str,
+) -> bool:
+    """Treat plain recipe-side socker as strösocker, not low-sugar carriers."""
+    if matched_keyword != 'socker':
+        return True
+    return (
+        'strösocker' in product_keywords
+        or 'strosocker' in product_keywords
+        or 'strösocker' in product_lower
+        or 'strosocker' in product_lower
+    )
 _EXPLICIT_VEGAN_PRODUCT_CUES = frozenset({
     'vegansk', 'veganska', 'veganskt',
     'vegan',
@@ -870,7 +906,6 @@ _RECIPE_NEVER_MATCH_KEYWORDS = frozenset({
     'svarpeppar',
     'vatten',
     'olja',
-    'socker',
     'kikärtsspad',
     'kikartsspad',
     'aquafaba',
@@ -1097,20 +1132,27 @@ def _fresh_chili_product_allowed(
         return True
     if any(cue in product_lower for cue in _CHILI_SPICE_PRODUCT_CUES):
         return False
-    if category in {'fruit', 'vegetables'}:
-        return True
-    if category == 'frozen':
-        return any(ind in product_lower for ind in FROZEN_PRODUCT_INDICATORS)
-    if not category:
-        return any(cue in product_lower for cue in (
-            'klass', 'kl1',
-            'färsk', 'farsk',
-            'fryst', 'frysta',
-            'peppar röd', 'peppar rod',
-            'peppar grön', 'peppar gron',
-            'peppar gul',
-        ))
-    return False
+    if any(blocker in product_lower for blocker in _CHILI_VARIETY_PRODUCT_BLOCKERS):
+        return False
+    return any(cue in product_lower for cue in (
+        'klass', 'kl1',
+        'färsk', 'farsk',
+        'fryst', 'frysta',
+        'peppar röd', 'peppar rod',
+        'peppar grön', 'peppar gron',
+        'peppar gul',
+        'chili röd', 'chili rod',
+        'chili grön', 'chili gron',
+        'chili gul',
+        'chilipeppar röd', 'chilipeppar rod',
+        'chilipeppar grön', 'chilipeppar gron',
+        'chilipeppar gul',
+        'chili naga',
+        'chilifrukt',
+        'habanero',
+        'jalapeño', 'jalapeno',
+        'serrano',
+    ))
 
 
 def _soy_sauce_requirement_allows_product(
@@ -2530,9 +2572,13 @@ def _whole_crayfish_product_allowed(product_lower: str, ingredient_lower: str, m
         return False
     if (
         ('havskräft' in ingredient_lower or 'havskraft' in ingredient_lower)
-        and ('havskräft' in product_lower or 'havskraft' in product_lower)
     ):
-        return True
+        return 'havskräft' in product_lower or 'havskraft' in product_lower
+    if (
+        ('signalkräft' in ingredient_lower or 'signalkraft' in ingredient_lower)
+        and not ('signalkräft' in product_lower or 'signalkraft' in product_lower)
+    ):
+        return False
     return any(word in product_lower for word in _WHOLE_CRAYFISH_FROZEN_PRODUCT_WORDS)
 
 
@@ -2556,21 +2602,33 @@ _CHILI_VARIETY_PRODUCT_BLOCKERS = frozenset({
     'peppers', 'sliced', 'skivad', 'skivade',
     'oliver',
     'chips', 'chip', 'majskakor', 'riskakor',
-    'ostcrème', 'ostcreme', 'cheezy',
+    'ostcrème', 'ostcreme', 'cheezy', 'cheese', 'ost',
     'korv', 'salami', 'chorizo',
+    'beef', 'biff', 'bean', 'bön', 'bon',
+    'kyckling', 'chicken',
+    'nugget', 'nuggets',
+    'nötter', 'notter', 'nöt', 'not',
+    'béarnaise', 'bearnaise',
     'snus', 'tobaksfritt',
 })
 
 
 def _is_plain_fresh_or_frozen_chili_variety_product(product_lower: str, category: str) -> bool:
     """True for plain produce-form chili varieties, not jarred/flavored carriers."""
-    if category not in {'fruit', 'vegetables', 'frozen'}:
-        return False
     if any(blocker in product_lower for blocker in _CHILI_VARIETY_PRODUCT_BLOCKERS):
         return False
-    if category in {'fruit', 'vegetables'}:
-        return True
-    return any(ind in product_lower for ind in FROZEN_PRODUCT_INDICATORS)
+    return any(cue in product_lower for cue in (
+        'klass', 'kl1',
+        'färsk', 'farsk',
+        'fryst', 'frysta',
+        'röd', 'rod',
+        'grön', 'gron',
+        'gul',
+        'habanero',
+        'jalapeño', 'jalapeno',
+        'serrano',
+        'chilipeppar',
+    ))
 
 
 def _expand_offer_keywords_for_matching(product_keywords: List[str], product_name: str = "") -> List[str]:
@@ -2595,8 +2653,6 @@ def _expand_offer_keywords_for_matching(product_keywords: List[str], product_nam
             for extra in (
                 'signalkräfta', 'signalkrafta',
                 'kräftor', 'kraftor',
-                'havskräfta', 'havskrafta',
-                'havskräftor', 'havskraftor',
             ):
                 if extra not in seen:
                     expanded.append(extra)
@@ -3069,6 +3125,18 @@ def matches_ingredient(
         ingredient_lower,
         product_name_normalized,
         product_keywords,
+    ):
+        return None
+    if not _named_must_requirement_allows_product(
+        product_name_normalized,
+        ingredient_lower,
+        matched_keyword,
+    ):
+        return None
+    if not _generic_sugar_requirement_allows_product(
+        product_name_normalized,
+        set(product_keywords),
+        matched_keyword,
     ):
         return None
     if not _explicit_vegan_requirement_allows_product(
@@ -5267,6 +5335,18 @@ def matches_ingredient_fast(
             matched_keyword == 'lingondryck'
             and 'koncentrat' in offer_data['name_normalized']
             and any(cue in ingredient_lower for cue in _NON_CONCENTRATE_INGREDIENT_CUES)
+        ):
+            return None
+        if not _named_must_requirement_allows_product(
+            offer_data.get('name_normalized', ''),
+            ingredient_lower,
+            matched_keyword,
+        ):
+            return None
+        if not _generic_sugar_requirement_allows_product(
+            offer_data.get('name_normalized', ''),
+            set(offer_data.get('keywords', ())),
+            matched_keyword,
         ):
             return None
         if (

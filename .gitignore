@@ -37,6 +37,7 @@ CODEX.md
 app/tests/batch_review_*
 app/tests/recipe_matching_review_template.md
 app/tests/test_*.py
+!app/tests/test_matching_sanity.py
 app/tests/scrape_*_full_sortiment.py
 app/tests/candidate_term_index_parity.py
 app/tests/import_legacy_questions.py

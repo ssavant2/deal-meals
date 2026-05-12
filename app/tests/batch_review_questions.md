@@ -2002,3 +2002,262 @@ Track A follow-up fix wave 2 - 2026-05-09:
   `tomatpesto`, `Ansjoviskrydda` as `sill`, fresh habanero as habanero sauce,
   tube kaviar as `storkornskaviar`, and strawberry jam as `morotssylt` were
   absent.
+
+Batch 16-18 ICA checkpoint gatekeeping - 2026-05-12:
+- Preflight: rebuilt the prepared cache against the current ICA full assortment
+  before starting review. Cache is `ready` with 24,768 ICA offers, 13,540 cached
+  recipes, 4,384,149 candidate rows, and matcher
+  `matcher-820d3408fe0a`. Batches 16-18 are the current review targets:
+  ranks 1501-1800.
+- Batch 16 checkpoint ranks 1501-1506 accepted after DB and live spot-checks:
+  6/6 reviewed, 9 accepted DB issues, no real Stefan questions, no worker file
+  edits. Accepted direct-fix candidates: chocolate-cookie ingredient should not
+  match plain chocolate/cake carriers; dark chocolate should block banana/
+  caramel/candy carriers; `drickfärdig svartvinbärssaft` should match current
+  Kiviks blackcurrant drink rows; optional nuts/seeds should block bread/spice
+  seed carriers; fresh `paprika` should block paprika spice; plain
+  `crème fraiche` should block sweet mango crème fraiche; standalone `persilja`
+  should block vitost carrier products; `inläggningssill` should block
+  `Västkustsallad` carrier rows. Accepted non-issues: generic salt/water/
+  pepper and `svartpeppar` zero matches, broad produce/dairy variants, and
+  normal egg/bread/potato/onion breadth.
+- Batch 17 checkpoint ranks 1601-1606 accepted after DB and live spot-checks:
+  6/6 reviewed, 11 accepted DB issues, no real Stefan questions, no worker file
+  edits. Accepted direct-fix candidates: plain mayonnaise should block curry
+  mayo; whole/lemon ingredient should block supplement/sports-gel carriers;
+  standalone garlic should block seafood salad/vitost carriers; carrots should
+  block non-food decoration; standalone cardamom should block pancake-mix
+  carriers; cooked green lentils should route to current ready green-lentil
+  rows; baby spinach should block pasta/seasoning carriers; garlic carrier
+  issue repeats in rank 1605; explicit `sambal oelek` should not match harissa
+  sambal; raw squid rings should block breaded squid rings; `sesamfrön` should
+  require sesame rows and not generic seed/bread fallback. Accepted non-issues:
+  generic salt/water/oil and pepper zero matches, same-family duplicate zero
+  rows, broad bread alternative for naan/milk-free bread, and whole/spiskummin
+  not being counted for explicit ground caraway.
+- Batch 18 checkpoint ranks 1701-1706 accepted after itemized breakdown, DB
+  check, and exact live spot-checks: 6/6 reviewed, 18 accepted DB issues, no
+  real Stefan questions, no worker file edits. The high issue rate is plausible
+  because the ICA full assortment exposes many carrier products and some ICA
+  category guesses are wrong. Accepted direct-fix candidates: lemon should
+  block supplement/sports-gel carriers; standalone garlic should block seafood
+  salad/vitost carriers; tortiglioni/pasta should block pasta seasoning mix and
+  ready-meal macaroni carriers; carrots should block non-food decoration;
+  Parmigiano Reggiano should block cracker carriers; fresh red chili and fresh
+  mint should match current ICA `Peppar Röd`/`Mynta` rows even when scraped
+  category is misclassified as `meat`; cinnamon should block pancake-mix
+  carriers; fresh cucumber should block preserved/chopped cucumber; firm tofu
+  should block prepared tofu skagen/spread. Accepted non-issues: `julskinka`
+  with no current relevant offer, generic salt/water/pepper zero matches,
+  duplicate same-family grouping, broad soy/olive-oil/produce/dairy variants.
+- Batch 16 final ranks 1501-1600 accepted after DB confirmation: 100/100
+  reviewed, 205 accepted DB issues, no real Stefan questions, no worker file
+  edits. Main accepted fix families: block carrier products for standalone
+  garlic, parsley, citrus, chocolate, fresh paprika, creme fraiche/mayo, seeds,
+  crackers/cakes/snacks/bread/ready-meals; tighten raw-vs-prepared meat/fish/
+  chicken/squid/tofu/pasta products; add or repair current-offer coverage for
+  fresh chili/herbs, skin-on salmon, fullkorn lasagne plates, pasta-shape
+  specificity, kalamata/citron olives, saltgurka, blackcurrant drink, melon,
+  lettuce, ginger, non-alcohol/dark beer, vanilla protein powder, dried
+  apricots, ice cubes, instant coffee, truffle oil, and the rank 1580 seitan
+  pantry-match/cache-materialization gap. Gatekeeper note: several listed live
+  false negatives pass a direct synthetic pair check, so those should be
+  treated as cache/materialization/filter candidates until the exact fix wave
+  proves whether the term itself is missing. Accepted non-issues include generic
+  salt/water/pepper/oil, ordinary broad produce/dairy/bread/pasta/olive-oil
+  matches, fresh/frozen vegetable variants, and no-current-offer alcohol/
+  cocktail ingredients.
+- Batch 17 final ranks 1601-1700 accepted after DB confirmation and
+  representative live/synthetic checks: 100/100 reviewed, 264 accepted DB
+  issues, no real Stefan questions, no worker file edits. Main accepted fix
+  families: recurring garlic/citrus/flavored-oil carriers; non-food carrot;
+  baby/flavored milk drinks; cheese/pesto/kex/soft-cheese carriers for cheese;
+  prepared/seasoned raw meat, chicken, fish, and seafood products; rice/pasta/
+  cereal/ready-meal carriers; generic seed fallback overmatching; cooked-vs-dry
+  lentils; canned/preserved vs fresh tomato/cucumber; fresh herb/chili/
+  jalapeno/mint/thyme routing/category misses; whole-cinnamon and dry-spice form
+  misses; named/current-offer gaps for Non Stop, Cheez Doodles, dulce de leche,
+  kanelstänger, and fresh chili/herbs. Gatekeeper spot-checks reproduced the
+  policy-sensitive cases for `julmust` -> current apple-must carrier, `Di Bufala
+  Campana` -> ordinary/riven mozzarella, `grovt rågmjöl` -> fine rye flour,
+  pitted olives -> olives with pits, and `havskräfta` -> current signalkräftor
+  row. Accepted non-issues: generic salt/water/oil/black pepper zeros, brewed
+  coffee/espresso zeros, kitchen aids, broad ordinary dairy/lactose-free/plant
+  variants, broad potatoes/pasta/soy sauce, duplicate same-family zero rows,
+  optional glaze, and no-current-offer speciality items.
+- Batch 18 final ranks 1701-1800 accepted after DB confirmation and
+  representative live/synthetic checks: 100/100 reviewed, 223 accepted DB
+  issues, no real Stefan questions, no worker file edits. Main accepted fix
+  families: repeated supplement/carrier false positives for lemon/citron juice;
+  repeated standalone garlic carriers; ICA category/coverage anomalies around
+  fresh chili/herbs/root rows such as `Peppar Röd`, `Mynta`, `Timjan`, and
+  `Ingefära`; generic sugar and coconut coverage gaps; pasta/rice/ready-meal
+  carriers; prepared meat/fish/poultry false positives; non-food product false
+  positives such as `Hänge morot`; cheese/cream qualifier problems; seed/herb
+  carrier overmatches; dry-vs-cooked legume mismatches; prepared-pancake/mix
+  confusion; `dillfrön` falling back to generic seeds/breads; `gräddost`
+  matching blue-cheese/grädd carriers; and `cottage cheese` matching
+  almond/plant-based `Cottage Pearls`. Gatekeeper spot-checks reproduced the
+  citron supplement, garlic carrier, dill seed fallback, gräddost/blue-cheese
+  carrier, cottage-pearl carrier, and current kombucha live match. The generic
+  sugar and coconut cases are accepted as coverage/term gaps because direct
+  synthetic checks still miss representative current ICA rows. Accepted
+  non-issues: broad fresh/frozen ordinary veg/herbs, ordinary dairy/lactose
+  variants, broad soy sauce, salt/pepper/water/generic oil behavior, raw
+  fresh/frozen substitutions where not clearly prepared, and the rank 1792
+  kombucha cache miss because current kombucha rows live-match.
+
+Batch 16-18 ICA deduplicated fix backlog - 2026-05-12:
+- Gatekeeper summary: the 692 counted issues are review occurrences, not 692
+  independent fixes. Collapsed by behavior, this looks like roughly 18 practical
+  follow-up families. Several are broad recurring rule families that should be
+  fixed and rebuilt in waves; several are store-category/data-quality issues;
+  and a smaller group are term/coverage additions.
+- P0/high - standalone ingredient carrier false positives. Seen across all
+  three batches. Examples: `vitlök` -> `Kräftstjärtsallad Vitlök` / `Vitost
+  ... vitlök persilja`, `persilja` -> vitost carrier, `citron`/`citronjuice`
+  -> supplements/sports gels, `mörk choklad` -> banana/caramel/chocolate candy
+  carriers, `Parmigiano Reggiano` -> crackers, `babyspenat` -> Knorr pasta.
+  Fix direction: stronger component/carrier blocking for prepared products
+  where the recipe asks for the standalone ingredient.
+- P0/high - raw/fresh ingredient vs prepared/seasoned product false positives.
+  Seen across all three batches. Examples: raw chicken/fish/meat/squid/tofu
+  matching gyoza, roasted/smoked/cured products, ready meals, breaded squid,
+  pasta meals, `Skagenröra Tofu`, and other prepared carriers. Fix direction:
+  prepared-product blockers that respect explicit recipe wording and avoid
+  blocking valid broad raw/frozen substitutions.
+- P0/high - category-dependent food matching is the wrong abstraction. Seen in
+  batches 16-18. Examples: `Peppar Röd`, `Mynta`, `Timjan`, `Ingefära`, and
+  some dried fruit rows are stored with misleading categories such as `meat` or
+  `dairy`. Stefan clarified on 2026-05-12 that store categories are only
+  trustworthy enough to filter obvious non-food; no food-vs-food matching
+  decision should depend on them because store/source categories are routinely
+  wrong. Fix direction: make product text and matcher terms drive food matching;
+  use category only as a coarse non-food guard, never as a reason to reject or
+  accept a plausible food match.
+- P0/high - generic seed fallback overmatching. Seen across all three batches.
+  Examples: `sesamfrön` and `dillfrön` falling back to generic seeds, breads,
+  spice seeds, and `Bockhornsklöver Hela Frön`. Fix direction: require the
+  requested seed/herb-seed family when the ingredient is specific; keep generic
+  `frön` broad only when the recipe itself is generic.
+- P1/high - spice/fresh/form specificity. Seen across all three batches.
+  Examples: fresh `paprika` -> paprika spice, fresh chili/herbs missed or
+  blocked, `kanel`/`kanelstänger` vs pancake mix/whole cinnamon, `hel` vs
+  ground spice, `mal d kummin` not same as whole/spiskummin. Fix direction:
+  extend the existing fresh-vs-spice and form-qualifier gates.
+- P1/high - cheese and dairy qualifier specificity. Seen in batches 16-18.
+  Examples: plain `crème fraiche` -> sweet mango creme fraiche, plain
+  mayonnaise -> curry mayo, `Di Bufala Campana` -> ordinary/riven mozzarella,
+  `gräddost` -> blue-cheese/grädd carriers, `cottage cheese` -> almond/plant
+  based `Cottage Pearls`, baby/flavored milk drinks for ordinary milk. Fix
+  direction: named subtype/qualifier guards for cheese, dairy, mayo, and cream.
+- P1/high - pasta/rice/cereal/bread/ready-meal carriers. Seen across all three
+  batches. Examples: tortiglioni/pasta -> pasta seasoning or ready-meal
+  macaroni, rice/pasta/cereal carriers, cakes/chips/snacks/bagels/crackers
+  satisfying base ingredients, `mörkt filmjölksbröd` matching filmjölk instead
+  of bread. Fix direction: distinguish base ingredient from product/meal/bakery
+  carrier unless the recipe wording asks for that product family.
+- P1/medium - canned/preserved/cooked vs fresh form specificity. Seen across
+  batches 16-18. Examples: fresh cucumber -> chopped/preserved cucumber,
+  saltgurka vs mixed pickles, cooked green lentils vs dry lentils, canned/
+  preserved tomato vs fresh tomato, olives with pits vs `urkärnade oliver`.
+  Fix direction: add narrow form guards; avoid reducing accepted fresh/frozen
+  breadth for ordinary produce.
+- P1/medium - current-offer coverage/term gaps that should be checked in the
+  next fix wave. Seen across all three batches. Examples: blackcurrant drink,
+  fresh herbs/chili, skin-on salmon, fullkorn lasagne plates, pappardelle/
+  strozzapreti-like pasta specificity, kalamata/citron olives, melon, lettuce,
+  ginger, non-alcohol/dark beer, vanilla protein powder, dried apricots, ice
+  cubes, instant coffee, truffle oil, Non Stop, Cheez Doodles, dulce de leche,
+  kanelstänger, sugar, and coconut. Fix direction: run targeted synthetic checks
+  first; some are true term gaps and some are cache/filter/materialization
+  gaps.
+- P1/medium - generic sugar and coconut should probably not behave like
+  generic oil/pepper. Seen mostly in batch 18. Examples: `socker` missing
+  `Strösocker`, coconut milk/cream and coconut flakes/products not routing
+  consistently. Fix direction: confirm policy, then add explicit pantry
+  coverage with guards for desserts/snacks where needed.
+- P1/medium - drink and named beverage specificity. Seen in batches 16-18.
+  Examples: `julmust` -> apple must, `alkoholfri öl` / dark beer current-offer
+  misses, `drickfärdig svartvinbärssaft` should find current blackcurrant
+  drink. Fix direction: named drink families should not collapse to generic
+  `must`/drink terms unless explicitly accepted.
+- P2/medium - seafood/meat subtype specificity. Seen in batches 16-17 and
+  overlaps the raw/prepared family. Examples: `havskräfta` -> signalkräftor,
+  raw pork/ham/chicken/fish vs cooked/smoked/cured alternatives, squid rings vs
+  breaded squid rings. Fix direction: subtype and preparation guards; this
+  should be patched carefully because broad fish/meat substitutions can be
+  intentional in some recipe contexts.
+- P2/medium - vegetarian/tofu/plant-based prepared-product qualifiers. Seen in
+  batches 16 and 18. Examples: firm tofu -> tofu skagen/spread, vegan/plant
+  dairy products as ordinary dairy, `Cottage Pearls` almond/plant-based as
+  cottage cheese. Fix direction: use explicit plant-based qualifier rules rather
+  than broad brand/name keyword hits.
+- P2/medium - non-food offer false positives. Seen in batches 17-18. Examples:
+  `Hänge morot ull`, kitchen aids, hygiene products with herb/citrus names.
+  Fix direction: category/text guard for non-food rows before semantic matching.
+- P2/medium - parser/normalization oddities. Seen in batch 16 and related to
+  existing broad text cleanup. Examples: `färsk hackad persilja` producing
+  mince/`färs` matches, `mörkt filmjölksbröd` matching filmjölk. Fix direction:
+  add regression fixtures before touching normalization; risk of unintended
+  matcher-wide effects.
+- P2/low - no-current-offer or accepted-broad cases should stay out of the fix
+  wave. Examples: generic salt/water/pepper/oil, broad ordinary produce/dairy/
+  bread/pasta/olive-oil matches, coffee/espresso zeros, cocktail/alcohol
+  ingredients without current grocery offers, and duplicate same-family zero
+  rows. Fix direction: do not spend fix time here unless later evidence shows a
+  real current-offer product text.
+- Suggested fix-wave order: first handle P0 carrier/raw-prepared/category-
+  dependent matching/seed fallback families together, then rebuild once and
+  rerun a targeted sample from batches 16-18. After that, take the P1 term/coverage and form
+  specificity items in smaller groups. Avoid using the raw 692 count as the
+  progress metric; track by these families plus targeted regression cases.
+
+Batch 16-18 policy decisions before fix wave - 2026-05-12:
+- Store/source categories must only be trusted as a coarse non-food filter.
+  `hygiene`, `household`, `baby`, `petfood`, and `garden` are hard non-food
+  blocks. Everything else should pass into the text/term matcher, because
+  grocery store categories are often wrong. Food-vs-food decisions must not be
+  based on `fruit`, `vegetables`, `meat`, `dairy`, `beverages`, `pantry`,
+  `spices`, etc.
+- The path into `household` must be conservative. ICA has many real non-food
+  products such as grills, clothing, books, napkins, and outdoor furniture, but
+  a borderline product should stay matchable and be blocked later by text rules
+  rather than being dropped as non-food too early.
+- Beverages are not non-food by category, but they should only match when the
+  recipe explicitly asks for a drink ingredient. Named drink families stay
+  narrow: `julmust` is not ordinary/apple must, `porter` is not generic beer,
+  apple cider is not pear cider, and drink products must not satisfy fruit/flavor
+  ingredients.
+- Stefan decisions for the first fix wave: block `havskräfta` ->
+  `signalkräftor`; block `julmust` -> ordinary/apple must; treat `socker` as
+  `strösocker`; treat `kokosmjölk` as only coconut milk, while bare `kokos`
+  needs its own context.
+
+Batch 16-18 first safe fix wave - 2026-05-12:
+- Implemented the category policy for the first affected paths: fresh herb/chili
+  form checks and the local-meat/flavor-carrier guards no longer reject obvious
+  food matches just because ICA/source category says `meat`, `fruit`, etc.
+  Hard non-food categories still block before semantic matching.
+- Patched accepted direct decisions: `havskräfta` no longer matches
+  `signalkräftor`; `julmust` no longer falls back to ordinary/apple must;
+  `socker` is buyable again and matches `strösocker` while specialty sugars/
+  sockerärtor stay blocked; `äppelmust` gets its own offer extraction.
+- Added alcohol-free beer extraction that does not depend on `beverages`
+  category. Follow-up targeted verification caught that alcohol-free beer was
+  still leaking into generic/dark beer via product extraction; `alkoholfri öl`
+  now stays named-only and does not satisfy `öl` or `mörkt öl`.
+- Follow-up targeted verification also caught that generic `socker` overmatched
+  low-sugar carriers such as marmalade/jam with "mindre/utan tillsatt socker".
+  Runtime matching now requires plain recipe `socker` to hit `strösocker`, while
+  `sockerärter`/`sockerärtor` keep their own route and stay blocked from plain
+  sugar.
+- Added regression coverage in `test_matching_sanity.py` for the decisions
+  above, including bad ICA categories, household hard block, drink specificity,
+  sugar, crayfish subtype, and alcohol-free beer.
+- Verification: targeted live/synthetic checks for this fix wave passed without
+  rerunning all 300 batch recipes; `tests/test_matching_sanity.py` passed
+  1970/1970; term registry export, guard/bridge, contract, and matcher-rule
+  model checks passed. The contract check now treats line-based B2 variant-id
+  churn as a warning while coverage-key gates remain blocking for real lost/new
+  terms.

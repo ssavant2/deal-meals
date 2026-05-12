@@ -65,7 +65,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     # Specific neighboring terms like havssalt, strösocker and citronpeppar still
     # match through their own explicit keywords.
     'salt', 'peppar', 'svartpeppar', 'svartpepparkorn', 'svarpeppar',
-    'vatten', 'olja', 'socker',
+    'vatten', 'olja',
 
     # Non-buyable recipe byproducts: these require recipe-side handling, not offers.
     'kikärtsspad', 'kikartsspad', 'aquafaba',
@@ -1857,7 +1857,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'mango', 'lime', 'kiwi', 'päron', 'paron', 'lingon',  # fruits
     'banan', 'druva', 'fikon', 'melon', 'äpple',  # fruits (5 chars)
     'grape', 'guava', 'dadel', 'dadlar', 'goji', 'acai',  # exotic fruits (≤6 chars)
-    'kanel', 'senap', 'ajvar', 'soja', 'sambal', 'honung', 'salsa',  # spices/condiments
+    'kanel', 'senap', 'ajvar', 'soja', 'sambal', 'honung', 'salsa', 'socker',  # spices/condiments/staples
     'kummin',  # cumin spice (6 chars)
     'salvia',  # sage herb (6 chars) — "Salvia Kruka" etc.
     'russin',  # raisins (6 chars)

@@ -57,7 +57,7 @@ variants = ["generic_sugar_no_match ! socker", "generic_sugar_no_match ! ströso
 negative_guards = ["generic_sugar_no_match ! socker", "generic_sugar_no_match ! strösocker"]
 source_refs = ["policy:no_match_policies:policy_generic_sugar"]
 layer_policy = ["negative_guard_only"]
-notes = "Generic sugar is a staple no-match term; explicit sugar types remain buyable."
+notes = "Retained for B2 export compatibility. Runtime is disabled for plain socker via allowed_specifics; generic socker should match strösocker."
 
 [entries.language_payload.no_match_policy]
 id = "policy_generic_sugar"
@@ -67,10 +67,10 @@ canonical = "generic_sugar_no_match"
 ingredient_patterns = ["\\bsocker\\b"]
 blocked_offer_keywords = ["socker", "strösocker"]
 blocked_offer_patterns = []
-allowed_specifics = []
-reason = "Generic sugar is a staple no-match term; explicit sugar types remain buyable."
+allowed_specifics = ["socker"]
+reason = "Legacy B2 no-match policy retained as disabled export; plain socker now matches strösocker."
 policy_ref = "matcher_layer_plan_initial"
-fixture_refs = ["plan_initial_generic_sugar_negative"]
+fixture_refs = ["plan_initial_strosocker_positive"]
 supersedes = ["legacy_no_match_generic_sugar"]
 
 [[entries.coverage]]
@@ -84,11 +84,6 @@ source_family = "no_match_policy"
 canonical = "generic_sugar_no_match"
 variant = "generic_sugar_no_match ! strösocker"
 layer_role = "negative_guard_keyword"
-
-[[entries.negative_examples]]
-ingredient = "generic_sugar_no_match"
-offer_name = "generic_sugar_no_match ! socker"
-expected = 0
 
 [[entries]]
 entry_id = "sv-se.guard.policy_black_pepper_staple"

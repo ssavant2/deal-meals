@@ -892,8 +892,8 @@ def get_filtered_offers(preferences: Dict) -> List[Offer]:
                 continue
 
         if local_meat_only:
-            in_meat_cat = offer.category in MEAT_CATEGORIES
             meat_keywords_in_name = any(kw in name_lower for kw in MEAT_NAME_KEYWORDS)
+            in_meat_cat = offer.category in MEAT_CATEGORIES and meat_keywords_in_name
             in_extended = offer.category in MEAT_EXTENDED_CATEGORIES and meat_keywords_in_name
 
             if in_meat_cat or in_extended:
@@ -1048,8 +1048,8 @@ def analyze_unmatched_offers(preferences: Dict, matched_offer_ids: set[str]) -> 
                 continue
 
         if local_meat_only:
-            in_meat_cat = offer.category in MEAT_CATEGORIES
             meat_keywords_in_name = any(kw in name_lower for kw in MEAT_NAME_KEYWORDS)
+            in_meat_cat = offer.category in MEAT_CATEGORIES and meat_keywords_in_name
             in_extended = offer.category in MEAT_EXTENDED_CATEGORIES and meat_keywords_in_name
             if in_meat_cat or in_extended:
                 is_specialty = any(s in name_lower for s in IMPORTED_SPECIALTY_EXCEPTIONS)
@@ -1548,7 +1548,10 @@ def _flavor_carrier_context_blocked(
             continue
         return True
 
-    if category_lower in _MEAT_FLAVOR_CARRIER_CATEGORIES:
+    if (
+        category_lower in _MEAT_FLAVOR_CARRIER_CATEGORIES
+        and any(cue in product_lower for cue in _MEAT_FLAVOR_CARRIER_INGREDIENT_CUES)
+    ):
         if not any(cue in ingredient_lower for cue in _MEAT_FLAVOR_CARRIER_INGREDIENT_CUES):
             return True
 

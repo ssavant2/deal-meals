@@ -29,12 +29,6 @@ FRESH_HERB_KEYWORDS: FrozenSet[str] = frozenset({
 })
 
 
-FRESH_PRODUCE_CATEGORIES: FrozenSet[str] = frozenset({
-    'fruit',
-    'vegetables',
-})
-
-
 _CHILI_FRESH_KEYWORDS: FrozenSet[str] = frozenset({
     'chili',
     'chilipeppar',
@@ -60,6 +54,55 @@ _CHILI_FRESH_PRODUCT_CUES: FrozenSet[str] = frozenset({
     'piripiri',
     'chilipeppar',
     'chillipeppar',
+    'habanero',
+    'jalapeño',
+    'jalapeno',
+    'serrano',
+    'chilli',
+})
+
+
+_SPARSE_FRESH_HERB_KEYWORDS: FrozenSet[str] = frozenset({
+    'gräslök',
+    'graslok',
+    'citronmeliss',
+})
+
+
+_SPARSE_FRESH_PRODUCT_BLOCKERS: FrozenSet[str] = frozenset({
+    'burk',
+    'påse',
+    'pase',
+    'kockens',
+    'te',
+    'tea',
+    'friggs',
+    'sås',
+    'sas',
+    'dressing',
+    'marinad',
+    'krydda',
+    'kryddmix',
+    'pesto',
+    'olja',
+    'chips',
+    'ost',
+    'soppa',
+    'juice',
+    'dryck',
+    'godis',
+})
+
+
+_FRESH_GINGER_PRODUCT_CUES: FrozenSet[str] = frozenset({
+    'riven',
+    'rivet',
+    'hackad',
+    'hackade',
+    'färsk',
+    'farsk',
+    'puré',
+    'pure',
 })
 
 
@@ -87,10 +130,19 @@ def product_indicates_fresh_herb_form(
         return False
     if any(ind in product_lower for ind in FRESH_PRODUCT_INDICATORS):
         return True
-    if (offer_category or "").lower() in FRESH_PRODUCE_CATEGORIES:
-        return True
     if matched_keyword in _CHILI_FRESH_KEYWORDS:
         return any(cue in product_lower for cue in _CHILI_FRESH_PRODUCT_CUES)
+    if matched_keyword in {'ingefära', 'ingefara'}:
+        if any(blocker in product_lower for blocker in _SPARSE_FRESH_PRODUCT_BLOCKERS):
+            return False
+        return (
+            product_lower.startswith(('ingefära', 'ingefara'))
+            or any(cue in product_lower for cue in _FRESH_GINGER_PRODUCT_CUES)
+        )
+    if matched_keyword in _SPARSE_FRESH_HERB_KEYWORDS:
+        if any(blocker in product_lower for blocker in _SPARSE_FRESH_PRODUCT_BLOCKERS):
+            return False
+        return product_lower.startswith((matched_keyword, fix_swedish_chars(matched_keyword)))
     return False
 
 

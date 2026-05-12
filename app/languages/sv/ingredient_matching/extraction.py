@@ -165,8 +165,6 @@ def _is_chipotle_spice_product_text(text: str, category: Optional[str] = None) -
 
 
 def _is_plain_sparkling_water_product_text(text: str, category: Optional[str] = None) -> bool:
-    if (category or '').lower() != 'beverages':
-        return False
     if not re.search(r'\b(?:kolsyrat\s+vatten|mineralvatten|sparkling\s+water)\b', text):
         return False
     return not any(token in text for token in (
@@ -180,8 +178,6 @@ def _is_plain_sparkling_water_product_text(text: str, category: Optional[str] = 
 
 
 def _is_plain_instant_coffee_product_text(text: str, category: Optional[str] = None) -> bool:
-    if (category or '').lower() not in {'pantry', 'beverages'}:
-        return False
     if not re.search(r'\b(?:snabbkaffe|pulverkaffe|instant\s+coffee)\b', text):
         return False
     return not any(token in text for token in (
@@ -412,8 +408,7 @@ def extract_keywords_from_product(
         return ['sodavatten']
 
     if (
-        (category or '').lower() == 'beverages'
-        and re.search(r'\b(?:läsk|lask|cola|soda|fanta|sprite|pepsi|trocadero|zingo|jarritos)\b', original_name_lower)
+        re.search(r'\b(?:läsk|lask|cola|soda|fanta|sprite|pepsi|trocadero|zingo|jarritos)\b', original_name_lower)
         and not re.search(r'\b(?:kolsyrat\s+vatten|mineralvatten|sparkling\s+water|ginger\s+ale)\b', original_name_lower)
     ):
         return ['läsk']
@@ -470,23 +465,27 @@ def extract_keywords_from_product(
         return ['lime', 'limejuice']
 
     if (
-        (category or '').lower() == 'beverages'
-        and re.search(r'\b(?:folköl|folkol)\b', original_name_lower)
+        re.search(r'\b(?:folköl|folkol)\b', original_name_lower)
         and not any(cue in original_name_lower for cue in ('ginger beer', 'root beer'))
     ):
         return ['folköl', 'öl']
 
     if (
-        (category or '').lower() == 'beverages'
-        and re.search(r'\b(?:öl|ol|lager|beer|lättöl|lattol)\b', original_name_lower)
+        re.search(r'\b(?:alkoholfri|alkfri|alcohol\s+free|non\s+alcoholic)\b', original_name_lower)
+        and re.search(r'\b(?:öl|ol|lager|beer)\b', original_name_lower)
+        and not any(cue in original_name_lower for cue in ('ginger beer', 'root beer'))
+    ):
+        return ['alkoholfriöl']
+
+    if (
+        re.search(r'\b(?:öl|ol|lager|beer|lättöl|lattol)\b', original_name_lower)
         and not any(cue in original_name_lower for cue in ('ginger beer', 'root beer'))
         and 'porter' not in original_name_lower
     ):
         return ['öl']
 
     if (
-        (category or '').lower() == 'beverages'
-        and 'cider' in original_name_lower
+        'cider' in original_name_lower
         and 'vinäger' not in original_name_lower
         and 'vinager' not in original_name_lower
     ):
@@ -590,16 +589,10 @@ def extract_keywords_from_product(
         and any(cue in original_name_lower for cue in ('gelé', 'gele'))
     ):
         return ['rödvinbärsgele']
-    if (
-        re.search(r'\b(?:alkoholfri|alkfri|alcohol\s+free|non\s+alcoholic)\b', original_name_lower)
-        and re.search(r'\b(?:öl|ol|lager|beer)\b', original_name_lower)
-    ):
-        return ['alkoholfriöl']
-
     # Cooking recipes occasionally call for porter specifically. Keep that beer
     # family searchable as an exact ingredient without opening generic beer or
     # other beverage matching.
-    if (category or '').lower() == 'beverages' and re.search(r'\bporter\b', original_name_lower):
+    if re.search(r'\bporter\b', original_name_lower):
         return ['porter']
 
     # Specific savory spread/dip products should keep their own identity instead
@@ -929,8 +922,7 @@ def extract_keywords_from_product(
     # Explicit sparkling-wine ingredients should reach real mousserande vin
     # products without broadening to other sparkling drinks or preserves.
     _sparkling_wine_like = (
-        (category or '').lower() == 'beverages'
-        and 'mousserande' in original_name_lower
+        'mousserande' in original_name_lower
         and (
             re.search(r'\bvin\b', original_name_lower) is not None
             or 'chardonnay' in original_name_lower
@@ -1650,6 +1642,9 @@ def extract_keywords_from_product(
         and 'örtblandningar' not in unique_keywords
     ):
         unique_keywords.append('örtblandningar')
+
+    if re.search(r'\b(?:äppel|appel|apple)\s*must\b|\bmust\s+(?:äpple|apple)\b', original_name_lower):
+        return ['äppelmust', 'must']
 
     # Block products where the only keyword is too generic (e.g., "Kryddmix Classic" → ['kryddmix'])
     if len(unique_keywords) == 1 and unique_keywords[0] in SOLO_KEYWORD_BLOCK:

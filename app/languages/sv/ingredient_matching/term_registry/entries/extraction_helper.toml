@@ -3395,3 +3395,43 @@ source_family = "extraction_helper"
 canonical = "wokmix"
 variant = "wokmix"
 layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.appelmust"
+language = "sv"
+market = "SE"
+canonical = "äppelmust"
+status = "active"
+variants = ["äppelmust"]
+ingredient_terms = []
+offer_terms = ["äppelmust"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:1647"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "äppelmust"
+variant = "äppelmust"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.must"
+language = "sv"
+market = "SE"
+canonical = "must"
+status = "active"
+variants = ["must"]
+ingredient_terms = []
+offer_terms = ["must"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:1647"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "must"
+variant = "must"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
