@@ -2317,3 +2317,23 @@ Batch 16-18 wave-2 completion - 2026-05-12:
   dulce de leche, kanelstänger, sugar, coconut (P1/medium); seafood/meat
   subtypes and vegetarian/tofu qualifiers (P2/medium); non-food text guard
   for `Hänge morot ull` etc. (P2/medium). P0 families fully resolved.
+
+Batch 16-18 P1/high wave completion - 2026-05-12:
+- All P1/high families from the backlog are now fixed and committed (c7867dc).
+- pannkaksmix added to CARRIER_PRODUCTS (blocks kanel/kardemumma flavor words
+  in pancake mix products).
+- bufala/campana added to CONTEXT_WORD_KEYWORD_EXEMPTIONS in carrier_context.py
+  so `di bufala campana` recipe ingredient matches `Mozzarella di Bufala Campana`
+  product without requiring `mozzarella` in the ingredient text.
+- PPR entries added to processed_rules.py: fraiche + {mango, sötstark};
+  cottage + {pearls, mandel, havre}; inlagdgurka + {mixed}.
+- kanelstänger/kanelstång added to _REVERSE_PARENT_EXCLUSIONS (matching.py) so
+  ground kanel products no longer acquire whole-cinnamon keywords via reverse
+  parent expansion.
+- urkärnade oliver → new no_match_policy entry in no_match_policy.toml +
+  hint in no_match_policies.py. Blocks olives-with-pits products when ingredient
+  says urkärnade. entry_id uses ASCII form (urkarnade) per _ENTRY_ID_RE regex.
+- 16 regression tests added to test_matching_sanity.py. Baseline 5475 variants.
+  73/73 sanity checks pass. Dev reload completed.
+- Remaining work: P1/medium term/coverage gaps and P2/medium families (see above).
+  Resume here next session.
