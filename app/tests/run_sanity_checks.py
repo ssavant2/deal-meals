@@ -434,7 +434,7 @@ def _run_term_registry_gate_checks() -> None:
     error_codes = [issue.code for issue in issues if issue.severity == "error"]
     new_term_gate = payload["summary"].get("new_term_gate", {})
     test("term registry contract check passes", error_codes, [])
-    test("term registry new legacy key count", new_term_gate.get("new_legacy_coverage_keys"), 2)
+    test("term registry new legacy key count", new_term_gate.get("new_legacy_coverage_keys"), 0)
     test("term registry R4 failure probe", new_term_gate.get("failure_probe_passed"), True)
 
 
