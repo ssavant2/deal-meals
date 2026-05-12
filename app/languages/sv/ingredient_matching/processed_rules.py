@@ -390,6 +390,24 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
     'kardemumma': {
         'längd',  # "Kardemumma Längd" = bakery loaf
     },
+    # Crème fraiche — sweet/dessert variants ≠ plain cooking crème fraiche
+    # "Lätt Creme Fraiche Sötstark Mango" is a sweet dip, not cooking crème fraiche.
+    # Savory variants (paprika, citron, vitlök, tomat, dragon) are still acceptable.
+    'fraiche': {
+        'mango',       # "Sötstark Mango Creme Fraiche" — sweet dessert variant
+        'sötstark',    # "Sötstark" = sweet-sharp, indicates dessert/dip use
+    },
+    # Cottage cheese — plant-based almond/oat "Cottage Pearls" ≠ real cottage cheese
+    'cottage': {
+        'pearls',    # "Cottage Pearls Mandel Havre" — plant-based variant brand name
+        'mandel',    # almond-based product
+        'mandlar',
+        'havre',     # oat-based product
+    },
+    # Pickled cucumber types — saltgurka (salt/dill pickle) ≠ mixed vegetable pickles
+    'inlagdgurka': {
+        'mixed',  # "Mixed Pickles" = assorted pickled vegetables, not cucumber-specific
+    },
 }
 
 # Compound words that bypass PROCESSED_PRODUCT_RULES for a base word.

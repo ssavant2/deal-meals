@@ -331,6 +331,9 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     'soltork tomat',  # abbreviated form: "Soltork Tomat i Balsamvinäger"
     'solt tomat',  # abbreviated: "Pomodori Secchi ... Solt Tomat"
 
+    # Pancake/waffle mixes — spice names (kanel, kardemumma) are flavoring, not standalone spice
+    'pannkaksmix',  # "Pannkaksmix Kanel & Kardemumma" — kanel/kardemumma are flavors in the mix
+
     # Ready meals where first word is flavor
     'risotto',  # "Risotto Svamp Vitlök" - frozen ready meal, not svamp/vitlök
 
@@ -699,6 +702,10 @@ CONTEXT_WORD_KEYWORD_EXEMPTIONS: Dict[str, FrozenSet[str]] = {
     # "Fior di latte" is a mozzarella style, not a coffee-latte carrier.
     'mozzarella': frozenset({'burrata', 'latte'}),
     'mozarella': frozenset({'burrata', 'latte'}),
+    # "Mozzarella di Bufala Campana" — matching via 'bufala' or 'campana' keyword
+    # implies the mozzarella type; do not require the ingredient to also say 'mozzarella'.
+    'bufala': frozenset({'mozzarella', 'mozarella'}),
+    'campana': frozenset({'mozzarella', 'mozarella'}),
     'coppa': frozenset({'parma'}),
     'coppadiparma': frozenset({'parma'}),
 

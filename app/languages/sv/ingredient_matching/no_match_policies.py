@@ -151,6 +151,7 @@ _POLICY_INGREDIENT_HINTS = {
     "policy_tryffelburrata_not_plain_burrata": ("tryffelburrata",),
     "policy_riven_veganost_not_spread": ("veganost",),
     "policy_morotssylt_not_other_jams": ("morotssylt",),
+    "policy_urkärnade_oliver_not_with_pits": ("urkärnade", "oliver"),
 }
 
 

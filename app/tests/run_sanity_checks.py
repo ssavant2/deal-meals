@@ -450,7 +450,7 @@ def _run_term_registry_add_term_checks() -> None:
     error_codes = [issue.code for issue in issues if issue.severity == "error"]
     summary = payload["summary"]
     test("term registry add-term check passes", error_codes, [])
-    test("term registry add-term coverage count", summary.get("unique_coverage_key_count"), 5335)
+    test("term registry add-term coverage count", summary.get("unique_coverage_key_count"), 5336)
     test("term registry add-term layer count", summary.get("known_export_layer_count"), 25)
 
 

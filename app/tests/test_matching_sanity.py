@@ -10102,6 +10102,30 @@ test("kycklingfilé blocks gyoza product", recipe_match_num(["kycklingfilé"], {
 # Panerade bläckfiskringar blocks raw bläckfiskringar
 test("bläckfiskringar blocks panerade squid", recipe_match_num(["bläckfiskringar"], {"name": "Bläckfiskringar Panerade Fryst", "category": "fish"}), 0)
 
+section("Batch 16-18 P1 spice/dairy/form regressions")
+# Pancake mix as carrier: kanel/kardemumma should not satisfy standalone spice recipes
+test("pannkaksmix carrier blocks kanel", recipe_match_num(["kanel"], {"name": "Pannkaksmix Kanel & Kardemumma", "category": "pantry"}), 0)
+test("pannkaksmix carrier blocks kanelstänger", recipe_match_num(["kanelstänger"], {"name": "Pannkaksmix Kanel & Kardemumma", "category": "pantry"}), 0)
+test("pannkaksmix carrier blocks kardemumma", recipe_match_num(["kardemumma"], {"name": "Pannkaksmix Kanel & Kardemumma", "category": "pantry"}), 0)
+# kanelstänger (cinnamon sticks) should not match ground cinnamon via full recipe path
+test("kanelstång blocks ground kanel", recipe_match_num(["1 kanelstång"], {"name": "Kanel Mald 15g ICA", "category": "spices"}), 0)
+test("kanelstång accepts whole kanel", recipe_match_num(["1 kanelstång"], {"name": "Kanel Hel 10g ICA", "category": "spices"}), 1)
+# Di Bufala Campana: context_word exemption allows bufala/campana keyword to bypass mozzarella requirement
+test("di bufala matches bufala mozzarella product", recipe_match_num(["di bufala campana"], {"name": "Mozzarella di Bufala Campana 125g", "category": "dairy"}), 1)
+test("di bufala blocks plain mozzarella", recipe_match_num(["di bufala campana"], {"name": "Mozzarella 125g ICA", "category": "dairy"}), 0)
+# Crème fraiche: sweet/dessert variants should not satisfy plain cooking crème fraiche
+test("crème fraiche blocks sötstark mango variant", recipe_match_num(["crème fraiche"], {"name": "Lätt Creme Fraiche Sötstark Mango 11% Arla", "category": "dairy"}), 0)
+test("crème fraiche accepts plain variant", recipe_match_num(["crème fraiche"], {"name": "Creme fraiche 32% ICA", "category": "dairy"}), 1)
+# Cottage Pearls: plant-based almond/oat product should not satisfy cottage cheese
+test("cottage cheese blocks Cottage Pearls", recipe_match_num(["cottage cheese"], {"name": "Cottage Pearls Mandel Havre ICA", "category": "dairy"}), 0)
+test("cottage cheese accepts real cottage cheese", recipe_match_num(["cottage cheese"], {"name": "Cottage Cheese 500g ICA", "category": "dairy"}), 1)
+# Saltgurka vs mixed pickles: different product types
+test("saltgurka blocks mixed pickles", recipe_match_num(["saltgurka"], {"name": "Mixed Pickles ICA", "category": "condiments"}), 0)
+test("saltgurka accepts real saltgurka", recipe_match_num(["saltgurka"], {"name": "Saltgurka Skivor ICA", "category": "condiments"}), 1)
+# Urkärnade oliver: pitted olive recipe should not match olives with pits
+test("urkärnade oliver blocks oliver med kärnor", recipe_match_num(["urkärnade oliver"], {"name": "Oliver med Kärnor Halkidiki ICA", "category": "condiments"}), 0)
+test("plain oliver accepts oliver med kärnor", recipe_match_num(["oliver"], {"name": "Oliver med Kärnor Halkidiki ICA", "category": "condiments"}), 1)
+
 # ========================================================================
 print("\n========================================")
 print(f"TOTAL: {passed}/{passed+failed} tests passed ({total_sections} sections)")

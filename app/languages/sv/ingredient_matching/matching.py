@@ -3639,6 +3639,11 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
         # Apple-cider ingredient forms must not be added back to every cider
         # offer; otherwise pear/berry cider satisfies "cider äpple".
         'äppelcider', 'applelcider',
+        # Cinnamon forms: "kanelstänger"/"kanelstång" should not be added to ALL
+        # kanel products. Ground cinnamon (kanel mald) must not get these as
+        # reverse-parent siblings; the specialty-rules check (stång/hel qualifier)
+        # handles the blocking once the product only has plain 'kanel' keyword.
+        'kanelstänger', 'kanelstanger', 'kanelstång', 'kanelstang',
     })
     extra_keywords = []
 

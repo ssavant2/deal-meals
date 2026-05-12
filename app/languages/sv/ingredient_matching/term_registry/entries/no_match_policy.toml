@@ -5608,3 +5608,40 @@ layer_role = "negative_guard_pattern"
 ingredient = "morotssylt"
 offer_name = "morotssylt ! ^(?!.*\\bmorot)(?=.*(?:sylt|marmelad)).*"
 expected = 0
+
+[[entries]]
+entry_id = "sv-se.guard.policy_urkarnade_oliver_not_with_pits"
+language = "sv"
+market = "SE"
+canonical = "urkärnade oliver"
+status = "active"
+variants = ["urkärnade oliver ! \\bkärnor\\b"]
+negative_guards = ["urkärnade oliver ! \\bkärnor\\b"]
+source_refs = ["policy:no_match_policies:policy_urkärnade_oliver_not_with_pits"]
+layer_policy = ["negative_guard_only"]
+notes = "Explicit pitted-olive ingredient must not match olives sold with pits (kärnor)."
+
+[entries.language_payload.no_match_policy]
+id = "policy_urkärnade_oliver_not_with_pits"
+rule_schema_version = 1
+rule_version = 1
+canonical = "urkärnade oliver"
+ingredient_patterns = ["\\burkärnade\\b.*\\boliver\\b", "\\boliver\\b.*\\burkärnade\\b"]
+blocked_offer_keywords = []
+blocked_offer_patterns = ["\\bkärnor\\b"]
+allowed_specifics = []
+reason = "Pitted-olive recipe ingredient must not match olives sold with pits."
+policy_ref = "batch_16_18_wave_3"
+fixture_refs = ["batch_16_18_urkärnade_oliver_with_pits_negative"]
+supersedes = []
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "urkärnade oliver"
+variant = "urkärnade oliver ! \\bkärnor\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.negative_examples]]
+ingredient = "urkärnade oliver"
+offer_name = "urkärnade oliver ! \\bkärnor\\b"
+expected = 0
