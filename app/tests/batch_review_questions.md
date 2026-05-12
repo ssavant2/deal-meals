@@ -2261,3 +2261,59 @@ Batch 16-18 first safe fix wave - 2026-05-12:
   model checks passed. The contract check now treats line-based B2 variant-id
   churn as a warning while coverage-key gates remain blocking for real lost/new
   terms.
+
+Batch 16-18 continuation checkpoint - 2026-05-12:
+- First safe fix wave is committed as `31b14de Fix batch 16-18 matching edge
+  cases`; worktree was clean immediately after that commit.
+- Started looking at the next P0 wave, focused on standalone component carriers,
+  raw/fresh ingredient vs prepared product, and generic seed fallback. Targeted
+  reproduction confirmed representative still-open failures before any accepted
+  patch: standalone `vitlök` can match `Kräftstjärtsallad Vitlök`/`Vitost
+  Vitlök Persilja`; `citron`/`citronjuice` can match supplement/sportgel rows;
+  `babyspenat` can match a pasta carrier; raw `kyckling` can match `Gyoza
+  Kyckling`; raw `bläckfiskringar` can match panerade squid rings; `sesamfrön`
+  and `dillfrön` can fall back to unrelated generic `frön` products.
+- Important rejected approach: do not solve the next wave with raw-ingredient
+  keyed blocker maps such as `kyckling -> {gyoza, paj, pizza, pasta, wrap,
+  sallad, ...}`. That patch direction was tried briefly, reviewed, and fully
+  reverted before this checkpoint. It is too ad hoc, would likely grow into
+  brittle rule sprawl, and does not fit the matcher architecture.
+- Preferred continuation direction for next session: fix these at the existing
+  extraction/carrier/form layers. Product extraction should avoid exposing
+  standalone component keywords from clear carrier/prepared products; carrier
+  context rules should express product-family requirements generically; specific
+  seed ingredients should not be satisfied by unrelated generic seed products;
+  raw-vs-prepared should use form/preparation semantics rather than per-raw-
+  ingredient carrier lists.
+- No accepted wave-2 code is currently in place. Resume by designing a smaller
+  architecture-aligned patch and adding regression coverage only once that
+  direction is agreed.
+
+Batch 16-18 wave-2 completion - 2026-05-12:
+- Root cause confirmed: all failures were missing CARRIER_PRODUCTS entries for
+  ICA-specific product types not seen in Willys. Same pattern as existing
+  räkor/potatissallad/rödbetssallad — just new ICA vocabulary.
+- New carriers added: `vitost`, `kräftstjärtsallad`, `laxsallad`, `pastasallad`,
+  `energigel`, `proteingel`, `kollagen`, `gyoza`, `spaghetteria`.
+- `frön`/`fron` added to `_SUFFIX_PROTECTED_KEYWORDS` (compound_text.py) so
+  `sesamfrön`/`dillfrön` no longer match `Bockhornsklöver Hela Frön` via
+  bare-suffix substring. Same mechanism as `kärnor`/`spaghetti`.
+- `bläckfiskringar` added to PROCESSED_PRODUCT_RULES with `panerad`/`panerade`
+  (processed_rules.py). Same pattern as sej/torsk/kolja/kummel.
+- 19 regression cases added to test_matching_sanity.py.
+- Supplement products (energigel etc.) are categorized as `beverages` by ICA,
+  not `hygiene`/`household` — confirmed: carrier approach is the right defense,
+  not category blocking.
+- Term registry baseline promoted: `must`/`äppelmust` from extraction_helper.toml
+  (added in first wave 31b14de but baseline not updated) merged in via new
+  promote_term_baseline.py script. EXPECTED_B2_VARIANT_COUNT 5472 → 5474.
+  new_legacy_coverage_keys back to 0.
+- Commits: `480fe4e Fix batch 16-18 carrier/seed/prepared-product matching gaps`,
+  `d378ecc Promote must/äppelmust into B-track baseline`.
+- Remaining open items from P1/P2 backlog: term/coverage gaps for blackcurrant
+  drink, fresh herbs/chili, skin-on salmon, fullkorn lasagne, pasta specificity,
+  kalamata olives, melon, ginger, non-alcohol beer, vanilla protein, dried
+  apricots, ice cubes, instant coffee, truffle oil, Non Stop, Cheez Doodles,
+  dulce de leche, kanelstänger, sugar, coconut (P1/medium); seafood/meat
+  subtypes and vegetarian/tofu qualifiers (P2/medium); non-food text guard
+  for `Hänge morot ull` etc. (P2/medium). P0 families fully resolved.
