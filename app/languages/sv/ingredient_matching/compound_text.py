@@ -127,6 +127,7 @@ _SUFFIX_PROTECTED_KEYWORDS: FrozenSet[str] = frozenset({
         'köttbullar', 'dressing',
         'krydda',     # "Klassisk Krydda" should NOT match inside compound "salladskrydda"
         'kärnor',     # "Oliver med Kärnor" should NOT match inside "granatäpplekärnor"
+        'frön', 'fron',  # "4 dl frön" should NOT match inside "sesamfrön"/"dillfrön" etc.
         'spaghetti',  # "Spaghetti Barilla" should NOT match inside "kålrotsspaghetti"
         'spagetti',   # alternate spelling
         'sallat',     # "Sallat Grön" should NOT match inside compound "plocksallat"

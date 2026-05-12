@@ -246,6 +246,14 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         'burgare',
         'grytbitar', 'grytbit',
     },
+    # Breaded squid rings ≠ raw squid rings
+    # "Bläckfiskringar Panerade Fryst" should NOT match raw bläckfiskringar recipe
+    'bläckfiskringar': {
+        'panerad', 'panerade', 'sprödbakad', 'sprödbakade',
+    },
+    'blackfiskringar': {
+        'panerad', 'panerade', 'sprödbakad', 'sprödbakade',
+    },
     # Breaded/crispy fish ≠ fresh fish
     # "Sej Panerad" / "Kummel Sprödbakad" should NOT match "600 g fisk"
     # but SHOULD match if recipe explicitly says "panerad"/"sprödbakad"

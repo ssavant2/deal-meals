@@ -72,6 +72,10 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     'smördeg', 'smordeg',  # "Smördeg på smör" — smör describes the dough, not standalone butter
     'pajdeg',  # "Pajdeg med smör" — same
     'rödbetssallad', 'rodbetssallad',  # "Rödbetssallad med Crème Fraiche" — fraiche is variant, not ingredient
+    # Prepared salads (ICA assortment) — flavor/spice words after sallad-base are toppings, not ingredients
+    'kräftstjärtsallad', 'kraftstjartsallad',  # "Kräftstjärtsallad Vitlök" — vitlök is flavoring
+    'laxsallad',  # "Laxsallad Citron" — citron is flavoring
+    'pastasallad',  # "Pastasallad Vitlök" — vitlök is flavoring
     'matfett',  # "Matfett Smör & Raps 58%" - margarine, NOT butter
               # (Arla Köket "Smör- & rapsolja" has no "matfett" → unaffected)
     'bredbart',  # "Bredbart Ekologisk med Raps Shea, Kokos" — spread, kokos is base not flavor
@@ -256,6 +260,7 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     'mazariner', 'mazarin',
 
     # Pasta-based ready meals - "Rigatoni kyckling pesto 380g Felix" is NOT kyckling
+    'spaghetteria',  # "Spaghetteria Spenat 2-p Knorr" — pasta kit brand, spenat is flavor/filling
     'pasta',  # "Pasta Pomodoro Ricotta Fryst Felix" → keep 'pasta', strip pomodoro/ricotta
     'rigatoni', 'penne', 'fusilli', 'tagliatelle', 'linguine', 'fettuccine',
     'farfalle', 'conchiglie', 'conchigle', 'gemelli', 'gnocchi', 'radiatori',
@@ -265,8 +270,9 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     # NOTE: 'krämig' REMOVED from CARRIER_PRODUCTS — STOP_WORDS already handles it,
     # and keeping it here stripped useful base keywords like `ost`.
 
-    # Greek meat dishes - "Gyros Kyckling med Vitlökssås" is NOT kyckling
+    # Greek/Asian meat dishes - filling type is not a raw ingredient
     'gyros',
+    'gyoza',  # "Gyoza Kyckling Fryst" — kyckling is filling, not raw chicken
 
     # Kebab products - "Kyckling Kebab Fryst" is NOT kyckling (but IS kebab)
     'kebab',
@@ -378,9 +384,14 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     'cider',  # 15 products (päroncider, jordgubb lime cider, etc.)
     'nektar',  # 6 products (apelsin nektar, tropisk nektar, etc.)
     'proteinshake',  # "Vanilj Proteinshake" is NOT vanilj
+    # Sport/supplement gels and collagen — fruit/vitamin words are flavoring, not ingredients
+    'energigel',  # "Energigel Citron" — citron is flavoring
+    'proteingel',  # "Proteingel Apelsin" — apelsin is flavoring
+    'kollagen',  # "Kollagen Citron C-Vitamin" — citron is flavoring in supplement
 
     # Cheese spreads - flavors are toppings, not ingredients
     'mjukost',  # "Mjukost Räkor" - räkor is the flavor, NOT actual shrimp
+    'vitost',  # "Vitost Vitlök Persilja" — vitlök/persilja are flavor additions, vitost is the product
 
     # Baked goods - flavors are mix-ins, not standalone ingredients
     'finskorpor',  # "Finskorpor Kardemumma" - kardemumma is flavoring

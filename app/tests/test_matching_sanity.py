@@ -10079,6 +10079,29 @@ test("Track A tryffelburrata blocks plain burrata", recipe_match_num(["tryffelbu
 test("Track A riven veganost blocks vegan spread cheese", recipe_match_num_cached(["riven veganost"], {"name": "Vegansk Färskost Violife", "category": "dairy"}), 0)
 test("Track A morotssylt blocks other jam", recipe_match_num(["morotssylt"], {"name": "Jordgubbssylt Bob", "category": "pantry"}), 0)
 
+section("Batch 16-18 ICA carrier/seed/prepared-product regressions")
+# Carrier gaps: new ICA product types that should strip flavor words
+test("vitost carrier strips vitlök", recipe_match_num(["vitlök"], {"name": "Vitost Vitlök Persilja", "category": "dairy"}), 0)
+test("vitost carrier strips persilja", recipe_match_num(["persilja"], {"name": "Vitost Vitlök Persilja", "category": "dairy"}), 0)
+test("vitost carrier keeps vitost keyword", recipe_match_num(["vitost"], {"name": "Vitost Vitlök Persilja", "category": "dairy"}), 1)
+test("kräftstjärtsallad carrier strips vitlök", recipe_match_num(["vitlök"], {"name": "Kräftstjärtsallad Vitlök ICA", "category": "deli"}), 0)
+test("laxsallad carrier strips citron", recipe_match_num(["citron"], {"name": "Laxsallad Citron ICA", "category": "deli"}), 0)
+test("pastasallad carrier strips vitlök", recipe_match_num(["vitlök"], {"name": "Pastasallad Vitlök ICA", "category": "deli"}), 0)
+test("energigel carrier strips citron", recipe_match_num(["citron"], {"name": "Energigel Citron Sport", "category": "beverages"}), 0)
+test("proteingel carrier strips apelsin", recipe_match_num(["apelsin"], {"name": "Proteingel Apelsin Sport", "category": "beverages"}), 0)
+test("kollagen carrier strips citron", recipe_match_num(["citron"], {"name": "Kollagen Citron C-Vitamin", "category": "health"}), 0)
+test("spaghetteria carrier strips spenat (babyspenat path)", recipe_match_num(["babyspenat"], {"name": "Spaghetteria Spenat 2-p Knorr", "category": "spices"}), 0)
+# frön suffix: sesamfrön/dillfrön must not match unrelated generic frön products
+test("sesamfrön blocks unrelated frön product", recipe_match_num(["2 msk sesamfrön"], {"name": "Bockhornsklöver Hela Frön", "category": "spices"}), 0)
+test("dillfrön blocks unrelated frön product", recipe_match_num(["dillfrön"], {"name": "Bockhornsklöver Hela Frön", "category": "spices"}), 0)
+test("generic frön still matches generic frön product", recipe_match_num(["4 dl frön"], {"name": "Bockhornsklöver Hela Frön", "category": "spices"}), 1)
+test("sesamfrön still matches sesam product", recipe_match_num(["2 msk sesamfrön"], {"name": "Sesamfrön Skalade Garant Eko", "category": "spices"}), 1)
+# Gyoza blocks raw chicken
+test("kyckling blocks gyoza product", recipe_match_num(["kyckling"], {"name": "Gyoza Kyckling Fryst", "category": "frozen"}), 0)
+test("kycklingfilé blocks gyoza product", recipe_match_num(["kycklingfilé"], {"name": "Gyoza Kyckling Fryst", "category": "frozen"}), 0)
+# Panerade bläckfiskringar blocks raw bläckfiskringar
+test("bläckfiskringar blocks panerade squid", recipe_match_num(["bläckfiskringar"], {"name": "Bläckfiskringar Panerade Fryst", "category": "fish"}), 0)
+
 # ========================================================================
 print("\n========================================")
 print(f"TOTAL: {passed}/{passed+failed} tests passed ({total_sections} sections)")
