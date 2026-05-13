@@ -10159,6 +10159,16 @@ test("snabbkaffe matches Nescafé Gold", match("snabbkaffe", "Nescafé Gold 200g
 test("snabbkaffe matches Nescafe Classic", match("snabbkaffe", "Nescafe Classic 100g", "beverages"), "snabbkaffe")
 test("snabbkaffe does not match Nescafé Dolce Gusto", match("snabbkaffe", "Nescafé Dolce Gusto", "beverages"), None)
 
+section("Batch 16-18 P2/medium tofu/non-food regressions")
+# Skagenröra Tofu: spread product must not satisfy plain tofu ingredient (PPR)
+test("tofu blocks skagenröra tofu spread", recipe_match_num(["tofu"], {"name": "Skagenröra Tofu Vegansk 200g YiPin", "category": "meat"}), 0)
+test("tofu still matches plain tofu", recipe_match_num(["tofu"], {"name": "Tofu naturell 400g ICA Basic", "category": "meat"}), 1)
+test("tofu still matches firm tofu", recipe_match_num(["tofu"], {"name": "Tofu Fast 307g Mori Nu", "category": "meat"}), 1)
+test("skagenröra ingredient still matches skagenröra product", match("skagenröra", "Skagenröra Tofu Vegansk 200g YiPin", "meat"), "skagenröra")
+# Non-food guard: wool/yarn products (ICA miscategorized as dairy) must not match food ingredients
+test("morot does not match ull decoration product", match("morot", "Hänge morot ull Nordic Season", "dairy"), None)
+test("morot still matches real morot product", match("morot", "Morot 500g Klass 1", "fruit"), "morot")
+
 # ========================================================================
 print("\n========================================")
 print(f"TOTAL: {passed}/{passed+failed} tests passed ({total_sections} sections)")

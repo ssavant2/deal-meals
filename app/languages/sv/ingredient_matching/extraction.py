@@ -256,6 +256,11 @@ def is_non_food_product(product_name: str, category: Optional[str] = None) -> bo
     if re.search(r'\bpuffat\s+ris\b|\bris\s+puffat\b', name_normalized):
         return False
 
+    # "ull" (wool/yarn) as a standalone word indicates a textile/craft product
+    # that ICA sometimes miscategorizes (e.g. "Hänge morot ull Nordic Season" in dairy).
+    if re.search(r'\bull\b', name_normalized):
+        return True
+
     # Check against non-food keywords using pre-compiled combined pattern
     # This is ~50x faster than looping through each keyword
     if _NON_FOOD_PATTERN and _NON_FOOD_PATTERN.search(name_normalized):

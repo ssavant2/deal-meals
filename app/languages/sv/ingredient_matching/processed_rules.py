@@ -408,6 +408,11 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
     'inlagdgurka': {
         'mixed',  # "Mixed Pickles" = assorted pickled vegetables, not cucumber-specific
     },
+    # Plain tofu ≠ skagenröra spread made with tofu
+    # "Skagenröra Tofu Vegansk" has tofu as an ingredient in a spread, not a standalone block of tofu
+    'tofu': {
+        'skagenröra', 'skagenrora',
+    },
 }
 
 # Compound words that bypass PROCESSED_PRODUCT_RULES for a base word.
