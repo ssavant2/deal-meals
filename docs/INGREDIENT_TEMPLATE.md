@@ -123,8 +123,8 @@ UK matcher; use it as a shape/template, not as production rule coverage.
 
 ## Testing Your Translation
 
-1. From the project root, run `docker compose exec -T web python tests/dev_reload.py` to rebuild the cache after changes
-2. Run `docker compose exec -T -w /app web python tests/run_sanity_checks.py` for the tracked app-support sanity checks
+1. From the project root, run `docker compose exec -T web python support_checks/dev_reload.py` to rebuild the cache after changes
+2. Run `docker compose exec -T -w /app web python support_checks/run_sanity_checks.py` for the tracked app-support sanity checks
 3. Keep broader local sanity/regression scripts private unless they become small deterministic `run_*_checks.py` support checks
 4. Check for:
    - Missing matches (ingredient should match but doesn't)

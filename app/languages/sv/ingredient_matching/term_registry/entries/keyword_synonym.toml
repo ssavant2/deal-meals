@@ -8,7 +8,7 @@ variants = ["ärter"]
 offer_terms = ["ärtor"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -31,7 +31,7 @@ variants = ["cabanossy"]
 offer_terms = ["kabanoss"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -54,7 +54,7 @@ variants = ["fries"]
 offer_terms = ["pommes"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -77,7 +77,7 @@ variants = ["frites"]
 offer_terms = ["pommes"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -100,7 +100,7 @@ variants = ["mustard"]
 offer_terms = ["senap"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -123,7 +123,7 @@ variants = ["tandori"]
 offer_terms = ["tandoori"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -146,7 +146,7 @@ variants = ["drumsticks"]
 offer_terms = ["kycklingben"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -169,7 +169,7 @@ variants = ["burger"]
 offer_terms = ["hamburgare"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -192,7 +192,7 @@ variants = ["beef"]
 offer_terms = ["nötkött"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -215,7 +215,7 @@ variants = ["bamboo"]
 offer_terms = ["bambuskott"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -238,7 +238,7 @@ variants = ["philadelphia"]
 offer_terms = ["färskost"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -261,7 +261,7 @@ variants = ["pecannöt"]
 offer_terms = ["pekannöt"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -284,7 +284,7 @@ variants = ["pecannot"]
 offer_terms = ["pekannot"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -307,7 +307,7 @@ variants = ["pecannötter"]
 offer_terms = ["pekannötter"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -330,7 +330,7 @@ variants = ["pecannotter"]
 offer_terms = ["pekannotter"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -353,7 +353,7 @@ variants = ["haricots"]
 offer_terms = ["haricot"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -376,7 +376,7 @@ variants = ["chilli"]
 offer_terms = ["chili"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -399,7 +399,7 @@ variants = ["chillipeppar"]
 offer_terms = ["chilipeppar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -422,7 +422,7 @@ variants = ["morötter"]
 offer_terms = ["morot"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -445,7 +445,7 @@ variants = ["morotter"]
 offer_terms = ["morot"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -468,7 +468,7 @@ variants = ["morätter"]
 offer_terms = ["morot"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -491,7 +491,7 @@ variants = ["moratter"]
 offer_terms = ["morot"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -514,7 +514,7 @@ variants = ["dillfrön"]
 offer_terms = ["dillfrö"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -537,7 +537,7 @@ variants = ["dillfron"]
 offer_terms = ["dillfrö"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -560,7 +560,7 @@ variants = ["dillfro"]
 offer_terms = ["dillfrö"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -583,7 +583,7 @@ variants = ["ruccola"]
 offer_terms = ["rucola"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -606,7 +606,7 @@ variants = ["machesallad"]
 offer_terms = ["machesallat"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -629,7 +629,7 @@ variants = ["huvudsallat"]
 offer_terms = ["huvudsallad"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -652,7 +652,7 @@ variants = ["surdegsbaguette"]
 offer_terms = ["baguette"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -675,7 +675,7 @@ variants = ["surdegsbaguett"]
 offer_terms = ["baguette"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -698,7 +698,7 @@ variants = ["cantucci"]
 offer_terms = ["cantuccini"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -721,7 +721,7 @@ variants = ["biscotti"]
 offer_terms = ["cantuccini"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -744,7 +744,7 @@ variants = ["tryffelmayo"]
 offer_terms = ["tryffelmajonnäs"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -767,7 +767,7 @@ variants = ["tryffelmajo"]
 offer_terms = ["tryffelmajonnäs"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -790,7 +790,7 @@ variants = ["gille-drömmar"]
 offer_terms = ["drömmar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -813,7 +813,7 @@ variants = ["gille-drommar"]
 offer_terms = ["drommar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -836,7 +836,7 @@ variants = ["savoiardokex"]
 offer_terms = ["savoiardikex"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -859,7 +859,7 @@ variants = ["savoiardo"]
 offer_terms = ["savoiardikex"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -882,7 +882,7 @@ variants = ["savoiarde"]
 offer_terms = ["savoiardikex"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -905,7 +905,7 @@ variants = ["savoiardi"]
 offer_terms = ["savoiardikex"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -928,7 +928,7 @@ variants = ["ladyfinger"]
 offer_terms = ["savoiardikex"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -951,7 +951,7 @@ variants = ["ladyfingers"]
 offer_terms = ["savoiardikex"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -974,7 +974,7 @@ variants = ["spätta"]
 offer_terms = ["rödspätta"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -997,7 +997,7 @@ variants = ["spatta"]
 offer_terms = ["rodspatta"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1020,7 +1020,7 @@ variants = ["spättafilé"]
 offer_terms = ["rödspättafilé"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1043,7 +1043,7 @@ variants = ["spättafile"]
 offer_terms = ["rodspattafile"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1066,7 +1066,7 @@ variants = ["spättafiléer"]
 offer_terms = ["rödspättafilé"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1089,7 +1089,7 @@ variants = ["spattafileer"]
 offer_terms = ["rodspattafile"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1112,7 +1112,7 @@ variants = ["västerbottens"]
 offer_terms = ["västerbottensost"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1135,7 +1135,7 @@ variants = ["vasterbottens"]
 offer_terms = ["västerbottensost"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1158,7 +1158,7 @@ variants = ["humrar"]
 offer_terms = ["hummer"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1181,7 +1181,7 @@ variants = ["balsamica"]
 offer_terms = ["balsamico"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1204,7 +1204,7 @@ variants = ["bjäst"]
 offer_terms = ["näringsjäst"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1227,7 +1227,7 @@ variants = ["blåmögelost"]
 offer_terms = ["ädelost"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1250,7 +1250,7 @@ variants = ["blamogelost"]
 offer_terms = ["adelost"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1273,7 +1273,7 @@ variants = ["grönmögelost"]
 offer_terms = ["ädelost"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1296,7 +1296,7 @@ variants = ["gronmogelost"]
 offer_terms = ["adelost"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1319,7 +1319,7 @@ variants = ["muscovadosocker"]
 offer_terms = ["muskovadosocker"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1342,7 +1342,7 @@ variants = ["nötcreme"]
 offer_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1365,7 +1365,7 @@ variants = ["notcreme"]
 offer_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1388,7 +1388,7 @@ variants = ["notkram"]
 offer_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1411,7 +1411,7 @@ variants = ["hasselnötkräm"]
 offer_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1434,7 +1434,7 @@ variants = ["hasselnotkram"]
 offer_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1457,7 +1457,7 @@ variants = ["karamelliseradmjolk"]
 offer_terms = ["karamelliseradmjölk"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1480,7 +1480,7 @@ variants = ["kondenseradmjolk"]
 offer_terms = ["kondenseradmjölk"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1503,7 +1503,7 @@ variants = ["fläderblomssaft"]
 offer_terms = ["flädersaft"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1526,7 +1526,7 @@ variants = ["fläderblomsaft"]
 offer_terms = ["flädersaft"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1549,7 +1549,7 @@ variants = ["fladerblomssaft"]
 offer_terms = ["fladersaft"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1572,7 +1572,7 @@ variants = ["fladerblomsaft"]
 offer_terms = ["fladersaft"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1595,7 +1595,7 @@ variants = ["skogshallonsaft"]
 offer_terms = ["hallonsaft"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1618,7 +1618,7 @@ variants = ["jordgubbsaft"]
 offer_terms = ["jordgubbssaft"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1641,7 +1641,7 @@ variants = ["ingefärsshot"]
 offer_terms = ["ingefärsjuice"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1664,7 +1664,7 @@ variants = ["ingefarsshot"]
 offer_terms = ["ingefärsjuice"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1687,7 +1687,7 @@ variants = ["tranbärsdryck"]
 offer_terms = ["tranbärsjuice"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1710,7 +1710,7 @@ variants = ["tranbarsdryck"]
 offer_terms = ["tranbärsjuice"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1733,7 +1733,7 @@ variants = ["gräddkola"]
 offer_terms = ["kolakaramell"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1756,7 +1756,7 @@ variants = ["graddkola"]
 offer_terms = ["kolakaramell"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1779,7 +1779,7 @@ variants = ["gräddkaramell"]
 offer_terms = ["kolakaramell"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1802,7 +1802,7 @@ variants = ["graddkaramell"]
 offer_terms = ["kolakaramell"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1825,7 +1825,7 @@ variants = ["svarpeppar"]
 offer_terms = ["svartpeppar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1848,7 +1848,7 @@ variants = ["apelsinsaft"]
 offer_terms = ["apelsinjuice"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1871,7 +1871,7 @@ variants = ["matjesill"]
 offer_terms = ["matjessill"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1894,7 +1894,7 @@ variants = ["pistasch"]
 offer_terms = ["pistagenötter"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1917,7 +1917,7 @@ variants = ["rökextrakt"]
 offer_terms = ["rökarom"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1940,7 +1940,7 @@ variants = ["rokextrakt"]
 offer_terms = ["rökarom"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1963,7 +1963,7 @@ variants = ["smörgåspickles"]
 offer_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -1986,7 +1986,7 @@ variants = ["smorgaspickles"]
 offer_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2009,7 +2009,7 @@ variants = ["sötströ"]
 offer_terms = ["lättströ"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2032,7 +2032,7 @@ variants = ["sotstro"]
 offer_terms = ["lattstro"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2055,7 +2055,7 @@ variants = ["spisbröd"]
 offer_terms = ["knäckebröd"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2078,7 +2078,7 @@ variants = ["spisbrod"]
 offer_terms = ["knäckebröd"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2101,7 +2101,7 @@ variants = ["burgarbröd"]
 offer_terms = ["hamburgerbröd"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2124,7 +2124,7 @@ variants = ["burgarbrod"]
 offer_terms = ["hamburgerbröd"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2147,7 +2147,7 @@ variants = ["svejkon"]
 offer_terms = ["vegobacon"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2170,7 +2170,7 @@ variants = ["glasstrut"]
 offer_terms = ["våffelstrutar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2193,7 +2193,7 @@ variants = ["glasstrutar"]
 offer_terms = ["våffelstrutar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2216,7 +2216,7 @@ variants = ["våffelstrut"]
 offer_terms = ["våffelstrutar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2239,7 +2239,7 @@ variants = ["vaffelstrut"]
 offer_terms = ["våffelstrutar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2262,7 +2262,7 @@ variants = ["vaffelstrutar"]
 offer_terms = ["våffelstrutar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2285,7 +2285,7 @@ variants = ["tzaybitar"]
 offer_terms = ["vegobitar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2308,7 +2308,7 @@ variants = ["tzaybit"]
 offer_terms = ["vegobitar"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2331,7 +2331,7 @@ variants = ["kebabfeferoni"]
 offer_terms = ["feferoni"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2354,7 +2354,7 @@ variants = ["smördegsark"]
 offer_terms = ["smördeg"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2377,7 +2377,7 @@ variants = ["smordegsark"]
 offer_terms = ["smördeg"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2400,7 +2400,7 @@ variants = ["smördegsplatta"]
 offer_terms = ["smördeg"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2423,7 +2423,7 @@ variants = ["smordegsplatta"]
 offer_terms = ["smördeg"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2446,7 +2446,7 @@ variants = ["smördegsplattor"]
 offer_terms = ["smördeg"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2469,7 +2469,7 @@ variants = ["smordegsplattor"]
 offer_terms = ["smördeg"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2492,7 +2492,7 @@ variants = ["daimchoklad"]
 offer_terms = ["daim"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"
@@ -2515,7 +2515,7 @@ variants = ["daim"]
 offer_terms = ["daim"]
 source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned keyword synonym mapping migrated in R5."
+notes = "Registry-owned keyword synonym mapping."
 
 [[entries.coverage]]
 source_family = "keyword_synonym"

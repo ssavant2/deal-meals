@@ -17703,6 +17703,26 @@ variant = "matcher_regression_pitted_kalamata_with_pits_positive: Kalamata Olive
 layer_role = "positive_regression"
 
 [[entries]]
+entry_id = "sv-se.policy.urkarnade_oliver.matcher_regression_urkarnade_oliver_with_pits_negative"
+language = "sv"
+market = "SE"
+canonical = "urkärnade oliver"
+status = "active"
+variants = ["matcher_regression_urkarnade_oliver_with_pits_negative: Oliver med Kärnor Fontana"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:matcher_regression_urkarnade_oliver_with_pits_negative"]
+layer_policy = ["negative_guard_only"]
+notes = "Registry coverage for matcher regression fixture matcher_regression_urkarnade_oliver_with_pits_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "urkärnade oliver"
+variant = "matcher_regression_urkarnade_oliver_with_pits_negative: Oliver med Kärnor Fontana"
+layer_role = "negative_regression"
+
+[[entries]]
 entry_id = "sv-se.policy.chilisas.matcher_regression_plain_chilisas_classic_positive"
 language = "sv"
 market = "SE"

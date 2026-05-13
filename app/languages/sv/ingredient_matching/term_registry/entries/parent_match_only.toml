@@ -15,7 +15,7 @@ variants = [
 route_terms = ["kalkon"]
 source_refs = ["code:term_registry_entries:parent_match_only.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned parent-match-only turkey compounds migrated in R5."
+notes = "Registry-owned parent-match-only turkey compounds."
 
 [[entries.coverage]]
 source_family = "parent_match_only"
@@ -81,7 +81,7 @@ variants = [
 route_terms = ["salami"]
 source_refs = ["code:term_registry_entries:parent_match_only.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned parent-match-only salami compounds migrated in R5."
+notes = "Registry-owned parent-match-only salami compounds."
 
 [[entries.coverage]]
 source_family = "parent_match_only"

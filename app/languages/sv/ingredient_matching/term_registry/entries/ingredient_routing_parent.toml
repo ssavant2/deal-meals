@@ -8,7 +8,7 @@ variants = ["ansjovisfileer", "ansjovisfiléer"]
 route_terms = ["ansjovis"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -37,7 +37,7 @@ variants = ["aprikoser"]
 route_terms = ["aprikos"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -60,7 +60,7 @@ variants = ["baguetter"]
 route_terms = ["baguette"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -83,7 +83,7 @@ variants = ["champinjoner"]
 route_terms = ["champinjon"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -106,7 +106,7 @@ variants = ["skogschampinjoner"]
 route_terms = ["champinjoner"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -134,7 +134,7 @@ variants = [
 route_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -175,7 +175,7 @@ variants = ["lammkotletter"]
 route_terms = ["lammkotlett"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -198,7 +198,7 @@ variants = ["kalamataoliver"]
 route_terms = ["oliver"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -221,7 +221,7 @@ variants = ["oreokaka", "oreokakor"]
 route_terms = ["oreo"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -250,7 +250,7 @@ variants = ["prastost", "prästost"]
 route_terms = ["ost"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -279,7 +279,7 @@ variants = ["lantchips", "mandelpotatischips"]
 route_terms = ["potatischips"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -308,7 +308,7 @@ variants = ["rodspattafile", "rödspättafilé"]
 route_terms = ["rödspätta"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -337,7 +337,7 @@ variants = ["kycklingschnitzel"]
 route_terms = ["schnitzel"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -360,7 +360,7 @@ variants = ["kaffepulver", "pulverkaffe", "snabbkaffepulver"]
 route_terms = ["snabbkaffe"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -395,7 +395,7 @@ variants = ["babyspenat", "bladspenat"]
 route_terms = ["spenat"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -424,7 +424,7 @@ variants = ["johansvamp", "skogssvamp"]
 route_terms = ["svamp"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -453,7 +453,7 @@ variants = ["tortillabrod", "tortillabröd"]
 route_terms = ["tortilla"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -482,7 +482,7 @@ variants = ["rodvinbarsgele", "svartvinbarsgele"]
 route_terms = ["vinbarsgele"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"
@@ -511,7 +511,7 @@ variants = ["rödvinbärsgele", "svartvinbärsgele"]
 route_terms = ["vinbärsgele"]
 source_refs = ["code:term_registry_entries:ingredient_routing_parent.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned ingredient routing parent terms migrated in R5."
+notes = "Registry-owned ingredient routing parent terms."
 
 [[entries.coverage]]
 source_family = "ingredient_routing_parent"

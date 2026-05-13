@@ -1,9 +1,8 @@
 """Generated Swedish registry exports.
 
-Runtime matcher modules may import narrowly migrated exports from this module
-after the R2 equivalence checks pass. The builders operate on a registry
-variant view supplied by checks/tests so they do not import legacy matcher
-sources themselves.
+Runtime matcher modules import registry-owned exports from this module. The
+variant-view builders are kept for support checks that compare current exports
+with the verified-term baseline.
 """
 
 from __future__ import annotations

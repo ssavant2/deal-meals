@@ -4731,6 +4731,30 @@
     ]
   },
   {
+    "id": "matcher_regression_urkarnade_oliver_with_pits_negative",
+    "policy_ref": "current_queue_matcher_regression",
+    "source_ref": "current_review:negative_guard:urkarnade_oliver_with_pits",
+    "recipe_name": "Sanity Recipe",
+    "ingredients": [
+      "urkärnade oliver"
+    ],
+    "offer": {
+      "name": "Oliver med Kärnor Fontana",
+      "category": "spices"
+    },
+    "expected": 0,
+    "allowed_additional_matches": {
+      "max_extra_matches": 0,
+      "allowed_canonicals": [
+        "urkärnade oliver"
+      ],
+      "forbidden_canonicals": [
+        "urkärnade oliver"
+      ],
+      "reason": "Canonical marker for the negative pitted-olive guard."
+    }
+  },
+  {
     "id": "matcher_regression_pitted_kalamata_gemlik_fallback_positive",
     "policy_ref": "current_queue_matcher_regression",
     "source_ref": "current_review:positive_sibling:pitted_kalamata_gemlik_fallback",

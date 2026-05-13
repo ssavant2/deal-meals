@@ -32,22 +32,10 @@ app/static/vendor/
 # Claude Code internal files
 .claude/
 
-# Codex / private batch-review working files (keep local only)
+# Codex / private local workbench files (keep local only)
+# Trackable deterministic support checks live in app/support_checks/.
 CODEX.md
-app/tests/batch_review_*
-app/tests/recipe_matching_review_template.md
-app/tests/test_*.py
-!app/tests/test_matching_sanity.py
-app/tests/scrape_*_full_sortiment.py
-app/tests/candidate_term_index_parity.py
-app/tests/import_legacy_questions.py
-app/tests/promote_legacy_confirmed_cases.py
-app/tests/refresh_matcher_legacy_inventory_line_refs.py
-app/tests/report_legacy_validator_adapter_candidates.py
-app/tests/run_matcher_legacy_inventory_checks.py
-app/tests/fixtures/matcher_layer_plan_initial_cases.json
-app/tests/fixtures/matcher_legacy_questions_*.json
-app/tests/fixtures/matcher_legacy_rule_inventory.json
+app/tests/
 
 # AI instructions (dev-only)
 CLAUDE.md

@@ -10,7 +10,7 @@ offer_terms = ["\\bnori\\b", "\\bseaweed\\b", "\\bseeweed\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_alger_nori"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_alger_nori."
+notes = "Registry-owned match bridge: bridge_alger_nori."
 
 [entries.language_payload.match_bridge]
 id = "bridge_alger_nori"
@@ -63,7 +63,7 @@ offer_terms = ["\\bbamboo\\s+shoot\\b", "\\bbambuskott\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_bambuskott_bamboo_shoot"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_bambuskott_bamboo_shoot."
+notes = "Registry-owned match bridge: bridge_bambuskott_bamboo_shoot."
 
 [entries.language_payload.match_bridge]
 id = "bridge_bambuskott_bamboo_shoot"
@@ -110,7 +110,7 @@ offer_terms = ["\\bhamburgerbröd\\b", "\\bhamburgerbrod\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_burgarbrod_hamburgerbrod"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_burgarbrod_hamburgerbrod."
+notes = "Registry-owned match bridge: bridge_burgarbrod_hamburgerbrod."
 
 [entries.language_payload.match_bridge]
 id = "bridge_burgarbrod_hamburgerbrod"
@@ -169,7 +169,7 @@ offer_terms = ["\\bchokladägg\\b", "\\bchokladagg\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_chokladagg_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_chokladagg_exact."
+notes = "Registry-owned match bridge: bridge_chokladagg_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_chokladagg_exact"
@@ -228,7 +228,7 @@ offer_terms = ["\\bcitronmeliss\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_citronmeliss_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_citronmeliss_exact."
+notes = "Registry-owned match bridge: bridge_citronmeliss_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_citronmeliss_exact"
@@ -269,7 +269,7 @@ offer_terms = ["\\bdaim(?:choklad)?\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_daimchoklad_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_daimchoklad_exact."
+notes = "Registry-owned match bridge: bridge_daimchoklad_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_daimchoklad_exact"
@@ -310,7 +310,7 @@ offer_terms = ["\\bdillfrö\\b", "\\bdillfrön\\b", "\\bdillfro\\b", "\\bdillfro
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_dillfro_plural"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_dillfro_plural."
+notes = "Registry-owned match bridge: bridge_dillfro_plural."
 
 [entries.language_payload.match_bridge]
 id = "bridge_dillfro_plural"
@@ -393,7 +393,7 @@ offer_terms = ["\\bfolköl\\b", "\\bfolkol\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_folkol_beer"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_folkol_beer."
+notes = "Registry-owned match bridge: bridge_folkol_beer."
 
 [entries.language_payload.match_bridge]
 id = "bridge_folkol_beer"
@@ -452,7 +452,7 @@ offer_terms = ["\\bförkokt\\b", "\\bforkokt\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_forkoktmajskolv_prepared"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_forkoktmajskolv_prepared."
+notes = "Registry-owned match bridge: bridge_forkoktmajskolv_prepared."
 
 [entries.language_payload.match_bridge]
 id = "bridge_forkoktmajskolv_prepared"
@@ -559,7 +559,7 @@ offer_terms = ["\\bvåffelstrutar\\b", "\\bvaffelstrutar\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_glasstrutar_vaffelstrutar"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_glasstrutar_vaffelstrutar."
+notes = "Registry-owned match bridge: bridge_glasstrutar_vaffelstrutar."
 
 [entries.language_payload.match_bridge]
 id = "bridge_glasstrutar_vaffelstrutar"
@@ -606,7 +606,7 @@ offer_terms = ["\\bgräslök\\b", "\\bgraslok\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_graslok_fresh"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_graslok_fresh."
+notes = "Registry-owned match bridge: bridge_graslok_fresh."
 
 [entries.language_payload.match_bridge]
 id = "bridge_graslok_fresh"
@@ -665,7 +665,7 @@ offer_terms = ["\\bdill\\b"]
 negative_guards = ["dill ! \\bdillfrö", "dill ! \\bdillfro", "dill ! \\bkrondill\\b", "dill ! \\bdillmarinad\\b"]
 source_refs = ["bridge:match_bridges:bridge_dill_fresh_herb"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_dill_fresh_herb."
+notes = "Registry-owned match bridge: bridge_dill_fresh_herb."
 
 [entries.language_payload.match_bridge]
 id = "bridge_dill_fresh_herb"
@@ -735,7 +735,7 @@ offer_terms = ["\\bkoriander\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_koriander_fresh_herb"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_koriander_fresh_herb."
+notes = "Registry-owned match bridge: bridge_koriander_fresh_herb."
 
 [entries.language_payload.match_bridge]
 id = "bridge_koriander_fresh_herb"
@@ -776,7 +776,7 @@ offer_terms = ["\\bsalladsblad\\b", "\\bgrönsallad\\b", "\\bgronsallad\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_gronsallad_salladsblad"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_gronsallad_salladsblad."
+notes = "Registry-owned match bridge: bridge_gronsallad_salladsblad."
 
 [entries.language_payload.match_bridge]
 id = "bridge_gronsallad_salladsblad"
@@ -847,7 +847,7 @@ offer_terms = ["\\bharicots?\\s+verts\\b", "\\bharicot\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_haricoverts_typo"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_haricoverts_typo."
+notes = "Registry-owned match bridge: bridge_haricoverts_typo."
 
 [entries.language_payload.match_bridge]
 id = "bridge_haricoverts_typo"
@@ -906,7 +906,7 @@ offer_terms = ["\\bingefärsshot\\b", "\\bingefarsshot\\b", "\\bingefärsjuice\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_ingefarsshot_juice"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_ingefarsshot_juice."
+notes = "Registry-owned match bridge: bridge_ingefarsshot_juice."
 
 [entries.language_payload.match_bridge]
 id = "bridge_ingefarsshot_juice"
@@ -989,7 +989,7 @@ offer_terms = ["\\bjordgubbssaft\\b", "\\bjordgubbsaft\\b", "\\bblandsaft\\b.*\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_jordgubbssaft_blandsaft"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_jordgubbssaft_blandsaft."
+notes = "Registry-owned match bridge: bridge_jordgubbssaft_blandsaft."
 
 [entries.language_payload.match_bridge]
 id = "bridge_jordgubbssaft_blandsaft"
@@ -1072,7 +1072,7 @@ offer_terms = ["\\bkrispsallat\\b", "\\bkruksallad\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kruksallad_krispsallat"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kruksallad_krispsallat."
+notes = "Registry-owned match bridge: bridge_kruksallad_krispsallat."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kruksallad_krispsallat"
@@ -1119,7 +1119,7 @@ offer_terms = ["\\bkryddpeppar\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kryddpeppar_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kryddpeppar_exact."
+notes = "Registry-owned match bridge: bridge_kryddpeppar_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kryddpeppar_exact"
@@ -1160,7 +1160,7 @@ offer_terms = ["\\bläsk\\b", "\\blask\\b", "\\bcoca[-\\s]?cola\\b", "\\bcola\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_lask_cola"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_lask_cola."
+notes = "Registry-owned match bridge: bridge_lask_cola."
 
 [entries.language_payload.match_bridge]
 id = "bridge_lask_cola"
@@ -1243,7 +1243,7 @@ offer_terms = ["\\bcroustades?\\b", "\\bkrustader\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_minikrustader_croustades"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_minikrustader_croustades."
+notes = "Registry-owned match bridge: bridge_minikrustader_croustades."
 
 [entries.language_payload.match_bridge]
 id = "bridge_minikrustader_croustades"
@@ -1302,7 +1302,7 @@ offer_terms = ["\\bhasselnötkräm\\b", "\\bhasselnotkram\\b", "\\bnötkräm\\b"
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_notcreme_spread"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_notcreme_spread."
+notes = "Registry-owned match bridge: bridge_notcreme_spread."
 
 [entries.language_payload.match_bridge]
 id = "bridge_notcreme_spread"
@@ -1433,7 +1433,7 @@ offer_terms = ["\\böl\\b", "\\bol\\b", "\\bfolköl\\b", "\\bfolkol\\b", "\\blag
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_ol_beer"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_ol_beer."
+notes = "Registry-owned match bridge: bridge_ol_beer."
 
 [entries.language_payload.match_bridge]
 id = "bridge_ol_beer"
@@ -1528,7 +1528,7 @@ offer_terms = ["\\bpaprikapulver\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_paprikakrydda_pulver"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_paprikakrydda_pulver."
+notes = "Registry-owned match bridge: bridge_paprikakrydda_pulver."
 
 [entries.language_payload.match_bridge]
 id = "bridge_paprikakrydda_pulver"
@@ -1569,7 +1569,7 @@ offer_terms = ["\\bpickles\\b", "smörgåspickles\\b", "smorgaspickles\\b", "\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_pickles_inlagdgurka"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_pickles_inlagdgurka."
+notes = "Registry-owned match bridge: bridge_pickles_inlagdgurka."
 
 [entries.language_payload.match_bridge]
 id = "bridge_pickles_inlagdgurka"
@@ -1634,7 +1634,7 @@ offer_terms = ["\\bpolly\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_polly_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_polly_exact."
+notes = "Registry-owned match bridge: bridge_polly_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_polly_exact"
@@ -1675,7 +1675,7 @@ offer_terms = ["\\bmajsmjöl\\b", "\\bmajsmjol\\b", "\\bpolenta\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_polenta_majsmjol"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_polenta_majsmjol."
+notes = "Registry-owned match bridge: bridge_polenta_majsmjol."
 
 [entries.language_payload.match_bridge]
 id = "bridge_polenta_majsmjol"
@@ -1728,7 +1728,7 @@ offer_terms = ["\\bruccola\\b", "\\brucola\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_ruccola_rucola"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_ruccola_rucola."
+notes = "Registry-owned match bridge: bridge_ruccola_rucola."
 
 [entries.language_payload.match_bridge]
 id = "bridge_ruccola_rucola"
@@ -1787,7 +1787,7 @@ offer_terms = ["\\bskaldjursfond\\b", "\\bhummerfond\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_skaldjursfond_hummerfond"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_skaldjursfond_hummerfond."
+notes = "Registry-owned match bridge: bridge_skaldjursfond_hummerfond."
 
 [entries.language_payload.match_bridge]
 id = "bridge_skaldjursfond_hummerfond"
@@ -1834,7 +1834,7 @@ offer_terms = ["\\bsommar\\b", "\\bsommargrönsaker\\b", "\\bsommargronsaker\\b"
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_sommargronsaker_apetit"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sommargronsaker_apetit."
+notes = "Registry-owned match bridge: bridge_sommargronsaker_apetit."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sommargronsaker_apetit"
@@ -1917,7 +1917,7 @@ offer_terms = ["\\blättströ\\b", "\\blattstro\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_sotstro_lattstro"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sotstro_lattstro."
+notes = "Registry-owned match bridge: bridge_sotstro_lattstro."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sotstro_lattstro"
@@ -1976,7 +1976,7 @@ offer_terms = ["\\bblomkål\\b", "\\bblomkal\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_blomkalshuvud_fresh"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_blomkalshuvud_fresh."
+notes = "Registry-owned match bridge: bridge_blomkalshuvud_fresh."
 
 [entries.language_payload.match_bridge]
 id = "bridge_blomkalshuvud_fresh"
@@ -2035,7 +2035,7 @@ offer_terms = ["\\bformbröd\\b", "\\bformbrod\\b", "\\bjättefranska\\b", "\\bj
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_brodskivor_formbrod"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_brodskivor_formbrod."
+notes = "Registry-owned match bridge: bridge_brodskivor_formbrod."
 
 [entries.language_payload.match_bridge]
 id = "bridge_brodskivor_formbrod"
@@ -2130,7 +2130,7 @@ offer_terms = ["\\bdijonsenap\\b", "\\bdijon\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_fransk_senap_dijon"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_fransk_senap_dijon."
+notes = "Registry-owned match bridge: bridge_fransk_senap_dijon."
 
 [entries.language_payload.match_bridge]
 id = "bridge_fransk_senap_dijon"
@@ -2189,7 +2189,7 @@ offer_terms = ["\\bgrapefrukt\\b", "\\bgrape\\b.*\\bröd\\b", "\\bröd\\b.*\\bgr
 negative_guards = ["grapefrukt ! \\bjuice\\b"]
 source_refs = ["bridge:match_bridges:bridge_grapefrukt_grape"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_grapefrukt_grape."
+notes = "Registry-owned match bridge: bridge_grapefrukt_grape."
 
 [entries.language_payload.match_bridge]
 id = "bridge_grapefrukt_grape"
@@ -2265,7 +2265,7 @@ offer_terms = ["\\bhuvudsallat\\b", "\\bhuvudsallad\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_huvudsallat_head_lettuce"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_huvudsallat_head_lettuce."
+notes = "Registry-owned match bridge: bridge_huvudsallat_head_lettuce."
 
 [entries.language_payload.match_bridge]
 id = "bridge_huvudsallat_head_lettuce"
@@ -2324,7 +2324,7 @@ offer_terms = ["\\briven\\b.*\\bkokos\\b", "\\bkokos\\b.*\\briven\\b", "\\bkokos
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kokosflingor_riven_kokos"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kokosflingor_riven_kokos."
+notes = "Registry-owned match bridge: bridge_kokosflingor_riven_kokos."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kokosflingor_riven_kokos"
@@ -2377,7 +2377,7 @@ offer_terms = ["\\bkolasås\\b", "\\bkolasas\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kolasas_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kolasas_exact."
+notes = "Registry-owned match bridge: bridge_kolasas_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kolasas_exact"
@@ -2436,7 +2436,7 @@ offer_terms = ["\\bmandelspån\\b", "\\bmandelspan\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_mandelspan_spelling"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_mandelspan_spelling."
+notes = "Registry-owned match bridge: bridge_mandelspan_spelling."
 
 [entries.language_payload.match_bridge]
 id = "bridge_mandelspan_spelling"
@@ -2519,7 +2519,7 @@ offer_terms = ["\\bpotato\\s+buns\\b", "\\bhamburgerbröd\\b", "\\bhamburgerbrod
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_potato_buns_hamburgerbrod"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_potato_buns_hamburgerbrod."
+notes = "Registry-owned match bridge: bridge_potato_buns_hamburgerbrod."
 
 [entries.language_payload.match_bridge]
 id = "bridge_potato_buns_hamburgerbrod"
@@ -2572,7 +2572,7 @@ offer_terms = ["\\bspareribs\\b", "\\brevbensspjäll\\b", "\\brevbensspjall\\b"]
 negative_guards = ["revbensspjäll ! \\brub\\b"]
 source_refs = ["bridge:match_bridges:bridge_revbensspjall_spareribs"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_revbensspjall_spareribs."
+notes = "Registry-owned match bridge: bridge_revbensspjall_spareribs."
 
 [entries.language_payload.match_bridge]
 id = "bridge_revbensspjall_spareribs"
@@ -2654,7 +2654,7 @@ offer_terms = ["\\bknäckebröd\\b", "\\bknackebrod\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_spisbrod_knackebrod"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_spisbrod_knackebrod."
+notes = "Registry-owned match bridge: bridge_spisbrod_knackebrod."
 
 [entries.language_payload.match_bridge]
 id = "bridge_spisbrod_knackebrod"
@@ -2713,7 +2713,7 @@ offer_terms = ["\\bsvampfond\\b", "\\bkantarellfond\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_svampfond_kantarellfond"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_svampfond_kantarellfond."
+notes = "Registry-owned match bridge: bridge_svampfond_kantarellfond."
 
 [entries.language_payload.match_bridge]
 id = "bridge_svampfond_kantarellfond"
@@ -2760,7 +2760,7 @@ offer_terms = ["\\bvegobitar\\b", "\\btzaybitar\\b", "\\btzay\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tzaybitar_vegobitar"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tzaybitar_vegobitar."
+notes = "Registry-owned match bridge: bridge_tzaybitar_vegobitar."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tzaybitar_vegobitar"
@@ -2831,7 +2831,7 @@ offer_terms = ["\\bvegokebab\\b", "\\bvegetarisk\\s+kebab\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vegetarisk_kebab_vegokebab"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vegetarisk_kebab_vegokebab."
+notes = "Registry-owned match bridge: bridge_vegetarisk_kebab_vegokebab."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vegetarisk_kebab_vegokebab"
@@ -2890,7 +2890,7 @@ offer_terms = ["\\bäppelcider\\b", "\\bappelcider\\b", "\\bapple\\s+cider\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_apple_cider_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_apple_cider_exact."
+notes = "Registry-owned match bridge: bridge_apple_cider_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_apple_cider_exact"
@@ -2979,7 +2979,7 @@ offer_terms = ["\\bingefära\\b.*\\bshot\\b", "\\bingefara\\b.*\\bshot\\b", "\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_pressad_ingefarsjuice"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_pressad_ingefarsjuice."
+notes = "Registry-owned match bridge: bridge_pressad_ingefarsjuice."
 
 [entries.language_payload.match_bridge]
 id = "bridge_pressad_ingefarsjuice"
@@ -3158,7 +3158,7 @@ offer_terms = ["\\bcrispy\\s+chili\\s+oil\\b", "\\bcrispychiliolja\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_crispy_chili_oil"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_crispy_chili_oil."
+notes = "Registry-owned match bridge: bridge_crispy_chili_oil."
 
 [entries.language_payload.match_bridge]
 id = "bridge_crispy_chili_oil"
@@ -3217,7 +3217,7 @@ offer_terms = ["\\bcondimento\\b.*\\brose\\b", "\\brose\\b.*\\bcondimento\\b", "
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_balsamvinager_rose"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_balsamvinager_rose."
+notes = "Registry-owned match bridge: bridge_balsamvinager_rose."
 
 [entries.language_payload.match_bridge]
 id = "bridge_balsamvinager_rose"
@@ -3348,7 +3348,7 @@ offer_terms = ["\\bvispgrädde\\b.*\\b40\\s*%", "\\bvispgradde\\b.*\\b40\\s*%", 
 negative_guards = ["grädde ! \\bmatgrädde\\b", "grädde ! \\bmatgradde\\b"]
 source_refs = ["bridge:match_bridges:bridge_gradde_40pct"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_gradde_40pct."
+notes = "Registry-owned match bridge: bridge_gradde_40pct."
 
 [entries.language_payload.match_bridge]
 id = "bridge_gradde_40pct"
@@ -3448,7 +3448,7 @@ offer_terms = ["\\bguajillo\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_guajillo_chili_variant"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_guajillo_chili_variant."
+notes = "Registry-owned match bridge: bridge_guajillo_chili_variant."
 
 [entries.language_payload.match_bridge]
 id = "bridge_guajillo_chili_variant"
@@ -3489,7 +3489,7 @@ offer_terms = ["\\bsushilax\\b", "\\bsushi\\s+lax\\b", "\\bsashimi\\b.*\\blax\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_sashimi_lax_sushilax"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sashimi_lax_sushilax."
+notes = "Registry-owned match bridge: bridge_sashimi_lax_sushilax."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sashimi_lax_sushilax"
@@ -3560,7 +3560,7 @@ offer_terms = ["\\bkanelglass\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kanelglass_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kanelglass_exact."
+notes = "Registry-owned match bridge: bridge_kanelglass_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kanelglass_exact"
@@ -3601,7 +3601,7 @@ offer_terms = ["\\bpastasås\\b.*\\bclassico\\b", "\\bpastasas\\b.*\\bclassico\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_classico_pastasas_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_classico_pastasas_exact."
+notes = "Registry-owned match bridge: bridge_classico_pastasas_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_classico_pastasas_exact"
@@ -3732,7 +3732,7 @@ offer_terms = ["\\bcocktailtomater\\b", "\\bkörsbärstomater\\b", "\\bkorsbarst
 negative_guards = ["körsbärstomater ! \\btomatjuice\\b", "körsbärstomater ! \\bpastasås\\b", "körsbärstomater ! \\bpastasas\\b"]
 source_refs = ["bridge:match_bridges:bridge_korsbarstomater_cocktail"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_korsbarstomater_cocktail."
+notes = "Registry-owned match bridge: bridge_korsbarstomater_cocktail."
 
 [entries.language_payload.match_bridge]
 id = "bridge_korsbarstomater_cocktail"
@@ -3862,7 +3862,7 @@ offer_terms = ["\\bhoisin\\b", "\\bhoisinsås\\b", "\\bhoisinsas\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_hoisin_vegan_alternative_scope"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_hoisin_vegan_alternative_scope."
+notes = "Registry-owned match bridge: bridge_hoisin_vegan_alternative_scope."
 
 [entries.language_payload.match_bridge]
 id = "bridge_hoisin_vegan_alternative_scope"
@@ -3951,7 +3951,7 @@ offer_terms = ["\\bmjölk\\b.*\\blaktosfri\\b", "\\bmjolk\\b.*\\blaktosfri\\b", 
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_laktosfri_mjolk_scope"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_laktosfri_mjolk_scope."
+notes = "Registry-owned match bridge: bridge_laktosfri_mjolk_scope."
 
 [entries.language_payload.match_bridge]
 id = "bridge_laktosfri_mjolk_scope"
@@ -4034,7 +4034,7 @@ offer_terms = ["\\bstandardmjölk\\b", "\\bstandardmjolk\\b", "\\bmjölkdryck\\b
 negative_guards = ["standardmjölk ! \\bchoklad\\b", "standardmjölk ! \\bchokladknappar\\b", "standardmjölk ! \\bjordgubb\\b", "standardmjölk ! \\bprotein\\b"]
 source_refs = ["bridge:match_bridges:bridge_standardmjolk_plain"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_standardmjolk_plain."
+notes = "Registry-owned match bridge: bridge_standardmjolk_plain."
 
 [entries.language_payload.match_bridge]
 id = "bridge_standardmjolk_plain"
@@ -4146,7 +4146,7 @@ offer_terms = ["\\bmörk\\b.*\\bchoklad\\b", "\\bmork\\b.*\\bchoklad\\b", "\\bda
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_mork_chokladkaka_dark"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_mork_chokladkaka_dark."
+notes = "Registry-owned match bridge: bridge_mork_chokladkaka_dark."
 
 [entries.language_payload.match_bridge]
 id = "bridge_mork_chokladkaka_dark"
@@ -4253,7 +4253,7 @@ offer_terms = ["\\bfläderblom\\b.*\\bsaft\\b", "\\bfladerblom\\b.*\\bsaft\\b", 
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_spaced_saft_flavors"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_spaced_saft_flavors."
+notes = "Registry-owned match bridge: bridge_spaced_saft_flavors."
 
 [entries.language_payload.match_bridge]
 id = "bridge_spaced_saft_flavors"
@@ -4342,7 +4342,7 @@ offer_terms = ["\\bsurkål\\b", "\\bsurkal\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_surkal_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_surkal_exact."
+notes = "Registry-owned match bridge: bridge_surkal_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_surkal_exact"
@@ -4401,7 +4401,7 @@ offer_terms = ["\\bpotatismos\\b"]
 negative_guards = ["potatismos ! \\bfisk\\b", "potatismos ! \\bpanerad\\b", "potatismos ! \\bredo\\b"]
 source_refs = ["bridge:match_bridges:bridge_potatismos_instant"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_potatismos_instant."
+notes = "Registry-owned match bridge: bridge_potatismos_instant."
 
 [entries.language_payload.match_bridge]
 id = "bridge_potatismos_instant"
@@ -4465,7 +4465,7 @@ offer_terms = ["\\bvitlök\\b.*\\bmarinad\\b", "\\bvitlok\\b.*\\bmarinad\\b", "\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vitloksmarinad_spaced"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vitloksmarinad_spaced."
+notes = "Registry-owned match bridge: bridge_vitloksmarinad_spaced."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vitloksmarinad_spaced"
@@ -4548,7 +4548,7 @@ offer_terms = ["\\bvitlök\\b.*\\bkrossad\\b", "\\bvitlok\\b.*\\bkrossad\\b"]
 negative_guards = ["vitlök ! \\bpulver\\b", "vitlök ! \\bmarinerad", "vitlök ! \\bolja\\b"]
 source_refs = ["bridge:match_bridges:bridge_vitlok_torkad_burk_crushed"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vitlok_torkad_burk_crushed."
+notes = "Registry-owned match bridge: bridge_vitlok_torkad_burk_crushed."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vitlok_torkad_burk_crushed"
@@ -4630,7 +4630,7 @@ offer_terms = ["\\brostbröd\\b", "\\brostbrod\\b", "\\bjättefranska\\b", "\\bj
 negative_guards = ["formbröd ! \\btunnbröd\\b", "formbröd ! \\btunnbrod\\b", "formbröd ! \\bliba\\b"]
 source_refs = ["bridge:match_bridges:bridge_vitt_brod_formbrod"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vitt_brod_formbrod."
+notes = "Registry-owned match bridge: bridge_vitt_brod_formbrod."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vitt_brod_formbrod"
@@ -4748,7 +4748,7 @@ offer_terms = ["\\bknippe\\b", "\\bsalladslök\\b", "\\bsalladslok\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_knipplok_bunch"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_knipplok_bunch."
+notes = "Registry-owned match bridge: bridge_knipplok_bunch."
 
 [entries.language_payload.match_bridge]
 id = "bridge_knipplok_bunch"
@@ -4819,7 +4819,7 @@ offer_terms = ["\\bsalladslök\\b", "\\bsalladslok\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_farsk_lok_salladslok_stalks"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_farsk_lok_salladslok_stalks."
+notes = "Registry-owned match bridge: bridge_farsk_lok_salladslok_stalks."
 
 [entries.language_payload.match_bridge]
 id = "bridge_farsk_lok_salladslok_stalks"
@@ -4878,7 +4878,7 @@ offer_terms = ["\\bvit\\b.*\\bchoklad\\b", "\\bchoklad\\b.*\\bvit\\b", "\\bbakch
 negative_guards = ["choklad ! \\bmörk\\b", "choklad ! \\bmork\\b", "choklad ! \\bdark\\b"]
 source_refs = ["bridge:match_bridges:bridge_vit_chokladkaka_white"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vit_chokladkaka_white."
+notes = "Registry-owned match bridge: bridge_vit_chokladkaka_white."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vit_chokladkaka_white"
@@ -4984,7 +4984,7 @@ offer_terms = ["\\bfalafelmix\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_falafelmix_mix"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_falafelmix_mix."
+notes = "Registry-owned match bridge: bridge_falafelmix_mix."
 
 [entries.language_payload.match_bridge]
 id = "bridge_falafelmix_mix"
@@ -5025,7 +5025,7 @@ offer_terms = ["\\bmineralvatten\\b.*\\bkolsyrat\\b", "\\bkolsyrat\\b.*\\bminera
 negative_guards = ["sodavatten ! \\bcitron\\b", "sodavatten ! \\bsmultron\\b"]
 source_refs = ["bridge:match_bridges:bridge_kolsyrat_mineralvatten_sodavatten"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kolsyrat_mineralvatten_sodavatten."
+notes = "Registry-owned match bridge: bridge_kolsyrat_mineralvatten_sodavatten."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kolsyrat_mineralvatten_sodavatten"
@@ -5113,7 +5113,7 @@ offer_terms = ["\\byoghurt\\b.*\\bkardemumma\\b", "\\byogurt\\b.*\\bkardemumma\\
 negative_guards = ["kardemummayoghurt ! \\bnaturell\\b"]
 source_refs = ["bridge:match_bridges:bridge_kardemummayoghurt_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kardemummayoghurt_exact."
+notes = "Registry-owned match bridge: bridge_kardemummayoghurt_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kardemummayoghurt_exact"
@@ -5231,7 +5231,7 @@ offer_terms = ["\\bmalen\\b.*\\bkardemumma\\b", "\\bkardemumma\\b.*\\bmalen\\b",
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kardemumma_malen_spice"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kardemumma_malen_spice."
+notes = "Registry-owned match bridge: bridge_kardemumma_malen_spice."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kardemumma_malen_spice"
@@ -5362,7 +5362,7 @@ offer_terms = ["\\bwokmix\\b", "\\bwok\\s+classic\\b"]
 negative_guards = ["wokgrönsaker ! \\bsauce\\b", "wokgrönsaker ! \\bsås\\b", "wokgrönsaker ! \\bsas\\b"]
 source_refs = ["bridge:match_bridges:bridge_wokgronsaker_forms"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_wokgronsaker_forms."
+notes = "Registry-owned match bridge: bridge_wokgronsaker_forms."
 
 [entries.language_payload.match_bridge]
 id = "bridge_wokgronsaker_forms"
@@ -5444,7 +5444,7 @@ offer_terms = ["\\bwok\\s+mix\\b.*\\bbrine\\b", "\\bvegetables\\b.*\\bbrine\\b",
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_wokgronsaker_brine"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_wokgronsaker_brine."
+notes = "Registry-owned match bridge: bridge_wokgronsaker_brine."
 
 [entries.language_payload.match_bridge]
 id = "bridge_wokgronsaker_brine"
@@ -5623,7 +5623,7 @@ offer_terms = ["\\bpersiljesmör\\b", "\\bpersiljesmor\\b", "\\baromsmör\\b", "
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_aromsmor_flavored_butter"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_aromsmor_flavored_butter."
+notes = "Registry-owned match bridge: bridge_aromsmor_flavored_butter."
 
 [entries.language_payload.match_bridge]
 id = "bridge_aromsmor_flavored_butter"
@@ -5706,7 +5706,7 @@ offer_terms = ["\\bchilimajo\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_chilimajo_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_chilimajo_exact."
+notes = "Registry-owned match bridge: bridge_chilimajo_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_chilimajo_exact"
@@ -5759,7 +5759,7 @@ offer_terms = ["\\bsmör\\b.*\\brapsolja\\b", "\\bsmor\\b.*\\brapsolja\\b", "\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_smorrapsolja_blend"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_smorrapsolja_blend."
+notes = "Registry-owned match bridge: bridge_smorrapsolja_blend."
 
 [entries.language_payload.match_bridge]
 id = "bridge_smorrapsolja_blend"
@@ -5890,7 +5890,7 @@ offer_terms = ["\\blime\\s+pepper\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_limepepper_seasoning"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_limepepper_seasoning."
+notes = "Registry-owned match bridge: bridge_limepepper_seasoning."
 
 [entries.language_payload.match_bridge]
 id = "bridge_limepepper_seasoning"
@@ -5931,7 +5931,7 @@ offer_terms = ["\\bsockerärtor\\b", "\\bsockerartor\\b", "\\bsugar\\s+snaps\\b"
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_salladsartor_sockerartor"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_salladsartor_sockerartor."
+notes = "Registry-owned match bridge: bridge_salladsartor_sockerartor."
 
 [entries.language_payload.match_bridge]
 id = "bridge_salladsartor_sockerartor"
@@ -6056,7 +6056,7 @@ offer_terms = ["\\bvegofärs\\b", "\\bvegofars\\b", "\\bquorn\\b.*\\bfärs\\b", 
 negative_guards = ["quornfärs ! \\bskivor\\b"]
 source_refs = ["bridge:match_bridges:bridge_quornfars_vegofars"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_quornfars_vegofars."
+notes = "Registry-owned match bridge: bridge_quornfars_vegofars."
 
 [entries.language_payload.match_bridge]
 id = "bridge_quornfars_vegofars"
@@ -6186,7 +6186,7 @@ offer_terms = ["\\bmarängtoppar\\b", "\\bmarangtoppar\\b"]
 negative_guards = ["maräng ! \\bjordgubb\\b"]
 source_refs = ["bridge:match_bridges:bridge_maranger_toppers"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_maranger_toppers."
+notes = "Registry-owned match bridge: bridge_maranger_toppers."
 
 [entries.language_payload.match_bridge]
 id = "bridge_maranger_toppers"
@@ -6280,7 +6280,7 @@ offer_terms = ["\\boreo\\b"]
 negative_guards = ["oreo ! \\bchoklad\\b"]
 source_refs = ["bridge:match_bridges:bridge_oreo_original_cookie"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_oreo_original_cookie."
+notes = "Registry-owned match bridge: bridge_oreo_original_cookie."
 
 [entries.language_payload.match_bridge]
 id = "bridge_oreo_original_cookie"
@@ -6332,7 +6332,7 @@ offer_terms = ["\\bsavoiardikex\\b", "\\bsavoiardi\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_savoiardikex_specialty"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_savoiardikex_specialty."
+notes = "Registry-owned match bridge: bridge_savoiardikex_specialty."
 
 [entries.language_payload.match_bridge]
 id = "bridge_savoiardikex_specialty"
@@ -6391,7 +6391,7 @@ offer_terms = ["\\bbjörnbärssaft\\b", "\\bbjornbarssaft\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_bjornbarssaft_cordial"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_bjornbarssaft_cordial."
+notes = "Registry-owned match bridge: bridge_bjornbarssaft_cordial."
 
 [entries.language_payload.match_bridge]
 id = "bridge_bjornbarssaft_cordial"
@@ -6450,7 +6450,7 @@ offer_terms = ["\\bnaturell\\b.*\\bkolsyrat\\b.*\\bvatten\\b", "\\bkolsyrat\\b.*
 negative_guards = ["sodavatten ! \\bcitron\\b", "sodavatten ! \\bsmultron\\b"]
 source_refs = ["bridge:match_bridges:bridge_sodavatten_plain_sparkling"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sodavatten_plain_sparkling."
+notes = "Registry-owned match bridge: bridge_sodavatten_plain_sparkling."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sodavatten_plain_sparkling"
@@ -6514,7 +6514,7 @@ offer_terms = ["\\bhavregryn\\b"]
 negative_guards = ["havregryn ! \\bhavreflingor\\b", "havregryn ! \\bhavsalt\\b", "havregryn ! \\bwasa\\b"]
 source_refs = ["bridge:match_bridges:bridge_havregryn_plain"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_havregryn_plain."
+notes = "Registry-owned match bridge: bridge_havregryn_plain."
 
 [entries.language_payload.match_bridge]
 id = "bridge_havregryn_plain"
@@ -6578,7 +6578,7 @@ offer_terms = ["\\bfanta\\b", "\\borange\\b.*\\bläsk\\b", "\\borange\\b.*\\blas
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_apelsinlask_soda"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_apelsinlask_soda."
+notes = "Registry-owned match bridge: bridge_apelsinlask_soda."
 
 [entries.language_payload.match_bridge]
 id = "bridge_apelsinlask_soda"
@@ -6649,7 +6649,7 @@ offer_terms = ["\\bbeyond\\s+burger\\b", "\\bbeyondburgare\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_beyondburgare_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_beyondburgare_exact."
+notes = "Registry-owned match bridge: bridge_beyondburgare_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_beyondburgare_exact"
@@ -6696,7 +6696,7 @@ offer_terms = ["\\blingon\\b.*\\bfrysta\\b", "\\bfrysta\\b.*\\blingon\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_frysta_lingon_raw"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_frysta_lingon_raw."
+notes = "Registry-owned match bridge: bridge_frysta_lingon_raw."
 
 [entries.language_payload.match_bridge]
 id = "bridge_frysta_lingon_raw"
@@ -6755,7 +6755,7 @@ offer_terms = ["\\bvegobacon\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vegobacon"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vegobacon."
+notes = "Registry-owned match bridge: bridge_vegobacon."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vegobacon"
@@ -6808,7 +6808,7 @@ offer_terms = ["\\bhavredryck\\b", "\\boatly\\b", "\\bväxtdryck\\b", "\\bvaxtdr
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vaxtbaserad_mjolkryck"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vaxtbaserad_mjolkryck."
+notes = "Registry-owned match bridge: bridge_vaxtbaserad_mjolkryck."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vaxtbaserad_mjolkryck"
@@ -6987,7 +6987,7 @@ offer_terms = ["\\bhavredryck\\b.*\\bnaturell\\b", "\\bnaturell\\b.*\\bhavredryc
 negative_guards = ["havredryck ! \\bmaple\\b", "havredryck ! \\bwalnut\\b"]
 source_refs = ["bridge:match_bridges:bridge_havredryck_naturell"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_havredryck_naturell."
+notes = "Registry-owned match bridge: bridge_havredryck_naturell."
 
 [entries.language_payload.match_bridge]
 id = "bridge_havredryck_naturell"
@@ -7063,7 +7063,7 @@ offer_terms = ["\\brökt\\b.*\\bpaprika\\b", "\\brokt\\b.*\\bpaprika\\b", "\\bpa
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_rokt_paprikapulver"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_rokt_paprikapulver."
+notes = "Registry-owned match bridge: bridge_rokt_paprikapulver."
 
 [entries.language_payload.match_bridge]
 id = "bridge_rokt_paprikapulver"
@@ -7194,7 +7194,7 @@ offer_terms = ["\\bkesella\\b.*\\bvanilj\\b", "\\bvanilj\\b.*\\bkesella\\b", "\\
 negative_guards = ["vaniljkvarg ! \\bnaturell\\b"]
 source_refs = ["bridge:match_bridges:bridge_kesella_vaniljkvarg"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kesella_vaniljkvarg."
+notes = "Registry-owned match bridge: bridge_kesella_vaniljkvarg."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kesella_vaniljkvarg"
@@ -7276,7 +7276,7 @@ offer_terms = ["\\btunnbröd\\b.*\\bhårt\\b", "\\btunnbrod\\b.*\\bhart\\b", "\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_hart_tunnbrod_form"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_hart_tunnbrod_form."
+notes = "Registry-owned match bridge: bridge_hart_tunnbrod_form."
 
 [entries.language_payload.match_bridge]
 id = "bridge_hart_tunnbrod_form"
@@ -7359,7 +7359,7 @@ offer_terms = ["\\bfröfralla\\b", "\\bfrofralla\\b", "\\bfralla\\b"]
 negative_guards = ["styckbröd ! \\bsirap\\b"]
 source_refs = ["bridge:match_bridges:bridge_styckbrod_bread_rolls"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_styckbrod_bread_rolls."
+notes = "Registry-owned match bridge: bridge_styckbrod_bread_rolls."
 
 [entries.language_payload.match_bridge]
 id = "bridge_styckbrod_bread_rolls"
@@ -7441,7 +7441,7 @@ offer_terms = ["\\blammracks\\b"]
 negative_guards = ["lammracks ! \\blammstek\\b"]
 source_refs = ["bridge:match_bridges:bridge_lammracks_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_lammracks_exact."
+notes = "Registry-owned match bridge: bridge_lammracks_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_lammracks_exact"
@@ -7493,7 +7493,7 @@ offer_terms = ["\\btortilla\\b"]
 negative_guards = ["tortilla ! \\butan\\s+lök\\b", "tortilla ! \\butan\\s+lok\\b", "tortilla ! \\bpalacios\\b", "tortilla ! \\bomelett\\b", "tortilla ! \\bspansk\\b"]
 source_refs = ["bridge:match_bridges:bridge_tortilla_wrap_not_spanish"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tortilla_wrap_not_spanish."
+notes = "Registry-owned match bridge: bridge_tortilla_wrap_not_spanish."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tortilla_wrap_not_spanish"
@@ -7569,7 +7569,7 @@ offer_terms = ["\\bprosciutto\\b.*\\bparma\\b", "\\bparma\\b.*\\bprosciutto\\b",
 negative_guards = ["parmaskinka ! \\btortellini\\b", "parmaskinka ! \\btortelloni\\b", "parmaskinka ! \\bravioli\\b", "parmaskinka ! \\bpizza\\b", "parmaskinka ! \\bpinsa\\b"]
 source_refs = ["bridge:match_bridges:bridge_parmaskinka_prosciutto_di_parma"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_parmaskinka_prosciutto_di_parma."
+notes = "Registry-owned match bridge: bridge_parmaskinka_prosciutto_di_parma."
 
 [entries.language_payload.match_bridge]
 id = "bridge_parmaskinka_prosciutto_di_parma"
@@ -7657,7 +7657,7 @@ offer_terms = ["\\bkaramelliserad\\b.*\\bmjölk\\b", "\\bkaramelliserad\\b.*\\bm
 negative_guards = ["karamelliseradmjölk ! \\bkondenserad\\b"]
 source_refs = ["bridge:match_bridges:bridge_dulce_de_leche_karamelliserad_mjolk"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_dulce_de_leche_karamelliserad_mjolk."
+notes = "Registry-owned match bridge: bridge_dulce_de_leche_karamelliserad_mjolk."
 
 [entries.language_payload.match_bridge]
 id = "bridge_dulce_de_leche_karamelliserad_mjolk"
@@ -7757,7 +7757,7 @@ offer_terms = ["\\bkokosdryck\\b", "\\bkokos\\b.*\\bdryck\\b"]
 negative_guards = ["kokosdryck ! \\bkokosnöt\\b", "kokosdryck ! \\bkokosnot\\b"]
 source_refs = ["bridge:match_bridges:bridge_kokosnotsdryck_kokosdryck"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kokosnotsdryck_kokosdryck."
+notes = "Registry-owned match bridge: bridge_kokosnotsdryck_kokosdryck."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kokosnotsdryck_kokosdryck"
@@ -7833,7 +7833,7 @@ offer_terms = ["\\bljus\\s+sirap\\b", "\\bsirap\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_ljus_sirap_usage_tail"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_ljus_sirap_usage_tail."
+notes = "Registry-owned match bridge: bridge_ljus_sirap_usage_tail."
 
 [entries.language_payload.match_bridge]
 id = "bridge_ljus_sirap_usage_tail"
@@ -7880,7 +7880,7 @@ offer_terms = ["\\bcitron\\b"]
 negative_guards = ["citron ! \\bcitronjuice\\b.*\\bpantry\\b"]
 source_refs = ["bridge:match_bridges:bridge_citron_juice_skal_whole_fruit"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_citron_juice_skal_whole_fruit."
+notes = "Registry-owned match bridge: bridge_citron_juice_skal_whole_fruit."
 
 [entries.language_payload.match_bridge]
 id = "bridge_citron_juice_skal_whole_fruit"
@@ -7950,7 +7950,7 @@ offer_terms = ["\\bchilipeppar\\b", "\\bchili\\b.*\\bklass\\b", "\\bröd\\s+pepp
 negative_guards = ["chili ! \\bmalen\\b", "chili ! \\bkrydda\\b", "chili ! \\bmild\\b", "chili ! \\bspice\\b"]
 source_refs = ["bridge:match_bridges:bridge_fresh_chilipeppar_not_spice"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_fresh_chilipeppar_not_spice."
+notes = "Registry-owned match bridge: bridge_fresh_chilipeppar_not_spice."
 
 [entries.language_payload.match_bridge]
 id = "bridge_fresh_chilipeppar_not_spice"
@@ -8230,7 +8230,7 @@ offer_terms = ["\\bcottage\\s+cheese\\b", "\\bkeso\\b"]
 negative_guards = ["keso ! \\bvanilj\\b", "keso ! \\bsmaksatt\\b", "keso ! \\bfrukt\\b"]
 source_refs = ["bridge:match_bridges:bridge_keso_cottage_cheese_naturell"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_keso_cottage_cheese_naturell."
+notes = "Registry-owned match bridge: bridge_keso_cottage_cheese_naturell."
 
 [entries.language_payload.match_bridge]
 id = "bridge_keso_cottage_cheese_naturell"
@@ -8300,7 +8300,7 @@ offer_terms = ["\\bskorpor\\b"]
 negative_guards = ["skorpor ! \\bcantuccini"]
 source_refs = ["bridge:match_bridges:bridge_skorpor_plain"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_skorpor_plain."
+notes = "Registry-owned match bridge: bridge_skorpor_plain."
 
 [entries.language_payload.match_bridge]
 id = "bridge_skorpor_plain"
@@ -8352,7 +8352,7 @@ offer_terms = ["\\bmousserande\\b.*\\bvin\\b", "\\bchampagne\\b"]
 negative_guards = ["mousserandevin ! \\bspritz\\b"]
 source_refs = ["bridge:match_bridges:bridge_mousserande_vitt_vin_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_mousserande_vitt_vin_exact."
+notes = "Registry-owned match bridge: bridge_mousserande_vitt_vin_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_mousserande_vitt_vin_exact"
@@ -8422,7 +8422,7 @@ offer_terms = ["\\bkex\\b.*\\bsalta\\b", "\\bsalta\\b.*\\bkex\\b"]
 negative_guards = ["kex ! \\bbiscoff\\b"]
 source_refs = ["bridge:match_bridges:bridge_salta_kex_plain"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_salta_kex_plain."
+notes = "Registry-owned match bridge: bridge_salta_kex_plain."
 
 [entries.language_payload.match_bridge]
 id = "bridge_salta_kex_plain"
@@ -8480,7 +8480,7 @@ offer_terms = ["\\blingondryck\\b"]
 negative_guards = ["lingondryck ! \\bkoncentrat\\b"]
 source_refs = ["bridge:match_bridges:bridge_lingondryck_non_concentrate"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_lingondryck_non_concentrate."
+notes = "Registry-owned match bridge: bridge_lingondryck_non_concentrate."
 
 [entries.language_payload.match_bridge]
 id = "bridge_lingondryck_non_concentrate"
@@ -8532,7 +8532,7 @@ offer_terms = ["\\bbreoliv\\b", "\\bbregott\\b", "\\bmargarin\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_breoliv_spread_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_breoliv_spread_family."
+notes = "Registry-owned match bridge: bridge_breoliv_spread_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_breoliv_spread_family"
@@ -8585,7 +8585,7 @@ offer_terms = ["\\bmusslor\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_musslor_lake_frozen"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_musslor_lake_frozen."
+notes = "Registry-owned match bridge: bridge_musslor_lake_frozen."
 
 [entries.language_payload.match_bridge]
 id = "bridge_musslor_lake_frozen"
@@ -8632,7 +8632,7 @@ offer_terms = ["\\bcrème\\s+fraiche\\b.*\\bfranska\\b.*\\börter\\b", "\\bcreme
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_creme_fraiche_franska_orter"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_creme_fraiche_franska_orter."
+notes = "Registry-owned match bridge: bridge_creme_fraiche_franska_orter."
 
 [entries.language_payload.match_bridge]
 id = "bridge_creme_fraiche_franska_orter"
@@ -8703,7 +8703,7 @@ offer_terms = ["\\bfärskost\\b.*\\b(paprika|chili|örter|orter|vitlök|vitlok|p
 negative_guards = ["färskost ! \\bnaturell\\b"]
 source_refs = ["bridge:match_bridges:bridge_farskost_smaksatt_flavored"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_farskost_smaksatt_flavored."
+notes = "Registry-owned match bridge: bridge_farskost_smaksatt_flavored."
 
 [entries.language_payload.match_bridge]
 id = "bridge_farskost_smaksatt_flavored"
@@ -8773,7 +8773,7 @@ offer_terms = ["\\brödbeta\\b", "\\brodbeta\\b"]
 negative_guards = ["rödbeta ! \\bskivade\\b", "rödbeta ! \\binlagd"]
 source_refs = ["bridge:match_bridges:bridge_rodbetor_fresh_sliced"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_rodbetor_fresh_sliced."
+notes = "Registry-owned match bridge: bridge_rodbetor_fresh_sliced."
 
 [entries.language_payload.match_bridge]
 id = "bridge_rodbetor_fresh_sliced"
@@ -8873,7 +8873,7 @@ offer_terms = ["\\btandoori\\b"]
 negative_guards = ["tandoori ! \\bsanta\\s+maria\\b", "tandoori ! \\bkrydda\\b", "tandoori ! \\bspice\\b", "tandoori ! \\b35g\\b"]
 source_refs = ["bridge:match_bridges:bridge_tandoori_cooking_sauce"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tandoori_cooking_sauce."
+notes = "Registry-owned match bridge: bridge_tandoori_cooking_sauce."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tandoori_cooking_sauce"
@@ -8949,7 +8949,7 @@ offer_terms = ["\\bmandarinklyftor\\b", "\\bmandarin\\b.*\\bsockerlag\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_mandariner_fruktkonserver"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_mandariner_fruktkonserver."
+notes = "Registry-owned match bridge: bridge_mandariner_fruktkonserver."
 
 [entries.language_payload.match_bridge]
 id = "bridge_mandariner_fruktkonserver"
@@ -9008,7 +9008,7 @@ offer_terms = ["\\bpaprika\\b.*\\bröd\\b", "\\bpaprika\\b.*\\brod\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_paprika_later_variant"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_paprika_later_variant."
+notes = "Registry-owned match bridge: bridge_paprika_later_variant."
 
 [entries.language_payload.match_bridge]
 id = "bridge_paprika_later_variant"
@@ -9067,7 +9067,7 @@ offer_terms = ["\\bfeferoni\\b.*\\bkebab\\b", "\\bkebabfeferoni\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_feferoni_kebab_variant"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_feferoni_kebab_variant."
+notes = "Registry-owned match bridge: bridge_feferoni_kebab_variant."
 
 [entries.language_payload.match_bridge]
 id = "bridge_feferoni_kebab_variant"
@@ -9114,7 +9114,7 @@ offer_terms = ["\\bpulled\\s*chicken\\b", "\\bpulledchicken\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_pulled_chicken_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_pulled_chicken_exact."
+notes = "Registry-owned match bridge: bridge_pulled_chicken_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_pulled_chicken_exact"
@@ -9173,7 +9173,7 @@ offer_terms = ["\\bvinbärsgelé\\b", "\\bvinbarsgele\\b", "\\bgele\\b.*\\bsvart
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vinbarsgele_variants"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vinbarsgele_variants."
+notes = "Registry-owned match bridge: bridge_vinbarsgele_variants."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vinbarsgele_variants"
@@ -9280,7 +9280,7 @@ offer_terms = ["\\bpasserade\\b.*\\btomater\\b", "\\btomatpassata\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tomatpassata_passerade_tomater"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tomatpassata_passerade_tomater."
+notes = "Registry-owned match bridge: bridge_tomatpassata_passerade_tomater."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tomatpassata_passerade_tomater"
@@ -9339,7 +9339,7 @@ offer_terms = ["\\bgrana\\s+padano\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_grana_padano_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_grana_padano_exact."
+notes = "Registry-owned match bridge: bridge_grana_padano_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_grana_padano_exact"
@@ -9380,7 +9380,7 @@ offer_terms = ["\\bworcestershire\\s+sauce\\b", "\\bworcestershiresås\\b", "\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_worcestersas_worcestershire"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_worcestersas_worcestershire."
+notes = "Registry-owned match bridge: bridge_worcestersas_worcestershire."
 
 [entries.language_payload.match_bridge]
 id = "bridge_worcestersas_worcestershire"
@@ -9595,7 +9595,7 @@ offer_terms = ["\\bcornichons\\b", "\\bcornichoner\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_cornichons_cornichoner"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_cornichons_cornichoner."
+notes = "Registry-owned match bridge: bridge_cornichons_cornichoner."
 
 [entries.language_payload.match_bridge]
 id = "bridge_cornichons_cornichoner"
@@ -9654,7 +9654,7 @@ offer_terms = ["\\bpärlcouscous\\b.*\\bmoghrabie\\b", "\\bparlcouscous\\b.*\\bm
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_moghrabiah_parlcouscous"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_moghrabiah_parlcouscous."
+notes = "Registry-owned match bridge: bridge_moghrabiah_parlcouscous."
 
 [entries.language_payload.match_bridge]
 id = "bridge_moghrabiah_parlcouscous"
@@ -9725,7 +9725,7 @@ offer_terms = ["\\bfänkålsfrö", "\\bfankalsfro", "\\bfänkålsfrön\\b", "\\b
 negative_guards = ["fänkål ! \\bfänkål\\b\\s+ca\\s+\\d", "fänkål ! \\bfankal\\b\\s+ca\\s+\\d"]
 source_refs = ["bridge:match_bridges:bridge_fankal_seed_spice_list"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_fankal_seed_spice_list."
+notes = "Registry-owned match bridge: bridge_fankal_seed_spice_list."
 
 [entries.language_payload.match_bridge]
 id = "bridge_fankal_seed_spice_list"
@@ -9825,7 +9825,7 @@ offer_terms = ["\\bharissa\\b"]
 negative_guards = ["harissa ! \\bhummus\\b"]
 source_refs = ["bridge:match_bridges:bridge_harissa_exact_not_hummus"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_harissa_exact_not_hummus."
+notes = "Registry-owned match bridge: bridge_harissa_exact_not_hummus."
 
 [entries.language_payload.match_bridge]
 id = "bridge_harissa_exact_not_hummus"
@@ -9877,7 +9877,7 @@ offer_terms = ["\\bkokkaffe\\b"]
 negative_guards = ["kokkaffe ! \\bbryggkaffe\\b"]
 source_refs = ["bridge:match_bridges:bridge_kokkaffe_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kokkaffe_exact."
+notes = "Registry-owned match bridge: bridge_kokkaffe_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kokkaffe_exact"
@@ -9929,7 +9929,7 @@ offer_terms = ["\\bbifftomat(?:er)?\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_bifftomat_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_bifftomat_exact."
+notes = "Registry-owned match bridge: bridge_bifftomat_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_bifftomat_exact"
@@ -9970,7 +9970,7 @@ offer_terms = ["\\bblandade\\s+bönor\\b", "\\bblandade\\s+bonor\\b", "\\bbönmi
 negative_guards = ["bönor ! \\bkidneybönor\\b", "bönor ! \\bkidneybonor\\b"]
 source_refs = ["bridge:match_bridges:bridge_blandade_bonor_bonmix"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_blandade_bonor_bonmix."
+notes = "Registry-owned match bridge: bridge_blandade_bonor_bonmix."
 
 [entries.language_payload.match_bridge]
 id = "bridge_blandade_bonor_bonmix"
@@ -10070,7 +10070,7 @@ offer_terms = ["\\btunnbröd\\b", "\\btunnbrod\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_libabrod_tunnbrod"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_libabrod_tunnbrod."
+notes = "Registry-owned match bridge: bridge_libabrod_tunnbrod."
 
 [entries.language_payload.match_bridge]
 id = "bridge_libabrod_tunnbrod"
@@ -10129,7 +10129,7 @@ offer_terms = ["\\bmatlagningsvin\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vitt_vin_matlagningsvin"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vitt_vin_matlagningsvin."
+notes = "Registry-owned match bridge: bridge_vitt_vin_matlagningsvin."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vitt_vin_matlagningsvin"
@@ -10176,7 +10176,7 @@ offer_terms = ["\\bmarinerad\\w*\\b.*\\bkronärtskock", "\\bmarinerad\\w*\\b.*\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_marinerad_kronartskocka"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_marinerad_kronartskocka."
+notes = "Registry-owned match bridge: bridge_marinerad_kronartskocka."
 
 [entries.language_payload.match_bridge]
 id = "bridge_marinerad_kronartskocka"
@@ -10307,7 +10307,7 @@ offer_terms = ["\\bhasselnötsolja\\b", "\\bhasselnotsolja\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_hasselnotsolja_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_hasselnotsolja_exact."
+notes = "Registry-owned match bridge: bridge_hasselnotsolja_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_hasselnotsolja_exact"
@@ -10366,7 +10366,7 @@ offer_terms = ["\\baprikos(?:er)?\\b"]
 negative_guards = ["aprikos ! \\bsoft\\b", "aprikos ! \\btorkad"]
 source_refs = ["bridge:match_bridges:bridge_farska_aprikoser_fresh"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_farska_aprikoser_fresh."
+notes = "Registry-owned match bridge: bridge_farska_aprikoser_fresh."
 
 [entries.language_payload.match_bridge]
 id = "bridge_farska_aprikoser_fresh"
@@ -10430,7 +10430,7 @@ offer_terms = ["\\bsoltorkadetomatcreme\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_soltorkadetomatcreme_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_soltorkadetomatcreme_exact."
+notes = "Registry-owned match bridge: bridge_soltorkadetomatcreme_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_soltorkadetomatcreme_exact"
@@ -10489,7 +10489,7 @@ offer_terms = ["\\bjalapeno(?:s)?\\b", "\\bjalapeño(?:s)?\\b"]
 negative_guards = ["jalapeno ! \\bgrön\\b", "jalapeno ! \\bgron\\b"]
 source_refs = ["bridge:match_bridges:bridge_inlagd_jalapeno_preserved"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_inlagd_jalapeno_preserved."
+notes = "Registry-owned match bridge: bridge_inlagd_jalapeno_preserved."
 
 [entries.language_payload.match_bridge]
 id = "bridge_inlagd_jalapeno_preserved"
@@ -10565,7 +10565,7 @@ offer_terms = ["\\bgrenadine\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_grenadine_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_grenadine_exact."
+notes = "Registry-owned match bridge: bridge_grenadine_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_grenadine_exact"
@@ -10606,7 +10606,7 @@ offer_terms = ["\\bkrossad\\s+is\\b", "\\bkrossadis\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_krossad_is_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_krossad_is_exact."
+notes = "Registry-owned match bridge: bridge_krossad_is_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_krossad_is_exact"
@@ -10665,7 +10665,7 @@ offer_terms = ["\\bröd\\s+peppar\\b", "\\brod\\s+peppar\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_rod_spansk_peppar_fresh_chili"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_rod_spansk_peppar_fresh_chili."
+notes = "Registry-owned match bridge: bridge_rod_spansk_peppar_fresh_chili."
 
 [entries.language_payload.match_bridge]
 id = "bridge_rod_spansk_peppar_fresh_chili"
@@ -10724,7 +10724,7 @@ offer_terms = ["\\bpimientos\\b.*\\bpiquillo\\b", "\\bpiquillo\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_pimientos_piquillo_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_pimientos_piquillo_exact."
+notes = "Registry-owned match bridge: bridge_pimientos_piquillo_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_pimientos_piquillo_exact"
@@ -10771,7 +10771,7 @@ offer_terms = ["\\bparmesansås\\b", "\\bparmesansas\\b"]
 negative_guards = ["parmesansås ! \\bpasta\\b", "parmesansås ! \\bbacon\\b", "parmesansås ! \\bfindus\\b"]
 source_refs = ["bridge:match_bridges:bridge_parmesansas_exact_sauce"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_parmesansas_exact_sauce."
+notes = "Registry-owned match bridge: bridge_parmesansas_exact_sauce."
 
 [entries.language_payload.match_bridge]
 id = "bridge_parmesansas_exact_sauce"
@@ -10853,7 +10853,7 @@ offer_terms = ["\\bporter\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_porter_beer"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_porter_beer."
+notes = "Registry-owned match bridge: bridge_porter_beer."
 
 [entries.language_payload.match_bridge]
 id = "bridge_porter_beer"
@@ -10894,7 +10894,7 @@ offer_terms = ["\\bsteklök\\b", "\\bsteklok\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_steklok_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_steklok_exact."
+notes = "Registry-owned match bridge: bridge_steklok_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_steklok_exact"
@@ -10953,7 +10953,7 @@ offer_terms = ["\\bchorizo(?:korv(?:ar)?|korvar?)?\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_chorizokorv_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_chorizokorv_exact."
+notes = "Registry-owned match bridge: bridge_chorizokorv_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_chorizokorv_exact"
@@ -11000,7 +11000,7 @@ offer_terms = ["\\bananas\\b.*\\bkrossad\\b", "\\bkrossad\\b.*\\bananas\\b", "\\
 negative_guards = ["ananas ! \\bfryst\\b"]
 source_refs = ["bridge:match_bridges:bridge_avrunnen_ananas_preserved"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_avrunnen_ananas_preserved."
+notes = "Registry-owned match bridge: bridge_avrunnen_ananas_preserved."
 
 [entries.language_payload.match_bridge]
 id = "bridge_avrunnen_ananas_preserved"
@@ -11094,7 +11094,7 @@ offer_terms = ["\\bsyltad\\b.*\\bingefära\\b", "\\bsyltad\\b.*\\bingefara\\b", 
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_syltad_ingefara_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_syltad_ingefara_exact."
+notes = "Registry-owned match bridge: bridge_syltad_ingefara_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_syltad_ingefara_exact"
@@ -11201,7 +11201,7 @@ offer_terms = ["\\btortiglioni\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tortiglioni_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tortiglioni_exact."
+notes = "Registry-owned match bridge: bridge_tortiglioni_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tortiglioni_exact"
@@ -11242,7 +11242,7 @@ offer_terms = ["\\bsataysås\\b", "\\bsataysas\\b", "\\bsatay\\b.*\\bcooking\\b.
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_sataysas_cooking_sauce"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sataysas_cooking_sauce."
+notes = "Registry-owned match bridge: bridge_sataysas_cooking_sauce."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sataysas_cooking_sauce"
@@ -11313,7 +11313,7 @@ offer_terms = ["\\bfettuccine\\b.*\\bfärsk\\b", "\\bfettuccine\\b.*\\bfarsk\\b"
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_fettuccine_farsk_longpasta"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_fettuccine_farsk_longpasta."
+notes = "Registry-owned match bridge: bridge_fettuccine_farsk_longpasta."
 
 [entries.language_payload.match_bridge]
 id = "bridge_fettuccine_farsk_longpasta"
@@ -11420,7 +11420,7 @@ offer_terms = ["\\bsweet\\s+chili(?:\\s+(?:sås|sas|sauce)|sås|sas)?\\b", "\\bt
 negative_guards = ["chilisås ! \\bkyckling\\b", "chilisås ! \\bosötad\\b", "chilisås ! \\bosotad\\b"]
 source_refs = ["bridge:match_bridges:bridge_sweet_chili_sauce"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sweet_chili_sauce."
+notes = "Registry-owned match bridge: bridge_sweet_chili_sauce."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sweet_chili_sauce"
@@ -11550,7 +11550,7 @@ offer_terms = ["\\bchilisås\\b.*\\boriginal\\b", "\\bchilisas\\b.*\\boriginal\\
 negative_guards = ["chilisås ! \\bgo-?chu-?jang\\b", "chilisås ! \\bgochujang\\b"]
 source_refs = ["bridge:match_bridges:bridge_chilisas_original_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_chilisas_original_exact."
+notes = "Registry-owned match bridge: bridge_chilisas_original_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_chilisas_original_exact"
@@ -11626,7 +11626,7 @@ offer_terms = ["\\bfärska?\\b.*\\bfikon\\b", "\\bfarska?\\b.*\\bfikon\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_farska_fikon_fresh"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_farska_fikon_fresh."
+notes = "Registry-owned match bridge: bridge_farska_fikon_fresh."
 
 [entries.language_payload.match_bridge]
 id = "bridge_farska_fikon_fresh"
@@ -11685,7 +11685,7 @@ offer_terms = ["\\bhavregurt\\b", "\\bplantgurt\\b", "\\byoghurt\\b.*\\bnaturell
 negative_guards = ["yoghurt ! \\bäpple\\b", "yoghurt ! \\bapple\\b", "yoghurt ! \\bbaked\\b", "yoghurt ! \\bpassion\\b", "yoghurt ! \\bmango\\b"]
 source_refs = ["bridge:match_bridges:bridge_vaxtbaserad_gurt_naturell"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vaxtbaserad_gurt_naturell."
+notes = "Registry-owned match bridge: bridge_vaxtbaserad_gurt_naturell."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vaxtbaserad_gurt_naturell"
@@ -11827,7 +11827,7 @@ offer_terms = ["\\bvitlökssmör\\b", "\\bvitlokssmor\\b", "\\bkryddsmör\\b.*\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vitlokssmor_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vitlokssmor_exact."
+notes = "Registry-owned match bridge: bridge_vitlokssmor_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vitlokssmor_exact"
@@ -11910,7 +11910,7 @@ offer_terms = ["\\bcantuccini\\b", "\\bcantucci\\b", "\\bbiscotti\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_cantuccini_biscotti_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_cantuccini_biscotti_exact."
+notes = "Registry-owned match bridge: bridge_cantuccini_biscotti_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_cantuccini_biscotti_exact"
@@ -11999,7 +11999,7 @@ offer_terms = ["\\bfitnessflingor\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_fitnessflingor_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_fitnessflingor_exact."
+notes = "Registry-owned match bridge: bridge_fitnessflingor_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_fitnessflingor_exact"
@@ -12040,7 +12040,7 @@ offer_terms = ["\\btonfisk\\b.*\\bfärsk\\b", "\\btonfisk\\b.*\\bfarsk\\b", "\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tonfisk_farsk"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tonfisk_farsk."
+notes = "Registry-owned match bridge: bridge_tonfisk_farsk."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tonfisk_farsk"
@@ -12099,7 +12099,7 @@ offer_terms = ["\\bromsås\\b", "\\bromsas\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_romsas_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_romsas_exact."
+notes = "Registry-owned match bridge: bridge_romsas_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_romsas_exact"
@@ -12158,7 +12158,7 @@ offer_terms = ["\\bkålhuvud\\b", "\\bkalhuvud\\b", "\\bvitkål\\b", "\\bvitkal\
 negative_guards = ["kålhuvud ! \\brödkål\\b", "kålhuvud ! \\brodkal\\b", "kålhuvud ! \\bspetskål\\b", "kålhuvud ! \\bspetskal\\b", "kålhuvud ! \\bstrimlad\\b", "kålhuvud ! \\bdelad\\b"]
 source_refs = ["bridge:match_bridges:bridge_kalhuvud_vitkal"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kalhuvud_vitkal."
+notes = "Registry-owned match bridge: bridge_kalhuvud_vitkal."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kalhuvud_vitkal"
@@ -12282,7 +12282,7 @@ offer_terms = ["\\bliquid\\s+smoke\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_liquid_smoke_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_liquid_smoke_exact."
+notes = "Registry-owned match bridge: bridge_liquid_smoke_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_liquid_smoke_exact"
@@ -12323,7 +12323,7 @@ offer_terms = ["\\btorsk(?:filé|file)?\\b", "\\bstillahavstorsk\\b", "\\bkolja(
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vit_fiskfile_white_fish"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vit_fiskfile_white_fish."
+notes = "Registry-owned match bridge: bridge_vit_fiskfile_white_fish."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vit_fiskfile_white_fish"
@@ -12466,7 +12466,7 @@ offer_terms = ["\\btortillachips\\b.*\\bost\\b", "\\btortillachipsost\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tortillachips_ost_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tortillachips_ost_exact."
+notes = "Registry-owned match bridge: bridge_tortillachips_ost_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tortillachips_ost_exact"
@@ -12525,7 +12525,7 @@ offer_terms = ["\\bgräslök\\b.*\\bkruka\\b", "\\bgraslok\\b.*\\bkruka\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_graslok_i_kruka"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_graslok_i_kruka."
+notes = "Registry-owned match bridge: bridge_graslok_i_kruka."
 
 [entries.language_payload.match_bridge]
 id = "bridge_graslok_i_kruka"
@@ -12584,7 +12584,7 @@ offer_terms = ["\\bnötter\\b", "\\bnotter\\b", "\\bvalnötter\\b", "\\bvalnotte
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_hackade_notter_generic"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_hackade_notter_generic."
+notes = "Registry-owned match bridge: bridge_hackade_notter_generic."
 
 [entries.language_payload.match_bridge]
 id = "bridge_hackade_notter_generic"
@@ -12763,7 +12763,7 @@ offer_terms = ["\\bbabyspenat\\b", "\\bspenat\\b", "\\bhackad\\b.*\\bspenat\\b.*
 negative_guards = ["spenat ! \\bstuvad\\b"]
 source_refs = ["bridge:match_bridges:bridge_farsk_bladspenat_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_farsk_bladspenat_family."
+notes = "Registry-owned match bridge: bridge_farsk_bladspenat_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_farsk_bladspenat_family"
@@ -12845,7 +12845,7 @@ offer_terms = ["\\bsalami\\s*-?\\s*chips\\b", "\\bsalamichips\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_salamichips_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_salamichips_exact."
+notes = "Registry-owned match bridge: bridge_salamichips_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_salamichips_exact"
@@ -12904,7 +12904,7 @@ offer_terms = ["\\bkantareller\\b.*\\bvatten\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kantareller_burk_i_vatten"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kantareller_burk_i_vatten."
+notes = "Registry-owned match bridge: bridge_kantareller_burk_i_vatten."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kantareller_burk_i_vatten"
@@ -12951,7 +12951,7 @@ offer_terms = ["\\blammkotlett(?:er)?\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_lammkotlett_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_lammkotlett_exact."
+notes = "Registry-owned match bridge: bridge_lammkotlett_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_lammkotlett_exact"
@@ -12992,7 +12992,7 @@ offer_terms = ["\\brimmat\\b.*\\bfläsk\\b", "\\brimmat\\b.*\\bflask\\b", "\\bst
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_rimmat_flask_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_rimmat_flask_exact."
+notes = "Registry-owned match bridge: bridge_rimmat_flask_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_rimmat_flask_exact"
@@ -13075,7 +13075,7 @@ offer_terms = ["\\btrattkantarell(?:er)?\\b"]
 negative_guards = ["trattkantarell ! \\btorkad"]
 source_refs = ["bridge:match_bridges:bridge_farska_trattkantareller_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_farska_trattkantareller_exact."
+notes = "Registry-owned match bridge: bridge_farska_trattkantareller_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_farska_trattkantareller_exact"
@@ -13133,7 +13133,7 @@ offer_terms = ["\\bpaprika\\b"]
 negative_guards = ["paprika ! \\bost\\b", "paprika ! \\bolja\\b"]
 source_refs = ["bridge:match_bridges:bridge_paprika_exact_not_cheese"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_paprika_exact_not_cheese."
+notes = "Registry-owned match bridge: bridge_paprika_exact_not_cheese."
 
 [entries.language_payload.match_bridge]
 id = "bridge_paprika_exact_not_cheese"
@@ -13191,7 +13191,7 @@ offer_terms = ["\\bgrötris\\b", "\\bgrotris\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_grotris_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_grotris_exact."
+notes = "Registry-owned match bridge: bridge_grotris_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_grotris_exact"
@@ -13238,7 +13238,7 @@ offer_terms = ["\\bmakrillfiléer\\b", "\\bmakrillfileer\\b"]
 negative_guards = ["makrillfileer ! \\bcitrontimjan\\b", "makrillfileer ! \\bportugisiskt\\b"]
 source_refs = ["bridge:match_bridges:bridge_makrillfileer_plain"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_makrillfileer_plain."
+notes = "Registry-owned match bridge: bridge_makrillfileer_plain."
 
 [entries.language_payload.match_bridge]
 id = "bridge_makrillfileer_plain"
@@ -13314,7 +13314,7 @@ offer_terms = ["\\bchiafrön\\b", "\\bchiafron\\b", "\\bbockhornsklöver\\b.*\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_generic_fron_seeds"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_generic_fron_seeds."
+notes = "Registry-owned match bridge: bridge_generic_fron_seeds."
 
 [entries.language_payload.match_bridge]
 id = "bridge_generic_fron_seeds"
@@ -13397,7 +13397,7 @@ offer_terms = ["\\bolivolja\\b.*\\btoscana\\b", "\\btoscana\\b.*\\bolivolja\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_olivolja_toscana_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_olivolja_toscana_exact."
+notes = "Registry-owned match bridge: bridge_olivolja_toscana_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_olivolja_toscana_exact"
@@ -13456,7 +13456,7 @@ offer_terms = ["\\btortellini\\b.*\\bricotta\\s*/\\s*spenat\\b", "\\bricotta\\s*
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tortellini_ricotta_spenat_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tortellini_ricotta_spenat_exact."
+notes = "Registry-owned match bridge: bridge_tortellini_ricotta_spenat_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tortellini_ricotta_spenat_exact"
@@ -13515,7 +13515,7 @@ offer_terms = ["\\bmjukost\\b.*\\bhot\\b.*\\bjalape(?:n|ñ)o\\b", "\\bhot\\b.*\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_mjukost_hot_jalapeno_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_mjukost_hot_jalapeno_exact."
+notes = "Registry-owned match bridge: bridge_mjukost_hot_jalapeno_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_mjukost_hot_jalapeno_exact"
@@ -13574,7 +13574,7 @@ offer_terms = ["\\bteriyakisås\\b", "\\bteriyakisas\\b", "\\bteriyaki\\s+sauce\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_teriyakisas_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_teriyakisas_exact."
+notes = "Registry-owned match bridge: bridge_teriyakisas_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_teriyakisas_exact"
@@ -13681,7 +13681,7 @@ offer_terms = ["\\bcantucci(?:ni)?\\b.*\\bglutenfri\\b", "\\bglutenfri\\b.*\\bca
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_glutenfri_cantucci_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_glutenfri_cantucci_exact."
+notes = "Registry-owned match bridge: bridge_glutenfri_cantucci_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_glutenfri_cantucci_exact"
@@ -13740,7 +13740,7 @@ offer_terms = ["\\bgari\\b", "\\bkålrotsgari\\b", "\\bkalrotsgari\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_gari_kalrotsgari_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_gari_kalrotsgari_exact."
+notes = "Registry-owned match bridge: bridge_gari_kalrotsgari_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_gari_kalrotsgari_exact"
@@ -13829,7 +13829,7 @@ offer_terms = ["\\bthaibasilika\\b", "\\bkoriander\\b.*\\bkruka\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_shisoblad_herb_alternatives"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_shisoblad_herb_alternatives."
+notes = "Registry-owned match bridge: bridge_shisoblad_herb_alternatives."
 
 [entries.language_payload.match_bridge]
 id = "bridge_shisoblad_herb_alternatives"
@@ -13876,7 +13876,7 @@ offer_terms = ["\\bskinkschnitzel\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_skinkschnitzel_raw_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_skinkschnitzel_raw_exact."
+notes = "Registry-owned match bridge: bridge_skinkschnitzel_raw_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_skinkschnitzel_raw_exact"
@@ -13917,7 +13917,7 @@ offer_terms = ["\\bgo-?chu-?jang\\b", "\\bgochujang\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_gochujang_chilipasta_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_gochujang_chilipasta_exact."
+notes = "Registry-owned match bridge: bridge_gochujang_chilipasta_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_gochujang_chilipasta_exact"
@@ -14000,7 +14000,7 @@ offer_terms = ["\\bfärskkorv(?:ar)?\\b", "\\bfarskkorv(?:ar)?\\b", "\\bfärsk\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_farskkorv_salsiccia_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_farskkorv_salsiccia_family."
+notes = "Registry-owned match bridge: bridge_farskkorv_salsiccia_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_farskkorv_salsiccia_family"
@@ -14179,7 +14179,7 @@ offer_terms = ["\\bgröna\\b.*\\boliver\\b", "\\bgrona\\b.*\\boliver\\b", "\\ble
 negative_guards = ["oliver ! \\bfyllda\\b", "oliver ! \\bfärskostfyllda\\b", "oliver ! \\bfarskostfyllda\\b", "oliver ! \\bpimiento\\b"]
 source_refs = ["bridge:match_bridges:bridge_oliver_plain_not_stuffed"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_oliver_plain_not_stuffed."
+notes = "Registry-owned match bridge: bridge_oliver_plain_not_stuffed."
 
 [entries.language_payload.match_bridge]
 id = "bridge_oliver_plain_not_stuffed"
@@ -14279,7 +14279,7 @@ offer_terms = ["\\bvegansk\\b", "\\bviolife\\b", "\\bgreenvie\\b"]
 negative_guards = ["veganost ! \\bnudlar\\b"]
 source_refs = ["bridge:match_bridges:bridge_veganost_plant_cheese_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_veganost_plant_cheese_family."
+notes = "Registry-owned match bridge: bridge_veganost_plant_cheese_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_veganost_plant_cheese_family"
@@ -14397,7 +14397,7 @@ offer_terms = ["\\bvegansk\\b.*\\bviolife\\b", "\\bviolife\\b.*\\bvegansk\\b"]
 negative_guards = ["violife_cheddar ! \\bnudlar\\b"]
 source_refs = ["bridge:match_bridges:bridge_violife_vegan_cheddar_variant"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_violife_vegan_cheddar_variant."
+notes = "Registry-owned match bridge: bridge_violife_vegan_cheddar_variant."
 
 [entries.language_payload.match_bridge]
 id = "bridge_violife_vegan_cheddar_variant"
@@ -14491,7 +14491,7 @@ offer_terms = ["\\brostbiff\\b.*\\binnanlår\\b", "\\brostbiff\\b.*\\binnanlar\\
 negative_guards = ["rostbiff ! \\bpålägg\\b", "rostbiff ! \\bpalagg\\b", "rostbiff ! \\bdeliskivor\\b"]
 source_refs = ["bridge:match_bridges:bridge_rostbiff_raw_cut_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_rostbiff_raw_cut_exact."
+notes = "Registry-owned match bridge: bridge_rostbiff_raw_cut_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_rostbiff_raw_cut_exact"
@@ -14573,7 +14573,7 @@ offer_terms = ["\\bkoriander\\b.*\\bmalen\\b", "\\bmalen\\b.*\\bkoriander\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_koriander_malen_spice"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_koriander_malen_spice."
+notes = "Registry-owned match bridge: bridge_koriander_malen_spice."
 
 [entries.language_payload.match_bridge]
 id = "bridge_koriander_malen_spice"
@@ -14632,7 +14632,7 @@ offer_terms = ["\\bkoriander\\b.*\\bfryst\\b", "\\bfryst\\b.*\\bkoriander\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_koriander_fryst_herb"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_koriander_fryst_herb."
+notes = "Registry-owned match bridge: bridge_koriander_fryst_herb."
 
 [entries.language_payload.match_bridge]
 id = "bridge_koriander_fryst_herb"
@@ -14691,7 +14691,7 @@ offer_terms = ["\\bapelsin\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_apelsinskal_fresh_fruit"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_apelsinskal_fresh_fruit."
+notes = "Registry-owned match bridge: bridge_apelsinskal_fresh_fruit."
 
 [entries.language_payload.match_bridge]
 id = "bridge_apelsinskal_fresh_fruit"
@@ -14732,7 +14732,7 @@ offer_terms = ["\\bapelsinskal\\b.*\\bkanderat\\b", "\\bkanderat\\b.*\\bapelsins
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kanderade_citrusskal_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kanderade_citrusskal_exact."
+notes = "Registry-owned match bridge: bridge_kanderade_citrusskal_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kanderade_citrusskal_exact"
@@ -14791,7 +14791,7 @@ offer_terms = ["\\bvetemjöl\\b.*\\bspecial\\b", "\\bvetemjol\\b.*\\bspecial\\b"
 negative_guards = ["vetemjölspecial ! \\bfullkorn\\b"]
 source_refs = ["bridge:match_bridges:bridge_vetemjol_special_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vetemjol_special_exact."
+notes = "Registry-owned match bridge: bridge_vetemjol_special_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vetemjol_special_exact"
@@ -14861,7 +14861,7 @@ offer_terms = ["\\bvetemjöl\\b.*\\bfullkorn\\b", "\\bvetemjol\\b.*\\bfullkorn\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vetemjol_fullkorn_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vetemjol_fullkorn_exact."
+notes = "Registry-owned match bridge: bridge_vetemjol_fullkorn_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vetemjol_fullkorn_exact"
@@ -14920,7 +14920,7 @@ offer_terms = ["\\bpeppar\\b.*\\bröd\\b", "\\bpeppar\\b.*\\brod\\b", "\\bröd\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_fresh_red_chilipeppar_produce"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_fresh_red_chilipeppar_produce."
+notes = "Registry-owned match bridge: bridge_fresh_red_chilipeppar_produce."
 
 [entries.language_payload.match_bridge]
 id = "bridge_fresh_red_chilipeppar_produce"
@@ -15075,7 +15075,7 @@ offer_terms = ["\\bchilipeppar\\b.*\\bmalen\\b", "\\bmalen\\b.*\\bchilipeppar\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_chilipeppar_malen_spice"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_chilipeppar_malen_spice."
+notes = "Registry-owned match bridge: bridge_chilipeppar_malen_spice."
 
 [entries.language_payload.match_bridge]
 id = "bridge_chilipeppar_malen_spice"
@@ -15134,7 +15134,7 @@ offer_terms = ["\\bsambal\\b.*\\boelek\\b", "\\boelek\\b.*\\bsambal\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_sambal_oelek_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sambal_oelek_exact."
+notes = "Registry-owned match bridge: bridge_sambal_oelek_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sambal_oelek_exact"
@@ -15193,7 +15193,7 @@ offer_terms = ["\\btorskfilé\\b.*\\bfryst\\b", "\\btorskfile\\b.*\\bfryst\\b", 
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_generic_frozen_fiskfile"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_generic_frozen_fiskfile."
+notes = "Registry-owned match bridge: bridge_generic_frozen_fiskfile."
 
 [entries.language_payload.match_bridge]
 id = "bridge_generic_frozen_fiskfile"
@@ -15300,7 +15300,7 @@ offer_terms = ["\\bmaccaronetti\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_maccaronetti_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_maccaronetti_exact."
+notes = "Registry-owned match bridge: bridge_maccaronetti_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_maccaronetti_exact"
@@ -15341,7 +15341,7 @@ offer_terms = ["\\blaxfilé\\b", "\\blaxfile\\b"]
 negative_guards = ["fiskgrytbitar ! \\bsushi\\b"]
 source_refs = ["bridge:match_bridges:bridge_fiskgrytbitar_laxfile"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_fiskgrytbitar_laxfile."
+notes = "Registry-owned match bridge: bridge_fiskgrytbitar_laxfile."
 
 [entries.language_payload.match_bridge]
 id = "bridge_fiskgrytbitar_laxfile"
@@ -15399,7 +15399,7 @@ offer_terms = ["\\bsmör\\b", "\\bsmor\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_smor_plain_common"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_smor_plain_common."
+notes = "Registry-owned match bridge: bridge_smor_plain_common."
 
 [entries.language_payload.match_bridge]
 id = "bridge_smor_plain_common"
@@ -15458,7 +15458,7 @@ offer_terms = ["\\bfärskost\\b.*\\bphiladelphia\\b", "\\bfarskost\\b.*\\bphilad
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_philadelphia_farskost"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_philadelphia_farskost."
+notes = "Registry-owned match bridge: bridge_philadelphia_farskost."
 
 [entries.language_payload.match_bridge]
 id = "bridge_philadelphia_farskost"
@@ -15505,7 +15505,7 @@ offer_terms = ["\\bmandelpotatischips\\b", "\\bpotatischips\\b", "\\blantchips\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_potatischips_lantchips_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_potatischips_lantchips_family."
+notes = "Registry-owned match bridge: bridge_potatischips_lantchips_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_potatischips_lantchips_family"
@@ -15594,7 +15594,7 @@ offer_terms = ["\\btranbärsjuice\\b", "\\btranbarsjuice\\b", "\\bsvartvinbärsj
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_barjuice_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_barjuice_exact."
+notes = "Registry-owned match bridge: bridge_barjuice_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_barjuice_exact"
@@ -15725,7 +15725,7 @@ offer_terms = ["\\bmatlagningsbas\\b.*\\bhavre\\b", "\\bhavregrädde\\b", "\\bha
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_havrebaserad_matlagning"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_havrebaserad_matlagning."
+notes = "Registry-owned match bridge: bridge_havrebaserad_matlagning."
 
 [entries.language_payload.match_bridge]
 id = "bridge_havrebaserad_matlagning"
@@ -15820,7 +15820,7 @@ offer_terms = ["\\bjapansk\\b.*\\bsoja\\b", "\\bsoja\\b"]
 negative_guards = ["soja ! \\balpro\\b", "soja ! \\bcuisine\\b", "soja ! \\bmatlagningsgrädde\\b", "soja ! \\bmatlagningsgradde\\b"]
 source_refs = ["bridge:match_bridges:bridge_kinesisk_japansk_soja"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kinesisk_japansk_soja."
+notes = "Registry-owned match bridge: bridge_kinesisk_japansk_soja."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kinesisk_japansk_soja"
@@ -15896,7 +15896,7 @@ offer_terms = ["\\btapenade\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tapenade_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tapenade_exact."
+notes = "Registry-owned match bridge: bridge_tapenade_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tapenade_exact"
@@ -15937,7 +15937,7 @@ offer_terms = ["\\bsriracha\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_sriracha_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sriracha_exact."
+notes = "Registry-owned match bridge: bridge_sriracha_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sriracha_exact"
@@ -15978,7 +15978,7 @@ offer_terms = ["\\bwoksås\\b.*\\bteriyaki\\b", "\\bwoksas\\b.*\\bteriyaki\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_woksas_teriyaki_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_woksas_teriyaki_exact."
+notes = "Registry-owned match bridge: bridge_woksas_teriyaki_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_woksas_teriyaki_exact"
@@ -16037,7 +16037,7 @@ offer_terms = ["\\bananas\\b.*\\bkrossad\\b", "\\bkrossad\\b.*\\bananas\\b", "\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_ananas_krossad_or_fryst"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_ananas_krossad_or_fryst."
+notes = "Registry-owned match bridge: bridge_ananas_krossad_or_fryst."
 
 [entries.language_payload.match_bridge]
 id = "bridge_ananas_krossad_or_fryst"
@@ -16120,7 +16120,7 @@ offer_terms = ["\\bpiment[oó]n\\b.*\\bpicante\\b", "\\bpicante\\b.*\\bpiment[o�
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_pimenton_picante_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_pimenton_picante_exact."
+notes = "Registry-owned match bridge: bridge_pimenton_picante_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_pimenton_picante_exact"
@@ -16179,7 +16179,7 @@ offer_terms = ["\\bchampinjon(?:er)?\\b", "\\bskogschampinjon(?:er)?\\b"]
 negative_guards = ["champinjoner ! \\bskivade?\\b", "champinjoner ! \\bhela\\b", "champinjoner ! \\btetra\\b", "champinjoner ! \\binlagd"]
 source_refs = ["bridge:match_bridges:bridge_champinjoner_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_champinjoner_exact."
+notes = "Registry-owned match bridge: bridge_champinjoner_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_champinjoner_exact"
@@ -16267,7 +16267,7 @@ offer_terms = ["\\bvarmrökt\\b.*\\blax\\b", "\\bvarmrokt\\b.*\\blax\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_varmrokt_lax_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_varmrokt_lax_exact."
+notes = "Registry-owned match bridge: bridge_varmrokt_lax_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_varmrokt_lax_exact"
@@ -16326,7 +16326,7 @@ offer_terms = ["\\bcurrypasta\\b.*\\bröd\\b", "\\bcurrypasta\\b.*\\brod\\b", "\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_rodcurry_paste_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_rodcurry_paste_exact."
+notes = "Registry-owned match bridge: bridge_rodcurry_paste_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_rodcurry_paste_exact"
@@ -16415,7 +16415,7 @@ offer_terms = ["\\bcharkbricka\\b", "\\bantipastitallrik\\b", "\\btapastallrik\\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_charkbricka_platter"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_charkbricka_platter."
+notes = "Registry-owned match bridge: bridge_charkbricka_platter."
 
 [entries.language_payload.match_bridge]
 id = "bridge_charkbricka_platter"
@@ -16474,7 +16474,7 @@ offer_terms = ["\\byoghurt\\b", "\\byogurt\\b"]
 negative_guards = ["yoghurt ! \\bfilmjölk\\b", "yoghurt ! \\bfilmjolk\\b"]
 source_refs = ["bridge:match_bridges:bridge_yoghurt_alt_naturell"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_yoghurt_alt_naturell."
+notes = "Registry-owned match bridge: bridge_yoghurt_alt_naturell."
 
 [entries.language_payload.match_bridge]
 id = "bridge_yoghurt_alt_naturell"
@@ -16550,7 +16550,7 @@ offer_terms = ["\\bkardemummakärnor\\b", "\\bkardemummakarnor\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kardemummakarnor_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kardemummakarnor_exact."
+notes = "Registry-owned match bridge: bridge_kardemummakarnor_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kardemummakarnor_exact"
@@ -16609,7 +16609,7 @@ offer_terms = ["\\bhavregryn\\b.*\\bglutenfri\\b", "\\bglutenfri\\b.*\\bhavregry
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_glutenfri_havregryn_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_glutenfri_havregryn_exact."
+notes = "Registry-owned match bridge: bridge_glutenfri_havregryn_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_glutenfri_havregryn_exact"
@@ -16698,7 +16698,7 @@ offer_terms = ["\\bvegoburgare\\b", "\\bhalloumiburgare\\b", "\\bgrillostburgare
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_veg_hamburgare_vegoburgare"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_veg_hamburgare_vegoburgare."
+notes = "Registry-owned match bridge: bridge_veg_hamburgare_vegoburgare."
 
 [entries.language_payload.match_bridge]
 id = "bridge_veg_hamburgare_vegoburgare"
@@ -16769,7 +16769,7 @@ offer_terms = ["\\bsalami\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_salami_palagg_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_salami_palagg_exact."
+notes = "Registry-owned match bridge: bridge_salami_palagg_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_salami_palagg_exact"
@@ -16816,7 +16816,7 @@ offer_terms = ["\\bsojabönor\\b", "\\bsojabonor\\b"]
 negative_guards = ["sojabönor ! \\btorkade\\b", "sojabönor ! \\brostade\\b"]
 source_refs = ["bridge:match_bridges:bridge_sojabonor_generic_processed_allowance"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sojabonor_generic_processed_allowance."
+notes = "Registry-owned match bridge: bridge_sojabonor_generic_processed_allowance."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sojabonor_generic_processed_allowance"
@@ -16892,7 +16892,7 @@ offer_terms = ["\\bjäst\\b.*\\bmatbröd\\b", "\\bjäst\\b.*\\bmatbrod\\b", "\\b
 negative_guards = ["jäst ! \\bsöta\\s+degar\\b", "jäst ! \\bsota\\s+degar\\b"]
 source_refs = ["bridge:match_bridges:bridge_matbrodsjast_generic_route_sibling"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_matbrodsjast_generic_route_sibling."
+notes = "Registry-owned match bridge: bridge_matbrodsjast_generic_route_sibling."
 
 [entries.language_payload.match_bridge]
 id = "bridge_matbrodsjast_generic_route_sibling"
@@ -17016,7 +17016,7 @@ offer_terms = ["\\bkalkon\\b.*\\brökt\\b", "\\bkalkon\\b.*\\brokt\\b", "\\bkalk
 negative_guards = ["kalkon ! \\bbröstfilé\\b", "kalkon ! \\bbrostfile\\b", "kalkon ! \\bfilé\\b", "kalkon ! \\bfile\\b"]
 source_refs = ["bridge:match_bridges:bridge_kalkon_palagg_deli_slice"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kalkon_palagg_deli_slice."
+notes = "Registry-owned match bridge: bridge_kalkon_palagg_deli_slice."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kalkon_palagg_deli_slice"
@@ -17128,7 +17128,7 @@ offer_terms = ["\\bkikärtor\\b", "\\bkikartor\\b"]
 negative_guards = ["kikärtor ! \\btorkade\\b", "kikärtor ! \\btorra\\b", "kikärtor ! \\bfrysta\\b", "kikärtor ! \\brostade\\b", "kikärtor ! \\bhavssalt\\b"]
 source_refs = ["bridge:match_bridges:bridge_kikartor_ready_packaged_guard"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kikartor_ready_packaged_guard."
+notes = "Registry-owned match bridge: bridge_kikartor_ready_packaged_guard."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kikartor_ready_packaged_guard"
@@ -17222,7 +17222,7 @@ offer_terms = ["\\bnötfärs\\b", "\\bnotfars\\b", "\\bkycklingfärs\\b", "\\bky
 negative_guards = ["färs ! \\bsalsiccia", "färs ! \\bfiskfärs\\b", "färs ! \\bfiskfars\\b", "färs ! \\blaxfärs\\b", "färs ! \\blaxfars\\b", "färs ! \\bälgfärs\\b", "färs ! \\balgfars\\b", "färs ! \\bviltfärs\\b", "färs ! \\bviltfars\\b", "färs ! \\bhamburger"]
 source_refs = ["bridge:match_bridges:bridge_generic_fars_practical_scope"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_generic_fars_practical_scope."
+notes = "Registry-owned match bridge: bridge_generic_fars_practical_scope."
 
 [entries.language_payload.match_bridge]
 id = "bridge_generic_fars_practical_scope"
@@ -17898,7 +17898,7 @@ offer_terms = ["\\blammkorv\\b", "\\bchorizo\\b", "\\bkabanoss\\b", "\\bbratwurs
 negative_guards = ["korv ! \\blammracks\\b"]
 source_refs = ["bridge:match_bridges:bridge_korvar_garna_lamm_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_korvar_garna_lamm_family."
+notes = "Registry-owned match bridge: bridge_korvar_garna_lamm_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_korvar_garna_lamm_family"
@@ -18004,7 +18004,7 @@ offer_terms = ["\\bsillfilé\\b", "\\bsillfile\\b", "\\bströmmingsfileer\\b", "
 negative_guards = ["strömmingsfileer ! \\bmatjes", "strömmingsfileer ! \\binlagd"]
 source_refs = ["bridge:match_bridges:bridge_sill_stromming_file_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sill_stromming_file_family."
+notes = "Registry-owned match bridge: bridge_sill_stromming_file_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sill_stromming_file_family"
@@ -18152,7 +18152,7 @@ offer_terms = ["\\brostbiff\\b.*\\bpålägg\\b", "\\brostbiff\\b.*\\bpalagg\\b",
 negative_guards = ["rostbiff ! \\bfärsk\\b", "rostbiff ! \\bfarsk\\b", "rostbiff ! \\bbit\\b", "rostbiff ! \\binnanlår\\b", "rostbiff ! \\binnanlar\\b"]
 source_refs = ["bridge:match_bridges:bridge_rostbiff_palagg_deli_slice"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_rostbiff_palagg_deli_slice."
+notes = "Registry-owned match bridge: bridge_rostbiff_palagg_deli_slice."
 
 [entries.language_payload.match_bridge]
 id = "bridge_rostbiff_palagg_deli_slice"
@@ -18258,7 +18258,7 @@ offer_terms = ["\\bsallat\\b", "\\bplocksallat\\b", "\\bkruksallat\\b", "\\bkris
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_plocksallat_sallat_products"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_plocksallat_sallat_products."
+notes = "Registry-owned match bridge: bridge_plocksallat_sallat_products."
 
 [entries.language_payload.match_bridge]
 id = "bridge_plocksallat_sallat_products"
@@ -18317,7 +18317,7 @@ offer_terms = ["\\bsalladsblad\\b", "\\bsallat\\b", "\\bkruksallat\\b", "\\bkris
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_salladsblad_leafy_salad_products"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_salladsblad_leafy_salad_products."
+notes = "Registry-owned match bridge: bridge_salladsblad_leafy_salad_products."
 
 [entries.language_payload.match_bridge]
 id = "bridge_salladsblad_leafy_salad_products"
@@ -18418,7 +18418,7 @@ offer_terms = ["\\bkex\\b", "\\bdigestivekex\\b", "\\baperitivokex\\b", "\\bmari
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_generic_kex_compound_products"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_generic_kex_compound_products."
+notes = "Registry-owned match bridge: bridge_generic_kex_compound_products."
 
 [entries.language_payload.match_bridge]
 id = "bridge_generic_kex_compound_products"
@@ -18513,7 +18513,7 @@ offer_terms = ["\\btacokrydda\\b", "\\btaco\\b.*\\bkryddmix\\b", "\\bkryddmix\\b
 negative_guards = ["kryddmix ! \\btikka\\b", "kryddmix ! \\btacoskal\\b"]
 source_refs = ["bridge:match_bridges:bridge_tacokrydda_spice_mix"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tacokrydda_spice_mix."
+notes = "Registry-owned match bridge: bridge_tacokrydda_spice_mix."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tacokrydda_spice_mix"
@@ -18583,7 +18583,7 @@ offer_terms = ["\\btomatsås\\b", "\\btomatsas\\b", "\\bpastasås\\b.*\\btomats�
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tomatsas_pastasas_products"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tomatsas_pastasas_products."
+notes = "Registry-owned match bridge: bridge_tomatsas_pastasas_products."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tomatsas_pastasas_products"
@@ -18666,7 +18666,7 @@ offer_terms = ["\\blöjrom\\b", "\\blojrom\\b", "\\bstenbitsrom\\b", "\\bforellr
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_fish_roe_rom_products"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_fish_roe_rom_products."
+notes = "Registry-owned match bridge: bridge_fish_roe_rom_products."
 
 [entries.language_payload.match_bridge]
 id = "bridge_fish_roe_rom_products"
@@ -18731,7 +18731,7 @@ offer_terms = ["\\bdurumvete\\b", "\\bdurumvetemjöl\\b", "\\bdurumvetemjol\\b",
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_durumvete_flour_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_durumvete_flour_family."
+notes = "Registry-owned match bridge: bridge_durumvete_flour_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_durumvete_flour_family"
@@ -18856,7 +18856,7 @@ offer_terms = ["\\brisottoris\\b", "\\brisotto\\b", "\\barborioris\\b", "\\barbo
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_risotto_rice_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_risotto_rice_family."
+notes = "Registry-owned match bridge: bridge_risotto_rice_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_risotto_rice_family"
@@ -18963,7 +18963,7 @@ offer_terms = ["\\bfläderdryck\\b", "\\bfladerdryck\\b", "\\bfläderblomsdryck\
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_fladerdryck_elderflower"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_fladerdryck_elderflower."
+notes = "Registry-owned match bridge: bridge_fladerdryck_elderflower."
 
 [entries.language_payload.match_bridge]
 id = "bridge_fladerdryck_elderflower"
@@ -19094,7 +19094,7 @@ offer_terms = ["\\brödspätta\\b", "\\brodspatta\\b", "\\brödspättafilé\\b",
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_rodspatta_spattafile"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_rodspatta_spattafile."
+notes = "Registry-owned match bridge: bridge_rodspatta_spattafile."
 
 [entries.language_payload.match_bridge]
 id = "bridge_rodspatta_spattafile"
@@ -19225,7 +19225,7 @@ offer_terms = ["\\btomatsoppa\\b", "\\btomatsoppor\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tomatsoppa_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tomatsoppa_exact."
+notes = "Registry-owned match bridge: bridge_tomatsoppa_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tomatsoppa_exact"
@@ -19284,7 +19284,7 @@ offer_terms = ["\\bchipotle\\s+paste\\b", "\\bchipotlepasta\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_chipotlepasta_paste_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_chipotlepasta_paste_exact."
+notes = "Registry-owned match bridge: bridge_chipotlepasta_paste_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_chipotlepasta_paste_exact"
@@ -19331,7 +19331,7 @@ offer_terms = ["\\bboveteflingor\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_boveteflingor_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_boveteflingor_exact."
+notes = "Registry-owned match bridge: bridge_boveteflingor_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_boveteflingor_exact"
@@ -19372,7 +19372,7 @@ offer_terms = ["\\bmynta\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_mynta_grouped_herb_leaf"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_mynta_grouped_herb_leaf."
+notes = "Registry-owned match bridge: bridge_mynta_grouped_herb_leaf."
 
 [entries.language_payload.match_bridge]
 id = "bridge_mynta_grouped_herb_leaf"
@@ -19413,7 +19413,7 @@ offer_terms = ["\\bansjovis\\b", "\\bansjovisfiléer\\b", "\\bansjovisfileer\\b"
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_ansjovis_fileer_grouping"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_ansjovis_fileer_grouping."
+notes = "Registry-owned match bridge: bridge_ansjovis_fileer_grouping."
 
 [entries.language_payload.match_bridge]
 id = "bridge_ansjovis_fileer_grouping"
@@ -19484,7 +19484,7 @@ offer_terms = ["\\btomatsås\\b", "\\btomatsas\\b", "\\bpinsasås\\b", "\\bpinsa
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tomatsas_pinsasas_alternative_line"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tomatsas_pinsasas_alternative_line."
+notes = "Registry-owned match bridge: bridge_tomatsas_pinsasas_alternative_line."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tomatsas_pinsasas_alternative_line"
@@ -19615,7 +19615,7 @@ offer_terms = ["\\bvitkål\\b", "\\bvitkal\\b", "\\brödkål\\b", "\\brodkal\\b"
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_bladkal_cabbage_alternatives"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_bladkal_cabbage_alternatives."
+notes = "Registry-owned match bridge: bridge_bladkal_cabbage_alternatives."
 
 [entries.language_payload.match_bridge]
 id = "bridge_bladkal_cabbage_alternatives"
@@ -19722,7 +19722,7 @@ offer_terms = ["\\blaxfilé\\b", "\\blaxfile\\b", "\\blax\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_lax_laxfile_raw"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_lax_laxfile_raw."
+notes = "Registry-owned match bridge: bridge_lax_laxfile_raw."
 
 [entries.language_payload.match_bridge]
 id = "bridge_lax_laxfile_raw"
@@ -19775,7 +19775,7 @@ offer_terms = ["\\btomat\\b", "\\btomater\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tomat_fresh_or_canned_alternative"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tomat_fresh_or_canned_alternative."
+notes = "Registry-owned match bridge: bridge_tomat_fresh_or_canned_alternative."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tomat_fresh_or_canned_alternative"
@@ -19822,7 +19822,7 @@ offer_terms = ["\\bgemsallad\\b", "\\bbabygemsallad\\b", "\\bhjärtsallad\\b", "
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_gemsallad_hjartsallad_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_gemsallad_hjartsallad_family."
+notes = "Registry-owned match bridge: bridge_gemsallad_hjartsallad_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_gemsallad_hjartsallad_family"
@@ -19881,7 +19881,7 @@ offer_terms = ["\\bsylt\\b", "\\blingonsylt\\b", "\\bhallonsylt\\b", "\\bdrottni
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_generic_sylt_berry_jams"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_generic_sylt_berry_jams."
+notes = "Registry-owned match bridge: bridge_generic_sylt_berry_jams."
 
 [entries.language_payload.match_bridge]
 id = "bridge_generic_sylt_berry_jams"
@@ -19940,7 +19940,7 @@ offer_terms = ["\\bvaniljsås\\b", "\\bvaniljsas\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vaniljsas_alternative_line"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vaniljsas_alternative_line."
+notes = "Registry-owned match bridge: bridge_vaniljsas_alternative_line."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vaniljsas_alternative_line"
@@ -19999,7 +19999,7 @@ offer_terms = ["\\bkvibille\\b.*\\bädel\\b", "\\bkvibille\\b.*\\badel\\b", "\\b
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kvibille_adel_blue_cheese"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kvibille_adel_blue_cheese."
+notes = "Registry-owned match bridge: bridge_kvibille_adel_blue_cheese."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kvibille_adel_blue_cheese"
@@ -20106,7 +20106,7 @@ offer_terms = ["\\bkorma\\b", "\\bkormasås\\b", "\\bkormasas\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kormasas_sauce_products"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kormasas_sauce_products."
+notes = "Registry-owned match bridge: bridge_kormasas_sauce_products."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kormasas_sauce_products"
@@ -20177,7 +20177,7 @@ offer_terms = ["\\bcouscous\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_couscous_plain"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_couscous_plain."
+notes = "Registry-owned match bridge: bridge_couscous_plain."
 
 [entries.language_payload.match_bridge]
 id = "bridge_couscous_plain"
@@ -20218,7 +20218,7 @@ offer_terms = ["\\bpesto\\b.*\\bgrön\\b", "\\bpesto\\b.*\\bgron\\b", "\\bpesto\
 negative_guards = ["pesto ! \\bpesto\\b.*\\bröd\\b", "pesto ! \\bpesto\\b.*\\brod\\b", "pesto ! \\bpesto\\s+rosso\\b"]
 source_refs = ["bridge:match_bridges:bridge_pesto_gron"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_pesto_gron."
+notes = "Registry-owned match bridge: bridge_pesto_gron."
 
 [entries.language_payload.match_bridge]
 id = "bridge_pesto_gron"
@@ -20294,7 +20294,7 @@ offer_terms = ["\\bkörsbär\\b.*\\bfryst\\b", "\\bkorsbar\\b.*\\bfryst\\b", "\\
 negative_guards = ["körsbär ! \\bkörsbärstomat", "körsbär ! \\bkorsbarstomat", "körsbär ! \\bmarmelad\\b", "körsbär ! \\bmaraschino"]
 source_refs = ["bridge:match_bridges:bridge_korsbar_frozen_fruit"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_korsbar_frozen_fruit."
+notes = "Registry-owned match bridge: bridge_korsbar_frozen_fruit."
 
 [entries.language_payload.match_bridge]
 id = "bridge_korsbar_frozen_fruit"
@@ -20406,7 +20406,7 @@ offer_terms = ["\\bmajs\\b.*\\bförkokt\\b", "\\bmajs\\b.*\\bforkokt\\b"]
 negative_guards = ["förkoktmajskolv ! \\bfryst\\b"]
 source_refs = ["bridge:match_bridges:bridge_forkoktmajskolv_prepared_route"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_forkoktmajskolv_prepared_route."
+notes = "Registry-owned match bridge: bridge_forkoktmajskolv_prepared_route."
 
 [entries.language_payload.match_bridge]
 id = "bridge_forkoktmajskolv_prepared_route"
@@ -20476,7 +20476,7 @@ offer_terms = ["\\bströsocker\\b", "\\bstrosocker\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_strosocker_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_strosocker_exact."
+notes = "Registry-owned match bridge: bridge_strosocker_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_strosocker_exact"
@@ -20535,7 +20535,7 @@ offer_terms = ["\\bäppelcider\\b", "\\bapple\\s+cider\\b"]
 negative_guards = ["cider ! \\bpäron", "cider ! \\bparon"]
 source_refs = ["bridge:match_bridges:bridge_apple_cider_flavor_parent"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_apple_cider_flavor_parent."
+notes = "Registry-owned match bridge: bridge_apple_cider_flavor_parent."
 
 [entries.language_payload.match_bridge]
 id = "bridge_apple_cider_flavor_parent"
@@ -20611,7 +20611,7 @@ offer_terms = ["\\bapelsinjuice\\b.*\\bkoncentrat\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_apelsinjuice_concentrate"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_apelsinjuice_concentrate."
+notes = "Registry-owned match bridge: bridge_apelsinjuice_concentrate."
 
 [entries.language_payload.match_bridge]
 id = "bridge_apelsinjuice_concentrate"
@@ -20652,7 +20652,7 @@ offer_terms = ["\\brotfruktsmix\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_rotfrukter_rotfruktsmix"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_rotfrukter_rotfruktsmix."
+notes = "Registry-owned match bridge: bridge_rotfrukter_rotfruktsmix."
 
 [entries.language_payload.match_bridge]
 id = "bridge_rotfrukter_rotfruktsmix"
@@ -20693,7 +20693,7 @@ offer_terms = ["\\börter\\b.*\\bfrysta\\b", "\\borter\\b.*\\bfrysta\\b", "\\bfr
 negative_guards = ["frystaörter ! \\btorkade\\b"]
 source_refs = ["bridge:match_bridges:bridge_frysta_orter_frozen_herbs"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_frysta_orter_frozen_herbs."
+notes = "Registry-owned match bridge: bridge_frysta_orter_frozen_herbs."
 
 [entries.language_payload.match_bridge]
 id = "bridge_frysta_orter_frozen_herbs"
@@ -20787,7 +20787,7 @@ offer_terms = ["\\bmicropopcorn\\b", "\\bmikropopcorn\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_micropopcorn_mikropopcorn"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_micropopcorn_mikropopcorn."
+notes = "Registry-owned match bridge: bridge_micropopcorn_mikropopcorn."
 
 [entries.language_payload.match_bridge]
 id = "bridge_micropopcorn_mikropopcorn"
@@ -20846,7 +20846,7 @@ offer_terms = ["\\bbakchoklad\\b.*\\bvit\\b", "\\bbakchoklad\\b.*\\bmörk\\b", "
 negative_guards = ["choklad ! \\bljus\\b"]
 source_refs = ["bridge:match_bridges:bridge_white_dark_chocolate_color_list"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_white_dark_chocolate_color_list."
+notes = "Registry-owned match bridge: bridge_white_dark_chocolate_color_list."
 
 [entries.language_payload.match_bridge]
 id = "bridge_white_dark_chocolate_color_list"
@@ -20940,7 +20940,7 @@ offer_terms = ["\\bkalamata\\b.*\\boliver\\b", "\\bolivmix\\b.*\\bkalamata\\b", 
 negative_guards = ["kalamataoliver ! \\bolivolja\\b", "kalamataoliver ! \\bhummus\\b", "kalamataoliver ! \\btapenade\\b"]
 source_refs = ["bridge:match_bridges:bridge_kalamata_oliver_parent"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kalamata_oliver_parent."
+notes = "Registry-owned match bridge: bridge_kalamata_oliver_parent."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kalamata_oliver_parent"
@@ -21046,7 +21046,7 @@ offer_terms = ["\\bvinbärs\\b.*\\bgele\\b", "\\bvinbars\\b.*\\bgele\\b", "\\br�
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_vinbarsgele_color_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_vinbarsgele_color_family."
+notes = "Registry-owned match bridge: bridge_vinbarsgele_color_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_vinbarsgele_color_family"
@@ -21177,7 +21177,7 @@ offer_terms = ["\\bbasilika\\b.*\\bkruka\\b", "\\bruccola\\b", "\\brucola\\b"]
 negative_guards = ["färska_örter ! \\bburk\\b"]
 source_refs = ["bridge:match_bridges:bridge_mixed_fresh_herbs_examples"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_mixed_fresh_herbs_examples."
+notes = "Registry-owned match bridge: bridge_mixed_fresh_herbs_examples."
 
 [entries.language_payload.match_bridge]
 id = "bridge_mixed_fresh_herbs_examples"
@@ -21259,7 +21259,7 @@ offer_terms = ["\\bkantareller\\b.*\\bi\\s+vatten\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kantareller_i_vatten_reclass"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kantareller_i_vatten_reclass."
+notes = "Registry-owned match bridge: bridge_kantareller_i_vatten_reclass."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kantareller_i_vatten_reclass"
@@ -21306,7 +21306,7 @@ offer_terms = ["\\bbasilika\\b.*\\bkruka\\b", "\\bbasilika\\b.*\\bfryst\\b"]
 negative_guards = ["färska_örter ! \\bfärskost\\b", "färska_örter ! \\bfarskost\\b"]
 source_refs = ["bridge:match_bridges:bridge_farska_orter_fresh_or_frozen_basil"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_farska_orter_fresh_or_frozen_basil."
+notes = "Registry-owned match bridge: bridge_farska_orter_fresh_or_frozen_basil."
 
 [entries.language_payload.match_bridge]
 id = "bridge_farska_orter_fresh_or_frozen_basil"
@@ -21382,7 +21382,7 @@ offer_terms = ["\\boreo\\b.*\\bkakor\\b"]
 negative_guards = ["oreo ! \\bchokladkaka\\b"]
 source_refs = ["bridge:match_bridges:bridge_oreokakor_cookie_pack"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_oreokakor_cookie_pack."
+notes = "Registry-owned match bridge: bridge_oreokakor_cookie_pack."
 
 [entries.language_payload.match_bridge]
 id = "bridge_oreokakor_cookie_pack"
@@ -21440,7 +21440,7 @@ offer_terms = ["\\bschnitzel\\b.*\\bkyckling\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kycklingschnitzel_chicken"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kycklingschnitzel_chicken."
+notes = "Registry-owned match bridge: bridge_kycklingschnitzel_chicken."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kycklingschnitzel_chicken"
@@ -21481,7 +21481,7 @@ offer_terms = ["\\btrattkantarell\\b.*\\btorkad\\b", "\\bkarl\\s+johan.*\\btorka
 negative_guards = ["svamp ! \\bfrysta\\b", "svamp ! \\bi\\s+vatten\\b"]
 source_refs = ["bridge:match_bridges:bridge_dried_forest_mushroom_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_dried_forest_mushroom_family."
+notes = "Registry-owned match bridge: bridge_dried_forest_mushroom_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_dried_forest_mushroom_family"
@@ -21557,7 +21557,7 @@ offer_terms = ["\\bpräst\\b", "\\bprast\\b"]
 negative_guards = ["prästost ! \\bgouda\\b"]
 source_refs = ["bridge:match_bridges:bridge_prastost_abbreviated"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_prastost_abbreviated."
+notes = "Registry-owned match bridge: bridge_prastost_abbreviated."
 
 [entries.language_payload.match_bridge]
 id = "bridge_prastost_abbreviated"
@@ -21627,7 +21627,7 @@ offer_terms = ["\\bbostongurka\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_bostongurka_relish_family"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_bostongurka_relish_family."
+notes = "Registry-owned match bridge: bridge_bostongurka_relish_family."
 
 [entries.language_payload.match_bridge]
 id = "bridge_bostongurka_relish_family"
@@ -21668,7 +21668,7 @@ offer_terms = ["\\btom\\s+kha\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_tomkha_spice_mix"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tomkha_spice_mix."
+notes = "Registry-owned match bridge: bridge_tomkha_spice_mix."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tomkha_spice_mix"
@@ -21709,7 +21709,7 @@ offer_terms = ["\\bsvarta\\s+bönor\\b", "\\bsvarta\\s+bonor\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_svart_bona_swedish_black_beans"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_svart_bona_swedish_black_beans."
+notes = "Registry-owned match bridge: bridge_svart_bona_swedish_black_beans."
 
 [entries.language_payload.match_bridge]
 id = "bridge_svart_bona_swedish_black_beans"
@@ -21768,7 +21768,7 @@ offer_terms = ["\\bancho\\s+chili\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_ancho_chili_exact"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_ancho_chili_exact."
+notes = "Registry-owned match bridge: bridge_ancho_chili_exact."
 
 [entries.language_payload.match_bridge]
 id = "bridge_ancho_chili_exact"
@@ -21809,7 +21809,7 @@ offer_terms = ["\\bkycklinginnerfilé", "\\bkycklinginnerfile"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_kycklinginnerfile_parent"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_kycklinginnerfile_parent."
+notes = "Registry-owned match bridge: bridge_kycklinginnerfile_parent."
 
 [entries.language_payload.match_bridge]
 id = "bridge_kycklinginnerfile_parent"
@@ -21868,7 +21868,7 @@ offer_terms = ["\\bsnabbkaffe\\b"]
 negative_guards = ["snabbkaffe ! \\bcappuccino\\b", "snabbkaffe ! \\blatte\\b"]
 source_refs = ["bridge:match_bridges:bridge_snabbkaffepulver_snabbkaffe"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_snabbkaffepulver_snabbkaffe."
+notes = "Registry-owned match bridge: bridge_snabbkaffepulver_snabbkaffe."
 
 [entries.language_payload.match_bridge]
 id = "bridge_snabbkaffepulver_snabbkaffe"
@@ -21926,7 +21926,7 @@ offer_terms = ["\\bsliders\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_sliderbrod_sliders"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_sliderbrod_sliders."
+notes = "Registry-owned match bridge: bridge_sliderbrod_sliders."
 
 [entries.language_payload.match_bridge]
 id = "bridge_sliderbrod_sliders"
@@ -21979,7 +21979,7 @@ offer_terms = ["\\bbaguette\\b"]
 negative_guards = ["baguette ! \\bvitlök\\b", "baguette ! \\bvitlok\\b"]
 source_refs = ["bridge:match_bridges:bridge_baguette_typo_route_alias"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_baguette_typo_route_alias."
+notes = "Registry-owned match bridge: bridge_baguette_typo_route_alias."
 
 [entries.language_payload.match_bridge]
 id = "bridge_baguette_typo_route_alias"
@@ -22055,7 +22055,7 @@ offer_terms = ["\\btortilla\\b"]
 negative_guards = ["tortilla ! \\bmed\\s+lök\\b", "tortilla ! \\bmed\\s+lok\\b", "tortilla ! \\bpalacios\\b"]
 source_refs = ["bridge:match_bridges:bridge_tortillabrod_tortilla"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge migrated in R5: bridge_tortillabrod_tortilla."
+notes = "Registry-owned match bridge: bridge_tortillabrod_tortilla."
 
 [entries.language_payload.match_bridge]
 id = "bridge_tortillabrod_tortilla"

@@ -196,8 +196,8 @@ vocabulary becomes more than a tiny scaffold:
 - `exports.py` — builds runtime exports consumed by matcher modules.
 - `add_term.py` — maps language-specific coverage rows to known export/check
   layers and powers add-term validation.
-- `migration_exceptions.toml` — temporary narrow exceptions for legacy-only
-  terms during migration.
+- `coverage_exceptions.toml` — temporary narrow exceptions for source-derived
+  terms that need to pass the registry coverage gate before a TOML entry exists.
 - `baselines/*.json` — optional frozen vocabulary-audit baselines used by
   contract/export checks once a production matcher has been audited.
 
@@ -238,8 +238,8 @@ cache/index rows are invalidated after the web container restarts.
    positive cases, relevant negative sibling cases, and rule/source inventory
    refs for the rules you are shipping.
 10. **Create `ingredient_matching/term_registry/`** once the matcher has real
-    vocabulary: TOML entries, registry loader, legacy inventory adapter, runtime
-    exports, add-term export specs, and migration exceptions.
+    vocabulary: TOML entries, registry loader, source-inventory support adapter,
+    runtime exports, add-term export specs, and coverage exceptions.
 11. **Set recipe full-text search config** — set `RECIPE_FTS_CONFIG` in `.env`
    to the PostgreSQL text search config used by your recipe language
    (`swedish`, `english`, etc.) and keep `recipe_matcher_backend.RECIPE_FTS_CONFIG`
@@ -321,6 +321,6 @@ the selected profile rather than being Swedish-only.
 - Keep accepted matcher semantics in `app/languages/<code>/matcher_contracts/`;
   local `app/tests/test_*.py` files are useful workbenches, not the durable
   regression contract.
-- From the project root, run `docker compose exec -T web python tests/dev_reload.py` after changes to verify the cache builds correctly
-- Run `docker compose exec -T -w /app web python tests/run_sanity_checks.py` for the tracked app-support sanity checks
+- From the project root, run `docker compose exec -T web python support_checks/dev_reload.py` after changes to verify the cache builds correctly
+- Run `docker compose exec -T -w /app web python support_checks/run_sanity_checks.py` for the tracked app-support sanity checks
 - Keep broader local sanity/regression scripts private unless they become small deterministic `run_*_checks.py` support checks

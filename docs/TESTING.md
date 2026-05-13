@@ -2,7 +2,7 @@
 
 Deal Meals keeps two different kinds of local checks:
 
-- **Tracked app-support checks** live in `app/tests/run_*_checks.py`. These are
+- **Tracked app-support checks** live in `app/support_checks/`. These are
   small, deterministic scripts that support the app itself and can be run in the
   normal web container without pytest.
 - **Private/dev workbench tests** live in ignored files such as
@@ -16,7 +16,7 @@ Run this first after touching matching, store plugin discovery, or startup
 registry cleanup:
 
 ```bash
-docker compose exec -T -w /app web python tests/run_sanity_checks.py
+docker compose exec -T -w /app web python support_checks/run_sanity_checks.py
 ```
 
 The sanity check covers:
@@ -27,7 +27,7 @@ The sanity check covers:
   recipe matching
 - store plugin discovery import/initialization errors
 - fail-safe store registry startup cleanup when plugin discovery fails
-- the term-registry R4 gate and add-term/export-plan checks
+- the term-registry coverage gate and add-term/export-plan checks
 
 It does not scrape websites, use live product data, or require a database.
 
@@ -36,21 +36,22 @@ It does not scrape websites, use live product data, or require a database.
 Run the tracked support suite with:
 
 ```bash
-docker compose exec -T -w /app web python tests/run_app_support_checks.py
+docker compose exec -T -w /app web python support_checks/run_app_support_checks.py
 ```
 
 This runs the sanity check plus the tracked helper checks for cache doctor
 metadata, recipe cache refresh decisions, offer-refresh cache decisions,
-scheduled cache reconciliation decisions, recipe-delta patch rollback behavior,
+scheduled cache reconciliation decisions, delta classification/planning,
+delta term-index fallbacks, runtime delta probation gates, recipe-delta patch rollback behavior,
 pantry search-term index policy,
-candidate routing, ingredient term maps, ingredient-routing mode normalization,
+candidate routing, matcher/compiler version manifests, ingredient term maps, ingredient-routing mode normalization,
 delta verification policy, and the minimal
 frontend smoke.
 
 The frontend smoke can also be run directly:
 
 ```bash
-docker compose exec -T -w /app web python tests/run_frontend_smoke.py
+docker compose exec -T -w /app web python support_checks/run_frontend_smoke.py
 ```
 
 It opens the four main pages in Chromium at desktop and mobile viewport sizes,
@@ -81,12 +82,12 @@ the live app behavior:
   summary, and rolling fallback-frequency stats from
   `cache_metadata.operation_history`.
 - For scheduled cache reconciliation changes, run
-  `docker compose exec -T -w /app web python tests/run_cache_reconciliation_checks.py`.
+  `docker compose exec -T -w /app web python support_checks/run_cache_reconciliation_checks.py`.
   Reconciliation is opportunistic: after scheduled recipe/store jobs it should
   run only when the cache is ready, the app has been idle long enough, and the
   last full rebuild is old or enough delta/skip operations have accumulated.
 - For scheduled recipe scraper limit/status/cancel changes, run
-  `docker compose exec -T -w /app web python tests/run_scheduler_recipe_limit_checks.py`.
+  `docker compose exec -T -w /app web python support_checks/run_scheduler_recipe_limit_checks.py`.
   Scheduled incremental runs should use the same effective per-source
   `max_recipes_incremental` setting as the manual UI path and expose a
   cancellable running state to the recipes page.
@@ -148,17 +149,17 @@ regression contract.
 
 These JSON files are read-only contract inputs in production-style environments.
 Runtime code does not update them. The only writer is the manual dev maintenance
-script `tests/refresh_matcher_rule_inventory_line_refs.py --write`, which should
+script `support_checks/refresh_matcher_rule_inventory_line_refs.py --write`, which should
 not be run against a read-only production filesystem.
 
 The Swedish term registry is now the vocabulary coverage surface for matcher
 terms. After adding or changing a registry TOML entry, run:
 
 ```bash
-docker compose exec -T -w /app web python tests/run_term_registry_contract_checks.py --language sv
-docker compose exec -T -w /app web python tests/run_term_registry_add_term_checks.py --language sv
-docker compose exec -T -w /app web python tests/run_term_registry_export_checks.py --language sv
-docker compose exec -T -w /app web python tests/run_term_registry_guard_bridge_checks.py --language sv
+docker compose exec -T -w /app web python support_checks/run_term_registry_contract_checks.py --language sv
+docker compose exec -T -w /app web python support_checks/run_term_registry_add_term_checks.py --language sv
+docker compose exec -T -w /app web python support_checks/run_term_registry_export_checks.py --language sv
+docker compose exec -T -w /app web python support_checks/run_term_registry_guard_bridge_checks.py --language sv
 ```
 
 These checks do not scrape, rebuild cache, or require live product data. The
@@ -175,11 +176,13 @@ stored in the baseline. The baseline includes historical multi-store vocabulary;
 absence from the current Willys or ICA assortment is not a failure unless a
 future check explicitly targets current-catalog materialization.
 
-Do not keep regenerated debug reports under `app/tests/reports/`. If a new
+Support-check reports default to `/tmp/deal-meals-support-checks/`; override
+with `--report-dir` or `DEAL_MEALS_SUPPORT_REPORT_ROOT` for a specific
+maintenance run. Do not promote regenerated debug reports to Git. If a new
 matcher vocabulary baseline is intentionally started, rebuild the local audit
-ledger with `tests/run_verified_term_audit.py --rebuild-table`, promote
-only the consolidated JSON needed by the registry checks, and drop the dev-only
-`tmp_verified_term_audit_variants` table when finished.
+ledger with `support_checks/run_verified_term_audit.py --rebuild-table`,
+promote only the consolidated JSON needed by the registry checks, and drop the
+dev-only `tmp_verified_term_audit_variants` table when finished.
 
 ## Matcher/Cache Full DB Diff
 
@@ -190,7 +193,7 @@ refresh when the active cache needs to be compared with a fresh full preview, or
 when cache doctor/reconciliation indicates possible drift.
 
 ```bash
-docker compose exec -T -w /app web python tests/run_matcher_full_db_diff.py --sample-limit 25
+docker compose exec -T -w /app web python support_checks/run_matcher_full_db_diff.py --sample-limit 25
 ```
 
 The script computes a fresh full preview with `persist=False`, compares it to
@@ -217,18 +220,18 @@ are part of the regression surface, not temporary batch-question output:
 
 Do not keep generated review-import staging files in the production tree once
 their pass-clean decisions have been promoted into the main fixture and
-inventory. The active `app/tests/batch_review_questions.md` file is separate
-from those generated staging files: keep it as the current review queue, but do
-not treat it as a matcher regression gate until a decision has been promoted
-into the main fixture and inventory.
+inventory. A local `app/tests/batch_review_questions.md` file, when present, is
+separate from those generated staging files: keep it as the current review
+queue, but do not treat it as a matcher regression gate until a decision has
+been promoted into the main fixture and inventory.
 
 Generated cache benchmark fixtures are local workbench data. Keep them out of
 Git and do not treat them as part of the matcher regression surface.
 
 ## Local Workbench Tests
 
-Files matching `app/tests/test_*.py` are intentionally ignored. Keep using them
-for broader local regression work, pytest experiments, live-data investigations,
-and one-off review fixtures. If a check becomes part of the app's public support
-surface, move or copy the small deterministic part into a `run_*_checks.py`
-script instead of publishing the whole workbench test.
+The `app/tests/` tree is intentionally ignored. Keep using it for broader local
+regression work, batch-review queues, pytest experiments, full-scrape scripts,
+live-data investigations, and one-off review fixtures. If a check becomes part
+of the app's public support surface, move or copy the small deterministic part
+into `app/support_checks/` instead of publishing the whole workbench test.

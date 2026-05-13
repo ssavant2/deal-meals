@@ -8,7 +8,7 @@ variants = ["färskpotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -31,7 +31,7 @@ variants = ["farskpotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -54,7 +54,7 @@ variants = ["bakpotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -77,7 +77,7 @@ variants = ["sparrispotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -100,7 +100,7 @@ variants = ["glutenfrihavregryn"]
 offer_terms = ["havregryn"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -123,7 +123,7 @@ variants = ["vegoburgare"]
 offer_terms = ["vegetariskhamburgare", "hamburgare", "burgare"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -158,7 +158,7 @@ variants = ["veggoburgare"]
 offer_terms = ["vegetariskhamburgare", "hamburgare", "burgare"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -193,7 +193,7 @@ variants = ["halloumiburgare"]
 offer_terms = ["vegetariskhamburgare"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -216,7 +216,7 @@ variants = ["grillostburgare"]
 offer_terms = ["vegetariskhamburgare"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -239,7 +239,7 @@ variants = ["ädelost"]
 offer_terms = ["ädel"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -262,7 +262,7 @@ variants = ["adelost"]
 offer_terms = ["adel"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -285,7 +285,7 @@ variants = ["mjölkpulver"]
 offer_terms = ["torrmjölk"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -308,7 +308,7 @@ variants = ["mjolkpulver"]
 offer_terms = ["torrmjölk"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -331,7 +331,7 @@ variants = ["basilico"]
 offer_terms = ["basilikapesto"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -354,7 +354,7 @@ variants = ["cornichons"]
 offer_terms = ["inlagdgurka", "cornichoner"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -383,7 +383,7 @@ variants = ["cornichoner"]
 offer_terms = ["inlagdgurka", "cornichons"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -412,7 +412,7 @@ variants = ["smörgåspickles"]
 offer_terms = ["inlagdgurka", "cornichons"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -441,7 +441,7 @@ variants = ["smorgaspickles"]
 offer_terms = ["inlagdgurka", "cornichons"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -470,7 +470,7 @@ variants = ["sockerärtor"]
 offer_terms = ["salladsärtor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -493,7 +493,7 @@ variants = ["sockerartor"]
 offer_terms = ["salladsärtor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -516,7 +516,7 @@ variants = ["salladsärtor"]
 offer_terms = ["sockerärtor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -539,7 +539,7 @@ variants = ["salladsartor"]
 offer_terms = ["sockerärtor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -562,7 +562,7 @@ variants = ["majsmjöl"]
 offer_terms = ["polenta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -585,7 +585,7 @@ variants = ["majsmjol"]
 offer_terms = ["polenta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -608,7 +608,7 @@ variants = ["polenta"]
 offer_terms = ["majsmjöl"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -631,7 +631,7 @@ variants = ["persiljesmör"]
 offer_terms = ["aromsmör"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -654,7 +654,7 @@ variants = ["persiljesmor"]
 offer_terms = ["aromsmör"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -677,7 +677,7 @@ variants = ["vitlökssmör"]
 offer_terms = ["aromsmör"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -700,7 +700,7 @@ variants = ["vitlokssmor"]
 offer_terms = ["aromsmör"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -723,7 +723,7 @@ variants = ["sobanudlar"]
 offer_terms = ["nudlar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -746,7 +746,7 @@ variants = ["udonnudlar"]
 offer_terms = ["nudlar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -769,7 +769,7 @@ variants = ["ramennudlar"]
 offer_terms = ["nudlar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -792,7 +792,7 @@ variants = ["somennudlar"]
 offer_terms = ["nudlar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -815,7 +815,7 @@ variants = ["äggnudlar"]
 offer_terms = ["nudlar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -838,7 +838,7 @@ variants = ["aggnudlar"]
 offer_terms = ["nudlar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -861,7 +861,7 @@ variants = ["risnudlar"]
 offer_terms = ["nudlar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -884,7 +884,7 @@ variants = ["glasnudlar"]
 offer_terms = ["nudlar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -907,7 +907,7 @@ variants = ["vetenudlar"]
 offer_terms = ["nudlar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -930,7 +930,7 @@ variants = ["ananasskivor"]
 offer_terms = ["ananas"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -953,7 +953,7 @@ variants = ["chiafrön"]
 offer_terms = ["frön"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -976,7 +976,7 @@ variants = ["chiafron"]
 offer_terms = ["fron"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -999,7 +999,7 @@ variants = ["bockhornsklöver"]
 offer_terms = ["frön"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1022,7 +1022,7 @@ variants = ["bockhornsklover"]
 offer_terms = ["fron"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1045,7 +1045,7 @@ variants = ["pumpakärnor"]
 offer_terms = ["frön"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1068,7 +1068,7 @@ variants = ["pumpakarnor"]
 offer_terms = ["fron"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1091,7 +1091,7 @@ variants = ["pumpafrön"]
 offer_terms = ["frön"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1114,7 +1114,7 @@ variants = ["pumpafron"]
 offer_terms = ["fron"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1137,7 +1137,7 @@ variants = ["sesamfrön"]
 offer_terms = ["frön"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1160,7 +1160,7 @@ variants = ["sesamfron"]
 offer_terms = ["fron"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1183,7 +1183,7 @@ variants = ["solrosfrön"]
 offer_terms = ["solroskärnor", "frön"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1212,7 +1212,7 @@ variants = ["solrosfron"]
 offer_terms = ["solroskarnor", "fron"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1241,7 +1241,7 @@ variants = ["solroskärnor"]
 offer_terms = ["solrosfrön", "frön"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1270,7 +1270,7 @@ variants = ["solroskarnor"]
 offer_terms = ["solrosfron", "fron"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1299,7 +1299,7 @@ variants = ["linfrö"]
 offer_terms = ["frön"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1322,7 +1322,7 @@ variants = ["linfro"]
 offer_terms = ["fron"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1345,7 +1345,7 @@ variants = ["krustader"]
 offer_terms = ["minikrustader"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1368,7 +1368,7 @@ variants = ["marängtoppar"]
 offer_terms = ["maräng"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1391,7 +1391,7 @@ variants = ["marangtoppar"]
 offer_terms = ["marang"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1414,7 +1414,7 @@ variants = ["marängdroppar"]
 offer_terms = ["maräng"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1437,7 +1437,7 @@ variants = ["marangdroppar"]
 offer_terms = ["marang"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1460,7 +1460,7 @@ variants = ["quornfärs"]
 offer_terms = ["vegofärs"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1483,7 +1483,7 @@ variants = ["quornfars"]
 offer_terms = ["vegofärs"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1506,7 +1506,7 @@ variants = ["kalvhögrev"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1529,7 +1529,7 @@ variants = ["kalvhogrev"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1552,7 +1552,7 @@ variants = ["kalvbiff"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1575,7 +1575,7 @@ variants = ["kalventrecote"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1598,7 +1598,7 @@ variants = ["kalvschnitzel"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1621,7 +1621,7 @@ variants = ["kalvstek"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1644,7 +1644,7 @@ variants = ["kalvfilé"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1667,7 +1667,7 @@ variants = ["kalvfile"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1690,7 +1690,7 @@ variants = ["kalvytterfilé"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1713,7 +1713,7 @@ variants = ["kalvytterfile"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1736,7 +1736,7 @@ variants = ["kalvinnanlår"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1759,7 +1759,7 @@ variants = ["kalvinnanlar"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1782,7 +1782,7 @@ variants = ["kalvlägg"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1805,7 +1805,7 @@ variants = ["kalvlagg"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1828,7 +1828,7 @@ variants = ["kalvbog"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1851,7 +1851,7 @@ variants = ["kalvbringa"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1874,7 +1874,7 @@ variants = ["kalvkotlett"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1897,7 +1897,7 @@ variants = ["kalvrygg"]
 offer_terms = ["kalvkött"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1920,7 +1920,7 @@ variants = ["laxfilé"]
 offer_terms = ["lax", "fiskfilé"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1949,7 +1949,7 @@ variants = ["laxfile"]
 offer_terms = ["lax", "fiskfilé"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -1978,7 +1978,7 @@ variants = ["torsk"]
 offer_terms = ["fiskfilé"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2001,7 +2001,7 @@ variants = ["stillahavstorsk"]
 offer_terms = ["fiskfilé"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2024,7 +2024,7 @@ variants = ["kolja"]
 offer_terms = ["fiskfilé"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2047,7 +2047,7 @@ variants = ["sej"]
 offer_terms = ["fiskfilé"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2070,7 +2070,7 @@ variants = ["rödspätta"]
 offer_terms = ["fiskfilé"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2093,7 +2093,7 @@ variants = ["rodspatta"]
 offer_terms = ["fiskfilé"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2116,7 +2116,7 @@ variants = ["najadlax"]
 offer_terms = ["lax"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2139,7 +2139,7 @@ variants = ["blåmusslor"]
 offer_terms = ["musslor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2162,7 +2162,7 @@ variants = ["blamusslor"]
 offer_terms = ["musslor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2185,7 +2185,7 @@ variants = ["grönmusslor"]
 offer_terms = ["musslor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2208,7 +2208,7 @@ variants = ["gronmusslor"]
 offer_terms = ["musslor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2231,7 +2231,7 @@ variants = ["kammusslor"]
 offer_terms = ["kammussla", "pilgrimsmussla"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2260,7 +2260,7 @@ variants = ["pilgrimsmusslor"]
 offer_terms = ["kammussla", "pilgrimsmussla"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2289,7 +2289,7 @@ variants = ["chokladtårtbotten"]
 offer_terms = ["tårtbottnar", "tårtbotten"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2318,7 +2318,7 @@ variants = ["chokladtartbotten"]
 offer_terms = ["tårtbottnar", "tårtbotten"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2347,7 +2347,7 @@ variants = ["vaniljtårtbotten"]
 offer_terms = ["tårtbottnar", "tårtbotten"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2376,7 +2376,7 @@ variants = ["vaniljtartbotten"]
 offer_terms = ["tårtbottnar", "tårtbotten"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2405,7 +2405,7 @@ variants = ["sillfilé"]
 offer_terms = ["sillfileer", "strömmingsfileer"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2434,7 +2434,7 @@ variants = ["sillfile"]
 offer_terms = ["sillfileer", "strömmingsfileer"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2463,7 +2463,7 @@ variants = ["strömmingsfileer"]
 offer_terms = ["sillfileer"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2486,7 +2486,7 @@ variants = ["antipastitallrik"]
 offer_terms = ["charkbricka"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2509,7 +2509,7 @@ variants = ["tapastallrik"]
 offer_terms = ["charkbricka"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2532,7 +2532,7 @@ variants = ["tapasmix"]
 offer_terms = ["charkbricka"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2555,7 +2555,7 @@ variants = ["pepparsalami"]
 offer_terms = ["salami"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2578,7 +2578,7 @@ variants = ["cocktailbär"]
 offer_terms = ["maraschinokörsbär"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2601,7 +2601,7 @@ variants = ["cocktailbar"]
 offer_terms = ["maraschinokörsbär"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2624,7 +2624,7 @@ variants = ["torskfilé"]
 offer_terms = ["torsk"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2647,7 +2647,7 @@ variants = ["torskfile"]
 offer_terms = ["torsk"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2670,7 +2670,7 @@ variants = ["torskrygg"]
 offer_terms = ["torsk"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2693,7 +2693,7 @@ variants = ["sejfilé"]
 offer_terms = ["sej"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2716,7 +2716,7 @@ variants = ["sejfile"]
 offer_terms = ["sej"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2739,7 +2739,7 @@ variants = ["koljafilé"]
 offer_terms = ["kolja"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2762,7 +2762,7 @@ variants = ["koljafile"]
 offer_terms = ["kolja"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2785,7 +2785,7 @@ variants = ["rödspättafilé"]
 offer_terms = ["rödspätta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2808,7 +2808,7 @@ variants = ["rodspattafile"]
 offer_terms = ["rödspätta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2831,7 +2831,7 @@ variants = ["parmigiano reggiano"]
 offer_terms = ["parmigiano"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2854,7 +2854,7 @@ variants = ["babyspenat"]
 offer_terms = ["spenat"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2877,7 +2877,7 @@ variants = ["bladspenat"]
 offer_terms = ["spenat"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2900,7 +2900,7 @@ variants = ["kronärtskocka"]
 offer_terms = ["kronärtskockshjärta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2923,7 +2923,7 @@ variants = ["kronartskocka"]
 offer_terms = ["kronärtskockshjärta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2946,7 +2946,7 @@ variants = ["strösocker"]
 offer_terms = ["socker"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2969,7 +2969,7 @@ variants = ["strosocker"]
 offer_terms = ["socker"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -2992,7 +2992,7 @@ variants = ["majskorn"]
 offer_terms = ["majs"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3015,7 +3015,7 @@ variants = ["balsamico"]
 offer_terms = ["balsamvinäger"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3038,7 +3038,7 @@ variants = ["rucola"]
 offer_terms = ["ruccola"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3061,7 +3061,7 @@ variants = ["gruyère"]
 offer_terms = ["gruyere"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3084,7 +3084,7 @@ variants = ["gruyére"]
 offer_terms = ["gruyere"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3107,7 +3107,7 @@ variants = ["prästost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3130,7 +3130,7 @@ variants = ["prastost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3153,7 +3153,7 @@ variants = ["herrgårdsost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3176,7 +3176,7 @@ variants = ["herrgardost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3199,7 +3199,7 @@ variants = ["grevéost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3222,7 +3222,7 @@ variants = ["greveost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3245,7 +3245,7 @@ variants = ["hushållsost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3268,7 +3268,7 @@ variants = ["hushallsost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3291,7 +3291,7 @@ variants = ["edamerost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3314,7 +3314,7 @@ variants = ["sveciaost"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3337,7 +3337,7 @@ variants = ["cashewnötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3360,7 +3360,7 @@ variants = ["cashewnotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3383,7 +3383,7 @@ variants = ["havredryck"]
 offer_terms = ["växtdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3406,7 +3406,7 @@ variants = ["sojadryck"]
 offer_terms = ["växtdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3429,7 +3429,7 @@ variants = ["mandeldryck"]
 offer_terms = ["växtdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3452,7 +3452,7 @@ variants = ["ärtdryck"]
 offer_terms = ["växtdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3475,7 +3475,7 @@ variants = ["artdryck"]
 offer_terms = ["växtdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3498,7 +3498,7 @@ variants = ["risdryck"]
 offer_terms = ["växtdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3521,7 +3521,7 @@ variants = ["kokosdryck"]
 offer_terms = ["växtdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3544,7 +3544,7 @@ variants = ["mjölkdryck"]
 offer_terms = ["mjölk", "mellanmjölk"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3573,7 +3573,7 @@ variants = ["mjolkdryck"]
 offer_terms = ["mjölk", "mellanmjölk"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3602,7 +3602,7 @@ variants = ["sojasås"]
 offer_terms = ["soja"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3625,7 +3625,7 @@ variants = ["sojasas"]
 offer_terms = ["soja"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3648,7 +3648,7 @@ variants = ["fläderblomsdryck"]
 offer_terms = ["fläderdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3671,7 +3671,7 @@ variants = ["fladerblomsdryck"]
 offer_terms = ["fladerdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3694,7 +3694,7 @@ variants = ["flädersaft"]
 offer_terms = ["fläderdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3717,7 +3717,7 @@ variants = ["fladersaft"]
 offer_terms = ["fladerdryck"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3740,7 +3740,7 @@ variants = ["krispies"]
 offer_terms = ["rispuffar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3763,7 +3763,7 @@ variants = ["hasselnötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3786,7 +3786,7 @@ variants = ["hasselnotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3809,7 +3809,7 @@ variants = ["hasselnötskärnor"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3832,7 +3832,7 @@ variants = ["hasselnotskarnor"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3855,7 +3855,7 @@ variants = ["jordnötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3878,7 +3878,7 @@ variants = ["jordnotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3901,7 +3901,7 @@ variants = ["macadamianötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3924,7 +3924,7 @@ variants = ["macadamianotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3947,7 +3947,7 @@ variants = ["paranötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3970,7 +3970,7 @@ variants = ["paranotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -3993,7 +3993,7 @@ variants = ["pekannötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4016,7 +4016,7 @@ variants = ["pekannotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4039,7 +4039,7 @@ variants = ["pecannötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4062,7 +4062,7 @@ variants = ["pecannotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4085,7 +4085,7 @@ variants = ["pinjenötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4108,7 +4108,7 @@ variants = ["pinjenotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4131,7 +4131,7 @@ variants = ["pistagenötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4154,7 +4154,7 @@ variants = ["pistagenotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4177,7 +4177,7 @@ variants = ["pistaschnötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4200,7 +4200,7 @@ variants = ["pistaschnotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4223,7 +4223,7 @@ variants = ["valnötter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4246,7 +4246,7 @@ variants = ["valnotter"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4269,7 +4269,7 @@ variants = ["valnötskärnor"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4292,7 +4292,7 @@ variants = ["valnotskarnor"]
 offer_terms = ["nötter"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4315,7 +4315,7 @@ variants = ["makrillbitar"]
 offer_terms = ["makrill"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4338,7 +4338,7 @@ variants = ["makrillfilé"]
 offer_terms = ["makrill"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4361,7 +4361,7 @@ variants = ["makrillfile"]
 offer_terms = ["makrill"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4384,7 +4384,7 @@ variants = ["mandarinklyftor"]
 offer_terms = ["mandariner"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4407,7 +4407,7 @@ variants = ["vegochorizo"]
 offer_terms = ["chorizo"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4430,7 +4430,7 @@ variants = ["chorizo"]
 offer_terms = ["korv"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4453,7 +4453,7 @@ variants = ["salsiccia"]
 offer_terms = ["korv"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4476,7 +4476,7 @@ variants = ["kabanoss"]
 offer_terms = ["korv"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4499,7 +4499,7 @@ variants = ["cabanossy"]
 offer_terms = ["korv"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4522,7 +4522,7 @@ variants = ["bratwurst"]
 offer_terms = ["korv"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4545,7 +4545,7 @@ variants = ["isterband"]
 offer_terms = ["korv"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4568,7 +4568,7 @@ variants = ["medister"]
 offer_terms = ["korv"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4591,7 +4591,7 @@ variants = ["merguez"]
 offer_terms = ["korv"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4614,7 +4614,7 @@ variants = ["idealmakaroner"]
 offer_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4637,7 +4637,7 @@ variants = ["rödcurrypasta"]
 offer_terms = ["rödcurry"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4660,7 +4660,7 @@ variants = ["rodcurrypasta"]
 offer_terms = ["rodcurry"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4683,7 +4683,7 @@ variants = ["gröncurrypasta"]
 offer_terms = ["gröncurry"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4706,7 +4706,7 @@ variants = ["groncurrypasta"]
 offer_terms = ["groncurry"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4729,7 +4729,7 @@ variants = ["gulcurrypasta"]
 offer_terms = ["gulcurry"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4752,7 +4752,7 @@ variants = ["crispychiliolja"]
 offer_terms = ["chiliolja"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4775,7 +4775,7 @@ variants = ["chiliflakes"]
 offer_terms = ["chili"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4798,7 +4798,7 @@ variants = ["chiliflingor"]
 offer_terms = ["chili"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4821,7 +4821,7 @@ variants = ["kalkonbacon"]
 offer_terms = ["bacon"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4844,7 +4844,7 @@ variants = ["kalkonkorv"]
 offer_terms = ["korv"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4867,7 +4867,7 @@ variants = ["kalkonköttbullar"]
 offer_terms = ["köttbullar"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4890,7 +4890,7 @@ variants = ["baconost"]
 offer_terms = ["baconmjukost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4913,7 +4913,7 @@ variants = ["långpasta"]
 offer_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4936,7 +4936,7 @@ variants = ["langpasta"]
 offer_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4959,7 +4959,7 @@ variants = ["kantarellfond"]
 offer_terms = ["fond", "svampfond"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -4988,7 +4988,7 @@ variants = ["rostbröd"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5011,7 +5011,7 @@ variants = ["rostbrod"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5034,7 +5034,7 @@ variants = ["frasrost"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5057,7 +5057,7 @@ variants = ["ostrost"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5080,7 +5080,7 @@ variants = ["fiberrost"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5103,7 +5103,7 @@ variants = ["originalrost"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5126,7 +5126,7 @@ variants = ["frörost"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5149,7 +5149,7 @@ variants = ["frorost"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5172,7 +5172,7 @@ variants = ["vallmorost"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5195,7 +5195,7 @@ variants = ["levainrost"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5218,7 +5218,7 @@ variants = ["roast'n"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5241,7 +5241,7 @@ variants = ["brioche"]
 offer_terms = ["formbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5264,7 +5264,7 @@ variants = ["slider"]
 offer_terms = ["hamburgerbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5287,7 +5287,7 @@ variants = ["sliders"]
 offer_terms = ["hamburgerbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5310,7 +5310,7 @@ variants = ["jättefranska"]
 offer_terms = ["formbröd", "formfranska"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5339,7 +5339,7 @@ variants = ["jattefranska"]
 offer_terms = ["formbröd", "formfranska"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5368,7 +5368,7 @@ variants = ["formbröd"]
 offer_terms = ["formfranska"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5391,7 +5391,7 @@ variants = ["sarek"]
 offer_terms = ["tunnbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5414,7 +5414,7 @@ variants = ["abisko"]
 offer_terms = ["tunnbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5437,7 +5437,7 @@ variants = ["njalla"]
 offer_terms = ["tunnbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5460,7 +5460,7 @@ variants = ["liba"]
 offer_terms = ["tunnbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5483,7 +5483,7 @@ variants = ["fralla"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5506,7 +5506,7 @@ variants = ["fröfralla"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5529,7 +5529,7 @@ variants = ["frofralla"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5552,7 +5552,7 @@ variants = ["grötfralla"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5575,7 +5575,7 @@ variants = ["grotfralla"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5598,7 +5598,7 @@ variants = ["surdegsfralla"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5621,7 +5621,7 @@ variants = ["småbröd"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5644,7 +5644,7 @@ variants = ["smabrod"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5667,7 +5667,7 @@ variants = ["småfranska"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5690,7 +5690,7 @@ variants = ["smafranska"]
 offer_terms = ["styckbröd"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5713,7 +5713,7 @@ variants = ["minibaguette"]
 offer_terms = ["baguette"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5736,7 +5736,7 @@ variants = ["sportbaguette"]
 offer_terms = ["baguette"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5759,7 +5759,7 @@ variants = ["mayo"]
 offer_terms = ["majonnäs"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5782,7 +5782,7 @@ variants = ["digestivekex"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5805,7 +5805,7 @@ variants = ["digestive"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5828,7 +5828,7 @@ variants = ["aperitivokex"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5851,7 +5851,7 @@ variants = ["mariekex"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5874,7 +5874,7 @@ variants = ["smörgåskex"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5897,7 +5897,7 @@ variants = ["smorgaskex"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5920,7 +5920,7 @@ variants = ["matkex"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5943,7 +5943,7 @@ variants = ["bokstavskex"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5966,7 +5966,7 @@ variants = ["breton"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -5989,7 +5989,7 @@ variants = ["saltiner"]
 offer_terms = ["kex"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6012,7 +6012,7 @@ variants = ["mandelsmör"]
 offer_terms = ["nötsmör"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6035,7 +6035,7 @@ variants = ["mandelsmor"]
 offer_terms = ["nötsmör"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6058,7 +6058,7 @@ variants = ["jordnötssmör"]
 offer_terms = ["nötsmör"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6081,7 +6081,7 @@ variants = ["jordnotssmor"]
 offer_terms = ["nötsmör"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6104,7 +6104,7 @@ variants = ["kokosflingor"]
 offer_terms = ["kokos"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6127,7 +6127,7 @@ variants = ["kokoschips"]
 offer_terms = ["kokos", "kokosflingor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6156,7 +6156,7 @@ variants = ["gurkailag"]
 offer_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6179,7 +6179,7 @@ variants = ["tunnskivadgurka"]
 offer_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6202,7 +6202,7 @@ variants = ["saltgurka"]
 offer_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6225,7 +6225,7 @@ variants = ["5-minuterssill"]
 offer_terms = ["inläggningssill"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6248,7 +6248,7 @@ variants = ["salladsblad"]
 offer_terms = ["grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6271,7 +6271,7 @@ variants = ["sallat"]
 offer_terms = ["plocksallat", "salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6306,7 +6306,7 @@ variants = ["plocksallat"]
 offer_terms = ["salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6335,7 +6335,7 @@ variants = ["kruksallat"]
 offer_terms = ["plocksallat", "salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6370,7 +6370,7 @@ variants = ["krispsallat"]
 offer_terms = ["plocksallat", "salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6405,7 +6405,7 @@ variants = ["isbergssallat"]
 offer_terms = ["salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6434,7 +6434,7 @@ variants = ["hjärtsallad"]
 offer_terms = ["salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6463,7 +6463,7 @@ variants = ["hjartsallad"]
 offer_terms = ["salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6492,7 +6492,7 @@ variants = ["hjärtbergsallad"]
 offer_terms = ["grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6515,7 +6515,7 @@ variants = ["hjartbergsallad"]
 offer_terms = ["grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6538,7 +6538,7 @@ variants = ["bistrosallad"]
 offer_terms = ["salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6567,7 +6567,7 @@ variants = ["romansallad"]
 offer_terms = ["salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6596,7 +6596,7 @@ variants = ["romanasallad"]
 offer_terms = ["grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6619,7 +6619,7 @@ variants = ["miniromansallat"]
 offer_terms = ["salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6648,7 +6648,7 @@ variants = ["machesallat"]
 offer_terms = ["salladsblad", "grönsallad"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6677,7 +6677,7 @@ variants = ["svartvinbärsgele"]
 offer_terms = ["vinbärsgele"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6700,7 +6700,7 @@ variants = ["rödvinbärsgele"]
 offer_terms = ["vinbärsgele"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6723,7 +6723,7 @@ variants = ["bordsgurka"]
 offer_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6746,7 +6746,7 @@ variants = ["bryggkaffe"]
 offer_terms = ["bryggkaffe", "kokkaffe"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6775,7 +6775,7 @@ variants = ["kaffebönor"]
 offer_terms = ["kaffebönor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6798,7 +6798,7 @@ variants = ["kaffeböna"]
 offer_terms = ["kaffebönor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6821,7 +6821,7 @@ variants = ["cottage cheese"]
 offer_terms = ["keso"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6844,7 +6844,7 @@ variants = ["tomatsås"]
 offer_terms = ["tomatsås"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6867,7 +6867,7 @@ variants = ["ostar"]
 offer_terms = ["ost"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6890,7 +6890,7 @@ variants = ["champinjoner"]
 offer_terms = ["svamp"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6913,7 +6913,7 @@ variants = ["skogschampinjoner"]
 offer_terms = ["skogschampinjoner", "champinjoner", "svamp"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6948,7 +6948,7 @@ variants = ["babychampinjoner"]
 offer_terms = ["babychampinjoner", "champinjoner", "svamp"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -6983,7 +6983,7 @@ variants = ["kantarell"]
 offer_terms = ["svamp"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7006,7 +7006,7 @@ variants = ["kantareller"]
 offer_terms = ["svamp"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7029,7 +7029,7 @@ variants = ["ostronskivling"]
 offer_terms = ["svamp"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7052,7 +7052,7 @@ variants = ["karljohansvamp"]
 offer_terms = ["svamp"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7075,7 +7075,7 @@ variants = ["bönmix"]
 offer_terms = ["bönor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7098,7 +7098,7 @@ variants = ["haricot"]
 offer_terms = ["bönor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7121,7 +7121,7 @@ variants = ["brytbönor"]
 offer_terms = ["bönor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7144,7 +7144,7 @@ variants = ["brytbonor"]
 offer_terms = ["bönor"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7167,7 +7167,7 @@ variants = ["silkesmjuk"]
 offer_terms = ["silkestofu"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7190,7 +7190,7 @@ variants = ["regnbågslaxrom"]
 offer_terms = ["laxrom"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7213,7 +7213,7 @@ variants = ["fjällrödingfilé"]
 offer_terms = ["röding"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7236,7 +7236,7 @@ variants = ["fjallrodingfile"]
 offer_terms = ["röding"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7259,7 +7259,7 @@ variants = ["plantgurt"]
 offer_terms = ["plantgurt", "yoghurt"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7288,7 +7288,7 @@ variants = ["havregurt"]
 offer_terms = ["havregurt", "yoghurt"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7317,7 +7317,7 @@ variants = ["kokosgurt"]
 offer_terms = ["kokosgurt", "yoghurt"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7346,7 +7346,7 @@ variants = ["soygurt"]
 offer_terms = ["soygurt", "yoghurt"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7375,7 +7375,7 @@ variants = ["körsbärstomater"]
 offer_terms = ["körsbärstomater", "körsbärstomat"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7404,7 +7404,7 @@ variants = ["korsbarstomat"]
 offer_terms = ["körsbärstomat"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping migrated in R5."
+notes = "Registry-owned offer extra keyword mapping."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"

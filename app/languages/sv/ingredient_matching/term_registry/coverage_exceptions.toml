@@ -1,0 +1,17 @@
+# Temporary bridge for source-derived terms that must be accepted before their
+# registry entry exists. The coverage gate treats every row as a narrow
+# exception, not as a second source of truth.
+#
+# [[exceptions]]
+# id = "sv-se.example.coverage_exception"
+# owner = "codex"
+# language = "sv"
+# market = "SE"
+# source_family = "match_bridge"
+# canonical = "example"
+# variant = "example variant"
+# layer_role = "bridge_positive"
+# reason = "Temporary source-derived bridge until registry coverage handles this source family."
+# created_at = "2026-05-09"
+# expires_when = "Remove when registry coverage includes this exact key."
+# expires_on = "2026-06-30"

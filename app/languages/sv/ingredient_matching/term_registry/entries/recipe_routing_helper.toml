@@ -8,7 +8,7 @@ variants = ["baguette"]
 route_terms = ["baguette"]
 source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned recipe routing extra alias migrated in R5."
+notes = "Registry-owned recipe routing extra alias."
 
 [[entries.coverage]]
 source_family = "recipe_routing_helper"
@@ -31,7 +31,7 @@ variants = ["helkyckling"]
 route_terms = ["helkyckling"]
 source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned recipe routing extra alias migrated in R5."
+notes = "Registry-owned recipe routing extra alias."
 
 [[entries.coverage]]
 source_family = "recipe_routing_helper"
@@ -54,7 +54,7 @@ variants = ["kyckling"]
 route_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned recipe routing extra alias migrated in R5."
+notes = "Registry-owned recipe routing extra alias."
 
 [[entries.coverage]]
 source_family = "recipe_routing_helper"
@@ -77,7 +77,7 @@ variants = ["oreo"]
 route_terms = ["oreo"]
 source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned recipe routing extra alias migrated in R5."
+notes = "Registry-owned recipe routing extra alias."
 
 [[entries.coverage]]
 source_family = "recipe_routing_helper"
@@ -100,7 +100,7 @@ variants = ["ost"]
 route_terms = ["ost"]
 source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned recipe routing extra alias migrated in R5."
+notes = "Registry-owned recipe routing extra alias."
 
 [[entries.coverage]]
 source_family = "recipe_routing_helper"
@@ -123,7 +123,7 @@ variants = ["schnitzel"]
 route_terms = ["schnitzel"]
 source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned recipe routing extra alias migrated in R5."
+notes = "Registry-owned recipe routing extra alias."
 
 [[entries.coverage]]
 source_family = "recipe_routing_helper"
@@ -146,7 +146,7 @@ variants = ["snabbkaffe"]
 route_terms = ["snabbkaffe"]
 source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned recipe routing extra alias migrated in R5."
+notes = "Registry-owned recipe routing extra alias."
 
 [[entries.coverage]]
 source_family = "recipe_routing_helper"
@@ -169,7 +169,7 @@ variants = ["svamp"]
 route_terms = ["svamp"]
 source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned recipe routing extra alias migrated in R5."
+notes = "Registry-owned recipe routing extra alias."
 
 [[entries.coverage]]
 source_family = "recipe_routing_helper"
@@ -192,7 +192,7 @@ variants = ["tortilla"]
 route_terms = ["tortilla"]
 source_refs = ["code:term_registry_entries:recipe_routing_helper.toml"]
 layer_policy = ["route_only"]
-notes = "Registry-owned recipe routing extra alias migrated in R5."
+notes = "Registry-owned recipe routing extra alias."
 
 [[entries.coverage]]
 source_family = "recipe_routing_helper"

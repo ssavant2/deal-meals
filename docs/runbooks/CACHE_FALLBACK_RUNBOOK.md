@@ -163,13 +163,13 @@ docker compose exec web tail -f /app/logs/access.log
 Support checks in dev:
 
 ```bash
-docker compose exec -T -w /app web python tests/run_app_support_checks.py
+docker compose exec -T -w /app web python support_checks/run_app_support_checks.py
 ```
 
 Read-only matcher/cache full DB diff for suspected semantic drift:
 
 ```bash
-docker compose exec -T -w /app web python tests/run_matcher_full_db_diff.py --sample-limit 25
+docker compose exec -T -w /app web python support_checks/run_matcher_full_db_diff.py --sample-limit 25
 ```
 
 This is a heavy live parity gate, not a quick support check. See

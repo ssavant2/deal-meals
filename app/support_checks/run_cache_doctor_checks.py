@@ -1,0 +1,157 @@
+#!/usr/bin/env python3
+"""Policy checks for cache doctor and cache-operation metadata helpers."""
+
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+
+
+APP_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(APP_DIR))
+
+from cache_doctor import _overall_status, _summary
+from cache_operation_metadata import (
+    MAX_OPERATION_HISTORY,
+    build_cache_last_operation,
+    summarize_cache_operation_history,
+)
+
+
+def check(name: str, actual, expected) -> None:
+    if actual != expected:
+        raise AssertionError(f"{name}: expected {expected!r}, got {actual!r}")
+    print(f"OK {name}")
+
+
+def main() -> int:
+    operation = build_cache_last_operation(
+        {
+            "run_kind": "recipe_delta_patch_preview",
+            "source": "recipe_scrape:koket:incremental",
+            "status": "ready",
+            "effective_rebuild_mode": "delta",
+            "changed_recipe_count": "20",
+            "removed_recipe_count": 0,
+            "changed_recipe_ids": ["should-not-be-persisted"],
+            "patch_result": {
+                "total_matches": 1234,
+                "inserted_count": 18,
+                "deleted_count": 2,
+                "inserted_recipe_ids": ["should-not-be-persisted"],
+            },
+            "trigger_reason": "delta_apply_failed:materialized_patch_mismatch",
+            "recipe_delta_decision": "full",
+            "recipe_delta_reason": "ratio_above_threshold",
+            "affected_recipe_count": "500",
+            "active_recipe_count": "13000",
+            "affected_ratio_pct": "3.8461",
+            "delta_ratio_threshold_pct": 2.0,
+            "changed_offer_sample": [
+                {
+                    "kind": "score_changed",
+                    "name": "x" * 300,
+                    "price": "12.00",
+                }
+            ],
+            "offer_change_counts": {"score_changed": 1},
+            "offer_delta_impact_mode": "fast_sql",
+            "cache_reconciliation_trigger": "recipe_batch:koket",
+            "cache_reconciliation_reason": "full_rebuild_age_due",
+            "cache_reconciliation_idle_seconds": "1200",
+            "cache_reconciliation_incremental_operations_since_full": "25",
+            "cache_reconciliation_min_age_hours": "168",
+            "cache_reconciliation_max_incremental_operations": "25",
+            "cache_reconciliation_last_full_age_hours": "200.5",
+            "error": "x" * 700,
+        },
+        operation_type="recipe_delta",
+    )
+
+    check("operation mode", operation["mode"], "recipe_delta")
+    check("operation status", operation["status"], "ready")
+    check("operation changed count coerced", operation["changed_recipe_count"], 20)
+    check("operation patch total", operation["total_matches"], 1234)
+    check("operation patch inserted", operation["patch_inserted_count"], 18)
+    check("operation trigger reason", operation["trigger_reason"], "delta_apply_failed:materialized_patch_mismatch")
+    check("operation recipe delta decision", operation["recipe_delta_decision"], "full")
+    check("operation affected recipe count", operation["affected_recipe_count"], 500)
+    check("operation affected ratio pct", operation["affected_ratio_pct"], 3.8461)
+    check("operation threshold pct", operation["delta_ratio_threshold_pct"], 2.0)
+    check("operation offer impact mode", operation["offer_delta_impact_mode"], "fast_sql")
+    check("operation reconciliation trigger", operation["cache_reconciliation_trigger"], "recipe_batch:koket")
+    check("operation reconciliation idle", operation["cache_reconciliation_idle_seconds"], 1200)
+    check("operation reconciliation age", operation["cache_reconciliation_last_full_age_hours"], 200.5)
+    check("operation keeps changed offer sample", operation["changed_offer_sample"][0]["kind"], "score_changed")
+    check("operation bounds changed offer sample text", operation["changed_offer_sample"][0]["name"].endswith("..."), True)
+    check("operation keeps offer change counts", operation["offer_change_counts"]["score_changed"], 1)
+    check("operation excludes id lists", "changed_recipe_ids" in operation, False)
+    check("operation truncates long error", operation["error"].endswith("..."), True)
+    check("operation truncates to bounded length", len(operation["error"]), 503)
+
+    history = [
+        {"mode": "full_rebuild", "status": "ready", "generated_at": "2026-04-30T01:00:00+00:00"},
+        {
+            "mode": "recipe_delta",
+            "status": "fallback",
+            "fallback_reason": "materialized_patch_mismatch",
+            "generated_at": "2026-04-30T02:00:00+00:00",
+        },
+        {
+            "mode": "full_rebuild",
+            "status": "error",
+            "error": "boom",
+            "generated_at": "2026-04-30T03:00:00+00:00",
+        },
+        {
+            "mode": "offer_delta",
+            "status": "fallback",
+            "fallback_reason": "planner_missed_preview_diff",
+            "generated_at": "2026-04-30T04:00:00+00:00",
+        },
+        {
+            "mode": "recipe_delta",
+            "status": "fallback",
+            "fallback_reason": "planner_missed_preview_diff",
+            "generated_at": "2026-04-30T05:00:00+00:00",
+        },
+    ]
+    history_summary = summarize_cache_operation_history(history, recent_window=3)
+    check("history size", history_summary["history_size"], 5)
+    check("history limit", history_summary["history_limit"], MAX_OPERATION_HISTORY)
+    check("history fallback count", history_summary["fallback_count"], 3)
+    check("history fallback rate", history_summary["fallback_rate_pct"], 60.0)
+    check("history recent fallback count", history_summary["recent_fallback_count"], 2)
+    check("history recent error count", history_summary["recent_error_count"], 1)
+    check("history consecutive fallbacks", history_summary["consecutive_fallbacks"], 2)
+    check("history fallback reasons", history_summary["fallback_reasons"], {
+        "materialized_patch_mismatch": 1,
+        "planner_missed_preview_diff": 2,
+    })
+    check("history by mode", history_summary["by_mode"], {
+        "full_rebuild": 2,
+        "offer_delta": 1,
+        "recipe_delta": 2,
+    })
+
+    checks = [
+        {"status": "ok"},
+        {"status": "warning"},
+        {"status": "ok"},
+    ]
+    check("overall warning", _overall_status(checks), "warning")
+    check("summary counts", _summary(checks), {
+        "checks": 3,
+        "ok": 2,
+        "warning": 1,
+        "error": 0,
+    })
+    checks.append({"status": "error"})
+    check("overall error wins", _overall_status(checks), "error")
+
+    print("ALL CACHE DOCTOR CHECKS PASSED")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

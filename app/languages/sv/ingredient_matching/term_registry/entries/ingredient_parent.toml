@@ -8,7 +8,7 @@ variants = ["jasminris"]
 ingredient_terms = ["ris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -31,7 +31,7 @@ variants = ["basmatiris"]
 ingredient_terms = ["ris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -54,7 +54,7 @@ variants = ["arborio"]
 ingredient_terms = ["risottoris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -77,7 +77,7 @@ variants = ["arborioris"]
 ingredient_terms = ["risottoris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -100,7 +100,7 @@ variants = ["carnaroliris"]
 ingredient_terms = ["risottoris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -123,7 +123,7 @@ variants = ["carnaroli"]
 ingredient_terms = ["risottoris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -146,7 +146,7 @@ variants = ["vialonenano"]
 ingredient_terms = ["risottoris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -169,7 +169,7 @@ variants = ["avorio"]
 ingredient_terms = ["risottoris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -192,7 +192,7 @@ variants = ["långkornsris"]
 ingredient_terms = ["ris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -215,7 +215,7 @@ variants = ["langkornsris"]
 ingredient_terms = ["ris"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -238,7 +238,7 @@ variants = ["fusilli"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -261,7 +261,7 @@ variants = ["penne"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -284,7 +284,7 @@ variants = ["rigate"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -307,7 +307,7 @@ variants = ["maniche"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -330,7 +330,7 @@ variants = ["mafalda"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -353,7 +353,7 @@ variants = ["conchiglie"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -376,7 +376,7 @@ variants = ["conchigle"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -399,7 +399,7 @@ variants = ["gemelli"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -422,7 +422,7 @@ variants = ["rigatoni"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -445,7 +445,7 @@ variants = ["radiatori"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -468,7 +468,7 @@ variants = ["farfalle"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -491,7 +491,7 @@ variants = ["tortiglioni"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -514,7 +514,7 @@ variants = ["caserecce"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -537,7 +537,7 @@ variants = ["girandole"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -560,7 +560,7 @@ variants = ["strozzapreti"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -583,7 +583,7 @@ variants = ["strozzapretti"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -606,7 +606,7 @@ variants = ["orecchiette"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -629,7 +629,7 @@ variants = ["ziti"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -652,7 +652,7 @@ variants = ["spaghetti"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -675,7 +675,7 @@ variants = ["spagetti"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -698,7 +698,7 @@ variants = ["linguine"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -721,7 +721,7 @@ variants = ["tagliatelle"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -744,7 +744,7 @@ variants = ["fettuccine"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -767,7 +767,7 @@ variants = ["fettuccini"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -790,7 +790,7 @@ variants = ["fettucine"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -813,7 +813,7 @@ variants = ["pappardelle"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -836,7 +836,7 @@ variants = ["tagliolini"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -859,7 +859,7 @@ variants = ["bucatini"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -882,7 +882,7 @@ variants = ["capellini"]
 ingredient_terms = ["långpasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -905,7 +905,7 @@ variants = ["makaroner"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -928,7 +928,7 @@ variants = ["maccaronetti"]
 ingredient_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -951,7 +951,7 @@ variants = ["delikatessköttbullar"]
 ingredient_terms = ["köttbullar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -974,7 +974,7 @@ variants = ["delikatesskottbullar"]
 ingredient_terms = ["köttbullar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -997,7 +997,7 @@ variants = ["nötköttbullar"]
 ingredient_terms = ["köttbullar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1020,7 +1020,7 @@ variants = ["notkottbullar"]
 ingredient_terms = ["köttbullar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1043,7 +1043,7 @@ variants = ["minutkyckling"]
 ingredient_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1066,7 +1066,7 @@ variants = ["minutstrimlor"]
 ingredient_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1089,7 +1089,7 @@ variants = ["minutfilé"]
 ingredient_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1112,7 +1112,7 @@ variants = ["minutfile"]
 ingredient_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1135,7 +1135,7 @@ variants = ["minutbitar"]
 ingredient_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1158,7 +1158,7 @@ variants = ["gårdspommes"]
 ingredient_terms = ["pommes"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1181,7 +1181,7 @@ variants = ["gardspommes"]
 ingredient_terms = ["pommes"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1204,7 +1204,7 @@ variants = ["mandelpotatis"]
 ingredient_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1227,7 +1227,7 @@ variants = ["blomkålshuvud"]
 ingredient_terms = ["blomkål"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1250,7 +1250,7 @@ variants = ["blomkalshuvud"]
 ingredient_terms = ["blomkål"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1273,7 +1273,7 @@ variants = ["kålhuvud"]
 ingredient_terms = ["vitkål"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1296,7 +1296,7 @@ variants = ["kalhuvud"]
 ingredient_terms = ["vitkål"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1319,7 +1319,7 @@ variants = ["ruccolasallat"]
 ingredient_terms = ["rucola"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1342,7 +1342,7 @@ variants = ["ruccolasallad"]
 ingredient_terms = ["rucola"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1365,7 +1365,7 @@ variants = ["frukostägg"]
 ingredient_terms = ["ägg"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1388,7 +1388,7 @@ variants = ["tacokyckling"]
 ingredient_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1411,7 +1411,7 @@ variants = ["gyroskyckling"]
 ingredient_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1434,7 +1434,7 @@ variants = ["kvisttomat"]
 ingredient_terms = ["tomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1457,7 +1457,7 @@ variants = ["kvisttomater"]
 ingredient_terms = ["tomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1480,7 +1480,7 @@ variants = ["körsbärstomat"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1503,7 +1503,7 @@ variants = ["körsbärstomater"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1526,7 +1526,7 @@ variants = ["korsbarstomat"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1549,7 +1549,7 @@ variants = ["korsbarstomater"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1572,7 +1572,7 @@ variants = ["cocktailtomat"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1595,7 +1595,7 @@ variants = ["cocktailtomater"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1618,7 +1618,7 @@ variants = ["babyplommontomat"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1641,7 +1641,7 @@ variants = ["babyplommontomater"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1664,7 +1664,7 @@ variants = ["babyplommon"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1687,7 +1687,7 @@ variants = ["piccolinitomat"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1710,7 +1710,7 @@ variants = ["piccolinitomater"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1733,7 +1733,7 @@ variants = ["piccolini"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1756,7 +1756,7 @@ variants = ["småtomater"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1779,7 +1779,7 @@ variants = ["romanticatomat"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1802,7 +1802,7 @@ variants = ["romanticatomater"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1825,7 +1825,7 @@ variants = ["romantica"]
 ingredient_terms = ["småtomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1848,7 +1848,7 @@ variants = ["plommontomat"]
 ingredient_terms = ["tomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1871,7 +1871,7 @@ variants = ["plommontomater"]
 ingredient_terms = ["tomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1894,7 +1894,7 @@ variants = ["bifftomat"]
 ingredient_terms = ["tomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1917,7 +1917,7 @@ variants = ["bifftomater"]
 ingredient_terms = ["tomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1940,7 +1940,7 @@ variants = ["fänkålsfrön"]
 ingredient_terms = ["fänkålsfrö"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1963,7 +1963,7 @@ variants = ["fankalsfron"]
 ingredient_terms = ["fankalsfro"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -1986,7 +1986,7 @@ variants = ["fänkålsfrö"]
 ingredient_terms = ["fänkål"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2009,7 +2009,7 @@ variants = ["fankalsfro"]
 ingredient_terms = ["fänkål"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2032,7 +2032,7 @@ variants = ["korianderfrön"]
 ingredient_terms = ["koriander"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2055,7 +2055,7 @@ variants = ["korianderfron"]
 ingredient_terms = ["koriander"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2078,7 +2078,7 @@ variants = ["valnötskärnor"]
 ingredient_terms = ["valnötter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2101,7 +2101,7 @@ variants = ["valnotskarnor"]
 ingredient_terms = ["valnotter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2124,7 +2124,7 @@ variants = ["hasselnötkärnor"]
 ingredient_terms = ["hasselnötter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2147,7 +2147,7 @@ variants = ["hasselnotkarnor"]
 ingredient_terms = ["hasselnotter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2170,7 +2170,7 @@ variants = ["pumpakärnor"]
 ingredient_terms = ["pumpafrön"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2193,7 +2193,7 @@ variants = ["pumpakaernor"]
 ingredient_terms = ["pumpafrön"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2216,7 +2216,7 @@ variants = ["pumpakarnor"]
 ingredient_terms = ["pumpafron"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2239,7 +2239,7 @@ variants = ["pumpafrön"]
 ingredient_terms = ["pumpakärnor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2262,7 +2262,7 @@ variants = ["pumpafron"]
 ingredient_terms = ["pumpakarnor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2285,7 +2285,7 @@ variants = ["kikärtor"]
 ingredient_terms = ["kikärter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2308,7 +2308,7 @@ variants = ["kikartor"]
 ingredient_terms = ["kikarter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2331,7 +2331,7 @@ variants = ["kikärter"]
 ingredient_terms = ["kikärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2354,7 +2354,7 @@ variants = ["kikarter"]
 ingredient_terms = ["kikartor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2377,7 +2377,7 @@ variants = ["blackeyeböna"]
 ingredient_terms = ["böna"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2400,7 +2400,7 @@ variants = ["blackeyebönor"]
 ingredient_terms = ["bönor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2423,7 +2423,7 @@ variants = ["blackeyebona"]
 ingredient_terms = ["bona"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2446,7 +2446,7 @@ variants = ["blackeyebonor"]
 ingredient_terms = ["bonor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2469,7 +2469,7 @@ variants = ["bönmix"]
 ingredient_terms = ["bönor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2492,7 +2492,7 @@ variants = ["bonmix"]
 ingredient_terms = ["bonor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2515,7 +2515,7 @@ variants = ["strömmingsflundra"]
 ingredient_terms = ["strömming"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2538,7 +2538,7 @@ variants = ["strommingsflundra"]
 ingredient_terms = ["strömming"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2561,7 +2561,7 @@ variants = ["fiskgrytbitar"]
 ingredient_terms = ["lax"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2584,7 +2584,7 @@ variants = ["laxfiléer"]
 ingredient_terms = ["laxfilé"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2607,7 +2607,7 @@ variants = ["laxfileer"]
 ingredient_terms = ["laxfilé"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2630,7 +2630,7 @@ variants = ["storkornskaviar"]
 ingredient_terms = ["stenbitsrom"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2653,7 +2653,7 @@ variants = ["kanelhel"]
 ingredient_terms = ["kanel"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2676,7 +2676,7 @@ variants = ["citronjuice"]
 ingredient_terms = ["citron"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2699,7 +2699,7 @@ variants = ["limejuice"]
 ingredient_terms = ["lime"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2722,7 +2722,7 @@ variants = ["karamellfärg"]
 ingredient_terms = ["hushållsfärg"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2745,7 +2745,7 @@ variants = ["karamellfarg"]
 ingredient_terms = ["hushållsfärg"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2768,7 +2768,7 @@ variants = ["limefrukt"]
 ingredient_terms = ["lime"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2791,7 +2791,7 @@ variants = ["avokador"]
 ingredient_terms = ["avokado"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2814,7 +2814,7 @@ variants = ["avocados"]
 ingredient_terms = ["avokado"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2837,7 +2837,7 @@ variants = ["hirsflingor"]
 ingredient_terms = ["hirs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2860,7 +2860,7 @@ variants = ["bananer"]
 ingredient_terms = ["banan"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2883,7 +2883,7 @@ variants = ["grapefrukter"]
 ingredient_terms = ["grapefrukt"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2906,7 +2906,7 @@ variants = ["philadelphiaost"]
 ingredient_terms = ["färskost"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2929,7 +2929,7 @@ variants = ["vispgrädde"]
 ingredient_terms = ["grädde"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2952,7 +2952,7 @@ variants = ["vispgradde"]
 ingredient_terms = ["gradde"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2975,7 +2975,7 @@ variants = ["matlagningsgrädde"]
 ingredient_terms = ["grädde"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -2998,7 +2998,7 @@ variants = ["matlagningsgradde"]
 ingredient_terms = ["gradde"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3021,7 +3021,7 @@ variants = ["smörgåsgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3044,7 +3044,7 @@ variants = ["smorgasgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3067,7 +3067,7 @@ variants = ["smörgåsgurkor"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3090,7 +3090,7 @@ variants = ["smorgasgurkor"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3113,7 +3113,7 @@ variants = ["ättiksgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3136,7 +3136,7 @@ variants = ["attiksgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3159,7 +3159,7 @@ variants = ["ättiksgurkor"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3182,7 +3182,7 @@ variants = ["attiksgurkor"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3205,7 +3205,7 @@ variants = ["saltgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3228,7 +3228,7 @@ variants = ["ishavsräkor"]
 ingredient_terms = ["räkor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3251,7 +3251,7 @@ variants = ["ishavsrakor"]
 ingredient_terms = ["rakor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3274,7 +3274,7 @@ variants = ["kräftor"]
 ingredient_terms = ["signalkräftor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3297,7 +3297,7 @@ variants = ["kraftor"]
 ingredient_terms = ["signalkraftor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3320,7 +3320,7 @@ variants = ["signalkräfta"]
 ingredient_terms = ["signalkräftor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3343,7 +3343,7 @@ variants = ["signalkrafta"]
 ingredient_terms = ["signalkraftor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3366,7 +3366,7 @@ variants = ["havskräfta"]
 ingredient_terms = ["havskräftor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3389,7 +3389,7 @@ variants = ["havskrafta"]
 ingredient_terms = ["havskraftor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3412,7 +3412,7 @@ variants = ["brieost"]
 ingredient_terms = ["brie"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3435,7 +3435,7 @@ variants = ["gruyèreost"]
 ingredient_terms = ["gruyere"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3458,7 +3458,7 @@ variants = ["gruyereost"]
 ingredient_terms = ["gruyere"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3481,7 +3481,7 @@ variants = ["gruyerost"]
 ingredient_terms = ["gruyere"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3504,7 +3504,7 @@ variants = ["senapsfrön"]
 ingredient_terms = ["senapsfrö"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3527,7 +3527,7 @@ variants = ["senapsfron"]
 ingredient_terms = ["senapsfrö"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3550,7 +3550,7 @@ variants = ["linfrön"]
 ingredient_terms = ["linfrö"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3573,7 +3573,7 @@ variants = ["linfron"]
 ingredient_terms = ["linfro"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3596,7 +3596,7 @@ variants = ["maizena"]
 ingredient_terms = ["majsstärkelse"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3619,7 +3619,7 @@ variants = ["majsena"]
 ingredient_terms = ["majsstärkelse"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3642,7 +3642,7 @@ variants = ["redning"]
 ingredient_terms = ["majsstärkelse"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3665,7 +3665,7 @@ variants = ["korianderblad"]
 ingredient_terms = ["koriander"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3688,7 +3688,7 @@ variants = ["nötcreme"]
 ingredient_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3711,7 +3711,7 @@ variants = ["notcreme"]
 ingredient_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3734,7 +3734,7 @@ variants = ["nötkräm"]
 ingredient_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3757,7 +3757,7 @@ variants = ["notkräm"]
 ingredient_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3780,7 +3780,7 @@ variants = ["notkram"]
 ingredient_terms = ["nötkräm"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3803,7 +3803,7 @@ variants = ["sardellfiléer"]
 ingredient_terms = ["sardeller"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3826,7 +3826,7 @@ variants = ["sardellfileer"]
 ingredient_terms = ["sardeller"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3849,7 +3849,7 @@ variants = ["sardellfilé"]
 ingredient_terms = ["sardeller"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3872,7 +3872,7 @@ variants = ["sardellfile"]
 ingredient_terms = ["sardeller"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3895,7 +3895,7 @@ variants = ["sardellcrème"]
 ingredient_terms = ["sardellcreme"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3918,7 +3918,7 @@ variants = ["sardellcremé"]
 ingredient_terms = ["sardellcreme"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3941,7 +3941,7 @@ variants = ["sardellcréme"]
 ingredient_terms = ["sardellcreme"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3964,7 +3964,7 @@ variants = ["sardellkräm"]
 ingredient_terms = ["sardellcreme"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3987,7 +3987,7 @@ variants = ["sardellkram"]
 ingredient_terms = ["sardellcreme"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4010,7 +4010,7 @@ variants = ["srirachasås"]
 ingredient_terms = ["sriracha"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4033,7 +4033,7 @@ variants = ["worcestershire"]
 ingredient_terms = ["worcestersås"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4056,7 +4056,7 @@ variants = ["worcestershiresauce"]
 ingredient_terms = ["worcestersås"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4079,7 +4079,7 @@ variants = ["worcestershiresås"]
 ingredient_terms = ["worcestersås"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4102,7 +4102,7 @@ variants = ["worcestershiresas"]
 ingredient_terms = ["worcestersas"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4125,7 +4125,7 @@ variants = ["worchestersås"]
 ingredient_terms = ["worcestersås"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4148,7 +4148,7 @@ variants = ["worchestersas"]
 ingredient_terms = ["worcestersas"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4171,7 +4171,7 @@ variants = ["hoisin"]
 ingredient_terms = ["hoisinsås"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4194,7 +4194,7 @@ variants = ["pistaschnötter"]
 ingredient_terms = ["pistagenötter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4217,7 +4217,7 @@ variants = ["pistaschnotter"]
 ingredient_terms = ["pistagenotter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4240,7 +4240,7 @@ variants = ["pistaschkärnor"]
 ingredient_terms = ["pistagenötter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4263,7 +4263,7 @@ variants = ["pistaschkarnor"]
 ingredient_terms = ["pistagenotter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4286,7 +4286,7 @@ variants = ["pistagekärnor"]
 ingredient_terms = ["pistagenötter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4309,7 +4309,7 @@ variants = ["pistagekarnor"]
 ingredient_terms = ["pistagenotter"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4332,7 +4332,7 @@ variants = ["libabröd"]
 ingredient_terms = ["tunnbröd"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4355,7 +4355,7 @@ variants = ["libabrod"]
 ingredient_terms = ["tunnbröd"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4378,7 +4378,7 @@ variants = ["liba"]
 ingredient_terms = ["tunnbröd"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4401,7 +4401,7 @@ variants = ["schalotten"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4424,7 +4424,7 @@ variants = ["schalottenlökar"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4447,7 +4447,7 @@ variants = ["schalottenlokar"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4470,7 +4470,7 @@ variants = ["scharlottenlök"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4493,7 +4493,7 @@ variants = ["scharlottenlökar"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4516,7 +4516,7 @@ variants = ["scharlottenlokar"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4539,7 +4539,7 @@ variants = ["lökar"]
 ingredient_terms = ["lök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4562,7 +4562,7 @@ variants = ["lokar"]
 ingredient_terms = ["lök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4585,7 +4585,7 @@ variants = ["steklökar"]
 ingredient_terms = ["steklök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4608,7 +4608,7 @@ variants = ["steklokar"]
 ingredient_terms = ["steklök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4631,7 +4631,7 @@ variants = ["rödlökar"]
 ingredient_terms = ["rödlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4654,7 +4654,7 @@ variants = ["rodlokar"]
 ingredient_terms = ["rodlok"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4677,7 +4677,7 @@ variants = ["salladslökar"]
 ingredient_terms = ["salladslök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4700,7 +4700,7 @@ variants = ["salladslokar"]
 ingredient_terms = ["salladslok"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4723,7 +4723,7 @@ variants = ["romansallat"]
 ingredient_terms = ["romansallad"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4746,7 +4746,7 @@ variants = ["huvudsallat"]
 ingredient_terms = ["huvudsallad"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4769,7 +4769,7 @@ variants = ["huvudsallatshuvud"]
 ingredient_terms = ["huvudsallad"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4792,7 +4792,7 @@ variants = ["krispsallad"]
 ingredient_terms = ["krispsallat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4815,7 +4815,7 @@ variants = ["kruksallad"]
 ingredient_terms = ["krispsallat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4838,7 +4838,7 @@ variants = ["gemsallad"]
 ingredient_terms = ["hjärtsallad"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4861,7 +4861,7 @@ variants = ["babygemsallad"]
 ingredient_terms = ["hjärtsallad"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4884,7 +4884,7 @@ variants = ["gemsalladshuvud"]
 ingredient_terms = ["hjärtsallad"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4907,7 +4907,7 @@ variants = ["gemsalladshuvuden"]
 ingredient_terms = ["hjärtsallad"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4930,7 +4930,7 @@ variants = ["selleristjälkar"]
 ingredient_terms = ["bladselleri"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4953,7 +4953,7 @@ variants = ["selleristjalkar"]
 ingredient_terms = ["bladselleri"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4976,7 +4976,7 @@ variants = ["selleristjälk"]
 ingredient_terms = ["bladselleri"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -4999,7 +4999,7 @@ variants = ["selleristjalk"]
 ingredient_terms = ["bladselleri"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5022,7 +5022,7 @@ variants = ["blekselleristjälkar"]
 ingredient_terms = ["bladselleri"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5045,7 +5045,7 @@ variants = ["blekselleristjälk"]
 ingredient_terms = ["bladselleri"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5068,7 +5068,7 @@ variants = ["pastaplattor"]
 ingredient_terms = ["lasagneplattor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5091,7 +5091,7 @@ variants = ["paprikakrydda"]
 ingredient_terms = ["paprikapulver"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5114,7 +5114,7 @@ variants = ["matolja"]
 ingredient_terms = ["rapsolja"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5137,7 +5137,7 @@ variants = ["nejlika"]
 ingredient_terms = ["nejlikor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5160,7 +5160,7 @@ variants = ["kryddnejlika"]
 ingredient_terms = ["nejlikor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5183,7 +5183,7 @@ variants = ["kryddnejlikor"]
 ingredient_terms = ["nejlikor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5206,7 +5206,7 @@ variants = ["gulbetor"]
 ingredient_terms = ["gulbeta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5229,7 +5229,7 @@ variants = ["sockerärta"]
 ingredient_terms = ["sockerärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5252,7 +5252,7 @@ variants = ["sockerarta"]
 ingredient_terms = ["sockerärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5275,7 +5275,7 @@ variants = ["sockerärter"]
 ingredient_terms = ["sockerärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5298,7 +5298,7 @@ variants = ["sockerarter"]
 ingredient_terms = ["sockerärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5321,7 +5321,7 @@ variants = ["sugarsnaps"]
 ingredient_terms = ["sockerärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5344,7 +5344,7 @@ variants = ["sugarsnap"]
 ingredient_terms = ["sockerärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5367,7 +5367,7 @@ variants = ["salladsärta"]
 ingredient_terms = ["salladsärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5390,7 +5390,7 @@ variants = ["salladsarta"]
 ingredient_terms = ["salladsärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5413,7 +5413,7 @@ variants = ["salladsärter"]
 ingredient_terms = ["salladsärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5436,7 +5436,7 @@ variants = ["salladsarter"]
 ingredient_terms = ["salladsärtor"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5459,7 +5459,7 @@ variants = ["haricoverts"]
 ingredient_terms = ["haricot"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5482,7 +5482,7 @@ variants = ["potatisklyftor"]
 ingredient_terms = ["klyftpotatis"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5505,7 +5505,7 @@ variants = ["polenta"]
 ingredient_terms = ["majsmjöl"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5528,7 +5528,7 @@ variants = ["mineralvatten"]
 ingredient_terms = ["sodavatten"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5551,7 +5551,7 @@ variants = ["wokgrönsaker"]
 ingredient_terms = ["wokmix"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5574,7 +5574,7 @@ variants = ["wokgronsaker"]
 ingredient_terms = ["wokmix"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5597,7 +5597,7 @@ variants = ["sommargrönsaker"]
 ingredient_terms = ["sommargrönsaker"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5620,7 +5620,7 @@ variants = ["sommargronsaker"]
 ingredient_terms = ["sommargrönsaker"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5643,7 +5643,7 @@ variants = ["muscovadorörsocker"]
 ingredient_terms = ["muscovadosocker"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5666,7 +5666,7 @@ variants = ["muscovadororsocker"]
 ingredient_terms = ["muscovadosocker"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5689,7 +5689,7 @@ variants = ["råsocker"]
 ingredient_terms = ["rörsocker"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5712,7 +5712,7 @@ variants = ["rasocker"]
 ingredient_terms = ["rörsocker"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5735,7 +5735,7 @@ variants = ["wasabipasta"]
 ingredient_terms = ["wasabi"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5758,7 +5758,7 @@ variants = ["wasabipulver"]
 ingredient_terms = ["wasabi"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5781,7 +5781,7 @@ variants = ["gullök"]
 ingredient_terms = ["lök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5804,7 +5804,7 @@ variants = ["gullok"]
 ingredient_terms = ["lök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5827,7 +5827,7 @@ variants = ["sashimilax"]
 ingredient_terms = ["sushilax"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5850,7 +5850,7 @@ variants = ["solroskärnor"]
 ingredient_terms = ["solrosfrön"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5873,7 +5873,7 @@ variants = ["solroskarnor"]
 ingredient_terms = ["solrosfrön"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5896,7 +5896,7 @@ variants = ["trattkantareller"]
 ingredient_terms = ["kantareller"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5919,7 +5919,7 @@ variants = ["trattkantarell"]
 ingredient_terms = ["kantareller"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5942,7 +5942,7 @@ variants = ["polkabetor"]
 ingredient_terms = ["polkabeta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5965,7 +5965,7 @@ variants = ["muskot"]
 ingredient_terms = ["muskotnöt"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -5988,7 +5988,7 @@ variants = ["muskotnot"]
 ingredient_terms = ["muskotnöt"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6011,7 +6011,7 @@ variants = ["nöt"]
 ingredient_terms = ["nötkött"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6034,7 +6034,7 @@ variants = ["not"]
 ingredient_terms = ["nötkött"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6057,7 +6057,7 @@ variants = ["chilifrukter"]
 ingredient_terms = ["chili"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6080,7 +6080,7 @@ variants = ["chilifrukt"]
 ingredient_terms = ["chili"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6103,7 +6103,7 @@ variants = ["chilipeppar"]
 ingredient_terms = ["chili"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6126,7 +6126,7 @@ variants = ["anchochili"]
 ingredient_terms = ["ancho"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6149,7 +6149,7 @@ variants = ["habanerochili"]
 ingredient_terms = ["habanero"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6172,7 +6172,7 @@ variants = ["nagachili"]
 ingredient_terms = ["naga"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6195,7 +6195,7 @@ variants = ["jalapenos"]
 ingredient_terms = ["jalapeno"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6218,7 +6218,7 @@ variants = ["basilka"]
 ingredient_terms = ["basilika"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6241,7 +6241,7 @@ variants = ["basilikablad"]
 ingredient_terms = ["basilika"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6264,7 +6264,7 @@ variants = ["potatisar"]
 ingredient_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6287,7 +6287,7 @@ variants = ["morötter"]
 ingredient_terms = ["morot"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6310,7 +6310,7 @@ variants = ["morotter"]
 ingredient_terms = ["morot"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6333,7 +6333,7 @@ variants = ["morätter"]
 ingredient_terms = ["morot"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6356,7 +6356,7 @@ variants = ["moratter"]
 ingredient_terms = ["morot"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6379,7 +6379,7 @@ variants = ["delikatesspotatis"]
 ingredient_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6402,7 +6402,7 @@ variants = ["snackmorötter"]
 ingredient_terms = ["morot"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6425,7 +6425,7 @@ variants = ["tomater"]
 ingredient_terms = ["tomat"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6448,7 +6448,7 @@ variants = ["kantareller"]
 ingredient_terms = ["kantarell"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6471,7 +6471,7 @@ variants = ["murklor"]
 ingredient_terms = ["murkla"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6494,7 +6494,7 @@ variants = ["fläskkotletter"]
 ingredient_terms = ["fläskkotlett"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6517,7 +6517,7 @@ variants = ["kycklingar"]
 ingredient_terms = ["kyckling"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6540,7 +6540,7 @@ variants = ["kalkonkött"]
 ingredient_terms = ["kalkon"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6563,7 +6563,7 @@ variants = ["kalkonkott"]
 ingredient_terms = ["kalkon"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6586,7 +6586,7 @@ variants = ["kycklingbröst"]
 ingredient_terms = ["kycklingfilé"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6609,7 +6609,7 @@ variants = ["kycklingbrost"]
 ingredient_terms = ["kycklingfilé"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6632,7 +6632,7 @@ variants = ["kycklingfiléer"]
 ingredient_terms = ["kycklingfilé"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6655,7 +6655,7 @@ variants = ["kycklingfileer"]
 ingredient_terms = ["kycklingfilé"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6678,7 +6678,7 @@ variants = ["köttfärs"]
 ingredient_terms = ["färs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6701,7 +6701,7 @@ variants = ["kottfars"]
 ingredient_terms = ["färs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6724,7 +6724,7 @@ variants = ["hushållsfärs"]
 ingredient_terms = ["färs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6747,7 +6747,7 @@ variants = ["hushallsfars"]
 ingredient_terms = ["färs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6770,7 +6770,7 @@ variants = ["lamfärs"]
 ingredient_terms = ["lammfärs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6793,7 +6793,7 @@ variants = ["lamfars"]
 ingredient_terms = ["lammfärs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6816,7 +6816,7 @@ variants = ["sojafärs"]
 ingredient_terms = ["vegofärs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6839,7 +6839,7 @@ variants = ["sojafars"]
 ingredient_terms = ["vegofärs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6862,7 +6862,7 @@ variants = ["quornfärs"]
 ingredient_terms = ["vegofärs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6885,7 +6885,7 @@ variants = ["quornfars"]
 ingredient_terms = ["vegofärs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6908,7 +6908,7 @@ variants = ["squash"]
 ingredient_terms = ["zucchini"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6931,7 +6931,7 @@ variants = ["jordärtskockor"]
 ingredient_terms = ["jordärtskocka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6954,7 +6954,7 @@ variants = ["jordartskockor"]
 ingredient_terms = ["jordärtskocka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -6977,7 +6977,7 @@ variants = ["rödbetor"]
 ingredient_terms = ["rödbeta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7000,7 +7000,7 @@ variants = ["rodbetor"]
 ingredient_terms = ["rödbeta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7023,7 +7023,7 @@ variants = ["palsternackor"]
 ingredient_terms = ["palsternacka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7046,7 +7046,7 @@ variants = ["kronärtskockor"]
 ingredient_terms = ["kronärtskocka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7069,7 +7069,7 @@ variants = ["kronartskockor"]
 ingredient_terms = ["kronärtskocka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7092,7 +7092,7 @@ variants = ["paprikor"]
 ingredient_terms = ["paprika"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7115,7 +7115,7 @@ variants = ["gurkor"]
 ingredient_terms = ["gurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7138,7 +7138,7 @@ variants = ["persikor"]
 ingredient_terms = ["persika"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7161,7 +7161,7 @@ variants = ["nektariner"]
 ingredient_terms = ["nektarin"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7184,7 +7184,7 @@ variants = ["kålrötter"]
 ingredient_terms = ["kålrot"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7207,7 +7207,7 @@ variants = ["kalrotter"]
 ingredient_terms = ["kålrot"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7230,7 +7230,7 @@ variants = ["kanelstång"]
 ingredient_terms = ["kanel"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7253,7 +7253,7 @@ variants = ["kanelstang"]
 ingredient_terms = ["kanel"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7276,7 +7276,7 @@ variants = ["kanelstänger"]
 ingredient_terms = ["kanel"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7299,7 +7299,7 @@ variants = ["kanelstanger"]
 ingredient_terms = ["kanel"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7322,7 +7322,7 @@ variants = ["kardemummakapslar"]
 ingredient_terms = ["kardemumma"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7345,7 +7345,7 @@ variants = ["kardemummakapsel"]
 ingredient_terms = ["kardemumma"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7368,7 +7368,7 @@ variants = ["mandel"]
 ingredient_terms = ["mandlar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7391,7 +7391,7 @@ variants = ["korvar"]
 ingredient_terms = ["korv"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7414,7 +7414,7 @@ variants = ["sötmandel"]
 ingredient_terms = ["mandlar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7437,7 +7437,7 @@ variants = ["sötmandlar"]
 ingredient_terms = ["mandlar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7460,7 +7460,7 @@ variants = ["sotmandel"]
 ingredient_terms = ["mandlar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7483,7 +7483,7 @@ variants = ["sotmandlar"]
 ingredient_terms = ["mandlar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7506,7 +7506,7 @@ variants = ["bananschalottenlök"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7529,7 +7529,7 @@ variants = ["bananschalottenloek"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7552,7 +7552,7 @@ variants = ["bananschalotten"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7575,7 +7575,7 @@ variants = ["bananscharlottenlök"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7598,7 +7598,7 @@ variants = ["bananscharlottenlock"]
 ingredient_terms = ["schalottenlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7621,7 +7621,7 @@ variants = ["standardmjölk"]
 ingredient_terms = ["mjölk"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7644,7 +7644,7 @@ variants = ["standardmjolk"]
 ingredient_terms = ["mjölk"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7667,7 +7667,7 @@ variants = ["havremjölk"]
 ingredient_terms = ["havredryck"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7690,7 +7690,7 @@ variants = ["havremjolk"]
 ingredient_terms = ["havredryck"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7713,7 +7713,7 @@ variants = ["skånsksenap"]
 ingredient_terms = ["senap"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7736,7 +7736,7 @@ variants = ["comteost"]
 ingredient_terms = ["comte"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7759,7 +7759,7 @@ variants = ["matlagningsyoghurt"]
 ingredient_terms = ["yoghurt"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7782,7 +7782,7 @@ variants = ["myntablad"]
 ingredient_terms = ["mynta"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7805,7 +7805,7 @@ variants = ["kajennpeppar"]
 ingredient_terms = ["cayennepeppar"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7828,7 +7828,7 @@ variants = ["äggulor"]
 ingredient_terms = ["ägg"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7851,7 +7851,7 @@ variants = ["äggula"]
 ingredient_terms = ["ägg"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7874,7 +7874,7 @@ variants = ["maränger"]
 ingredient_terms = ["maräng"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7897,7 +7897,7 @@ variants = ["maranger"]
 ingredient_terms = ["marang"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7920,7 +7920,7 @@ variants = ["persiljestjälk"]
 ingredient_terms = ["persilja"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7943,7 +7943,7 @@ variants = ["köttbuljongtärning"]
 ingredient_terms = ["köttbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7966,7 +7966,7 @@ variants = ["köttbuljongtärningar"]
 ingredient_terms = ["köttbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -7989,7 +7989,7 @@ variants = ["kycklingbuljongtärning"]
 ingredient_terms = ["kycklingbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8012,7 +8012,7 @@ variants = ["kycklingbuljongtärningar"]
 ingredient_terms = ["kycklingbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8035,7 +8035,7 @@ variants = ["grönsaksbuljongtärning"]
 ingredient_terms = ["grönsaksbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8058,7 +8058,7 @@ variants = ["grönsaksbuljongtärningar"]
 ingredient_terms = ["grönsaksbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8081,7 +8081,7 @@ variants = ["buljongtärning"]
 ingredient_terms = ["buljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8104,7 +8104,7 @@ variants = ["buljongtärningar"]
 ingredient_terms = ["buljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8127,7 +8127,7 @@ variants = ["hönsbuljong"]
 ingredient_terms = ["kycklingbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8150,7 +8150,7 @@ variants = ["honsbuljong"]
 ingredient_terms = ["kycklingbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8173,7 +8173,7 @@ variants = ["hönsbuljongtärning"]
 ingredient_terms = ["kycklingbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8196,7 +8196,7 @@ variants = ["hönsbuljongtärningar"]
 ingredient_terms = ["kycklingbuljong"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8219,7 +8219,7 @@ variants = ["oxfond"]
 ingredient_terms = ["köttfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8242,7 +8242,7 @@ variants = ["schalottenlökfond"]
 ingredient_terms = ["schalottenlöksfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8265,7 +8265,7 @@ variants = ["hummerfond"]
 ingredient_terms = ["skaldjursfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8288,7 +8288,7 @@ variants = ["räkfond"]
 ingredient_terms = ["skaldjursfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8311,7 +8311,7 @@ variants = ["rakfond"]
 ingredient_terms = ["skaldjursfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8334,7 +8334,7 @@ variants = ["kräftfond"]
 ingredient_terms = ["skaldjursfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8357,7 +8357,7 @@ variants = ["kraftfond"]
 ingredient_terms = ["skaldjursfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8380,7 +8380,7 @@ variants = ["krabbfond"]
 ingredient_terms = ["skaldjursfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8403,7 +8403,7 @@ variants = ["musslefond"]
 ingredient_terms = ["skaldjursfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8426,7 +8426,7 @@ variants = ["musselsfond"]
 ingredient_terms = ["skaldjursfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8449,7 +8449,7 @@ variants = ["musslorfond"]
 ingredient_terms = ["skaldjursfond"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8472,7 +8472,7 @@ variants = ["dragonreduktion"]
 ingredient_terms = ["dragon"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8495,7 +8495,7 @@ variants = ["jungfruolivolja"]
 ingredient_terms = ["olivolja"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8518,7 +8518,7 @@ variants = ["vitlöksklyfta"]
 ingredient_terms = ["vitlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8541,7 +8541,7 @@ variants = ["vitloksklyfta"]
 ingredient_terms = ["vitlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8564,7 +8564,7 @@ variants = ["vitlöksklyftor"]
 ingredient_terms = ["vitlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8587,7 +8587,7 @@ variants = ["vitloksklyftor"]
 ingredient_terms = ["vitlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8610,7 +8610,7 @@ variants = ["vitlöksklyft"]
 ingredient_terms = ["vitlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8633,7 +8633,7 @@ variants = ["vitloksklyft"]
 ingredient_terms = ["vitlök"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8656,7 +8656,7 @@ variants = ["noriblad"]
 ingredient_terms = ["nori"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8679,7 +8679,7 @@ variants = ["sjögräsark"]
 ingredient_terms = ["nori"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8702,7 +8702,7 @@ variants = ["sjograsark"]
 ingredient_terms = ["nori"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8725,7 +8725,7 @@ variants = ["timjankvistar"]
 ingredient_terms = ["timjan"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8748,7 +8748,7 @@ variants = ["timjankvista"]
 ingredient_terms = ["timjan"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8771,7 +8771,7 @@ variants = ["persiljekvistar"]
 ingredient_terms = ["persilja"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8794,7 +8794,7 @@ variants = ["persiljekvista"]
 ingredient_terms = ["persilja"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8817,7 +8817,7 @@ variants = ["citronzest"]
 ingredient_terms = ["citron"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8840,7 +8840,7 @@ variants = ["citrongrässtjälkar"]
 ingredient_terms = ["citrongräs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8863,7 +8863,7 @@ variants = ["citrongrasstjalkar"]
 ingredient_terms = ["citrongräs"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8886,7 +8886,7 @@ variants = ["miniburrata"]
 ingredient_terms = ["burrata"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8909,7 +8909,7 @@ variants = ["blockchoklad"]
 ingredient_terms = ["bakchoklad"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8932,7 +8932,7 @@ variants = ["glass"]
 ingredient_terms = ["vaniljglass"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8955,7 +8955,7 @@ variants = ["gräddglass"]
 ingredient_terms = ["vaniljglass"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -8978,7 +8978,7 @@ variants = ["graddglass"]
 ingredient_terms = ["vaniljglass"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -9001,7 +9001,7 @@ variants = ["äppelcider"]
 ingredient_terms = ["cider"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -9024,7 +9024,7 @@ variants = ["applelcider"]
 ingredient_terms = ["cider"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping migrated in R5."
+notes = "Registry-owned ingredient parent mapping."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"

@@ -5632,7 +5632,7 @@ blocked_offer_patterns = ["\\bkärnor\\b"]
 allowed_specifics = []
 reason = "Pitted-olive recipe ingredient must not match olives sold with pits."
 policy_ref = "batch_16_18_wave_3"
-fixture_refs = ["batch_16_18_urkärnade_oliver_with_pits_negative"]
+fixture_refs = ["matcher_regression_urkarnade_oliver_with_pits_negative"]
 supersedes = []
 
 [[entries.coverage]]
