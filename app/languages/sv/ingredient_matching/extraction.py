@@ -531,7 +531,7 @@ def extract_keywords_from_product(
 
     if any(token in original_name_lower for token in (
         'kokos riven', 'riven kokos', 'kokosflingor',
-        'kokos flakes', 'kokoschips', 'kokos chips',
+        'kokos flakes', 'kokosflakes', 'kokoschips', 'kokos chips',
     )):
         return ['kokosflingor', 'kokos']
 
@@ -542,8 +542,16 @@ def extract_keywords_from_product(
         return ['förkoktmajskolv', 'majskolv']
 
     if (
-        any(cue in original_name_lower for cue in ('svartvinbär', 'svartvinbar', 'svart vinbär', 'svart vinbar'))
-        and re.search(r'\b(?:saft|lättdryck|lattdryck)\b', original_name_lower)
+        'svartvinbärsdryck' in original_name_lower or 'svartvinbarsdryck' in original_name_lower
+    ):
+        return ['svartvinbärssaft', 'svartvinbärsdryck']
+
+    if (
+        any(cue in original_name_lower for cue in (
+            'svartvinbär', 'svartvinbar', 'svart vinbär', 'svart vinbar',
+            'svarta vinbär', 'svarta vinbar',
+        ))
+        and re.search(r'\b(?:saft|blandsaft|lättdryck|lattdryck)\b', original_name_lower)
     ):
         return ['svartvinbärssaft']
 

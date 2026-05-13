@@ -3435,3 +3435,23 @@ source_family = "extraction_helper"
 canonical = "must"
 variant = "must"
 layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.svartvinbarsdryck"
+language = "sv"
+market = "SE"
+canonical = "svartvinbärsdryck"
+status = "active"
+variants = ["svartvinbärsdryck"]
+ingredient_terms = []
+offer_terms = ["svartvinbärsdryck"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:544"]
+layer_policy = ["normal"]
+notes = "Svartvinbärsdryck products (e.g. Svartvinbärsdryck Drickfärdig Kiviks) also emit svartvinbärssaft keyword so drickfärdig svartvinbärssaft recipe lines find them."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "svartvinbärsdryck"
+variant = "svartvinbärsdryck"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"

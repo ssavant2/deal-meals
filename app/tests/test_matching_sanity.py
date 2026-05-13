@@ -10126,6 +10126,22 @@ test("saltgurka accepts real saltgurka", recipe_match_num(["saltgurka"], {"name"
 test("urkärnade oliver blocks oliver med kärnor", recipe_match_num(["urkärnade oliver"], {"name": "Oliver med Kärnor Halkidiki ICA", "category": "condiments"}), 0)
 test("plain oliver accepts oliver med kärnor", recipe_match_num(["oliver"], {"name": "Oliver med Kärnor Halkidiki ICA", "category": "condiments"}), 1)
 
+section("Batch 16-18 P1/medium kokos/svartvinbär extraction regressions")
+# kokosflingor: ICA-style "Kokosflakes" compound form should match kokosflingor ingredient
+test("kokosflakes compound matches kokosflingor", match("kokosflingor", "Kokosflakes Rostade 150g ICA Gott liv", "bread"), "kokosflingor")
+test("kokosflakes ekologiska matches kokosflingor", match("kokosflingor", "Kokosflakes Ekologiska Rostade 200g ICA", "bread"), "kokosflingor")
+test("riven kokos still matches kokosflingor", match("kokosflingor", "Riven Kokos 200g ICA", "bread"), "kokosflingor")
+# svartvinbärssaft: blandsaft + svartvinbär/svarta vinbär spaced forms
+test("blandsaft svartvinbär matches svartvinbärssaft", match("svartvinbärssaft", "Blandsaft Svartvinbär 95cl BOB", "beverages"), "svartvinbärssaft")
+test("blandsaft svarta vinbär spaced matches svartvinbärssaft", match("svartvinbärssaft", "Blandsaft Svarta vinbär 500ml BOB", "beverages"), "svartvinbärssaft")
+test("lättdryck svarta vinbär matches svartvinbärssaft", match("svartvinbärssaft", "Lättdryck Svarta vinbär Koncentrat 2dl Kiviks", "dairy"), "svartvinbärssaft")
+test("svartvinbärsdryck drickfärdig matches svartvinbärssaft", match("svartvinbärssaft", "Svartvinbärsdryck Drickfärdig 1,5l Kiviks", "dairy"), "svartvinbärssaft")
+test("saft svartvinbär still matches", match("svartvinbärssaft", "Saft Svartvinbär 500ml Herrljunga", "beverages"), "svartvinbärssaft")
+# Regression: blandsaft jordgubb must still map to jordgubbssaft, not be broken
+test("blandsaft jordgubb still matches jordgubbssaft", match("jordgubbssaft", "Blandsaft Jordgubb 500ml", "beverages"), "jordgubbssaft")
+# Regression: bare kokos must NOT match kokosmjölk (Stefan policy: kokos = dry coconut only)
+test("bare kokos does not match kokosmjölk", match("kokos", "Kokosmjölk 400ml ICA", "dairy"), None)
+
 # ========================================================================
 print("\n========================================")
 print(f"TOTAL: {passed}/{passed+failed} tests passed ({total_sections} sections)")

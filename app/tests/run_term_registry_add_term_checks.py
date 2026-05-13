@@ -31,7 +31,7 @@ from languages.sv.ingredient_matching.term_registry.add_term import (  # noqa: E
 
 
 DEFAULT_REPORT_ROOT = APP_DIR / "tests" / "reports" / "term_registry"
-EXPECTED_B2_UNIQUE_COVERAGE_KEYS = 5336
+EXPECTED_B2_UNIQUE_COVERAGE_KEYS = 5337
 EXPECTED_SV_EXPORT_LAYER_COUNT = 25
 
 

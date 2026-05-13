@@ -81,7 +81,12 @@ def _update_py_constant(path: Path, name: str, new_value: int) -> bool:
     return True
 
 
-def promote(*, dry_run: bool = False) -> int:
+def _content_key(v: dict) -> tuple:
+    """Stable content key for matching variants across hash changes."""
+    return (v.get("variant_text", ""), v.get("canonical", ""), v.get("source_type", ""))
+
+
+def promote(*, dry_run: bool = False, migrate_hashes: bool = False) -> int:
     print("Loading current baseline …")
     baseline = _load_json(BASELINE_PATH)
     current_ids = {v["variant_id"] for v in baseline["variants"] if isinstance(v, dict) and v.get("variant_id")}
@@ -91,28 +96,76 @@ def promote(*, dry_run: bool = False) -> int:
     fresh_variants = _generate_fresh_variants()
     fresh_ids = {v["variant_id"] for v in fresh_variants if v.get("variant_id")}
 
-    new_variants = [v for v in fresh_variants if v.get("variant_id") and v["variant_id"] not in current_ids]
+    all_new_variants = [v for v in fresh_variants if v.get("variant_id") and v["variant_id"] not in current_ids]
     removed_ids = current_ids - fresh_ids
 
+    hash_migrations: list[tuple[str, str]] = []  # (old_id, new_id)
+    migrated_new_ids: set[str] = set()
     if removed_ids:
-        print(f"\n⚠️  WARNING: {len(removed_ids)} variant(s) in baseline are MISSING from fresh scan:")
-        for vid in sorted(removed_ids)[:10]:
-            print(f"   {vid}")
-        print("This usually means a TOML entry or extraction function was removed.")
-        print("Investigate before promoting. Aborting.")
-        return 1
+        if migrate_hashes:
+            # Build a FIFO queue per content_key so duplicates are matched 1:1
+            from collections import defaultdict
+            fresh_queues: dict[tuple, list] = defaultdict(list)
+            for v in fresh_variants:
+                if v.get("variant_id") and v["variant_id"] not in current_ids:
+                    fresh_queues[_content_key(v)].append(v)
+            baseline_by_id = {v["variant_id"]: v for v in baseline["variants"] if v.get("variant_id")}
+            truly_removed = []
+            for vid in removed_ids:
+                old_v = baseline_by_id[vid]
+                queue = fresh_queues.get(_content_key(old_v))
+                if queue:
+                    fresh_v = queue.pop(0)  # FIFO: match oldest fresh entry first
+                    if fresh_v["variant_id"] != vid:
+                        hash_migrations.append((vid, fresh_v["variant_id"]))
+                        migrated_new_ids.add(fresh_v["variant_id"])
+                else:
+                    truly_removed.append(vid)
+            if truly_removed:
+                print(f"\n⚠️  WARNING: {len(truly_removed)} variant(s) truly removed (no content match in fresh):")
+                for vid in sorted(truly_removed)[:10]:
+                    v = baseline_by_id[vid]
+                    print(f"   {vid}: {v.get('variant_text','')!r} ({v.get('source_type','')})")
+                print("Investigate before promoting. Aborting.")
+                return 1
+            print(f"\nHash migration: {len(hash_migrations)} variant(s) will get new IDs (same content, source_order shifted).")
+        else:
+            print(f"\n⚠️  WARNING: {len(removed_ids)} variant(s) in baseline are MISSING from fresh scan:")
+            for vid in sorted(removed_ids)[:10]:
+                print(f"   {vid}")
+            print("This usually means a TOML entry or extraction function was removed.")
+            print("Re-run with --migrate-hashes if extraction.py source_order shifted, or investigate.")
+            print("Aborting.")
+            return 1
 
-    if not new_variants:
+    # Truly new variants = fresh entries not in baseline AND not just hash-migrated old ones
+    new_variants = [v for v in all_new_variants if v["variant_id"] not in migrated_new_ids]
+
+    if not new_variants and not hash_migrations:
         print(f"\nNothing to promote — baseline is up to date ({current_count} variants).")
         return 0
 
-    print(f"\nNew variants to add: {len(new_variants)}")
-    for v in new_variants:
-        print(f"  [{v.get('batch_id','?')}] {v.get('canonical','?')} | {v.get('source_type','?')} | {v.get('variant_id','?')[:24]}")
+    if new_variants:
+        print(f"\nNew variants to add: {len(new_variants)}")
+        for v in new_variants:
+            print(f"  [{v.get('batch_id','?')}] {v.get('canonical','?')} | {v.get('source_type','?')} | {v.get('variant_id','?')[:24]}")
+
+    # Apply hash migrations: replace old-hash entries with new-hash entries in-place
+    if hash_migrations:
+        migration_map = {old_id: new_id for old_id, new_id in hash_migrations}
+        fresh_by_id = {v["variant_id"]: v for v in fresh_variants}
+        baseline["variants"] = [
+            fresh_by_id[migration_map[v["variant_id"]]] if v.get("variant_id") in migration_map else v
+            for v in baseline["variants"]
+        ]
+        current_count = len(baseline["variants"])
 
     new_count = current_count + len(new_variants)
     if dry_run:
-        print(f"\n[dry-run] Would update baseline: {current_count} → {new_count} variants")
+        if migrate_hashes and removed_ids:
+            print(f"\n[dry-run] Would migrate {len(hash_migrations)} hash(es) + add {len(new_variants)} variant(s): total {new_count}")
+        else:
+            print(f"\n[dry-run] Would update baseline: {current_count} → {new_count} variants")
         print("[dry-run] No files written.")
         return 0
 
@@ -191,8 +244,17 @@ def promote(*, dry_run: bool = False) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true", help="Show what would change without writing files")
+    parser.add_argument(
+        "--migrate-hashes",
+        action="store_true",
+        help=(
+            "Allow hash-ID migration when extraction.py source_order shifted (e.g. after inserting a new "
+            "extraction block). Entries with matching content (variant_text + canonical + source_type) are "
+            "re-hashed in place. Truly removed entries (no content match) still abort."
+        ),
+    )
     args = parser.parse_args()
-    return promote(dry_run=args.dry_run)
+    return promote(dry_run=args.dry_run, migrate_hashes=args.migrate_hashes)
 
 
 if __name__ == "__main__":
