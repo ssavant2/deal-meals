@@ -178,7 +178,12 @@ def _is_plain_sparkling_water_product_text(text: str, category: Optional[str] = 
 
 
 def _is_plain_instant_coffee_product_text(text: str, category: Optional[str] = None) -> bool:
-    if not re.search(r'\b(?:snabbkaffe|pulverkaffe|instant\s+coffee)\b', text):
+    has_instant_form = bool(re.search(r'\b(?:snabbkaffe|pulverkaffe|instant\s+coffee)\b', text))
+    has_nescafe = 'nescafé' in text or 'nescafe' in text
+    if not (has_instant_form or has_nescafe):
+        return False
+    # Nescafé capsules, Dolce Gusto, and barista formats are not plain instant powder
+    if has_nescafe and any(token in text for token in ('kapsel', 'kapslar', 'dolce', 'gusto', 'barista')):
         return False
     return not any(token in text for token in (
         'cappuccino', 'cappucino', 'latte', 'choklad', 'chocolate',

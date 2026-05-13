@@ -7416,3 +7416,130 @@ layer_role = "offer_extra_keyword_mapping"
 ingredient = "körsbärstomat"
 offer_name = "Korsbarstomat"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.galiamelon_310"
+language = "sv"
+market = "SE"
+canonical = "melon"
+status = "active"
+variants = ["galiamelon"]
+offer_terms = ["melon"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Galiamelon products respond to bare melon ingredient."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "melon"
+variant = "galiamelon"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "melon"
+offer_name = "Galiamelon"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.honungsmelon_311"
+language = "sv"
+market = "SE"
+canonical = "melon"
+status = "active"
+variants = ["honungsmelon"]
+offer_terms = ["melon"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Honungsmelon products respond to bare melon ingredient."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "melon"
+variant = "honungsmelon"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "melon"
+offer_name = "Honungsmelon"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.cantaloupemelon_312"
+language = "sv"
+market = "SE"
+canonical = "melon"
+status = "active"
+variants = ["cantaloupemelon"]
+offer_terms = ["melon"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Cantaloupemelon products respond to bare melon ingredient."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "melon"
+variant = "cantaloupemelon"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "melon"
+offer_name = "Cantaloupemelon"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.vattenmelon_313"
+language = "sv"
+market = "SE"
+canonical = "melon"
+status = "active"
+variants = ["vattenmelon"]
+offer_terms = ["melon"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Vattenmelon products respond to bare melon ingredient."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "melon"
+variant = "vattenmelon"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "melon"
+offer_name = "Vattenmelon"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.isbergssallad_314"
+language = "sv"
+market = "SE"
+canonical = "grönsallad"
+status = "active"
+variants = ["isbergssallad"]
+offer_terms = ["grönsallad", "salladsblad", "sallad"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Isbergssallad products respond to sallad/grönsallad/salladsblad ingredients."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "grönsallad"
+variant = "isbergssallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "salladsblad"
+variant = "isbergssallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "sallad"
+variant = "isbergssallad"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "grönsallad"
+offer_name = "Isbergssallad"
+expected = 1

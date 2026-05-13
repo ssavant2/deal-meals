@@ -10142,6 +10142,23 @@ test("blandsaft jordgubb still matches jordgubbssaft", match("jordgubbssaft", "B
 # Regression: bare kokos must NOT match kokosmjölk (Stefan policy: kokos = dry coconut only)
 test("bare kokos does not match kokosmjölk", match("kokos", "Kokosmjölk 400ml ICA", "dairy"), None)
 
+section("Batch 16-18 P1/medium melon/sallad/snabbkaffe regressions")
+# melon: bare melon ingredient matches any melon subtype via OFFER_EXTRA_KEYWORDS
+test("melon matches galiamelon", match("melon", "Galiamelon ca 850g Klass 1 ICA", "fruit"), "melon")
+test("melon matches honungsmelon", match("melon", "Honungsmelon ca 1000g Klass 1 ICA", "fruit"), "melon")
+test("melon matches cantaloupemelon", match("melon", "Cantaloupemelon ca 870g Klass 1 ICA", "fruit"), "melon")
+test("melon matches vattenmelon", match("melon", "Vattenmelon 5kg", "fruit"), "melon")
+test("galiamelon still matches galiamelon", match("galiamelon", "Galiamelon ca 850g Klass 1 ICA", "fruit"), "galiamelon")
+# isbergssallad: gets grönsallad/salladsblad keywords via OFFER_EXTRA_KEYWORDS
+test("grönsallad matches isbergssallad", match("grönsallad", "Isbergssallad 1-p Klass 1", "fruit"), "grönsallad")
+test("salladsblad matches isbergssallad", match("salladsblad", "Isbergssallad 1-p Klass 1", "fruit"), "salladsblad")
+test("isbergssallad still matches isbergssallad", match("isbergssallad", "Isbergssallad 1-p Klass 1", "fruit"), "isbergssallad")
+test("grönsallad still matches hjärtsallad", match("grönsallad", "Hjärtsallad Eko 180g", "fruit"), "grönsallad")
+# snabbkaffe: Nescafé Gold is plain instant coffee
+test("snabbkaffe matches Nescafé Gold", match("snabbkaffe", "Nescafé Gold 200g", "beverages"), "snabbkaffe")
+test("snabbkaffe matches Nescafe Classic", match("snabbkaffe", "Nescafe Classic 100g", "beverages"), "snabbkaffe")
+test("snabbkaffe does not match Nescafé Dolce Gusto", match("snabbkaffe", "Nescafé Dolce Gusto", "beverages"), None)
+
 # ========================================================================
 print("\n========================================")
 print(f"TOTAL: {passed}/{passed+failed} tests passed ({total_sections} sections)")
