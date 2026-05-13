@@ -39,7 +39,7 @@ def compare_variants_to_baseline(
             severity="warning",
             code="baseline_variants_missing",
             message=(
-                "current registry view is missing B2 baseline variant ids; "
+                "current registry view is missing verified-term baseline variant ids; "
                 "coverage-key checks remain authoritative for lost terms"
             ),
             details={"count": len(missing), "sample": missing[:20]},
@@ -48,7 +48,7 @@ def compare_variants_to_baseline(
         issues.append(CheckIssue(
             severity="warning",
             code="baseline_variants_extra",
-            message="current registry view has variants not present in the B2 baseline",
+            message="current registry view has variants not present in the verified-term baseline",
             details={"count": len(extra), "sample": extra[:20]},
         ))
     return issues

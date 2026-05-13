@@ -3,7 +3,7 @@
 
 This script does not change matcher runtime behavior, rebuild cache, or touch
 the database. It verifies that the Swedish registry view can reproduce the
-completed B-track baseline and writes a language-scoped report.
+completed verified-term baseline and writes a language-scoped report.
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ from typing import Any
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_DIR = APP_DIR.parent
 sys.path.insert(0, "/app" if os.path.exists("/app") else str(APP_DIR))
+os.environ.setdefault("TERM_REGISTRY_DISABLE_LOCAL_ENTRIES", "1")
 
 from languages.term_registry.checks import (  # noqa: E402
     check_shared_core_import_boundaries,
@@ -47,9 +48,22 @@ DEFAULT_REPORT_ROOT = APP_DIR / "tests" / "reports" / "term_registry"
 DEFAULT_SHARED_REGISTRY_DIR = APP_DIR / "languages" / "term_registry"
 DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
 DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
-EXPECTED_B2_VARIANT_COUNT = 5476  # updated by tests/promote_term_baseline.py
-EXPECTED_B2_LAST_BATCH = "B092"
-EXPECTED_B2_BATCH_COUNT = 92
+EXPECTED_VERIFIED_TERM_VARIANT_COUNT = 5476  # updated by tests/promote_term_baseline.py
+FORBIDDEN_BASELINE_SUMMARY_KEYS = {
+    "batch_count",
+    "batch_counts",
+    "first_batch_id",
+    "last_batch_id",
+    "normal_batch_size",
+    "working_table",
+}
+FORBIDDEN_BASELINE_VARIANT_KEYS = {"batch_id", "batch_index"}
+FORBIDDEN_BASELINE_VERIFICATION_KEYS = {
+    "applied_batch_count",
+    "batch_report_count",
+    "first_batch_id",
+    "last_batch_id",
+}
 CoverageKey = tuple[str, str, str, str, str, str]
 
 
@@ -113,7 +127,7 @@ def _has_broad_coverage_value(value: str) -> bool:
     return value.strip() in {"", "*", "all", "any"}
 
 
-def _load_b2_baseline(
+def _load_verified_terms_baseline(
     path: Path,
     *,
     language: str,
@@ -123,8 +137,8 @@ def _load_b2_baseline(
     if not path.exists():
         return {}, set(), set(), [_issue(
             "error",
-            "missing_b2_baseline_json",
-            "B2 baseline JSON is required before R0 can run",
+            "missing_verified_terms_baseline_json",
+            "verified-term baseline JSON is required before R0 can run",
             item_id=str(path),
             details={
                 "hint": (
@@ -141,11 +155,21 @@ def _load_b2_baseline(
     if not isinstance(variants, list):
         issues.append(_issue(
             "error",
-            "invalid_b2_baseline_json",
-            "B2 baseline variants payload must be a list",
+            "invalid_verified_terms_baseline_json",
+            "verified-term baseline variants payload must be a list",
             item_id=str(path),
         ))
         variants = []
+
+    forbidden_summary_keys = sorted(FORBIDDEN_BASELINE_SUMMARY_KEYS & set(summary))
+    if forbidden_summary_keys:
+        issues.append(_issue(
+            "error",
+            "verified_terms_baseline_has_audit_batch_summary",
+            "verified-term baseline summary must not store obsolete audit batch metadata",
+            item_id=str(path),
+            details={"keys": forbidden_summary_keys},
+        ))
 
     baseline_ids = {
         str(variant.get("variant_id"))
@@ -154,9 +178,13 @@ def _load_b2_baseline(
     }
     baseline_coverage_keys: set[CoverageKey] = set()
     invalid_coverage_rows = []
+    forbidden_variant_rows = []
     for index, variant in enumerate(variants):
         if not isinstance(variant, dict):
             continue
+        forbidden_keys = sorted(FORBIDDEN_BASELINE_VARIANT_KEYS & set(variant))
+        if forbidden_keys:
+            forbidden_variant_rows.append({"row_index": index, "keys": forbidden_keys})
         key = _coverage_key_from_dict(
             variant,
             default_language=language,
@@ -168,41 +196,40 @@ def _load_b2_baseline(
         baseline_coverage_keys.add(key)
 
     variant_count = int(summary.get("variant_count") or 0)
-    last_batch_id = str(summary.get("last_batch_id") or "")
-    if variant_count != EXPECTED_B2_VARIANT_COUNT:
+    if variant_count != EXPECTED_VERIFIED_TERM_VARIANT_COUNT:
         issues.append(_issue(
             "error",
-            "unexpected_b2_variant_count",
-            "B2 baseline variant count does not match the frozen status file",
+            "unexpected_verified_term_variant_count",
+            "verified-term baseline variant count does not match the frozen status file",
             item_id=str(path),
-            details={"expected": EXPECTED_B2_VARIANT_COUNT, "actual": variant_count},
-        ))
-    if last_batch_id != EXPECTED_B2_LAST_BATCH:
-        issues.append(_issue(
-            "error",
-            "unexpected_b2_last_batch",
-            "B2 baseline last batch does not match the frozen status file",
-            item_id=str(path),
-            details={"expected": EXPECTED_B2_LAST_BATCH, "actual": last_batch_id},
+            details={"expected": EXPECTED_VERIFIED_TERM_VARIANT_COUNT, "actual": variant_count},
         ))
     if len(baseline_ids) != variant_count:
         issues.append(_issue(
             "error",
-            "b2_baseline_id_count_mismatch",
-            "B2 baseline variant ids are missing or duplicated",
+            "verified_terms_baseline_id_count_mismatch",
+            "verified-term baseline variant ids are missing or duplicated",
             item_id=str(path),
             details={"summary_count": variant_count, "unique_variant_ids": len(baseline_ids)},
         ))
     if invalid_coverage_rows:
         issues.append(_issue(
             "error",
-            "b2_baseline_coverage_keys_invalid",
-            "B2 baseline rows must provide complete coverage keys",
+            "verified_terms_baseline_coverage_keys_invalid",
+            "verified-term baseline rows must provide complete coverage keys",
             item_id=str(path),
             details={
                 "unique_coverage_keys": len(baseline_coverage_keys),
                 "invalid_row_sample": invalid_coverage_rows[:20],
             },
+        ))
+    if forbidden_variant_rows:
+        issues.append(_issue(
+            "error",
+            "verified_terms_baseline_has_audit_batch_rows",
+            "verified-term baseline variants must not store obsolete audit batch metadata",
+            item_id=str(path),
+            details={"row_sample": forbidden_variant_rows[:20]},
         ))
 
     return payload, baseline_ids, baseline_coverage_keys, issues
@@ -228,52 +255,32 @@ def _load_verification_summary(
     status_counts = Counter(verification.get("status_counts") or {})
     source_counts = Counter(verification.get("source_counts") or {})
     variant_count = int(verification.get("variant_count") or 0)
-    applied_batch_count = int(verification.get("applied_batch_count") or 0)
-    batch_report_count = int(verification.get("batch_report_count") or 0)
+    forbidden_verification_keys = sorted(FORBIDDEN_BASELINE_VERIFICATION_KEYS & set(verification))
 
-    if variant_count != EXPECTED_B2_VARIANT_COUNT:
+    if variant_count != EXPECTED_VERIFIED_TERM_VARIANT_COUNT:
         issues.append(_issue(
             "error",
             "verified_terms_variant_count_mismatch",
             "Verified matcher terms summary does not cover the frozen baseline",
             item_id=str(baseline_path),
-            details={"expected": EXPECTED_B2_VARIANT_COUNT, "actual": variant_count},
+            details={"expected": EXPECTED_VERIFIED_TERM_VARIANT_COUNT, "actual": variant_count},
         ))
-    if batch_report_count != EXPECTED_B2_BATCH_COUNT:
+    if forbidden_verification_keys:
         issues.append(_issue(
             "error",
-            "verified_terms_batch_count_mismatch",
-            "Verified matcher terms summary does not include every final audit batch",
+            "verified_terms_verification_has_audit_batch_summary",
+            "Verified matcher terms summary must not store obsolete audit batch metadata",
             item_id=str(baseline_path),
-            details={"expected": EXPECTED_B2_BATCH_COUNT, "actual": batch_report_count},
+            details={"keys": forbidden_verification_keys},
         ))
-    if applied_batch_count != EXPECTED_B2_BATCH_COUNT:
-        issues.append(_issue(
-            "error",
-            "verified_terms_applied_batch_count_mismatch",
-            "Verified matcher terms summary was not applied for every final audit batch",
-            item_id=str(baseline_path),
-            details={"expected": EXPECTED_B2_BATCH_COUNT, "actual": applied_batch_count},
-        ))
-    if str(verification.get("last_batch_id") or "") != EXPECTED_B2_LAST_BATCH:
-        issues.append(_issue(
-            "error",
-            "verified_terms_last_batch_mismatch",
-            "Verified matcher terms summary does not end at the frozen final batch",
-            item_id=str(baseline_path),
-            details={
-                "expected": EXPECTED_B2_LAST_BATCH,
-                "actual": verification.get("last_batch_id"),
-            },
-        ))
-    if int(status_counts.get("audited") or 0) != EXPECTED_B2_VARIANT_COUNT:
+    if int(status_counts.get("audited") or 0) != EXPECTED_VERIFIED_TERM_VARIANT_COUNT:
         issues.append(_issue(
             "error",
             "verified_terms_audited_count_mismatch",
             "Verified matcher terms summary does not mark every baseline variant as audited",
             item_id=str(baseline_path),
             details={
-                "expected": EXPECTED_B2_VARIANT_COUNT,
+                "expected": EXPECTED_VERIFIED_TERM_VARIANT_COUNT,
                 "actual": int(status_counts.get("audited") or 0),
             },
         ))
@@ -296,15 +303,11 @@ def _load_verification_summary(
 
     return {
         "method": verification.get("method"),
-        "batch_report_count": batch_report_count,
-        "applied_batch_count": applied_batch_count,
         "variant_count": variant_count,
         "classification_counts": dict(sorted(classification_counts.items())),
         "problem_counts": dict(sorted(problem_counts.items())),
         "status_counts": dict(sorted(status_counts.items())),
         "source_counts": dict(sorted(source_counts.items())),
-        "first_batch_id": verification.get("first_batch_id"),
-        "last_batch_id": verification.get("last_batch_id"),
     }, issues
 
 
@@ -646,8 +649,8 @@ def _run_new_term_gate(
     for key in sorted(exception_coverage_keys & baseline_coverage_keys):
         issues.append(_issue(
             "error",
-            "migration_exception_covers_b2_baseline",
-            "migration exception is unnecessary because this key is already in the B2 baseline",
+            "migration_exception_covers_verified_terms_baseline",
+            "migration exception is unnecessary because this key is already in the verified-term baseline",
             item_id=exception_ids_by_key.get(key, ""),
             details={"coverage_key": _coverage_key_to_dict(key)},
         ))
@@ -663,7 +666,7 @@ def _run_new_term_gate(
     summary = {
         "enabled": True,
         "current_legacy_coverage_keys": len(current_keys),
-        "b2_grandfathered_coverage_keys": len(baseline_coverage_keys & current_keys),
+        "verified_term_baseline_coverage_keys": len(baseline_coverage_keys & current_keys),
         "new_legacy_coverage_keys": len(new_keys),
         "new_keys_covered_by_registry": len(covered_by_registry),
         "new_keys_covered_by_migration_exception": len(covered_by_exception),
@@ -700,7 +703,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     issues.extend(_check_registry_source_refs(entries, language=args.language))
 
     variants = build_legacy_registry_variants(batch_size=args.batch_size)
-    baseline_payload, baseline_ids, baseline_coverage_keys, baseline_issues = _load_b2_baseline(
+    baseline_payload, baseline_ids, baseline_coverage_keys, baseline_issues = _load_verified_terms_baseline(
         args.baseline_json,
         language=args.language,
         market=args.market,
@@ -725,7 +728,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         )
         issues.extend(new_term_gate_issues)
     else:
-        new_term_gate_summary = {"enabled": False, "reason": "missing B2 baseline coverage keys"}
+        new_term_gate_summary = {"enabled": False, "reason": "missing verified-term baseline coverage keys"}
 
     verification_summary, verification_issues = _load_verification_summary(
         baseline_payload,
@@ -743,8 +746,8 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         "legacy_registry_view": summarize_variants(variants),
         "baseline_variant_count": len(baseline_ids),
         "baseline_coverage_key_count": len(baseline_coverage_keys),
-        "b2_expected_variant_count": EXPECTED_B2_VARIANT_COUNT,
-        "b2_baseline_file": str(args.baseline_json.relative_to(REPO_DIR)),
+        "verified_term_expected_variant_count": EXPECTED_VERIFIED_TERM_VARIANT_COUNT,
+        "verified_terms_baseline_file": str(args.baseline_json.relative_to(REPO_DIR)),
         "verified_terms_summary": verification_summary,
         "new_term_gate": new_term_gate_summary,
         "migration_exceptions_file": str(exception_path.relative_to(REPO_DIR)),

@@ -52,9 +52,9 @@ COPY app/ .
 # and Python modules even if the local checkout has restrictive permissions.
 RUN find /app -type d -exec chmod 755 {} + && \
     find /app -type f -exec chmod 644 {} +
-RUN chown -R appuser:appuser /app/logs /app/static/recipe_images 2>/dev/null || true
-RUN mkdir -p /app/logs /app/static/recipe_images /app/static/vendor && \
-    chown appuser:appuser /app/logs /app/static/recipe_images /app/static/vendor
+RUN chown -R appuser:appuser /app/data /app/logs /app/static/recipe_images 2>/dev/null || true
+RUN mkdir -p /app/data /app/logs /app/static/recipe_images /app/static/vendor && \
+    chown appuser:appuser /app/data /app/logs /app/static/recipe_images /app/static/vendor
 
 # Download vendor assets to staging dir (copied to /app at startup by entrypoint.sh)
 # This eliminates runtime dependency on cdn.jsdelivr.net

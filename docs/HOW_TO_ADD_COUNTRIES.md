@@ -207,6 +207,14 @@ local recipe/product text. If the language is still only a smoke-test scaffold,
 it can omit full registry coverage, but it should not be considered production
 matching until the registry/contracts cover the vocabulary being enabled.
 
+Production languages should also provide a local overlay for simple user-added
+terms. The Swedish loader reads built-in `entries/*.toml` for audited release
+coverage and, at runtime, additionally reads writable local entries from
+`/app/data/term_registry/sv/entries` (or `TERM_REGISTRY_LOCAL_ENTRIES_DIR` /
+`TERM_REGISTRY_EXTRA_ENTRIES_DIRS`). The local overlay is intentionally not part
+of the frozen audit baseline, but it is included in the matcher version hash so
+cache/index rows are invalidated after the web container restarts.
+
 ### `category_utils.py`
 - `guess_category()` — product name → category string
 - Brand detection, meat keyword lists, lactose-free detection

@@ -8,6 +8,9 @@ from __future__ import annotations
 
 from hashlib import sha256
 from pathlib import Path
+from typing import Any
+
+from .term_registry.registry import iter_registry_entry_files
 
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -137,6 +140,18 @@ OFFER_COMPILER_HASH_FILES = (
 )
 
 
+def _hash_local_term_registry_entries(digest: Any) -> None:
+    built_in_entries_dir = (PACKAGE_DIR / "term_registry" / "entries").resolve()
+    for path in iter_registry_entry_files(include_local=True):
+        path = path.resolve()
+        if path.is_relative_to(built_in_entries_dir):
+            continue
+        digest.update(f"local-term-registry:{path}".encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+
+
 def _hash_manifest(prefix: str, manifest: tuple[str, ...]) -> str:
     digest = sha256()
     for rel_path in manifest:
@@ -144,6 +159,7 @@ def _hash_manifest(prefix: str, manifest: tuple[str, ...]) -> str:
         digest.update(b"\0")
         digest.update((REPO_ROOT / rel_path).read_bytes())
         digest.update(b"\0")
+    _hash_local_term_registry_entries(digest)
     return f"{prefix}-{digest.hexdigest()[:12]}"
 
 

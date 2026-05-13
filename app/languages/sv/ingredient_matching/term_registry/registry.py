@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 import tomllib
@@ -11,6 +12,14 @@ from languages.term_registry.models import RegistryEntry, RegistryExample
 
 REGISTRY_DIR = Path(__file__).resolve().parent
 ENTRIES_DIR = REGISTRY_DIR / "entries"
+EXTRA_ENTRIES_DIRS_ENV = "TERM_REGISTRY_EXTRA_ENTRIES_DIRS"
+LOCAL_ENTRIES_DIR_ENV = "TERM_REGISTRY_LOCAL_ENTRIES_DIR"
+DISABLE_LOCAL_ENTRIES_ENV = "TERM_REGISTRY_DISABLE_LOCAL_ENTRIES"
+DEFAULT_LOCAL_ENTRIES_DIR = Path("/app/data/term_registry/sv/entries")
+
+
+def _truthy_env(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _tuple_str(value: Any) -> tuple[str, ...]:
@@ -72,11 +81,46 @@ def _entry_from_payload(payload: dict[str, Any], *, path: Path) -> RegistryEntry
         raise ValueError(f"{path}: missing required registry field {exc.args[0]!r}") from exc
 
 
-def load_registry_entries(entries_dir: Path = ENTRIES_DIR) -> list[RegistryEntry]:
+def local_registry_entries_dirs() -> tuple[Path, ...]:
+    """Return writable local registry overlay dirs for this language/market."""
+    if _truthy_env(DISABLE_LOCAL_ENTRIES_ENV):
+        return ()
+    raw_dirs = os.environ.get(EXTRA_ENTRIES_DIRS_ENV)
+    if raw_dirs:
+        return tuple(Path(item) for item in raw_dirs.split(os.pathsep) if item)
+    return (Path(os.environ.get(LOCAL_ENTRIES_DIR_ENV, str(DEFAULT_LOCAL_ENTRIES_DIR))),)
+
+
+def iter_registry_entry_files(
+    entries_dir: Path = ENTRIES_DIR,
+    *,
+    include_local: bool = False,
+) -> list[Path]:
+    dirs = [Path(entries_dir)]
+    if include_local:
+        dirs.extend(local_registry_entries_dirs())
+
+    seen: set[Path] = set()
+    files: list[Path] = []
+    for directory in dirs:
+        if not directory.exists():
+            continue
+        for path in sorted(directory.glob("*.toml")):
+            resolved = path.resolve()
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            files.append(path)
+    return files
+
+
+def load_registry_entries(
+    entries_dir: Path = ENTRIES_DIR,
+    *,
+    include_local: bool = False,
+) -> list[RegistryEntry]:
     entries: list[RegistryEntry] = []
-    if not entries_dir.exists():
-        return entries
-    for path in sorted(entries_dir.glob("*.toml")):
+    for path in iter_registry_entry_files(entries_dir, include_local=include_local):
         payload = tomllib.loads(path.read_text(encoding="utf-8"))
         if "entries" in payload:
             raw_entries = payload["entries"]

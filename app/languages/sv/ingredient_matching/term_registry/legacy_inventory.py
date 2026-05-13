@@ -96,7 +96,7 @@ def _variant_to_registry_variant(variant) -> RegistryVariant:
 
 def iter_legacy_variants(batch_size: int = DEFAULT_BATCH_SIZE) -> Iterable[RegistryVariant]:
     # Keep the legacy dependency test-only and lazy to avoid runtime import cycles.
-    from tests.run_term_pipeline_b_track_audit import build_variants
+    from tests.run_verified_term_audit import build_variants
 
     for variant in build_variants(batch_size):
         yield _variant_to_registry_variant(variant)

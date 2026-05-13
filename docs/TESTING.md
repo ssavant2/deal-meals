@@ -169,16 +169,17 @@ examples.
 The frozen Swedish vocabulary baseline used by these checks lives at
 `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json`.
 It is a retained matcher contract input, not generated test output. It
-consolidates the completed static audit: 5,472 variants across 92 audit batches,
-all audited, with 0 `needs_fix`. The baseline includes historical multi-store
-vocabulary; absence from the current Willys or ICA assortment is not a failure
-unless a future check explicitly targets current-catalog materialization.
+consolidates the completed static audit into one readable snapshot: 5,476
+variants, all audited, with 0 `needs_fix`. Obsolete audit-bucket ids are not
+stored in the baseline. The baseline includes historical multi-store vocabulary;
+absence from the current Willys or ICA assortment is not a failure unless a
+future check explicitly targets current-catalog materialization.
 
 Do not keep regenerated debug reports under `app/tests/reports/`. If a new
 matcher vocabulary baseline is intentionally started, rebuild the local audit
-ledger with `tests/run_term_pipeline_b_track_audit.py --rebuild-table`, promote
+ledger with `tests/run_verified_term_audit.py --rebuild-table`, promote
 only the consolidated JSON needed by the registry checks, and drop the dev-only
-`tmp_term_pipeline_b_audit_variants` table when finished.
+`tmp_verified_term_audit_variants` table when finished.
 
 ## Matcher/Cache Full DB Diff
 

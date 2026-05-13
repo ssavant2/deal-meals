@@ -2258,7 +2258,7 @@ Batch 16-18 first safe fix wave - 2026-05-12:
 - Verification: targeted live/synthetic checks for this fix wave passed without
   rerunning all 300 batch recipes; `tests/test_matching_sanity.py` passed
   1970/1970; term registry export, guard/bridge, contract, and matcher-rule
-  model checks passed. The contract check now treats line-based B2 variant-id
+  model checks passed. The contract check now treats line-based verified-term variant-id
   churn as a warning while coverage-key gates remain blocking for real lost/new
   terms.
 
@@ -2306,10 +2306,10 @@ Batch 16-18 wave-2 completion - 2026-05-12:
   not category blocking.
 - Term registry baseline promoted: `must`/`äppelmust` from extraction_helper.toml
   (added in first wave 31b14de but baseline not updated) merged in via new
-  promote_term_baseline.py script. EXPECTED_B2_VARIANT_COUNT 5472 → 5474.
+  promote_term_baseline.py script. EXPECTED_VERIFIED_TERM_VARIANT_COUNT 5472 → 5474.
   new_legacy_coverage_keys back to 0.
 - Commits: `480fe4e Fix batch 16-18 carrier/seed/prepared-product matching gaps`,
-  `d378ecc Promote must/äppelmust into B-track baseline`.
+  `d378ecc Promote must/äppelmust into verified-term baseline`.
 - Remaining open items from P1/P2 backlog: term/coverage gaps for blackcurrant
   drink, fresh herbs/chili, skin-on salmon, fullkorn lasagne, pasta specificity,
   kalamata olives, melon, ginger, non-alcohol beer, vanilla protein, dried

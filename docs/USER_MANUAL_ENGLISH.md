@@ -647,6 +647,30 @@ Some simplifications are intentional. For example, pasta is grouped into broad f
 
 This gives you room to choose the exact product you prefer, and it increases the chance that a real offer is shown for the ingredient family instead of hiding useful deals because the recipe wording and the store wording were slightly different.
 
+### Can I add my own matching word?
+
+Yes, for simple single-word aliases you can add a local term directly in a production install. It is stored on the app's writable data volume and survives container upgrades.
+
+Run this from the directory that contains your production `docker-compose.yml`:
+
+```bash
+docker compose exec -T web python manage_terms.py add-local-alias \
+  --canonical "potatis" \
+  --variant "exempelpotatis" \
+  --kind offer-extra
+docker compose restart web
+```
+
+Replace `potatis` with the existing ingredient family and `exempelpotatis` with the new product word. After the restart, go to Home and click the refresh button next to "Weekly deal recipes" so the cache is recomputed with the new matcher version.
+
+`--kind offer-extra` is the default and fits product words that should count as an existing ingredient. Use `--kind keyword-synonym` for spelling/plural variants that should normalize on both recipe and product side, and `--kind ingredient-parent` when a recipe word should roll up to an existing parent. Multi-word phrases, negative rules and uncertain family boundaries still need a real matcher rule.
+
+List local terms with:
+
+```bash
+docker compose exec -T web python manage_terms.py list-local
+```
+
 ### What's the difference between e-commerce and physical store?
 
 - **E-commerce** shows online delivery offers (what you'd see when shopping on the store's website for home delivery)

@@ -650,6 +650,30 @@ Vissa förenklingar är medvetna. Till exempel klumpar systemet ihop pasta i bre
 
 Det gör att du själv kan välja exakt vilken variant du vill köpa, och det ökar chansen att ett faktiskt extrapris visas för ingrediensfamiljen istället för att ett användbart erbjudande döljs bara för att receptet och butiken råkar använda lite olika ord.
 
+### Kan jag lägga till ett eget matchningsord?
+
+Ja, för enkla enords-alias kan du lägga till en lokal term direkt i en produktionsinstallation. Den sparas i appens skrivbara data-volym och överlever containeruppgraderingar.
+
+Kör från mappen där din produktions-`docker-compose.yml` ligger:
+
+```bash
+docker compose exec -T web python manage_terms.py add-local-alias \
+  --canonical "potatis" \
+  --variant "exempelpotatis" \
+  --kind offer-extra
+docker compose restart web
+```
+
+Byt ut `potatis` mot den befintliga ingrediensfamiljen och `exempelpotatis` mot det nya produktordet. Efter omstarten, gå till startsidan och klicka på uppdateringsknappen bredvid "Veckans fyndrecept" så cachen räknas om med den nya matchningsversionen.
+
+`--kind offer-extra` är standard och passar när ett produktord ska räknas som en befintlig ingrediens. Använd `--kind keyword-synonym` för stavning/plural som ska normaliseras på både recept- och produktsidan, och `--kind ingredient-parent` när ett receptord ska rulla upp till en befintlig parent. Flerordsfraser, negativa regler och osäkra familjegränser kräver fortfarande en riktig matcher-regel.
+
+Visa lokala termer med:
+
+```bash
+docker compose exec -T web python manage_terms.py list-local
+```
+
 ### Vad är skillnaden mellan e-handel och fysisk butik?
 
 - **E-handel** visar erbjudanden vid nätbeställning (det du ser när du handlar på butikens webbplats för hemleverans)

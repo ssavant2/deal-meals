@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """R1/R2 export checks for the term registry.
 
-The script proves that narrow registry-generated exports match the frozen B2
+The script proves that narrow registry-generated exports match the frozen verified-term
 baseline and, once R2 starts, that public runtime constants import generated
 exports. It does not rebuild cache or touch the database.
 """
@@ -22,6 +22,7 @@ from typing import Any
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_DIR = APP_DIR.parent
 sys.path.insert(0, "/app" if os.path.exists("/app") else str(APP_DIR))
+os.environ.setdefault("TERM_REGISTRY_DISABLE_LOCAL_ENTRIES", "1")
 
 from languages.term_registry.models import CheckIssue, RegistryVariant  # noqa: E402
 from languages.term_registry.reports import write_json_and_markdown_report  # noqa: E402
@@ -71,7 +72,7 @@ from languages.sv.ingredient_matching.term_registry.legacy_inventory import (  #
 
 
 DEFAULT_REPORT_ROOT = APP_DIR / "tests" / "reports" / "term_registry"
-DEFAULT_B_TRACK_BASELINE_JSON = (
+DEFAULT_VERIFIED_TERMS_BASELINE_JSON = (
     APP_DIR
     / "languages"
     / "sv"
@@ -295,7 +296,7 @@ def _bridge_signature(bridge) -> dict[str, Any]:
     }
 
 
-def _load_b2_mapping_baseline(
+def _load_verified_terms_mapping_baseline(
     path: Path,
     *,
     source_family: str,
@@ -303,8 +304,8 @@ def _load_b2_mapping_baseline(
     if not path.exists():
         return {}, [_issue(
             "error",
-            "missing_b2_baseline_json",
-            "B2 baseline JSON is required for export drift checks",
+            "missing_verified_terms_baseline_json",
+            "verified-term baseline JSON is required for export drift checks",
             item_id=str(path),
         )]
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -312,8 +313,8 @@ def _load_b2_mapping_baseline(
     if not isinstance(variants, list):
         return {}, [_issue(
             "error",
-            "invalid_b2_baseline_json",
-            "B2 baseline variants payload must be a list",
+            "invalid_verified_terms_baseline_json",
+            "verified-term baseline variants payload must be a list",
             item_id=str(path),
         )]
 
@@ -330,7 +331,7 @@ def _load_b2_mapping_baseline(
             issues.append(_issue(
                 "error",
                 "invalid_mapping_baseline_row",
-                f"B2 {source_family} rows must include variant_text and canonical",
+                f"verified-term {source_family} rows must include variant_text and canonical",
                 item_id=str(variant.get("variant_id") or ""),
             ))
             continue
@@ -341,7 +342,7 @@ def _load_b2_mapping_baseline(
         issues.append(_issue(
             "error",
             "missing_mapping_baseline_rows",
-            f"B2 baseline contains no {source_family} rows",
+            f"verified-term baseline contains no {source_family} rows",
             item_id=str(path),
         ))
     baseline = {
@@ -385,8 +386,8 @@ def _compare_mapping_export(
     if not _mappings_semantically_equal(generated, baseline):
         issues.append(_issue(
             "error",
-            "export_b2_baseline_mismatch",
-            f"generated {item_id} export differs from the frozen B2 baseline",
+            "export_verified_terms_baseline_mismatch",
+            f"generated {item_id} export differs from the frozen verified-term baseline",
             item_id=item_id,
             details=_mapping_diff(generated, baseline),
         ))
@@ -501,7 +502,7 @@ def _run_runtime_import_boundary_check() -> list[CheckIssue]:
 
     forbidden_markers = (
         "legacy_inventory",
-        "run_term_pipeline_b_track_audit",
+        "run_verified_term_audit",
         "ingredient_matching.ingredient_routing",
         ".ingredient_routing",
         "ingredient_matching.parent_maps",
@@ -677,39 +678,39 @@ def _load_language_variants(language: str, batch_size: int) -> list[RegistryVari
 
 def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssue]]:
     issues: list[CheckIssue] = []
-    parent_b2_baseline, parent_baseline_issues = _load_b2_mapping_baseline(
+    parent_verified_terms_baseline, parent_baseline_issues = _load_verified_terms_mapping_baseline(
         args.baseline_json,
         source_family=PARENT_MATCH_ONLY_SOURCE_FAMILY,
     )
-    keyword_synonym_b2_baseline, keyword_synonym_baseline_issues = _load_b2_mapping_baseline(
+    keyword_synonym_verified_terms_baseline, keyword_synonym_baseline_issues = _load_verified_terms_mapping_baseline(
         args.baseline_json,
         source_family=KEYWORD_SYNONYM_SOURCE_FAMILY,
     )
-    ingredient_parent_b2_baseline, ingredient_parent_baseline_issues = _load_b2_mapping_baseline(
+    ingredient_parent_verified_terms_baseline, ingredient_parent_baseline_issues = _load_verified_terms_mapping_baseline(
         args.baseline_json,
         source_family=INGREDIENT_PARENT_SOURCE_FAMILY,
     )
-    routing_b2_baseline, routing_baseline_issues = _load_b2_mapping_baseline(
+    routing_verified_terms_baseline, routing_baseline_issues = _load_verified_terms_mapping_baseline(
         args.baseline_json,
         source_family=INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY,
     )
-    keyword_extra_b2_baseline, keyword_extra_baseline_issues = _load_b2_mapping_baseline(
+    keyword_extra_verified_terms_baseline, keyword_extra_baseline_issues = _load_verified_terms_mapping_baseline(
         args.baseline_json,
         source_family=KEYWORD_EXTRA_PARENT_SOURCE_FAMILY,
     )
-    offer_extra_b2_baseline, offer_extra_baseline_issues = _load_b2_mapping_baseline(
+    offer_extra_verified_terms_baseline, offer_extra_baseline_issues = _load_verified_terms_mapping_baseline(
         args.baseline_json,
         source_family=OFFER_EXTRA_KEYWORD_SOURCE_FAMILY,
     )
-    no_match_policy_b2_baseline, no_match_policy_baseline_issues = _load_b2_mapping_baseline(
+    no_match_policy_verified_terms_baseline, no_match_policy_baseline_issues = _load_verified_terms_mapping_baseline(
         args.baseline_json,
         source_family=NO_MATCH_POLICY_SOURCE_FAMILY,
     )
-    match_bridge_b2_baseline, match_bridge_baseline_issues = _load_b2_mapping_baseline(
+    match_bridge_verified_terms_baseline, match_bridge_baseline_issues = _load_verified_terms_mapping_baseline(
         args.baseline_json,
         source_family=MATCH_BRIDGE_SOURCE_FAMILY,
     )
-    recipe_routing_b2_baseline, recipe_routing_baseline_issues = _load_b2_mapping_baseline(
+    recipe_routing_verified_terms_baseline, recipe_routing_baseline_issues = _load_verified_terms_mapping_baseline(
         args.baseline_json,
         source_family=RECIPE_ROUTING_HELPER_SOURCE_FAMILY,
     )
@@ -803,7 +804,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     issues.extend(_compare_mapping_export(
         generated=generated_parent_static,
-        baseline=parent_b2_baseline,
+        baseline=parent_verified_terms_baseline,
         selected_variants=selected_parent_variants,
         item_id="PARENT_MATCH_ONLY",
         source_family=PARENT_MATCH_ONLY_SOURCE_FAMILY,
@@ -827,7 +828,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     issues.extend(_compare_mapping_export(
         generated=generated_keyword_synonym_static,
-        baseline=keyword_synonym_b2_baseline,
+        baseline=keyword_synonym_verified_terms_baseline,
         selected_variants=selected_keyword_synonym_variants,
         item_id="KEYWORD_SYNONYMS",
         source_family=KEYWORD_SYNONYM_SOURCE_FAMILY,
@@ -851,7 +852,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     issues.extend(_compare_mapping_export(
         generated=generated_ingredient_parent_static,
-        baseline=ingredient_parent_b2_baseline,
+        baseline=ingredient_parent_verified_terms_baseline,
         selected_variants=selected_ingredient_parent_variants,
         item_id="INGREDIENT_PARENTS",
         source_family=INGREDIENT_PARENT_SOURCE_FAMILY,
@@ -881,7 +882,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     issues.extend(_compare_mapping_export(
         generated=generated_routing_static,
-        baseline=routing_b2_baseline,
+        baseline=routing_verified_terms_baseline,
         selected_variants=selected_routing_variants,
         item_id="INGREDIENT_ROUTING_PARENT_TERMS",
         source_family=INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY,
@@ -905,7 +906,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     issues.extend(_compare_mapping_export(
         generated=generated_keyword_extra_static,
-        baseline=keyword_extra_b2_baseline,
+        baseline=keyword_extra_verified_terms_baseline,
         selected_variants=selected_keyword_extra_variants,
         item_id="KEYWORD_EXTRA_PARENTS",
         source_family=KEYWORD_EXTRA_PARENT_SOURCE_FAMILY,
@@ -929,7 +930,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     issues.extend(_compare_mapping_export(
         generated=generated_offer_extra_static,
-        baseline=offer_extra_b2_baseline,
+        baseline=offer_extra_verified_terms_baseline,
         selected_variants=selected_offer_extra_variants,
         item_id="OFFER_EXTRA_KEYWORDS",
         source_family=OFFER_EXTRA_KEYWORD_SOURCE_FAMILY,
@@ -953,7 +954,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     issues.extend(_compare_mapping_export(
         generated=generated_no_match_policy_static,
-        baseline=no_match_policy_b2_baseline,
+        baseline=no_match_policy_verified_terms_baseline,
         selected_variants=selected_no_match_policy_variants,
         item_id="NO_MATCH_POLICIES",
         source_family=NO_MATCH_POLICY_SOURCE_FAMILY,
@@ -982,7 +983,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     issues.extend(_compare_mapping_export(
         generated=generated_match_bridge_static,
-        baseline=match_bridge_b2_baseline,
+        baseline=match_bridge_verified_terms_baseline,
         selected_variants=selected_match_bridge_variants,
         item_id="MATCH_BRIDGES",
         source_family=MATCH_BRIDGE_SOURCE_FAMILY,
@@ -1011,7 +1012,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     issues.extend(_compare_mapping_export(
         generated=generated_recipe_routing_static,
-        baseline=recipe_routing_b2_baseline,
+        baseline=recipe_routing_verified_terms_baseline,
         selected_variants=selected_recipe_routing_variants,
         item_id="RECIPE_ROUTING_EXTRA_ALIASES",
         source_family=RECIPE_ROUTING_HELPER_SOURCE_FAMILY,
@@ -1027,7 +1028,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
 
     parent_failure_probe_passed, parent_failure_probe_error_codes = _run_required_layer_failure_probe(
         variants=variants,
-        baseline=parent_b2_baseline,
+        baseline=parent_verified_terms_baseline,
         source_family=PARENT_MATCH_ONLY_SOURCE_FAMILY,
         item_id="PARENT_MATCH_ONLY",
         build_export=build_parent_match_only_export,
@@ -1035,7 +1036,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     keyword_synonym_failure_probe_passed, keyword_synonym_failure_probe_error_codes = (
         _run_required_layer_failure_probe(
             variants=variants,
-            baseline=keyword_synonym_b2_baseline,
+            baseline=keyword_synonym_verified_terms_baseline,
             source_family=KEYWORD_SYNONYM_SOURCE_FAMILY,
             item_id="KEYWORD_SYNONYMS",
             build_export=build_keyword_synonyms_export,
@@ -1044,7 +1045,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     ingredient_parent_failure_probe_passed, ingredient_parent_failure_probe_error_codes = (
         _run_required_layer_failure_probe(
             variants=variants,
-            baseline=ingredient_parent_b2_baseline,
+            baseline=ingredient_parent_verified_terms_baseline,
             source_family=INGREDIENT_PARENT_SOURCE_FAMILY,
             item_id="INGREDIENT_PARENTS",
             build_export=build_ingredient_parents_export,
@@ -1052,7 +1053,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     )
     routing_failure_probe_passed, routing_failure_probe_error_codes = _run_required_layer_failure_probe(
         variants=variants,
-        baseline=routing_b2_baseline,
+        baseline=routing_verified_terms_baseline,
         source_family=INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY,
         item_id="INGREDIENT_ROUTING_PARENT_TERMS",
         build_export=build_ingredient_routing_parent_export,
@@ -1060,7 +1061,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     keyword_extra_failure_probe_passed, keyword_extra_failure_probe_error_codes = (
         _run_required_layer_failure_probe(
             variants=variants,
-            baseline=keyword_extra_b2_baseline,
+            baseline=keyword_extra_verified_terms_baseline,
             source_family=KEYWORD_EXTRA_PARENT_SOURCE_FAMILY,
             item_id="KEYWORD_EXTRA_PARENTS",
             build_export=build_keyword_extra_parents_export,
@@ -1069,7 +1070,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     offer_extra_failure_probe_passed, offer_extra_failure_probe_error_codes = (
         _run_required_layer_failure_probe(
             variants=variants,
-            baseline=offer_extra_b2_baseline,
+            baseline=offer_extra_verified_terms_baseline,
             source_family=OFFER_EXTRA_KEYWORD_SOURCE_FAMILY,
             item_id="OFFER_EXTRA_KEYWORDS",
             build_export=build_offer_extra_keywords_export,
@@ -1078,7 +1079,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     no_match_policy_failure_probe_passed, no_match_policy_failure_probe_error_codes = (
         _run_required_layer_failure_probe(
             variants=variants,
-            baseline=no_match_policy_b2_baseline,
+            baseline=no_match_policy_verified_terms_baseline,
             source_family=NO_MATCH_POLICY_SOURCE_FAMILY,
             item_id="NO_MATCH_POLICIES",
             build_export=_build_no_match_policy_coverage_from_variants,
@@ -1087,7 +1088,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     match_bridge_failure_probe_passed, match_bridge_failure_probe_error_codes = (
         _run_required_layer_failure_probe(
             variants=variants,
-            baseline=match_bridge_b2_baseline,
+            baseline=match_bridge_verified_terms_baseline,
             source_family=MATCH_BRIDGE_SOURCE_FAMILY,
             item_id="MATCH_BRIDGES",
             build_export=_build_match_bridge_coverage_from_variants,
@@ -1096,7 +1097,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     recipe_routing_failure_probe_passed, recipe_routing_failure_probe_error_codes = (
         _run_required_layer_failure_probe(
             variants=variants,
-            baseline=recipe_routing_b2_baseline,
+            baseline=recipe_routing_verified_terms_baseline,
             source_family=RECIPE_ROUTING_HELPER_SOURCE_FAMILY,
             item_id="RECIPE_ROUTING_EXTRA_ALIASES",
             build_export=build_recipe_routing_extra_alias_export,
@@ -1153,7 +1154,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
             INGREDIENT_ROUTING_PARENT_SOURCE_FAMILY,
             RECIPE_ROUTING_HELPER_SOURCE_FAMILY,
         ],
-        "b2_baseline_file": str(args.baseline_json.relative_to(REPO_DIR)),
+        "verified_terms_baseline_file": str(args.baseline_json.relative_to(REPO_DIR)),
         "registry_variant_count": len(variants),
         "selected_variant_counts": {
             "PARENT_MATCH_ONLY": len(selected_parent_variants),
@@ -1177,16 +1178,16 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
             "INGREDIENT_ROUTING_PARENT_TERMS": _expanded_mapping_count(generated_routing_static),
             "RECIPE_ROUTING_EXTRA_ALIASES": _expanded_mapping_count(generated_recipe_routing_static),
         },
-        "b2_baseline_export_counts": {
-            "PARENT_MATCH_ONLY": _expanded_mapping_count(parent_b2_baseline),
-            "KEYWORD_SYNONYMS": _expanded_mapping_count(keyword_synonym_b2_baseline),
-            "INGREDIENT_PARENTS": _expanded_mapping_count(ingredient_parent_b2_baseline),
-            "KEYWORD_EXTRA_PARENTS": _expanded_mapping_count(keyword_extra_b2_baseline),
-            "OFFER_EXTRA_KEYWORDS": _expanded_mapping_count(offer_extra_b2_baseline),
-            "NO_MATCH_POLICIES": _expanded_mapping_count(no_match_policy_b2_baseline),
-            "MATCH_BRIDGES": _expanded_mapping_count(match_bridge_b2_baseline),
-            "INGREDIENT_ROUTING_PARENT_TERMS": _expanded_mapping_count(routing_b2_baseline),
-            "RECIPE_ROUTING_EXTRA_ALIASES": _expanded_mapping_count(recipe_routing_b2_baseline),
+        "verified_terms_baseline_export_counts": {
+            "PARENT_MATCH_ONLY": _expanded_mapping_count(parent_verified_terms_baseline),
+            "KEYWORD_SYNONYMS": _expanded_mapping_count(keyword_synonym_verified_terms_baseline),
+            "INGREDIENT_PARENTS": _expanded_mapping_count(ingredient_parent_verified_terms_baseline),
+            "KEYWORD_EXTRA_PARENTS": _expanded_mapping_count(keyword_extra_verified_terms_baseline),
+            "OFFER_EXTRA_KEYWORDS": _expanded_mapping_count(offer_extra_verified_terms_baseline),
+            "NO_MATCH_POLICIES": _expanded_mapping_count(no_match_policy_verified_terms_baseline),
+            "MATCH_BRIDGES": _expanded_mapping_count(match_bridge_verified_terms_baseline),
+            "INGREDIENT_ROUTING_PARENT_TERMS": _expanded_mapping_count(routing_verified_terms_baseline),
+            "RECIPE_ROUTING_EXTRA_ALIASES": _expanded_mapping_count(recipe_routing_verified_terms_baseline),
         },
         "public_runtime_export_counts": {
             "PARENT_MATCH_ONLY": _expanded_mapping_count(public_parent_runtime),
@@ -1242,16 +1243,16 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
             "INGREDIENT_ROUTING_PARENT_TERMS": generated_routing_static,
             "RECIPE_ROUTING_EXTRA_ALIASES": generated_recipe_routing_static,
         },
-        "b2_baseline_exports": {
-            "PARENT_MATCH_ONLY": parent_b2_baseline,
-            "KEYWORD_SYNONYMS": keyword_synonym_b2_baseline,
-            "INGREDIENT_PARENTS": ingredient_parent_b2_baseline,
-            "KEYWORD_EXTRA_PARENTS": keyword_extra_b2_baseline,
-            "OFFER_EXTRA_KEYWORDS": offer_extra_b2_baseline,
-            "NO_MATCH_POLICIES": no_match_policy_b2_baseline,
-            "MATCH_BRIDGES": match_bridge_b2_baseline,
-            "INGREDIENT_ROUTING_PARENT_TERMS": routing_b2_baseline,
-            "RECIPE_ROUTING_EXTRA_ALIASES": recipe_routing_b2_baseline,
+        "verified_terms_baseline_exports": {
+            "PARENT_MATCH_ONLY": parent_verified_terms_baseline,
+            "KEYWORD_SYNONYMS": keyword_synonym_verified_terms_baseline,
+            "INGREDIENT_PARENTS": ingredient_parent_verified_terms_baseline,
+            "KEYWORD_EXTRA_PARENTS": keyword_extra_verified_terms_baseline,
+            "OFFER_EXTRA_KEYWORDS": offer_extra_verified_terms_baseline,
+            "NO_MATCH_POLICIES": no_match_policy_verified_terms_baseline,
+            "MATCH_BRIDGES": match_bridge_verified_terms_baseline,
+            "INGREDIENT_ROUTING_PARENT_TERMS": routing_verified_terms_baseline,
+            "RECIPE_ROUTING_EXTRA_ALIASES": recipe_routing_verified_terms_baseline,
         },
         "public_runtime_exports": {
             "PARENT_MATCH_ONLY": public_parent_runtime,
@@ -1273,7 +1274,7 @@ def main() -> int:
     parser.add_argument("--language", default="sv")
     parser.add_argument("--market", default="SE")
     parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
-    parser.add_argument("--baseline-json", type=Path, default=DEFAULT_B_TRACK_BASELINE_JSON)
+    parser.add_argument("--baseline-json", type=Path, default=DEFAULT_VERIFIED_TERMS_BASELINE_JSON)
     parser.add_argument("--report-dir", type=Path, default=None)
     parser.add_argument("--skip-runtime-sanity", action="store_true")
     args = parser.parse_args()

@@ -22,6 +22,7 @@ from typing import Any
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_DIR = APP_DIR.parent
 sys.path.insert(0, "/app" if os.path.exists("/app") else str(APP_DIR))
+os.environ.setdefault("TERM_REGISTRY_DISABLE_LOCAL_ENTRIES", "1")
 
 from languages.term_registry.models import CheckIssue, RegistryEntry, RegistryExample  # noqa: E402
 from languages.term_registry.reports import write_json_and_markdown_report  # noqa: E402
@@ -31,7 +32,7 @@ from languages.sv.ingredient_matching.term_registry.add_term import (  # noqa: E
 
 
 DEFAULT_REPORT_ROOT = APP_DIR / "tests" / "reports" / "term_registry"
-EXPECTED_B2_UNIQUE_COVERAGE_KEYS = 5337
+EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS = 5337
 EXPECTED_SV_EXPORT_LAYER_COUNT = 25
 
 
@@ -180,13 +181,13 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     issues.extend(_run_failure_probes())
 
     summary = dict(payload["summary"])
-    if summary.get("unique_coverage_key_count") != EXPECTED_B2_UNIQUE_COVERAGE_KEYS:
+    if summary.get("unique_coverage_key_count") != EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS:
         issues.append(_issue(
             "error",
             "add_term_coverage_key_count_mismatch",
-            "registry add-term coverage should cover the full B2 unique key surface",
+            "registry add-term coverage should cover the full verified-term unique key surface",
             details={
-                "expected": EXPECTED_B2_UNIQUE_COVERAGE_KEYS,
+                "expected": EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS,
                 "actual": summary.get("unique_coverage_key_count"),
             },
         ))

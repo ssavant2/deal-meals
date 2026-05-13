@@ -517,7 +517,7 @@ def build_runtime_exports_from_entries(entries: Iterable[RegistryEntry]) -> dict
     }
 
 
-_REGISTRY_ENTRIES = load_registry_entries()
+_REGISTRY_ENTRIES = load_registry_entries(include_local=True)
 
 PARENT_MATCH_ONLY: dict[str, str] = build_parent_match_only_export_from_entries(_REGISTRY_ENTRIES)
 KEYWORD_SYNONYMS: dict[str, str] = build_keyword_synonyms_export_from_entries(_REGISTRY_ENTRIES)

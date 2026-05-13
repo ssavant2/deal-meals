@@ -21,6 +21,7 @@ from typing import Any
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_DIR = APP_DIR.parent
 sys.path.insert(0, "/app" if os.path.exists("/app") else str(APP_DIR))
+os.environ.setdefault("TERM_REGISTRY_DISABLE_LOCAL_ENTRIES", "1")
 
 from languages.term_registry.models import CheckIssue  # noqa: E402
 from languages.term_registry.reports import write_json_and_markdown_report  # noqa: E402
