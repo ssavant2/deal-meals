@@ -1444,6 +1444,21 @@ function removeCacheErrorBanner() {
 
 /// Refresh visible suggestions, rebuilding the server cache only if settings require it.
 async function refreshRecipeSuggestions() {
+    if (suggestionsUpdateReadyPending) {
+        sessionStorage.removeItem('recipeSuggestions');
+        sessionStorage.removeItem('recipeBalance');
+        sessionStorage.removeItem('cacheGeneration');
+        sessionStorage.removeItem(SUGGESTIONS_PREFERENCES_HASH_KEY);
+        suggestionsLoaded = false;
+        allSuggestions = [];
+        renderedRecipeIds = new Set();
+
+        await loadMoreSuggestions(true);
+        acknowledgeSuggestionsUpdate();
+        clearSuggestionsUpdateState();
+        return;
+    }
+
     try {
         if (await canSkipRecipeSuggestionsRefresh()) {
             acknowledgeSuggestionsUpdate();

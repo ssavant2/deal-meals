@@ -710,7 +710,6 @@ def get_cache_status():
         from cache_manager import cache_manager
 
         runtime_status = cache_manager.get_runtime_rebuild_status()
-        freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=False)
         with get_db_session() as db:
             result = db.execute(text("""
                 SELECT status, total_matches, computation_time_ms, last_computed_at,
@@ -720,19 +719,51 @@ def get_cache_status():
             """)).fetchone()
 
             if result:
+                cache_generation = result.last_computed_at.isoformat() if result.last_computed_at else None
+                if result.status == "computing":
+                    cached_rows = int(result.total_matches or 0)
+                    return JSONResponse({
+                        "success": True,
+                        "status": result.status,
+                        "ready": False,
+                        "total_matches": result.total_matches,
+                        "time_ms": result.computation_time_ms,
+                        "cache_generation": cache_generation,
+                        "last_background_rebuild_at": (
+                            result.last_background_rebuild_at.isoformat()
+                            if result.last_background_rebuild_at
+                            else None
+                        ),
+                        "background_rebuild_source": result.background_rebuild_source,
+                        "cache_freshness": {
+                            "state": "computing",
+                            "servable": cached_rows > 0,
+                            "cached_rows": cached_rows,
+                            "metadata": {
+                                "status": result.status,
+                                "last_computed_at": cache_generation,
+                                "computation_time_ms": result.computation_time_ms,
+                                "total_matches": result.total_matches,
+                            },
+                        },
+                        **runtime_status,
+                    })
+
+                freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=False)
                 return JSONResponse({
                     "success": True,
                     "status": result.status,
                     "ready": result.status == 'ready',
                     "total_matches": result.total_matches,
                     "time_ms": result.computation_time_ms,
-                    "cache_generation": result.last_computed_at.isoformat() if result.last_computed_at else None,
+                    "cache_generation": cache_generation,
                     "last_background_rebuild_at": result.last_background_rebuild_at.isoformat() if result.last_background_rebuild_at else None,
                     "background_rebuild_source": result.background_rebuild_source,
                     "cache_freshness": freshness_status,
                     **runtime_status,
                 })
             else:
+                freshness_status = cache_manager.inspect_cache_freshness(include_version_scan=False)
                 return JSONResponse({
                     "success": True,
                     "status": "unknown",
