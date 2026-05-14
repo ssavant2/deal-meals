@@ -353,6 +353,10 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     # NOTE: bakchoklad/blockchoklad darkness qualifiers in _SPECIALTY_QUALIFIERS_RAW
 
+    # Pralin (general) should NOT match specifically mint-flavored praline ingredient
+    # "chokladpralin med mintsmak" requires mint flavor — hazelnut praline (Toffifee) is wrong flavor
+    'pralin': {'mintsmak'},
+
     # Lax (salmon) != laxrom (salmon roe) — different product
     # "lax" is substring of "laxrom" → reverse-substring FP
     'lax': {
@@ -521,6 +525,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'havreris',  # oat grains (mathavre) ≠ rice
         'risberg',  # brand name (Risberg Import) — "ris" substring ≠ rice
         'algsallad',  # algae salad ≠ rice
+        'björkris',  # birch twigs (Easter decoration) ≠ rice ("väl utslaget björkris")
     },
 
     # Iceberg lettuce — "isberg" is substring of "risberg" (brand name)
@@ -882,6 +887,10 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # "bittermandelarom"/"mandelarom" = almond extract, NOT whole almonds
     'mandel': {'cantuccini', 'mandelarom'},
     'mandlar': {'cantuccini', 'mandelarom'},
+
+    # TUC (brand) is 3 letters — substring-matches 'cantucciniskorpor' ingredient text
+    # "TUC Crackers Original" ≠ cantuccini biscuits
+    'tuc': {'cantuccini'},
 
     # Ananas (pineapple fruit) should NOT match ananasjuice (different product)
     'ananas': {'ananasjuice'},
@@ -1616,6 +1625,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'sriracha', 'sauce', 'sås', 'sas',
         'soya', 'soy', 'grillspett', 'karré', 'karre',
         'burgarcheddar',           # "Burgarcheddar Chili Jalapeno" — burger cheese, not fresh chili
+        'hamburgerost',            # "Hamburgerost Chili" — burger cheese, not fresh chili
+        'cheese',                  # "Chili Cheese 170ml by Danyel Couet" — cheese product
     },
     'chilifrukt': {
         'örtsalt', 'ortsalt',
@@ -1979,6 +1990,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'jalapeno': {
         'ostcrème', 'ostcreme',  # "Jalapeno ostcrème middagsmagi" — cheese cream, not pepper
         'cashew',                # "Cashew Jalapeno 140g Exotic Snacks" — snack, not pepper
+        'burgarcheddar',         # "Burgarcheddar Chili Jalapeno" — burger cheese, not pickled pepper
+        'hamburgerost',          # "Hamburgerost Jalapeno" variant — cheese, not pepper
     },
     # Laoganma products (jordnötter/bönor i chiliolja) should only match recipes
     # that specifically ask for Laoganma, not generic "chiliolja" recipes
@@ -2021,6 +2034,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'svartvinbär': {'torkad frukt'},
     # Juice products ≠ whole fruit
     'blodapelsin': {'juice'},  # "Juice Apelsin Röd Grape" gets keyword 'blodapelsin' via substitution
+    # Vitamin supplements ≠ fresh orange — "Berocca Multivitamin C-Vitamin Apelsin" is a supplement
+    'apelsin': {'berocca', 'multivitamin', 'c-vitamin'},
     # Candy strips with fruit flavor ≠ fresh fruit
     'äpple': {'godisrem'},
     # "Popcorn chicken" = breaded bites, not actual popcorn
@@ -2214,6 +2229,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'balsamico',       # "Crema Di Balsamico Tryffel" — balsamic cream with truffle flavor
         'vitmögelost',     # "Vitmögelost Tryffel" — cheese with truffle ≠ truffle oil
         'olja',            # "Tryffelolja" — truffle oil ≠ truffle cheese/flavored products
+        'burgarcheddar',   # "Burgarcheddar Tryffel" — burger cheese ≠ truffle sauce/oil
+        'hamburgerost',    # "Hamburgerost Tryffel" variant — cheese ≠ truffle ingredient
     },
     # Canned stew pork ≠ fresh pork
     'fläsk': {
@@ -2327,6 +2344,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Whole raw lamb cuts ≠ processed lamb sausage
     'lammframdel': {'lammkorv', 'korv'},
     'lammstek': {'lammkorv', 'korv'},
+    'lammkött': {'lammkorv', 'korv'},
+    'lammkott': {'lammkorv', 'korv'},
     # Spice ingredient ≠ chips flavored with that spice
     'rosepeppar': {'chips', 'potatischips'},
     'rosépeppar': {'chips', 'potatischips'},
@@ -2456,6 +2475,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'pralin',               # "Chokladpralin Mörk Choklad 60% Lindt" — filled pralines, not baking chocolate
         'karamell',             # "Choklad Vegan Salt Karamell Green Star" — caramel-flavor candy bar
     },
+
     # Kakao (cocoa powder) ≠ hazelnut spread containing "kakao" in name
     # "Hasselnötkräm Kakao Duo Nutella" has kakao in name but is a spread, not cocoa powder
     'kakao': {

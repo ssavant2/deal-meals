@@ -277,6 +277,8 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'perfect',    # English marketing adjective — "Perfect Bratwurst" brand leaked into baby pacifiers via 'perfect match'
     'veggie',     # English generic for vegetable — "Sallad Asiatisk Veggie" matched "veggie burger mix" ingredient
 
+    'mortel',   # kitchen tool — "Mortel Granit" matched "stötta i mortel" ingredient text
+
     # Quantities/forms (meaningless for matching)
     'paket', 'pack', 'burk', 'påse', 'flaska', 'liter', 'gram', 'kilo',
     'knippe', 'knippa',  # "salladslök knippe" - knippe is a quantity
