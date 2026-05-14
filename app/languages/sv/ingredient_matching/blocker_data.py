@@ -2322,6 +2322,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     # Raw beef cuts ≠ processed/filled products using beef as ingredient name
     'biff': {'dumpling'},  # "Dumpling biff, chili & ingefära Beijing8" — filled dumpling, not raw beef
+    # Daim candy bar ≠ frozen cakes/desserts containing Daim as a topping/flavor
+    'daim': {'moussetårta', 'cheesecake', 'almondy'},  # Almondy = frozen dessert brand (moussetårta, cheesecake, orange cake)
     # Whole raw lamb cuts ≠ processed lamb sausage
     'lammframdel': {'lammkorv', 'korv'},
     'lammstek': {'lammkorv', 'korv'},
@@ -3164,9 +3166,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Flavored yoghurt matched via fruit keyword (not caught by check_yoghurt_match)
     'havtorn': {'yoghurt', 'gurt'},  # "Yoghurt Havtorn 2.7%" ≠ fresh havtorn berries
     # ---- Arla review 2026-03-26 ----
-    # Smoked fläskfilé ≠ raw fläskfilé
-    'fläskfilé': {'rökt', 'rokt'},
-    'flaskfile': {'rökt', 'rokt'},
+    # Smoked or ready-sauce fläskfilé ≠ raw fläskfilé
+    'fläskfilé': {'rökt', 'rokt', 'grönpepparsås', 'gronpepparsas'},
+    'flaskfile': {'rökt', 'rokt', 'grönpepparsås', 'gronpepparsas'},
     # Marinated/flavored fläskytterfilé ≠ plain
     'fläskytterfilé': {'mörmarinerad', 'mormarinerad', 'medaljonger', 'vitlök & peppar'},
     'flaskytterfile': {'mörmarinerad', 'mormarinerad', 'medaljonger'},
@@ -3284,7 +3286,18 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'bröd': {'våfflor', 'vafflor', 'maamoul', 'mjölkbullar', 'mjolkbullar', 'pinsa'},
     'brod': {'våfflor', 'vafflor', 'maamoul', 'mjölkbullar', 'mjolkbullar', 'pinsa'},
     # Deli kalkon products ≠ raw kalkonfilé
-    'kalkon': {'pastramibröst', 'pastramibrost', 'örtmarinerad', 'ortmarinerad'},
+    'kalkon': {
+        'pastramibröst', 'pastramibrost', 'örtmarinerad', 'ortmarinerad',
+        'bacon',           # "Bacon Kalkon" — processed/smoked strip product
+        'rökt', 'rokt',    # "Kalkon Rökt Tunna Skivor" — smoked deli slices
+        'kallrökt', 'kallrokt',
+        'basturökt', 'basturökt',
+        'kokt',            # "Kalkon Strimlad Kokt Tulip" — cooked/ready-to-eat
+        'skivor',          # sliced deli format ≠ whole or raw turkey cuts
+        'korv',            # kalkonkorv/lökkorv av kalkon — sausage product
+        'chorizo',         # "Chorizo av Kalkon" — processed sausage
+        'strimlad',        # "Kalkon Strimlad" — pre-cooked strips
+    },
     # Kanin (rabbit) ≠ toys/decorations — Easter products matching rabbit recipes
     'kanin': {
         'filt', 'snuttefilt',  # baby blankets
