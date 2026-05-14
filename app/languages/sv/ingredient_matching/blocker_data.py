@@ -1683,9 +1683,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'burrata': {
         'cappellacci',         # "Pasta Cappellacci Pesto och Burrata" — stuffed pasta, not burrata cheese
     },
-    # Parmigiano — flarn are cheese chips, not grated/shaved cheese for cooking
+    # Parmigiano — flarn and tunnbrödskex are cheese-flavored snacks, not grated/shaved cheese
     'parmigiano': {
         'flarn',
+        'tunnbrödskex',  # "Tunnbrödskex Parmigiano Reggiano Wernerssons" — cracker, not cheese
     },
     # Grana Padano — same cheese-chip form issue as parmigiano
     'padano': {
@@ -2370,6 +2371,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'mezze lune',               # "Pasta Mezze Lune Karl-johansvamp" — filled half-moon
         'fyllning',                 # any filled pasta (svampfyllning, spenatfyllning)
         'chicken',                  # "Tagliatelle chicken 1kg Findus" — frozen ready meal
+        'kryddblandning',           # "Pasta rossa Kryddblandning Santa Maria" — spice mix, not pasta
+        'köttbullar',               # "Delikatessköttbullar med stuvade makaroner Felix" — ready meal
     },
     'makaroner': {
         'wasabi',                   # "Wasabi Pasta" = wasabi paste (tube), not makaroner
@@ -2717,7 +2720,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     'kyckling': {
         'wook', 'wok', 'junior', 'äggjaktsägg', 'aggjaktsagg',
-        'stekt', 'färdiglagad',
+        'stekt', 'färdiglagad', 'rostad',  # "Rostad kyckling Findus" — prepared, not raw
         'pålägg', 'palagg',
         'dumpling', 'dumplings',  # dumplings ≠ raw chicken
         'bacon',  # "Bacon Kyckling Skivad" — processed, not raw chicken
@@ -2746,8 +2749,13 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'ortkryddad': {'kyckling'},
     # "Isberg Frisé" is frisée lettuce (curly salad mix), not iceberg
     'isberg': {'frisé', 'frise'},
-    # Blend oils containing olivolja as a component ≠ pure olive oil
-    'olivolja': {'raps', 'solros'},
+    # Blend oils, flavored oils, and spray ≠ pure olive oil
+    'olivolja': {
+        'raps', 'solros',            # blend oils with olivolja as a component
+        'tryffel', 'tryffelolja',    # truffle-infused — specialty, not plain olive oil
+        'limone', 'citron',          # lemon-infused — flavor oil, not plain olive oil
+        'spray',                     # aerosol spray — different product form
+    },
     # Spreads/margarin with "smör" in the name ≠ real butter (smör = 80%+ fat)
     # Bregott (smör&raps), Flora ("med Smör 70%"), Gårdsgoda, etc. are NOT butter.
     # Herb butters (persiljesmör, vitlökssmör) are serving condiments, not cooking butter.
@@ -3135,6 +3143,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'blåbär': {'boost', 'hallon'},  # "Berry Boost Blåbär" snack bar; "Hallon & blåbär" mix ≠ pure blåbär
     # Berry mixes for recipes should not fall through to nut/berry trail mixes.
     'bärmix': {'nöt', 'not'},
+    # Nut/fruit mixes should not match pastry/strudel products where fruktmix is a filling
+    'fruktmix': {'strudel'},  # "Strudel Fruktmix Master" — pastry carrier, not a trail mix
     # ---- Bean products in sauce ----
     'bönor': {'tomatsås', 'tomatsas'},    # "Vita Bönor i Tomatsås" ≠ plain cooked beans
     'bonor': {'tomatsås', 'tomatsas'},
@@ -3321,6 +3331,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'socker': {'utan', 'mindre'},
     # "Rågmackor 450g Åkes Äkta Hönökaka" extracts 'kaka' — rye crackers ≠ cake/cookies
     'kaka': {'hönökaka', 'honokaka', 'rågmackor', 'ragmackor'},
+    # Pre-cooked rice packs ≠ dry raw rice for cooking
+    'ris': {'färdigkokt'},  # "Jasminris snabbris färdigkokt ICA" — already cooked, not raw rice
 }
 
 PRODUCT_NAME_BLOCKERS: Dict[str, Set[str]] = {

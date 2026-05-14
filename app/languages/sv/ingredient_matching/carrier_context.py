@@ -390,6 +390,7 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     # Sport/supplement gels and collagen — fruit/vitamin words are flavoring, not ingredients
     'energigel',  # "Energigel Citron" — citron is flavoring
     'proteingel',  # "Proteingel Apelsin" — apelsin is flavoring
+    'liquid gel',  # "Liquid Gel Citron" — citron is flavoring
     'kollagen',  # "Kollagen Citron C-Vitamin" — citron is flavoring in supplement
 
     # Cheese spreads - flavors are toppings, not ingredients
