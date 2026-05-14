@@ -35,6 +35,18 @@ DESCRIPTOR_SUPPRESSION_PRIMARIES: FrozenSet[str] = frozenset({
 })
 
 
+# CUISINE_CONTEXT: products with very cuisine-specific seasoning in their name
+# are only allowed to match recipes that contain the corresponding context words.
+# This preserves pre-seasoned raw products as valid suggestions in matching recipes
+# while preventing e.g. "Thaikryddad kycklingfilé" from appearing in French recipes.
+#
+# When to add a new entry:
+#   A product trigger word is so cuisine-specific that it would be wrong in 95%+
+#   of recipes. Examples of future candidates: 'tikka masala', 'tandoori', 'shawarma'.
+#   Use this instead of PNB so the product remains visible in matching cuisine recipes.
+#
+# How it works: if product name contains the trigger, full_recipe_text must contain
+# at least one of the context words, otherwise the match is rejected (recipe_matcher_backend.py).
 CUISINE_CONTEXT: Dict[str, Set[str]] = {
     'taco': {
         'taco', 'tacos', 'texmex', 'tex mex', 'tex-mex',
