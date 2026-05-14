@@ -9036,3 +9036,26 @@ layer_role = "ingredient_parent_mapping"
 ingredient = "applelcider"
 offer_name = "Cider"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.toastbrodskivor_394"
+language = "sv"
+market = "SE"
+canonical = "formbröd"
+status = "active"
+variants = ["toastbrödskivor"]
+ingredient_terms = ["formbröd"]
+source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
+layer_policy = ["ingredient_alias"]
+notes = "Registry-owned ingredient parent mapping."
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "formbröd"
+variant = "toastbrödskivor"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "toastbrödskivor"
+offer_name = "Toastbröd"
+expected = 1

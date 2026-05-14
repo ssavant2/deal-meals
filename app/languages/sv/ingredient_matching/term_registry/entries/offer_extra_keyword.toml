@@ -7543,3 +7543,49 @@ layer_role = "offer_extra_keyword_mapping"
 ingredient = "grönsallad"
 offer_name = "Isbergssallad"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.bladpersilja_315"
+language = "sv"
+market = "SE"
+canonical = "persilja"
+status = "active"
+variants = ["bladpersilja"]
+offer_terms = ["persilja"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Registry-owned offer extra keyword mapping."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "persilja"
+variant = "bladpersilja"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "persilja"
+offer_name = "Bladpersilja"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.hirs_316"
+language = "sv"
+market = "SE"
+canonical = "hirs"
+status = "active"
+variants = ["hirs"]
+offer_terms = ["hirs"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Hirs (millet) is too short for automatic extraction — explicit offer keyword mapping."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "hirs"
+variant = "hirs"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "hirs"
+offer_name = "Hirs"
+expected = 1

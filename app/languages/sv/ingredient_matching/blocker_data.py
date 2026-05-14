@@ -1510,6 +1510,7 @@ _PLAIN_MILK_PRODUCT_BLOCKERS: Set[str] = {
     'jordgubb', 'blåbär', 'hallon', 'banan', 'choklad', 'vanilj',
     'protein',
     'baby', 'yogo', '6m', '8m', '12m',
+    '1år', '1ar', 'unna',  # "Mjölkdryck eko 1år Unna" — baby formula, not cooking milk
 }
 
 _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
@@ -1614,6 +1615,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'mango',               # "Torkad Mango Chili Twist" — dried mango snack, not chili
         'sriracha', 'sauce', 'sås', 'sas',
         'soya', 'soy', 'grillspett', 'karré', 'karre',
+        'burgarcheddar',           # "Burgarcheddar Chili Jalapeno" — burger cheese, not fresh chili
     },
     'chilifrukt': {
         'örtsalt', 'ortsalt',
@@ -1688,6 +1690,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'flarn',
         'tunnbrödskex',  # "Tunnbrödskex Parmigiano Reggiano Wernerssons" — cracker, not cheese
     },
+    # Compound keyword variant — same blockers must apply when matched via full compound
+    'parmigiano reggiano': {'flarn', 'tunnbrödskex'},
     # Grana Padano — same cheese-chip form issue as parmigiano
     'padano': {
         'flarn',
@@ -1997,6 +2001,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'curry',        # "Curry Mango 41g Santa Maria" — spice blend, not mango fruit
         'hallon',       # "Mango & hallon Fryst" = mixed fruit ≠ pure mango
         'torkad frukt',  # "Torkad frukt Bara Mango Ananas" — dried fruit snack ≠ fresh mango
+        'naturgodis', 'bara snacks',  # "Naturgodis Bara Snacks Mango Ananas Exotic Snacks" — candy snack ≠ fresh mango
     },
     'papaya': {
         'torkad',        # "Papaya Torkad Tärningar" — dried fruit, not fresh papaya
@@ -2312,9 +2317,14 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'burger bun', 'burger buns',
         'vego', 'vegansk', 'växtbaserad',  # vegan burger ≠ meat burger
         'gummi', 'squishy', 'robetoy',    # candy/toy burgers (non-food)
+        'beyond',                          # "Beyond burger Fryst Beyond Meat" — plant-based brand
+        'green burger', 'plant beef',      # "Real/Crispy Green burger MAX", "plant beef burger" — plant-based
     },
-    # Whole raw lamb cut ≠ processed lamb sausage
+    # Raw beef cuts ≠ processed/filled products using beef as ingredient name
+    'biff': {'dumpling'},  # "Dumpling biff, chili & ingefära Beijing8" — filled dumpling, not raw beef
+    # Whole raw lamb cuts ≠ processed lamb sausage
     'lammframdel': {'lammkorv', 'korv'},
+    'lammstek': {'lammkorv', 'korv'},
     # Spice ingredient ≠ chips flavored with that spice
     'rosepeppar': {'chips', 'potatischips'},
     'rosépeppar': {'chips', 'potatischips'},
@@ -2661,7 +2671,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'örtagård': {'dressingmix'},
     # "Stracciatella Kvarg" = vanilla kvarg with chocolate chips (dessert)
     # ≠ Stracciatella cheese (burrata interior, used in pasta/salad recipes)
-    'stracciatella': {'kvarg', 'mousse'},  # "Mousse Stracciatella Protein" = dessert ≠ cheese
+    'stracciatella': {'kvarg', 'mousse', 'dessert', 'choco'},  # dessert/mousse products ≠ stracciatella cheese
     # NOTE: Kvarg matching moved to check_kvarg_match() function — handles all flavored variants
     # "Barkis Vallmo" (baked bread with poppy seeds) ≠ raw vallmofrö for baking
     'vallmo': {'barkis'},
@@ -3176,7 +3186,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Flavored halloumi ≠ plain
     'halloumi': {'tryffel', 'chili'},
     # Le Roulé-style cream cheese ≠ generic hard/riven ost
-    'ost': {'roule'},
+    'ost': {'roule', 'pesto'},  # pesto carrier contains "ost" as ingredient word, not cheese product
     # Flavored vitmögelost ≠ plain
     'vitmögelost': {'tryffel'},
     'vitmogelost': {'tryffel'},
@@ -3204,7 +3214,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'pastasås': {'arrabbiata'},
     'pastasas': {'arrabbiata'},
     # Smoked musslor ≠ fresh blåmusslor
-    'musslor': {'rökta', 'rokta', 'rökt', 'rokt'},
+    'musslor': {'rökta', 'rokta', 'rökt', 'rokt', 'i vatten', 'i lake'},  # canned/preserved ≠ fresh mussels
     'blåmusslor': {'rökta', 'rokta', 'rökt', 'rokt', 'i vatten', 'i lake'},
     'blamusslor': {'rökta', 'rokta', 'rökt', 'rokt', 'i vatten', 'i lake'},
     # Rökt paprikapulver ≠ vanlig paprikapulver (and vice versa)
@@ -3345,6 +3355,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     # Hair/body styling products ≠ cooking oil (miscategorized in store data)
     'kokosolja': {'stylinggel'},  # "Stylinggel Coconut Oil ECO Style" — non-food, not coconut oil
+    # Seeds ingredient ≠ bread/crackers that happen to contain seeds
+    'frön': {'rågbröd'},  # "Rågbröd med frön" — bread carrier, not loose seeds
 }
 
 PRODUCT_NAME_BLOCKERS: Dict[str, Set[str]] = {
