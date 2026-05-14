@@ -279,6 +279,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
 
     'mortel',   # kitchen tool — "Mortel Granit" matched "stötta i mortel" ingredient text
     'barber',   # beard-care brand — "Barber Club" is substring of "rabarber" ingredient text
+    'mycket',   # Swedish intensifier word — "Välkommen till världen" book matched via ingredient text "mycket"
 
     # Quantities/forms (meaningless for matching)
     'paket', 'pack', 'burk', 'påse', 'flaska', 'liter', 'gram', 'kilo',

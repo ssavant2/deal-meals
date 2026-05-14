@@ -353,6 +353,10 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     # NOTE: bakchoklad/blockchoklad darkness qualifiers in _SPECIALTY_QUALIFIERS_RAW
 
+    # Generic seed keyword 'frön' should NOT match vanilla-context ingredients
+    # "urskrapade frön från 1 vaniljstång" → seed products (solrosfrön, bockhornsklöver) wrong
+    'frön': {'vaniljstång', 'vaniljsocker', 'vaniljstang'},
+
     # Pralin (general) should NOT match specifically mint-flavored praline ingredient
     # "chokladpralin med mintsmak" requires mint flavor — hazelnut praline (Toffifee) is wrong flavor
     'pralin': {'mintsmak'},
@@ -2285,7 +2289,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Pinsa (Italian flatbread pizza) ≠ generic bread types
     'tunnbröd': {'pinsa'},
     'tunnbrod': {'pinsa'},
-    'dragon': {'twin dragon', 'twin'},
+    'dragon': {'twin dragon', 'twin', 'kafe baby', 'baby dragon', 'kafe'},  # non-herb products with "dragon" in name
     'surdegsbröd': {'pinsa'},
     'surdegsbrod': {'pinsa'},
     'formbröd': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod', 'bagel', 'brioche'},
@@ -2388,11 +2392,14 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'jerky', 'beef jerky', 'torkat kött',  # dried snack ≠ fresh beef
         'märgben',       # marrow bones ≠ beef meat
         'fond du chef',  # stock concentrate ≠ beef meat
+        'hamburgare',    # "Hamburgare Nötkött 900g Julles" — pre-formed patties ≠ raw strips
+        'deliköttbullar',  # "Deliköttbullar Nötkött & grönsaker Felix" — pre-made meatballs ≠ raw beef
     },
     'notkott': {
         'fruktmix', 'bärmix', 'oumph', 'gelatinblad',
         'fågelmatare', 'ekosalami', 'salami', 'oxpytt',
         'jerky', 'beef jerky', 'torkat kött', 'märgben', 'fond du chef',
+        'hamburgare', 'deliköttbullar',
     },
     # fix_swedish_chars normalizes ASCII `farskost` to the same key as `färskost`,
     # so only a single combined färskost entry should exist here.
@@ -3134,6 +3141,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'ingefära', 'ingefara',      # ginger-flavored sill
         'lime',                      # citrus-flavored sill
         'senapsmarinerad',  # "Sill Senapsmarinerad 500g Abba" — mustard-marinated
+        'västkustsallad', 'vastkustsallad',  # "Västkustsallad Prinsens" — finished mayo salad ≠ plain herring
         'senapsgravad',     # mustard-cured sill variant
         'rökt', 'rokt',     # "Rökt Sill" — smoked herring ≠ plain inläggningssill
         'gravad',           # "Gravad Sill" — cured sill ≠ plain inläggningssill
@@ -3456,8 +3464,27 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     # still breadcrumbs, not majsmjöl for baking.
     'majsmjöl': {'ströbröd', 'strobrod', 'pankoströbröd', 'pankostrobrod'},
     'majsmjol': {'ströbröd', 'strobrod', 'pankoströbröd', 'pankostrobrod'},
-    # Smoked salmon products ≠ fresh lemon (they have 'citron' as flavor keyword)
-    'citron': {'varmrökt', 'kallrökt', 'lax i bit', 'lax'},
+    # Smoked salmon + supplement products ≠ fresh lemon
+    # Supplements (Möllers Tran, Berocca, Vitamin Well) have 'citron' as flavor keyword
+    # but are not food ingredients — parallel to existing apelsin PNB (berocca/multivitamin)
+    'citron': {
+        'varmrökt', 'kallrökt', 'lax i bit', 'lax',
+        'kosttillskott', 'tran', 'möllers', 'mollers',
+        'berocca', 'multivitamin', 'brustablett',
+        'vitamin well', 'reload',
+    },
+    # Cassis liqueur ≠ vitamin supplement with cassis flavor
+    'cassis': {'multivitamin', 'berocca', 'kosttillskott', 'energy', 'brustablett'},
+    # Limpa (bread) ≠ cigarette carton (Swedish slang "limpa" = carton of cigarettes)
+    'limpa': {'marlboro', 'winston', 'terea', 'kona', 'blend vit', 'tobak', 'cigarr'},
+    # Standalone marshmallows ≠ cookie/cake products containing marshmallow
+    'marshmallow': {'kakor', 'kaka'},
+    'marshmallows': {'kakor', 'kaka'},
+    # Whiskey (for cooking/baking) ≠ BBQ sauce flavored with bourbon
+    'whiskey': {'bbq', 'bbqsås', 'sauce'},
+    # Öl (beer for cooking) ≠ BBQ rub spice mix with "beer can" in name
+    'öl': {'bbq rub', 'beer can', 'bbq sauce'},
+    'ol': {'bbq rub', 'beer can', 'bbq sauce'},
     # Tex mex-flavored creme fraiche ≠ plain fraiche for cooking
     'fraiche': {'tex mex', 'texmex'},
     # Confectionery ≠ baking marzipan
@@ -3471,3 +3498,17 @@ for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():
     PRODUCT_NAME_BLOCKERS.setdefault(fix_swedish_chars(_keyword).lower(), set()).update(
         {fix_swedish_chars(w).lower() for w in _blockers}
     )
+
+# Products whose name contains any of these strings are non-food and should
+# never match any recipe ingredient, regardless of which keyword triggered the match.
+# Applied in recipe_matcher_backend.py after the per-keyword PNB check.
+GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
+    'kosttillskott',   # dietary supplement — never a food ingredient
+    'brustablett',     # effervescent tablet — supplement delivery form
+    'kattsnack', 'kattgodis', 'kattmat',       # cat food
+    'hundgodis', 'hundsnack', 'hundmat',        # dog food
+    'dogman', 'vitakraft',                       # pet food brands
+    'diskmedel', 'tvättmedel', 'sköljmedel',    # cleaning products
+    'tobak', 'snus', 'marlboro', 'winston',     # tobacco
+    'terea', 'iqos',                             # heated tobacco
+})

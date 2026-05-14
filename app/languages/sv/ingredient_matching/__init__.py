@@ -12,7 +12,7 @@ try:
 except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
-from .blocker_data import FALSE_POSITIVE_BLOCKERS, PRODUCT_NAME_BLOCKERS
+from .blocker_data import FALSE_POSITIVE_BLOCKERS, PRODUCT_NAME_BLOCKERS, GLOBAL_PRODUCT_NAME_BLOCKERS
 from .carrier_context import (
     CARRIER_PRODUCTS,
     KEYWORD_SUPPRESSED_BY_CONTEXT,
@@ -247,6 +247,7 @@ __all__ = [
     'PASTA_KEYWORDS',
     'PREFERENCE_PAREN_WORDS',
     'PRODUCT_NAME_BLOCKERS',
+    'GLOBAL_PRODUCT_NAME_BLOCKERS',
     'PROCESSED_FOODS',
     'PROCESSED_FOODS_EXEMPTIONS',
     'PROCESSED_PRODUCT_RULES',

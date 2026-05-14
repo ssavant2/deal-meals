@@ -45,6 +45,7 @@ try:
         FRESH_HERB_KEYWORDS,
         FRESH_WORDS,
         FROZEN_PRODUCT_INDICATORS,
+        GLOBAL_PRODUCT_NAME_BLOCKERS,
         HELKALKON_WORD,
         KALKON_WORD,
         KEYWORD_SUPPRESSED_BY_CONTEXT,
@@ -170,6 +171,7 @@ except ModuleNotFoundError:
         FRESH_HERB_KEYWORDS,
         FRESH_WORDS,
         FROZEN_PRODUCT_INDICATORS,
+        GLOBAL_PRODUCT_NAME_BLOCKERS,
         HELKALKON_WORD,
         KALKON_WORD,
         KEYWORD_SUPPRESSED_BY_CONTEXT,
@@ -2513,6 +2515,24 @@ def validate_offer_match_candidate(
                         keyword=matched_keyword,
                     )
                     matched_keyword = None
+
+    # Global product name blocker — non-food products that must never match any ingredient
+    # regardless of which keyword triggered the match (supplements, pet food, tobacco, etc.)
+    if matched_keyword and matched_ing_idx is not None:
+        product_lower = (
+            offer_precomputed['name_normalized']
+            if offer_precomputed is not None
+            else offer_name_normalized
+        )
+        if any(blocker in product_lower for blocker in GLOBAL_PRODUCT_NAME_BLOCKERS):
+            _record_validation_event(
+                validation_events,
+                'validation_reject',
+                rule='global_product_name_blocker',
+                ing_idx=matched_ing_idx,
+                keyword=matched_keyword,
+            )
+            matched_keyword = None
 
     if matched_keyword and matched_ing_idx is not None and matched_keyword == FOND_WORD:
         product_lower = (
