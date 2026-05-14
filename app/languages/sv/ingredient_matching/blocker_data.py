@@ -143,6 +143,8 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'pärllök', 'parllok',  # pearl onion (specific variety)
         'lökpulver', 'lokpulver',  # onion powder (spice, not fresh onion)
         'löksill', 'loksill',  # pickled herring (onion herring) — "lök" is NOT the ingredient
+        'löksoppa', 'loksoppa',  # onion soup mix — recipe wants dehydrated mix, not fresh onion
+        'soppa pulver', 'soppmix',  # dehydrated soup ≠ fresh onion
     },
 
     # Potato products - generic potatis may match fresh potato varieties, but
@@ -221,6 +223,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'vaniljsocker',
         'sockerkaka',  # sponge cake — plain sugar ≠ sockerkaka
         'sockerfri', 'sockerfritt',
+        'sockertång',  # sugar kelp (seaweed) — 'socker' is substring of 'sockertång'
     },
 
     # Bacon - "bacon" != "Dressing Bacon" (bacon-flavored dressing)
@@ -1103,6 +1106,15 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'sylt': {
         'syltsocker',  # jam sugar — different product from jam itself
         'syltlök', 'syltlok',  # pickled onion ≠ jam
+        # Specific berry jam in ingredient — block generic 'sylt' keyword so only the
+        # matching berry compound (e.g. blåbärssylt) can match, not any-berry jam
+        'blåbärssylt', 'blabärssylt', 'blabarssylt',
+        'jordgubbssylt',
+        'hallonsylt',
+        'lingonsylt',
+        'hjortronsylt',
+        'nyponssylt',
+        'rabarbersylt', 'rabarbersylten',
     },
 
     # Vegeta (spice brand) != vegetabilisk/vegetarisk
@@ -1988,10 +2000,12 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     # Nacho cheese dip ≠ nachochips/tortillachips
     'nacho': {
-        'dip',  # "Dip Nacho Cheese 250g ICA" — cheese dip, not tortilla chips
+        'dip',       # "Dip Nacho Cheese 250g ICA" — cheese dip, not chips
+        'dressing',  # "Amerikansk Dressing Nacho Cheese 230g Kavli" — dressing, not chips
     },
     'nachochips': {
-        'dip',  # same product
+        'dip',       # cheese dip ≠ chips
+        'dressing',  # cheese dressing ≠ chips
     },
     # Jalapeno cheese cream / snacks ≠ fresh jalapeno
     'jalapeno': {
@@ -3503,7 +3517,8 @@ for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():
 # never match any recipe ingredient, regardless of which keyword triggered the match.
 # Applied in recipe_matcher_backend.py after the per-keyword PNB check.
 GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
-    'kosttillskott',   # dietary supplement — never a food ingredient
+    'kosttillskott',   # dietary supplement
+    'stylinggel',      # hair styling gel — "Stylinggel Mineral" matched mineralsalt
     'brustablett',     # effervescent tablet — supplement delivery form
     'kattsnack', 'kattgodis', 'kattmat',       # cat food
     'hundgodis', 'hundsnack', 'hundmat',        # dog food
