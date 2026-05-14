@@ -2311,7 +2311,13 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod',
         'burger bun', 'burger buns',
         'vego', 'vegansk', 'växtbaserad',  # vegan burger ≠ meat burger
+        'gummi', 'squishy', 'robetoy',    # candy/toy burgers (non-food)
     },
+    # Whole raw lamb cut ≠ processed lamb sausage
+    'lammframdel': {'lammkorv', 'korv'},
+    # Spice ingredient ≠ chips flavored with that spice
+    'rosepeppar': {'chips', 'potatischips'},
+    'rosépeppar': {'chips', 'potatischips'},
     # Pulled Turkey ≠ pulled vegobitar
     'pulled': {
         'turkey', 'kalkon',  # "Pulled Turkey" is meat, not vegan pulled pieces
