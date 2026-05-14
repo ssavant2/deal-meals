@@ -286,6 +286,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'tallrik',  # plate/dish — "Tallrik Princess" matched "tapastallrik/antipastitallrik" ingredient
     'hållare',  # holder — generic non-food word ("Gatukritor med hållare")
     'sorterade',  # sorted/assorted — generic adjective ("Tallrik sorterade färger")
+    'riserva',  # Italian quality grade (maturation/reserve) — "Vitvinsvinäger Riserva Zeta" matched 'rispapper' ingredient
 
     # Quantities/forms (meaningless for matching)
     'paket', 'pack', 'burk', 'påse', 'flaska', 'liter', 'gram', 'kilo',

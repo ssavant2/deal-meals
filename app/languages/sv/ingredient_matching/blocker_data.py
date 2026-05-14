@@ -3566,4 +3566,5 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'blöja', 'blojor', # diapers
     'rengöring',       # cleaning/cleansing product
     'nelson garden',   # seed packets for home growing — not food produce
+    'hundmannen',      # book product ("Hundmannen: Bollen rullar för dig") matched via 'rullar' keyword
 })
