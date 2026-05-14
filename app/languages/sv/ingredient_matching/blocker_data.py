@@ -2433,6 +2433,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'nötspread', 'notspread',  # "Nötspread Hasselnöt & Choklad" — nut spread, not baking chocolate
         'digestive',            # "Digestive Choklad 150g" / "Digestive doppade i mörk choklad" — biscuits, not baking chocolate
         'likör', 'likor',       # "chokladlikör" wants liqueur, not plain chocolate
+        'skumbanan', 'chokladbanan',  # "Chokladbanan Skumbanan Choklad Stark" — marshmallow candy, not baking chocolate
+        'pralin',               # "Chokladpralin Mörk Choklad 60% Lindt" — filled pralines, not baking chocolate
+        'karamell',             # "Choklad Vegan Salt Karamell Green Star" — caramel-flavor candy bar
     },
     # Kakao (cocoa powder) ≠ hazelnut spread containing "kakao" in name
     # "Hasselnötkräm Kakao Duo Nutella" has kakao in name but is a spread, not cocoa powder
@@ -3214,8 +3217,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'sardellfileer': {'chili'},
     # Gochujang mayo ≠ gochujang paste
     'gochujang': {'mayo', 'chilimayo'},
-    # Sambal badjak ≠ sambal oelek (block cross-matching)
-    'sambal': {'badjak'},
+    # Sambal badjak/harissa ≠ sambal oelek (different chili paste families)
+    'sambal': {'badjak', 'harissa'},
     # Teriyaki sauce should not broaden to jerky / ready meals / wok sauces.
     'teriyakisås': {
         'jerky', 'beef jerky', 'torkat kött', 'torkat kott',
@@ -3237,7 +3240,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'woksås', 'woksas', 'wok ',
         'dafgårds', 'dafgards', 'mama chin', 'bbq',
         'fryst', 'glazed',
-        'kycklingspett',  # "Kycklingspett Teriyaki Spicefield" — chicken skewer (raw meat) in marinade, not pure sauce
+        'kycklingspett',  # "Kycklingspett Teriyaki Spicefield" — chicken skewer in marinade, not sauce
+        'nudlar',         # "Kyckling teriyaki, nudlar & grönsaker Findus" — ready meal, not teriyaki sauce
+        'kyckling',       # same ready-meal family (kyckling teriyaki = complete dish)
     },
     # Anklevermousse flavored ≠ plain
     'anklevermousse': {'cognac', 'grönpeppar', 'gronpeppar'},
@@ -3332,6 +3337,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'socker': {'utan', 'mindre'},
     # "Rågmackor 450g Åkes Äkta Hönökaka" extracts 'kaka' — rye crackers ≠ cake/cookies
     'kaka': {'hönökaka', 'honokaka', 'rågmackor', 'ragmackor'},
+    # Rosemary herb ≠ rosemary-flavored sausage (herb carrier in sausage)
+    'rosmarin': {'lammkorv', 'korv'},
+    # Sambal oelek ≠ harissa (different chili paste families)
     # Pre-cooked rice packs and ready meals ≠ dry raw rice for cooking
     'ris': {
         'färdigkokt',  # "Jasminris snabbris färdigkokt ICA" — already cooked
