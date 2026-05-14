@@ -2012,7 +2012,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
                'mango', 'blåbär', 'hallongrotta', 'hallongrottor'},  # mixed berries/cookies ≠ pure hallon
     'jordgubb': {'torkad frukt', 'pastill', 'pastiller', 'läkerol', 'lakerol', 'godisrem', 'lättyoghurt', 'lattyoghurt'},
     'jordgubbar': {'torkad frukt', 'pastill', 'pastiller', 'läkerol', 'lakerol', 'godisrem', 'lättyoghurt', 'lattyoghurt'},
-    'ananas': {'torkad frukt'},
+    'ananas': {'torkad frukt', 'naturgodis', 'bara snacks'},  # candy snacks are not fresh/canned pineapple
     'svartvinbär': {'torkad frukt'},
     # Juice products ≠ whole fruit
     'blodapelsin': {'juice'},  # "Juice Apelsin Röd Grape" gets keyword 'blodapelsin' via substitution
@@ -2093,6 +2093,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'hummus',  # "Hummus med Kalamata Oliver" — hummus is the product, oliver is flavoring
         'tärnad ost', 'tarnad ost',  # "Tärnad ost i olja Gröna oliver" — cheese product, not olives
         'tapenade',  # olive paste/spread ≠ whole olives
+        'med kärnor', 'med karnor',  # pitted olive ingredient should not match olives with pits
     },
     'kapris': {
         'tapenade',  # caper flavor/component in tapenade ≠ standalone capers
@@ -2260,8 +2261,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'dragon': {'twin dragon', 'twin'},
     'surdegsbröd': {'pinsa'},
     'surdegsbrod': {'pinsa'},
-    'formbröd': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod'},
-    'formbrod': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod'},
+    'formbröd': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod', 'bagel'},
+    'formbrod': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod', 'bagel'},
     'rostbröd': {'pinsa'},
     'rostbrod': {'pinsa'},
     # Ready-made pinsa / filled pasta ≠ sliced prosciutto or mortadella
