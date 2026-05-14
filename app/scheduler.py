@@ -1575,7 +1575,6 @@ class ScraperScheduler:
 
             if scrape_result.should_replace_offers:
                 from db_saver import ensure_store_exists, save_offers, clear_offers_for_empty_scrape
-                import asyncio
 
                 scrape_meta = getattr(store_plugin, '_scrape_meta', None)
                 if scrape_result.is_empty_success:
@@ -1653,6 +1652,9 @@ class ScraperScheduler:
             logger.exception(f"{run_label.capitalize()} store scraper {store_id} failed")
             duration = int(time.time() - start_time)
             save_run_history(f"store_{store_id}", "scheduled", duration, 0, success=False, error_message=str(e))
+            job = self.scheduler.get_job(f"store_{store_id}")
+            if job and job.next_run_time:
+                self._update_store_next_run(store_id, job.next_run_time)
             if not is_retry:
                 self._schedule_store_retry(store_id)
         finally:

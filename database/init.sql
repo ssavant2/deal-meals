@@ -644,7 +644,7 @@ COMMENT ON TABLE scraper_schedules IS 'Scheduled runs for recipe scrapers';
 CREATE TABLE scraper_run_history (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     scraper_id VARCHAR(50) NOT NULL,
-    mode VARCHAR(20) NOT NULL CHECK (mode IN ('test', 'incremental', 'full')),
+    mode VARCHAR(20) NOT NULL CHECK (mode IN ('test', 'incremental', 'full', 'scheduled')),
     duration_seconds INTEGER NOT NULL,
     recipes_found INTEGER DEFAULT 0,
     attempted_count INTEGER,

@@ -32,6 +32,7 @@ ADD_RECIPE_TERM_FOUND_RECIPE_FK_ID = "20260430_add_recipe_term_found_recipe_fk"
 CREATE_RECIPE_SEARCH_TERM_INDEX_ID = "20260430_create_recipe_search_term_index"
 CREATE_RECIPE_OFFER_CANDIDATES_ID = "20260507_create_recipe_offer_candidates"
 ADD_CANDIDATE_JOIN_TERM_INDEXES_ID = "20260507_add_candidate_join_term_indexes"
+ADD_SCRAPER_RUN_HISTORY_SCHEDULED_MODE_ID = "20260514_add_scraper_run_history_scheduled_mode"
 MIGRATION_TABLE = "deal_meals_schema_migrations"
 
 DROP_MEMORY_CACHE_PREFS_SQL = """
@@ -259,6 +260,18 @@ CREATE INDEX IF NOT EXISTS idx_compiled_recipe_term_candidate_join
     ON compiled_recipe_term_index(matcher_version, recipe_compiler_version, term_manifest_hash, term);
 """.strip()
 
+ADD_SCRAPER_RUN_HISTORY_SCHEDULED_MODE_SQL = """
+ALTER TABLE scraper_run_history
+DROP CONSTRAINT IF EXISTS scraper_run_history_mode_check;
+
+ALTER TABLE scraper_run_history
+DROP CONSTRAINT IF EXISTS chk_run_history_mode;
+
+ALTER TABLE scraper_run_history
+ADD CONSTRAINT scraper_run_history_mode_check
+CHECK (mode IN ('test', 'incremental', 'full', 'scheduled'));
+""".strip()
+
 
 @dataclass(frozen=True)
 class _MigrationEngine:
@@ -474,6 +487,21 @@ def _compiled_recipe_offer_candidates_exists(conn) -> bool:
     return row is not None
 
 
+def _scraper_run_history_allows_scheduled_mode(conn) -> bool:
+    return bool(conn.execute(text("""
+        WITH target_table AS (
+            SELECT to_regclass('public.scraper_run_history') AS table_oid
+        )
+        SELECT EXISTS (
+            SELECT 1
+            FROM pg_constraint c
+            JOIN target_table t ON t.table_oid = c.conrelid
+            WHERE c.contype = 'c'
+              AND pg_get_constraintdef(c.oid) LIKE '%scheduled%'
+        )
+    """)).scalar())
+
+
 def _warn_manual_cache_last_operation_add() -> None:
     logger.warning(
         "cache_metadata.last_operation is missing, but the app DB user cannot "
@@ -533,6 +561,15 @@ def _warn_manual_recipe_offer_candidates_create() -> None:
         "cannot run DDL. Run the startup migration with DB admin credentials "
         "or create the table from database/init.sql before enabling "
         "database-backed cache candidate scoring."
+    )
+
+
+def _warn_manual_scraper_run_history_scheduled_mode_add() -> None:
+    logger.warning(
+        "scraper_run_history.mode does not allow 'scheduled', but the app DB "
+        "user cannot run DDL. Run the startup migration with DB admin "
+        "credentials or alter the scraper_run_history mode check constraint "
+        "before relying on scheduled store run history."
     )
 
 
@@ -818,6 +855,42 @@ def _run_add_candidate_join_term_indexes(engine_info: _MigrationEngine, release_
         )
 
 
+def _run_add_scraper_run_history_scheduled_mode(
+    engine_info: _MigrationEngine,
+    release_version: str,
+) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _scraper_run_history_allows_scheduled_mode(conn):
+                _warn_manual_scraper_run_history_scheduled_mode_add()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, ADD_SCRAPER_RUN_HISTORY_SCHEDULED_MODE_ID):
+            return
+
+        already_allows_scheduled = _scraper_run_history_allows_scheduled_mode(conn)
+        if not already_allows_scheduled:
+            conn.execute(text(ADD_SCRAPER_RUN_HISTORY_SCHEDULED_MODE_SQL))
+            logger.info(
+                "Startup migration {} allowed scheduled scraper run history rows",
+                ADD_SCRAPER_RUN_HISTORY_SCHEDULED_MODE_ID,
+            )
+        else:
+            logger.info(
+                "Startup migration {} recorded; scraper_run_history already allowed scheduled mode",
+                ADD_SCRAPER_RUN_HISTORY_SCHEDULED_MODE_ID,
+            )
+
+        _record_migration(
+            conn,
+            ADD_SCRAPER_RUN_HISTORY_SCHEDULED_MODE_ID,
+            release_version,
+            {"mode": "scheduled", "already_allowed": already_allows_scheduled},
+        )
+
+
 def run_startup_migrations(release_version: str) -> None:
     """Run one-off migrations that are safe during app startup."""
     if not _version_can_run_startup_migrations(release_version):
@@ -839,6 +912,7 @@ def run_startup_migrations(release_version: str) -> None:
         _run_create_recipe_search_term_index(engine_info, release_version)
         _run_create_recipe_offer_candidates(engine_info, release_version)
         _run_add_candidate_join_term_indexes(engine_info, release_version)
+        _run_add_scraper_run_history_scheduled_mode(engine_info, release_version)
     except SQLAlchemyError as e:
         logger.warning(f"Startup migrations skipped after database error: {e}")
     finally:

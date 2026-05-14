@@ -601,7 +601,7 @@ class ScraperRunHistory(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuidv7()"))
     scraper_id = Column(String(50), nullable=False)
-    mode = Column(String(20), nullable=False)  # 'test', 'incremental', 'full'
+    mode = Column(String(20), nullable=False)  # 'test', 'incremental', 'full', 'scheduled'
     duration_seconds = Column(Integer, nullable=False)
     recipes_found = Column(Integer, default=0)
     attempted_count = Column(Integer)
@@ -610,7 +610,7 @@ class ScraperRunHistory(Base):
     run_at = Column(DateTime(timezone=True), default=_utcnow)
 
     __table_args__ = (
-        CheckConstraint("mode IN ('test', 'incremental', 'full')", name='chk_run_history_mode'),
+        CheckConstraint("mode IN ('test', 'incremental', 'full', 'scheduled')", name='chk_run_history_mode'),
         Index('idx_scraper_run_history_scraper_mode', 'scraper_id', 'mode'),
         Index('idx_scraper_run_history_run_at', 'run_at'),
     )
