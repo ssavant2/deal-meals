@@ -3332,8 +3332,13 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'socker': {'utan', 'mindre'},
     # "Rågmackor 450g Åkes Äkta Hönökaka" extracts 'kaka' — rye crackers ≠ cake/cookies
     'kaka': {'hönökaka', 'honokaka', 'rågmackor', 'ragmackor'},
-    # Pre-cooked rice packs ≠ dry raw rice for cooking
-    'ris': {'färdigkokt'},  # "Jasminris snabbris färdigkokt ICA" — already cooked, not raw rice
+    # Pre-cooked rice packs and ready meals ≠ dry raw rice for cooking
+    'ris': {
+        'färdigkokt',  # "Jasminris snabbris färdigkokt ICA" — already cooked
+        'chicken',     # "Chicken Red Curry med Jasminris Food Collective" — ready meal English name
+    },
+    # Hair/body styling products ≠ cooking oil (miscategorized in store data)
+    'kokosolja': {'stylinggel'},  # "Stylinggel Coconut Oil ECO Style" — non-food, not coconut oil
 }
 
 PRODUCT_NAME_BLOCKERS: Dict[str, Set[str]] = {
