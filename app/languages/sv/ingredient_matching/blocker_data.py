@@ -1298,6 +1298,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'småtomat', 'småtomater',  # small tomatoes ≠ regular tomatoes
         'körsbärstomat', 'körsbärstomater',  # cherry tomatoes (canned) ≠ regular tomatoes
         'tomatsmak',  # tomato-flavored ≠ actual tomatoes
+        'kycklingpate',  # chicken liver pâté with tomato ≠ fresh tomato
     },
     'tomater': {
         'tomatbas',  # prepared tomato base / sub-recipe reference
@@ -1425,6 +1426,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'svampsmak',  # mushroom-flavored ≠ actual mushrooms
         'svampkrydda',  # mushroom spice/seasoning ≠ fresh mushrooms ("1 dl svampkrydda")
         'svampkryddor',  # plural form of mushroom spice
+        'crème av svamp', 'creme av svamp',  # ready-to-use mushroom cream ≠ raw mushrooms
     },
 
     # "Inläggning Snabb" (pickling liquid) ≠ "inläggningssill" (pickled herring)
@@ -1849,7 +1851,12 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     # Soy sauce keyword matching tofu product ≠ actual soy sauce
     'sojasås': {
-        'tofu',  # "Marinerad Tofu Sojasås & Ingefära" — tofu product, not soy sauce
+        'tofu',     # "Marinerad Tofu Sojasås & Ingefära" — tofu product, not soy sauce
+        'teriyaki', # teriyaki sauce is sweetened/seasoned soy — not plain kinesisk soja
+    },
+    'sojasas': {
+        'tofu',
+        'teriyaki',
     },
     # Mirin (sweet rice wine) ≠ risvinäger (rice vinegar)
     'risvinäger': {
@@ -2075,12 +2082,17 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Vitamin supplements ≠ fresh orange — "Berocca Multivitamin C-Vitamin Apelsin" is a supplement
     'apelsin': {'berocca', 'multivitamin', 'c-vitamin'},
     # Candy strips with fruit flavor ≠ fresh fruit
-    'äpple': {'godisrem'},
+    'äpple': {'godisrem', 'gelegodis', '4m', '1år', '1ar', 'välling', 'valling'},
     # "Popcorn chicken" = breaded bites, not actual popcorn
     'popcorn': {'chicken', 'chcken'},
+    # Ready-meal wok pouches (kyckling+sauce) ≠ raw vegetable wok mix
+    'wokmix': {'kyckling'},
     # Marmalade with spirit flavor ≠ the spirit itself
     'brandy': {'marmelad'},
     'calvados': {'marmelad'},
+    # Kinder Surprise (hollow toy egg) ≠ decorative dragerade chokladägg
+    'chokladägg': {'kinder', 'surprise', 'ferrero'},
+    'chokladagg': {'kinder', 'surprise', 'ferrero'},
     # Ready-meal/pesto with sun-dried tomatoes ≠ actual sun-dried tomatoes
     'soltorkad tomat': {'pesto', 'krämig kyckling', 'tapenade'},
     'soltorkade tomater': {'pesto', 'krämig kyckling', 'creme', 'créme', 'tapenade'},
@@ -2329,7 +2341,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'rostbrod': {'pinsa'},
     # Ready-made pinsa / filled pasta ≠ sliced prosciutto or mortadella
     'mortadella': {'tortellini', 'tortelloni', 'ravioli'},
-    'prosciutto': {'pinsa', 'tortellini', 'tortelloni', 'ravioli', 'perline'},
+    'prosciutto': {'pinsa', 'tortellini', 'tortelloni', 'ravioli', 'perline', 'piadina'},
     'skinka': {'pinsa'},
     # Breaded/processed fish fillets ≠ fresh fish fillets
     'fiskfileer': {
@@ -2533,7 +2545,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'kakao': {
         'hasselnötkräm', 'hasselnotkram',  # hazelnut spread (Nutella) ≠ cocoa powder
         'likör', 'likor',  # "kakaolikör" wants liqueur, not cocoa powder
-        'zaps',  # "Zaps kakao glutenfri 300g Schär" — chocolate puffed rice cereal ≠ cocoa powder
+        'zaps',           # "Zaps kakao glutenfri 300g Schär" — chocolate puffed rice cereal ≠ cocoa powder
+        'havrekuddar',    # cocoa-flavored breakfast cereal ≠ baking cocoa
+        'granola',        # cocoa granola ≠ baking cocoa
+        'havredryck', 'proteinhavredryck',  # cocoa-flavored oat drink ≠ baking cocoa
     },
     # schweizernöt chocolate ≠ ready-made schweizernöt cake
     'schweizernöt': {
@@ -2756,8 +2771,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Syrad grädde is a cultured cream product — only match when recipe explicitly says "syrad"
     # Flavored matgrädde (Paprika Chili, Tre Ostar) / protein pudding
     # ≠ plain matlagningsgrädde
-    'grädde': {'syrad', 'paprika chili', 'tre ostar', 'proteinpudding'},
-    'gradde': {'syrad', 'paprika chili', 'tre ostar', 'proteinpudding'},
+    'grädde': {'syrad', 'paprika chili', 'tre ostar', 'proteinpudding', 'marshmallow'},
+    'gradde': {'syrad', 'paprika chili', 'tre ostar', 'proteinpudding', 'marshmallow'},
     'matlagningsgrädde': {'proteinpudding'},
     'matlagningsgradde': {'proteinpudding'},
     # Flavored oat cream ≠ plain havregrädde
@@ -3240,8 +3255,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # NOTE: 'olivolja' limone entry merged into existing olivolja PNB
     # NOTE: 'rapsolja' vitlök entry merged into existing rapsolja PNB
     # ---- Specialty vinegar / herb-in-vinegar ----
-    'vinäger': {'dragonblad', 'crema', 'balsamico', 'chips'},  # chips / crema ≠ cooking vinegar
-    'vinager': {'dragonblad', 'crema', 'balsamico', 'chips'},
+    'vinäger': {'dragonblad', 'crema', 'balsamico', 'chips', 'golden mountain'},  # Thai seasoning sauce / chips / crema ≠ cooking vinegar
+    'vinager': {'dragonblad', 'crema', 'balsamico', 'chips', 'golden mountain'},
     # ---- Flavored curry / snack bars ----
     # NOTE: 'curry' mango entry merged into existing curry PNB
     'blåbär': {'boost', 'hallon'},  # "Berry Boost Blåbär" snack bar; "Hallon & blåbär" mix ≠ pure blåbär
@@ -3571,4 +3586,7 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'rengöring',       # cleaning/cleansing product
     'nelson garden',   # seed packets for home growing — not food produce
     'hundmannen',      # book product ("Hundmannen: Bollen rullar för dig") matched via 'rullar' keyword
+    'tattoo',          # body-tattoo kits (e.g. "Tattoo set glitter Real UniQ") — not food
+    'rökspån',         # wood smoking chips (grilling accessory) — not food
+    'rokspan',         # diacritic-free variant
 })
