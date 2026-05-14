@@ -2954,9 +2954,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'persiljestjälk': {
         'kryddsmör',    # "Kryddsmör Persilja 65g Biggans" — herb butter ≠ fresh parsley stems
         'bruschetta',   # "Bruschetta Vitlök & persilja" — spread
+        'krutonger',    # "Krutonger Vitlök & persilja" — croutons ≠ fresh parsley stems
     },
     'persiljestjalk': {
-        'kryddsmör', 'bruschetta',  # normalized
+        'kryddsmör', 'bruschetta', 'krutonger',  # normalized
     },
     # Creme products ≠ fresh mushrooms
     'svamp': {
