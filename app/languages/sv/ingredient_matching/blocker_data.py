@@ -583,6 +583,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'asiatisk',  # "Asiatisk Färs" - different type of mince
         'ingefär',  # "ingefärsmarmelad" contains 'färs' as substring — not ground meat
         'farfärs',  # brand name "Stensåkra Farfars" — not ground meat
+        'köttfärssås', 'köttfärssåser',  # ready sauce ≠ raw mince ("150g färdiga köttfärssåser")
     },
 
     # Berries - fresh berries should NOT match jam/sylt recipes
@@ -1673,6 +1674,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'tofu',                 # "Tofu marinerad soja ingefära" — tofu product, not ginger
         'marinerad',            # "Marinerad Tofu Sojasås & Ingefära" — marinated product
         'friggs', 'marmelad', 'shot', 'juice', 'dryck', 'choklad',
+        'dumpling', 'dumplings',  # "Dumpling biff, chili & ingefära" — dumpling product ≠ fresh ginger
     },
     # Tamari soy — block tofu products
     'tamarisoja': {
@@ -1700,9 +1702,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'parmigiano': {
         'flarn',
         'tunnbrödskex',  # "Tunnbrödskex Parmigiano Reggiano Wernerssons" — cracker, not cheese
+        'pomamore',      # "Pomamore Basilika Parmesan" — pesto/tomato sauce, not cheese
     },
     # Compound keyword variant — same blockers must apply when matched via full compound
-    'parmigiano reggiano': {'flarn', 'tunnbrödskex'},
+    'parmigiano reggiano': {'flarn', 'tunnbrödskex', 'pomamore'},
     # Grana Padano — same cheese-chip form issue as parmigiano
     'padano': {
         'flarn',
@@ -2121,6 +2124,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'mozzarella': {
         'fusii', 'pastakopp',  # ready pasta dishes with mozzarella as topping
         'pompodoro', 'knorr',  # sauce/meal mix, not mozzarella cheese
+        'pizzarulle',          # "Pizzarulle Mozzarella & skinka" — frozen pizza snack ≠ cheese
     },
     'ricotta': {
         'potatisterrin',  # "Potatisterrin spenat & ricotta" is a potato dish, not ricotta cheese
@@ -2255,6 +2259,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'bruschetta': {
         'pizza',  # "Bruschetta pizza 150g Maretti" — snack chip ≠ toasted bread
         'vitlök', 'vitlok',  # garlic-flavored bruschetta ≠ plain bruschetta
+        'tunnbrödschips', 'chips',  # "Tunnbrödschips Bruschetta" — cracker/chip ≠ bread topping
     },
     # Flavored crostini ≠ plain crostini
     'crostini': {
@@ -2283,7 +2288,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'dragon': {'twin dragon', 'twin'},
     'surdegsbröd': {'pinsa'},
     'surdegsbrod': {'pinsa'},
-    'formbröd': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod', 'bagel'},
+    'formbröd': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod', 'bagel', 'brioche'},
     'formbrod': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod', 'bagel'},
     'rostbröd': {'pinsa'},
     'rostbrod': {'pinsa'},
@@ -2342,10 +2347,15 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Daim candy bar ≠ frozen cakes/desserts containing Daim as a topping/flavor
     'daim': {'moussetårta', 'cheesecake', 'almondy'},  # Almondy = frozen dessert brand (moussetårta, cheesecake, orange cake)
     # Whole raw lamb cuts ≠ processed lamb sausage
+    # Note: 'lamm' is also needed — "lammstek" ingredient matches via 'lamm' substring
     'lammframdel': {'lammkorv', 'korv'},
     'lammstek': {'lammkorv', 'korv'},
     'lammkött': {'lammkorv', 'korv'},
     'lammkott': {'lammkorv', 'korv'},
+    'lamm': {
+        'lammkorv',  # generic 'lamm' keyword matches 'lammstek'/'lammkött' via substring
+        'vitakraft', 'dogman', 'hundsticks', 'chew sticks',  # pet food ≠ lamb ingredient
+    },
     # Spice ingredient ≠ chips flavored with that spice
     'rosepeppar': {'chips', 'potatischips'},
     'rosépeppar': {'chips', 'potatischips'},
@@ -2481,6 +2491,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'kakao': {
         'hasselnötkräm', 'hasselnotkram',  # hazelnut spread (Nutella) ≠ cocoa powder
         'likör', 'likor',  # "kakaolikör" wants liqueur, not cocoa powder
+        'zaps',  # "Zaps kakao glutenfri 300g Schär" — chocolate puffed rice cereal ≠ cocoa powder
     },
     # schweizernöt chocolate ≠ ready-made schweizernöt cake
     'schweizernöt': {
@@ -2523,6 +2534,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'vegeta',                # "Paprika Mild malen 100g Vegeta Maestro" — spice brand
         'pesto',                 # "Pesto Paprika 130g ICA" — pesto, not fresh peppers
         'ärter', 'majs',         # "Ärter, Majs & Paprika 600g Apetit" — frozen mix, not fresh paprika
+        'crackers',              # "Crispy Crackers Paprika" — cracker snack ≠ fresh bell pepper
     },
     # Plural form 'paprikor' — mirrors 'paprika' PNB above.
     # PNB checks matched_keyword directly; keyword alias 'paprikor'→'paprika' doesn't resolve for PNB.
@@ -2765,6 +2777,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'grillkryddad skivad',
         'presentpåse', 'presentpase', 'presesentpåse', 'presesentpase',  # gift bag
         'teriyaki',
+        'dogman',  # "Easy chew sticks Kyckling Dogman" — pet food ≠ chicken ingredient
     },
     # Milk chocolate candy/buttons contain "mjölk" as flavor descriptor — NOT actual milk.
     # "Chokladknappar Mjölk Odense" is candy/confection, not a milk product.
@@ -2788,6 +2801,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'tryffel', 'tryffelolja',    # truffle-infused — specialty, not plain olive oil
         'limone', 'citron',          # lemon-infused — flavor oil, not plain olive oil
         'spray',                     # aerosol spray — different product form
+        'chili',                     # "Olivolja Chili 250ml Zeta" — chili-infused oil ≠ plain olive oil
     },
     # Spreads/margarin with "smör" in the name ≠ real butter (smör = 80%+ fat)
     # Bregott (smör&raps), Flora ("med Smör 70%"), Gårdsgoda, etc. are NOT butter.
@@ -2824,28 +2838,37 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'marinerad', 'marinerade',  # marinated garlic cloves ≠ neutral jarred garlic
         'tofu',                  # "Tofu Chili Vitlök" — tofu product, not fresh garlic
         'dumpling', 'dumplings',  # dumpling filling/flavor ≠ fresh garlic
+        'krutonger',             # "Krutonger Vitlök & persilja" — croutons ≠ fresh garlic
+        'kryddsmör',             # "Kryddsmör Vitlök" — herb butter condiment ≠ raw garlic
     },
     'vitlok': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu', 'dumpling', 'dumplings',
+        'krutonger', 'kryddsmor',
     },
     # Compound forms of vitlök — same blockers apply
     'vitlöksklyftor': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu', 'dumpling', 'dumplings',
+        'krutonger', 'kryddsmör',
     },
     'vitloksklyftor': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu',
+        'krutonger', 'kryddsmor',
     },
     'vitlöksklyfta': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu',
+        'krutonger', 'kryddsmör',
     },
     'vitloksklyfta': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu',
+        'krutonger', 'kryddsmor',
     },
     'vitlöksklyft': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu',
+        'krutonger', 'kryddsmör',
     },
     'vitloksklyft': {
         'roule', 'bruschetta', 'rapsolja', 'tofu',
+        'krutonger', 'kryddsmor',
     },
     # Parsley-flavored products ≠ fresh parsley
     'persilja': {
@@ -3084,6 +3107,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'kyckling',   # "Wrap Kyckling BBQ" — filled wrap, not empty
         'bbq',        # "Wrap Kyckling BBQ"
         'korean',     # "Wrap Kyckling Korean"
+        'kallrökt', 'lax',  # "Wrap Kallrökt Lax" — filled smoked salmon wrap ≠ empty tortilla
     },
     # Flavored drinks ≠ actual syrup/ingredient
     'lönnsirap': {
@@ -3150,6 +3174,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'vego', 'vegansk', 'växtbaserad',
         'kalkon', 'kalkonbacon',  # turkey bacon ≠ pork bacon
         'lyckans ost',  # cheese product with bacon flavor ≠ bacon slices
+        'snacks',        # "Bacon snacks 175g Crispy" — snack puffs ≠ bacon rashers
+        'kyckling',      # "Bacon Kyckling Skivad 100g Tulip" — chicken-based deli ≠ pork bacon
     },
     'schnitzel': {'vego', 'vegansk', 'växtbaserad'},
     # ---- Frozen vegetable mixes ----
@@ -3379,7 +3405,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # "Rågmackor 450g Åkes Äkta Hönökaka" extracts 'kaka' — rye crackers ≠ cake/cookies
     'kaka': {'hönökaka', 'honokaka', 'rågmackor', 'ragmackor'},
     # Rosemary herb ≠ rosemary-flavored sausage (herb carrier in sausage)
-    'rosmarin': {'lammkorv', 'korv'},
+    'rosmarin': {'lammkorv', 'korv', 'riskakor'},  # "Riskakor Linfrö & rosmarin" — rice cracker ≠ rosemary herb
     # Sambal oelek ≠ harissa (different chili paste families)
     # Pre-cooked rice packs and ready meals ≠ dry raw rice for cooking
     'ris': {
@@ -3430,6 +3456,15 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     # still breadcrumbs, not majsmjöl for baking.
     'majsmjöl': {'ströbröd', 'strobrod', 'pankoströbröd', 'pankostrobrod'},
     'majsmjol': {'ströbröd', 'strobrod', 'pankoströbröd', 'pankostrobrod'},
+    # Smoked salmon products ≠ fresh lemon (they have 'citron' as flavor keyword)
+    'citron': {'varmrökt', 'kallrökt', 'lax i bit', 'lax'},
+    # Tex mex-flavored creme fraiche ≠ plain fraiche for cooking
+    'fraiche': {'tex mex', 'texmex'},
+    # Confectionery ≠ baking marzipan
+    'marsipan': {'baileys', 'treats', 'cognac', 'bar', 'anthon berg'},
+    'figurmarsipan': {'baileys', 'treats', 'cognac', 'bar'},
+    # Sweetened/flavored yoghurt products ≠ plain yoghurt for cooking
+    'yoghurt': {'granola', 'smoothie', 'frukt & müsli'},
 }
 
 for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():

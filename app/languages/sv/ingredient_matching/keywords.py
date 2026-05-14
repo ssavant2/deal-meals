@@ -278,6 +278,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'veggie',     # English generic for vegetable — "Sallad Asiatisk Veggie" matched "veggie burger mix" ingredient
 
     'mortel',   # kitchen tool — "Mortel Granit" matched "stötta i mortel" ingredient text
+    'barber',   # beard-care brand — "Barber Club" is substring of "rabarber" ingredient text
 
     # Quantities/forms (meaningless for matching)
     'paket', 'pack', 'burk', 'påse', 'flaska', 'liter', 'gram', 'kilo',
