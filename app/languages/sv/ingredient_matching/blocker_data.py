@@ -3511,4 +3511,14 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'diskmedel', 'tvättmedel', 'sköljmedel',    # cleaning products
     'tobak', 'snus', 'marlboro', 'winston',     # tobacco
     'terea', 'iqos',                             # heated tobacco
+    # Non-food product types found in offer catalog
+    'ljudbok',         # audio book (matched "chokladknappar" via 'knappar' keyword)
+    'leksak',          # toy/plaything
+    'resespel',        # travel game
+    'enervit',         # sports nutrition brand (Liquid Gel Competition matched liquidsmoke)
+    'ansiktsfärg',     # face paint (theatrical)
+    'nagellack',       # nail polish
+    'plåster',         # band-aid/plaster
+    'blöja', 'blojor', # diapers
+    'rengöring',       # cleaning/cleansing product
 })

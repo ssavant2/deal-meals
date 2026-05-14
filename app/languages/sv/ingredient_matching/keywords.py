@@ -280,6 +280,12 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'mortel',   # kitchen tool — "Mortel Granit" matched "stötta i mortel" ingredient text
     'barber',   # beard-care brand — "Barber Club" is substring of "rabarber" ingredient text
     'mycket',   # Swedish intensifier word — "Välkommen till världen" book matched via ingredient text "mycket"
+    # Non-food generic words that leak into food keyword matching
+    'knappar',  # buttons — "ljudbok med 10 knappar" matched "chokladknappar" ingredient
+    'dragons',  # English plural — "Squishy Dragons" toy matched "dragonsås" ingredient
+    'tallrik',  # plate/dish — "Tallrik Princess" matched "tapastallrik/antipastitallrik" ingredient
+    'hållare',  # holder — generic non-food word ("Gatukritor med hållare")
+    'sorterade',  # sorted/assorted — generic adjective ("Tallrik sorterade färger")
 
     # Quantities/forms (meaningless for matching)
     'paket', 'pack', 'burk', 'påse', 'flaska', 'liter', 'gram', 'kilo',
