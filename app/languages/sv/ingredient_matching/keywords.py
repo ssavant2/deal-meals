@@ -274,6 +274,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'hickory',  # BBQ flavor descriptor — "Grillsås Hickory" is a sauce flavor, not a food keyword
     'smokey',  # English flavor descriptor — "Violife Smokey Flavour" matched "Pulled Chicken Smokey BBQ"
     'breakfast',  # English meal word — "Kex Breakfast Golden Oats" matched "Te English Breakfast" recipe
+    'perfect',    # English marketing adjective — "Perfect Bratwurst" brand leaked into baby pacifiers via 'perfect match'
 
     # Quantities/forms (meaningless for matching)
     'paket', 'pack', 'burk', 'påse', 'flaska', 'liter', 'gram', 'kilo',
