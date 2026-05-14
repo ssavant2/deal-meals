@@ -1924,6 +1924,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         # matches via those compound keywords, not plain 'rom'.
         'stenbitsrom', 'laxrom', 'löjrom', 'rom av', 'rom svart', 'rom röd',
         'kaviarmix', 'lodda',
+        'caviar',       # "Caviar Röd/Svart" — fish roe product, not rum
     },
     # Råsocker/rörsocker — sugar cubes are not the granulated baking form
     'råsocker': {
