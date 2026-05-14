@@ -3400,6 +3400,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'vinägrett': {
         'potatissallad', 'sallad',  # "Potatissallad Krämig Vinägrett" — ready salad ≠ vinaigrette dressing
     },
+    'soltorkadetomatcreme': {
+        'kyckling',  # "Krämig kyckling med soltorkad tomat Felix" — chicken ready-meal ≠ sun-dried tomato crème
+    },
     'vindruvor': {'smoothie'},  # "Fruktsmoothie Green Dream Äpple Vindruvor" ≠ fresh grapes
     'piadina': {'ristorante'},  # "Ristorante Piadina 4 formaggi" = frozen pizza ≠ plain flatbread
     'pizzadeg': {'sauce'},  # "Pizza sauce Tomat & Örter" ≠ pizza dough
