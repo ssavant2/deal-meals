@@ -55,4 +55,14 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
         'gyros', 'souvlaki', 'grekisk', 'pita',
         'tzatziki', 'medelhav',
     },
+    # Thaikryddad products require a Thai/Asian recipe context.
+    # Without thai context (wok, pad thai, curry, kokosmjölk, etc.) a
+    # thaikryddad kycklingfilé would appear in French or Italian recipes
+    # where the seasoning profile is completely wrong.
+    'thaikryddad': {
+        'thai', 'thaikryddad', 'wok', 'pad', 'asiatisk', 'asian',
+        'kokosmjölk', 'ingefära', 'lemongrass', 'citrongräs',
+        'fisksås', 'röd curry', 'grön curry', 'panang', 'massaman',
+        'sriracha', 'koriander', 'lime',
+    },
 }

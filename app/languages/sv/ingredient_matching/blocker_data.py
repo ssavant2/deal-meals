@@ -2703,49 +2703,36 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # "Original Junior Kyckling" is a spreadable pâté, not raw chicken fillet
     # "Äggjaktsägg kyckling" is Easter egg candy (påskgodis), not chicken
     'kycklingfilé': {
+        # Cooked/prepared products ≠ raw fillet
         'wook', 'wok', 'junior', 'äggjaktsägg', 'aggjaktsagg',
-        'stekt', 'färdiglagad',  # pre-cooked deli chicken ≠ raw fillet
-        'pålägg', 'palagg',      # sliced cold cuts ≠ raw fillet
-        'dumpling', 'dumplings',  # dumplings ≠ raw chicken fillet
-        'thaikryddad',            # "Thaikryddad kyckling" — pre-seasoned
-        'örtkryddad', 'ortkryddad',  # "Kyckling Örtkryddad" — herb-seasoned
-        'bbq',                    # "Kycklinglårfilé BBQ" / "BBQ Black Garlic"
-        'marinerad',              # "Kycklingbröstfilé strimlad marinerad"
-        'korean',                 # "Korean Style" marinerad
-        'thai strimlad',          # "Kyckling Färsk Thai Strimlad"
-        'pastrami', 'pastramikryddad', 'pastramibröst', 'pastramibrost',  # deli pastrami ≠ raw fillet
-        'grillkryddad skivad',    # cooked/deli sliced chicken, not raw grill-seasoned fillet
-        'örtmarinerad', 'ortmarinerad',    # deli herb-marinated slices
-        'sweet chili',            # "Sweet chili kyckling Fryst" — pre-seasoned ready meal
-        'teriyaki',               # "Kyckling Teriyaki/nudlar/grön Findus" — ready meal with sauce + sides
+        'stekt', 'färdiglagad',
+        'pålägg', 'palagg',      # sliced cold cuts
+        'dumpling', 'dumplings',
+        'pastrami', 'pastramikryddad', 'pastramibröst', 'pastramibrost',
+        'grillkryddad skivad',   # cooked/deli sliced, not raw grill-seasoned
+        'teriyaki',              # "Kyckling Teriyaki/nudlar/grön Findus" — ready meal with sauce + sides
+        # NOTE: thaikryddad moved to CUISINE_CONTEXT (recipe_context.py) — only allowed in thai-context recipes
+        # NOTE: marinerad, örtkryddad, bbq, korean removed — raw pre-seasoned, user may choose
     },
     'kycklingfile': {
         'wook', 'wok', 'junior', 'äggjaktsägg', 'aggjaktsagg',
         'stekt', 'färdiglagad',
         'pålägg', 'palagg',
         'dumpling', 'dumplings',
-        'thaikryddad', 'örtkryddad', 'ortkryddad', 'bbq',
-        'marinerad', 'korean', 'thai strimlad',
         'pastrami', 'pastramikryddad', 'pastramibröst', 'pastramibrost',
         'grillkryddad skivad',
-        'örtmarinerad', 'ortmarinerad',
-        'sweet chili',            # "Sweet chili kyckling Fryst" — pre-seasoned ready meal
-        'teriyaki',               # "Kyckling Teriyaki/nudlar/grön Findus" — ready meal
+        'teriyaki',
     },
     'kyckling': {
         'wook', 'wok', 'junior', 'äggjaktsägg', 'aggjaktsagg',
         'stekt', 'färdiglagad', 'rostad',  # "Rostad kyckling Findus" — prepared, not raw
         'pålägg', 'palagg',
-        'dumpling', 'dumplings',  # dumplings ≠ raw chicken
+        'dumpling', 'dumplings',
         'bacon',  # "Bacon Kyckling Skivad" — processed, not raw chicken
-        'thaikryddad', 'örtkryddad', 'ortkryddad', 'bbq',
-        'marinerad', 'korean', 'thai strimlad',
         'pastrami', 'pastramikryddad', 'pastramibröst', 'pastramibrost',
         'grillkryddad skivad',
-        'örtmarinerad', 'ortmarinerad',
         'presentpåse', 'presentpase', 'presesentpåse', 'presesentpase',  # gift bag
-        'sweet chili',            # "Sweet chili kyckling Fryst" — pre-seasoned ready meal
-        'teriyaki',               # "Kyckling Teriyaki/nudlar/grön Findus" — ready meal
+        'teriyaki',
     },
     # Milk chocolate candy/buttons contain "mjölk" as flavor descriptor — NOT actual milk.
     # "Chokladknappar Mjölk Odense" is candy/confection, not a milk product.
