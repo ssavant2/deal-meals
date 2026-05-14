@@ -1915,10 +1915,15 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'baguetter': {'vitlök', 'vitlok'},
     # Fish roe "rom" products ≠ rum (the spirit) for baking/desserts
     'rom': {
-        'finkornig',   # "Rom röd finkornig 80g Abba" — fish roe, not rum
-        'finkorning',  # "Röd Rom Finkorning 70g ICA" — typo variant of finkornig
-        'caviarmix',   # "Caviarmix svart rom av sill och lodda" — fish roe
-        'arom',        # "Arraksarom"/"Citronarom" are extracts, not fish roe or rum
+        'finkornig',    # "Rom röd finkornig 80g Abba" — fish roe, not rum
+        'finkorning',   # "Röd Rom Finkorning 70g ICA" — typo variant
+        'caviarmix',    # "Caviarmix svart rom av sill och lodda" — fish roe
+        'arom',         # "Arraksarom"/"Citronarom" are extracts, not rum
+        # Fish roe products — blocked from plain 'rom' (rum/spirits) ingredient.
+        # Fish roe recipes always specify the type ("laxrom", "stenbitsrom") which
+        # matches via those compound keywords, not plain 'rom'.
+        'stenbitsrom', 'laxrom', 'löjrom', 'rom av', 'rom svart', 'rom röd',
+        'kaviarmix', 'lodda',
     },
     # Råsocker/rörsocker — sugar cubes are not the granulated baking form
     'råsocker': {
