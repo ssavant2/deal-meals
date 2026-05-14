@@ -1115,6 +1115,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'hjortronsylt',
         'nyponssylt',
         'rabarbersylt', 'rabarbersylten',
+        'kalvsylta',  # veal aspic — 'sylt' is substring, berry jams should not match
     },
 
     # Vegeta (spice brand) != vegetabilisk/vegetarisk
