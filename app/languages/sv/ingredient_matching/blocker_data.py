@@ -3159,11 +3159,12 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Marinated/flavored fläskytterfilé ≠ plain
     'fläskytterfilé': {'mörmarinerad', 'mormarinerad', 'medaljonger', 'vitlök & peppar'},
     'flaskytterfile': {'mörmarinerad', 'mormarinerad', 'medaljonger'},
-    # BBQ/grillmarinerad/grillkryddad fläskkarré ≠ plain
-    'karré': {'grillmarinerad', 'bbq', 'asian bbq', 'vedrökt', 'grillkryddad'},
-    'karre': {'grillmarinerad', 'bbq', 'asian bbq', 'vedrökt', 'grillkryddad'},
-    'fläskkarré': {'grillmarinerad', 'bbq', 'asian bbq', 'vedrökt', 'grillkryddad'},
-    'flaskkarre': {'grillmarinerad', 'bbq', 'asian bbq', 'vedrökt', 'grillkryddad'},
+    # BBQ/grillmarinerad fläskkarré ≠ plain (only cooked/smoked variants, not fresh pre-seasoned)
+    # NOTE: "grillkryddad färsk" is still raw meat — do not block pre-seasoned raw products
+    'karré': {'grillmarinerad', 'bbq', 'asian bbq', 'vedrökt'},
+    'karre': {'grillmarinerad', 'bbq', 'asian bbq', 'vedrökt'},
+    'fläskkarré': {'grillmarinerad', 'bbq', 'asian bbq', 'vedrökt'},
+    'flaskkarre': {'grillmarinerad', 'bbq', 'asian bbq', 'vedrökt'},
     # Seasoned chicken drumsticks ≠ plain kycklingben
     'kycklingben': {'bbq', 'grillkrydda', 'grillkryddad', 'kryddmarinerad'},
     # Pre-seasoned torsk ≠ plain (all keyword forms)
