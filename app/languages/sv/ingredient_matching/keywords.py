@@ -1636,7 +1636,10 @@ FLAVOR_WORDS: FrozenSet[str] = frozenset({
     # Spices as flavors (in juices, ready meals, bakery)
     'gurkmeja', 'kurkuma',  # turmeric in juice
     'saffran',  # "Mazariner Saffran" - saffran is flavor in bakery
-    'kakao',  # "Granola Kakao" - kakao is the flavor
+    # 'kakao' intentionally NOT here — pure cocoa powder is a primary baking
+    # ingredient, not a flavor carrier. "Granola Kakao" is rare in offers and
+    # handled via PNB instead. Keeping kakao in FLAVOR_WORDS caused pure
+    # "Kakao 200g ICA" (category=bread) to be blocked for 400+ baking recipes.
 
     # Deli meat as flavor (in filled pasta)
     'prosciutto',  # "Tortelloni Prosciutto" - prosciutto is the filling
