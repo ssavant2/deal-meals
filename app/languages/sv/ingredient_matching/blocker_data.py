@@ -1644,6 +1644,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'burgarcheddar',           # "Burgarcheddar Chili Jalapeno" — burger cheese, not fresh chili
         'hamburgerost',            # "Hamburgerost Chili" — burger cheese, not fresh chili
         'cheese',                  # "Chili Cheese 170ml by Danyel Couet" — cheese product
+        'cashew',                  # "Cashew Jalapeno 140g Exotic Snacks" — nut snack, not fresh chili
+        'nudlar', 'ramen', 'buldak',  # "Nudlar Buldak Habanero Lime Ramen" — instant noodles, not fresh chili
     },
     'chilifrukt': {
         'örtsalt', 'ortsalt',
@@ -2032,6 +2034,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'lime': {
         'coriander',  # "Coriander Lime 250ml El Taco Truck" — tortilla product, not lime fruit
         'pastill', 'pastiller', 'läkerol', 'lakerol',  # candy, not fruit
+        # Supplements with lime flavor ≠ fresh lime (mirrors citron PNB)
+        'vitamin well', 'reload', 'berocca', 'kosttillskott',
+        'brustablett', 'multivitamin',
+        'torkad lime', 'pani',  # dried lime balls (Persian spice) ≠ fresh lime
     },
     # Mango-flavored products ≠ fresh mango
     'mango': {
@@ -2506,6 +2512,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'majspuffar',           # "Choco corns Fullkornsmajspuffar med choklad" — cereal, not baking chocolate
         'corns',                # "Choco corns" — chocolate cereal brand, not baking chocolate
         'nötspread', 'notspread',  # "Nötspread Hasselnöt & Choklad" — nut spread, not baking chocolate
+        'nesquik',      # "Bar Nesquik Choklad" — chocolate milk drink bar, not baking chocolate
+        'majskoner',    # "Majskoner Choklad Smash XL OLW" — chocolate-coated corn snack
+        'smash',        # "Smash!" brand — chocolate-coated popcorn/corn snack
+        'popcorn',      # "Choklad Vegan Ljus Popcorn" — popcorn-flavored chocolate, wrong form
         'digestive',            # "Digestive Choklad 150g" / "Digestive doppade i mörk choklad" — biscuits, not baking chocolate
         'likör', 'likor',       # "chokladlikör" wants liqueur, not plain chocolate
         'skumbanan', 'chokladbanan',  # "Chokladbanan Skumbanan Choklad Stark" — marshmallow candy, not baking chocolate
@@ -2901,6 +2911,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'persilja': {
         'kryddsmör', 'kryddsm\u00f6r',  # "Kryddsmör Persilja" — herb butter
         'bruschetta',                    # "Bruschetta Vitlök & persilja" — spread
+        'krutonger',                     # "Krutonger Vitlök & persilja" — croutons ≠ fresh parsley
     },
     'persilje': {
         'torsk',  # "Torsk persilje & citronsmör" — fish product, not parsley
@@ -3386,10 +3397,16 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'vasterbotten': {'philadelphia', 'färskost', 'farskost', 'cream cheese'},
     'västerbottensost': {'bites', 'philadelphia', 'färskost', 'farskost', 'cream cheese'},
     'vasterbottensost': {'bites', 'philadelphia', 'färskost', 'farskost', 'cream cheese'},
+    'vinägrett': {
+        'potatissallad', 'sallad',  # "Potatissallad Krämig Vinägrett" — ready salad ≠ vinaigrette dressing
+    },
     'vindruvor': {'smoothie'},  # "Fruktsmoothie Green Dream Äpple Vindruvor" ≠ fresh grapes
     'piadina': {'ristorante'},  # "Ristorante Piadina 4 formaggi" = frozen pizza ≠ plain flatbread
     'pizzadeg': {'sauce'},  # "Pizza sauce Tomat & Örter" ≠ pizza dough
-    'kex': {'frukost'},  # "Frukost Crackers Göteborgs kex" ≠ digestive/baking kex
+    'kex': {
+        'frukost',              # "Frukost Crackers Göteborgs kex" ≠ digestive/baking kex
+        'savoiardi', 'savioardi',  # sweet ladyfinger biscuit ≠ savory cracker/matkex
+    },
     # Plain digestive crumbs/biscuits should not broaden to chocolate/cocoa-filled variants.
     'digestive': {'choklad', 'chocolate', 'cocoa', 'cream'},
     'kondenserad': {'osötad', 'osotad'},  # "Kondenserad Mjölk Osötad" ≠ sötad kondenserad mjölk
@@ -3439,6 +3456,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'ris': {
         'färdigkokt',  # "Jasminris snabbris färdigkokt ICA" — already cooked
         'chicken',     # "Chicken Red Curry med Jasminris Food Collective" — ready meal English name
+        '1år', '1ar',  # "Stroganoff med biff & ris 1år Semper" — baby food age marker
     },
     # Hair/body styling products ≠ cooking oil (miscategorized in store data)
     'kokosolja': {'stylinggel'},  # "Stylinggel Coconut Oil ECO Style" — non-food, not coconut oil
@@ -3542,4 +3560,5 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'plåster',         # band-aid/plaster
     'blöja', 'blojor', # diapers
     'rengöring',       # cleaning/cleansing product
+    'nelson garden',   # seed packets for home growing — not food produce
 })
