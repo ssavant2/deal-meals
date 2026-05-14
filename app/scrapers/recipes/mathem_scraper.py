@@ -48,6 +48,7 @@ import re
 import json
 from datetime import datetime, timezone
 from xml.etree import ElementTree as ET
+from urllib.parse import urlsplit
 import sys
 import os
 
@@ -91,6 +92,30 @@ NON_FOOD_INGREDIENTS = {
     'ballonger', 'engångsduk', 'luftuppfriskare', 'fönsterputs',
     'städhandskar', 'skurhink', 'skurborste', 'dammsugarpåsar',
 }
+
+# Explicit Mathem "recipe" IDs that are product bundles, not recipes.
+# Keep this URL-based so real cooking recipes like fish/salmon in foil packets
+# still pass through normally. Matching the ID keeps the block stable if Mathem
+# changes the title slug.
+BLOCKED_NON_RECIPE_PACKAGE_IDS = frozenset({
+    '6862',  # Delipaketet
+    '3182',  # Dryckespaketet
+    '6865',  # Dukningspaketet
+    '6864',  # Hamburgerpaketet
+    '6863',  # Korvpaketet
+    '2184',  # Lilla städpaketet
+    '808',   # Mathems kaffepaket
+    '6861',  # Snackspaketet
+    '2182',  # Stora städpaketet
+})
+
+
+def is_blocked_non_recipe_package_url(url: str) -> bool:
+    """Return True for known Mathem product-bundle pages masquerading as recipes."""
+    path = urlsplit(url).path.rstrip('/').lower()
+    match = re.match(r'^/se/recipes/(\d+)(?:-|$)', path)
+    return bool(match and match.group(1) in BLOCKED_NON_RECIPE_PACKAGE_IDS)
+
 
 class MathemScraper:
     """Fast scraper for Mathem.se using sitemap + httpx."""
@@ -208,6 +233,7 @@ class MathemScraper:
         logger.info("Fetching recipe URLs from sitemaps...")
 
         all_recipes = []
+        blocked_package_count = 0
 
         async with httpx.AsyncClient(headers=self.headers, timeout=30, event_hooks={"request": [ssrf_safe_event_hook]}) as client:
             # Dynamically discover sitemaps
@@ -231,17 +257,25 @@ class MathemScraper:
                             url = loc.text
                             mod_date = lastmod.text if lastmod is not None else None
 
-                            # Filter out pre-made meals ('fardigpreppat')
-                            if "fardigpreppat" not in url.lower():
-                                all_recipes.append((url, mod_date))
-                                count += 1
+                            # Filter out pre-made meals and known product bundles.
+                            if "fardigpreppat" in url.lower():
+                                continue
+                            if is_blocked_non_recipe_package_url(url):
+                                blocked_package_count += 1
+                                continue
+
+                            all_recipes.append((url, mod_date))
+                            count += 1
 
                     logger.info(f"   {sitemap_url.split('/')[-1]}: {count} recipes")
 
                 except Exception as e:
                     logger.warning(f"   Error fetching {sitemap_url}: {e}")
 
-        logger.info(f"Total recipe URLs (excl. pre-made meals): {len(all_recipes)}")
+        logger.info(
+            f"Total recipe URLs (excl. pre-made meals and {blocked_package_count} "
+            f"blocked package pages): {len(all_recipes)}"
+        )
         return all_recipes
 
     async def get_existing_recipes(self) -> Dict[str, datetime]:
@@ -264,6 +298,10 @@ class MathemScraper:
         Scrape a single recipe using httpx (fast, no browser).
         Parses JSON-LD schema from the HTML.
         """
+        if is_blocked_non_recipe_package_url(url):
+            logger.info(f"   Skipping blocked Mathem non-recipe package URL: {url}")
+            return None
+
         try:
             response = await client.get(url, follow_redirects=True)
             response.raise_for_status()
