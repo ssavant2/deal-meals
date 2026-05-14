@@ -2682,12 +2682,16 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'korean',                          # "Majonnäs Korean Chili"
         'gurk',                            # "Gurkmajonnäs" = dressing, not mayo
         'cactus', 'lime',                  # "Cactus/lime Mayo"
+        'japanese curry', 'curry mayo',    # "Japanese Curry Mayo UMA" — flavored, not plain
     },
     'majonnas': {
         'garlic', 'vitlök', 'vitloks', 'chili', 'sriracha', 'jalapeno',
         'tryffel', 'tryffelmayo', 'mango', 'habanero', 'citron',
         'korean', 'gurk', 'cactus', 'lime',
+        'japanese curry', 'curry mayo',
     },
+    # Peppermint cooking extract ≠ candy mints/pastilles
+    'pepparmint': {'pastillask', 'bon bons', 'läkerol', 'pastil'},
     # "Kyckling Wook" is a ready-made meal, not raw chicken fillet
     # "Original Junior Kyckling" is a spreadable pâté, not raw chicken fillet
     # "Äggjaktsägg kyckling" is Easter egg candy (påskgodis), not chicken
