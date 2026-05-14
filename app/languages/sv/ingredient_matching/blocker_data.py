@@ -1103,6 +1103,10 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
 
     # Jam (sylt) != jam-making sugar (syltsocker)
+    # Generic sprinkles should not match when ingredient specifies a specific type
+    'strössel': {
+        'lakritsströssel',  # liquorice sprinkles required — generic coloured/chocolate strössel is wrong
+    },
     'sylt': {
         'syltsocker',  # jam sugar — different product from jam itself
         'syltlök', 'syltlok',  # pickled onion ≠ jam
