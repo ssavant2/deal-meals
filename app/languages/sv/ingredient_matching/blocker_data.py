@@ -3808,6 +3808,8 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     # "Ramslök & Vitlöksbrie" = flavored cheese ≠ fresh/frozen ramslök herb
     'ramslök': {'brie', 'vitlöksbrie', 'vitloksbrie'},
     'ramslok': {'brie', 'vitlöksbrie', 'vitloksbrie'},
+    # Alkoholfritt vin ≠ matlagningsvin — different products, different use case
+    'matlagningsvin': {'alkoholfri', 'alkoholfritt', 'alkoholfria'},
 }
 
 for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():
