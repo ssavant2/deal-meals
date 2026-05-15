@@ -975,6 +975,13 @@ def _append_canonical_keyword_synonyms(text: str) -> str:
         extras.append('chipotlepulver')
     if 'kycklingsteak' in text and 'kyckling' not in extras:
         extras.append('kyckling')
+    # "neutral olja" = rapsolja or solrosolja; both words must be present since
+    # 'olja' and 'neutral' are individually stop-words and extract nothing alone.
+    if 'neutral' in text and 'olja' in text:
+        if 'rapsolja' not in text and 'rapsolja' not in extras:
+            extras.append('rapsolja')
+        if 'solrosolja' not in text and 'solrosolja' not in extras:
+            extras.append('solrosolja')
     if not extras:
         return text
     return text + ' ' + ' '.join(extras)

@@ -73,8 +73,10 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
     # where the seasoning profile is completely wrong.
     'thaikryddad': {
         'thai', 'thaikryddad', 'wok', 'pad', 'asiatisk', 'asian',
-        'kokosmjölk', 'ingefära', 'lemongrass', 'citrongräs',
+        'kokosmjölk', 'lemongrass', 'citrongräs',
         'fisksås', 'röd curry', 'grön curry', 'panang', 'massaman',
         'sriracha', 'koriander', 'lime',
+        # 'ingefära' removed — too generic, also used in Persian/Moroccan/Mediterranean
+        # recipes and should not alone trigger thai product context.
     },
 }
