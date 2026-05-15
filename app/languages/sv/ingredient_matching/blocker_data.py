@@ -455,6 +455,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'kaffebön',  # coffee beans (not food beans!)
         'limabön',  # lima beans
         'gelébönor', 'gelebonor',  # candy jelly beans (not legumes!)
+        'långbönor', 'langbonor',  # yard-long beans = specialty Asian vegetable, not generic legumes
     },
 
     # Kakor (cookies/biscuits) - "kakor" should NOT match "pannkakor" (pancakes)
@@ -678,10 +679,13 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'kalvbuljong',  # veal broth
     },
 
-    # Chips - generic "chips" should NOT match taco chips (different product category)
+    # Chips - generic "chips" should NOT match taco/tortilla chips (different product category)
     'chips': {
-        'tacochips',  # taco-flavored tortilla chips ≠ generic chips
-        'nachochips',  # nacho chips ≠ generic chips
+        'tacochips',       # taco-flavored tortilla chips ≠ generic chips
+        'nachochips',      # nacho chips ≠ generic chips
+        'tortillachips',   # tortilla/corn chips ≠ potato chips
+        'tortilla chips',  # same, spaced form
+        'tortilla',        # plain "tortilla chips" ingredient — corn-based ≠ potato
         'bananachips', 'bananchips',  # dried banana slices ≠ chips
     },
 
@@ -3623,4 +3627,5 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'rökspån',         # wood smoking chips (grilling accessory) — not food
     'rokspan',         # diacritic-free variant
     'briketter',       # grill briquettes (charcoal) — not food
+    'aluminiumfolie',  # aluminium foil (kitchen supply) — not food
 })
