@@ -2550,3 +2550,26 @@ layer_role = "keyword_synonym_mapping"
 ingredient = "1 gelantinblad"
 offer_name = "Gelatinblad"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.savoykaal.savojkaal_001"
+language = "sv"
+market = "SE"
+canonical = "savoykål"
+status = "active"
+variants = ["savojkål"]
+offer_terms = ["savoykål"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Swedish spelling variant: recipes write 'savojkål', products labelled 'Savoykål'. Same vegetable (savoy cabbage)."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "savoykål"
+variant = "savojkål"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "500 g savojkål, strimlad"
+offer_name = "Savoykål ca 1,15kg Klass 1 ICA"
+expected = 1

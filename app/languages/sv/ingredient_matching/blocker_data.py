@@ -1130,6 +1130,9 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'nyponssylt',
         'rabarbersylt', 'rabarbersylten',
         'kalvsylta',  # veal aspic — 'sylt' is substring, berry jams should not match
+        # "Drottningsylt" is a specific jam; generic berry jams (matched via 'sylt' substring)
+        # should not match. Real drottningsylt products match via their own 'drottningsylt' keyword
+        'drottning',
     },
 
     # Vegeta (spice brand) != vegetabilisk/vegetarisk
@@ -2271,6 +2274,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'pepper',                 # English pepper-flavored variant
         'chevre',                 # goat cheese flavored/spiked cream cheese
         'plant based', 'vegansk', 'växtbaserad',  # plant-based substitutes ≠ dairy cream cheese
+        'pineapple', 'almond',    # sweet tropical/nut flavors (Castello Pineapple&Almond) ≠ savory cooking cream cheese
+        'kajmak',                 # Balkan dairy spread (Poljorad) ≠ generic cream cheese
     },
     'cream cheese': {
         # Same as färskost — block flavored variants
@@ -2848,6 +2853,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'spread': {
         'hazelnut', 'cocoa', 'choklad', 'chocolate',
         'proteinella', 'nutella',
+        'biscoff',  # Lotus Biscoff Spread = cookie-butter ≠ savory spread (silverlök etc.)
     },
     # "Chicken Hoisin 1p" is a frozen ready meal, not hoisin sauce.
     'hoisinsås': {'chicken'},
@@ -3334,6 +3340,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'fuet',      # fuet = dry-cured Spanish sausage, not cooking chorizo
         'pamplona',  # pamplona chorizo = cured charcuterie, not cooking chorizo
         'iberico',   # ibérico = cured/charcuterie format, not cooking chorizo
+        'cheesy',    # "Kryddkorv Cheesy Chorizo Sibylla" = hot dog with chorizo flavor + cheese ≠ real chorizo
     },
     'bacon': {
         'vego', 'vegansk', 'växtbaserad',
@@ -3697,6 +3704,11 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'figurmarsipan': {'baileys', 'treats', 'cognac', 'bar'},
     # Sweetened/flavored yoghurt products ≠ plain yoghurt for cooking
     'yoghurt': {'granola', 'smoothie', 'frukt & müsli'},
+    # "Inlagda Grönsaker Mix Pickles 610g" = mixed pickled veg ≠ inlagd gurka (pickled cucumber)
+    'inlagdgurka': {'grönsaker', 'gronsaksmix'},
+    # "Tranbär Koncentrat 500ml" = juice concentrate ≠ whole/dried cranberries for salad/baking
+    'tranbär': {'koncentrat', 'juice', 'saft'},
+    'tranbar': {'koncentrat', 'juice', 'saft'},
 }
 
 for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():
