@@ -1333,6 +1333,12 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
 
     # Cucumber (fresh) != pickled/preserved cucumber products
     # "Gurka ca 320g" should NOT match recipe needing "saltgurka" or "bostongurka"
+    # Saffran: ready-baked products used as ingredients should not match the raw spice
+    'saffran': {
+        'saffransbullar',  # "4 st saffransbullar" = baked product ingredient ≠ raw saffron spice
+        'kanelbullar',     # "kanelbullar" as ingredient ≠ raw saffron
+    },
+
     'gurka': {
         'saltgurka', 'saltgurkor',  # pickled cucumber (singular + plural)
         'bostongurka', 'bostongurkor',  # sweet pickled relish
@@ -3302,6 +3308,22 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # ---- Flavored oils ----
     # NOTE: 'olivolja' limone entry merged into existing olivolja PNB
     # NOTE: 'rapsolja' vitlök entry merged into existing rapsolja PNB
+    # ---- Flavored sparkling water ----
+    # Plain "kolsyrat vatten" in recipes (e.g., pancake batter) should not match fruit-flavored variants
+    'kolsyrat': {
+        'smaksatt',     # generic flavored label
+        'vattenmelon',  # watermelon-flavored sparkling water
+        'jordgubb',     # strawberry-flavored
+        'hallon',       # raspberry-flavored
+        'citron',       # lemon-flavored sparkling water
+        'lime',         # lime-flavored
+        'mango',        # mango-flavored
+        'päron', 'paron',
+        'granatäpple', 'granatapple',
+        'kaktus', 'björnbär', 'bjornbar', 'rabarber',
+        'körsbär', 'korsbar',
+        'crush',
+    },
     # ---- Specialty vinegar / herb-in-vinegar ----
     'vinäger': {'dragonblad', 'crema', 'balsamico', 'chips', 'golden mountain'},  # Thai seasoning sauce / chips / crema ≠ cooking vinegar
     'vinager': {'dragonblad', 'crema', 'balsamico', 'chips', 'golden mountain'},

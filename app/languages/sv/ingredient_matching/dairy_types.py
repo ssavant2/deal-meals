@@ -187,4 +187,9 @@ def check_kvarg_match(keyword: str, ingredient_lower: str,
     if any(v in product_name_lower for v in _YOGHURT_VANILJ_INDICATORS):
         return any(v in ingredient_lower for v in _YOGHURT_VANILJ_INDICATORS)
 
+    # When recipe explicitly says "naturell", block any product labeled as flavored/smaksatt
+    if 'naturell' in ingredient_lower:
+        if 'smaksatt' in product_name_lower:
+            return False
+
     return True
