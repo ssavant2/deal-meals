@@ -1395,6 +1395,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'cornichon', 'cornichoner',  # small pickled gherkins
         'västeråsgurka', 'vasterasgurka', 'västeråsgurkor', 'vasterasgurkor',
         'juice',  # "juice från pickles" = brine ingredient; buying the jar for its liquid ≠ cucumber product
+        'hackad', 'hackade',  # pre-chopped cucumber ≠ whole cucumber ("1 st gurka")
     },
     # Inlagdgurka / pickled cucumber products should not match when ingredient is pickle brine
     'inlagdgurka': {
