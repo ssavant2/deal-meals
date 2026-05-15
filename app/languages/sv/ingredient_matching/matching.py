@@ -399,6 +399,10 @@ _CONTEXT_WORD_INGREDIENT_ALIASES = {
     'havregurt': frozenset({'gurt', 'yoghurt'}),
     'kokosgurt': frozenset({'gurt', 'yoghurt'}),
     'soygurt': frozenset({'gurt', 'yoghurt'}),
+    # "Jalapenos 225g" (plural) requires 'jalapenos' in ingredient, but recipe text
+    # says "1 jalapeño" → normalized to "1 jalapeno" (singular) — accept as equivalent.
+    'jalapenos': frozenset({'jalapeno', 'jalapeño'}),
+    'jalapeños': frozenset({'jalapeno', 'jalapeño'}),
 }
 _SPECIALTY_KEYWORD_ALIASES = {
     # Fresh chili family has several recipe-side surface forms that should all

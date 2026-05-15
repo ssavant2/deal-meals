@@ -645,6 +645,7 @@ _CONTEXT_REQUIRED_WORDS_RAW: FrozenSet[str] = frozenset({
     # Chili pepper varieties - specific types require specific match
     # "chilipeppar" (generic) should NOT match "Chilipeppar Chipotle" unless recipe says "chipotle"
     'chipotle', 'ancho', 'habanero', 'jalapeño', 'jalapeno',
+    'jalapeños', 'jalapenos',  # plural form — "Jalapenos 225g" also needs ingredient specificity
     'flakes', 'flingor',  # "Red Hot Flakes" - specific type
 
     # Spice intensity - "Paprika Stark" should ONLY match if recipe says "stark"
