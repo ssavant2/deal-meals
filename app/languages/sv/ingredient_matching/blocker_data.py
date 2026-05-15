@@ -1629,10 +1629,12 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'ätklart', 'ätklar',   # "Soltorkad Tomat Ätklart Kyckling" — chicken product, not tomatoes
         'fusii',               # "Fusii mozzarella & tomat" — ready pasta dish, not tomatoes
         'krämig kyckling',     # "Krämig kyckling med soltorkad tomat" — ready meal, not tomato sauce
+        'kycklingpate',        # "Kycklingpate med tomat" — chicken pâté, tomato is flavor
     },
     'tomater': {
         'ätklart', 'ätklar',   # same as above, plural form
         'krämig kyckling',     # same as above
+        'kycklingpate',        # same as above, plural form
     },
     'tomatsopp': {
         'färskost',   # "Tomatsopp Färskost ICA" — cream cheese flavor, not tomato soup
@@ -3697,4 +3699,11 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'spritspåse',      # piping bag (kitchen tool) — not food
     'spritspase',      # diacritic-free variant
     'glitter',         # decoration/craft glitter (e.g. "Pärlor glitter Playbox") — not food
+    # Baby food — never a recipe ingredient (matches purees/snacks to recipes via fruit/veg keywords)
+    'ellas kitchen',   # baby food brand (e.g. "Maize sticks majs & morot 7m 16g Ellas Kitchen")
+    'lovemade',        # baby food brand (e.g. "Majs, morot & mangoringar Eko 8m 20g Lovemade")
+    'barnmat',         # generic "baby food" prefix used across brands
+    'barngröt',        # baby porridge
+    'barngrot',        # diacritic-free variant
+    'barnsnack',       # baby snacks ("Barnsnacks Majs morot 8m ICA I love eco")
 })
