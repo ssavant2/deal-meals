@@ -12,9 +12,9 @@ services:
     # shared_buffers means every rebuild reads it cold.
     # Normal values: no mem_limit, no shm_size, no command override.
     # Restore when batch reviews are complete.
-    mem_limit: ${DEV_DB_MEM_LIMIT:-10g}
-    shm_size: 6g
-    command: "postgres -c shared_buffers=4GB -c effective_cache_size=8GB -c work_mem=32MB -c max_parallel_workers_per_gather=4 -c max_parallel_workers=8 -c max_worker_processes=10 -c parallel_setup_cost=100"
+    mem_limit: ${DEV_DB_MEM_LIMIT:-14g}
+    shm_size: 10g
+    command: "postgres -c shared_buffers=8GB -c effective_cache_size=12GB -c work_mem=32MB -c max_parallel_workers_per_gather=4 -c max_parallel_workers=8 -c max_worker_processes=10 -c parallel_setup_cost=100"
 
   adminer:
     container_name: deal-meals-dev-adminer
