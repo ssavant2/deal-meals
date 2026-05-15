@@ -3570,10 +3570,28 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'bordsmargarin': {'dinkelkex', 'kex', 'cracker'},
 }
 
-PRODUCT_NAME_BLOCKERS: Dict[str, Set[str]] = {
-    fix_swedish_chars(k).lower(): {fix_swedish_chars(w).lower() for w in v}
-    for k, v in _PRODUCT_NAME_BLOCKERS_RAW.items()
-}
+def _merge_pnb_raw(raw: Dict[str, Set[str]]) -> Dict[str, Set[str]]:
+    """Merge raw PNB entries by normalized key.
+
+    Many entries have both diacritic and ASCII variants of the same key
+    (e.g. 'vitlök' and 'vitlok', 'kycklingfilé' and 'kycklingfile').
+    fix_swedish_chars normalizes both to the same canonical key, so a
+    plain dict comprehension would silently overwrite the first entry's
+    blocker set with the second one's. We instead union the blocker sets
+    so that BOTH variants' blockers apply to the canonical key.
+    """
+    merged: Dict[str, Set[str]] = {}
+    for k, v in raw.items():
+        norm_key = fix_swedish_chars(k).lower()
+        norm_values = {fix_swedish_chars(w).lower() for w in v}
+        if norm_key in merged:
+            merged[norm_key].update(norm_values)
+        else:
+            merged[norm_key] = norm_values
+    return merged
+
+
+PRODUCT_NAME_BLOCKERS: Dict[str, Set[str]] = _merge_pnb_raw(_PRODUCT_NAME_BLOCKERS_RAW)
 
 _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     # Batch review policy fixes: keep broad staples useful while blocking
