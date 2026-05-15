@@ -2093,6 +2093,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'chilibearnaise': {'original', 'klassisk', 'ramslök', 'vitlök', 'tryffel', 'bbq', 'tre peppar', 'med smör'},
     # Ready-meal wok pouches (kyckling+sauce) ≠ raw vegetable wok mix
     'wokmix': {'kyckling'},
+    # Ready-meal wok dishes ≠ raw frozen wok vegetables ("frysta wokgrönsaker")
+    'wokgrönsaker': {'kyckling', 'teriyaki', 'panang', 'röd curry', 'sweet chili', 'findus', 'mama chin'},
+    'wokgronsaker': {'kyckling', 'teriyaki', 'panang', 'rod curry', 'sweet chili', 'findus', 'mama chin'},
     # Marmalade with spirit flavor ≠ the spirit itself
     'brandy': {'marmelad'},
     'calvados': {'marmelad'},
@@ -2544,6 +2547,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'digestive',            # "Digestive Choklad 150g" / "Digestive doppade i mörk choklad" — biscuits, not baking chocolate
         'likör', 'likor',       # "chokladlikör" wants liqueur, not plain chocolate
         'skumbanan', 'chokladbanan',  # "Chokladbanan Skumbanan Choklad Stark" — marshmallow candy, not baking chocolate
+        'banan choklad', 'bananchoklad',  # "Banan Choklad 125g Stark" — banana-chocolate candy ≠ baking/plain chocolate
         'pralin',               # "Chokladpralin Mörk Choklad 60% Lindt" — filled pralines, not baking chocolate
         'karamell',             # "Choklad Vegan Salt Karamell Green Star" — caramel-flavor candy bar
     },
