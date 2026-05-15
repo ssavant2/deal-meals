@@ -626,6 +626,12 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # Fresh horseradish root ≠ jarred grated (riven). "2 msk pepparrot färsk" should
     # not match "Pepparrot Riven" since riven is a preserved processed form.
     'pepparrot': {'färsk', 'farsk'},
+    # Food coloring: when recipe specifies a color (gul, röd, svart...), only that color should match.
+    # All colors are bidirectional so "gul karamellfärg" recipe blocks Svart/Röd/Grön products.
+    'karamellfärg': {'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'},
+    'karamellfarg': {'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'},
+    'hushållsfärg': {'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'},
+    'hushallsfarg': {'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'},
     # Cloves: ground (malen) ≠ whole. "6 kryddnejlikor" = whole for infusion, not ground.
     # 'nejlikor' is the parent keyword (nejlika → nejlikor in INGREDIENT_PARENTS).
     'nejlika': {'malen', 'mald', 'malet'},
@@ -1120,6 +1126,11 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
     'sidflask': frozenset({'rökt', 'rokt', 'rimmat'}),
     'fläsk': frozenset({'rökt', 'rokt'}),
     'flask': frozenset({'rökt', 'rokt'}),
+    # Food coloring: color is always bidirectional — gul/svart/röd/grön must match
+    'karamellfärg': frozenset({'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'}),
+    'karamellfarg': frozenset({'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'}),
+    'hushållsfärg': frozenset({'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'}),
+    'hushallsfarg': frozenset({'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'}),
     # Lingonberry jam/preserve: "Rårörda Lingon" should NOT match generic "lingon"
     'lingon': frozenset({'rårörda', 'rörda'}),
     'päron': frozenset({'halvor'}),
