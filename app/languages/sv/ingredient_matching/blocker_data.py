@@ -1568,6 +1568,11 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # "Marinad BBQ/Korean/Bulgogi" ≠ the olive-oil from sun-dried tomato jar
     # When ingredient says "marinerade soltorkade tomater", the marinad is the jar oil, not a separate bottle
     'marinad': {'soltorkade', 'soltorkad'},
+    # Generic pepparsås products ≠ Tabasco brand specifically
+    # PNB already blocks pepparsås products named 'tabasco'; this FPB blocks ANY pepparsås
+    # product when the ingredient text explicitly asks for tabasco (the brand)
+    'pepparsås': {'tabasco'},
+    'pepparsas': {'tabasco'},
 
 
 }
@@ -2661,6 +2666,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     'emmentaler': {
         'kex',  # "Kex Mini twist Emmentaler" — snack crackers, not cheese
+        'kryddkorv',  # "Kryddkorv Käsekrainer med Emmentalerost" — sausage, not cheese
+    },
+    'emmentalerost': {
+        'kex',
+        'kryddkorv',  # same pattern
     },
     # Napoli (origin) — pizzadeg ≠ salame napoli
     'napoli': {
@@ -3621,6 +3631,12 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'bordsmargarin': {'dinkelkex', 'kex', 'cracker'},
     # "Filmjölk Lemonad 2,7% Arla Ko" = fermented dairy drink ≠ soft-drink lemonade for cocktails/sangria
     'lemonad': {'filmjölk', 'filmjolk'},
+    # Inverse: plain filmjölk ingredient should not match flavored "Filmjölk Lemonad" product
+    'filmjölk': {'lemonad'},
+    'filmjolk': {'lemonad'},
+    # "Mandarinklyftor i sockerlag" = sugar-syrup canned segments ≠ fresh skinless mandarin segments
+    'mandarin': {'sockerlag'},
+    'mandariner': {'sockerlag'},
 }
 
 def _merge_pnb_raw(raw: Dict[str, Set[str]]) -> Dict[str, Set[str]]:
