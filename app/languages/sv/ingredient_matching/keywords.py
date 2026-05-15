@@ -287,6 +287,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'hållare',  # holder — generic non-food word ("Gatukritor med hållare")
     'sorterade',  # sorted/assorted — generic adjective ("Tallrik sorterade färger")
     'riserva',  # Italian quality grade (maturation/reserve) — "Vitvinsvinäger Riserva Zeta" matched 'rispapper' ingredient
+    'flikar',   # recipe format word (= slices/tabs of butter etc.) — leaks into children's books with "flikar" (= book flaps) in title
 
     # Quantities/forms (meaningless for matching)
     'paket', 'pack', 'burk', 'påse', 'flaska', 'liter', 'gram', 'kilo',

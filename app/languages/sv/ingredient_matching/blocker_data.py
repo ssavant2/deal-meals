@@ -307,6 +307,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'långpasta', 'langpasta',  # "långpasta" is a specific group — generic "pasta" keyword
                                    # should NOT substring-match inside recipe text "långpasta"
         'pastamaskin',  # equipment word ("om du har pastamaskin"), not an ingredient
+        'lakritspasta',  # liquorice paste (baking/candy) ≠ Italian pasta noodles
     },
 
     # Citron (lemon) != citrongräs (lemongrass) - different ingredients
@@ -2126,6 +2127,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Habanero sauce ≠ fresh habanero pepper
     'habanero': {
         'sauce', 'sås',  # "Hot Habanero Sauce", "Sås Habanero het" — sauces, not fresh pepper
+        'nudlar', 'ramen', 'buldak',  # "Nudlar Buldak Habanero Lime Ramen" — instant noodles ≠ fresh habanero chili
     },
     # Harissa paste/sauce products ≠ hummus
     'harissa': {
