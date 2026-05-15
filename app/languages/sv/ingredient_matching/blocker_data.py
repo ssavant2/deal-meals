@@ -1273,6 +1273,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'vitlökssås', 'vitlokssas',  # garlic sauce (prepared)
         'vitlöksbaguett', 'vitloksbaguett',  # garlic bread (baked product)
         'vitlöksbröd', 'vitloksbrod',  # garlic bread
+        'solo',  # "vitlök solo" = monoclove garlic (single-clove variety) — only matches itself
     },
 
     # Salad (prepared) != salladslök (spring onion)
@@ -1339,6 +1340,11 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'ättiksgurka', 'attiksgurka', 'ättiksgurkor', 'attiksgurkor',
         'cornichon', 'cornichoner',  # small pickled gherkins
         'västeråsgurka', 'vasterasgurka', 'västeråsgurkor', 'vasterasgurkor',
+        'juice',  # "juice från pickles" = brine ingredient; buying the jar for its liquid ≠ cucumber product
+    },
+    # Inlagdgurka / pickled cucumber products should not match when ingredient is pickle brine
+    'inlagdgurka': {
+        'juice',  # "juice från pickles" = brine — buying the jar for its liquid ≠ pickle for eating
     },
     'gurkor': {
         'saltgurkor',  # plural pickled
@@ -2366,6 +2372,13 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'mortadella': {'tortellini', 'tortelloni', 'ravioli'},
     'prosciutto': {'pinsa', 'tortellini', 'tortelloni', 'ravioli', 'perline', 'piadina'},
     'skinka': {'pinsa'},
+    # Julskinka = whole cured ham for roasting. Deli/sliced ham is a completely different purchase.
+    'julskinka': {
+        'strimlad',     # "Rökt Skinka Strimlad" — shredded deli ham ≠ whole roasting ham
+        'skivad',       # "Julskinka Skivad" — pre-sliced deli ≠ whole ham
+        'tunna skivor', # "Skinka Tunna Skivor" — cold-cut thin slices ≠ roasting ham
+        'deli',         # deli counter ham ≠ whole julskinka
+    },
     # Breaded/processed fish fillets ≠ fresh fish fillets
     'fiskfileer': {
         'frasig', 'frasiga', 'sprödbakad', 'sprodbakad',  # breaded products
