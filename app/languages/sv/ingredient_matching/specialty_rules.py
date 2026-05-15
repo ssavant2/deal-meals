@@ -626,6 +626,13 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # Fresh horseradish root ≠ jarred grated (riven). "2 msk pepparrot färsk" should
     # not match "Pepparrot Riven" since riven is a preserved processed form.
     'pepparrot': {'färsk', 'farsk'},
+    # Mustard type distinctions — sötstark/skånsk/dijon are specific families.
+    # "senap ljus" should not match sötstark/skånsk/dijon; generic "senap" same.
+    'senap': {
+        'sötstark', 'sotstark',
+        'skånsk', 'skansk',
+        'dijon', 'dijonsenap',
+    },
     'mango': {'torkad', 'torkade', 'inlagd', 'inlagda'},
     'banan': {'torkad', 'torkade'},
     'persika': {'torkad', 'torkade'},
@@ -1014,6 +1021,14 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
         'oliver',                                  # gröna oliver
         'garlic', 'herbs',                         # English = vitlök & örter
         'grekisk',                                 # Grekisk Vitlök Färskost
+    }),
+    # Mustard types: sötstark/skånsk/dijon are specific flavour families.
+    # A recipe asking for "senap ljus" (mild yellow) should not accept sweet or sharp varieties.
+    # Generic "senap" in a recipe also shouldn't accept these without explicit mention.
+    'senap': frozenset({
+        'sötstark', 'sotstark',   # sweet-strong Swedish style
+        'skånsk', 'skansk',       # Scanian sweet style
+        'dijon', 'dijonsenap',    # French sharp style
     }),
     # Wine color: "Matlagningsvin Röd" should NOT match "vitt matlagningsvin" recipe
     # Per-keyword to avoid collisions with 'röd'/'vit' used elsewhere (e.g., paprika colors)
