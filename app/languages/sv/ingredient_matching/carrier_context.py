@@ -1077,7 +1077,9 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     'chips': {'tortilla', 'tång', 'tang', 'sjögräs', 'sjogras', 'alger', 'algsallad'},
     # Flatbread compounds should not fall back to generic bread products.
     # "libabröd" / "tunnbröd" wants flatbread, not bagels or other bread shapes.
-    'bröd': {'tunnbröd', 'tunnbrod', 'liba'},
+    # "steamed buns bröd eller tortillabröd" — 'bröd' here is a label word, not
+    # a genuine request for any generic bread. Only steamed buns and tortillabröd should match.
+    'bröd': {'tunnbröd', 'tunnbrod', 'liba', 'steamed'},
     # "creme av soltorkade tomater" wants the specific spread/dip, not plain jars
     # of sun-dried tomatoes. The specific creme products use a dedicated compound
     # keyword after normalization, so suppressing the generic family is safe here.

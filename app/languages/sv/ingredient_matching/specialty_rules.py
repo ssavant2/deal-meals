@@ -623,6 +623,9 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     'körsbär': {'torkad', 'torkade'},
     # 'dadlar' removed — dried is the default form in Sweden. "Dadlar" = torkade dadlar.
     # "Torkade Dadlar" should match any recipe asking for "dadlar".
+    # Fresh horseradish root ≠ jarred grated (riven). "2 msk pepparrot färsk" should
+    # not match "Pepparrot Riven" since riven is a preserved processed form.
+    'pepparrot': {'färsk', 'farsk'},
     'mango': {'torkad', 'torkade', 'inlagd', 'inlagda'},
     'banan': {'torkad', 'torkade'},
     'persika': {'torkad', 'torkade'},
