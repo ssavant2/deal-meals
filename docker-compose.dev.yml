@@ -7,6 +7,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.db
+    # NOTE: mem_limit, shm_size and command below are TEMPORARY for batch-review
+    # runs (2026-05-15). compiled_recipe_offer_candidates is 16GB — default 128MB
+    # shared_buffers means every rebuild reads it cold.
+    # Normal values: no mem_limit, no shm_size, no command override.
+    # Restore when batch reviews are complete.
+    mem_limit: ${DEV_DB_MEM_LIMIT:-10g}
+    shm_size: 6g
+    command: "postgres -c shared_buffers=4GB -c effective_cache_size=8GB -c work_mem=32MB -c max_parallel_workers_per_gather=4 -c max_parallel_workers=8 -c max_worker_processes=10 -c parallel_setup_cost=100"
 
   adminer:
     container_name: deal-meals-dev-adminer
@@ -14,11 +22,15 @@ services:
   web:
     container_name: deal-meals-dev-web
     build: .
-    mem_limit: ${DEV_WEB_MEM_LIMIT:-1536m}
+    # NOTE: mem_limit and cpus below are TEMPORARY for batch-review runs (2026-05-15).
+    # Normal values: mem_limit 1536m, cpus 4 (or remove cpus line entirely).
+    # Restore when batch reviews are complete.
+    mem_limit: ${DEV_WEB_MEM_LIMIT:-12g}
+    cpus: ${DEV_WEB_CPUS:-10}
     environment:
       DEAL_MEALS_VERSION: ${DEAL_MEALS_VERSION:-dev}
       PYTHONDONTWRITEBYTECODE: "1"
-      CACHE_REBUILD_MAX_WORKERS: ${CACHE_REBUILD_MAX_WORKERS:-3}
+      CACHE_REBUILD_MAX_WORKERS: ${CACHE_REBUILD_MAX_WORKERS:-8}
       CACHE_DELTA_VERIFICATION_MAX_WORKERS: ${CACHE_DELTA_VERIFICATION_MAX_WORKERS:-3}
     volumes:
       - ./app:/app

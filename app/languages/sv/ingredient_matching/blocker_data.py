@@ -456,6 +456,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'limabön',  # lima beans
         'gelébönor', 'gelebonor',  # candy jelly beans (not legumes!)
         'långbönor', 'langbonor',  # yard-long beans = specialty Asian vegetable, not generic legumes
+        'laoganma', 'chiliolja',  # "Svarta Bönor i Chiliolja Laoganma" = chili-oil condiment ≠ plain beans
     },
 
     # Kakor (cookies/biscuits) - "kakor" should NOT match "pannkakor" (pancakes)
@@ -3531,6 +3532,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'korv',            # kalkonkorv/lökkorv av kalkon — sausage product
         'chorizo',         # "Chorizo av Kalkon" — processed sausage
         'strimlad',        # "Kalkon Strimlad" — pre-cooked strips
+        'grillad',         # "Kalkon Gourmet Grillad 90g Brödernas" — cooked deli (≠ grillkryddad/raw)
     },
     # Kanin (rabbit) ≠ toys/decorations — Easter products matching rabbit recipes
     'kanin': {
