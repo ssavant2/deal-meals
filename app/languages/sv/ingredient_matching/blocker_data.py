@@ -1333,6 +1333,15 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
 
     # Cucumber (fresh) != pickled/preserved cucumber products
     # "Gurka ca 320g" should NOT match recipe needing "saltgurka" or "bostongurka"
+    # Citrus fruit: 'citron'/'apelsin' removed from FLAVOR_WORDS so "saft av citron" recipes
+    # correctly find products. Guard zest/skal context: juice products are wrong there.
+    'citronjuice': {
+        'skal', 'zest', 'rivet citronskal', 'riven citron',  # zest context needs whole fruit
+    },
+    'apelsinjuice': {
+        'skal', 'zest', 'rivet apelsinskal', 'riven apelsin',
+    },
+
     # Saffran: ready-baked products used as ingredients should not match the raw spice
     'saffran': {
         'saffransbullar',  # "4 st saffransbullar" = baked product ingredient ≠ raw saffron spice
