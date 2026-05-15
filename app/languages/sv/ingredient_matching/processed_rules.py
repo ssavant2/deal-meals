@@ -59,7 +59,8 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         'skivad', 'skivade', 'skivor',       # sliced = always preserved (no pre-sliced fresh beets)
         'inlagd', 'inlagda',                 # recipe says "inlagda rödbetor" → allow all pickled products
         'konserverad', 'konserverade',       # recipe/product says "Rödbetor Konserverade"
-        # NOTE: 'hela' intentionally omitted — too common in "4 hela rödbetor" (= 4 whole fresh)
+        'hela',                              # Q19: "1 förp felix hela rödbetor" = packaged whole beets
+        'förp', 'forp',                      # Q19: "förp" signals packaged/preserved product
     },
     # Prepared spinach dishes should not match plain spinach ingredients.
     # Frozen chopped spinach is still an acceptable fallback for fresh spinach lines,

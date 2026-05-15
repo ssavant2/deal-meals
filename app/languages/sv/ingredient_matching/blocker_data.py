@@ -108,7 +108,10 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'oregano',  # "ost" substring of "oreganostrimlad" — NOT cheese
         'ostsås', 'ostsas',  # cheese sauce (ready-made) ≠ block cheese
         'ostbricka',  # cheese platter (assorted) ≠ single cheese product
+        'ostpaj',  # "färdig ostpaj" = ready-made pie ≠ loose cheese blocks (Q21)
     },
+    # When ingredient specifies a prepared gratäng dish, raw root vegetables should not match
+    'rotfrukter': {'gratäng', 'rotfruktsgratäng'},  # "1 förp rotfruktsgratäng" ≠ loose morot/rödbeta/kålrot
     'gratäng': {
         # Dish names ending in "-gratäng" are NOT cheese ingredients
         # "Gratängost" should NOT match ingredient "potatisgratäng" (dish name)
@@ -790,6 +793,10 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'chilimajonnäs', 'chilimajonnas',  # chili mayo ≠ plain mayo
         'srirachamajonnäs', 'srirachamajonnas',  # spicy sriracha mayo ≠ plain mayo
     },
+    'majonnas': {
+        'chilimajonnäs', 'chilimajonnas',
+        'srirachamajonnäs', 'srirachamajonnas',
+    },
     'mayo': {
         'chilimayo',  # chili mayo ≠ plain mayo
         'srirachamayo',  # spicy sriracha mayo ≠ plain mayo
@@ -1111,6 +1118,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Thickener (redning) != preparation text (beredning)
     'redning': {
         'beredning', 'beredningstexten', 'beredningstips',  # preparation instructions, not thickener
+        'vetemjöl', 'vetemjol',  # "vetemjöl till redning" = wheat flour for thickening ≠ maizena/stärkelse
     },
 
     # Jam (sylt) != jam-making sugar (syltsocker)
@@ -1742,6 +1750,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'mild',                # "Yellow/Green Chili Mild" — sauce
         'favabönor', 'favabonor', 'foul modemmas',  # bean conserve
         'mango',               # "Torkad Mango Chili Twist" — dried mango snack
+        'malen', 'mald', 'malet',  # ground/powder ≠ whole dried chili fruit
+        'original',            # "Chili Original Santa Maria" = branded spice mix ≠ whole fruit
+        'kryddmix',            # generic spice mix ≠ whole dried fruit
     },
     'chilifrukter': {
         'örtsalt', 'ortsalt',
@@ -2282,6 +2293,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'plant based', 'vegansk', 'växtbaserad',  # plant-based substitutes ≠ dairy cream cheese
         'pineapple', 'almond',    # sweet tropical/nut flavors (Castello Pineapple&Almond) ≠ savory cooking cream cheese
         'kajmak',                 # Balkan dairy spread (Poljorad) ≠ generic cream cheese
+        'philadelphia',           # when ingredient says "Philadelphia [smak]", plain naturell färskost is too generic
     },
     'cream cheese': {
         # Same as färskost — block flavored variants
@@ -2907,12 +2919,14 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'gurk',                            # "Gurkmajonnäs" = dressing, not mayo
         'cactus', 'lime',                  # "Cactus/lime Mayo"
         'japanese curry', 'curry mayo',    # "Japanese Curry Mayo UMA" — flavored, not plain
+        'asiatisk',                        # "Asiatisk Mayo" — Asian-flavored ≠ plain mayo
     },
     'majonnas': {
         'garlic', 'vitlök', 'vitloks', 'chili', 'sriracha', 'jalapeno',
         'tryffel', 'tryffelmayo', 'mango', 'habanero', 'citron',
         'korean', 'gurk', 'cactus', 'lime',
         'japanese curry', 'curry mayo',
+        'asiatisk',
     },
     # Peppermint cooking extract ≠ candy mints/pastilles
     'pepparmint': {'pastillask', 'bon bons', 'läkerol', 'pastil'},
@@ -3727,6 +3741,11 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     # "Tranbär Koncentrat 500ml" = juice concentrate ≠ whole/dried cranberries for salad/baking
     'tranbär': {'koncentrat', 'juice', 'saft'},
     'tranbar': {'koncentrat', 'juice', 'saft'},
+    # Q7: Violife Färskost = vegan cream cheese alternative, not mozzarella substitute
+    'violife': {'färskost', 'farskost'},
+    # Q13: "Jordgubbar 35% bär ICA Basic" = jam/preserve (35% fruit content label) ≠ fresh strawberries
+    'jordgubb': {'35%'},
+    'jordgubbar': {'35%'},
 }
 
 for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():

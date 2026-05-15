@@ -2535,7 +2535,21 @@ def _product_is_whole_kyckling_offer(
     if 'helkyckling' in product_kw_set:
         return True
     product_lower = fix_swedish_chars(product_name).lower() if product_name else ""
-    return 'majskyckling' in product_kw_set and 'hel' in product_lower
+    if 'majskyckling' in product_kw_set and 'hel' in product_lower:
+        return True
+    # "Kyckling Färsk Hel ICA Gott Liv": kyckling keyword + 'hel' as standalone word
+    # in product name. Space normalizations turn ingredient 'hel kyckling' into
+    # 'helkyckling', which blocks the 'kyckling' keyword via FPB, so this fallback
+    # path is the only way to recognize such products as whole-chicken offers.
+    # Guard: exclude fillet/sausage keywords so "Kycklingfilé Hel" doesn't match.
+    _NON_WHOLE_KYCKLING_KW = frozenset({'kycklingfilé', 'kycklingfile', 'kycklingkorv', 'kycklingklubba'})
+    if (
+        'kyckling' in product_kw_set
+        and not (product_kw_set & _NON_WHOLE_KYCKLING_KW)
+        and re.search(r'\bhel\b', product_lower)
+    ):
+        return True
+    return False
 
 
 _WHOLE_CRAYFISH_KEYWORDS = frozenset({

@@ -9059,3 +9059,26 @@ layer_role = "ingredient_parent_mapping"
 ingredient = "toastbrödskivor"
 offer_name = "Toastbröd"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.rundkornigt_395"
+language = "sv"
+market = "SE"
+canonical = "ris"
+status = "active"
+variants = ["rundkornigt"]
+ingredient_terms = ["ris"]
+source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
+layer_policy = ["ingredient_alias"]
+notes = "Q22: rundkornigt ris → ris (short-grain rice, same parent as arborio/risotto rice)."
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "ris"
+variant = "rundkornigt"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "rundkornigt ris"
+offer_name = "Ris"
+expected = 1

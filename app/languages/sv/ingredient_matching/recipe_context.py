@@ -75,8 +75,8 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
         'thai', 'thaikryddad', 'wok', 'pad', 'asiatisk', 'asian',
         'kokosmjölk', 'lemongrass', 'citrongräs',
         'fisksås', 'röd curry', 'grön curry', 'panang', 'massaman',
-        'sriracha', 'koriander', 'lime',
+        'sriracha', 'koriander',
         # 'ingefära' removed — too generic, also used in Persian/Moroccan/Mediterranean
-        # recipes and should not alone trigger thai product context.
+        # 'lime' removed — too generic, also used in Mexican/Caribbean/Mediterranean cuisines
     },
 }
