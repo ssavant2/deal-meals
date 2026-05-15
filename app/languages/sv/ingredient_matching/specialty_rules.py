@@ -648,40 +648,39 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
 
     # Italian/specialty cheeses - "parmesanost" should NOT match generic "Riven Ost"
     # If ingredient has specific cheese type, product must also have it
+    # "100 g ost" = generic Swedish cooking cheese (präst/greve/gouda group).
+    # Any of these qualifiers in an ingredient text requires the offer to match.
+    # Direction A: if ingredient says "brie" → offer must have "brie".
+    # BIDIRECTIONAL (via BIDIRECTIONAL_PER_KEYWORD): if offer has these → ingredient must too.
     'ost': {
-        'parmesan', 'parmigiano', 'parmesanost',
-        'mozzarella', 'mozarella',
-        'ricotta',
-        'mascarpone',
-        'burrata',
-        'grana', 'padano',  # grana padano
-        'pecorino',
+        # Italian aged
+        'parmesan', 'parmigiano', 'parmesanost', 'grana', 'padano', 'pecorino',
+        # Italian fresh
+        'mozzarella', 'mozarella', 'ricotta', 'mascarpone', 'burrata',
+        # Other Italian
         'gorgonzola',
+        # Common in specific contexts
         'cheddar',
         'gruyère', 'gruyere',
-        'grevé', 'greve', 'grevéost', 'greveost',
         'emmental', 'emmentaler',
+        # Generic group uses grevé only for direction A (ingredient says grevé → offer must too)
+        'grevé', 'greve', 'grevéost', 'greveost',
+        'manchego',
+        # French soft
         'brie', 'camembert',
-        'feta', 'fetaost',
-        'halloumi',
-        'cottage',  # cottage cheese
-        # Note: Swedish everyday cheeses (präst, herrgård, gratäng, hushåll) removed -
-        # they ARE generic ost and should match "ost" recipes.
-        # västerbotten is NOT in this group — distinct flavor, in SPECIALTY_QUALIFIERS.
-        # Note: Cheese forms (riven) removed from Direction A - any cheese can be grated.
-        # But 'skivad' is BIDIRECTIONAL (via BIDIRECTIONAL_PER_KEYWORD): pre-sliced
-        # cheese should NOT match "riven ost" or generic "ost" cooking recipes.
-        'skivad', 'skivade',
-        'rökt', 'rokt',  # smoked cheese — distinct from generic ost
-        'tärnad', 'tärnade', 'tärning', 'tärningar',  # pre-diced cheese (ost i olja) — not generic ost
-        # Specific cheese types
-        'färsk', 'färskost',  # cream cheese / fresh cheese
-        # Note: Aged cheese (lagrad/vällagrad) removed - most store cheeses say
-        # "lagrad" and should still match generic "ost" recipes.
-        # Goat/blue cheese - "getost" and "ädelost" are NOT generic ost
+        # Mediterranean
+        'feta', 'fetaost', 'halloumi',
+        # Other distinct
+        'cottage',
         'get', 'getost',
-        'ädel', 'ädelost',
-        'kvibille',  # specific blue cheese brand
+        'ädel', 'ädelost', 'kvibille',
+        'västerbotten', 'vasterbotten',
+        'tryffel', 'truffle',
+        # Product form qualifiers
+        'skivad', 'skivade',
+        'rökt', 'rokt',
+        'tärnad', 'tärnade', 'tärning', 'tärningar',
+        'färsk', 'färskost',
     },
 
     # Filled pasta: filling-specific lines like "tortellini ricotta/spenat"
@@ -1085,10 +1084,33 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
     }),
     # Pre-sliced cheese: "Herrgård Skivad" should NOT match "riven ost" or generic "ost"
     # Per-keyword because 'skivad' in other contexts (e.g., skivad lök) isn't bidirectional
+    # "100 g ost" should ONLY match the generic Swedish group (präst, greve, hushåll,
+    # gouda, edamer, herrgård, svecia, gräddost). Specialty cheeses require explicit
+    # mention in the ingredient text. This is enforced by making specialty cheese
+    # qualifiers bidirectional: if product has 'brie', ingredient must also say 'brie'.
     'ost': frozenset({
-        'skivad', 'skivade',  # pre-sliced cheese
-        'rökt', 'rokt',  # smoked cheese — not generic "ost"
-        'tärnad', 'tärnade', 'tärning', 'tärningar',  # pre-diced (ost i olja) — not generic "ost"
+        # Product form qualifiers
+        'skivad', 'skivade',
+        'rökt', 'rokt',
+        'tärnad', 'tärnade', 'tärning', 'tärningar',
+        # Italian aged
+        'parmesan', 'parmigiano', 'parmesanost', 'grana', 'padano', 'pecorino',
+        # Italian fresh
+        'mozzarella', 'mozarella', 'ricotta', 'mascarpone', 'burrata',
+        # Other Italian
+        'gorgonzola',
+        # French soft
+        'brie', 'camembert',
+        # Swiss/other
+        'gruyère', 'gruyere', 'emmental', 'emmentaler', 'manchego',
+        # Mediterranean
+        'feta', 'fetaost', 'halloumi',
+        # Other distinct
+        'cottage',
+        'get', 'getost',
+        'ädel', 'ädelost', 'kvibille',
+        'västerbotten', 'vasterbotten',
+        'tryffel', 'truffle',
     }),
     # Seasoned/marinated chicken fillet products should not satisfy plain raw
     # kycklingfilé recipes unless the recipe asks for that preparation.
