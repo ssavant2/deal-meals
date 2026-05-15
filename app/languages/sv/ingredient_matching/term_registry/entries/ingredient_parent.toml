@@ -9111,3 +9111,26 @@ layer_role = "ingredient_parent_mapping"
 ingredient = "persiljestjälkar"
 offer_name = "Bladpersilja"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.scotchbonnet_397"
+language = "sv"
+market = "SE"
+canonical = "habanero"
+status = "active"
+variants = ["scotchbonnet", "scotch bonnet"]
+ingredient_terms = ["habanero"]
+source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
+layer_policy = ["ingredient_alias"]
+notes = "Scotch bonnet is a habanero variety — map to habanero so habanero products match scotch bonnet ingredient (batch 49)."
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "habanero"
+variant = "scotchbonnet"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "scotch bonnet"
+offer_name = "Röd habanero"
+expected = 1

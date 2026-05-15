@@ -264,6 +264,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'minimajs',  # baby corn (wok ingredient) ≠ corn kernels
         'majsvälling', 'majsvalling',  # corn porridge (baby food) ≠ corn kernels
         'majspasta',  # corn pasta ≠ corn kernels
+        'tortillabröd', 'tortillabrod',  # corn kernels ≠ tortilla bread (batch 49)
     },
 
     # Crème fraiche - "fraiche" should NOT match plant-based alternatives
@@ -1035,6 +1036,14 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'saltsillfileer',  # generic sill should not match urvattnade saltsillfiléer
         'physillium', 'psillium', 'psyllium',  # fiber husk supplement — "sill" substring in "physillium"
     },
+    # Plain herring fillets ≠ matjessill (sweet-pickled) — when ingredient says "matjes",
+    # block plain sillfileer products from matching via 'sillfileer' substring (batch 49)
+    'sillfileer': {
+        'matjessill', 'matjes',
+    },
+    'sillfile': {
+        'matjessill', 'matjes',
+    },
 
 
     # Fermented milk (fil) != filé/filet/phyllo dough
@@ -1147,6 +1156,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         # should not match. Real drottningsylt products match via their own 'drottningsylt' keyword
         'drottning',
         'körsbärssylt', 'korsbärssylt', 'korsbarsylt',  # cherry jam ≠ other berry jams
+        'syltade', 'syltad',  # "syltade kantareller" = pickled chanterelles ≠ berry jam (batch 49)
     },
 
     # Vegeta (spice brand) != vegetabilisk/vegetarisk
@@ -2193,7 +2203,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Plain bearnaise (without chili) ≠ chilibearnaise ingredient
     'chilibearnaise': {'original', 'klassisk', 'ramslök', 'vitlök', 'tryffel', 'bbq', 'tre peppar', 'med smör'},
     # Ready-meal wok pouches (kyckling+sauce) ≠ raw vegetable wok mix
-    'wokmix': {'kyckling'},
+    'wokmix': {'kyckling',
+               'findus', 'thai style', 'vietnam style', 'classic style', 'zanju style'},  # Findus ready-meal wok kits ≠ raw frozen mix (batch 49)
     # Ready-meal wok dishes ≠ raw frozen wok vegetables ("frysta wokgrönsaker")
     'wokgrönsaker': {'kyckling', 'teriyaki', 'panang', 'röd curry', 'sweet chili', 'findus', 'mama chin'},
     'wokgronsaker': {'kyckling', 'teriyaki', 'panang', 'rod curry', 'sweet chili', 'findus', 'mama chin'},
@@ -2228,6 +2239,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'habanero': {
         'sauce', 'sås',  # "Hot Habanero Sauce", "Sås Habanero het" — sauces, not fresh pepper
         'nudlar', 'ramen', 'buldak',  # "Nudlar Buldak Habanero Lime Ramen" — instant noodles ≠ fresh habanero chili
+        'lantchips', 'chips',  # "LantChips Chili Habanero 200g" — snack chips ≠ fresh habanero pepper (batch 49)
     },
     # Harissa paste/sauce products ≠ hummus
     'harissa': {
@@ -3429,6 +3441,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'kaktus', 'björnbär', 'bjornbar', 'rabarber',
         'körsbär', 'korsbar',
         'crush',
+        'ananas', 'drakfrukt',  # "Kolsyrat vatten Ananas Drakfrukt 50cl Loka" (batch 49)
     },
     # ---- Specialty vinegar / herb-in-vinegar ----
     'vinäger': {'dragonblad', 'crema', 'balsamico', 'chips', 'golden mountain'},  # Thai seasoning sauce / chips / crema ≠ cooking vinegar
@@ -3777,6 +3790,12 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'tortellini': {'färdigmat', 'fardigmat'},
     # Batch 48: "Chilipeppar Malen 40g ICA" = dry ground chili spice ≠ chilipasta (wet condiment)
     'chilipasta': {'chilipeppar', 'malen'},
+    # Batch 49: finished bread products contain rågsurdeg as ingredient ≠ active sourdough starter
+    'rågsurdeg': {'bröd', 'brod', 'fralla', 'levainfralla', 'levain', 'valnötsbröd', 'valnötsbrod'},
+    'ragsurdeg': {'bröd', 'brod', 'fralla', 'levainfralla', 'levain', 'valnötsbröd', 'valnötsbrod'},
+    # Batch 49: "Ramslök & Vitlöksbrie" = flavored cheese ≠ fresh/frozen ramslök herb
+    'ramslök': {'brie', 'vitlöksbrie', 'vitloksbrie'},
+    'ramslok': {'brie', 'vitlöksbrie', 'vitloksbrie'},
 }
 
 for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():

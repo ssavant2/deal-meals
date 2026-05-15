@@ -84,6 +84,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'smoked',  # English cooking descriptor ("smoked paprikapulver") — matches "Black Smoked Bacon" via substring
     'fingers',  # English word — "Chicken fingers" ≠ "savoiardikex (ladyfingers)"
     'kolsyrat',  # water state ("kolsyrat vatten") — matches flavored "Citron Kolsyrat Vatten" drinks
+    'kolsyr',   # abbreviation of kolsyra/kolsyrat — substring-matches 'kolsyrat' in ingredient ("Dryck kolsyr Ananas 275ml Kazouza")
     'kokande',  # water state ("vatten, kokande")
     'finkrossad', 'finkrossade',  # prep method ("Finkrossade Tomater Basilika")
     'delikatess',  # quality descriptor ("Salami Delikatess", "Gurka Delikatess") — not a food type
@@ -287,6 +288,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'hållare',  # holder — generic non-food word ("Gatukritor med hållare")
     'sorterade',  # sorted/assorted — generic adjective ("Tallrik sorterade färger")
     'riserva',  # Italian quality grade (maturation/reserve) — "Vitvinsvinäger Riserva Zeta" matched 'rispapper' ingredient
+    'fungerar',  # Swedish verb "works/functions" — "lär dig om hur kroppen fungerar" (book title) matched ingredient note "Rödvinsvinäger - Vitvinsvinäger fungerar också!" (batch 49)
     'flikar',   # recipe format word (= slices/tabs of butter etc.) — leaks into children's books with "flikar" (= book flaps) in title
     'putsad',   # prep descriptor (= trimmed/cleaned) — "Ryggbiff Putsad" matched "putsad fläskfilé" via substring
 
