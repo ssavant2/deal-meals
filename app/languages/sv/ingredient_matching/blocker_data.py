@@ -908,8 +908,8 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'plommon': {'plommontomat', 'plommonvin'},
 
     # Vinäger should NOT match pickled/prepared items — recipe wants the prepared food, not plain vinegar
-    'vinäger': {'vinägerinlagd', 'vinägerpicklad', 'vinägerpicklade', 'vinägerpicklat'},
-    'vinager': {'vinagerinlagd', 'vinagerpicklad', 'vinagerpicklade', 'vinagerpicklat'},
+    'vinäger': {'vinägerinlagd', 'vinägerpicklad', 'vinägerpicklade', 'vinägerpicklat', 'vinägerchips'},
+    'vinager': {'vinagerinlagd', 'vinagerpicklad', 'vinagerpicklade', 'vinagerpicklat', 'vinagerchips'},
 
     # Svartvinbärs (blackcurrant) should NOT match svartvinbärsblad (pickling leaves)
     'svartvinbärs': {'svartvinbärsblad'},
@@ -1134,8 +1134,9 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'tapenade',  # olive paste/spread ≠ whole kalamata olives
     },
     'kalamataoliver': {
-        'hummus',  # "Hummus med Kalamata Oliver" — hummus product, not olive product
+        'hummus',    # "Hummus med Kalamata Oliver" — hummus product, not olive product
         'tapenade',  # olive paste/spread ≠ whole kalamata olives
+        'med kärna', 'med kärnor',  # pitted (urkärnade) ingredient ≠ with-pit product
     },
 
     # Bread != flour
@@ -1551,9 +1552,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # "Pulled Chicken Smokey BBQ med glaze" has keyword "bbqsås" but is a meat product
     'bbqsås': {
         'pulled', 'pulledchicken', 'pulledpork', 'pulledbeef',
+        'bulgogi', 'koreansk bulgogi',  # Korean sweet-soy marinade ≠ American-style BBQ sauce
     },
     'bbqsas': {
         'pulled', 'pulledchicken', 'pulledpork', 'pulledbeef',
+        'bulgogi', 'koreansk bulgogi',
     },
     # Cream pepparsås (Lohmanders) ≠ hot pepper sauce (Tabasco)
     # "Pepparsås 250ml Lohmanders" = cream-based steak sauce, NOT hot sauce
@@ -2225,6 +2228,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'aminos',      # "Coconut Aminos" — soy sauce alternative, not coconut
         'nick',        # "Nick Coconut" — candy/protein bar, not coconut
         'pineapple',   # "Torkad frukt Mango & Coconut Pineapple" — fruit mix
+        'chokladbar',  # Bounty bar (chocolate+coconut candy) ≠ raw shredded coconut
+        'skumtoppar',  # coconut marshmallow candy ≠ raw shredded coconut
     },
     'valnöt': {
         'rondelé', 'rondele', 'julien',  # walnut cheese
@@ -2617,9 +2622,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     # Ponzu/tofu ≠ regular soy sauce
     'soja': {
-        'ponzu',  # "Ponzu Citrus Seasoned Soy Sauce" is citrus dipping sauce, not soy
-        'tofu',   # "Tofu marinerad soja ingefära" — tofu product, not soy sauce
+        'ponzu',    # "Ponzu Citrus Seasoned Soy Sauce" is citrus dipping sauce, not soy
+        'tofu',     # "Tofu marinerad soja ingefära" — tofu product, not soy sauce
         'kycklingspett',  # "Kycklingspett Yakitori Soya" — chicken skewer, not soy sauce
+        'teriyaki', # teriyaki sauce = sweetened/seasoned soy ≠ plain japansk soja
     },
     # Beef+vegetable mix ≠ plain vegetables
     'grönsaker': {
@@ -3485,7 +3491,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Hair/body styling products ≠ cooking oil (miscategorized in store data)
     'kokosolja': {'stylinggel'},  # "Stylinggel Coconut Oil ECO Style" — non-food, not coconut oil
     # Seeds ingredient ≠ bread/crackers that happen to contain seeds
-    'frön': {'rågbröd'},  # "Rågbröd med frön" — bread carrier, not loose seeds
+    'frön': {'rågbröd', 'knäcke', 'fröknäcke', 'surdegsknäcke'},  # bread carrier, not loose seeds; fröknäcke products match via 'frön' substring but are bread
+    # Cracker/kex products ≠ margarine (Dinkelkex Utvalda lätta has 'lätta' extracted → 'margarin' keyword)
+    'margarin': {'dinkelkex', 'kex', 'cracker'},
+    'bordsmargarin': {'dinkelkex', 'kex', 'cracker'},
 }
 
 PRODUCT_NAME_BLOCKERS: Dict[str, Set[str]] = {
@@ -3589,4 +3598,5 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'tattoo',          # body-tattoo kits (e.g. "Tattoo set glitter Real UniQ") — not food
     'rökspån',         # wood smoking chips (grilling accessory) — not food
     'rokspan',         # diacritic-free variant
+    'briketter',       # grill briquettes (charcoal) — not food
 })
