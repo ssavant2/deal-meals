@@ -3689,8 +3689,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Seeds ingredient ≠ bread/crackers that happen to contain seeds
     'frön': {'rågbröd', 'knäcke', 'fröknäcke', 'surdegsknäcke'},  # bread carrier, not loose seeds; fröknäcke products match via 'frön' substring but are bread
     # Cracker/kex products ≠ margarine (Dinkelkex Utvalda lätta has 'lätta' extracted → 'margarin' keyword)
-    'margarin': {'dinkelkex', 'kex', 'cracker'},
-    'bordsmargarin': {'dinkelkex', 'kex', 'cracker'},
+    # Liquid cooking/whipping cream alternatives ≠ solid baking margarine
+    'margarin': {'dinkelkex', 'kex', 'cracker', 'gräddalternativ', 'matlagningsalternativ', 'visp'},
+    'bordsmargarin': {'dinkelkex', 'kex', 'cracker', 'gräddalternativ', 'matlagningsalternativ', 'visp'},
     # "Filmjölk Lemonad 2,7% Arla Ko" = fermented dairy drink ≠ soft-drink lemonade for cocktails/sangria
     'lemonad': {'filmjölk', 'filmjolk'},
     # Inverse: plain filmjölk ingredient should not match flavored "Filmjölk Lemonad" product
