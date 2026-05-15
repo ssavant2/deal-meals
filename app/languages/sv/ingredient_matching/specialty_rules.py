@@ -626,6 +626,12 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # Fresh horseradish root ≠ jarred grated (riven). "2 msk pepparrot färsk" should
     # not match "Pepparrot Riven" since riven is a preserved processed form.
     'pepparrot': {'färsk', 'farsk'},
+    # Cloves: ground (malen) ≠ whole. "6 kryddnejlikor" = whole for infusion, not ground.
+    # 'nejlikor' is the parent keyword (nejlika → nejlikor in INGREDIENT_PARENTS).
+    'nejlika': {'malen', 'mald', 'malet'},
+    'nejlikor': {'malen', 'mald', 'malet'},
+    'kryddnejlika': {'malen', 'mald', 'malet'},
+    'kryddnejlikor': {'malen', 'mald', 'malet'},
     # Mustard type distinctions — sötstark/skånsk/dijon are specific families.
     # "senap ljus" should not match sötstark/skånsk/dijon; generic "senap" same.
     'senap': {
@@ -1022,6 +1028,13 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
         'garlic', 'herbs',                         # English = vitlök & örter
         'grekisk',                                 # Grekisk Vitlök Färskost
     }),
+    # Cloves: ground (malen) ≠ whole. "6 kryddnejlikor" means whole for infusion.
+    # Ground cloves only match when recipe explicitly asks for "malen/mald nejlika".
+    # 'nejlikor' is the parent keyword (nejlika → nejlikor in INGREDIENT_PARENTS).
+    'nejlika': frozenset({'malen', 'mald', 'malet'}),
+    'nejlikor': frozenset({'malen', 'mald', 'malet'}),
+    'kryddnejlika': frozenset({'malen', 'mald', 'malet'}),
+    'kryddnejlikor': frozenset({'malen', 'mald', 'malet'}),
     # Mustard types: sötstark/skånsk/dijon are specific flavour families.
     # A recipe asking for "senap ljus" (mild yellow) should not accept sweet or sharp varieties.
     # Generic "senap" in a recipe also shouldn't accept these without explicit mention.
