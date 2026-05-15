@@ -1564,6 +1564,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Recipes use 'pepparsås' to mean hot sauce (Tabasco, sambal context)
     'pepparsås': {
         'lohmanders',  # Lohmanders = cream sauce brand (bearnaise, pepparsås etc.)
+        'tabasco',     # "tabasco" ingredient = Tabasco brand only; generic pepparsås does not qualify
     },
     # Sweet chili sauce ≠ frozen ready meals / flavored products with chili in name
     # "Sweet chili kyckling Fryst 600g Guldfågeln" = ready meal, not sauce
