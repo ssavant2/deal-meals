@@ -1098,4 +1098,8 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # that only happen to say "picante" (e.g. salami). Keep the specific pimenton
     # keyword path and suppress the generic heat descriptor in this context.
     'picante': {'pimenton'},
+    # "1 msk estragon, i vinäger" = estragonvinäger. Match only estragon/dragon products,
+    # not generic vinegar. Suppress 'vinäger' so only estragon-specific products surface.
+    'vinäger': {'estragon', 'dragon'},
+    'vinager': {'estragon', 'dragon'},
 }
