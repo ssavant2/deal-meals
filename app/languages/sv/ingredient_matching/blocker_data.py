@@ -3672,4 +3672,11 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'rokspan',         # diacritic-free variant
     'briketter',       # grill briquettes (charcoal) — not food
     'aluminiumfolie',  # aluminium foil (kitchen supply) — not food
+    'bakplåtspapper',  # baking paper / parchment (kitchen supply) — not food
+    'bakplatspapper',  # diacritic-free variant
+    'grillspett',      # grill skewers (grilling accessory) — not food
+    'termometer',      # cooking/grill thermometer (kitchen tool) — not food
+    'spritspåse',      # piping bag (kitchen tool) — not food
+    'spritspase',      # diacritic-free variant
+    'glitter',         # decoration/craft glitter (e.g. "Pärlor glitter Playbox") — not food
 })
