@@ -9134,3 +9134,26 @@ layer_role = "ingredient_parent_mapping"
 ingredient = "scotch bonnet"
 offer_name = "Röd habanero"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.paprikapulver_398"
+language = "sv"
+market = "SE"
+canonical = "paprika"
+status = "active"
+variants = ["paprikapulver"]
+ingredient_terms = ["paprika"]
+source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
+layer_policy = ["ingredient_alias"]
+notes = "Q28: paprikapulver → parent paprika so 'Krydda Paprika påse' matches paprikapulver ingredient. SPICE_VS_FRESH_RULES guards fresh paprika from matching."
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "paprika"
+variant = "paprikapulver"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "paprikapulver"
+offer_name = "Krydda Paprika"
+expected = 1
