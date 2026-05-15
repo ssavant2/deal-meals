@@ -108,7 +108,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'oregano',  # "ost" substring of "oreganostrimlad" — NOT cheese
         'ostsås', 'ostsas',  # cheese sauce (ready-made) ≠ block cheese
         'ostbricka',  # cheese platter (assorted) ≠ single cheese product
-        'ostpaj',  # "färdig ostpaj" = ready-made pie ≠ loose cheese blocks (Q21)
+        'ostpaj',  # "färdig ostpaj" = ready-made pie ≠ loose cheese blocks
     },
     # When ingredient specifies a prepared gratäng dish, raw root vegetables should not match
     'rotfrukter': {'gratäng', 'rotfruktsgratäng'},  # "1 förp rotfruktsgratäng" ≠ loose morot/rödbeta/kålrot
@@ -3789,22 +3789,22 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     # "Tranbär Koncentrat 500ml" = juice concentrate ≠ whole/dried cranberries for salad/baking
     'tranbär': {'koncentrat', 'juice', 'saft'},
     'tranbar': {'koncentrat', 'juice', 'saft'},
-    # Q7: Violife Färskost = vegan cream cheese alternative, not mozzarella substitute
+    # Violife Färskost = vegan cream cheese alternative, not mozzarella substitute
     'violife': {'färskost', 'farskost'},
-    # Q13: "Jordgubbar 35% bär ICA Basic" = jam/preserve (35% fruit content label) ≠ fresh strawberries
+    # "Jordgubbar 35% bär ICA Basic" = jam/preserve (35% fruit content label) ≠ fresh strawberries
     'jordgubb': {'35%'},
     'jordgubbar': {'35%'},
-    # Batch 48: "Färdigmat Tortellini Ost och Skinka" = ready meal ≠ fresh uncooked tortellini
+    # "Färdigmat Tortellini Ost och Skinka" = ready meal ≠ fresh uncooked tortellini
     'tortellini': {'färdigmat', 'fardigmat'},
-    # Batch 48: "Chilipeppar Malen 40g ICA" = dry ground chili spice ≠ chilipasta (wet condiment)
+    # "Chilipeppar Malen 40g ICA" = dry ground chili spice ≠ chilipasta (wet condiment)
     'chilipasta': {'chilipeppar', 'malen'},
-    # Batch 50: "5-minuters sillfilé" = quick-pickled herring ≠ raw strömming for marinating (batch 50)
+    # "5-minuters sillfilé" = quick-pickled herring ≠ raw strömming for marinating
     'strömmingsfileer': {'5-minuters'},
     'strommingsfileer': {'5-minuters'},
-    # Batch 49: finished bread products contain rågsurdeg as ingredient ≠ active sourdough starter
+    # Finished bread products contain rågsurdeg as ingredient ≠ active sourdough starter
     'rågsurdeg': {'bröd', 'brod', 'fralla', 'levainfralla', 'levain', 'valnötsbröd', 'valnötsbrod'},
     'ragsurdeg': {'bröd', 'brod', 'fralla', 'levainfralla', 'levain', 'valnötsbröd', 'valnötsbrod'},
-    # Batch 49: "Ramslök & Vitlöksbrie" = flavored cheese ≠ fresh/frozen ramslök herb
+    # "Ramslök & Vitlöksbrie" = flavored cheese ≠ fresh/frozen ramslök herb
     'ramslök': {'brie', 'vitlöksbrie', 'vitloksbrie'},
     'ramslok': {'brie', 'vitlöksbrie', 'vitloksbrie'},
 }

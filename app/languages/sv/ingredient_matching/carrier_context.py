@@ -638,7 +638,9 @@ _CONTEXT_REQUIRED_WORDS_RAW: FrozenSet[str] = frozenset({
     'plommon', 'plommontomater',
     'körsbär', 'körsbärstomater', 'cherry',  # keep: körsbärstomater default = canned
     'datterini', 'datterino',  # Italian variety (often canned) - not "vanliga tomater"
-    'marzano',  # "San Marzano Tomater" - canned product, not fresh tomatoes
+    # 'marzano' removed: San Marzano är premium konserverad tomat — lämplig som substitut
+    # för alla konserverade tomat-ingredienser. "(gärna San Marzano)"-parenteser strimlas av parsern
+    # så CONTEXT_REQUIRED_WORD omöjliggjorde matchning i praktiken.
 
     # Chili pepper varieties - specific types require specific match
     # "chilipeppar" (generic) should NOT match "Chilipeppar Chipotle" unless recipe says "chipotle"

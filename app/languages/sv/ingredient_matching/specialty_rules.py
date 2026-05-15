@@ -54,6 +54,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'skalad', 'skalade',  # peeled whole tomatoes
         'burk',  # "på burk" → QUALIFIER_EQUIVALENTS maps to all canned forms
         'konserverad', 'konserverade',  # → QUALIFIER_EQUIVALENTS maps to all canned forms
+        'dop',  # "San Marzano DOP Tomater" — DOP = Italian quality cert, equivalent to konserverade
     },
     # Plural form needed too - "Krossade tomater" extracts keyword "tomater" not "tomat"
     'tomater': {
@@ -65,6 +66,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'finkrossad', 'finkrossade',
         'skalad', 'skalade',
         'burk', 'konserverad', 'konserverade',
+        'dop',  # DOP = Italian canned-quality cert
     },
     # Cherry tomatoes: sun-dried ≠ canned/fresh
     'körsbärstomat': {
@@ -1248,16 +1250,19 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'burk': {'burk', 'konserverad', 'konserverade',
              'krossade', 'krossad', 'finkrossade', 'finkrossad',
              'passerade', 'passerad', 'skalade', 'skalad',
-             'polpa', 'koncentrerade', 'koncentrerad'},
+             'polpa', 'koncentrerade', 'koncentrerad',
+             'dop'},  # DOP = Italian quality cert, always canned
     # "konserverade tomater" — any canned product form is equivalent
     'konserverad': {'konserverad', 'konserverade', 'burk',
                     'krossade', 'krossad', 'finkrossade', 'finkrossad',
                     'passerade', 'passerad', 'skalade', 'skalad',
-                    'polpa', 'koncentrerade', 'koncentrerad'},
+                    'polpa', 'koncentrerade', 'koncentrerad',
+                    'dop'},  # DOP (Italian quality cert) = canned product
     'konserverade': {'konserverad', 'konserverade', 'burk',
                      'krossade', 'krossad', 'finkrossade', 'finkrossad',
                      'passerade', 'passerad', 'skalade', 'skalad',
-                     'polpa', 'koncentrerade', 'koncentrerad'},
+                     'polpa', 'koncentrerade', 'koncentrerad',
+                     'dop'},  # DOP (Italian quality cert) = canned product
     # Canned tomato forms: Direction B needs reverse mapping so "1 burk tomater"
     # satisfies Direction B for any specific canned form (passerade, krossade, etc.)
     'passerade': {'passerade', 'passerad', 'burk', 'konserverad', 'konserverade'},
@@ -1266,8 +1271,8 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'krossad': {'krossade', 'krossad', 'finkrossade', 'finkrossad', 'burk', 'konserverad', 'konserverade'},
     'finkrossade': {'krossade', 'krossad', 'finkrossade', 'finkrossad', 'burk', 'konserverad', 'konserverade'},
     'finkrossad': {'krossade', 'krossad', 'finkrossade', 'finkrossad', 'burk', 'konserverad', 'konserverade'},
-    'skalade': {'skalade', 'skalad', 'burk', 'konserverad', 'konserverade'},
-    'skalad': {'skalade', 'skalad', 'burk', 'konserverad', 'konserverade'},
+    'skalade': {'skalade', 'skalad', 'burk', 'konserverad', 'konserverade', 'dop'},  # DOP = premium peeled whole tomatoes (San Marzano)
+    'skalad': {'skalade', 'skalad', 'burk', 'konserverad', 'konserverade', 'dop'},   # same
     'marinerad': {'marinerad', 'marinerade'},
     'marinerade': {'marinerad', 'marinerade'},
     # Cinnamon: "kanelstång" ↔ "Kanel Hel" (stick and whole are interchangeable)
