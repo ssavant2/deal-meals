@@ -921,7 +921,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
 
     # TUC (brand) is 3 letters — substring-matches 'cantucciniskorpor' ingredient text
     # "TUC Crackers Original" ≠ cantuccini biscuits
-    'tuc': {'cantuccini', 'fettuccine'},  # TUC keyword substring-matches 'fet**tuc**cine'
+    'tuc': {'cantuccini', 'fettuccine', 'fettuccini'},  # TUC keyword substring-matches 'fet**tuc**cine/i'
 
     # Ananas (pineapple fruit) should NOT match ananasjuice (different product)
     'ananas': {'ananasjuice'},
@@ -1349,6 +1349,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'körsbärstomat', 'körsbärstomater',  # cherry tomatoes (canned) ≠ regular tomatoes
         'tomatsmak',  # tomato-flavored ≠ actual tomatoes
         'kycklingpate',  # chicken liver pâté with tomato ≠ fresh tomato
+        'plommontomater', 'plommontomat',  # fresh round tomatoes ≠ canned plum tomatoes (batch 50)
     },
     'tomater': {
         'tomatbas',  # prepared tomato base / sub-recipe reference
@@ -2805,6 +2806,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'kopp',  # "Nudlar i kopp Soba" — instant cup noodles with sauce
         'champinjonsmak',  # "Nudlar Champinjonsmak" — flavored instant noodles
         'bulgur',  # "Bulgur med Nudlar" — bulgur mix, not plain noodles
+        'soba',  # buckwheat noodles ≠ risnudlar (batch 50)
+        'udon',  # wheat noodles ≠ risnudlar (batch 50)
     },
     'vetenudlar': {
         'biffsmak', 'kycklingsmak',
@@ -2989,6 +2992,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'grillkryddad skivad',
         'teriyaki',
     },
+    # bröstfilé keyword: block cooked/ready deli products (batch 50)
+    'bröstfilé': {'stekt', 'färdiglagad', 'pålägg', 'palagg'},
+    'brostfile': {'stekt', 'färdiglagad', 'pålägg', 'palagg'},
     'kyckling': {
         'wook', 'wok', 'junior', 'äggjaktsägg', 'aggjaktsagg',
         'stekt', 'färdiglagad', 'rostad',  # "Rostad kyckling Findus" — prepared, not raw
@@ -3597,6 +3603,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'chorizo',         # "Chorizo av Kalkon" — processed sausage
         'strimlad',        # "Kalkon Strimlad" — pre-cooked strips
         'grillad',         # "Kalkon Gourmet Grillad 90g Brödernas" — cooked deli (≠ grillkryddad/raw)
+        'lårfilé', 'larfile',  # kalkonlårfilé ≠ kalkonbröst (thigh ≠ breast, batch 50)
     },
     # Kanin (rabbit) ≠ toys/decorations — Easter products matching rabbit recipes
     'kanin': {
@@ -3719,7 +3726,8 @@ PRODUCT_NAME_BLOCKERS: Dict[str, Set[str]] = _merge_pnb_raw(_PRODUCT_NAME_BLOCKE
 _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     # Batch review policy fixes: keep broad staples useful while blocking
     # obvious carrier/processed false positives.
-    'havregryn': {'knäcke', 'knacke', 'knäckebröd', 'knackebrod', 'wasa', 'kex'},
+    'havregryn': {'knäcke', 'knacke', 'knäckebröd', 'knackebrod', 'wasa', 'kex',
+                  'quinoa'},  # "Gröt Havregryn & quinoa" = blend ≠ plain rolled oats for smulpaj (batch 50)
     'bröd': {'sirap'},
     'brod': {'sirap'},
     'rostbiff': {'deliskivor', 'deli skivor', 'skivad', 'skivor', 'pålägg', 'palagg'},
@@ -3790,6 +3798,9 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'tortellini': {'färdigmat', 'fardigmat'},
     # Batch 48: "Chilipeppar Malen 40g ICA" = dry ground chili spice ≠ chilipasta (wet condiment)
     'chilipasta': {'chilipeppar', 'malen'},
+    # Batch 50: "5-minuters sillfilé" = quick-pickled herring ≠ raw strömming for marinating (batch 50)
+    'strömmingsfileer': {'5-minuters'},
+    'strommingsfileer': {'5-minuters'},
     # Batch 49: finished bread products contain rågsurdeg as ingredient ≠ active sourdough starter
     'rågsurdeg': {'bröd', 'brod', 'fralla', 'levainfralla', 'levain', 'valnötsbröd', 'valnötsbrod'},
     'ragsurdeg': {'bröd', 'brod', 'fralla', 'levainfralla', 'levain', 'valnötsbröd', 'valnötsbrod'},
