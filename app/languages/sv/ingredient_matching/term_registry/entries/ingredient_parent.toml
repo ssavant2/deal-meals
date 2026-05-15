@@ -9082,3 +9082,32 @@ layer_role = "ingredient_parent_mapping"
 ingredient = "rundkornigt ris"
 offer_name = "Ris"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.persiljestjalk_396"
+language = "sv"
+market = "SE"
+canonical = "persilja"
+status = "active"
+variants = ["persiljestjälk", "persiljestjälkar", "persiljestjalk", "persiljestjalkar"]
+ingredient_terms = ["persilja"]
+source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
+layer_policy = ["ingredient_alias"]
+notes = "Parsley stalks (persiljestjälkar) come from parsley plants — map to persilja so bladpersilja products match."
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "persilja"
+variant = "persiljestjälk"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "persilja"
+variant = "persiljestjälkar"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "persiljestjälkar"
+offer_name = "Bladpersilja"
+expected = 1

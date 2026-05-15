@@ -51,7 +51,7 @@ DEFAULT_REPORT_ROOT = (
 DEFAULT_SHARED_REGISTRY_DIR = APP_DIR / "languages" / "term_registry"
 DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
 DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
-EXPECTED_VERIFIED_TERM_VARIANT_COUNT = 5494  # updated by support_checks/promote_term_baseline.py
+EXPECTED_VERIFIED_TERM_VARIANT_COUNT = 5495  # updated by support_checks/promote_term_baseline.py
 FORBIDDEN_BASELINE_SUMMARY_KEYS = {
     "batch_count",
     "batch_counts",
