@@ -693,6 +693,11 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'balsamico', 'balsamicosirap',  # balsamic cream ≠ cooking syrup
     },
 
+    # Balsamico: crema di balsamico (thick glaze) ≠ aceto balsamico (thin vinegar)
+    'balsamico': {
+        'crema',  # "crema di balsamico" ingredient = glazing sauce, not pouring vinegar
+    },
+
     # Kaviar - generic "kaviar" should NOT match specific types
     'kaviar': {
         # storkornskaviar removed — now mapped to stenbitsrom via INGREDIENT_PARENTS
@@ -2726,7 +2731,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'sourcream', 'onion', 'jalapeno',
         'brynt smör', 'sea salt',
     },
-    'jordnötter': {'nötsmör', 'nötsmor'},
+    'jordnötter': {
+        'nötsmör', 'nötsmor',
+        'laoganma',    # Laoganma = chili oil product, not plain peanuts
+        'chiliolja',   # chili oil peanuts ≠ raw/roasted peanuts for cooking
+    },
     'hasselnöt': {'start'},  # "Hasselnöt 750g Start" — cereal, not plain hazelnuts
     'hasselnötter': {
         'nötsmör', 'nötsmor',
@@ -3057,6 +3066,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Flavored/specialty oat drinks ≠ plain oat drink for cooking
     # Only plain naturell/mellan/ekologisk should match recipe "havredryck"
     'havredryck': {
+        'smaksatt',     # any explicitly flavored variant ≠ neutral oat drink for cooking
         # Flavored
         'choklad',      # "Havredryck Choklad 1l" — chocolate flavored
         'matcha',       # "Havredryck Matcha" — tea flavored
@@ -3074,6 +3084,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'popcorn',      # "Havredryck iKaffe Popcorn" — popcorn flavored
         'kakao',        # "Proteinhavredryck Choko Kakao" — cocoa flavored
         'caramel',      # "Proteinhavredryck Salted Caramel" — caramel
+        'karamell',     # Swedish caramel spelling
+        'maple', 'walnut', 'hazelnut',  # additional English flavor names
+        'nötvan', 'notvan',             # nut-vanilla blend variants
         # Coffee-specific (not for cooking)
         'barista',      # "Havredryck Barista" — coffee-optimized, not cooking
         'ikaffe',       # "Havredryck iKaffe" — coffee-specific
@@ -3152,9 +3165,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'nöt', 'not', 'nötter', 'notter',
         'cashew', 'mandel', 'pistage',
     },
-    # Canned tuna in broth ≠ actual bouillon
+    # Canned tuna in broth ≠ actual bouillon; ramen/shoyu broth ≠ generic bouillon
     'buljong': {
-        'tonfisk',  # "Tonfisk i buljong 120g" — canned tuna, not bouillon
+        'tonfisk',          # "Tonfisk i buljong 120g" — canned tuna, not bouillon
+        'ramen',            # ramen broth = concentrated specialty, not generic bouillon
+        'shoyu',            # shoyu ramen broth — only relevant in ramen context
     },
     'buljongtärning': {
         'tonfisk',  # "Tonfisk i buljong 120g" — canned tuna, not bouillon cube
@@ -3529,7 +3544,6 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'kyckling': {'tunna skivor'},
     'kycklingfilé': {'tunna skivor'},
     'kycklingfile': {'tunna skivor'},
-    'havredryck': {'maple', 'walnut', 'choklad', 'caramel', 'karamell', 'hazelnut', 'nötvan', 'notvan'},
     'havrebas': {'fraiche'},
     'havregrädde': {'fraiche'},
     'havregradde': {'fraiche'},
