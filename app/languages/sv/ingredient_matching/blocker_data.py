@@ -1276,6 +1276,17 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'solo',  # "vitlök solo" = monoclove garlic (single-clove variety) — only matches itself
     },
 
+    # Rotselleri (celeriac) ≠ bladselleri/stjälkselleri (celery stalks).
+    # offer_extra_keyword maps bladselleri/stjälkselleri products → 'selleri' keyword,
+    # so plain 'selleri' ingredient correctly finds them. But 'rotselleri' is a
+    # completely different vegetable and must not match celery-stalk products.
+    'selleri': {
+        'rotselleri',  # celeriac ≠ celery stalks (bladselleri/stjälkselleri)
+    },
+    'bladselleri': {
+        'rotselleri',  # "rotselleri" ingredient must not match bladselleri products
+    },
+
     # Salad (prepared) != salladslök (spring onion)
     # "Kycklingcurry Sallad" should NOT match recipe ingredient "salladslök"
     'sallad': {
@@ -1550,6 +1561,9 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'havremjol': {'havremjölk', 'havremjolk'},
     # Apple must drink ≠ rågmustbröd (bread)
     'must': {'bröd', 'brod'},  # "Must Äpple 1l" matching "rågmustbröd" ingredient via reverse substring
+    # "Marinad BBQ/Korean/Bulgogi" ≠ the olive-oil from sun-dried tomato jar
+    # When ingredient says "marinerade soltorkade tomater", the marinad is the jar oil, not a separate bottle
+    'marinad': {'soltorkade', 'soltorkad'},
 
 
 }
@@ -1667,6 +1681,18 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'olja',                # "Chiliolja" — oil condiment, not fresh chili
         'mild',                # "Yellow/Green Chili Mild" — sauce, not fresh
         'favabönor', 'favabonor', 'foul modemmas',  # bean conserve with chili flavor
+        # Parity with 'chili' PNB — added for batch 45
+        'mango',               # "Torkad Mango Chili Twist" — dried mango snack
+        'coleslaw',            # "Coleslaw Chili Pepper Texas Longhorn" — seasoning, not fresh chili
+        'hamburgerost',        # "Hamburgerost Chili" — burger cheese
+        'cheese',              # "Chili Cheese by Danyel Couet" — cheese product
+        'marinade', 'marinad', # "Vitlöks Klyftor Chili Marinade" — marinade product
+        'sriracha', 'sauce', 'sås', 'sas',
+        'soya', 'soy',
+        'burgarcheddar',       # burger cheese
+        'cashew',              # nut snack
+        'nudlar', 'ramen', 'buldak',
+        'bearnaise', 'chilibearnaise',
     },
     'chili': {
         'örtsalt', 'ortsalt',
@@ -2646,6 +2672,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'pesto',                 # "Pesto Paprika 130g ICA" — pesto, not fresh peppers
         'ärter', 'majs',         # "Ärter, Majs & Paprika 600g Apetit" — frozen mix, not fresh paprika
         'crackers',              # "Crispy Crackers Paprika" — cracker snack ≠ fresh bell pepper
+        'mild',                  # "Paprika Mild 43g ICA" — small spice jar, not fresh bell pepper
+        'malen',                 # "Paprika Mild malen" — ground spice form, not fresh
     },
     # Plural form 'paprikor' — mirrors 'paprika' PNB above.
     # PNB checks matched_keyword directly; keyword alias 'paprikor'→'paprika' doesn't resolve for PNB.
@@ -2668,6 +2696,15 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     'kottbullar': {
         'gräddsås', 'graddsas', 'potatismos', 'med mos',
+    },
+    # Ready meals containing currysås in name ≠ plain currysås sauce ingredient
+    'currysås': {
+        'pärlcouscous', 'parlcouscous',  # "Pärlcouscous med ost i mango & currysås" — complete meal ≠ sauce
+        'tofu i äpple', 'tofu i apple',  # "Tofu i äpple & currysås" — complete meal ≠ sauce
+    },
+    'currysas': {
+        'parlcouscous', 'pärlcouscous',
+        'tofu i apple', 'tofu i äpple',
     },
     # Ponzu/tofu ≠ regular soy sauce
     'soja': {
@@ -2825,6 +2862,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # NOTE: Kvarg matching moved to check_kvarg_match() function — handles all flavored variants
     # "Barkis Vallmo" (baked bread with poppy seeds) ≠ raw vallmofrö for baking
     'vallmo': {'barkis'},
+    # Bread products topped with poppy seeds ≠ loose vallmofrön for baking
+    'vallmofrön': {'bagel', 'bagels'},  # "Bagels Sesam och Vallmofrön 300g Liba Bröd" ≠ 2 msk vallmofrön
+    'vallmofron': {'bagel', 'bagels'},
     # NOTE: 'havredryck' PNB moved to full entry below (with all flavored variants)
     # "Syrad Grädde Visp- & Kokbar" ≠ vispgrädde or regular grädde
     # Syrad grädde is a cultured cream product — only match when recipe explicitly says "syrad"
@@ -3570,6 +3610,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Cracker/kex products ≠ margarine (Dinkelkex Utvalda lätta has 'lätta' extracted → 'margarin' keyword)
     'margarin': {'dinkelkex', 'kex', 'cracker'},
     'bordsmargarin': {'dinkelkex', 'kex', 'cracker'},
+    # "Filmjölk Lemonad 2,7% Arla Ko" = fermented dairy drink ≠ soft-drink lemonade for cocktails/sangria
+    'lemonad': {'filmjölk', 'filmjolk'},
 }
 
 def _merge_pnb_raw(raw: Dict[str, Set[str]]) -> Dict[str, Set[str]]:
