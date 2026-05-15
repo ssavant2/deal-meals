@@ -363,6 +363,14 @@ _EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES = frozenset({
     'vego', 'vegoburgare', 'vegofärs', 'vegofars',
     'formbar',
 })
+# Word-boundary regex pattern for ingredient cues. The substring 'färs' would
+# otherwise match 'färska' (fresh), causing vegan recipes with 'färska tomater'
+# etc. to wrongly reject tomato offers. We compile once at module load.
+_EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES_PATTERN = re.compile(
+    r'\b(?:' + '|'.join(
+        sorted((re.escape(c) for c in _EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES), key=len, reverse=True)
+    ) + r')\b'
+)
 _VEGAN_RECIPE_PASTA_CUES = frozenset({
     'pasta', 'långpasta', 'langpasta',
     'tagliatelle', 'spaghetti', 'spagetti', 'linguine',
@@ -373,6 +381,15 @@ _EGG_PASTA_PRODUCT_CUES = frozenset({'äggpasta', 'aggpasta', 'ägg', 'agg', 'eg
 
 def _has_explicit_vegan_recipe_context(full_recipe_text: str) -> bool:
     return any(cue in full_recipe_text for cue in _EXPLICIT_VEGAN_RECIPE_CUES)
+
+
+def _ingredient_has_vegan_recipe_cue(ingredient_lower: str) -> bool:
+    """True if ingredient text contains a vegan-recipe cue word (word-boundary match).
+
+    Substring matching ('färs' in 'färska') caused false rejections for vegan
+    recipes containing 'färska tomater', 'färsk basilika' etc.
+    """
+    return _EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES_PATTERN.search(ingredient_lower) is not None
 
 
 def _explicit_vegan_context_allows_product(
@@ -390,7 +407,7 @@ def _explicit_vegan_context_allows_product(
     ):
         return False
 
-    if not any(cue in ingredient_lower for cue in _EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES):
+    if not _ingredient_has_vegan_recipe_cue(ingredient_lower):
         return True
     return any(cue in product_lower for cue in _EXPLICIT_VEGAN_PRODUCT_CUES)
 
@@ -404,7 +421,7 @@ def _vegan_context_allows_plant_based_product_blockers(
         return False
     if not product_blockers:
         return False
-    if not any(cue in ingredient_lower for cue in _EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES):
+    if not _ingredient_has_vegan_recipe_cue(ingredient_lower):
         return False
     return all(blocker in _EXPLICIT_VEGAN_PRODUCT_CUES for blocker in product_blockers)
 
@@ -1560,6 +1577,22 @@ def _flavor_carrier_context_blocked(
     if category_lower == 'bread':
         bread_cues = _FLAVOR_CARRIER_GROUPS[1][1]
         if not any(cue in ingredient_lower for cue in bread_cues):
+            # Exception: many baking-chocolate products (Bakchoklad, Chokladknappar,
+            # "Mörk choklad NN%", Choklad Valrhona) are mis-categorized as 'bread'.
+            # When the product itself is a chocolate-primary item, allow the match
+            # for choklad-keyword recipes. This avoids blocking ~750 baking recipes
+            # while still rejecting "Chokladmuffins"/"Cookies choklad" (which have
+            # no 'choklad' keyword extracted anyway).
+            if matched_kw_lower == 'choklad' and any(
+                cue in product_lower
+                for cue in (
+                    'bakchoklad', 'chokladknapp',
+                    'mörk choklad', 'mork choklad', 'ljus choklad', 'vit choklad',
+                    'mjölkchoklad', 'mjolkchoklad',
+                    'choklad valrhona', 'chokladkaka',
+                )
+            ):
+                return False
             return True
 
     return False

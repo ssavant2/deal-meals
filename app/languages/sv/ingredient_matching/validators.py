@@ -679,6 +679,15 @@ def check_spice_vs_fresh_rules(product_lower: str, ingredient_lower: str, base_w
 
     for rule_base_word, rules in rules_iter:
         if rule_base_word in ingredient_lower:
+            # Exception: frozen pre-prepped vitlök ("Vitlök finhackad fryst") is a
+            # legitimate fresh-garlic substitute. Without this, ~763 recipes asking
+            # for "vitlöksklyfta" miss frozen pre-prepped offers (very different
+            # from jarred paste/granules where the rule rightly applies).
+            if (
+                rule_base_word in {'vitlök', 'vitlok'}
+                and 'fryst' in product_lower
+            ):
+                continue
             # Check A: processed/jarred product (blocked_product_words)
             for blocked in rules['blocked_product_words']:
                 if blocked in product_lower:

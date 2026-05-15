@@ -4053,6 +4053,16 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
                 }
             continue
         # Check preserved/processed product words first
+        # Frozen pre-prepped vitlök ("Vitlök finhackad fryst") is a legitimate
+        # fresh-garlic substitute even though "finhackad" appears in the name.
+        # Without this exception, ~763 recipes asking for "vitlöksklyfta" miss
+        # frozen pre-prepped offers (different from jarred paste/granules).
+        skip_blocked_check = (
+            base_word in {'vitlök', 'vitlok'}
+            and 'fryst' in name_normalized
+        )
+        if skip_blocked_check:
+            continue
         for blocked in rules['blocked_product_words']:
             if blocked in name_normalized:
                 if 'allowed_indicators' in rules:
