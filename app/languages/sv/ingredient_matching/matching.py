@@ -276,6 +276,7 @@ _EXPLICIT_VEGAN_PRODUCT_CUES = frozenset({
     'plant based', 'plant-based',
     'vegetabilisk',
     'violife', 'greenvie',
+    'mjölkfri', 'mjolkfri', 'mjölkfritt', 'mjolkfritt',  # dairy-free label on products
 })
 _PLANT_BASED_PRODUCT_CUES = frozenset({
     *_EXPLICIT_VEGAN_PRODUCT_CUES,
@@ -310,6 +311,7 @@ _VEGAN_RECIPE_CUES = frozenset({
     'vegan',
     'växtbaserad', 'vaxtbaserad',
     'plant based', 'plant-based',
+    'mjölkfri', 'mjolkfri', 'mjölkfritt', 'mjolkfritt',  # dairy-free = no milk products
 })
 _VEGETARIAN_RECIPE_CUES = frozenset({'vegetarisk', 'vegetariskt', 'vegetariska', 'vego'})
 _LACTOSE_FREE_RECIPE_CUES = frozenset({
