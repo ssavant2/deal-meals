@@ -51,6 +51,8 @@ _YOGHURT_SNACK_FLAVORS: FrozenSet[str] = frozenset({
         'gröt',
         'bägare',
         'säsong',
+        'sommar', 'vår',   # seasonal flavored packs ("Vår & Sommar 8-p")
+        'smaker',          # "blandade smaker" = assorted flavors = snack/dessert yoghurt
     }
 })
 
