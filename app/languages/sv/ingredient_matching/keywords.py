@@ -1615,13 +1615,8 @@ FLAVOR_WORDS: FrozenSet[str] = frozenset({
     'plommon',  # note: also tomato variety but fine as flavor word
     'körsbär', 'korsbar', 'cherry',
     'nektarin',
-    # Citrus — NOTE: 'citron' and 'apelsin' intentionally removed from FLAVOR_WORDS.
-    # They are real food ingredients (fruits used in cooking) and their inclusion caused
-    # 0-match results for "saft av 1 citron"/"saft av 2 apelsiner" recipe ingredients.
-    # The carrier extraction mechanism (carrier_context.py) already prevents "Läsk Citron",
-    # "Yoghurt Citron" etc. from getting 'citron'/'apelsin' as keyword — so no FP risk.
-    # For zest/skal context: FPB citronjuice/apelsinjuice:{skal,zest} to be added later.
-    'lime', 'orange',
+    # Citrus
+    'citron', 'lime', 'apelsin', 'orange',
     'grapefrukt', 'clementin', 'mandarin', 'blodapelsin',
     # Tropical fruits
     'mango', 'ananas', 'pineapple', 'papaya', 'passionsfrukt', 'passion',

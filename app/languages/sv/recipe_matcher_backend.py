@@ -2683,10 +2683,16 @@ def validate_offer_match_candidate(
                     and 'i vatten' in ing_norm
                     and 'vatten' in carrier_product_lower
                 )
+                # Fresh citrus fruits ('citron', 'apelsin') are real cooking ingredients
+                # even when "saft"/"juice" appears in the ingredient text (e.g. "saft av
+                # 1 citron"). Carrier extraction already strips these words from flavored
+                # products (Yoghurt Citron, Läsk Citron etc.) so no FP risk remains.
+                fresh_citrus_use_case = matched_kw_lower in {'citron', 'apelsin'}
                 if (
                     not contextual_cheese_use_case
                     and not dark_chocolate_bar_use_case
                     and not preserved_mushroom_in_water_use_case
+                    and not fresh_citrus_use_case
                 ):
                     carrier_blocked = _flavor_keyword_blocked_by_carrier_text(
                         ing_norm,
