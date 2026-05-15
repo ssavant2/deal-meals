@@ -98,6 +98,12 @@ def _is_false_positive_blocked(keyword: str, ingredient_lower: str) -> bool:
     blockers = FALSE_POSITIVE_BLOCKERS[keyword]
     if not any(b in ingredient_lower for b in blockers):
         return False
+    # Multi-word blocker that contains the keyword itself (e.g. "creme av svamp" for
+    # keyword "svamp"): if the full phrase is present, block regardless of whether
+    # the keyword also appears standalone elsewhere in the ingredient.
+    for b in blockers:
+        if ' ' in b and b in ingredient_lower and keyword in b:
+            return True
     words_in_text = _WORD_PATTERN.findall(ingredient_lower)
     for w in words_in_text:
         if keyword not in w:

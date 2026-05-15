@@ -1656,6 +1656,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'cheese',                  # "Chili Cheese 170ml by Danyel Couet" — cheese product
         'cashew',                  # "Cashew Jalapeno 140g Exotic Snacks" — nut snack, not fresh chili
         'nudlar', 'ramen', 'buldak',  # "Nudlar Buldak Habanero Lime Ramen" — instant noodles, not fresh chili
+        'bearnaise', 'chilibearnaise',  # ingredient wants chili-bearnaise sauce, not raw chili pepper
     },
     'chilifrukt': {
         'örtsalt', 'ortsalt',
@@ -2088,6 +2089,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'äpple': {'godisrem', 'gelegodis', '4m', '1år', '1ar', 'välling', 'valling'},
     # "Popcorn chicken" = breaded bites, not actual popcorn
     'popcorn': {'chicken', 'chcken'},
+    # Plain bearnaise (without chili) ≠ chilibearnaise ingredient
+    'chilibearnaise': {'original', 'klassisk', 'ramslök', 'vitlök', 'tryffel', 'bbq', 'tre peppar', 'med smör'},
     # Ready-meal wok pouches (kyckling+sauce) ≠ raw vegetable wok mix
     'wokmix': {'kyckling'},
     # Marmalade with spirit flavor ≠ the spirit itself

@@ -2935,6 +2935,16 @@ def matches_ingredient(
                 blockers = FALSE_POSITIVE_BLOCKERS[keyword]
                 has_blocker = any(b in ingredient_lower for b in blockers)
                 if has_blocker:
+                    # Multi-word blocker containing the keyword (e.g. "creme av svamp"
+                    # for keyword "svamp"): block immediately — don't let the
+                    # standalone-word check allow it.
+                    multi_blocked = any(
+                        ' ' in b and b in ingredient_lower and keyword in b
+                        for b in blockers
+                    )
+                    if multi_blocked:
+                        keyword = None
+                        break
                     # Check each word: does keyword appear in a valid context?
                     words_in_text = _WORD_PATTERN.findall(ingredient_lower)
                     has_valid = False
@@ -4381,6 +4391,15 @@ def matches_ingredient_fast(
                 blockers = FALSE_POSITIVE_BLOCKERS[keyword]
                 has_blocker = any(b in ingredient_lower for b in blockers)
                 if has_blocker:
+                    # Multi-word blocker containing the keyword (e.g. "creme av svamp"
+                    # for keyword "svamp"): if the full phrase is present, block
+                    # immediately — don't let the standalone-word check allow it.
+                    multi_blocked = any(
+                        ' ' in b and b in ingredient_lower and keyword in b
+                        for b in blockers
+                    )
+                    if multi_blocked:
+                        continue  # blocked by multi-word phrase
                     words_in_text = _ingredient_words if _ingredient_words is not None else _WORD_PATTERN.findall(ingredient_lower)
                     has_valid = False
                     for w in words_in_text:

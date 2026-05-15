@@ -2527,3 +2527,26 @@ layer_role = "keyword_synonym_mapping"
 ingredient = "daim"
 offer_name = "Daim"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.gelatinblad.gelantinblad_001"
+language = "sv"
+market = "SE"
+canonical = "gelatinblad"
+status = "active"
+variants = ["gelantinblad"]
+offer_terms = ["gelatinblad"]
+source_refs = ["code:term_registry_entries:keyword_synonym.toml"]
+layer_policy = ["offer_alias"]
+notes = "Recipe misspelling: 'gelantinblad' → 'gelatinblad'. Common typo in scraped recipes."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "gelatinblad"
+variant = "gelantinblad"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "1 gelantinblad"
+offer_name = "Gelatinblad"
+expected = 1
