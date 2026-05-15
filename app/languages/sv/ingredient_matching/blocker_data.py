@@ -3811,6 +3811,8 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'ramslok': {'brie', 'vitlöksbrie', 'vitloksbrie'},
     # Alkoholfritt vin ≠ matlagningsvin — different products, different use case
     'matlagningsvin': {'alkoholfri', 'alkoholfritt', 'alkoholfria'},
+    # Honeycomb syrup (vaxkaka) ≠ Swedish dark bread syrup (brödsirap)
+    'sirap': {'vaxkaka'},
 }
 
 for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():

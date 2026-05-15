@@ -857,6 +857,7 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('nöt- och fröbitar', 'nötbitar och fröbitar'),
     ('not- och frobitar', 'nötbitar och fröbitar'),
     ('ärter', 'ärtor'),
+    ('dragon', 'estragon'),  # dragon and estragon are the same herb (tarragon)
     ('spagetti', 'spaghetti'),
     ('avocado', 'avokado'),
     ('texmex riven', 'texmexost riven'),
