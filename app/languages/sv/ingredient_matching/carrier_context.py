@@ -1103,4 +1103,20 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # not generic vinegar. Suppress 'vinäger' so only estragon-specific products surface.
     'vinäger': {'estragon', 'dragon'},
     'vinager': {'estragon', 'dragon'},
+    # "1 dl Zeta Kikärtor Ekologiska, spadet" = aquafaba (the brine), not the chickpeas.
+    # When ingredient asks for the liquid (spadet/aquafaba), suppress kikärtor keyword
+    # so canned chickpea products don't match — only the brine is needed.
+    'kikärtor': {'spadet', 'kikärtsspad', 'aquafaba'},
+    'kikartor': {'spadet', 'kikärtsspad', 'aquafaba'},
+    'kikärter': {'spadet', 'kikärtsspad', 'aquafaba'},
+    'kikarter': {'spadet', 'kikärtsspad', 'aquafaba'},
+    # "2 dl granatäpplejuice" — suppress plain äppeljuice keyword when ingredient
+    # specifies granatäpple (pomegranate), so apple juice products don't bridge across.
+    'äppeljuice': {'granatäpple', 'granatapple'},
+    'appeljuice': {'granatäpple', 'granatapple'},
+    # "2 dl granatäpplejuice" — suppress whole-fruit keyword when ingredient asks for juice.
+    # Whole-fruit "Granatäpple Jumbo Klass 1" ≠ pomegranate juice.
+    # Note: recipes use both "granatäpplejuice" (äpple-form) and "granatäppeljuice" (äppel-form).
+    'granatäpple': {'granatäpplejuice', 'granatapplejuice', 'granatäppeljuice', 'granatappeljuice'},
+    'granatapple': {'granatäpplejuice', 'granatapplejuice', 'granatäppeljuice', 'granatappeljuice'},
 }

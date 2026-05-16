@@ -2545,6 +2545,29 @@ def validate_offer_match_candidate(
                     and 'risnudel' not in ingredients_normalized[matched_ing_idx]
                 ):
                     continue
+                # Explicit Thai wokmix ingredients may use the Thai Style frozen
+                # wokmix line; plain wokmix still blocks the styled Findus product.
+                if (
+                    matched_kw_lower == 'wokmix'
+                    and blocker in {'findus', 'thai style'}
+                    and matched_ing_idx is not None
+                    and 'thai' in ingredients_normalized[matched_ing_idx]
+                    and 'thai style' in product_lower
+                ):
+                    continue
+                # "Färdiga köttbullar" explicitly asks for ready meatballs, so
+                # pre-cooked/stekta product wording is acceptable there only.
+                if (
+                    matched_kw_lower in {'köttbullar', 'kottbullar'}
+                    and blocker in {'stekta', 'stekt'}
+                    and matched_ing_idx is not None
+                    and any(cue in ingredients_normalized[matched_ing_idx] for cue in (
+                        'färdig', 'färdiga', 'färdiglagad', 'färdiglagade',
+                        'fardig', 'fardiga', 'fardiglagad', 'fardiglagade',
+                        'tillagad', 'tillagade',
+                    ))
+                ):
+                    continue
                 # "oliver med kärnor" PNB is intended for "utan kärnor" (pitted) recipes
                 # Plain "oliver" or "oliver med kärnor" recipes should still match
                 if (

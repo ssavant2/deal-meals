@@ -2264,9 +2264,9 @@ def _batch14_completion_requirement_allows_product(
             if any(cue in product_lower for cue in _SEASONED_CHICKEN_FILLET_CUES):
                 return False
 
-    if matched_keyword in {'kryddnejlika', 'nejlikor', 'nejlika'}:
-        if any(cue in ingredient_lower for cue in ('malen', 'mald', 'malda')):
-            if not any(cue in product_lower for cue in ('malen', 'malda', 'mald')):
+    if matched_keyword in {'kryddnejlika', 'nejlikor', 'nejlika', 'kanel', 'kardemumma'}:
+        if any(cue in ingredient_lower for cue in ('malen', 'mald', 'malda', 'malet')):
+            if not any(cue in product_lower for cue in ('malen', 'malda', 'mald', 'malet')):
                 return False
 
     if matched_keyword in {'färskost', 'farskost'} and (

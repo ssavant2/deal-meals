@@ -1867,6 +1867,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Skruvar — block snack chips from matching pastaskruvar
     'skruvar': {
         'olw', 'lättsaltade', 'saltade',  # "Skruvar Lättsaltade 100g OLW" — potato snack, not pasta
+        'snacks', 'salta',                # "Snacks Skruvar salta 100g ICA Basic" — pretzel snack, not pasta
     },
     # Fiskgrytbitar — block pre-made sushi from matching (only fish stew pieces for fish stew)
     # The mapping 'fiskgrytbitar' → 'lax' causes sushi products to match (they contain 'lax' keyword).
@@ -1917,6 +1918,12 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'tärnad', 'tarnad',  # "Tärnad ost i olja Paprika" — cheese cubes
         'ärtor', 'artor',    # "Ärtor, Majs & Paprika" — frozen veggie mix
         'rökt', 'rokt',      # "Paprikapulver Rökt" ≠ vanlig paprikapulver
+        'crackers', 'kex',   # "Crispy Crackers Paprika" — snack crackers, not spice
+    },
+    # Ready-meal kit ≠ raw pasta — "Middagskit Lasagnette 270g Knorr" is a
+    # complete dinner kit (sauce + pasta + spices) not raw lasagnette pasta.
+    'lasagnette': {
+        'middagskit', 'kit',  # Knorr Middagskit = ready-to-cook dinner kit
     },
     # Dill-flavored cucumber product ≠ fresh dill herb
     # Dill-flavored snacks (e.g. "Skruvar Dill") ≠ fresh dill herb
@@ -2463,7 +2470,13 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Pinsa (Italian flatbread pizza) ≠ generic bread types
     'tunnbröd': {'pinsa'},
     'tunnbrod': {'pinsa'},
-    'dragon': {'twin dragon', 'twin', 'kafe baby', 'baby dragon', 'kafe'},  # non-herb products with "dragon" in name
+    'dragon': {
+        'twin dragon', 'twin', 'kafe baby', 'baby dragon', 'kafe',  # non-herb products with "dragon" in name
+        'fraiche', 'creme fraiche',  # flavored dairy products (e.g. "Creme Fraiche Dragon Citron") ≠ dried herb
+    },
+    'estragon': {
+        'fraiche', 'creme fraiche',  # "Creme Fraiche Dragon" — dairy ≠ dried tarragon herb
+    },
     'surdegsbröd': {'pinsa'},
     'surdegsbrod': {'pinsa'},
     'formbröd': {'pinsa', 'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod', 'bagel', 'brioche'},
@@ -2707,7 +2720,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'cheddarost': {
         'sauce',
         'linsbågar', 'linsbaagar',  # "Linsbågar Cheddar Estrella" — lentil chips, not cheese
-        'mjukost',  # tube soft-cheese spread ≠ cheddar cheese for sandwiches/grating
+        'mjukost',   # tube soft-cheese spread ≠ cheddar cheese for sandwiches/grating
+        'ostcreme',  # "Cheddar Ostcreme Middagsmagi" — cheese spread ≠ block/sliced cheddar
+        'babybel',   # "Mini Cheddar Babybel" — snack-cheese ball, not sliced burger cheddar
     },
     'brie': {
         'mjukost',  # tube soft-cheese spread ≠ whole/served brie
@@ -3424,7 +3439,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'artor': {'morötter', 'morot', 'majs'},
     'ärta': {'vegonuggets'},                   # pea-based nuggets ≠ fresh/plain peas
     'arta': {'vegonuggets'},
-    'majs': {'ärtor', 'ärter', 'paprika'},     # "Ärter, Majs & Paprika" mix ≠ plain corn
+    'majs': {
+        'ärtor', 'ärter', 'paprika',           # "Ärter, Majs & Paprika" mix ≠ plain corn
+        'tortillabröd', 'tortillabrod',        # corn kernels ≠ corn-flavored tortilla bread
+    },
     'morötter': {'ärtor', 'ärter', 'syrade', 'sallad', 'surkål', 'soppa', 'riven'},
     'morot': {'ärtor', 'ärter', 'syrade', 'sallad', 'surkål', 'kanin', 'soppa', 'riven'},
     'morotter': {'ärtor', 'ärter', 'syrade', 'sallad', 'surkål', 'kanin', 'soppa', 'riven'},
