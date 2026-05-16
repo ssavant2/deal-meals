@@ -2523,6 +2523,40 @@ def validate_offer_match_candidate(
                     ))
                 ):
                     continue
+                # "Mandariner i fruktkonserver" recipe → allow canned sockerlag products
+                # (the PNB blocks fresh-mandarin recipes; an explicit canned recipe is the inverse case)
+                if (
+                    matched_kw_lower in {'mandarin', 'mandariner'}
+                    and blocker == 'sockerlag'
+                    and matched_ing_idx is not None
+                    and any(
+                        cue in ingredients_normalized[matched_ing_idx]
+                        for cue in ('fruktkonserver', 'fruktkonserv')
+                    )
+                ):
+                    continue
+                # Generic "nudlar" recipe → allow soba/udon products
+                # (PNB soba/udon is intended for risnudlar recipes, not generic nudlar)
+                if (
+                    matched_kw_lower == 'nudlar'
+                    and blocker in {'soba', 'udon'}
+                    and matched_ing_idx is not None
+                    and 'risnudlar' not in ingredients_normalized[matched_ing_idx]
+                    and 'risnudel' not in ingredients_normalized[matched_ing_idx]
+                ):
+                    continue
+                # "oliver med kärnor" PNB is intended for "utan kärnor" (pitted) recipes
+                # Plain "oliver" or "oliver med kärnor" recipes should still match
+                if (
+                    matched_kw_lower == 'oliver'
+                    and blocker in {'med kärnor', 'med karnor'}
+                    and matched_ing_idx is not None
+                    and not any(
+                        cue in ingredients_normalized[matched_ing_idx]
+                        for cue in ('utan kärnor', 'utan karnor', 'urkärnade', 'urkarnade', 'urkärnad', 'urkarnad')
+                    )
+                ):
+                    continue
                 product_blockers.append(blocker)
             if product_blockers:
                 ing_norm = ingredients_normalized[matched_ing_idx]

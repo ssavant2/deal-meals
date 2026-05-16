@@ -5191,6 +5191,14 @@ def matches_ingredient_fast(
             if any(ind in name_norm for ind in ('strimlad', 'delad', 'fryst', 'frysta')):
                 return None
 
+    # "vitlök hel" / "hel vitlök" should mean a whole garlic bulb, not pre-chopped
+    # (e.g. "Vitlök Hackad Fryst") or pre-pressed paste.
+    if matched_keyword in {'vitlök', 'vitlok'}:
+        name_norm = offer_data['name_normalized']
+        if any(ind in ingredient_lower for ind in ('vitlök hel', 'vitlok hel', 'hel vitlök', 'hel vitlok')):
+            if any(ind in name_norm for ind in ('hackad', 'hackade', 'pressad', 'pressade', 'finhackad', 'finhackade')):
+                return None
+
     # "350 g (avrunnen vikt) ananas" is canned/drained pineapple, not fresh,
     # frozen, or dried fruit.
     _DRAINED_PINEAPPLE_PRODUCT_CUES = frozenset({

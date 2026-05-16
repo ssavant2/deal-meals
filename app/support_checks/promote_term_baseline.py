@@ -654,8 +654,8 @@ def promote(
     print(f"  Unique coverage keys: {new_unique_key_count}")
     if output_dir is not None:
         print(f"  Changed files staged under: {output_dir}")
-    print(f"\nNow run:")
-    print(f"  docker compose exec -T -w /app web python support_checks/run_sanity_checks.py")
+    print("\nNow run:")
+    print("  docker compose exec -T -w /app web python support_checks/run_sanity_checks.py")
     return 0
 
 

@@ -208,6 +208,44 @@ def preserve_cheese_preference_parentheticals(text: str) -> str:
     return _CHEESE_PREFERENCE_PAREN_RE.sub(_replace, text)
 
 
+# Pattern: comma followed by "t ex / t.ex. / tex / exempelvis / till exempel"
+# and then the rest of the segment (up to end-of-string or next clause boundary).
+# We treat the entire ", t ex ..." tail as a preference hint, not a constraint.
+_T_EX_CHEESE_CLAUSE_RE = re.compile(
+    r',\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s+[^,()]*',
+    re.IGNORECASE,
+)
+
+
+def neutralize_t_ex_cheese_examples(text: str) -> str:
+    """Drop ", t ex <cheese>" example tails for cheese ingredients.
+
+    Background: Swedish recipes commonly write things like
+    "2 dl riven lagrad ost, t ex Västerbottensost" — the "t ex" is a
+    suggestion ("for example"), not a hard requirement. Once the bidirectional
+    qualifier check treats the example name as a constraint (e.g. Q47 added
+    'västerbotten' to BIDIRECTIONAL_PER_KEYWORD['ost']), the named example
+    starts blocking sibling cheeses like "Herrgård Lagrad".
+
+    This helper removes the ", t ex …" tail from the text so the qualifier
+    check sees only the actual ingredient requirement. The example name
+    survives in the un-scrubbed text used by the fast keyword matcher, so
+    products that literally match the example (e.g. Västerbottens Original
+    Ost) can still match via that path.
+
+    Only applied when the text mentions "ost" and only the comma-prefixed
+    form is touched — parenthetical "(t ex ...)" lists are handled by other
+    helpers and should keep their existing semantics.
+    """
+
+    lowered = text.lower()
+    if 'ost' not in lowered:
+        return text
+    if 't ex' not in lowered and 'tex' not in lowered and 'exempelvis' not in lowered and 'till exempel' not in lowered:
+        return text
+    return _T_EX_CHEESE_CLAUSE_RE.sub('', text)
+
+
 def preserve_parenthetical_chili_alias(text: str) -> str:
     """Keep parenthetical chili clarifiers from fresh-pepper wording.
 

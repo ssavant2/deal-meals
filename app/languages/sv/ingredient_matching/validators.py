@@ -12,7 +12,7 @@ from typing import Dict, Set
 
 from .compound_text import _is_whole_word
 from .extraction import extract_keywords_from_ingredient
-from .recipe_text import parse_eller_alternatives
+from .recipe_text import neutralize_t_ex_cheese_examples, parse_eller_alternatives
 from .processed_rules import (
     PROCESSED_RULES_COMPOUND_EXEMPTIONS,
     PROCESSED_PRODUCT_RULES,
@@ -386,6 +386,12 @@ def check_specialty_qualifiers(
     "hårdkokta ägg" falsely satisfying the qualifier check for "Skinka Kokt").
     """
     ingredient_keywords = None
+
+    # Drop ", t ex <cheese>" example tails for cheese ingredients so that the
+    # named example does not impose qualifier requirements on sibling cheeses.
+    # The fast keyword matcher uses the un-scrubbed text so the example can
+    # still match its own product (e.g. "Västerbottens Original Ost").
+    ingredient_lower = neutralize_t_ex_cheese_examples(ingredient_lower)
 
     for base_word, qualifiers in SPECIALTY_QUALIFIERS.items():
         if base_word != matched_keyword:

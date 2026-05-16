@@ -2205,8 +2205,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'wokmix': {'kyckling',
                'findus', 'thai style', 'vietnam style', 'classic style', 'zanju style'},  # Findus ready-meal wok kits ≠ raw frozen mix (batch 49)
     # Ready-meal wok dishes ≠ raw frozen wok vegetables ("frysta wokgrönsaker")
-    'wokgrönsaker': {'kyckling', 'teriyaki', 'panang', 'röd curry', 'sweet chili', 'findus', 'mama chin'},
-    'wokgronsaker': {'kyckling', 'teriyaki', 'panang', 'rod curry', 'sweet chili', 'findus', 'mama chin'},
+    # Note: removed 'findus' — "Wok Classic Bigpack Findus" is raw wok-veg mix, not a ready meal.
+    # Specific protein/sauce cues catch real ready-meal cases.
+    'wokgrönsaker': {'kyckling', 'teriyaki', 'panang', 'röd curry', 'sweet chili', 'mama chin'},
+    'wokgronsaker': {'kyckling', 'teriyaki', 'panang', 'rod curry', 'sweet chili', 'mama chin'},
     # Marmalade with spirit flavor ≠ the spirit itself
     'brandy': {'marmelad'},
     'calvados': {'marmelad'},
@@ -2326,7 +2328,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'plant based', 'vegansk', 'växtbaserad',  # plant-based substitutes ≠ dairy cream cheese
         'pineapple', 'almond',    # sweet tropical/nut flavors (Castello Pineapple&Almond) ≠ savory cooking cream cheese
         'kajmak',                 # Balkan dairy spread (Poljorad) ≠ generic cream cheese
-        'philadelphia',           # when ingredient says "Philadelphia [smak]", plain naturell färskost is too generic
+        # Note: 'philadelphia' was here but blocked plain "Philadelphia Original" from
+        # matching cream-cheese recipes. Removed — plain Philadelphia IS generic cream cheese.
     },
     'cream cheese': {
         # Same as färskost — block flavored variants

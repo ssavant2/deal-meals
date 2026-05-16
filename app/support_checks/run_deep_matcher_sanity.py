@@ -3725,36 +3725,36 @@ test(
     1,
 )
 test(
-    "Q4 batch 117 generic rom now matches frozen löjrom offer",
+    "Q4 batch 117 generic rom no longer matches frozen löjrom offer (fish roe PNB)",
     recipe_match_num(
         ["160 g Rom"],
         {"name": "Amerikansk löjrom Fryst 80g Pandalus", "category": "frozen"},
     ),
-    1,
+    0,
 )
 test(
-    "Q4 batch 117 cached generic rom now matches frozen löjrom offer",
+    "Q4 batch 117 cached generic rom no longer matches frozen löjrom offer (fish roe PNB)",
     recipe_match_num_cached(
         ["160 g Rom"],
         {"name": "Amerikansk löjrom Fryst 80g Pandalus", "category": "frozen"},
     ),
-    1,
+    0,
 )
 test(
-    "Q4 batch 117 generic rom also matches stenbitsrom caviar offer",
+    "Q4 batch 117 generic rom no longer matches stenbitsrom caviar offer (fish roe PNB)",
     recipe_match_num(
         ["160 g Rom"],
         {"name": "Caviar röd stenbitsrom 75g ICA", "category": "pantry"},
     ),
-    1,
+    0,
 )
 test(
-    "Q4 batch 117 generic rom also matches forellrom offer",
+    "Q4 batch 117 generic rom no longer matches forellrom offer (fish roe PNB blocks 'rom röd')",
     recipe_match_num(
         ["160 g Rom"],
         {"name": "Forellrom röd 80g Kallax", "category": "pantry"},
     ),
-    1,
+    0,
 )
 test(
     "Q4 batch 117 generic rom no longer defaults to spirit products",
@@ -9881,7 +9881,7 @@ test("Batch 14 pitted kalamata accepts pitted black olive fallback", recipe_matc
 test("Batch 14 pitted kalamata pragmatically accepts kalamata with pits", recipe_match_num(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Kalamata Oliver med Kärnor Fontana", "category": "spices"}), 1)
 test("Batch 14 pitted kalamata pragmatically accepts unqualified Gemlik fallback", recipe_match_num_cached(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Gemlik Oliver Ceren", "category": "spices"}), 1)
 test("Batch 14 pitted black olives accept pitted black olive product", recipe_match_num(["100 g Svarta oliver utan kärnor"], {"name": "Svarta Oliver Utan Kärnor Figaro", "category": "spices"}), 1)
-test("Batch 14 pitted black olives pragmatically accept kalamata with pits", recipe_match_num_cached(["100 g Svarta oliver utan kärnor"], {"name": "Kalamata Oliver med Kärnor Fontana", "category": "spices"}), 1)
+test("Batch 14 pitted black olives now block kalamata with pits (oliver PNB med kärnor)", recipe_match_num_cached(["100 g Svarta oliver utan kärnor"], {"name": "Kalamata Oliver med Kärnor Fontana", "category": "spices"}), 0)
 test("Batch 14 pitted black olives pragmatically accept unqualified Gemlik", recipe_match_num(["100 g Svarta oliver utan kärnor"], {"name": "Gemlik Oliver Ceren", "category": "spices"}), 1)
 test("Batch 14 majsmjöl accepts corn flour", recipe_match_num_cached(["50 g Majsmjöl"], {"name": "Majsmjöl Glutenfri Risenta", "category": "pantry"}), 1)
 test("Batch 14 majsmjöl blocks breadcrumb carrier", recipe_match_num(["50 g Majsmjöl"], {"name": "Ströbröd Instant Majsmjöl Glutenfritt Olda", "category": "pantry"}), 0)
@@ -10128,46 +10128,46 @@ test("plain oliver accepts oliver med kärnor", recipe_match_num(["oliver"], {"n
 
 section("Batch 16-18 P1/medium kokos/svartvinbär extraction regressions")
 # kokosflingor: ICA-style "Kokosflakes" compound form should match kokosflingor ingredient
-test("kokosflakes compound matches kokosflingor", match("kokosflingor", "Kokosflakes Rostade 150g ICA Gott liv", "bread"), "kokosflingor")
-test("kokosflakes ekologiska matches kokosflingor", match("kokosflingor", "Kokosflakes Ekologiska Rostade 200g ICA", "bread"), "kokosflingor")
-test("riven kokos still matches kokosflingor", match("kokosflingor", "Riven Kokos 200g ICA", "bread"), "kokosflingor")
+test("kokosflakes compound matches kokosflingor", match("Kokosflakes Rostade 150g ICA Gott liv", "kokosflingor", "bread"), "kokosflingor")
+test("kokosflakes ekologiska matches kokosflingor", match("Kokosflakes Ekologiska Rostade 200g ICA", "kokosflingor", "bread"), "kokosflingor")
+test("riven kokos still matches kokosflingor", match("Riven Kokos 200g ICA", "kokosflingor", "bread"), "kokosflingor")
 # svartvinbärssaft: blandsaft + svartvinbär/svarta vinbär spaced forms
-test("blandsaft svartvinbär matches svartvinbärssaft", match("svartvinbärssaft", "Blandsaft Svartvinbär 95cl BOB", "beverages"), "svartvinbärssaft")
-test("blandsaft svarta vinbär spaced matches svartvinbärssaft", match("svartvinbärssaft", "Blandsaft Svarta vinbär 500ml BOB", "beverages"), "svartvinbärssaft")
-test("lättdryck svarta vinbär matches svartvinbärssaft", match("svartvinbärssaft", "Lättdryck Svarta vinbär Koncentrat 2dl Kiviks", "dairy"), "svartvinbärssaft")
-test("svartvinbärsdryck drickfärdig matches svartvinbärssaft", match("svartvinbärssaft", "Svartvinbärsdryck Drickfärdig 1,5l Kiviks", "dairy"), "svartvinbärssaft")
-test("saft svartvinbär still matches", match("svartvinbärssaft", "Saft Svartvinbär 500ml Herrljunga", "beverages"), "svartvinbärssaft")
+test("blandsaft svartvinbär matches svartvinbärssaft", match("Blandsaft Svartvinbär 95cl BOB", "svartvinbärssaft", "beverages"), "svartvinbärssaft")
+test("blandsaft svarta vinbär spaced matches svartvinbärssaft", match("Blandsaft Svarta vinbär 500ml BOB", "svartvinbärssaft", "beverages"), "svartvinbärssaft")
+test("lättdryck svarta vinbär matches svartvinbärssaft", match("Lättdryck Svarta vinbär Koncentrat 2dl Kiviks", "svartvinbärssaft", "dairy"), "svartvinbärssaft")
+test("svartvinbärsdryck drickfärdig matches svartvinbärssaft", match("Svartvinbärsdryck Drickfärdig 1,5l Kiviks", "svartvinbärssaft", "dairy"), "svartvinbärssaft")
+test("saft svartvinbär still matches", match("Saft Svartvinbär 500ml Herrljunga", "svartvinbärssaft", "beverages"), "svartvinbärssaft")
 # Regression: blandsaft jordgubb must still map to jordgubbssaft, not be broken
-test("blandsaft jordgubb still matches jordgubbssaft", match("jordgubbssaft", "Blandsaft Jordgubb 500ml", "beverages"), "jordgubbssaft")
+test("blandsaft jordgubb still matches jordgubbssaft", match("Blandsaft Jordgubb 500ml", "jordgubbssaft", "beverages"), "jordgubbssaft")
 # Regression: bare kokos must NOT match kokosmjölk (Stefan policy: kokos = dry coconut only)
 test("bare kokos does not match kokosmjölk", match("kokos", "Kokosmjölk 400ml ICA", "dairy"), None)
 
 section("Batch 16-18 P1/medium melon/sallad/snabbkaffe regressions")
 # melon: bare melon ingredient matches any melon subtype via OFFER_EXTRA_KEYWORDS
-test("melon matches galiamelon", match("melon", "Galiamelon ca 850g Klass 1 ICA", "fruit"), "melon")
-test("melon matches honungsmelon", match("melon", "Honungsmelon ca 1000g Klass 1 ICA", "fruit"), "melon")
-test("melon matches cantaloupemelon", match("melon", "Cantaloupemelon ca 870g Klass 1 ICA", "fruit"), "melon")
-test("melon matches vattenmelon", match("melon", "Vattenmelon 5kg", "fruit"), "melon")
-test("galiamelon still matches galiamelon", match("galiamelon", "Galiamelon ca 850g Klass 1 ICA", "fruit"), "galiamelon")
+test("melon matches galiamelon", match("Galiamelon ca 850g Klass 1 ICA", "melon", "fruit"), "melon")
+test("melon matches honungsmelon", match("Honungsmelon ca 1000g Klass 1 ICA", "melon", "fruit"), "melon")
+test("melon matches cantaloupemelon", match("Cantaloupemelon ca 870g Klass 1 ICA", "melon", "fruit"), "melon")
+test("melon matches vattenmelon", match("Vattenmelon 5kg", "melon", "fruit"), "melon")
+test("galiamelon still matches galiamelon", match("Galiamelon ca 850g Klass 1 ICA", "galiamelon", "fruit"), "galiamelon")
 # isbergssallad: gets grönsallad/salladsblad keywords via OFFER_EXTRA_KEYWORDS
-test("grönsallad matches isbergssallad", match("grönsallad", "Isbergssallad 1-p Klass 1", "fruit"), "grönsallad")
-test("salladsblad matches isbergssallad", match("salladsblad", "Isbergssallad 1-p Klass 1", "fruit"), "salladsblad")
-test("isbergssallad still matches isbergssallad", match("isbergssallad", "Isbergssallad 1-p Klass 1", "fruit"), "isbergssallad")
-test("grönsallad still matches hjärtsallad", match("grönsallad", "Hjärtsallad Eko 180g", "fruit"), "grönsallad")
+test("grönsallad matches isbergssallad", match("Isbergssallad 1-p Klass 1", "grönsallad", "fruit"), "grönsallad")
+test("salladsblad matches isbergssallad", match("Isbergssallad 1-p Klass 1", "salladsblad", "fruit"), "salladsblad")
+test("isbergssallad still matches isbergssallad", match("Isbergssallad 1-p Klass 1", "isbergssallad", "fruit"), "isbergssallad")
+test("grönsallad still matches hjärtsallad", match("Hjärtsallad Eko 180g", "grönsallad", "fruit"), "grönsallad")
 # snabbkaffe: Nescafé Gold is plain instant coffee
-test("snabbkaffe matches Nescafé Gold", match("snabbkaffe", "Nescafé Gold 200g", "beverages"), "snabbkaffe")
-test("snabbkaffe matches Nescafe Classic", match("snabbkaffe", "Nescafe Classic 100g", "beverages"), "snabbkaffe")
-test("snabbkaffe does not match Nescafé Dolce Gusto", match("snabbkaffe", "Nescafé Dolce Gusto", "beverages"), None)
+test("snabbkaffe matches Nescafé Gold", match("Nescafé Gold 200g", "snabbkaffe", "beverages"), "snabbkaffe")
+test("snabbkaffe matches Nescafe Classic", match("Nescafe Classic 100g", "snabbkaffe", "beverages"), "snabbkaffe")
+test("snabbkaffe does not match Nescafé Dolce Gusto", match("Nescafé Dolce Gusto", "snabbkaffe", "beverages"), None)
 
 section("Batch 16-18 P2/medium tofu/non-food regressions")
 # Skagenröra Tofu: spread product must not satisfy plain tofu ingredient (PPR)
 test("tofu blocks skagenröra tofu spread", recipe_match_num(["tofu"], {"name": "Skagenröra Tofu Vegansk 200g YiPin", "category": "meat"}), 0)
 test("tofu still matches plain tofu", recipe_match_num(["tofu"], {"name": "Tofu naturell 400g ICA Basic", "category": "meat"}), 1)
 test("tofu still matches firm tofu", recipe_match_num(["tofu"], {"name": "Tofu Fast 307g Mori Nu", "category": "meat"}), 1)
-test("skagenröra ingredient still matches skagenröra product", match("skagenröra", "Skagenröra Tofu Vegansk 200g YiPin", "meat"), "skagenröra")
+test("skagenröra ingredient still matches skagenröra product", match("Skagenröra Tofu Vegansk 200g YiPin", "skagenröra", "meat"), "skagenröra")
 # Non-food guard: wool/yarn products (ICA miscategorized as dairy) must not match food ingredients
-test("morot does not match ull decoration product", match("morot", "Hänge morot ull Nordic Season", "dairy"), None)
-test("morot still matches real morot product", match("morot", "Morot 500g Klass 1", "fruit"), "morot")
+test("morot does not match ull decoration product", match("Hänge morot ull Nordic Season", "morot", "dairy"), None)
+test("morot still matches real morot product", match("Morot 500g Klass 1", "morot", "fruit"), "morot")
 
 # ========================================================================
 print("\n========================================")
