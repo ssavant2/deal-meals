@@ -65,6 +65,14 @@ or a write-enabled dev container.
 For most changes, start here and only read the longer sections when the wrapper
 flags or a failing gate are unclear.
 
+**Where to run from:**
+
+- **Track A:** run from inside the container (`docker compose exec -T -w /app web ...`).
+  Track A gates are read-only and tolerate the default `/app` read-only mount.
+- **Track B:** run from the host (`python3 app/support_checks/...`). Track B may
+  need to write baseline files, refresh inventory line refs, or stage promotion
+  output, all of which require a writable checkout.
+
 Track A runtime blocker/guard fix:
 
 ```bash
@@ -107,6 +115,18 @@ Add only the flags that match the change:
 If the host worktree is clean enough for git auto-detection, the wrapper can
 select many flags itself. If the worktree contains unrelated edits, pass the
 explicit flags above so the gate set reflects only your change.
+
+**Commands NOT covered by the wrapper** (run these separately when needed):
+
+- `dev_reload.py` — cache rebuild; use `--reload-cache --fresh-cache-gates` on
+  the wrapper if the gates themselves should also run on the refreshed cache,
+  but the rebuild itself is its own command for ad-hoc cache work.
+- `refresh_matcher_rule_inventory_line_refs.py` — host-only; the wrapper accepts
+  `--refresh-line-refs` to trigger it.
+- `matcher_layer_diagnostics.py` — interactive reproduction tool used in
+  triage, not a gate.
+- `run_matcher_full_db_diff.py` — heavy read-only DB diff for release work, not
+  routine.
 
 ## Short Standard Pipelines
 
@@ -548,6 +568,11 @@ The accepted intentional-removal flow is:
    ```
 
 3. Run the registry contract checks and full Track B gates.
+
+`promote_term_baseline.py` (with or without `--allow-removals`) auto-updates the
+relevant baseline JSON fields (`variant_count`, `source_counts`, `role_counts`,
+`status_counts`, `classification_counts`) and the `EXPECTED_VERIFIED_TERM_VARIANT_COUNT`
+constant in `run_term_registry_contract_checks.py`. Do not patch these by hand.
 
 Manual baseline JSON edits are a last resort. Use them only if the promotion
 script cannot write/stage the intended files, and record that clearly in the
