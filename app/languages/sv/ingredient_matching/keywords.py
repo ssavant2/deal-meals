@@ -1245,8 +1245,8 @@ PROCESSED_FOODS: FrozenSet[str] = frozenset({
     'green tea',  # English tea name ("Green Tea Lime & Ginger" is NOT lime/ginger)
     'black tea',  # "Peach Mango Black Tea Pyramid" — tea, not fruit
     'iskaffe',  # iced coffee drinks ("Iskaffe Hazelnut" is NOT hasselnöt)
-    'tonic', 'tonicvatten',  # tonic water ("Tonicvatten Gurka 20cl" is NOT gurka ingredient)
-    'tonic vatten',  # variant spelling
+    # 'tonic'/'tonicvatten' removed — tonic water IS a recipe ingredient (gin & tonic etc.)
+    # FP for "Tonicvatten Gurka" matching cucumber handled via PNB gurka: {tonic}
     'fruktdryck',  # fruit drinks ("Fruktdryck Hallon Björnbär" is NOT hallon)
     'lättdryck',  # light drinks ("Lättdryck Citron & lime" is NOT citron)
     'drinkmixer',  # drink mixer ("Drinkmixer Soda Nordic Apple" is NOT äpple)
@@ -1998,6 +1998,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'mache',  # product spelling for machesallat/maché
     'oreo',  # exact cookie brand ingredient in baking/dessert recipes
     'läsk', 'lask',  # explicit soft-drink ingredients
+    'tonic',  # tonic water — used in gin & tonic and mixed drinks
 })
 
 OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = _REGISTRY_OFFER_EXTRA_KEYWORDS

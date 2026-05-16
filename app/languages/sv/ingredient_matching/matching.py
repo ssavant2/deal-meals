@@ -3371,6 +3371,14 @@ def matches_ingredient(
     if matched_keyword in _CITRUS_ZEST_KEYWORDS and product_lower:
         if any(ind in product_lower for ind in JUICE_PRODUCT_INDICATORS):
             return None
+    # "1 tsk citronjuice" / "2 msk limejuice" = bottled juice. Whole fruits have
+    # 'citronjuice'/'limejuice' in their keywords so they can match "pressa en citron"-style
+    # ingredients, but should not match when ingredient names the bottled form explicitly.
+    # A genuine juice product (pressad, juice in name) is allowed through.
+    _BOTTLED_JUICE_KEYWORDS = frozenset({'citronjuice', 'limejuice'})
+    if matched_keyword in _BOTTLED_JUICE_KEYWORDS and product_lower:
+        if not any(ind in product_lower for ind in JUICE_PRODUCT_INDICATORS):
+            return None
 
     # STEP 2c: Whole crayfish recipes map to the frozen signalkräftor family,
     # not to shelf-stable "i lag"/tail products.

@@ -351,6 +351,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'risotto', 'risottoris',  # risotto rice (generic)
         'grötris', 'gröt',  # porridge rice (round grain)
         'sushiris', 'sushi',  # sushi rice (short grain, sticky)
+        'klibbigt', 'glutinöst', 'glutinous', 'sticky',  # glutinous/sticky rice
         'paella', 'paellaris',  # paella rice
         'vildris', 'vild',  # wild rice (different species)
         'råris',  # brown rice (unhulled)
@@ -1166,8 +1167,16 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
                         'karamelliserad', 'karamelliserat', 'karamelliserade'}),
     'mjolk': frozenset({'kondenserad', 'kondenserat', 'kondenserade',
                         'karamelliserad', 'karamelliserat', 'karamelliserade'}),
-    # Red/black specialty rice should not satisfy plain long-grain rice lines.
-    'ris': frozenset({'svart', 'svarta', 'röd', 'röda', 'rött', 'rod', 'roda', 'rott'}),
+    # Specialty rice types require explicit mention — sushi/sticky/red/black rice
+    # all have distinct starch/grain properties and cannot substitute each other
+    # or generic long-grain rice.
+    'ris': frozenset({
+        'svart', 'svarta',
+        'röd', 'röda', 'rött', 'rod', 'roda', 'rott',
+        'sushi', 'sushiris',     # short-grain sticky rice for sushi
+        'klibbigt', 'glutinöst', # sticky/glutinous rice
+        'vildris', 'vild',       # wild rice (different species entirely)
+    }),
 }
 
 # Qualifier equivalents: if ingredient says "grekisk", product can have "turkisk" (and vice versa)

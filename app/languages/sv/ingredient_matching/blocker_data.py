@@ -328,6 +328,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'citrontimjan',  # lemon thyme (herb) ≠ lemon fruit
         'citronsorbet',  # lemon sorbet (dessert) ≠ lemon fruit
         'citronsyra',  # citric acid (powder) ≠ lemon fruit
+        'citronjuice', 'citronjuicen',  # bottled juice form — whole lemon blocks via FPB; juice product matches via _BOTTLED_JUICE_KEYWORDS check
     },
 
     # Heart (meat) != artichoke hearts (kronärtskockshjärtan)
@@ -1020,6 +1021,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'lime': {
         'limeblad',  # kaffir lime leaves (Thai cooking) ≠ lime fruit
         'jordgubblime',  # strawberry-lime flavor ≠ lime fruit
+        'limejuice',  # "2 msk limejuice" = bottled juice, not whole lime
     },
 
     # Lager (beer) != lagerblad (bay leaf)
@@ -2315,6 +2317,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'tunnskivad',   # "Tunnskivad Gurka" = pickled (ICA/Önos product name)
         'finhackad garant',  # current Garant product is pickled/sweet-sour, not fresh prep
         'boston',        # "Bostongurka" = sweet pickled relish, not fresh
+        'tonic', 'tonicvatten',  # cucumber-flavored tonic water ≠ fresh cucumber ingredient
     },
     'färskost': {
         'tomatsopp',              # "Tomatsopp Färskost ICA" — tomato soup, not cream cheese
@@ -3857,6 +3860,8 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'spritspåse',      # piping bag (kitchen tool) — not food
     'spritspase',      # diacritic-free variant
     'glitter',         # decoration/craft glitter (e.g. "Pärlor glitter Playbox") — not food
+    # Indian ready-meal dishes — never a recipe ingredient (e.g. "Indian Palak Bowl Felix")
+    'palak bowl',        # Indian spinach curry ready-meal dish
     # Baby food — never a recipe ingredient (matches purees/snacks to recipes via fruit/veg keywords)
     'ellas kitchen',   # baby food brand (e.g. "Maize sticks majs & morot 7m 16g Ellas Kitchen")
     'lovemade',        # baby food brand (e.g. "Majs, morot & mangoringar Eko 8m 20g Lovemade")
