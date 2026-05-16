@@ -1117,6 +1117,9 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # specifies granatäpple (pomegranate), so apple juice products don't bridge across.
     'äppeljuice': {'granatäpple', 'granatapple'},
     'appeljuice': {'granatäpple', 'granatapple'},
+    # "Zeta Snackoliver Havssalt" — product is olive snacks, not crystalline sea salt.
+    # Suppress havssalt keyword when ingredient text is about olives as the carrier.
+    'havssalt': {'snackoliv', 'snack oliv', 'oliver', 'oliv'},
     # "2 dl granatäpplejuice" — suppress whole-fruit keyword when ingredient asks for juice.
     # Whole-fruit "Granatäpple Jumbo Klass 1" ≠ pomegranate juice.
     # Note: recipes use both "granatäpplejuice" (äpple-form) and "granatäppeljuice" (äppel-form).
