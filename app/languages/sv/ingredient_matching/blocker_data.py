@@ -1804,16 +1804,12 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'marinerad',            # "Marinerad Tofu Sojasås & Ingefära" — marinated product
         'friggs', 'marmelad', 'shot', 'juice', 'dryck', 'choklad',
         'dumpling', 'dumplings',  # "Dumpling biff, chili & ingefära" — dumpling product ≠ fresh ginger
-        # Dietary supplement products ≠ fresh/ground ginger (batch 48)
-        'biosalma', 'vitamin', 'multivitamin', 'kosttillskott',
+        # Note: supplement brands (biosalma, multivitamin etc.) now covered by GLOBAL_PRODUCT_NAME_BLOCKERS
     },
-    # Gurkmeja (turmeric spice) — block supplement products (batch 48)
-    # "Vitamin D3 Gurkmeja Ingefära BioSalma" = dietary supplement ≠ turmeric spice
+    # Note: gurkmeja/kurkuma supplement blocks (biosalma, multivitamin) now covered by GLOBAL_PRODUCT_NAME_BLOCKERS
     'gurkmeja': {
-        'biosalma', 'vitamin', 'multivitamin', 'kosttillskott',
     },
     'kurkuma': {
-        'biosalma', 'vitamin', 'multivitamin', 'kosttillskott',
     },
     # Tamari soy — block tofu products
     'tamarisoja': {
@@ -2166,9 +2162,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'lime': {
         'coriander',  # "Coriander Lime 250ml El Taco Truck" — tortilla product, not lime fruit
         'pastill', 'pastiller', 'läkerol', 'lakerol',  # candy, not fruit
-        # Supplements with lime flavor ≠ fresh lime (mirrors citron PNB)
-        'vitamin well', 'reload', 'berocca', 'kosttillskott',
-        'brustablett', 'multivitamin',
+        # Note: supplement brands (vitamin well, berocca, multivitamin) now in GLOBAL_PRODUCT_NAME_BLOCKERS
         'torkad lime', 'pani',  # dried lime balls (Persian spice) ≠ fresh lime
     },
     # Mango-flavored products ≠ fresh mango
@@ -2199,8 +2193,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'svartvinbär': {'torkad frukt'},
     # Juice products ≠ whole fruit
     'blodapelsin': {'juice'},  # "Juice Apelsin Röd Grape" gets keyword 'blodapelsin' via substitution
-    # Vitamin supplements ≠ fresh orange — "Berocca Multivitamin C-Vitamin Apelsin" is a supplement
-    'apelsin': {'berocca', 'multivitamin', 'c-vitamin'},
+    # Vitamin supplements ≠ fresh orange (berocca/multivitamin now in GLOBAL; c-vitamin still needed here)
+    'apelsin': {'c-vitamin'},
     # Candy strips with fruit flavor ≠ fresh fruit
     'äpple': {'godisrem', 'gelegodis', '4m', '1år', '1ar', 'välling', 'valling'},
     # "Popcorn chicken" = breaded bites, not actual popcorn
@@ -3763,16 +3757,14 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'majsmjöl': {'ströbröd', 'strobrod', 'pankoströbröd', 'pankostrobrod'},
     'majsmjol': {'ströbröd', 'strobrod', 'pankoströbröd', 'pankostrobrod'},
     # Smoked salmon + supplement products ≠ fresh lemon
-    # Supplements (Möllers Tran, Berocca, Vitamin Well) have 'citron' as flavor keyword
-    # but are not food ingredients — parallel to existing apelsin PNB (berocca/multivitamin)
+    # Supplement brands now in GLOBAL_PRODUCT_NAME_BLOCKERS (berocca/biosalma/multivitamin/vitamin well/möllers)
+    # 'tran' still needed here as it's also a food product (fiskrom); only supplements have it + citron
     'citron': {
         'varmrökt', 'kallrökt', 'lax i bit', 'lax',
-        'kosttillskott', 'tran', 'möllers', 'mollers',
-        'berocca', 'multivitamin', 'brustablett',
-        'vitamin well', 'reload',
+        'tran',  # cod liver oil supplement flavor ≠ fresh lemon
     },
-    # Cassis liqueur ≠ vitamin supplement with cassis flavor
-    'cassis': {'multivitamin', 'berocca', 'kosttillskott', 'energy', 'brustablett'},
+    # Cassis liqueur ≠ energy drinks with cassis flavor
+    'cassis': {'energy'},
     # Limpa (bread) ≠ cigarette carton (Swedish slang "limpa" = carton of cigarettes)
     'limpa': {'marlboro', 'winston', 'terea', 'kona', 'blend vit', 'tobak', 'cigarr'},
     # Standalone marshmallows ≠ cookie/cake products containing marshmallow
@@ -3833,6 +3825,13 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'kosttillskott',   # dietary supplement
     'stylinggel',      # hair styling gel — "Stylinggel Mineral" matched mineralsalt
     'brustablett',     # effervescent tablet — supplement delivery form
+    # Supplement brands and product types — always non-food regardless of keyword
+    'berocca',         # effervescent vitamin brand (Berocca Energy Orange etc.)
+    'biosalma',        # supplement brand (Omega-3, Magnesium, Multivitamin etc.)
+    'multivitamin',    # general multivitamin products
+    'vitamin well',    # functional drink brand (not a recipe ingredient)
+    'reload',          # Vitamin Well sub-brand (Reload Citron & lime etc.)
+    'möllers', 'mollers',  # cod liver oil / fish oil supplement brand
     'kattsnack', 'kattgodis', 'kattmat',       # cat food
     'hundgodis', 'hundsnack', 'hundmat',        # dog food
     'dogman', 'vitakraft',                       # pet food brands
@@ -3872,4 +3871,16 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'barngröt',        # baby porridge
     'barngrot',        # diacritic-free variant
     'barnsnack',       # baby snacks ("Barnsnacks Majs morot 8m ICA I love eco")
+    # Snack/candy products — contain food keywords as flavors but are never recipe ingredients
+    'buldak',          # Korean fire noodle brand (Buldak Habanero Ramen matched habanero/chili)
+    'cheez ballz',     # OLW snack puff (matched chili keyword)
+    'cheezdoodles', 'cheez doodles',  # corn puff snack brand
+    'lantchips',       # Swedish crisp brand (LantChips Habanero matched habanero)
+    'skumtoppar',      # marshmallow candy (Skumtoppar Kokos matched kokos)
+    'godispåse',       # candy bags — never a recipe ingredient
+    'godispase',       # diacritic-free variant
+    'kexchoklad',      # Swedish chocolate-covered cracker candy bar (Kexchoklad Cloetta)
+    'ahlgrens',        # gummy candy brand (Ahlgrens Bilar)
+    'dumle',           # toffee candy brand
+    'plopp',           # chocolate candy brand (Plopp mini påse)
 })
