@@ -1,4 +1,4 @@
-FROM postgres:18.3-alpine3.22
+FROM postgres:18.4-alpine3.23
 
 # Bake first-run schema + security setup into the Postgres image.
 # PostgreSQL only executes these scripts when PGDATA is empty.

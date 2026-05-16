@@ -1,4 +1,4 @@
-FROM python:3.14.4-slim
+FROM python:3.14.5-slim-trixie
 
 ARG RELEASE_VERSION=""
 
@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install uv (fast Python package manager, written in Rust)
-COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.14 /uv /usr/local/bin/uv
 
 # Install Python dependencies
 COPY app/requirements.txt .
