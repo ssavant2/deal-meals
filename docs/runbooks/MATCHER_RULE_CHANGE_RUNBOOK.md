@@ -5,9 +5,9 @@ new aliases, bridges, blockers, no-match policies, routing terms, and
 product-form rules.
 
 The goal is not to make every matcher change non-technical. The goal is to make
-Codex, Claude, Gemini, and humans choose the same level of proof for the same
-kind of change, so tactical runtime fixes stay fast while durable registry
-rules land with fixtures, inventory, parity coverage, and cache expectations.
+AI/LLM agents and humans choose the same level of proof for the same kind of
+change, so tactical runtime fixes stay fast while durable registry rules land
+with fixtures, inventory, parity coverage, and cache expectations.
 
 ## AI Cold-Start Orientation
 
@@ -60,6 +60,54 @@ The normal compose `web` service mounts `/app` read-only. Read-only checks run
 there. File edits and write-maintenance scripts usually need the host checkout
 or a write-enabled dev container.
 
+## Command First
+
+For most changes, start here and only read the longer sections when the wrapper
+flags or a failing gate are unclear.
+
+Track A runtime blocker/guard fix:
+
+```bash
+docker compose exec -T -w /app web \
+  python support_checks/run_matcher_change_gates.py --track A
+```
+
+Track B durable registry/fixture/inventory rule, from a writable host checkout:
+
+```bash
+python3 app/support_checks/run_matcher_change_gates.py --track B \
+  --policy-ref <policy_ref>
+```
+
+Track B with registry TOML changes:
+
+```bash
+python3 app/support_checks/run_matcher_change_gates.py --track B \
+  --policy-ref <policy_ref> \
+  --registry-changed
+```
+
+Add only the flags that match the change:
+
+- `--runtime-changed` when matcher Python changed.
+- `--fixtures-changed` when `matcher_regression_cases.json` changed.
+- `--inventory-changed` when `matcher_rule_inventory.json` changed.
+- `--migrate-hashes` when extraction/source order shifted verified-term IDs.
+- `--allow-removals` only after confirming intentional TOML inactivation or
+  removal.
+- `--refresh-line-refs` when inventory anchors moved; run from a writable host
+  checkout or write-enabled dev container.
+- `--baseline-output-dir /tmp/term-baseline-promotion` only when `/app` is
+  read-only; the wrapper stages generated files and stops so you can apply them
+  before rerunning gates.
+- `--reload-cache --fresh-cache-gates` when cache/UI/cache-backed validation is
+  part of the handoff.
+- `--dry-run` to print the exact gate list before running it.
+
+If the host worktree is clean enough for git auto-detection, the wrapper can
+select many flags itself. If the worktree contains unrelated edits, pass the
+explicit flags above so the gate set reflects only your change.
+
 ## Short Standard Pipelines
 
 Use these short paths first. The long sections later in this runbook explain
@@ -73,20 +121,20 @@ Use this for ordinary PNB/FPB/GPB/runtime guard fixes.
    probe.
 2. Patch the narrow runtime mechanism that already owns the pattern.
 3. Add or extend one focused `run_deep_matcher_sanity.py` regression.
-4. Run:
+4. Run the standard Track A gate wrapper:
 
    ```bash
    docker compose exec -T -w /app web \
-     python support_checks/run_deep_matcher_sanity.py
-
-   docker compose exec -T -w /app web \
-     python support_checks/run_matcher_layer_parity.py --skip-cache-freshness
+     python support_checks/run_matcher_change_gates.py --track A
    ```
 
-5. Run `dev_reload.py` only when cache/UI/cache-gated validation matters:
+5. Run the wrapper with cache refresh only when cache/UI/cache-gated validation
+   matters:
 
    ```bash
-   docker compose exec -T -w /app web python support_checks/dev_reload.py
+   docker compose exec -T -w /app web \
+     python support_checks/run_matcher_change_gates.py --track A \
+       --reload-cache --fresh-cache-gates
    ```
 
 Do not add fixtures, inventory, or registry TOML for Track A unless you
@@ -102,14 +150,21 @@ broad/systemic, release-facing, or meant to be permanent contract proof.
 3. Add the minimum fixture set: one positive, one negative or blocked sibling,
    and any positive guard needed to prove you did not over-block.
 4. Update inventory and refresh inventory line refs if anchors moved.
-5. If registry TOML changed, run the registry baseline flow:
-   - normal add/update: `promote_term_baseline.py`
-   - extraction/source-order hash move: `promote_term_baseline.py --migrate-hashes`
-   - intentional inactivation/removal: use the explicit removal flow below
-6. Run targeted fixture/parity by `--policy-ref`, `--canonical`, or `--case-id`.
-7. Run full fixture/parity and only the conditionally relevant gates from the
-   gate matrix below.
-8. Run `dev_reload.py` before cache/UI/cache-gated validation or handoff that
+5. Run the Track B gate wrapper from a writable host checkout or write-enabled
+   dev container, targeting by `--policy-ref`, `--canonical`, or `--case-id`
+   when possible:
+
+   ```bash
+   python3 app/support_checks/run_matcher_change_gates.py --track B \
+     --policy-ref plain_sensitive_filmjolk
+   ```
+
+   Add `--registry-changed` for TOML edits, `--migrate-hashes` for verified-term
+   source-order shifts, and `--allow-removals` for confirmed intentional TOML
+   inactivation/removal.
+6. Run full fixture/parity and only the conditionally relevant gates from the
+   gate matrix below if you are not using the wrapper.
+7. Run `dev_reload.py` before cache/UI/cache-gated validation or handoff that
    depends on active cache.
 
 If this feels like too many moving parts for a one-row tactical blocker, it is
@@ -290,18 +345,25 @@ where the fix is a narrow runtime dictionary/guard.
    every new rule. If a nearby case already asserts the exact same behavior,
    keep or extend that case rather than duplicating it. This script is the
    primary Track A sanity gate and should grow over time with new matcher rules.
-4. Run:
+4. Run the standard Track A gate wrapper:
+
+   ```bash
+   docker compose exec -T -w /app web \
+     python support_checks/run_matcher_change_gates.py --track A
+   ```
+
+   This runs the primary deep matcher sanity gate and the full matcher parity
+   gate with cache freshness skipped.
+
+5. If you run manually instead of using the wrapper, run the fixture parity check
+   to confirm no existing fixture contracts were broken by the change. This is
+   mandatory even for Track A — you are responsible for leaving parity clean,
+   not the next agent:
 
    ```bash
    docker compose exec -T -w /app web \
      python support_checks/run_deep_matcher_sanity.py
-   ```
 
-5. Run the fixture parity check to confirm no existing fixture contracts were broken by
-   the change. This is mandatory even for Track A — you are responsible for
-   leaving parity clean, not the next agent:
-
-   ```bash
    docker compose exec -T -w /app web \
      python support_checks/run_matcher_layer_parity.py --skip-cache-freshness
    ```
@@ -312,10 +374,12 @@ where the fix is a narrow runtime dictionary/guard.
    Do not commit with known parity failures.
 
 6. If any cache-backed validation, UI check, or cache-gated support check will be
-   used after the edit, hot-reload the matcher and rebuild the dev cache:
+   used after the edit, run the wrapper with cache refresh:
 
    ```bash
-   docker compose exec -T -w /app web python support_checks/dev_reload.py
+   docker compose exec -T -w /app web \
+     python support_checks/run_matcher_change_gates.py --track A \
+       --reload-cache --fresh-cache-gates
    ```
 
 7. Re-check the affected examples against the refreshed runtime/cache.
@@ -466,30 +530,28 @@ If `promote_term_baseline.py` aborts with "truly removed" variants, do not use
 `--migrate-hashes` unless the variants merely got re-hashed by extraction
 source-order movement. `--migrate-hashes` is not a removal approval mechanism.
 
-Until `promote_term_baseline.py` has an explicit `--allow-removals` workflow,
-the accepted fallback for intentional removal is:
+The accepted intentional-removal flow is:
 
 1. Confirm each removed variant ID corresponds to the TOML entry you just
    inactivated or removed. If any removed variant is unexpected, stop.
-2. Edit
-   `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json`:
-   - remove the matching objects from `variants[]`
-   - refresh `variant_count`
-   - refresh `verification.variant_count`
-   - refresh `verification.source_counts`
-   - refresh `verification.status_counts`
-   - refresh `verification.classification_counts`
-   - refresh top-level `source_counts` and `coverage_counts`
-3. Update `EXPECTED_VERIFIED_TERM_VARIANT_COUNT` in
-   `app/support_checks/run_term_registry_contract_checks.py` to match the new
-   variant count.
-4. Run `promote_term_baseline.py` again. It should now either report nothing to
-   promote or refresh only baseline metadata.
-5. Run the registry contract checks and full Track B gates.
+2. Re-run promotion with explicit removal approval:
 
-This manual baseline edit is deliberately a last-resort workflow. Record it in
-the handoff, because it means the current toolchain lacks a first-class removal
-command for that case.
+   ```bash
+   # Choose exactly one:
+   docker compose exec -T -w /app web \
+     python support_checks/promote_term_baseline.py --allow-removals
+
+   # OR, when an extraction block/source-order change also shifted hash IDs:
+   docker compose exec -T -w /app web \
+     python support_checks/promote_term_baseline.py \
+       --migrate-hashes --allow-removals
+   ```
+
+3. Run the registry contract checks and full Track B gates.
+
+Manual baseline JSON edits are a last resort. Use them only if the promotion
+script cannot write/stage the intended files, and record that clearly in the
+handoff.
 
 Nested declarative bridge payloads can include:
 
@@ -633,8 +695,29 @@ not use Track B fixture/inventory edits unless the work is escalated.
 
 ### 6. Run Contract Gates
 
-Do not run every script reflexively. Use this matrix to choose the smallest
-complete gate set for the change.
+Prefer the gate wrapper for standard Track B work:
+
+```bash
+python3 app/support_checks/run_matcher_change_gates.py --track B \
+  --policy-ref plain_sensitive_filmjolk
+```
+
+Useful wrapper options:
+
+- `--registry-changed`, `--runtime-changed`, `--fixtures-changed`, and
+  `--inventory-changed` override git auto-detection when the worktree contains
+  unrelated edits.
+- `--migrate-hashes` and `--allow-removals` are passed to
+  `promote_term_baseline.py`.
+- `--refresh-line-refs` runs the host-only inventory line-ref refresher.
+- `--baseline-output-dir` stages baseline promotion output and stops; apply the
+  staged files, then rerun the wrapper without that flag.
+- `--reload-cache --fresh-cache-gates` adds `dev_reload.py` and final
+  cache-fresh fixture/parity gates.
+- `--dry-run` prints the exact script list without running it.
+
+Do not run every script reflexively when running manually. Use this matrix to
+choose the smallest complete gate set for the change.
 
 | Gate | Run when |
 | --- | --- |
@@ -643,7 +726,7 @@ complete gate set for the change.
 | targeted `run_matcher_layer_parity.py` | Track B route, bridge, no-match, canonical, cache-facing, or fixture behavior work. |
 | full `run_matcher_layer_fixture_cases.py --skip-cache-freshness` | Every Track B behavior change before handoff. |
 | full `run_matcher_layer_parity.py --skip-cache-freshness` | Every Track A/Track B matcher behavior change before handoff. |
-| `promote_term_baseline.py` | Any tracked registry TOML change. Choose plain, `--migrate-hashes`, or the removal flow above. |
+| `promote_term_baseline.py` | Any tracked registry TOML change. Choose plain, `--migrate-hashes`, `--allow-removals`, or `--migrate-hashes --allow-removals`. |
 | term-registry checks | Any tracked registry TOML or baseline change. |
 | `run_matcher_rule_model_checks.py` | Track B rule-model, bridge, no-match, inventory, or registry-owned rule changes. |
 | `run_matcher_rule_inventory_checks.py` | Any inventory change or Track B rule that should be inventory-owned. |
@@ -674,7 +757,8 @@ standard gate after TOML edits. `--migrate-hashes` is required when an
 extraction block/source-order change shifts existing hash IDs.
 
 In a writable checkout/container, use the plain command unless an extraction
-block/source-order change requires hash migration:
+block/source-order change requires hash migration or intentional TOML
+inactivation/removal requires removal approval:
 
 ```bash
 # Choose exactly one:
@@ -684,12 +768,21 @@ docker compose exec -T -w /app web \
 # OR, when an extraction block/source-order change shifted hash IDs:
 docker compose exec -T -w /app web \
   python support_checks/promote_term_baseline.py --migrate-hashes
+
+# OR, when TOML inactivation/removal intentionally removed verified variants:
+docker compose exec -T -w /app web \
+  python support_checks/promote_term_baseline.py --allow-removals
+
+# OR, when both source-order hash migration and intentional removal are needed:
+docker compose exec -T -w /app web \
+  python support_checks/promote_term_baseline.py \
+    --migrate-hashes --allow-removals
 ```
 
 The normal compose `web` service may mount `/app` read-only. In that case, stage
 the generated files under a writable directory, again choosing either the plain
-or hash-migration variant as appropriate, and then apply the staged changes to
-the real checkout:
+hash-migration, removal, or combined variant as appropriate, and then apply the
+staged changes to the real checkout:
 
 ```bash
 # Choose exactly one:
@@ -701,6 +794,19 @@ docker compose exec -T -w /app web \
 docker compose exec -T -w /app web \
   python support_checks/promote_term_baseline.py \
   --migrate-hashes \
+  --output-dir /tmp/term-baseline-promotion
+
+# OR, when TOML inactivation/removal intentionally removed verified variants:
+docker compose exec -T -w /app web \
+  python support_checks/promote_term_baseline.py \
+  --allow-removals \
+  --output-dir /tmp/term-baseline-promotion
+
+# OR, when both source-order hash migration and intentional removal are needed:
+docker compose exec -T -w /app web \
+  python support_checks/promote_term_baseline.py \
+  --migrate-hashes \
+  --allow-removals \
   --output-dir /tmp/term-baseline-promotion
 ```
 
@@ -916,7 +1022,8 @@ Before calling a Track B matcher rule change done:
 - A corresponding focused regression was added or confirmed in
   `run_deep_matcher_sanity.py`.
 - `promote_term_baseline.py` was run after registry TOML changes, using
-  `--migrate-hashes` when extraction block/source-order changes require it.
+  `--migrate-hashes` when extraction block/source-order changes require it and
+  `--allow-removals` only for confirmed intentional TOML inactivation/removal.
 - Intentional TOML inactivation/removal followed the removal workflow if
   `promote_term_baseline.py` reported truly removed variants.
 - Targeted fixture/parity passes.

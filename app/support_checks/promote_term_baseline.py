@@ -17,6 +17,7 @@ Swedish defaults:
 Usage:
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --dry-run
+    docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --allow-removals
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --language sv --market SE
 
 The script does not require a dev-only DB table. For the current Swedish
@@ -397,7 +398,24 @@ def _refresh_summary_from_variants(baseline: dict[str, Any]) -> bool:
     return old_summary != new_summary
 
 
-def _apply_verification_updates(baseline: dict[str, Any], promoted_variants: list[dict]) -> None:
+def _decrement_classification_count(classification_counts: dict[str, int], classification: str) -> None:
+    if classification_counts.get(classification, 0) > 0:
+        classification_counts[classification] -= 1
+        return
+    if classification_counts.get("static_verified", 0) > 0:
+        classification_counts["static_verified"] -= 1
+        return
+    for existing_classification, count in classification_counts.items():
+        if count > 0:
+            classification_counts[existing_classification] = count - 1
+            return
+
+
+def _apply_verification_updates(
+    baseline: dict[str, Any],
+    promoted_variants: list[dict],
+    removed_variants: list[dict] | None = None,
+) -> None:
     variants = [v for v in baseline.get("variants", []) if isinstance(v, dict)]
     verification = {
         key: value
@@ -410,10 +428,20 @@ def _apply_verification_updates(baseline: dict[str, Any], promoted_variants: lis
         Counter(str(v.get("source_type") or v.get("source_family") or "unknown") for v in variants).items()
     ))
 
-    classification_counts = dict(verification.get("classification_counts", {}))
+    classification_counts = {
+        str(classification): int(count)
+        for classification, count in dict(verification.get("classification_counts", {})).items()
+    }
+    for v in removed_variants or []:
+        _decrement_classification_count(classification_counts, _promoted_classification(v))
     for v in promoted_variants:
         classification = _promoted_classification(v)
         classification_counts[classification] = classification_counts.get(classification, 0) + 1
+    classification_counts = {
+        classification: count
+        for classification, count in classification_counts.items()
+        if count
+    }
     if sum(classification_counts.values()) != len(variants):
         raise RuntimeError(
             "verification classification total "
@@ -428,6 +456,7 @@ def promote(
     config: PromotionConfig,
     dry_run: bool = False,
     migrate_hashes: bool = False,
+    allow_removals: bool = False,
     output_dir: Path | None = None,
 ) -> int:
     if output_dir is not None:
@@ -440,6 +469,7 @@ def promote(
     baseline_normalized = _normalize_baseline_payload(baseline)
     current_ids = {v["variant_id"] for v in baseline["variants"] if isinstance(v, dict) and v.get("variant_id")}
     current_count = len(baseline["variants"])
+    starting_count = current_count
 
     print("Generating fresh variant list from code + TOML …")
     fresh_variants = _generate_fresh_variants(config)
@@ -450,7 +480,10 @@ def promote(
 
     hash_migrations: list[tuple[str, str]] = []  # (old_id, new_id)
     migrated_new_ids: set[str] = set()
+    allowed_removed_ids: set[str] = set()
+    removed_variants: list[dict] = []
     if removed_ids:
+        baseline_by_id = {v["variant_id"]: v for v in baseline["variants"] if v.get("variant_id")}
         if migrate_hashes:
             # Build a FIFO queue per content_key so duplicates are matched 1:1
             from collections import defaultdict
@@ -458,7 +491,6 @@ def promote(
             for v in fresh_variants:
                 if v.get("variant_id") and v["variant_id"] not in current_ids:
                     fresh_queues[_content_key(v, config)].append(v)
-            baseline_by_id = {v["variant_id"]: v for v in baseline["variants"] if v.get("variant_id")}
             truly_removed = []
             for vid in removed_ids:
                 old_v = baseline_by_id[vid]
@@ -475,17 +507,26 @@ def promote(
                 for vid in sorted(truly_removed)[:10]:
                     v = baseline_by_id[vid]
                     print(f"   {vid}: {v.get('variant_text','')!r} ({v.get('source_type','')})")
-                print("Investigate before promoting. Aborting.")
-                return 1
+                if not allow_removals:
+                    print("Investigate before promoting, or re-run with --allow-removals after confirming.")
+                    print("Aborting.")
+                    return 1
+                allowed_removed_ids.update(truly_removed)
+                print("Removal approval enabled: these truly removed variants will be dropped from the baseline.")
             print(f"\nHash migration: {len(hash_migrations)} variant(s) will get new IDs (same content, source_order shifted).")
         else:
             print(f"\n⚠️  WARNING: {len(removed_ids)} variant(s) in baseline are MISSING from fresh scan:")
             for vid in sorted(removed_ids)[:10]:
-                print(f"   {vid}")
-            print("This usually means a TOML entry or extraction function was removed.")
-            print("Re-run with --migrate-hashes if extraction.py source_order shifted, or investigate.")
-            print("Aborting.")
-            return 1
+                v = baseline_by_id.get(vid) or {}
+                print(f"   {vid}: {v.get('variant_text','')!r} ({v.get('source_type','')})")
+            if not allow_removals:
+                print("This usually means a TOML entry or extraction function was removed.")
+                print("Re-run with --migrate-hashes if extraction.py source_order shifted, or investigate.")
+                print("Re-run with --allow-removals only after confirming the removals are intentional.")
+                print("Aborting.")
+                return 1
+            allowed_removed_ids.update(removed_ids)
+            print("Removal approval enabled: missing variants will be dropped from the baseline.")
 
     # Truly new variants = fresh entries not in baseline AND not just hash-migrated old ones
     new_variants = [v for v in all_new_variants if v["variant_id"] not in migrated_new_ids]
@@ -530,9 +571,22 @@ def promote(
         ]
         current_count = len(baseline["variants"])
 
+    if allowed_removed_ids:
+        removed_variants = [
+            _baseline_variant(v)
+            for v in baseline["variants"]
+            if v.get("variant_id") in allowed_removed_ids
+        ]
+        baseline["variants"] = [
+            _baseline_variant(v)
+            for v in baseline["variants"]
+            if v.get("variant_id") not in allowed_removed_ids
+        ]
+        current_count = len(baseline["variants"])
+
     new_count = current_count + len(new_variants)
 
-    if not new_variants and not hash_migrations:
+    if not new_variants and not hash_migrations and not allowed_removed_ids:
         summary_changed = _refresh_summary_from_variants(baseline)
         if not summary_changed and not baseline_normalized:
             print(f"\nNothing to promote — baseline is up to date ({current_count} variants).")
@@ -557,10 +611,16 @@ def promote(
         return 0
 
     if dry_run:
-        if migrate_hashes and removed_ids:
-            print(f"\n[dry-run] Would migrate {len(hash_migrations)} hash(es) + add {len(new_variants)} variant(s): total {new_count}")
+        if hash_migrations or allowed_removed_ids:
+            print(
+                "\n[dry-run] Would update baseline: "
+                f"{starting_count} → {new_count} variants "
+                f"({len(hash_migrations)} hash migration(s), "
+                f"{len(allowed_removed_ids)} removal(s), "
+                f"{len(new_variants)} addition(s))"
+            )
         else:
-            print(f"\n[dry-run] Would update baseline: {current_count} → {new_count} variants")
+            print(f"\n[dry-run] Would update baseline: {starting_count} → {new_count} variants")
         print("[dry-run] No files written.")
         return 0
 
@@ -568,7 +628,11 @@ def promote(
     baseline["variants"] = [_baseline_variant(v) for v in baseline["variants"] + new_variants]
     _normalize_baseline_payload(baseline)
     _refresh_summary_from_variants(baseline)
-    _apply_verification_updates(baseline, promoted_variants=new_variants)
+    _apply_verification_updates(
+        baseline,
+        promoted_variants=new_variants,
+        removed_variants=removed_variants,
+    )
 
     print(f"\nWriting baseline: {config.baseline_path.name} ({new_count} variants) …")
     changed_files: list[tuple[Path, Path]] = []
@@ -645,12 +709,12 @@ def promote(
     _write_output_manifest(
         output_dir=output_dir,
         changed_files=changed_files,
-        current_count=current_count,
+        current_count=starting_count,
         new_count=new_count,
         new_unique_key_count=new_unique_key_count,
     )
 
-    print(f"\n✓ Promotion complete: {current_count} → {new_count} variants")
+    print(f"\n✓ Promotion complete: {starting_count} → {new_count} variants")
     print(f"  Unique coverage keys: {new_unique_key_count}")
     if output_dir is not None:
         print(f"  Changed files staged under: {output_dir}")
@@ -696,7 +760,15 @@ def main() -> int:
         help=(
             "Allow hash-ID migration when extraction.py source_order shifted (e.g. after inserting a new "
             "extraction block). Entries with matching content (coverage key + source_id/source_file/expected) are "
-            "re-hashed in place. Truly removed entries (no content match) still abort."
+            "re-hashed in place. Truly removed entries (no content match) still abort unless --allow-removals is set."
+        ),
+    )
+    parser.add_argument(
+        "--allow-removals",
+        action="store_true",
+        help=(
+            "Allow confirmed intentional baseline removals after TOML entry inactivation/deletion. "
+            "Only use after checking that every removed variant is expected."
         ),
     )
     parser.add_argument(
@@ -737,6 +809,7 @@ def main() -> int:
         config=config,
         dry_run=args.dry_run,
         migrate_hashes=args.migrate_hashes,
+        allow_removals=args.allow_removals,
         output_dir=args.output_dir,
     )
 
