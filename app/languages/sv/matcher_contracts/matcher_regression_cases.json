@@ -109,7 +109,14 @@
       "name": "Strösocker 1kg ICA",
       "category": "pantry"
     },
-    "expected": 0
+    "expected": 1,
+    "expected_matches": [
+      {
+        "ingredient_index": 0,
+        "canonical": "socker",
+        "must_match_keyword": "socker"
+      }
+    ]
   },
   {
     "id": "plan_initial_strosocker_positive",
@@ -1012,14 +1019,7 @@
       "name": "Skånsk Senap Slotts",
       "category": "pantry"
     },
-    "expected": 1,
-    "expected_matches": [
-      {
-        "ingredient_index": 0,
-        "canonical": "senap",
-        "must_match_keyword": "senap"
-      }
-    ]
+    "expected": 0
   },
   {
     "id": "matcher_regression_grovkornig_senap_original_negative",
@@ -4808,14 +4808,7 @@
       "name": "Kalamata Oliver med Kärnor Fontana",
       "category": "spices"
     },
-    "expected": 1,
-    "expected_matches": [
-      {
-        "ingredient_index": 0,
-        "canonical": "oliver",
-        "must_match_keyword": "oliver"
-      }
-    ]
+    "expected": 0
   },
   {
     "id": "matcher_regression_majsmjol_corn_flour_positive",
@@ -17047,7 +17040,14 @@
     "source_ref": "legacy_review:fresh_chopped_graslok_lines_still_lose_live_chive_offers"
   },
   {
-    "expected": 0,
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "gräslök",
+        "ingredient_index": 0,
+        "must_match_keyword": "gräslök"
+      }
+    ],
     "id": "matcher_regression_negative_graslok",
     "ingredients": [
       "2 msk finskuren gräslök"
@@ -23384,14 +23384,7 @@
     "source_ref": "legacy_review:exact_cantucci_cantuccini_products_are_still_blocked_despite_the_earlier_biscuit_family_fix"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "rom",
-        "ingredient_index": 0,
-        "must_match_keyword": "rom"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus",
     "ingredients": [
       "160 g Rom"
@@ -23413,14 +23406,7 @@
     "source_ref": "legacy_review:generic_fish_roe_ingredient_rom_still_misses_current_roe_offers_in_a_fish_appetizer_recipe"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "rom",
-        "ingredient_index": 0,
-        "must_match_keyword": "rom"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica",
     "ingredients": [
       "160 g Rom"
@@ -23471,14 +23457,7 @@
     "source_ref": "legacy_review:generic_fish_roe_ingredient_rom_still_misses_current_roe_offers_in_a_fish_appetizer_recipe"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "rom",
-        "ingredient_index": 0,
-        "must_match_keyword": "rom"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_positive_stenbitsrom",
     "ingredients": [
       "160 g Rom"

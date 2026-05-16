@@ -2557,6 +2557,19 @@ def validate_offer_match_candidate(
                     )
                 ):
                     continue
+                # Cooked/deli kalkon PNBs (grillad, rökt, skivor, etc.) are intended to
+                # prevent COOKED kalkon products from matching RAW kalkon recipes.
+                # "Kalkon Pålägg" ingredients explicitly want deli/cooked turkey, so all
+                # those "cooked deli" blockers should be bypassed.
+                if (
+                    matched_kw_lower == 'kalkon'
+                    and matched_ing_idx is not None
+                    and any(
+                        cue in ingredients_normalized[matched_ing_idx]
+                        for cue in ('pålägg', 'palagg')
+                    )
+                ):
+                    continue
                 product_blockers.append(blocker)
             if product_blockers:
                 ing_norm = ingredients_normalized[matched_ing_idx]

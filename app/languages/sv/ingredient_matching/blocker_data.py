@@ -3881,7 +3881,9 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'buldak',          # Korean fire noodle brand (Buldak Habanero Ramen matched habanero/chili)
     'cheez ballz',     # OLW snack puff (matched chili keyword)
     'cheezdoodles', 'cheez doodles',  # corn puff snack brand
-    'lantchips',       # Swedish crisp brand (LantChips Habanero matched habanero)
+    # Note: 'lantchips' removed from GLOBAL blockers — per-keyword PNB for habanero/chili
+    # still handles the habanero FPs, but recipes that explicitly mention "lantchips" as an
+    # option (e.g. "mandelpotatischips eller lantchips") legitimately want to match LantChips.
     'skumtoppar',      # marshmallow candy (Skumtoppar Kokos matched kokos)
     'godispåse',       # candy bags — never a recipe ingredient
     'godispase',       # diacritic-free variant

@@ -18660,9 +18660,13 @@ language = "sv"
 market = "SE"
 canonical = "rom"
 status = "active"
-variants = ["\\brom\\b -> \\blöjrom\\b", "\\brom\\b -> \\blojrom\\b", "\\brom\\b -> \\bstenbitsrom\\b", "\\brom\\b -> \\bforellrom\\b", "\\brom\\b -> \\bcaviar\\b"]
+# Narrowed to forellrom only — generic ingredient "rom" no longer bridges to
+# löjrom/stenbitsrom/caviar; those are now treated as distinct fish roe types
+# (PNB rom separation, see fixture cases caviar_rod_stenbitsrom / stenbitsrom /
+# amerikansk_lojrom_fryst_80g_pandalus expected:0).
+variants = ["\\brom\\b -> \\bforellrom\\b"]
 ingredient_terms = ["\\brom\\b"]
-offer_terms = ["\\blöjrom\\b", "\\blojrom\\b", "\\bstenbitsrom\\b", "\\bforellrom\\b", "\\bcaviar\\b"]
+offer_terms = ["\\bforellrom\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_fish_roe_rom_products"]
 layer_policy = ["bridge_only"]
@@ -18674,10 +18678,10 @@ rule_schema_version = 1
 rule_version = 1
 canonical = "rom"
 ingredient_patterns = ["\\brom\\b"]
-offer_patterns = ["\\blöjrom\\b", "\\blojrom\\b", "\\bstenbitsrom\\b", "\\bforellrom\\b", "\\bcaviar\\b"]
+offer_patterns = ["\\bforellrom\\b"]
 negative_offer_patterns = []
-aliases = ["caviar", "forellrom", "löjrom", "stenbitsrom"]
-fixture_refs = ["matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus", "matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica", "matcher_regression_positive_forellrom", "matcher_regression_positive_stenbitsrom"]
+aliases = ["forellrom"]
+fixture_refs = ["matcher_regression_positive_forellrom"]
 supersedes = ["legacy_auto_promoted_batch117_q4"]
 ingredient_form_signals = []
 offer_form_signals = []
@@ -18687,36 +18691,12 @@ forbidden_offer_form_signals = []
 [[entries.coverage]]
 source_family = "match_bridge"
 canonical = "rom"
-variant = "\\brom\\b -> \\blöjrom\\b"
-layer_role = "bridge_positive"
-
-[[entries.coverage]]
-source_family = "match_bridge"
-canonical = "rom"
-variant = "\\brom\\b -> \\blojrom\\b"
-layer_role = "bridge_positive"
-
-[[entries.coverage]]
-source_family = "match_bridge"
-canonical = "rom"
-variant = "\\brom\\b -> \\bstenbitsrom\\b"
-layer_role = "bridge_positive"
-
-[[entries.coverage]]
-source_family = "match_bridge"
-canonical = "rom"
 variant = "\\brom\\b -> \\bforellrom\\b"
-layer_role = "bridge_positive"
-
-[[entries.coverage]]
-source_family = "match_bridge"
-canonical = "rom"
-variant = "\\brom\\b -> \\bcaviar\\b"
 layer_role = "bridge_positive"
 
 [[entries.positive_examples]]
 ingredient = "\\brom\\b"
-offer_name = "\\blöjrom\\b"
+offer_name = "\\bforellrom\\b"
 expected = 1
 
 [[entries]]

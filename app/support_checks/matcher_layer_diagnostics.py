@@ -258,6 +258,22 @@ def _is_allowed_duplicate_source(entry: dict[str, Any]) -> bool:
     term_types = set(entry["term_types"])
     if sources <= {"offer.keyword", "offer.route.keyword", "offer.route.parent_keyword"}:
         return term_types <= {"keyword", "parent_keyword"}
+    # Allow the alias→parent overlap pattern: a parent term (e.g. "paprika") appears
+    # both as a literal name word in the offer AND as the parent_keyword of a TOML
+    # alias-derived match (e.g. paprikapulver→paprika). Both signals point to the
+    # same canonical, so the duplication is benign.
+    if (
+        "offer.route.name_word" in sources
+        and "offer.route.parent_keyword" in sources
+        and sources <= {
+            "offer.keyword",
+            "offer.route.keyword",
+            "offer.route.name_word",
+            "offer.route.parent_keyword",
+        }
+        and term_types <= {"name_word", "parent_keyword", "keyword"}
+    ):
+        return True
     if sources <= {"recipe.extracted_keyword", "recipe.parent_keyword", "recipe.route_term"}:
         return True
     return len(sources) <= 1

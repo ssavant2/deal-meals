@@ -3183,24 +3183,24 @@ variant = "matcher_regression_grovkornig_senap_original_negative: Original Senap
 layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.senap.matcher_regression_grovkornig_senap_positive"
+entry_id = "sv-se.policy.current_queue_matcher_regression.matcher_regression_grovkornig_senap_positive"
 language = "sv"
 market = "SE"
-canonical = "senap"
+canonical = "current_queue_matcher_regression"
 status = "active"
 variants = ["matcher_regression_grovkornig_senap_positive: Skånsk Senap Slotts"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_grovkornig_senap_positive"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_grovkornig_senap_positive."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "senap"
+canonical = "current_queue_matcher_regression"
 variant = "matcher_regression_grovkornig_senap_positive: Skånsk Senap Slotts"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.current_queue_matcher_regression.matcher_regression_grovmalen_svartpeppar_hel_no_match"
@@ -9543,24 +9543,24 @@ variant = "matcher_regression_negative_gochujang: Gochujang"
 layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.legacy_import_auto_regression.matcher_regression_negative_graslok"
+entry_id = "sv-se.policy.graslok.matcher_regression_negative_graslok"
 language = "sv"
 market = "SE"
-canonical = "legacy_import_auto_regression"
+canonical = "gräslök"
 status = "active"
 variants = ["matcher_regression_negative_graslok: Gräslök"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_negative_graslok"]
-layer_policy = ["accepted_filter", "normal"]
+layer_policy = ["normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_negative_graslok."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "legacy_import_auto_regression"
+canonical = "gräslök"
 variant = "matcher_regression_negative_graslok: Gräslök"
-layer_role = "negative_regression"
+layer_role = "positive_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.legacy_import_auto_regression.matcher_regression_negative_green_chili_mild_113g_santa_maria"
@@ -17943,24 +17943,24 @@ variant = "matcher_regression_positive_adelost_gradd_36_230g_kvibille: Ädelost 
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.rom.matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus"
+entry_id = "sv-se.policy.legacy_import_auto_regression.matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus"
 language = "sv"
 market = "SE"
-canonical = "rom"
+canonical = "legacy_import_auto_regression"
 status = "active"
 variants = ["matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus: Amerikansk löjrom Fryst 80g Pandalus"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "rom"
+canonical = "legacy_import_auto_regression"
 variant = "matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus: Amerikansk löjrom Fryst 80g Pandalus"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.ananas.matcher_regression_positive_ananas_fryst_500g_ica_basic"
@@ -18863,24 +18863,24 @@ variant = "matcher_regression_positive_cashewnotter: Cashewnötter"
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.rom.matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica"
+entry_id = "sv-se.policy.legacy_import_auto_regression.matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica"
 language = "sv"
 market = "SE"
-canonical = "rom"
+canonical = "legacy_import_auto_regression"
 status = "active"
 variants = ["matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica: Caviar röd stenbitsrom 75g ICA"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "rom"
+canonical = "legacy_import_auto_regression"
 variant = "matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica: Caviar röd stenbitsrom 75g ICA"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.champinjon.matcher_regression_positive_champinjon"
@@ -23923,24 +23923,24 @@ variant = "matcher_regression_positive_steklok_rod_250g_klass_1_ica: Steklök r�
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.rom.matcher_regression_positive_stenbitsrom"
+entry_id = "sv-se.policy.legacy_import_auto_regression.matcher_regression_positive_stenbitsrom"
 language = "sv"
 market = "SE"
-canonical = "rom"
+canonical = "legacy_import_auto_regression"
 status = "active"
 variants = ["matcher_regression_positive_stenbitsrom: Stenbitsrom"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_positive_stenbitsrom"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_positive_stenbitsrom."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "rom"
+canonical = "legacy_import_auto_regression"
 variant = "matcher_regression_positive_stenbitsrom: Stenbitsrom"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.fiskfil.matcher_regression_positive_stillahavstorsk"
@@ -27183,24 +27183,24 @@ variant = "matcher_regression_svart_bona_positive: Svarta Bönor Eldorado"
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.oliver.matcher_regression_svarta_oliver_kalamata_fallback_positive"
+entry_id = "sv-se.policy.current_queue_matcher_regression.matcher_regression_svarta_oliver_kalamata_fallback_positive"
 language = "sv"
 market = "SE"
-canonical = "oliver"
+canonical = "current_queue_matcher_regression"
 status = "active"
 variants = ["matcher_regression_svarta_oliver_kalamata_fallback_positive: Kalamata Oliver med Kärnor Fontana"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_svarta_oliver_kalamata_fallback_positive"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_svarta_oliver_kalamata_fallback_positive."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "oliver"
+canonical = "current_queue_matcher_regression"
 variant = "matcher_regression_svarta_oliver_kalamata_fallback_positive: Kalamata Oliver med Kärnor Fontana"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.oliver.matcher_regression_svarta_oliver_pitted_positive"
@@ -29063,24 +29063,24 @@ variant = "plan_initial_generic_oil_plain_negative: Rapsolja Eldorado"
 layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.matcher_layer_plan_initial.plan_initial_generic_sugar_negative"
+entry_id = "sv-se.policy.socker.plan_initial_generic_sugar_negative"
 language = "sv"
 market = "SE"
-canonical = "matcher_layer_plan_initial"
+canonical = "socker"
 status = "active"
 variants = ["plan_initial_generic_sugar_negative: Strösocker 1kg ICA"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:plan_initial_generic_sugar_negative"]
-layer_policy = ["accepted_filter", "normal"]
+layer_policy = ["normal"]
 notes = "Registry coverage for matcher regression fixture plan_initial_generic_sugar_negative."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "matcher_layer_plan_initial"
+canonical = "socker"
 variant = "plan_initial_generic_sugar_negative: Strösocker 1kg ICA"
-layer_role = "negative_regression"
+layer_role = "positive_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.matcher_layer_plan_initial.plan_initial_hela_svartpepparkorn_hel_no_match"

@@ -12177,19 +12177,16 @@
     "adapter_ref": "match_bridges:bridge_fish_roe_rom_products",
     "canonical": "rom",
     "fixture_refs": [
-      "matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus",
-      "matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica",
-      "matcher_regression_positive_forellrom",
-      "matcher_regression_positive_stenbitsrom"
+      "matcher_regression_positive_forellrom"
     ],
     "id": "legacy_auto_promoted_batch117_q4",
     "kind": "legacy_synonym",
     "line_refs": [
       {
-        "anchor": "matcher_regression_positive_amerikansk_lojrom_fryst_80g_pandalus",
-        "end": 23395,
+        "anchor": "matcher_regression_positive_forellrom",
+        "end": 23453,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 23395
+        "start": 23453
       }
     ],
     "notes": "Auto-promoted confirmed legacy staging cases for legacy_review:generic_fish_roe_ingredient_rom_still_misses_current_roe_offers_in_a_fish_appetizer_recipe. All selected cases passed fixture diagnostics before promotion. Titles: Generic fish-roe ingredient `rom` still misses current roe offers in a fish appetizer recipe.",
