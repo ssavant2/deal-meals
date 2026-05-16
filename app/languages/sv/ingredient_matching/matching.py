@@ -1060,7 +1060,10 @@ _FRESH_COLOR_CHILI_INGREDIENT_CUES = frozenset({
     'gul chilipeppar',
 })
 _CHILI_COLOR_QUALIFIERS = frozenset({'röd', 'rod', 'red', 'grön', 'gron', 'green', 'gul', 'yellow'})
-_FRESH_CHILI_UNIT_CUES = frozenset({'st', 'styck', 'liten', 'lilla', 'stor', 'stora', 'skivad', 'skivade'})
+_FRESH_CHILI_UNIT_CUES = frozenset({
+    'st', 'styck', 'liten', 'lilla', 'stor', 'stora', 'skivad', 'skivade',
+    'finhackad', 'finhackade', 'hackad', 'hackade', 'urkärnad', 'urkarnad',
+})
 _FRESH_CHILI_INGREDIENT_RE = re.compile(
     r'\b(?:\d+(?:[,.]\d+)?\s*)?'
     r'(?:(?:st|styck)\s+)?'
@@ -1116,9 +1119,17 @@ def _ingredient_requests_fresh_chili(ingredient_lower: str, matched_keyword: str
         return False
     prefix = ingredient_lower[:match.start()].split()[-2:]
     segment = match.group(0)
+    suffix = ingredient_lower[match.end():].split()[:3]
     if any(cue in segment.split() for cue in _FRESH_CHILI_UNIT_CUES):
         return True
     if prefix and any(cue in prefix for cue in _FRESH_CHILI_UNIT_CUES):
+        return True
+    # Cues that appear AFTER the chili keyword also indicate fresh form
+    # (e.g. "1 tsk chilifrukt, finhackad" — finhackad/urkärnad = fresh chili,
+    # dried chili is "pulver"/"flakes"/"flingor", not chopped or seed-removed)
+    if suffix and any(
+        any(cue == w.strip(',.') for w in suffix) for cue in _FRESH_CHILI_UNIT_CUES
+    ):
         return True
     return (
         'sambal' in ingredient_lower

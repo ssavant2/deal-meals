@@ -1199,12 +1199,12 @@ entry_id = "sv-se.alias.mandelpotatis_053"
 language = "sv"
 market = "SE"
 canonical = "potatis"
-status = "active"
+status = "inactive"
 variants = ["mandelpotatis"]
 ingredient_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated 2026-05-16: mandelpotatis is a specific variety, not generic potatis (Stefan policy)."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"

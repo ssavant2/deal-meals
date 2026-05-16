@@ -3563,6 +3563,14 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'adelost': {'mjukost'},
     # Sherry style "manzanilla" ≠ manzanilla olive products
     'manzanilla': {'oliver'},
+    # Q105: pepparrot processed forms (kräm/visp/spread) ≠ fresh root. Fresh whole root
+    # AND fresh riven root (= grated fresh root) both match plain "pepparrot färsk" recipe.
+    # Only true cheese-spread / cream forms are blocked.
+    'pepparrot': {
+        'kräm', 'krem',         # "Pepparrotskräm" — cheese-based spread
+        'visp',                  # "Pepparrotsvisp" — whipped cream spread
+        'ostspread', 'mjukost',  # generic cheese-spread terms with pepparrot flavor
+    },
     # Plain chèvre/getost should not match chèvre-flavored cream cheese
     'chevre': {'färskost', 'farskost', 'kavli'},
     # Flavored getost ≠ plain
@@ -3685,6 +3693,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     'soltorkadetomatcreme': {
         'kyckling',  # "Krämig kyckling med soltorkad tomat Felix" — chicken ready-meal ≠ sun-dried tomato crème
+        'färskost', 'farskost',  # "Färskost Soltorkad Tomat Creme Bonjour" — cream cheese spread ≠ tomato paste
+        'creme bonjour',         # Creme Bonjour brand = cheese spread
+        'philadelphia',          # Philadelphia brand = cream cheese
+        'ostspread', 'mjukost',  # generic cheese spread terms
     },
     'vindruvor': {'smoothie'},  # "Fruktsmoothie Green Dream Äpple Vindruvor" ≠ fresh grapes
     'piadina': {'ristorante'},  # "Ristorante Piadina 4 formaggi" = frozen pizza ≠ plain flatbread
@@ -3842,6 +3854,10 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     # Confectionery ≠ baking marzipan
     'marsipan': {'baileys', 'treats', 'cognac', 'bar', 'anthon berg'},
     'figurmarsipan': {'baileys', 'treats', 'cognac', 'bar'},
+    # Marsipanlock (pre-stamped colored sheet for prinsesstårta) ≠ plain marsipan block.
+    # Recipe explicitly asks for "lock" (finished form). User can roll plain marsipan,
+    # but if recipe names "marsipanlock", suggest the actual product.
+    'marsipanlock': {'sötmandel', 'sotmandel'},
     # Sweetened/flavored yoghurt products ≠ plain yoghurt for cooking
     'yoghurt': {'granola', 'smoothie', 'frukt & müsli'},
     # "Inlagda Grönsaker Mix Pickles 610g" = mixed pickled veg ≠ inlagd gurka (pickled cucumber)

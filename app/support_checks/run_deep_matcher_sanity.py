@@ -5750,12 +5750,12 @@ test(
     1,
 )
 test(
-    "Batch 1 fast potatis accepts bakpotatis",
+    "Batch 1 fast potatis blocks bakpotatis (Q79 policy: bakpotatis is specific variety)",
     recipe_match_num(
         ["1 kg Potatis Fast"],
         {"name": "Bakpotatis Klass 1", "category": "fruit"},
     ),
-    1,
+    0,
 )
 test(
     "Batch 1 cached fast potatis accepts sparrispotatis",
@@ -5814,7 +5814,7 @@ test(
     1,
 )
 test(
-    "Batch 1 fresh chili matches Willys fruit-category chili",
+    "Batch 1 generic chili recipe blocks habanero variety (Q61/Q76 policy)",
     recipe_match_num_cached(
         ["2 st Chilifrukter"],
         {
@@ -5824,7 +5824,7 @@ test(
             "weight_grams": 40,
         },
     ),
-    1,
+    0,
 )
 test(
     "Batch 1 spice chili does not match fresh chili fruit",
@@ -10257,6 +10257,152 @@ test("havssalt blocked when ingredient is snackoliver product",
      match("Havssalt 250g Maldon", "70 g Zeta Snackoliver Havssalt", "pantry"), None)
 test("havssalt still matches plain salt recipe",
      match("Havssalt 250g Maldon", "1 krm havssalt", "pantry"), "havssalt")
+
+# Q79: Potatis specific varieties (bakpotatis/färskpotatis/mandelpotatis) only match themselves
+# Generic potatis recipe → only fast/mjölig/generic, NOT specific varieties
+test("Generic potatis recipe does not match bakpotatis product",
+     match("Bakpotatis 1.2kg Klass 1 ICA", "300 g potatis", "fruit"), None)
+test("Generic potatis recipe does not match färskpotatis product",
+     match("Färskpotatis 750g Klass 1", "300 g potatis", "fruit"), None)
+test("Generic potatis recipe does not match mandelpotatis product",
+     match("Mandelpotatis 500g Klass 1", "300 g potatis", "fruit"), None)
+# Specific recipe only matches own variety
+test("Bakpotatis recipe still matches bakpotatis product",
+     match("Bakpotatis 1.2kg Klass 1 ICA", "2 bakpotatisar", "fruit"), "bakpotatis")
+test("Färskpotatis recipe still matches färskpotatis product",
+     match("Färskpotatis 750g Klass 1", "500 g färskpotatis", "fruit"), "färskpotatis")
+test("Mandelpotatis recipe still matches mandelpotatis product",
+     match("Mandelpotatis 500g Klass 1", "mandelpotatis", "fruit"), "mandelpotatis")
+# Generic potatis still matches generic potatis products
+test("Generic potatis recipe matches Potatis Fast",
+     match("Potatis Fast 1kg Klass 1", "300 g potatis", "fruit"), "potatis")
+
+# Q106: yoghurt 'lätt'/'light' SPECIALTY_QUALIFIERS Direction A
+# Plain yoghurt recipe matches everything; lättyoghurt recipe constrains via slow-path
+# (live matcher). Fast-path Direction A only fires when product has the qualifier too.
+test("Plain yoghurt recipe matches Lätt-product",
+     match("Yoghurt Lätt Mild 0.1% 1000g", "2 dl yoghurt", "dairy"), "yoghurt")
+test("Plain yoghurt recipe matches full-fat",
+     match("Yoghurt Turkisk Naturell 10% 500g", "2 dl yoghurt", "dairy"), "yoghurt")
+test("lättyoghurt recipe matches Lätt-product",
+     match("Yoghurt Lätt Mild 0.1% 1000g", "2 dl mild lättyoghurt", "dairy"), "yoghurt")
+# Slow-path (matches_ingredient) blocks full-fat from lättyoghurt — verified via
+# direct matches_ingredient() call in Q106 testing. Fast-path Direction A is more lenient.
+# Verified live: matches_ingredient(['yoghurt'], '2 dl mild lättyoghurt', 'Yoghurt Turkisk 10%') = None
+
+# Q105: pepparrot SVF replaced with PNB — fresh whole + riven both match, only kräm/visp blocked
+test("Fresh pepparrot whole root matches pepparrot färsk recipe",
+     match("Pepparrot ca 70g Klass 1 ICA I love eco", "2 tsk pepparrot färsk", "fruit"), "pepparrot")
+test("Fresh pepparrot riven matches pepparrot färsk recipe",
+     match("Pepparrot Riven 220g D.Arcianski", "2 tsk pepparrot färsk", "fruit"), "pepparrot")
+test("Pepparrotskräm blocked from plain pepparrot recipe",
+     match("Pepparrotskräm 250g", "2 tsk pepparrot", "dairy"), None)
+
+# Q104: KSBC potatis — specific variety recipe (bakpotatis/mandelpotatis/färskpotatis)
+# should not match generic potatis products (mirror of Q79 product-side block)
+test("Generic potatis blocked from bakpotatis recipe",
+     match("Potatis Fast 1kg Klass 1", "2 bakpotatisar (à 350 g)", "fruit"), None)
+test("Generic potatis blocked from mandelpotatis recipe",
+     match("Mjölig potatis 1.2kg", "500g mandelpotatis", "fruit"), None)
+test("Bakpotatis still matches own variety",
+     match("Bakpotatis 1.2kg Klass 1 ICA", "2 bakpotatisar", "fruit"), "bakpotatis")
+
+# Q103: KSBC frön — vaniljstång's seeds shouldn't match seed-mix products
+test("frön blocked when ingredient says vaniljstång",
+     match("Pumpakärnor 200g ICA", "1 vaniljstång, urskrapade frön", "pantry"), None)
+test("frön still matches for plain seed recipe",
+     match("Sesamfrön 200g", "100g sesamfrön", "pantry"), "sesamfrön")
+
+# Q102: KSBC "sky från [protein]" — pan drippings are not purchasable, suppress protein keyword
+test("kalkon blocked when ingredient is 'sky från kalkon'",
+     match("Kalkon hel ca 4kg Ingelsta", "ca 4 dl sky från kalkon", "meat"), None)
+test("kalkon still matches plain kalkon recipe",
+     match("Kalkon hel ca 4kg Ingelsta", "1 hel kalkon", "meat"), "helkalkon")
+
+# Q98: KSBC kryddblandning — wrong-cuisine spice mixes blocked when ingredient names specific cuisine
+test("Cajun kryddblandning blocked from kinesisk femkrydda recipe",
+     match("Cajun American style Kryddblandning 38g", "1 tsk kinesisk femkrydda färdig kryddblandning", "pantry"), None)
+test("Garlic pepper kryddblandning blocked from kinesisk femkrydda recipe",
+     match("Roasted garlic & pepper Kryddblandning", "1 tsk kinesisk femkrydda färdig kryddblandning", "pantry"), None)
+test("Plain kryddblandning still matches plain recipe",
+     match("Italian Kryddblandning 35g", "1 msk kryddblandning", "pantry"), "kryddblandning")
+
+# Q94: PNB marsipanlock — plain marsipan block blocked from marsipanlock recipe
+test("marsipanlock PNB has sötmandel", 'sötmandel' in PRODUCT_NAME_BLOCKERS.get('marsipanlock', set()), True)
+
+# Q93: KSBC redning — Maizena blocked when ingredient says pastavatten as redning
+test("Maizena Redning blocked when ingredient is pastavatten-som-redning",
+     match("Redning Ljus 250g Maizena", "ev. lite pastavatten som redning till såsen", "pantry"), None)
+test("Maizena Redning still matches plain redning recipe",
+     match("Redning Ljus 250g Maizena", "1 msk redning", "pantry"), "redning")
+
+# Q92: chilifrukt → chili bridge (chilifrukt = fresh chili by definition)
+test("chilifrukt finhackad recipe matches fresh chili röd",
+     match("Chili Röd 80g Klass 1 ICA", "1 tsk chilifrukt, finhackad", "fruit"), "chili")
+test("chilifrukt finhackad recipe matches plain chili product",
+     match("Chili 80g Klass 1 ICA", "1 tsk chilifrukt, finhackad", "fruit"), "chili")
+test("chilifrukt does NOT match chilipulver (dried spice)",
+     match("Chilipulver 35g Santa Maria", "1 tsk chilifrukt, finhackad", "pantry"), None)
+
+# Q89: PNB soltorkadetomatcreme — cream cheese spreads blocked
+test("soltorkadetomatcreme PNB has färskost",
+     'färskost' in PRODUCT_NAME_BLOCKERS.get('soltorkadetomatcreme', set()), True)
+test("soltorkadetomatcreme PNB has creme bonjour",
+     'creme bonjour' in PRODUCT_NAME_BLOCKERS.get('soltorkadetomatcreme', set()), True)
+test("soltorkadetomatcreme PNB has philadelphia",
+     'philadelphia' in PRODUCT_NAME_BLOCKERS.get('soltorkadetomatcreme', set()), True)
+
+# Q88: KSBC citron — whole lemons blocked from läsk (soda) ingredients
+test("Whole lemon blocked from citronläsk recipe",
+     match("Citron 500g Klass 1", "1 l citronläsk", "fruit"), None)
+test("Whole lemon still matches plain citron recipe",
+     match("Citron 500g Klass 1", "2 citroner", "fruit"), "citron")
+
+# Q86: BDPK dumpling fillings — distinct protein profiles, only match named filling
+test("Dumpling biff blocked from kyckling recipe",
+     match("Dumpling biff chili ingefära 200g Beijing8", "400 g dumplings kyckling", "frozen"), None)
+test("Dumpling anka blocked from kyckling recipe",
+     match("Dumplings anka & ingefära 320g ICA", "400 g dumplings kyckling", "frozen"), None)
+test("Dumpling vegetariska blocked from kyckling recipe",
+     match("Vegetariska dumplings 320g ICA", "400 g dumplings kyckling", "frozen"), None)
+test("Dumpling kyckling matches kyckling recipe",
+     match("Dumpling kyckling 200g Beijing8", "400 g dumplings kyckling", "frozen"), "dumpling")
+
+# Q80: KSBC passionsfrukt — whole fruit blocked when ingredient asks for saft
+test("passionsfrukt whole blocked from saft recipe",
+     match("Passionsfrukt Fryst 250g ICA", "1 dl passionsfruktssaft", "fruit"), None)
+test("passionsfrukt whole still matches plain recipe",
+     match("Passionsfrukt ca 40g Klass 1 ICA", "2 passionsfrukter", "fruit"), "passionsfrukt")
+
+# Q61+Q76: BDPK chili/chilipeppar — extreme-heat varieties only match named recipes
+test("Chili Naga blocked from generic röd chili recipe",
+     match("Chili Naga 25g Klass 1 ICA", "1 röd chili", "fruit"), None)
+test("Röd habanero blocked from generic chili recipe",
+     match("Röd habanero 25g Klass 1 ICA", "1 chili, hackad", "fruit"), None)
+test("Carolina reaper blocked from generic chilipeppar",
+     match("Carolina Reaper 20g Klass 1", "25 g chilipeppar färsk", "fruit"), None)
+test("Habanero matches habanero-named recipe",
+     match("Röd habanero 25g Klass 1 ICA", "1 habanero, urkärnad", "fruit"), "habanero")
+test("Naga matches naga-named recipe",
+     match("Chili Naga 25g Klass 1 ICA", "25 g chili naga", "fruit"), "chili")
+test("Plain red chili still matches plain chili recipe",
+     match("Chili Röd 80g Klass 1 ICA", "1 röd chili", "fruit"), "chili")
+
+# Q75: äggulor/äggula → ägg parent mapping (registry, verifies stale-cache claim was false alarm)
+test("äggulor → ägg parent match", match("Ägg Ekologiska KRAV 12-p Stjärnägg", "5 äggulor", "dairy"), "ägg")
+test("äggula → ägg parent match", match("Ägg Ekologiska KRAV 12-p Stjärnägg", "2 äggula", "dairy"), "ägg")
+test("äggvita → ägg parent match", match("Ägg Ekologiska KRAV 12-p Stjärnägg", "1 äggvita", "dairy"), "ägg")
+
+# Q74: BDPK nötmix — flavored snack mixes only match flavor-matched ingredients
+# (BBQ product ↔ BBQ recipe; plain saltad/rostad ↔ plain products)
+test("nötmix BBQ blocked from plain saltad/rostad recipe",
+     match("Nötmix BBQ 140g Treatville", "1.75 dl Nötmix Saltad/Rostad", "candy"), None)
+test("nötmix BBQ matches BBQ recipe",
+     match("Nötmix BBQ 140g Treatville", "100 g bbq nötmix", "candy"), "nötmix")
+test("nötmix Mango blocked from plain recipe",
+     match("Nötmix Mango 175g OLW", "1.75 dl nötmix saltad", "candy"), None)
+test("nötmix plain still matches plain recipe",
+     match("Nötmix Saltad 150g Estrella", "1.75 dl Nötmix Saltad/Rostad", "candy"), "nötmix")
 
 # ========================================================================
 print("\n========================================")

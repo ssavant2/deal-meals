@@ -279,6 +279,10 @@ _COMPOUND_QUALIFIER_ALIASES: Dict[str, Set[str]] = {
     'surdegs': {'surdegs', 'surdeg'},
     # Poultry cuts — recipe "kalkonfilé" should match kalkonbröstfil, kalkonlårfilé etc.
     **{cut: _POULTRY_CUT_SUFFIXES for cut in _POULTRY_CUT_SUFFIXES},
+    # Chili synonyms: ingredient "chilipeppar" (= chili + peppar) is the canonical
+    # full name and identical to plain "chili". Plain chili products (without
+    # "peppar" in name) should match without requiring a qualifier suffix.
+    'peppar': {'peppar', 'chili'},
 }
 
 

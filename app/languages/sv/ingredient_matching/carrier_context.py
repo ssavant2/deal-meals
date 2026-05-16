@@ -873,7 +873,15 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # "MAX crispy no chicken" is a branded vegan product — not actual chicken
     'chicken': {'no chicken'},
     # "potatisskalare" = potato peeler (kitchen tool), not potatoes
-    'potatis': {'potatisskalare', 'sötpotatis', 'sotpotatis'},
+    'potatis': {
+        'potatisskalare', 'sötpotatis', 'sotpotatis',
+        # Q79/Q104 specific variety policy: when recipe names a specific variety,
+        # suppress generic 'potatis' so plain potatis products don't bridge.
+        # The specific variety still matches its own keyword.
+        'bakpotatis', 'bakpotatisar',
+        'mandelpotatis', 'mandelpotatisar',
+        'färskpotatis', 'farskpotatis',
+    },
     # "Hushållsaromer" = liquid flavoring, not hushållsost (cheese)
     'hushålls': {'hushållsaromer'},
     # "chokladägg" = hollow chocolate eggs (candy), not real eggs
@@ -916,7 +924,10 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # "Snackoliver Citron" = lemon-flavored snack olives, not fresh lemons.
     # "Kall citronsås" should stay on the sauce family, not fall back to fresh lemons.
     # Olive/sauce products already match via their own specific keywords.
-    'citron': {'snackoliver', 'citronkaka', 'citronsås', 'citronsas'},
+    'citron': {
+        'snackoliver', 'citronkaka', 'citronsås', 'citronsas',
+        'läsk', 'citronläsk',  # citron-flavored soda ≠ whole lemons
+    },
     # "maraschinokörsbär" = cocktail cherries, not fresh/frozen cherries.
     # "körsbärsmarmelad" should stay on the preserve instead of falling back
     # to plain fresh/frozen cherries.
@@ -957,7 +968,7 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     'sylt': {'hallonsylt', 'lingonsylt', 'jordgubbssylt', 'jordgubbsylt', 'apelsinskal'},
     # "400g Dumplings Kyckling" = pre-made chicken dumplings, not raw chicken.
     # Suppress 'kyckling' when ingredient mentions 'dumplings' — recipe wants ready-made product.
-    'kyckling': {'dumplings', 'dumpling'},
+    'kyckling': {'dumplings', 'dumpling', 'sky från kyckling'},
     # "mozzarellaost (limpa à ca 350-400 g)" — 'limpa' describes cheese block form, not bread.
     # Suppress 'limpa' when ingredient mentions 'mozzarella'.
     'limpa': {'mozzarella'},
@@ -1120,6 +1131,46 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # "Zeta Snackoliver Havssalt" — product is olive snacks, not crystalline sea salt.
     # Suppress havssalt keyword when ingredient text is about olives as the carrier.
     'havssalt': {'snackoliv', 'snack oliv', 'oliver', 'oliv'},
+    # "1 dl Passionsfruktssaft (utan kärnor)" — recipe wants juice/saft, not whole fruit.
+    # Unlike citrus (which is often pressed at home), passionsfrukt-juice is bought in
+    # boxes — no one juices passionsfrukt themselves. Suppress whole-fruit keyword.
+    'passionsfrukt': {'passionsfruktssaft', 'passionsfruktsaft'},
+    'passionfrukt': {'passionsfruktssaft', 'passionsfruktsaft', 'passionfruktssaft', 'passionfruktsaft'},
+    # "ev. lite pastavatten som redning till såsen" — recipe uses pasta water AS the
+    # thickener, not buying Maizena/cornstarch. Suppress redning keyword.
+    'redning': {'pastavatten'},
+    # "1 vaniljstång, urskrapade frön" — recipe scrapes seeds from a vanilla pod.
+    # Generic `frön` keyword should NOT match pumpkin/sesame/chia/lin/sunflower seeds.
+    # FPB smart-logic doesn't catch this because 'frön' appears standalone in the text.
+    'frön': {'vaniljstång', 'vaniljstang'},
+    'fron': {'vaniljstång', 'vaniljstang'},
+    # "ca 4 dl sky från kalkon" — sky = pan drippings produced during roasting,
+    # NOT a separately purchasable ingredient. Recipe already has the whole protein
+    # listed on another row. Suppress protein keyword when this exact phrasing appears.
+    'kalkon': {'sky från kalkon'},
+    'anka': {'sky från anka'},
+    'fläsk': {'sky från fläsk'},
+    'flask': {'sky från flask'},
+    'lamm': {'sky från lamm'},
+    'nötkött': {'sky från nötkött', 'sky från nöt'},
+    'notkott': {'sky från notkott', 'sky från not'},
+    # Generic `kryddblandning` keyword should NOT match when ingredient names a
+    # specific cuisine-spice blend. E.g. "kinesisk femkrydda" recipe should NOT
+    # pick up "Cajun Kryddblandning" or "Roasted garlic & pepper Kryddblandning".
+    'kryddblandning': {
+        'kinesisk', 'femkrydda',          # Chinese five-spice
+        'garam masala',                    # Indian
+        'ras el hanout', 'ras-el-hanout',  # Moroccan
+        'baharat',                         # Middle Eastern
+        'dukkah',                          # Egyptian
+        'harissa',                         # North African
+        'jerk',                            # Jamaican
+        'cajun',                           # Louisiana
+        'thai',                            # Thai
+        'marockansk', 'mexikansk',
+        'tandoori',                        # Indian
+        'shichimi', 'togarashi',           # Japanese
+    },
     # "2 dl granatäpplejuice" — suppress whole-fruit keyword when ingredient asks for juice.
     # Whole-fruit "Granatäpple Jumbo Klass 1" ≠ pomegranate juice.
     # Note: recipes use both "granatäpplejuice" (äpple-form) and "granatäppeljuice" (äppel-form).

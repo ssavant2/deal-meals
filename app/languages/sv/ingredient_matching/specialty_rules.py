@@ -240,6 +240,35 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'hel',        # "Kanel Hel Påse" = whole cinnamon
     },
 
+    # Snack nötmix flavors — flavored variants only match flavor-matched ingredients.
+    # Plain "saltad/rostad nötmix" should NOT pick up BBQ/Asia/mango/chili-honey/wasabi
+    # snack mixes. Bidirectional via BIDIRECTIONAL_PER_KEYWORD below.
+    'nötmix': {
+        'bbq', 'asia', 'mango', 'wasabi', 'thai', 'curry',
+        'honung', 'chili',
+    },
+
+    # Lätt yoghurt — recipe "lättyoghurt" should match only "Lätt"-labeled products,
+    # not full-fat 10% turkisk yoghurt. Bidirectional via BIDIRECTIONAL_PER_KEYWORD.
+    # Trade-off accepted: low-fat products without the word "lätt" in name (e.g.
+    # "Yoghurt 0.5%") also don't match — but it's OK per Stefan.
+    'yoghurt': {
+        'lätt', 'latt', 'light',
+    },
+
+    # Dumpling fillings — kyckling/biff/anka/vegetarisk/edamame/grönsaker are
+    # distinct protein/flavor profiles, not substitutable. Bidirectional below.
+    'dumpling': {
+        'kyckling', 'biff', 'anka', 'fläsk', 'flask',
+        'vegetarisk', 'vegetariska', 'vegan', 'vego',
+        'edamame', 'grönsaker', 'gronsaker',
+    },
+    'dumplings': {
+        'kyckling', 'biff', 'anka', 'fläsk', 'flask',
+        'vegetarisk', 'vegetariska', 'vegan', 'vego',
+        'edamame', 'grönsaker', 'gronsaker',
+    },
+
     # NOTE: Fresh herbs (koriander, basilika, persilja, mynta, dill) removed.
     # The qualifiers {färsk, kruka, bunt, knippe} are packaging descriptors,
     # not specialty types. Direction A blocked "Koriander Bunt" from matching
@@ -566,11 +595,30 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'dulce',
     },
 
-    # Fresh chili: color qualifiers distinguish red from green chili
-    # Same logic as paprika — "grön chili" should NOT match "Chili Röd" and vice versa
+    # Fresh chili: color qualifiers + extreme-heat varieties
+    # Color: "grön chili" ≠ "Chili Röd" and vice versa
+    # Heat: habanero/naga/ghost/reaper are 100–500× hotter than generic chili
+    # and ruin standard recipes — but if recipe explicitly names the variety,
+    # the matching product should still match (via bidirectional below).
     'chili': {
         'röd', 'rod', 'red',      # red chili
         'grön', 'gron', 'green',   # green chili
+        'habanero',
+        'naga',
+        'bhut jolokia',
+        'ghost pepper', 'ghost',
+        'carolina reaper', 'reaper',
+        'scotch bonnet',
+    },
+    'chilipeppar': {
+        'röd', 'rod', 'red',
+        'grön', 'gron', 'green',
+        'habanero',
+        'naga',
+        'bhut jolokia',
+        'ghost pepper', 'ghost',
+        'carolina reaper', 'reaper',
+        'scotch bonnet',
     },
 
     # Chili sauce types - "sweet chilisås" ≠ "lime chilisås" ≠ "sriracha chilisås"
@@ -616,10 +664,9 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     'jordgubbar': {'frystorkad', 'frystorkade'},
     'körsbär': {'torkad', 'torkade'},
     # 'dadlar' removed — dried is the default form in Sweden. "Dadlar" = torkade dadlar.
-    # "Torkade Dadlar" should match any recipe asking for "dadlar".
-    # Fresh horseradish root ≠ jarred grated (riven). "2 msk pepparrot färsk" should
-    # not match "Pepparrot Riven" since riven is a preserved processed form.
-    'pepparrot': {'färsk', 'farsk'},
+    # NOTE: pepparrot SVF rule removed 2026-05-16 (Q105). Was `'pepparrot': {'färsk', 'farsk'}`
+    # but blocked legitimate fresh products like "Pepparrot Riven" (= fresh grated root).
+    # Replaced by PNB on pepparrot to block only true preserved forms (kräm/visp/spread).
     # Food coloring: when recipe specifies a color (gul, röd, svart...), only that color should match.
     # All colors are bidirectional so "gul karamellfärg" recipe blocks Svart/Röd/Grön products.
     'karamellfärg': {'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'},
@@ -997,6 +1044,46 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
     }),
     'oliver': frozenset({
         'fylld', 'fyllda', 'pimiento',
+    }),
+    # Extreme-heat chili varieties (habanero/naga/ghost/reaper/scotch bonnet)
+    # only match recipes that explicitly name the variety. Plain "röd chili"
+    # or "1 chili" recipes get plain chili, not 1M-Scoville varieties.
+    'chili': frozenset({
+        'habanero', 'naga', 'bhut jolokia',
+        'ghost pepper', 'ghost', 'carolina reaper', 'reaper',
+        'scotch bonnet',
+    }),
+    'chilipeppar': frozenset({
+        'habanero', 'naga', 'bhut jolokia',
+        'ghost pepper', 'ghost', 'carolina reaper', 'reaper',
+        'scotch bonnet',
+    }),
+    # NOTE: yoghurt 'lätt'/'light' is in SPECIALTY_QUALIFIERS (Direction A only).
+    # Direction B intentionally skipped — plain "yoghurt" recipe should still match
+    # lätt-yoghurt products (user can buy any yoghurt). Only "lättyoghurt" recipe
+    # constrains the product side to "lätt"-labeled.
+
+    # Dumpling fillings — kyckling-dumpling recipe should not match anka/biff/veg etc.
+    'dumpling': frozenset({
+        'kyckling', 'biff', 'anka', 'fläsk', 'flask',
+        'vegetarisk', 'vegetariska', 'vegan', 'vego',
+        'edamame', 'grönsaker', 'gronsaker',
+    }),
+    'dumplings': frozenset({
+        'kyckling', 'biff', 'anka', 'fläsk', 'flask',
+        'vegetarisk', 'vegetariska', 'vegan', 'vego',
+        'edamame', 'grönsaker', 'gronsaker',
+    }),
+    # Flavored snack nötmix (BBQ/Asia/mango/chili-honey/wasabi) ≠ plain saltad/rostad
+    # nötmix. Bidirectional: ingredient must name the flavor to match a flavored
+    # product, AND product flavors must be requested by the ingredient.
+    'nötmix': frozenset({
+        'bbq', 'asia', 'mango', 'wasabi', 'thai', 'curry',
+        'honung', 'chili',
+    }),
+    'notmix': frozenset({
+        'bbq', 'asia', 'mango', 'wasabi', 'thai', 'curry',
+        'honung', 'chili',
     }),
     'fraiche': frozenset({
         'paprika', 'chili', 'tomat', 'basilika', 'dragon', 'citron',

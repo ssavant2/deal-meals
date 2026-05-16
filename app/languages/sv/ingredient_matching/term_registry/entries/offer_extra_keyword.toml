@@ -3,12 +3,12 @@ entry_id = "sv-se.alias.farskpotatis_001"
 language = "sv"
 market = "SE"
 canonical = "potatis"
-status = "active"
+status = "inactive"
 variants = ["färskpotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping."
+notes = "Inactivated 2026-05-16: färskpotatis is a specific variety, not generic potatis (Stefan policy)."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -26,12 +26,12 @@ entry_id = "sv-se.alias.farskpotatis_002_2"
 language = "sv"
 market = "SE"
 canonical = "potatis"
-status = "active"
+status = "inactive"
 variants = ["farskpotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping."
+notes = "Inactivated 2026-05-16: färskpotatis is a specific variety (Stefan policy)."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -49,12 +49,12 @@ entry_id = "sv-se.alias.bakpotatis_003"
 language = "sv"
 market = "SE"
 canonical = "potatis"
-status = "active"
+status = "inactive"
 variants = ["bakpotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Registry-owned offer extra keyword mapping."
+notes = "Inactivated 2026-05-16: bakpotatis is a specific variety (Stefan policy)."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7709,4 +7709,28 @@ layer_role = "offer_extra_keyword_mapping"
 [[entries.positive_examples]]
 ingredient = "tomatpesto"
 offer_name = "Pesto Soltorkad tomat Ekologisk 130g ICA I love eco"
+expected = 1
+
+
+[[entries]]
+entry_id = "sv-se.alias.kalamataoliver_322"
+language = "sv"
+market = "SE"
+canonical = "oliver"
+status = "active"
+variants = ["kalamataoliver"]
+offer_terms = ["oliver"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Kalamataoliver-named products are olive products (not olive oil) and should match generic 'oliver' ingredient. Bare 'kalamata' NOT included to avoid over-matching 'Olivolja Kalamata'."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "oliver"
+variant = "kalamataoliver"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "oliver"
+offer_name = "Kalamataoliver 200g Zeta"
 expected = 1
