@@ -3811,6 +3811,9 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'sirap': {'vaxkaka'},
     # Chipotle pepper sauce (Tabasco-style hot sauce) ≠ dried chipotle spice/paste
     'chipotle': {'sauce', 'tabasco', 'pepper sauce'},
+    # Elderflower tonic water ≠ elderflower cordial/drink ingredient (side-effect of tonic extraction fix)
+    'fläder': {'tonic', 'tonicvatten'},
+    'flader': {'tonic', 'tonicvatten'},
 }
 
 for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():

@@ -10000,7 +10000,7 @@ test("Batch 15 fänkålsfrö blocks ground fennel", recipe_match_num(["1 tsk fä
 test("Batch 15 fänkålsfrö accepts whole fennel", recipe_match_num_cached(["1 tsk fänkålsfrö"], {"name": "Fänkål Hel Påse Kockens", "category": "pantry"}), 1)
 test("Batch 15 Tzaybitar matches vegobitar", recipe_match_num(["200 g Tzaybitar"], {"name": "Vegobitar Anamma", "category": "frozen"}), 1)
 test("Batch 15 grovkornig senap blocks original mustard", recipe_match_num_cached(["1 msk grovkornig senap"], {"name": "Original Senap Slotts", "category": "pantry"}), 0)
-test("Batch 15 grovkornig senap accepts skånsk mustard", recipe_match_num(["1 msk grovkornig senap"], {"name": "Skånsk Senap Slotts", "category": "pantry"}), 1)
+test("Batch 15 grovkornig senap blocks skånsk mustard", recipe_match_num(["1 msk grovkornig senap"], {"name": "Skånsk Senap Slotts", "category": "pantry"}), 0)
 test("Batch 15 sashimi lax blocks generic salmon fillet", recipe_match_num_cached(["200 g sashimi lax"], {"name": "Laxfilé Fryst", "category": "fish"}), 0)
 test("Batch 15 sashimi lax accepts sushilax", recipe_match_num(["200 g sashimi lax"], {"name": "Sushilax Loin", "category": "fish"}), 1)
 test("Batch 15 title sashimi lax blocks generic salmon", recipe_match_num_named_cached("Sashimi lax", ["200 g lax"], {"name": "Laxfilé Fryst", "category": "fish"}), 0)

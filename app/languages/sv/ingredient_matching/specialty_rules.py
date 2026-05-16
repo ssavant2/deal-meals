@@ -176,14 +176,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'smörgås', 'smorgås', 'ättiks', 'attiks', 'boston',
     },
 
-    # Food coloring is color-specific: "röd hushållsfärg" should not match
-    # green/yellow/blue variants.
-    'hushållsfärg': {
-        'röd', 'rod', 'red',
-        'grön', 'gron', 'green',
-        'gul', 'yellow',
-        'blå', 'bla', 'blue',
-    },
+    # Note: 'hushållsfärg' color qualifiers defined below (line 634 area) — single entry to avoid ruff F601 duplicate key warning
 
     # Citron: "inlagda citroner" (preserved lemons) ≠ fresh "citron"
     # Direction A: recipe says "inlagda citroner" → fresh "Citron Klass 1" blocked
@@ -631,14 +624,14 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # All colors are bidirectional so "gul karamellfärg" recipe blocks Svart/Röd/Grön products.
     'karamellfärg': {'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'},
     'karamellfarg': {'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'},
-    'hushållsfärg': {'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'},
+    'hushållsfärg': {'gul', 'yellow', 'svart', 'röd', 'rod', 'red', 'röda', 'grön', 'gron', 'green', 'blå', 'bla', 'blue', 'vit', 'vitt', 'rosa'},
     'hushallsfarg': {'gul', 'svart', 'röd', 'rod', 'röda', 'grön', 'gron', 'blå', 'bla', 'vit', 'vitt', 'rosa'},
     # Cloves: ground (malen) ≠ whole. "6 kryddnejlikor" = whole for infusion, not ground.
     # 'nejlikor' is the parent keyword (nejlika → nejlikor in INGREDIENT_PARENTS).
-    'nejlika': {'malen', 'mald', 'malet'},
-    'nejlikor': {'malen', 'mald', 'malet'},
-    'kryddnejlika': {'malen', 'mald', 'malet'},
-    'kryddnejlikor': {'malen', 'mald', 'malet'},
+    'nejlika': {'malen', 'mald', 'malet', 'malda'},
+    'nejlikor': {'malen', 'mald', 'malet', 'malda'},
+    'kryddnejlika': {'malen', 'mald', 'malet', 'malda'},
+    'kryddnejlikor': {'malen', 'mald', 'malet', 'malda'},
     # Mustard type distinctions — sötstark/skånsk/dijon are specific families.
     # "senap ljus" should not match sötstark/skånsk/dijon; generic "senap" same.
     'senap': {
@@ -1037,10 +1030,10 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
     # Cloves: ground (malen) ≠ whole. "6 kryddnejlikor" means whole for infusion.
     # Ground cloves only match when recipe explicitly asks for "malen/mald nejlika".
     # 'nejlikor' is the parent keyword (nejlika → nejlikor in INGREDIENT_PARENTS).
-    'nejlika': frozenset({'malen', 'mald', 'malet'}),
-    'nejlikor': frozenset({'malen', 'mald', 'malet'}),
-    'kryddnejlika': frozenset({'malen', 'mald', 'malet'}),
-    'kryddnejlikor': frozenset({'malen', 'mald', 'malet'}),
+    'nejlika': frozenset({'malen', 'mald', 'malet', 'malda'}),
+    'nejlikor': frozenset({'malen', 'mald', 'malet', 'malda'}),
+    'kryddnejlika': frozenset({'malen', 'mald', 'malet', 'malda'}),
+    'kryddnejlikor': frozenset({'malen', 'mald', 'malet', 'malda'}),
     # Mustard types: sötstark/skånsk/dijon are specific flavour families.
     # A recipe asking for "senap ljus" (mild yellow) should not accept sweet or sharp varieties.
     # Generic "senap" in a recipe also shouldn't accept these without explicit mention.
@@ -1357,4 +1350,9 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'soltorkad': {'soltorkade', 'soltorkad', 'solt', 'secchi'},
     'solt': {'soltorkade', 'soltorkad', 'solt', 'secchi'},
     'secchi': {'soltorkade', 'soltorkad', 'solt', 'secchi'},
+    # Ground spice adjective forms: malen/mald/malet/malda are the same word in different grammatical forms
+    'malen': {'malen', 'mald', 'malet', 'malda'},
+    'mald': {'malen', 'mald', 'malet', 'malda'},
+    'malet': {'malen', 'mald', 'malet', 'malda'},
+    'malda': {'malen', 'mald', 'malet', 'malda'},
 }
