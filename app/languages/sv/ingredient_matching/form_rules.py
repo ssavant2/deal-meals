@@ -74,6 +74,7 @@ _SPARSE_FRESH_PRODUCT_BLOCKERS: FrozenSet[str] = frozenset({
     'påse',
     'pase',
     'kockens',
+    'santa maria',  # dried spice brand — small jars (3g) are not fresh herb
     'te',
     'tea',
     'friggs',

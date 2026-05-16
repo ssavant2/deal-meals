@@ -7681,3 +7681,32 @@ layer_role = "offer_extra_keyword_mapping"
 ingredient = "falafelmix"
 offer_name = "Falafelpulver 200g Sevan"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tomatpesto.soltorkad_001"
+language = "sv"
+market = "SE"
+canonical = "tomatpesto"
+status = "active"
+variants = ["pesto soltorkad tomat", "pesto soltorkade tomater"]
+offer_terms = ["tomatpesto"]
+source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
+layer_policy = ["offer_alias"]
+notes = "Sun-dried tomato pesto products respond to 'tomatpesto' ingredient — same product, different naming convention."
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tomatpesto"
+variant = "pesto soltorkad tomat"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.coverage]]
+source_family = "offer_extra_keyword"
+canonical = "tomatpesto"
+variant = "pesto soltorkade tomater"
+layer_role = "offer_extra_keyword_mapping"
+
+[[entries.positive_examples]]
+ingredient = "tomatpesto"
+offer_name = "Pesto Soltorkad tomat Ekologisk 130g ICA I love eco"
+expected = 1

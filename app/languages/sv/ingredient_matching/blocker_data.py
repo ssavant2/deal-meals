@@ -154,6 +154,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # not other species or prepared potato products.
     'potatis': {
         'sötpotatis', 'sotpotatis',  # sweet potato (different species)
+        'färskpotatis', 'farskpotatis',  # new-season potato — distinct variety, not generic
         'klyftpotatis',  # wedge potatoes (frozen/pre-made)
         'potatismjöl', 'potatismjol',  # potato starch (sauce thickener, different product)
         'potatischips',  # potato chips (snack)
@@ -3816,6 +3817,8 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'matlagningsvin': {'alkoholfri', 'alkoholfritt', 'alkoholfria'},
     # Honeycomb syrup (vaxkaka) ≠ Swedish dark bread syrup (brödsirap)
     'sirap': {'vaxkaka'},
+    # Chipotle pepper sauce (Tabasco-style hot sauce) ≠ dried chipotle spice/paste
+    'chipotle': {'sauce', 'tabasco', 'pepper sauce'},
 }
 
 for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():

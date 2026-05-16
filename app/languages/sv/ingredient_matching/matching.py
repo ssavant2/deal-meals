@@ -91,6 +91,7 @@ from .recipe_text import (
     preserve_parenthetical_shiso_alternatives,
     preserve_spice_mix_preference_parentheticals,
     preserve_single_product_example_parentheticals,
+    preserve_plant_based_parenthetical,
     strip_biff_portion_prep_phrase,
     rewrite_mince_of_alternatives,
     rewrite_truncated_chocolate_color_lists,
@@ -2919,6 +2920,7 @@ def matches_ingredient(
         ingredient_lower = preserve_parenthetical_shiso_alternatives(ingredient_lower)
         ingredient_lower = preserve_non_concentrate_parenthetical(ingredient_lower)
         ingredient_lower = preserve_spice_mix_preference_parentheticals(ingredient_lower)
+        ingredient_lower = preserve_plant_based_parenthetical(ingredient_lower)
     ingredient_lower = normalize_measured_durumvete_flour(ingredient_lower)
     ingredient_lower = normalize_measured_risotto_rice(ingredient_lower)
     ingredient_lower = rewrite_truncated_chocolate_color_lists(ingredient_lower)
@@ -4169,6 +4171,7 @@ def _prepare_fast_ingredient_text(
     ingredient_lower = preserve_parenthetical_shiso_alternatives(ingredient_lower)
     ingredient_lower = preserve_spice_mix_preference_parentheticals(ingredient_lower)
     ingredient_lower = preserve_single_product_example_parentheticals(ingredient_lower)
+    ingredient_lower = preserve_plant_based_parenthetical(ingredient_lower)
     if is_subrecipe_reference_text(ingredient_lower):
         return ''
     wants_herb_fresh_cheese = (

@@ -890,6 +890,7 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     'chili': {
         'tapenade', 'pinsasås', 'pinsasas', 'salsiccia', 'glaze', 'sriracha', 'chipotle',
         'chili oil', 'chiliolja', 'crispychiliolja',
+        'chiliflakes', 'chiliflingor',  # dried flake form ≠ ground/powder chili
     },  # flavor/heat word inside another condiment family
     # "Philadelphia cream cheese sweet chili" = flavored cream cheese, not chili sauce.
     # Suppress 'chilisås' when ingredient mentions 'färskost' or 'cream cheese'.

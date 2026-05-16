@@ -73,6 +73,11 @@ _SINGLE_PRODUCT_EXAMPLE_PAREN_RE = re.compile(
     r'\(\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s+(bostongurka|bostongurkor)\s*\)',
     re.IGNORECASE,
 )
+# Parenthetical plant-based/vegan labels signal a dietary requirement that must survive paren stripping
+_PLANT_BASED_PAREN_RE = re.compile(
+    r'\(\s*(växtbaserad|vaxtbaserad|vegansk|veganska|veganskt|vegan|vegetarisk|vegetariskt|vegetariska|vego)\s*\)',
+    re.IGNORECASE,
+)
 _MEASURE_PREFIX_ALT_RE = re.compile(
     r'^\s*((?:ca\s+)?\d+(?:[.,]\d+)?(?:\s*-\s*\d+(?:[.,]\d+)?)?\s*'
     r'(?:msk|tsk|krm|ml|cl|dl|l|g|kg|st))\s+([^\s,]+)\s*$',
@@ -261,6 +266,17 @@ def preserve_single_product_example_parentheticals(text: str) -> str:
     if 'bostongurk' not in text.lower():
         return text
     return _SINGLE_PRODUCT_EXAMPLE_PAREN_RE.sub(lambda m: f" {m.group(1).strip()} ", text)
+
+
+def preserve_plant_based_parenthetical(text: str) -> str:
+    """Lift plant-based/vegan dietary labels out of parentheses before generic stripping.
+
+    Example:
+    - "400 g färs (växtbaserad)" -> "400 g färs växtbaserad"
+    - "smör (veganskt)" -> "smör veganskt"
+    """
+
+    return _PLANT_BASED_PAREN_RE.sub(lambda m: f" {m.group(1).lower()} ", text)
 
 
 def preserve_parenthetical_shiso_alternatives(text: str) -> str:

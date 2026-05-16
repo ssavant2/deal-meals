@@ -774,6 +774,7 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('bananschalottenlök', 'schalottenlök'),
     ('bananschalottenlökar', 'schalottenlök'),
     ('bananscharlottenlök', 'schalottenlök'),
+    ('bananscharlottenlökar', 'schalottenlök'),  # typo: 'charl' instead of 'chal'
     ('lemon curd', 'lemoncurd'),
     ('raw slaw', 'råkostsallad'),
     ('råkost sallad', 'råkostsallad'),
