@@ -60,6 +60,61 @@ The normal compose `web` service mounts `/app` read-only. Read-only checks run
 there. File edits and write-maintenance scripts usually need the host checkout
 or a write-enabled dev container.
 
+## Short Standard Pipelines
+
+Use these short paths first. The long sections later in this runbook explain
+how to choose files, fixtures, inventory fields, and failure interpretation.
+
+### Track A: Narrow Runtime Fix
+
+Use this for ordinary PNB/FPB/GPB/runtime guard fixes.
+
+1. Reproduce the case with `matcher_layer_diagnostics.py` or a focused sanity
+   probe.
+2. Patch the narrow runtime mechanism that already owns the pattern.
+3. Add or extend one focused `run_deep_matcher_sanity.py` regression.
+4. Run:
+
+   ```bash
+   docker compose exec -T -w /app web \
+     python support_checks/run_deep_matcher_sanity.py
+
+   docker compose exec -T -w /app web \
+     python support_checks/run_matcher_layer_parity.py --skip-cache-freshness
+   ```
+
+5. Run `dev_reload.py` only when cache/UI/cache-gated validation matters:
+
+   ```bash
+   docker compose exec -T -w /app web python support_checks/dev_reload.py
+   ```
+
+Do not add fixtures, inventory, or registry TOML for Track A unless you
+explicitly escalate to Track B.
+
+### Track B: Registry/Contract Rule
+
+Use this when the change is registry-owned, route/bridge/no-match related,
+broad/systemic, release-facing, or meant to be permanent contract proof.
+
+1. Reproduce the current behavior.
+2. Add or update the runtime/TOML rule.
+3. Add the minimum fixture set: one positive, one negative or blocked sibling,
+   and any positive guard needed to prove you did not over-block.
+4. Update inventory and refresh inventory line refs if anchors moved.
+5. If registry TOML changed, run the registry baseline flow:
+   - normal add/update: `promote_term_baseline.py`
+   - extraction/source-order hash move: `promote_term_baseline.py --migrate-hashes`
+   - intentional inactivation/removal: use the explicit removal flow below
+6. Run targeted fixture/parity by `--policy-ref`, `--canonical`, or `--case-id`.
+7. Run full fixture/parity and only the conditionally relevant gates from the
+   gate matrix below.
+8. Run `dev_reload.py` before cache/UI/cache-gated validation or handoff that
+   depends on active cache.
+
+If this feels like too many moving parts for a one-row tactical blocker, it is
+probably Track A.
+
 ## Two Work Tracks
 
 Every matcher change starts by choosing a track. This is the most important
@@ -388,6 +443,54 @@ The registry also supports local dev entry directories under
 Those are useful for experiments, but durable matcher rules should be promoted
 to tracked TOML under `app/languages/sv/ingredient_matching/term_registry/entries/`.
 
+### Inactivating Or Removing Registry Entries
+
+Inactivating TOML entries is Track B when it changes matcher behavior. Treat it
+as a semantic removal, not as harmless cleanup.
+
+Use this path for cases such as "generic `potatis` should no longer inherit
+specific varieties from inactive `färskpotatis`/`bakpotatis` registry rows."
+
+1. Prefer `status = "inactive"` over deleting the TOML row. Keep enough
+   context in comments/notes to explain why the entry is inactive.
+2. Add or confirm the runtime/sanity proof:
+   - positive guard for the generic behavior that should remain
+   - negative case proving the inactive/specific behavior is gone
+3. Add or update Track B fixtures when the behavior change should be durable.
+   Inactivation that changes matching should have fixture/inventory proof just
+   like adding a rule.
+4. Update inventory to explain the owner and reason for the inactivation.
+5. Run `promote_term_baseline.py`.
+
+If `promote_term_baseline.py` aborts with "truly removed" variants, do not use
+`--migrate-hashes` unless the variants merely got re-hashed by extraction
+source-order movement. `--migrate-hashes` is not a removal approval mechanism.
+
+Until `promote_term_baseline.py` has an explicit `--allow-removals` workflow,
+the accepted fallback for intentional removal is:
+
+1. Confirm each removed variant ID corresponds to the TOML entry you just
+   inactivated or removed. If any removed variant is unexpected, stop.
+2. Edit
+   `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json`:
+   - remove the matching objects from `variants[]`
+   - refresh `variant_count`
+   - refresh `verification.variant_count`
+   - refresh `verification.source_counts`
+   - refresh `verification.status_counts`
+   - refresh `verification.classification_counts`
+   - refresh top-level `source_counts` and `coverage_counts`
+3. Update `EXPECTED_VERIFIED_TERM_VARIANT_COUNT` in
+   `app/support_checks/run_term_registry_contract_checks.py` to match the new
+   variant count.
+4. Run `promote_term_baseline.py` again. It should now either report nothing to
+   promote or refresh only baseline metadata.
+5. Run the registry contract checks and full Track B gates.
+
+This manual baseline edit is deliberately a last-resort workflow. Record it in
+the handoff, because it means the current toolchain lacks a first-class removal
+command for that case.
+
 Nested declarative bridge payloads can include:
 
 - `blockers` as `BlockerRule`
@@ -530,7 +633,26 @@ not use Track B fixture/inventory edits unless the work is escalated.
 
 ### 6. Run Contract Gates
 
-Run the full fixture and inventory gates for Track B:
+Do not run every script reflexively. Use this matrix to choose the smallest
+complete gate set for the change.
+
+| Gate | Run when |
+| --- | --- |
+| `run_deep_matcher_sanity.py` | Every Track A fix and every Track B runtime semantic change. |
+| targeted `run_matcher_layer_fixture_cases.py` | Track B fixture/rule work for the affected `--policy-ref`, `--canonical`, or `--case-id`. |
+| targeted `run_matcher_layer_parity.py` | Track B route, bridge, no-match, canonical, cache-facing, or fixture behavior work. |
+| full `run_matcher_layer_fixture_cases.py --skip-cache-freshness` | Every Track B behavior change before handoff. |
+| full `run_matcher_layer_parity.py --skip-cache-freshness` | Every Track A/Track B matcher behavior change before handoff. |
+| `promote_term_baseline.py` | Any tracked registry TOML change. Choose plain, `--migrate-hashes`, or the removal flow above. |
+| term-registry checks | Any tracked registry TOML or baseline change. |
+| `run_matcher_rule_model_checks.py` | Track B rule-model, bridge, no-match, inventory, or registry-owned rule changes. |
+| `run_matcher_rule_inventory_checks.py` | Any inventory change or Track B rule that should be inventory-owned. |
+| `run_matcher_version_checks.py` | After final generated/contract state for matcher behavior changes. |
+| `run_sanity_checks.py` | Runtime Python changes with broader app-support risk, or after baseline promotion if the promotion script updates support-check expectations. |
+| support-check self-checks | Support-check code/schema/diagnostics/parity tooling changes only. |
+| `dev_reload.py` | Cache/UI/cache-gated validation, or when handing off a change that must be visible in active dev cache. |
+
+Full Track B fixture and inventory gates:
 
 ```bash
 docker compose exec -T -w /app web \
@@ -729,8 +851,13 @@ each other. It does not mean fixture expectations are satisfied.
 - Adding a Track B fixture without inventory coverage.
 - Updating registry TOML without running `promote_term_baseline.py` and the
   registry checks.
+- Treating TOML inactivation/removal as a pure cleanup when it changes matcher
+  behavior. It needs fixture/inventory proof, and intentional verified-term
+  removals need the explicit removal workflow.
 - Forgetting `--migrate-hashes` when an extraction block/source-order change
   shifts verified-term hash IDs.
+- Using `--migrate-hashes` to approve true removals. Hash migration only handles
+  content-preserving rehashes, not deleted/inactivated variants.
 - Using raw substring checks for words that need word boundaries.
 - Fixing backend validation but forgetting `matches_ingredient_fast`.
 - Broadening a bridge without a negative sibling.
@@ -790,6 +917,8 @@ Before calling a Track B matcher rule change done:
   `run_deep_matcher_sanity.py`.
 - `promote_term_baseline.py` was run after registry TOML changes, using
   `--migrate-hashes` when extraction block/source-order changes require it.
+- Intentional TOML inactivation/removal followed the removal workflow if
+  `promote_term_baseline.py` reported truly removed variants.
 - Targeted fixture/parity passes.
 - Full fixture/parity passes with `--skip-cache-freshness`.
 - Rule model and inventory checks pass.
