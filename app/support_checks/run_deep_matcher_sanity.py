@@ -10176,6 +10176,88 @@ test("skagenröra ingredient still matches skagenröra product", match("Skagenr�
 test("morot does not match ull decoration product", match("Hänge morot ull Nordic Season", "morot", "dairy"), None)
 test("morot still matches real morot product", match("Morot 500g Klass 1", "morot", "fruit"), "morot")
 
+section("Batch 51-53 regression tests (PNB/FPB/KSBC additions)")
+
+# Batch 51: KSBC kikärtor — aquafaba/spadet should not match canned chickpeas
+test("kikärtor blocked when ingredient asks for aquafaba",
+     match("Zeta Kikärtor Ekologiska 400g", "1 dl Zeta Kikärtor Ekologiska, spadet", "pantry"), None)
+test("kikärtor blocked when ingredient asks for kikärtsspad",
+     match("Kikärtor ICA Basic 800g", "aquafaba (kikärtsspad)", "pantry"), None)
+test("kikärtor still matches plain chickpea recipe",
+     match("Zeta Kikärtor Ekologiska 400g", "400g kikärtor", "pantry"), "kikärtor")
+
+# Batch 51: PNB paprikapulver — crackers/kex are snacks, not spice
+test("paprikapulver PNB has crackers", 'crackers' in PRODUCT_NAME_BLOCKERS.get('paprikapulver', set()), True)
+test("paprikapulver PNB has kex", 'kex' in PRODUCT_NAME_BLOCKERS.get('paprikapulver', set()), True)
+
+# Batch 51: KSBC äppeljuice — granatäpplejuice should not match apple juice
+test("äppeljuice blocked when ingredient names granatäpple",
+     match("Äppeljuice Koncentrat 2dl ICA", "2 dl granatäpplejuice", "beverages"), None)
+test("äppeljuice still matches plain äppeljuice",
+     match("Äppeljuice Koncentrat 2dl ICA", "2 dl äppeljuice", "beverages"), "äppeljuice")
+
+# Batch 51: KSBC granatäpple — whole fruit should not match juice ingredient
+test("granatäpple whole fruit blocked when ingredient asks for granatäppeljuice",
+     match("Granatäpple Jumbo Klass 1", "2 dl granatäpplejuice", "fruit"), None)
+test("granatäpple still matches plain granatäpple ingredient",
+     match("Granatäpple Jumbo Klass 1", "1 granatäpple", "fruit"), "granatäpple")
+
+# Batch 51: PNB dragon/estragon — fraiche dairy product ≠ dried herb
+test("dragon PNB has fraiche", 'fraiche' in PRODUCT_NAME_BLOCKERS.get('dragon', set()), True)
+test("dragon PNB has creme fraiche", 'creme fraiche' in PRODUCT_NAME_BLOCKERS.get('dragon', set()), True)
+test("estragon PNB has fraiche", 'fraiche' in PRODUCT_NAME_BLOCKERS.get('estragon', set()), True)
+
+# Batch 51: PNB lasagnette — Middagskit is ready-meal kit, not raw pasta
+test("lasagnette PNB has middagskit", 'middagskit' in PRODUCT_NAME_BLOCKERS.get('lasagnette', set()), True)
+test("lasagnette PNB has kit", 'kit' in PRODUCT_NAME_BLOCKERS.get('lasagnette', set()), True)
+
+# Batch 51: PNB skruvar — pretzel-snack twists ≠ pasta skruvar
+test("skruvar PNB has snacks", 'snacks' in PRODUCT_NAME_BLOCKERS.get('skruvar', set()), True)
+test("skruvar PNB has salta", 'salta' in PRODUCT_NAME_BLOCKERS.get('skruvar', set()), True)
+
+# Batch 51: matching.py — whole spice form blocked when ingredient says malen
+test("kanel hel blocked when ingredient says malen kanel",
+     match("Kanel Hel 20g ICA", "1 tsk malen kanel, malen", "pantry"), None)
+test("kanel malen still matches malen kanel",
+     match("Kanel Malen 30g ICA", "1 tsk malen kanel", "pantry"), "kanel")
+test("kardemumma hel blocked when ingredient says malen",
+     match("Kardemumma Grön Hel 110g Kung Markatta", "2 tsk malen kardemumma", "pantry"), None)
+test("kardemumma kärnor blocked when ingredient says malen",
+     match("Krydda Kardemumma Kärnor 21g ICA", "2 tsk malen kardemumma", "pantry"), None)
+test("kardemumma malen still matches",
+     match("Kardemumma Malen 35g ICA", "2 tsk malen kardemumma", "pantry"), "kardemumma")
+
+# Batch 51: PNB cheddarost — Babybel snack-cheese ≠ block cheddar
+test("cheddarost PNB has babybel", 'babybel' in PRODUCT_NAME_BLOCKERS.get('cheddarost', set()), True)
+test("cheddarost PNB has ostcreme", 'ostcreme' in PRODUCT_NAME_BLOCKERS.get('cheddarost', set()), True)
+
+# Batch 52: FPB fil — compound forms (fix_swedish_chars strips accent mid-compound)
+test("fil blocked when ingredient is laxfilébitar",
+     match("Fil Blåbär 3.7% 1l Fjällfil", "1 förp frysta laxfilébitar 560g", "dairy"), None)
+test("fil still matches plain fil ingredient",
+     match("Fil Blåbär 3.7% 1l Fjällfil", "3 dl fil", "dairy"), "fil")
+test("fjällfil FPB exists in dict", 'fjällfil' in FALSE_POSITIVE_BLOCKERS, True)
+
+# Batch 52: PNB sockermassa — strösocker ≠ fondant
+test("sockermassa PNB has strösocker", 'strösocker' in PRODUCT_NAME_BLOCKERS.get('sockermassa', set()), True)
+
+# Batch 52: KSBC choklad — chokladbollar ingredient should not match raw chocolate
+test("choklad blocked when ingredient names chokladbollar",
+     match("Mörk Choklad 70% ICA Selection", "4 chokladbollar t ex delicatobollar", "candy"), None)
+test("choklad blocked when ingredient names delicatobollar",
+     match("Bakchoklad Extra Mörk 70% 100g ICA", "200g delicatobollar", "candy"), None)
+
+# Batch 52: PNB nuggets — vegan/quorn nuggets ≠ fish nuggets recipe
+test("nuggets PNB has vegan", 'vegan' in PRODUCT_NAME_BLOCKERS.get('nuggets', set()), True)
+test("nuggets PNB has quorn", 'quorn' in PRODUCT_NAME_BLOCKERS.get('nuggets', set()), True)
+test("nuggets PNB has couscous", 'couscous' in PRODUCT_NAME_BLOCKERS.get('nuggets', set()), True)
+
+# Batch 53: KSBC havssalt — Snackoliver Havssalt ≠ crystalline sea salt
+test("havssalt blocked when ingredient is snackoliver product",
+     match("Havssalt 250g Maldon", "70 g Zeta Snackoliver Havssalt", "pantry"), None)
+test("havssalt still matches plain salt recipe",
+     match("Havssalt 250g Maldon", "1 krm havssalt", "pantry"), "havssalt")
+
 # ========================================================================
 print("\n========================================")
 print(f"TOTAL: {passed}/{passed+failed} tests passed ({total_sections} sections)")
