@@ -1020,7 +1020,10 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # "chokladlikör" = liqueur, not plain chocolate.
     # "mörk choklad med mintcrisp" should not fall back to plain chocolate when
     # there is no exact mint-crisp product on sale.
-    'choklad': {'varm choklad', 'likör', 'likor', 'mintcrisp'},
+    'choklad': {
+        'varm choklad', 'likör', 'likor', 'mintcrisp',  # hot-drink / liqueur / mint form ≠ plain cooking chocolate
+        'chokladboll', 'chokladbollar', 'delicatoboll', 'delicatobollar',  # finished snack ≠ raw baking chocolate
+    },
     # "kakaolikör" = cocoa/chocolate liqueur, not cocoa powder.
     'kakao': {'likör', 'likor'},
     # "proteinpudding" should match explicit protein pudding products via their

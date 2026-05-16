@@ -1050,6 +1050,33 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
 
 
     # Fermented milk (fil) != filé/filet/phyllo dough
+    # Fjällfil brand keyword — same fish/fillet blockers as generic 'fil'.
+    # "Fil Blåbär 3,7% Fjällfil" extracts both 'fil' AND 'fjällfil'; the 'fjällfil'
+    # keyword bypasses the 'fil' FPB, so it needs its own identical blocker set.
+    # Include BOTH accented (filé) and non-accented (file) forms — fix_swedish_chars
+    # normalizes 'filé' to 'file' when it appears mid-compound (e.g. 'laxfilébitar'→'laxfilebitar')
+    # but NOT when standalone (e.g. 'laxfilé'→'laxfilé'). Both forms are needed.
+    'fjällfil': {
+        'filé', 'file', 'filéer', 'fileer',
+        'laxfilé', 'laxfile', 'fiskfilé', 'fiskfile',
+        'kycklingfilé', 'kycklingfile',
+        'fläskfilé', 'fläskfile',
+        'torskfilé', 'torskfile',
+        'innerfilé', 'innerfile',
+        'matjesfilé', 'matjesfile',
+        # mid-compound normalized forms
+        'laxfilebitar', 'laxfilebit',
+        'fiskfilebitar', 'fiskfilebit',
+    },
+    'fjallfil': {  # diacritic-free variant
+        'file', 'fileer',
+        'laxfile', 'fiskfile',
+        'kycklingfile',
+        'flaskfile',
+        'torskfile',
+        'innerfile',
+        'matjesfile',
+    },
     'fil': {
         'filoncini',    # Italian bread rolls — "fil" is embedded in "filoncini"
         'filodeg',      # phyllo dough — "fil" is embedded in "filodeg"
@@ -1064,6 +1091,11 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'matjesfilé', 'matjesfile', 'matjesfiléer',  # matjes fillet
         'torskfilé', 'torskfile', 'torskfilér', 'torskfiler', 'torskfiléer',  # cod fillet
         'rödspättafile',  # plaice fillet
+        # Compound/portioned forms: fix_swedish_chars strips accent mid-compound
+        # e.g. 'laxfilébitar' → 'laxfilebitar' in ingredient_lower
+        'laxfilebitar', 'laxfilebit',
+        'fiskfilebitar', 'fiskfilebit',
+        'torskfilebitar', 'torskfilebit',
         # Gräddfil ≠ fil — completely different dairy products
         'gräddfil', 'graddfil',  # "3 dl Gräddfil" should NOT match "Fil Original"
         # Nationality adjective — "filippinsk soja" ≠ fil (dairy)
@@ -2509,7 +2541,16 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     # Fish nuggets ≠ chicken nuggets
     'nuggets': {
-        'fisk', 'fish',  # "Fisk Nuggets" / "Fish & Crisp Nuggets" should NOT match chicken nuggets
+        'fisk', 'fish',       # "Fisk Nuggets" / "Fish & Crisp Nuggets" should NOT match chicken nuggets
+        'vegetariska', 'vego', 'vegan',  # vegan/veggie nuggets ≠ fish nuggets recipe
+        'couscous',           # "Krispiga nuggets av couscous Felix" — grain-based, not fish
+        'quorn',              # "Vegetariska Crispy nuggets Quorn" — quorn brand = meat-free
+        'crispy green',       # "Crispy green nuggets Max" — plant-based
+    },
+    # Sockermassa (fondant/sugar paste) ≠ strösocker (granulated sugar)
+    # "150 g svart sockermassa" = modelling fondant for decoration, not regular sugar.
+    'sockermassa': {
+        'strösocker', 'strosocker',  # granulated sugar is not fondant
     },
     # Calabrese frozen pizza ≠ calabrese salami
     'calabrese': {
