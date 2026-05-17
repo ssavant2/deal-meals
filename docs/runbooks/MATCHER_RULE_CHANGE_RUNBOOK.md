@@ -9,43 +9,52 @@ AI/LLM agents and humans choose the same level of proof for the same kind of
 change, so tactical runtime fixes stay fast while durable registry rules land
 with fixtures, inventory, parity coverage, and cache expectations.
 
-## AI Cold-Start Orientation
+## TL;DR Cheat Sheet
 
-If you are an AI/LLM coming into this repo with little current context, read
-this section before touching matcher code.
+Track A is a narrow runtime fix. Track B is durable registry/contract work.
+Start with the CLI wrapper; use raw support-check commands only when debugging.
 
-The Swedish matcher is deliberately layered. A pair can appear correct in a
-single live check but still fail in routed cache, compiled data, backend
-validation, or materialization. For durable rules, the permanent answer to "is
-this rule done?" is therefore not "the one example matches now"; it is "the
-fixture/inventory contract passes across all matcher paths."
+Known CLI rule shape:
 
-The important layers are:
+```bash
+./bin/dm matcher add keyword-extra-parent <canonical> --kids <kid1,kid2,...> ...
+```
 
-1. recipe normalization and ingredient extraction
-2. compiled recipe runtime data
-3. offer extraction and offer precompute
-4. compiled offer runtime data
-5. term indexes and candidate routing
-6. `matches_ingredient_fast`
-7. backend validation in `validate_offer_match_candidate`
-8. cache materialization and grouping
+Manual Track A:
 
-When a change affects semantics, think in terms of all eight layers. If you fix
-only the layer where you first noticed the bug, you may create a live/cache
-split.
+```bash
+# edit narrow Python runtime rule + focused run_deep_matcher_sanity.py case
+./bin/dm matcher gates --track A
+```
 
-The main repo map:
+Manual Track B:
 
-| Area | What it is |
-| --- | --- |
-| `app/languages/sv/ingredient_matching/` | Swedish matcher runtime rules, registry exports, extraction, routing, validators, and versioning. |
-| `app/languages/sv/matcher_contracts/sources/` | Authoritative matcher fixture and inventory TOML contracts. |
-| `app/languages/sv/matcher_contracts/*.json` | Generated matcher fixture and inventory JSON contracts used by existing readers/reports. |
-| `app/languages/sv/ingredient_matching/term_registry/entries/` | Tracked TOML registry entries for vocabulary/rule surfaces. |
-| `app/support_checks/` | Deterministic support checks and matcher diagnostics. |
-| `app/tests/` | Ignored local workbench/review material. Useful for investigation, not permanent proof. |
-| `docs/TESTING.md` | High-level testing policy and current durable matcher/cache gates. |
+```bash
+# edit TOML sources + focused run_deep_matcher_sanity.py case
+./bin/dm matcher gates --track B --policy-ref <policy_ref>
+```
+
+Inactivate/remove a registry rule:
+
+```text
+status = "inactive"
+./bin/dm matcher gates --track B --registry-changed --allow-removals
+```
+
+Iterate with live pre-flight feedback:
+
+```bash
+./bin/dm matcher dev-watch
+```
+
+Generated-file rule: edit the authoritative TOML sources, not generated JSON or
+generated registry coverage TOML. In particular, do not hand-edit
+`matcher_regression_case.toml` or `matcher_rule_inventory.toml`. The wrapper
+regenerates these files and pre-flight rejects drift.
+
+If something fails, read pre-flight `NEW` issues first. `KNOWN` is tracked
+pre-existing noise; `FIXED` means a tolerated issue disappeared and the baseline
+snapshot should be refreshed.
 
 Before editing, run:
 
@@ -53,15 +62,8 @@ Before editing, run:
 git status --short --untracked-files=all
 ```
 
-There may be active user or agent changes. Do not revert unrelated edits. If the
-working tree is already dirty, keep your change scoped and mention the relevant
-pre-existing files in your handoff.
-
-The production-style compose service mounts `/app` read-only. The dev overlay is
-writable in the current setup, but baseline writes belong to the file-owning
-`appuser`; a plain `docker compose exec web ...` may run as root and hit
-`PermissionError`. Use the host checkout or `docker compose exec -T -u appuser`
-for write-maintenance commands.
+Do not revert unrelated edits. If the working tree is already dirty, keep your
+change scoped and mention relevant pre-existing files in your handoff.
 
 ## Command First
 
@@ -78,13 +80,26 @@ before validation when Track B inputs require it. Its first validation gate is
 `run_matcher_change_preflight.py`; fix any `NEW` pre-flight issue before
 spending time on slower fixture/parity gates.
 
+For live feedback while editing matcher contracts or registry TOML, keep this
+running in another terminal:
+
+```bash
+./bin/dm matcher dev-watch
+```
+
+It polls matcher files and reruns pre-flight after saves. Use
+`--interval <seconds>` to tune polling, or `--once` for a single pre-flight run
+through the CLI entry point.
+
 **Where to run from:**
 
-- **Track A:** run from inside the container (`docker compose exec -T -w /app web ...`).
-  Track A gates are read-only and tolerate the default `/app` read-only mount.
-- **Track B:** run from a writable host checkout or the dev container as
-  `appuser`. Track B may need to write baseline files, refresh inventory line
-  refs, or stage promotion output.
+- **Wrapper commands:** run `./bin/dm matcher ...` from the host checkout.
+- **Raw Track A fallback:** run inside the container
+  (`docker compose exec -T -w /app web ...`). Track A gates are read-only and
+  tolerate the default `/app` read-only mount.
+- **Raw Track B/write maintenance:** run from a writable host checkout or the
+  dev container as `appuser`. Track B may need to write baseline files, refresh
+  inventory line refs, or stage promotion output.
 
 Track A runtime blocker/guard fix:
 
@@ -117,10 +132,7 @@ docker compose exec -T -u appuser -w /app web \
 Track B with registry TOML changes:
 
 ```bash
-docker compose exec -T -u appuser -w /app web \
-  python support_checks/run_matcher_change_gates.py --track B \
-    --policy-ref <policy_ref> \
-    --registry-changed
+./bin/dm matcher gates --track B --policy-ref <policy_ref> --registry-changed
 ```
 
 Add only the flags that match the change:
@@ -157,12 +169,7 @@ explicit flags above so the gate set reflects only your change.
 - `run_matcher_full_db_diff.py` — heavy read-only DB diff for release work, not
   routine.
 
-## Short Standard Pipelines
-
-Use these short paths first. The long sections later in this runbook explain
-how to choose files, fixtures, inventory fields, and failure interpretation.
-
-### Common CLI Workflows
+## Common CLI Workflows
 
 Use the CLI for supported rule shapes. It writes the registry TOML,
 fixture/inventory TOML sources, generated JSON, focused deep-sanity regression,
@@ -185,74 +192,49 @@ separate inventory row for a canonical that already has one. For all other rule
 types, follow the manual Track A or Track B workflow until a dedicated
 `dm matcher add ...` subcommand exists.
 
-For live feedback while editing matcher contracts or registry TOML:
+## Cold-Start Details
 
-```bash
-./bin/dm matcher dev-watch
-```
+Read this when you need repo orientation, when a gate fails in a layer you did
+not expect, or when you are deciding whether a one-off diagnostic is enough.
 
-It polls the matcher files and reruns pre-flight after saves. Use
-`--interval <seconds>` to tune polling, or `--once` for a single pre-flight run
-through the CLI entry point.
+The Swedish matcher is deliberately layered. A pair can appear correct in a
+single live check but still fail in routed cache, compiled data, backend
+validation, or materialization. For durable rules, the permanent answer to "is
+this rule done?" is therefore not "the one example matches now"; it is "the
+fixture/inventory contract passes across all matcher paths."
 
-### Track A: Narrow Runtime Fix
+The important layers are:
 
-Use this for ordinary PNB/FPB/GPB/runtime guard fixes.
+1. recipe normalization and ingredient extraction
+2. compiled recipe runtime data
+3. offer extraction and offer precompute
+4. compiled offer runtime data
+5. term indexes and candidate routing
+6. `matches_ingredient_fast`
+7. backend validation in `validate_offer_match_candidate`
+8. cache materialization and grouping
 
-1. Reproduce the case with `matcher_layer_diagnostics.py` or a focused sanity
-   probe.
-2. Patch the narrow runtime mechanism that already owns the pattern.
-3. Add or extend one focused `run_deep_matcher_sanity.py` regression.
-4. Run the standard Track A gate wrapper:
+When a change affects semantics, think in terms of all eight layers. If you fix
+only the layer where you first noticed the bug, you may create a live/cache
+split.
 
-   ```bash
-   docker compose exec -T -w /app web \
-     python support_checks/run_matcher_change_gates.py --track A
-   ```
+The main repo map:
 
-5. Run the wrapper with cache refresh only when cache/UI/cache-gated validation
-   matters:
+| Area | What it is |
+| --- | --- |
+| `app/languages/sv/ingredient_matching/` | Swedish matcher runtime rules, registry exports, extraction, routing, validators, and versioning. |
+| `app/languages/sv/matcher_contracts/sources/` | Authoritative matcher fixture and inventory TOML contracts. |
+| `app/languages/sv/matcher_contracts/*.json` | Generated matcher fixture and inventory JSON contracts used by existing readers/reports. |
+| `app/languages/sv/ingredient_matching/term_registry/entries/` | Tracked TOML registry entries for vocabulary/rule surfaces. |
+| `app/support_checks/` | Deterministic support checks and matcher diagnostics. |
+| `app/tests/` | Ignored local workbench/review material. Useful for investigation, not permanent proof. |
+| `docs/TESTING.md` | High-level testing policy and current durable matcher/cache gates. |
 
-   ```bash
-   docker compose exec -T -w /app web \
-     python support_checks/run_matcher_change_gates.py --track A \
-       --reload-cache --fresh-cache-gates
-   ```
-
-Do not add fixtures, inventory, or registry TOML for Track A unless you
-explicitly escalate to Track B.
-
-### Track B: Registry/Contract Rule
-
-Use this when the change is registry-owned, route/bridge/no-match related,
-broad/systemic, release-facing, or meant to be permanent contract proof.
-
-1. Reproduce the current behavior.
-2. Add or update the runtime/TOML rule.
-3. Add the minimum fixture set in the TOML source: one positive, one negative or
-   blocked sibling, and any positive guard needed to prove you did not
-   over-block.
-4. Update inventory in the TOML source and refresh inventory line refs if
-   anchors moved.
-5. Run the Track B gate wrapper from a writable host checkout or the dev
-   container as `appuser`, targeting by `--policy-ref`, `--canonical`, or
-   `--case-id` when possible:
-
-   ```bash
-   docker compose exec -T -u appuser -w /app web \
-     python support_checks/run_matcher_change_gates.py --track B \
-       --policy-ref plain_sensitive_filmjolk
-   ```
-
-   Add `--registry-changed` for TOML edits and `--allow-removals` for confirmed
-   intentional TOML inactivation/removal.
-6. Run full fixture/parity and only the conditionally relevant gates from the
-   gate matrix below if you are not using the wrapper.
-7. Run `dev_reload.py` before cache/UI/cache-gated validation or handoff that
-   depends on active cache.
-
-If this feels like too many moving parts for a one-row tactical blocker, it is
-probably Track A.
+The production-style compose service mounts `/app` read-only. The dev overlay is
+writable in the current setup, but baseline writes belong to the file-owning
+`appuser`; a plain `docker compose exec web ...` may run as root and hit
+`PermissionError`. Use the host checkout or `docker compose exec -T -u appuser`
+for write-maintenance commands.
 
 ## Two Work Tracks
 
@@ -1088,58 +1070,54 @@ each other. It does not mean fixture expectations are satisfied.
 
 ## Common Pitfalls
 
-### Track A Pitfalls
-
-- Forcing every Track A PNB/FPB/GPB runtime fix through fixture/inventory before
+- Track A: forcing every PNB/FPB/GPB runtime fix through fixture/inventory before
   it can land.
-- Calling a Track A tactical fix durable without escalating it to Track B and
+- Track A: calling a tactical fix durable without escalating it to Track B and
   adding contract proof.
-- Adding a new matcher rule without a corresponding focused
+- Track A: adding a new matcher rule without a corresponding focused
   `run_deep_matcher_sanity.py` regression.
-- Skipping `run_matcher_layer_parity.py --skip-cache-freshness` after a Track A
-  change. Track A fixes can break existing parity fixtures. You are responsible
-  for leaving parity clean before committing — do not assume the next agent will
-  catch and fix parity failures caused by your change.
-- Running heavy support-check self-check/model suites
+- Track A: skipping `run_matcher_layer_parity.py --skip-cache-freshness`. Track A
+  fixes can break existing parity fixtures; leave parity clean before committing.
+- Track A: running heavy support-check self-check/model suites
   (`run_matcher_layer_parity_checks.py`, `run_matcher_rule_model_checks.py`) as
-  routine Track A gates — these are Track B.
-
-### Track B Pitfalls
-
-- Adding a Track B runtime rule without a fixture.
-- Adding a Track B fixture without inventory coverage.
-- Updating registry TOML without running `promote_term_baseline.py` and the
-  registry checks.
-- Treating TOML inactivation/removal as a pure cleanup when it changes matcher
-  behavior. It needs fixture/inventory proof, and intentional verified-term
-  removals need the explicit removal workflow.
-- Treating a "truly removed" promotion warning as harmless. Content-preserving
-  verified-term ID changes are automatic; true removals need explicit approval.
-- Using raw substring checks for words that need word boundaries.
-- Fixing backend validation but forgetting `matches_ingredient_fast`.
-- Broadening a bridge without a negative sibling.
-- Adding `OFFER_EXTRA_KEYWORDS` or extraction output without making sure routed
-  cache sees the same term family.
-- Adding parent mappings where a scoped `MatchBridge` would be safer.
-- Forgetting nested `blockers` or `backend_allowances` when a bridge is mostly
-  right but has known guarded exceptions.
-- Adding product-name blockers for every flavor when a plain-sensitive family
-  rule is the real model.
-- Skipping parity for Track B route/bridge/release work.
-
-### General Pitfalls
-
-- Letting stale cache explain away a semantic fixture failure.
-- Forgetting `dev_reload.py` before cache-backed validation after matcher runtime
-  changes.
-- Treating `app/tests/` workbench files as permanent regression contracts.
-- Leaving experimental local registry files under `/app/data/term_registry/`
-  instead of promoting durable entries to tracked TOML.
-- Promoting regenerated support reports from `/tmp/deal-meals-support-checks/`
+  routine Track A gates. These are Track B/tooling checks.
+- Track B: adding a runtime rule without a fixture.
+- Track B: adding a fixture without inventory coverage.
+- Track B: hand-editing generated JSON or generated registry coverage TOML
+  instead of editing the authoritative TOML source and regenerating.
+- Track B: updating registry TOML without running `promote_term_baseline.py` and
+  the registry checks.
+- Track B: treating TOML inactivation/removal as pure cleanup when it changes
+  matcher behavior. It needs fixture/inventory proof, and intentional
+  verified-term removals need the explicit removal workflow.
+- Track B: treating a "truly removed" promotion warning as harmless.
+  Content-preserving verified-term ID changes are automatic; true removals need
+  explicit approval.
+- Track B: using raw substring checks for words that need word boundaries.
+- Track B: fixing backend validation but forgetting `matches_ingredient_fast`.
+- Track B: broadening a bridge without a negative sibling.
+- Track B: adding `OFFER_EXTRA_KEYWORDS` or extraction output without making sure
+  routed cache sees the same term family.
+- Track B: adding parent mappings where a scoped `MatchBridge` would be safer.
+- Track B: forgetting nested `blockers` or `backend_allowances` when a bridge is
+  mostly right but has known guarded exceptions.
+- Track B: adding product-name blockers for every flavor when a plain-sensitive
+  family rule is the real model.
+- Track B: skipping parity for route/bridge/release work.
+- General: letting stale cache explain away a semantic fixture failure.
+- General: forgetting `dev_reload.py` before cache-backed validation after
+  matcher runtime changes.
+- General: treating `app/tests/` workbench files as permanent regression
+  contracts.
+- General: leaving experimental local registry files under
+  `/app/data/term_registry/` instead of promoting durable entries to tracked
+  TOML.
+- General: promoting regenerated support reports from `/tmp/deal-meals-support-checks/`
   to Git.
-- Forgetting to refresh inventory line refs after moving anchors.
-- Updating hard-coded support-check expectations when the real issue is stale
-  generated/check data, or vice versa. Read the failure before patching counts.
+- General: forgetting to refresh inventory line refs after moving anchors.
+- General: updating hard-coded support-check expectations when the real issue is
+  stale generated/check data, or vice versa. Read the failure before patching
+  counts.
 
 ## Minimal Done Checklist
 
