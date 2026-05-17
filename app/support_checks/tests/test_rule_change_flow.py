@@ -5,6 +5,8 @@ from dataclasses import replace
 import json
 from pathlib import Path
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -218,7 +220,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         self.assertNotIn("fixture_missing_registry_coverage", codes, report)
         self.assertNotIn("inventory_missing_registry_coverage", codes, report)
         self.assertNotIn("generated_coverage_stale", codes, report)
-        self.assertEqual(codes, {"expected_verified_term_unique_coverage_keys_stale"})
+        self.assertEqual(codes, set(), report)
 
     def test_phase3_hash_tolerance_ignores_source_ref(self) -> None:
         variant = AuditVariant(
@@ -256,6 +258,118 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         variant_ids = [variant.variant_id for variant in variants]
 
         self.assertEqual(len(variant_ids), len(set(variant_ids)))
+
+    def test_phase4_cli_e2e(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = tree_root / "app"
+            shutil.copytree(
+                DEFAULT_FIXTURE_FILE.parents[1],
+                app_dir / "languages" / "sv",
+                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+            )
+            support_checks_dir = Path(__file__).resolve().parents[1]
+            shutil.copytree(
+                support_checks_dir,
+                app_dir / "support_checks",
+                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+            )
+
+            fixture_id = "keyword_extra_parent_citrusfrukter_phasefyraapelsin_positive"
+            inventory_id = "legacy_parent_citrusfrukter_phasefyraapelsin_family"
+            policy_ref = "keyword_extra_parent_citrusfrukter_phasefyraapelsin_family"
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "keyword-extra-parent",
+                    "citrusfrukter",
+                    "--kids",
+                    "phasefyraapelsin",
+                    "--recipe-name",
+                    "Synthetic Phase 4",
+                    "--ingredient",
+                    "3-4 citrusfrukter (valfri sort)",
+                    "--offer-names",
+                    "Phasefyraapelsin",
+                    "--offer-category",
+                    "fruit",
+                    "--policy-ref",
+                    policy_ref,
+                    "--inventory-id",
+                    inventory_id,
+                    "--tree-root",
+                    str(tree_root),
+                    "--report-root",
+                    str(tree_root / "support-reports"),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+            inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+            keyword_extra_parent_file = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "keyword_extra_parent.toml"
+            )
+            deep_sanity_file = app_dir / "support_checks" / "run_deep_matcher_sanity.py"
+
+            fixtures = json.loads(fixture_file.read_text(encoding="utf-8"))
+            inventory = json.loads(inventory_file.read_text(encoding="utf-8"))
+            self.assertTrue(any(item["id"] == fixture_id for item in fixtures))
+            self.assertTrue(any(item["id"] == inventory_id for item in inventory))
+            self.assertIn("phasefyraapelsin", keyword_extra_parent_file.read_text(encoding="utf-8"))
+            self.assertIn(policy_ref, deep_sanity_file.read_text(encoding="utf-8"))
+
+            generated = generate_coverage_files(tree_root=tree_root)
+            self.assertFalse(any(item.changed for item in generated))
+            report = run_preflight(tree_root=tree_root)
+            codes = {issue["code"] for issue in report["new_issues"]}
+            self.assertNotIn("fixture_missing_registry_coverage", codes, report)
+            self.assertNotIn("inventory_missing_registry_coverage", codes, report)
+            self.assertNotIn("generated_coverage_stale", codes, report)
+
+            gate_result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "gates",
+                    "--track",
+                    "B",
+                    "--tree-root",
+                    str(tree_root),
+                    "--policy-ref",
+                    policy_ref,
+                    "--case-id",
+                    fixture_id,
+                    "--fixtures-changed",
+                    "--inventory-changed",
+                    "--no-registry-changed",
+                    "--no-runtime-changed",
+                    "--no-support-checks-changed",
+                    "--dry-run",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(gate_result.returncode, 0, gate_result.stderr + gate_result.stdout)
 
 
 if __name__ == "__main__":

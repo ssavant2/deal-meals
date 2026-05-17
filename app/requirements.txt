@@ -21,6 +21,7 @@ zstandard==0.25.0
 # CLI och logging
 rich==15.0.0
 loguru==0.7.3
+typer>=0.12.5,<1.0.0
 
 # Web Framework
 fastapi==0.136.1

@@ -213,6 +213,9 @@ Open the dev app at `http://localhost:20070`. Adminer is available at
 See [INSTALL.md](INSTALL.md) for the full developer install, and
 [HOW_TO_ADD_SCRAPERS.md](docs/HOW_TO_ADD_SCRAPERS.md) /
 [HOW_TO_ADD_COUNTRIES.md](docs/HOW_TO_ADD_COUNTRIES.md) for extension guides.
+For matcher rule changes, see
+[MATCHER_RULE_CHANGE_RUNBOOK.md](docs/runbooks/MATCHER_RULE_CHANGE_RUNBOOK.md)
+or run `./bin/dm matcher --help`.
 
 ## Documentation
 

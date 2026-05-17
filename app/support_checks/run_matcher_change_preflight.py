@@ -603,7 +603,10 @@ def run_preflight(
         registry_entries_dir=registry_entries_dir,
         repo_root=repo_root,
     ))
-    issues.extend(_check_expected_counts(baseline_file, registry_entries_dir, repo_root=repo_root))
+    # Promote-owned EXPECTED_* constants describe the live checkout. Synthetic
+    # tree-root tests intentionally mutate copied registries without promoting.
+    if app_dir.resolve() == APP_DIR.resolve():
+        issues.extend(_check_expected_counts(baseline_file, registry_entries_dir, repo_root=repo_root))
 
     known = _load_known_fingerprints(snapshot_file)
     new_issues = [issue for issue in issues if issue.fingerprint not in known]

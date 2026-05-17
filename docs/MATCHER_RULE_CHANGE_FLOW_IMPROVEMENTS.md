@@ -766,6 +766,9 @@ After Phase 3: editing a `source_ref` string never produces a baseline diff.
 Codex's point: start with one verified-valuable subcommand. Don't build a
 full CLI surface up front; let actual use shape it.
 
+Implementation status as of 2026-05-17: shipped for the first supported
+subcommand.
+
 *Code:*
 - Pattern discovery script + `docs/MATCHER_RULE_TYPE_FREQUENCY.md`.
 - `app/cli/dm.py` (Typer-based) with **one** subcommand:
@@ -915,6 +918,10 @@ tree.
    - `keyword_extra_parent.toml`, fixture JSON, inventory JSON, and
      regression test stub all exist with expected content.
    - Track B wrapper invoked by the CLI returned green.
+   - Tree-root pre-flight skips live-checkout `EXPECTED_*` constant comparison;
+     those constants are promoted for the real checkout, not synthetic trees.
+   - The CLI passes only the newly generated runtime entry as an overlay during
+     tree-root gates so copied registry files do not duplicate live policy IDs.
 4. Tear down.
 
 These tests are runnable in CI and locally. They are the **definition of

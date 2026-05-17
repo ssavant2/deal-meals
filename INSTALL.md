@@ -105,6 +105,12 @@ The base `docker-compose.yml` is prod-ready. Dev adds `docker-compose.dev.yml` a
 
 First startup takes ~1 minute (database initialization, cache warmup).
 
+Developer matcher rule changes can use `./bin/dm matcher ...` from the host
+checkout. If you run the lower-level matcher support scripts directly for
+registry promotion or Track B gates, prefer
+`docker compose exec -T -u appuser -w /app web ...` so generated files are owned
+by the writable dev user.
+
 ### 6. Verify
 
 ```bash

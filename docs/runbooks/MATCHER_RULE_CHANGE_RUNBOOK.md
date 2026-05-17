@@ -67,6 +67,11 @@ for write-maintenance commands.
 For most changes, start here and only read the longer sections when the wrapper
 flags or a failing gate are unclear.
 
+Use `./bin/dm matcher ...` from the host checkout when available. It forwards to
+the web container and keeps the old support-check wrapper available as
+`dm matcher gates ...`. The raw `python support_checks/run_matcher_change_gates.py`
+commands below are the fallback/debug form.
+
 The wrapper runs generated-coverage refresh and baseline promotion maintenance
 before validation when Track B inputs require it. Its first validation gate is
 `run_matcher_change_preflight.py`; fix any `NEW` pre-flight issue before
@@ -83,12 +88,24 @@ spending time on slower fixture/parity gates.
 Track A runtime blocker/guard fix:
 
 ```bash
+./bin/dm matcher gates --track A
+```
+
+Fallback:
+
+```bash
 docker compose exec -T -w /app web \
   python support_checks/run_matcher_change_gates.py --track A
 ```
 
-Track B durable registry/fixture/inventory rule, from the writable dev
-container:
+Track B durable registry/fixture/inventory rule, from the host checkout or a
+writable dev container:
+
+```bash
+./bin/dm matcher gates --track B --policy-ref <policy_ref>
+```
+
+Fallback:
 
 ```bash
 docker compose exec -T -u appuser -w /app web \
@@ -143,6 +160,29 @@ explicit flags above so the gate set reflects only your change.
 
 Use these short paths first. The long sections later in this runbook explain
 how to choose files, fixtures, inventory fields, and failure interpretation.
+
+### Common CLI Workflows
+
+Use the CLI for supported rule shapes. It writes the registry TOML, fixture
+JSON, inventory JSON, focused deep-sanity regression, generated coverage TOML,
+and then runs Track B gates by default.
+
+Keyword extra parent fan-out:
+
+```bash
+./bin/dm matcher add keyword-extra-parent citrusfrukter \
+  --kids citron,lime,apelsin \
+  --recipe-name "Citrusrecept" \
+  --ingredient "3-4 citrusfrukter (valfri sort)" \
+  --offer-names "Citron,Lime,Apelsin" \
+  --offer-category fruit
+```
+
+Use `--dry-run` to preview generated TOML/sanity text, `--no-run-gates` only for
+isolated test trees, and `--inventory-id` only when deliberately adding a
+separate inventory row for a canonical that already has one. For all other rule
+types, follow the manual Track A or Track B workflow until a dedicated
+`dm matcher add ...` subcommand exists.
 
 ### Track A: Narrow Runtime Fix
 
