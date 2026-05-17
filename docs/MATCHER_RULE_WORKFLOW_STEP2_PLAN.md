@@ -1,7 +1,7 @@
 # Matcher Rule Workflow Step 2 Plan
 
-This is the follow-up plan after `MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md`
-Phases 1-5.
+This is the follow-up plan after the completed matcher rule workflow
+foundation work.
 
 The first plan built the foundation: pre-flight, generated coverage, stable
 variant IDs, `dm matcher`, `dev-watch`, prefix schema, and an explicit veto for

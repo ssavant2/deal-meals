@@ -63,7 +63,7 @@ def _classify(path: Path, line: str) -> str:
         return "blocking_reader"
     if suffix == ".py":
         return "python_reference"
-    if path.name in {"MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md", "MATCHER_REGISTRY_ARCHITECTURE.md"}:
+    if path.name == "MATCHER_REGISTRY_ARCHITECTURE.md":
         return "planning_doc"
     if suffix == ".md":
         return "documentation"

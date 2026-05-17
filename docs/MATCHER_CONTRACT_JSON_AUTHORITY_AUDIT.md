@@ -13,8 +13,8 @@ Decision: VETOED
 | Classification | Count |
 |---|---:|
 | blocking_reader | 8 |
-| documentation | 35 |
-| planning_doc | 11 |
+| documentation | 37 |
+| planning_doc | 2 |
 | python_reference | 37 |
 | reference | 3894 |
 
@@ -46,21 +46,14 @@ JSON files therefore remain authored source-of-truth for now.
 - `documentation` `docs/MATCHER_SYSTEMIC_FP_PLAN.md:1000` — `Any new regression case must be added to `matcher_regression_cases.json` BEFORE committing.`
 - `documentation` `docs/MATCHER_SYSTEMIC_FP_PLAN.md:1093` — `| `app/languages/sv/matcher_contracts/matcher_regression_cases.json` | Add positive + negative fixture for every new keyword | A, B, C |`
 - `documentation` `docs/MATCHER_SYSTEMIC_FP_PLAN.md:1094` — `| `app/languages/sv/matcher_contracts/matcher_rule_inventory.json` | Add entry per new mechanism | A, B, C |`
-- `planning_doc` `docs/MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md:58` — `2. Adding a new fixture to `matcher_regression_cases.json` does not require`
-- `planning_doc` `docs/MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md:207` — ``matcher_regression_cases.json` and `matcher_rule_inventory.json` and`
-- `planning_doc` `docs/MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md:339` — `Currently `matcher_regression_cases.json` and `matcher_rule_inventory.json``
-- `planning_doc` `docs/MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md:585` — `**What changes:** `matcher_regression_cases.json` and`
-- `planning_doc` `docs/MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md:586` — ``matcher_rule_inventory.json` become generated from TOML source files.`
-- `planning_doc` `docs/MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md:715` — `- L2-A auto-emit coverage TOML from `matcher_regression_cases.json` and`
-- `planning_doc` `docs/MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md:716` — ``matcher_rule_inventory.json`.`
-- `planning_doc` `docs/MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md:879` — `3. Inject a corresponding fixture in `matcher_regression_cases.json`, one`
-- `planning_doc` `docs/MATCHER_RULE_CHANGE_FLOW_IMPROVEMENTS.md:880` — `inventory entry in `matcher_rule_inventory.json`, and the current`
 - `documentation` `docs/TESTING.md:140` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json``
 - `documentation` `docs/TESTING.md:141` — `- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
 - `documentation` `docs/TESTING.md:217` — `- `matcher_regression_cases.json` is the main matcher parity corpus.`
 - `documentation` `docs/TESTING.md:218` — `- `matcher_rule_inventory.json` is the rule/source inventory checked by`
 - `planning_doc` `docs/MATCHER_REGISTRY_ARCHITECTURE.md:8` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json` stores`
 - `planning_doc` `docs/MATCHER_REGISTRY_ARCHITECTURE.md:10` — `- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json` stores the`
+- `documentation` `docs/MATCHER_RULE_WORKFLOW_STEP2_PLAN.md:37` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json``
+- `documentation` `docs/MATCHER_RULE_WORKFLOW_STEP2_PLAN.md:38` — `- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
 - `documentation` `app/tests/batch_review_questions.md:1361` — ``app/languages/sv/matcher_contracts/matcher_regression_cases.json` and`
 - `documentation` `app/tests/batch_review_questions.md:1362` — ``app/languages/sv/matcher_contracts/matcher_rule_inventory.json`.`
 - `python_reference` `app/support_checks/run_matcher_change_gates.py:69` — `return _app_dir_for_tree_root(args.tree_root) / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
@@ -194,4 +187,11 @@ JSON files therefore remain authored source-of-truth for now.
 - `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5725` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
 - `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5767` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
 - `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5809` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
-- ... 3825 additional reference(s)
+- `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5830` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5872` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5977` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6040` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6061` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6103` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6145` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- ... 3818 additional reference(s)
