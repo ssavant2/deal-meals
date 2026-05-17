@@ -208,8 +208,9 @@ types, follow the manual Track A or Track B workflow until a dedicated
 
 ## Cold-Start Details
 
-Read this when you need repo orientation, when a gate fails in a layer you did
-not expect, or when you are deciding whether a one-off diagnostic is enough.
+Read this section first if you have never seen this runbook before. Also return
+here when you need repo orientation, when a gate fails in a layer you did not
+expect, or when you are deciding whether a one-off diagnostic is enough.
 
 The Swedish matcher is deliberately layered. A pair can appear correct in a
 single live check but still fail in routed cache, compiled data, backend
@@ -411,12 +412,9 @@ Make two decisions: first choose the work track, then choose the matcher layer.
 
 ### Choose The Track
 
-- Concrete observed FP/FN, narrow local runtime fix, existing dict/guard pattern:
-  start with Track A.
-- Broad semantic rule, registry-owned rule, routing/bridge/no-match behavior,
-  release hardening, or anything that should become permanent regression
-  documentation: use Track B.
-- Stale cache only: refresh cache before judging semantics.
+Use the TL;DR Track A/Track B rule at the top of this file, then check the
+reference table in Two Work Tracks when the decision is ambiguous. If the case
+is only stale cache, refresh cache before judging semantics.
 
 ### Choose The Layer
 
