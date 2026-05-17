@@ -1,0 +1,29 @@
+version: 1
+
+source_ref:
+  allowed_prefixes:
+    - "current_review:"
+    - "legacy_review:"
+    - "manual:"
+    - "plan_initial:"
+    - "sanity:"
+  temporary_patterns:
+    - "^(?:current_queue:batch|legacy_import:old_review:|legacy_questions_old:|sanity:batch)"
+
+policy_ref:
+  temporary_patterns:
+    - "^(?:batch\\d+(?:_\\d+)?|legacy_questions_old(?:_|:).*)$"
+
+fixture_id:
+  temporary_patterns:
+    - "^(?:batch\\d+(?:_\\d+)?_|legacy_old_batch)"
+
+adapter_ref:
+  allowed_prefixes:
+    - "match_bridges:"
+    - "no_match_policies:"
+    - "backend_validation.events:"
+    - "matcher_layer_diagnostics:"
+  diagnostic_prefixes:
+    - "backend_validation.events:"
+    - "matcher_layer_diagnostics:"

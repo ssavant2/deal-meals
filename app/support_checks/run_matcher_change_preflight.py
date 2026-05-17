@@ -22,6 +22,7 @@ from languages.sv.ingredient_matching.term_registry.registry import load_registr
 from support_checks.generate_matcher_registry_coverage import (  # noqa: E402
     generate_coverage_files,
 )
+from support_checks.prefix_schema import allowed_prefixes, prefix_hint  # noqa: E402
 from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
     ALLOWED_SOURCE_REF_PREFIXES,
     _load_fixture_payload,
@@ -58,12 +59,7 @@ DEFAULT_BASELINE_FILE = (
 )
 DEFAULT_SNAPSHOT_FILE = APP_DIR / "support_checks" / "baselines" / "known_infrastructure_issues.json"
 
-ALLOWED_ADAPTER_REF_PREFIXES = (
-    "match_bridges:",
-    "no_match_policies:",
-    "backend_validation.events:",
-    "matcher_layer_diagnostics:",
-)
+ALLOWED_ADAPTER_REF_PREFIXES = allowed_prefixes("adapter_ref")
 CoverageKey = tuple[str, str, str, str, str, str]
 
 
@@ -294,7 +290,7 @@ def _check_inventory(
                     "inventory_adapter_ref_unknown_prefix",
                     (
                         f"adapter_ref has unknown prefix: {ref}. "
-                        f"Allowed: {', '.join(ALLOWED_ADAPTER_REF_PREFIXES)}"
+                        f"{prefix_hint('adapter_ref')}"
                     ),
                     file_name,
                     item_id,

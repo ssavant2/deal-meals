@@ -813,9 +813,14 @@ subcommand covers the common case, manifest mode may be unnecessary.
 
 **Phase 5** (target: 6-10 hours, **end-state consolidation**, medium-high risk):
 
+Implementation status as of 2026-05-17: shipped the safe additive parts and
+vetoed JSON-as-derived for the current tree.
+
 *Code:*
 - L3-B convention-based `entry_id` and coverage generation.
-- L3-C JSON-as-derived (audit first; may be vetoed).
+- L3-C JSON-as-derived audit first; current result is **VETOED** in
+  `docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md` because JSON contracts still
+  have direct Python readers.
 - L3-D file watcher / dev daemon.
 - L3-E schema-driven prefix validation.
 

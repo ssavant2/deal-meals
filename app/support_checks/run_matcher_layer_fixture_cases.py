@@ -8,7 +8,6 @@ from collections import Counter
 import json
 import os
 from pathlib import Path
-import re
 import sys
 from typing import Any
 
@@ -21,25 +20,21 @@ from support_checks.matcher_layer_diagnostics import (  # noqa: E402
     check_cache_freshness,
     diagnose_case,
 )
+from support_checks.prefix_schema import (  # noqa: E402
+    allowed_prefixes,
+    prefix_hint,
+    temporary_re,
+)
 
 
 DEFAULT_FIXTURE_FILE = (
     APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
 )
 
-ALLOWED_SOURCE_REF_PREFIXES = (
-    "current_review:",
-    "legacy_review:",
-    "manual:",
-    "plan_initial:",
-    "sanity:",
-)
-ALLOWED_SOURCE_REF_PREFIXES_TEXT = ", ".join(ALLOWED_SOURCE_REF_PREFIXES)
-TEMPORARY_POLICY_REF_RE = re.compile(r"^(?:batch\d+(?:_\d+)?|legacy_questions_old(?:_|:).*)$")
-TEMPORARY_FIXTURE_ID_RE = re.compile(r"^(?:batch\d+(?:_\d+)?_|legacy_old_batch)")
-TEMPORARY_SOURCE_REF_RE = re.compile(
-    r"^(?:current_queue:batch|legacy_import:old_review:|legacy_questions_old:|sanity:batch)"
-)
+ALLOWED_SOURCE_REF_PREFIXES = allowed_prefixes("source_ref")
+TEMPORARY_POLICY_REF_RE = temporary_re("policy_ref")
+TEMPORARY_FIXTURE_ID_RE = temporary_re("fixture_id")
+TEMPORARY_SOURCE_REF_RE = temporary_re("source_ref")
 
 
 def has_temporary_policy_ref(policy_ref: str) -> bool:
@@ -55,7 +50,7 @@ def has_temporary_source_ref(source_ref: str) -> bool:
 
 
 def source_ref_prefix_hint() -> str:
-    return f"Allowed: {ALLOWED_SOURCE_REF_PREFIXES_TEXT}"
+    return prefix_hint("source_ref")
 
 
 def _load_fixture_payload(path: Path) -> list[dict[str, Any]]:

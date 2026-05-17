@@ -38,6 +38,7 @@ from languages.sv.ingredient_matching.match_bridges import MATCH_BRIDGES  # noqa
 from languages.sv.ingredient_matching.no_match_policies import NO_MATCH_POLICIES  # noqa: E402
 from languages.sv.ingredient_matching.parent_maps import KEYWORD_EXTRA_PARENTS, PARENT_MATCH_ONLY  # noqa: E402
 from languages.sv.ingredient_matching.synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS  # noqa: E402
+from support_checks.prefix_schema import diagnostic_prefixes  # noqa: E402
 
 
 DEFAULT_BATCH_SIZE = 60
@@ -57,10 +58,7 @@ REGRESSION_CASES_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "ma
 EXTRACTION_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "extraction.py"
 TERM_INDEXES_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_indexes.py"
 WORKING_TABLE = "tmp_verified_term_audit_variants"
-KNOWN_DIAGNOSTIC_ADAPTER_PREFIXES = (
-    "backend_validation.events:",
-    "matcher_layer_diagnostics:",
-)
+KNOWN_DIAGNOSTIC_ADAPTER_PREFIXES = diagnostic_prefixes("adapter_ref")
 MAPPING_SOURCE_TYPES = frozenset({
     "ingredient_parent",
     "keyword_synonym",

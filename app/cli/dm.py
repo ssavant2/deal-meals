@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import time
 import tomllib
 from typing import Annotated
 import unicodedata
@@ -458,6 +459,28 @@ def _run_track_b_gates(
     return _run(argv, cwd=APP_DIR, env=_gate_env(paths, report_root, runtime_entries_dir))
 
 
+def _run_preflight(paths: MatcherPaths, report_root: Path | None) -> int:
+    argv = [sys.executable, str(SUPPORT_CHECKS_DIR / "run_matcher_change_preflight.py")]
+    if paths.app_dir != APP_DIR:
+        argv.extend(["--tree-root", str(paths.repo_root)])
+    return _run(argv, cwd=APP_DIR, env=_gate_env(paths, report_root, None))
+
+
+def _watch_files(paths: MatcherPaths) -> tuple[Path, ...]:
+    entries_dir = paths.app_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
+    files = [
+        paths.fixture_file,
+        paths.inventory_file,
+        paths.deep_sanity_file,
+        *sorted(entries_dir.glob("*.toml")),
+    ]
+    return tuple(path for path in files if path.exists())
+
+
+def _mtime_snapshot(files: tuple[Path, ...]) -> dict[Path, int]:
+    return {path: path.stat().st_mtime_ns for path in files if path.exists()}
+
+
 def _validate_keyword_extra_parent_args(canonical: str, kids: tuple[str, ...]) -> None:
     if not canonical.strip():
         raise typer.BadParameter("canonical must not be empty")
@@ -626,6 +649,50 @@ def add_keyword_extra_parent(
         runtime_entries_dir=runtime_entries_dir,
     )
     raise typer.Exit(gate_status)
+
+
+@matcher_app.command("dev-watch")
+def matcher_dev_watch(
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to watch instead of /app.")] = None,
+    interval: Annotated[
+        float,
+        typer.Option("--interval", min=0.25, help="Polling interval in seconds; default reports within 5 seconds."),
+    ] = 1.0,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    once: Annotated[bool, typer.Option("--once", help="Run pre-flight once and exit.")] = False,
+) -> None:
+    paths = _paths(tree_root)
+    files = _watch_files(paths)
+    typer.echo(f"Watching {len(files)} matcher file(s); press Ctrl-C to stop.")
+    status = _run_preflight(paths, report_root)
+    if once:
+        raise typer.Exit(status)
+
+    snapshot = _mtime_snapshot(files)
+    try:
+        while True:
+            time.sleep(interval)
+            current_files = _watch_files(paths)
+            current = _mtime_snapshot(current_files)
+            if current != snapshot:
+                changed = sorted(
+                    str(path.relative_to(paths.repo_root) if path.is_relative_to(paths.repo_root) else path)
+                    for path in set(current) | set(snapshot)
+                    if current.get(path) != snapshot.get(path)
+                )
+                typer.echo("")
+                typer.echo(f"Change detected: {', '.join(changed[:6])}")
+                if len(changed) > 6:
+                    typer.echo(f"... and {len(changed) - 6} more")
+                status = _run_preflight(paths, report_root)
+                snapshot = current
+    except KeyboardInterrupt:
+        typer.echo("")
+        typer.echo("Stopped matcher dev-watch.")
+        raise typer.Exit(status)
 
 
 @matcher_app.command(

@@ -22,12 +22,18 @@ from support_checks.generate_matcher_registry_coverage import (
     generate_coverage_files,
     write_coverage_files,
 )
+from support_checks.audit_matcher_contract_json_authority import audit as audit_json_authority
+from support_checks.prefix_schema import allowed_prefixes
 from support_checks.run_verified_term_audit import (
     AuditVariant,
     IDENTITY_HASH_VERSION_V1,
     IDENTITY_HASH_VERSION_V2,
     build_variants,
 )
+from languages.sv.ingredient_matching.term_registry.exports import (
+    build_keyword_extra_parents_export_from_entries,
+)
+from languages.sv.ingredient_matching.term_registry.registry import load_registry_entries
 
 
 class MatcherRuleChangePreflightTests(unittest.TestCase):
@@ -370,6 +376,58 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
                 text=True,
             )
             self.assertEqual(gate_result.returncode, 0, gate_result.stderr + gate_result.stdout)
+
+    def test_phase5_prefix_schema_and_convention_entry(self) -> None:
+        self.assertIn("current_review:", allowed_prefixes("source_ref"))
+        self.assertIn("matcher_layer_diagnostics:", allowed_prefixes("adapter_ref"))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            entries_dir = Path(tmp)
+            (entries_dir / "keyword_extra_parent.toml").write_text(
+                "\n".join([
+                    "[[entries]]",
+                    'language = "sv"',
+                    'market = "SE"',
+                    'canonical = "phasefemfrukt"',
+                    'status = "active"',
+                    'variants = ["phasefemapelsin"]',
+                    'route_terms = ["phasefemfrukt"]',
+                    'source_refs = ["manual:phase5_convention_test"]',
+                    'layer_policy = ["route_only"]',
+                    "",
+                ]),
+                encoding="utf-8",
+            )
+
+            entries = load_registry_entries(entries_dir=entries_dir)
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0].entry_id, "sv-se.family.phasefemfrukt.phasefemapelsin")
+        self.assertEqual(
+            entries[0].language_payload["coverage"],
+            [
+                {
+                    "source_family": "keyword_extra_parent",
+                    "canonical": "phasefemfrukt",
+                    "variant": "phasefemapelsin",
+                    "layer_role": "keyword_extra_parent_mapping",
+                }
+            ],
+        )
+        self.assertEqual(
+            build_keyword_extra_parents_export_from_entries(entries),
+            {"phasefemapelsin": "phasefemfrukt"},
+        )
+
+    def test_phase5_json_authority_audit_vetoes_current_tree(self) -> None:
+        hits = audit_json_authority(Path(__file__).resolve().parents[2])
+        blocking_paths = {
+            hit.path.name
+            for hit in hits
+            if hit.classification == "blocking_reader"
+        }
+        self.assertIn("generate_matcher_registry_coverage.py", blocking_paths)
+        self.assertIn("run_matcher_change_preflight.py", blocking_paths)
 
 
 if __name__ == "__main__":

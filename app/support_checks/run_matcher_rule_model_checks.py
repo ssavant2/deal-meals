@@ -36,6 +36,7 @@ from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
     has_temporary_fixture_id,
     has_temporary_policy_ref,
 )
+from support_checks.prefix_schema import diagnostic_prefixes  # noqa: E402
 from support_checks.run_matcher_rule_inventory_checks import (  # noqa: E402
     DEFAULT_INVENTORY_FILE,
     _entry_adapter_refs,
@@ -527,10 +528,7 @@ def main() -> int:
         if entry.get("status") == "wrapped_adapter"
         for adapter_ref in _entry_adapter_refs(entry)
     }
-    known_diagnostic_adapter_prefixes = (
-        "backend_validation.events:",
-        "matcher_layer_diagnostics:",
-    )
+    known_diagnostic_adapter_prefixes = diagnostic_prefixes("adapter_ref")
     unknown_inventory_adapter_refs = sorted(
         adapter_ref
         for adapter_ref in inventory_adapter_refs

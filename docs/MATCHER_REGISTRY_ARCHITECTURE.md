@@ -10,12 +10,21 @@ support-check contracts that keep them in sync.
 - `app/languages/sv/matcher_contracts/matcher_rule_inventory.json` stores the
   rule owner, risk, adapter, fixture refs, and source provenance.
 - `app/languages/sv/ingredient_matching/term_registry/entries/*.toml` stores
-  authored registry entries and exact verified-term coverage rows.
+  authored registry entries. Simple mapping families may omit `entry_id` and
+  `[[entries.coverage]]`; the registry loader derives them from language,
+  market, canonical, first variant, filename, and the family convention.
 - `matcher_regression_case.toml` and `matcher_rule_inventory.toml` are generated
   from the JSON contracts by
   `app/support_checks/generate_matcher_registry_coverage.py`.
 - `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json`
   is the frozen verified-term baseline used by registry contract checks.
+- `app/support_checks/schemas/prefixes.yml` is the single prefix schema for
+  permanent `source_ref`, temporary fixture/policy/source refs, and inventory
+  `adapter_ref` prefixes.
+
+The JSON contract files remain authored source-of-truth. L3-C was audited in
+`docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md` and vetoed for now because
+support checks and the CLI still read those JSON files directly.
 
 ## Verified-Term Variant IDs
 
@@ -44,10 +53,14 @@ migrations. True removals still require explicit `--allow-removals`.
 For Track B matcher-rule work, prefer the wrapper:
 
 ```bash
-docker compose exec -T -u appuser -w /app web \
-  python support_checks/run_matcher_change_gates.py --track B
+./bin/dm matcher gates --track B
 ```
 
 The wrapper refreshes generated coverage when fixture or inventory JSON changes,
 runs pre-flight checks before slower gates, and promotes the verified-term
 baseline when registry changes require it.
+
+During authoring, `./bin/dm matcher dev-watch` polls matcher contract and
+registry files and reruns pre-flight after saves. The default interval is one
+second, so infrastructure issues should surface within five seconds on normal
+dev machines.

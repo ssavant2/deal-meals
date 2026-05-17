@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import re
 from typing import Any
 import tomllib
+import unicodedata
 
 from languages.term_registry.models import RegistryEntry, RegistryExample
 
@@ -16,6 +18,16 @@ EXTRA_ENTRIES_DIRS_ENV = "TERM_REGISTRY_EXTRA_ENTRIES_DIRS"
 LOCAL_ENTRIES_DIR_ENV = "TERM_REGISTRY_LOCAL_ENTRIES_DIR"
 DISABLE_LOCAL_ENTRIES_ENV = "TERM_REGISTRY_DISABLE_LOCAL_ENTRIES"
 DEFAULT_LOCAL_ENTRIES_DIR = Path("/app/data/term_registry/sv/entries")
+
+CONVENTION_COVERAGE_SPECS = {
+    "ingredient_parent": ("alias", "ingredient_parent_mapping"),
+    "ingredient_routing_parent": ("family", "ingredient_routing_parent_mapping"),
+    "keyword_extra_parent": ("family", "keyword_extra_parent_mapping"),
+    "keyword_synonym": ("alias", "keyword_synonym_mapping"),
+    "offer_extra_keyword": ("alias", "offer_extra_keyword_mapping"),
+    "parent_match_only": ("family", "parent_match_only_mapping"),
+    "recipe_routing_helper": ("family", "recipe_routing_extra_alias"),
+}
 
 
 def _truthy_env(name: str) -> bool:
@@ -30,6 +42,51 @@ def _tuple_str(value: Any) -> tuple[str, ...]:
     if isinstance(value, list):
         return tuple(str(item) for item in value)
     raise ValueError(f"Expected string/list value, got {type(value).__name__}")
+
+
+def _slug(value: str, *, fallback: str = "term") -> str:
+    cleaned = value.strip().lower()
+    cleaned = (
+        cleaned.replace("å", "a")
+        .replace("ä", "a")
+        .replace("ö", "o")
+        .replace("é", "e")
+    )
+    normalized = unicodedata.normalize("NFKD", cleaned)
+    ascii_text = normalized.encode("ascii", "ignore").decode("ascii")
+    slug = re.sub(r"[^a-z0-9]+", "_", ascii_text).strip("_")
+    return slug or fallback
+
+
+def _derive_entry_id(payload: dict[str, Any], *, path: Path) -> str:
+    source_family = path.stem
+    entry_type, _layer_role = CONVENTION_COVERAGE_SPECS.get(source_family, ("family", "mapping"))
+    language = str(payload.get("language", "sv")).lower()
+    market = str(payload.get("market", "SE")).lower()
+    canonical = _slug(str(payload.get("canonical") or ""), fallback="canonical")
+    variants = _tuple_str(payload.get("variants"))
+    short_name = _slug(variants[0] if variants else source_family)
+    return f"{language}-{market}.{entry_type}.{canonical}.{short_name}"
+
+
+def _derive_coverage(payload: dict[str, Any], *, path: Path) -> list[dict[str, str]]:
+    source_family = path.stem
+    _entry_type, layer_role = CONVENTION_COVERAGE_SPECS.get(source_family, ("", ""))
+    if not layer_role or "coverage" in payload or "legacy_coverage" in payload:
+        return []
+    canonical = str(payload.get("canonical") or "").strip()
+    variants = _tuple_str(payload.get("variants"))
+    if not canonical or not variants:
+        return []
+    return [
+        {
+            "source_family": source_family,
+            "canonical": canonical,
+            "variant": variant,
+            "layer_role": layer_role,
+        }
+        for variant in variants
+    ]
 
 
 def _examples(value: Any) -> tuple[RegistryExample, ...]:
@@ -57,9 +114,12 @@ def _entry_from_payload(payload: dict[str, Any], *, path: Path) -> RegistryEntry
         language_payload["coverage"] = payload["coverage"]
     if "legacy_coverage" in payload:
         language_payload["legacy_coverage"] = payload["legacy_coverage"]
+    derived_coverage = _derive_coverage(payload, path=path)
+    if derived_coverage and "coverage" not in language_payload and "legacy_coverage" not in language_payload:
+        language_payload["coverage"] = derived_coverage
     try:
         return RegistryEntry(
-            entry_id=str(payload["entry_id"]),
+            entry_id=str(payload.get("entry_id") or _derive_entry_id(payload, path=path)),
             language=str(payload.get("language", "sv")),
             market=str(payload.get("market", "SE")),
             canonical=str(payload["canonical"]),

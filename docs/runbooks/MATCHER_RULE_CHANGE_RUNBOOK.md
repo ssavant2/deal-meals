@@ -184,6 +184,16 @@ separate inventory row for a canonical that already has one. For all other rule
 types, follow the manual Track A or Track B workflow until a dedicated
 `dm matcher add ...` subcommand exists.
 
+For live feedback while editing matcher contracts or registry TOML:
+
+```bash
+./bin/dm matcher dev-watch
+```
+
+It polls the matcher files and reruns pre-flight after saves. Use
+`--interval <seconds>` to tune polling, or `--once` for a single pre-flight run
+through the CLI entry point.
+
 ### Track A: Narrow Runtime Fix
 
 Use this for ordinary PNB/FPB/GPB/runtime guard fixes.
@@ -550,6 +560,11 @@ Allowed permanent `source_ref` prefixes are:
 | `manual:` | A human or agent added a standalone rule from direct domain reasoning, not from a named plan or imported review set. | `manual:mozzarella_bufala_guard` |
 | `plan_initial:` | The fixture implements an initial case named by a planning document. | `plan_initial:systemic_fp_plain_dairy` |
 | `sanity:` | The fixture is a small invariant used as a sanity/regression anchor. | `sanity:pnb_plain_positive_guard` |
+
+The machine-readable allow-list lives in
+`app/support_checks/schemas/prefixes.yml`. Update that schema first when a new
+permanent prefix is genuinely needed; pre-flight, fixture schema checks,
+inventory checks, and audit checks read from it.
 
 ### Inventory
 

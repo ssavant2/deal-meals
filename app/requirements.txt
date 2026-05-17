@@ -17,6 +17,7 @@ python-dotenv==1.2.2
 pydantic==2.13.4
 pydantic-settings==2.14.1
 zstandard==0.25.0
+PyYAML>=6.0.2,<7.0.0
 
 # CLI och logging
 rich==15.0.0
