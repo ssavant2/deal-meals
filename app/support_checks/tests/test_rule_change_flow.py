@@ -36,6 +36,22 @@ from languages.sv.ingredient_matching.term_registry.exports import (
 from languages.sv.ingredient_matching.term_registry.registry import load_registry_entries
 
 
+def _copy_matcher_tree(tree_root: Path) -> Path:
+    app_dir = tree_root / "app"
+    shutil.copytree(
+        DEFAULT_FIXTURE_FILE.parents[1],
+        app_dir / "languages" / "sv",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
+    support_checks_dir = Path(__file__).resolve().parents[1]
+    shutil.copytree(
+        support_checks_dir,
+        app_dir / "support_checks",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
+    return app_dir
+
+
 class MatcherRuleChangePreflightTests(unittest.TestCase):
     def test_current_tree_preflight_is_clean(self) -> None:
         report = run_preflight()
@@ -77,18 +93,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
     def test_tree_root_preflight_reads_temporary_contract_tree(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
-            app_dir = tree_root / "app"
-            shutil.copytree(
-                DEFAULT_FIXTURE_FILE.parents[1],
-                app_dir / "languages" / "sv",
-                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-            )
-            support_checks_dir = Path(__file__).resolve().parents[1]
-            shutil.copytree(
-                support_checks_dir,
-                app_dir / "support_checks",
-                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-            )
+            app_dir = _copy_matcher_tree(tree_root)
 
             fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
             fixtures = json.loads(fixture_file.read_text(encoding="utf-8"))
@@ -129,18 +134,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
     def test_phase2_coverage_generation_allows_json_only_fixture_and_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
-            app_dir = tree_root / "app"
-            shutil.copytree(
-                DEFAULT_FIXTURE_FILE.parents[1],
-                app_dir / "languages" / "sv",
-                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-            )
-            support_checks_dir = Path(__file__).resolve().parents[1]
-            shutil.copytree(
-                support_checks_dir,
-                app_dir / "support_checks",
-                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-            )
+            app_dir = _copy_matcher_tree(tree_root)
 
             fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
             inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
@@ -268,18 +262,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
     def test_phase4_cli_e2e(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
-            app_dir = tree_root / "app"
-            shutil.copytree(
-                DEFAULT_FIXTURE_FILE.parents[1],
-                app_dir / "languages" / "sv",
-                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-            )
-            support_checks_dir = Path(__file__).resolve().parents[1]
-            shutil.copytree(
-                support_checks_dir,
-                app_dir / "support_checks",
-                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-            )
+            app_dir = _copy_matcher_tree(tree_root)
 
             fixture_id = "keyword_extra_parent_citrusfrukter_phasefyraapelsin_positive"
             inventory_id = "legacy_parent_citrusfrukter_phasefyraapelsin_family"
@@ -376,6 +359,74 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
                 text=True,
             )
             self.assertEqual(gate_result.returncode, 0, gate_result.stderr + gate_result.stdout)
+
+    def test_phase4_cli_dry_run_canary_does_not_write(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+            inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+            keyword_extra_parent_file = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "keyword_extra_parent.toml"
+            )
+            deep_sanity_file = app_dir / "support_checks" / "run_deep_matcher_sanity.py"
+            watched_files = (
+                fixture_file,
+                inventory_file,
+                keyword_extra_parent_file,
+                deep_sanity_file,
+            )
+            before = {path: path.read_text(encoding="utf-8") for path in watched_files}
+
+            policy_ref = "keyword_extra_parent_citrusfrukter_dry_run_canary"
+            inventory_id = "legacy_parent_citrusfrukter_dry_run_canary"
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "keyword-extra-parent",
+                    "citrusfrukter",
+                    "--kids",
+                    "dryrunklementin",
+                    "--recipe-name",
+                    "Synthetic Dry Run",
+                    "--ingredient",
+                    "3-4 citrusfrukter (valfri sort)",
+                    "--offer-names",
+                    "Dryrunklementin",
+                    "--offer-category",
+                    "fruit",
+                    "--policy-ref",
+                    policy_ref,
+                    "--inventory-id",
+                    inventory_id,
+                    "--tree-root",
+                    str(tree_root),
+                    "--dry-run",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            after = {path: path.read_text(encoding="utf-8") for path in watched_files}
+            self.assertEqual(after, before)
+            self.assertIn('canonical = "citrusfrukter"', result.stdout)
+            self.assertIn('variants = ["dryrunklementin"]', result.stdout)
+            self.assertIn(f"# {policy_ref}: generated by dm matcher add keyword-extra-parent", result.stdout)
+            self.assertIn("Dry run only; no files written.", result.stdout)
 
     def test_phase5_prefix_schema_and_convention_entry(self) -> None:
         self.assertIn("current_review:", allowed_prefixes("source_ref"))
