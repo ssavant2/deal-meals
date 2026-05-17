@@ -13,7 +13,8 @@ import re
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_DIR = APP_DIR.parent
 DEFAULT_SOURCE = APP_DIR / "tests" / "batch_review_questions.md"
-DEFAULT_OUTPUT = REPO_DIR / "docs" / "MATCHER_RULE_TYPE_FREQUENCY.md"
+REPORTS_DIR = APP_DIR / "support_checks" / "reports"
+DEFAULT_OUTPUT = REPORTS_DIR / "MATCHER_RULE_TYPE_FREQUENCY.md"
 
 PATTERNS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
     ("pnb", "PNB add", ("pnb",)),

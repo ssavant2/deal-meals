@@ -32,8 +32,9 @@ from support_checks.matcher_contracts import (  # noqa: E402
 
 
 DEFAULT_OUTPUT_DIR = Path("/tmp/deal-meals-matcher-contract-sources")
-DEFAULT_REPORT_OUTPUT = REPO_DIR / "docs" / "MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md"
-DEFAULT_JSON_REPORT_OUTPUT = REPO_DIR / "docs" / "MATCHER_CONTRACT_TOML_SOURCE_AUDIT.json"
+REPORTS_DIR = APP_DIR / "support_checks" / "reports"
+DEFAULT_REPORT_OUTPUT = REPORTS_DIR / "MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md"
+DEFAULT_JSON_REPORT_OUTPUT = REPORTS_DIR / "MATCHER_CONTRACT_TOML_SOURCE_AUDIT.json"
 SCHEMA_README = APP_DIR / "languages" / "sv" / "matcher_contracts" / "sources" / "README.md"
 
 

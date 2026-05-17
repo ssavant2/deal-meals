@@ -28,14 +28,14 @@ support-check contracts that keep them in sync.
 
 Support checks and readers access generated JSON through
 `app/support_checks/matcher_contracts.py`; the L3-C direct-reader audit in
-`docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md` currently passes with zero
-blocking consumers.
+`app/support_checks/reports/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md`
+currently passes with zero blocking consumers.
 
 The authoritative TOML sources live in
 `app/languages/sv/matcher_contracts/sources/` and are documented in that
 directory's README. The current source/generation report is
-`docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md`. Pre-flight rejects generated JSON
-that no longer matches the TOML sources byte-for-byte.
+`app/support_checks/reports/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md`. Pre-flight
+rejects generated JSON that no longer matches the TOML sources byte-for-byte.
 
 ## Verified-Term Variant IDs
 
@@ -51,9 +51,10 @@ identity instead: source type/file/id, variant role/text, canonical,
 expected-family, ingredient/product text, and expected value. `source_ref`
 remains stored as provenance metadata, but it is not identity.
 
-The one-shot v1 to v2 migration is recorded in
-`app/languages/sv/ingredient_matching/term_registry/baselines/variant_id_migration_v1_to_v2.json`.
-It maps every old baseline ID to the new stable ID. Before migration, the v2
+The historical v1 to v2 migration is recorded in
+`app/languages/sv/ingredient_matching/term_registry/baselines/verified_term_variant_id_migrations.json`.
+It maps every old baseline ID to the new stable ID and is kept as a permanent
+provenance/audit map, not as runtime matcher input. Before migration, the v2
 payload was checked for collisions across the current 5517 verified variants.
 
 `promote_term_baseline.py` automatically applies content-equivalent ID

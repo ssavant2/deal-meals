@@ -70,8 +70,9 @@ DEFAULT_SWEDISH_BASELINE_PATH = (
     / "baselines"
     / "verified_matcher_terms.json"
 )
+VARIANT_ID_MIGRATIONS_FILENAME = "verified_term_variant_id_migrations.json"
 DEFAULT_SWEDISH_VARIANT_ID_MIGRATION_PATH = (
-    DEFAULT_SWEDISH_BASELINE_PATH.parent / "variant_id_migration_v1_to_v2.json"
+    DEFAULT_SWEDISH_BASELINE_PATH.parent / VARIANT_ID_MIGRATIONS_FILENAME
 )
 DEFAULT_SWEDISH_ADD_TERM_CHECKS_PATH = APP_DIR / "support_checks" / "run_term_registry_add_term_checks.py"
 DEFAULT_SWEDISH_CONTRACT_CHECKS_PATH = APP_DIR / "support_checks" / "run_term_registry_contract_checks.py"
@@ -173,7 +174,7 @@ def _build_config(args: argparse.Namespace) -> PromotionConfig:
         variant_id_migration_path=(
             DEFAULT_SWEDISH_VARIANT_ID_MIGRATION_PATH
             if (language, market) == (DEFAULT_LANGUAGE, DEFAULT_MARKET)
-            else _default_baseline_path(language).parent / "variant_id_migration_v1_to_v2.json"
+            else _default_baseline_path(language).parent / VARIANT_ID_MIGRATIONS_FILENAME
         ),
     )
 
@@ -360,9 +361,11 @@ def _write_variant_id_migration_map(
         "from_hash_version": "v1_source_ref",
         "to_hash_version": "v2_stable_without_source_ref",
         "description": (
-            "One-shot verified-term baseline migration. v2 variant_id hashes "
-            "exclude source_ref provenance text so source_ref edits do not "
-            "force future baseline hash migrations."
+            "Permanent verified-term variant_id migration map. Current "
+            "records come from the v1 source_ref-based hash to v2 stable "
+            "hash migration; v2 hashes exclude source_ref provenance text "
+            "so source_ref edits do not force future baseline hash "
+            "migrations."
         ),
         "variant_count": len(records),
         "migrations": sorted(records, key=lambda item: item["old_variant_id"]),

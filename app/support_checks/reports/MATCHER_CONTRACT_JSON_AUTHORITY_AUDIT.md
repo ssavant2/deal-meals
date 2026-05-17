@@ -14,24 +14,18 @@ Blocker count: 0
 | Classification | Count |
 |---|---:|
 | contract_access_api | 2 |
-| documentation | 14 |
+| documentation | 10 |
 | generated_output_reference | 4125 |
 | planning_doc | 2 |
 | python_reference | 15 |
-| reference | 3 |
+| reference | 1 |
 | test_reference | 49 |
 
 ## All References
 
 - `ref` `documentation` `docs/HOW_TO_ADD_COUNTRIES.md:177` — `- `matcher_regression_cases.json` and `matcher_rule_inventory.json` — generated`
-- `ref` `documentation` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md:21` — `- `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml` generates `app/languages/sv/matcher_contracts/matcher_regression_cases.json``
-- `ref` `documentation` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md:22` — `- `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml` generates `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
 - `ref` `planning_doc` `docs/MATCHER_REGISTRY_ARCHITECTURE.md:13` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json` and`
 - `ref` `planning_doc` `docs/MATCHER_REGISTRY_ARCHITECTURE.md:14` — ``app/languages/sv/matcher_contracts/matcher_rule_inventory.json` are`
-- `ref` `documentation` `docs/MATCHER_RULE_WORKFLOW_STEP2_PLAN.md:45` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json``
-- `ref` `documentation` `docs/MATCHER_RULE_WORKFLOW_STEP2_PLAN.md:46` — `- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
-- `ref` `reference` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.json:13` — `"source_json_path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
-- `ref` `reference` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.json:25` — `"source_json_path": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
 - `ref` `test_reference` `app/tests/batch_review_questions.md:1361` — ``app/languages/sv/matcher_contracts/matcher_regression_cases.json` and`
 - `ref` `test_reference` `app/tests/batch_review_questions.md:1362` — ``app/languages/sv/matcher_contracts/matcher_rule_inventory.json`.`
 - `ref` `python_reference` `app/support_checks/run_matcher_change_gates.py:198` — `"app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
@@ -42,12 +36,12 @@ Blocker count: 0
 - `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:38` — `"# Registry coverage for matcher_regression_cases.json fixtures.",`
 - `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:45` — `"# Source: app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
 - `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:48` — `"# Registry coverage for matcher_rule_inventory.json rows.",`
-- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:23` — `"matcher_regression_cases.json",`
-- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:24` — `"matcher_rule_inventory.json",`
-- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:27` — `"DEFAULT_FIXTURE_FILE",`
-- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:28` — `"DEFAULT_INVENTORY_FILE",`
-- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:29` — `"RULE_INVENTORY_FILE",`
-- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:30` — `"REGRESSION_CASES_FILE",`
+- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:24` — `"matcher_regression_cases.json",`
+- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:25` — `"matcher_rule_inventory.json",`
+- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:28` — `"DEFAULT_FIXTURE_FILE",`
+- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:29` — `"DEFAULT_INVENTORY_FILE",`
+- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:30` — `"RULE_INVENTORY_FILE",`
+- `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:31` — `"REGRESSION_CASES_FILE",`
 - `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:60` — `DEFAULT_FIXTURE_FILE = fixture_contract_path()`
 - `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:61` — `DEFAULT_INVENTORY_FILE = inventory_contract_path()`
 - `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:67` — `DEFAULT_FIXTURE_FILE.parents[1],`
@@ -183,4 +177,10 @@ Blocker count: 0
 - `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:8039` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
 - `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:8058` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
 - `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:8077` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- ... 4050 additional reference(s)
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:8096` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:8115` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:8134` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:8153` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:8172` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:8191` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- ... 4044 additional reference(s)

@@ -17,8 +17,9 @@ REPO_DIR = (
     if APP_DIR.parent != Path(APP_DIR.anchor) and (APP_DIR.parent / "docs").is_dir()
     else APP_DIR
 )
-DEFAULT_OUTPUT = REPO_DIR / "docs" / "MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md"
-DEFAULT_JSON_OUTPUT = REPO_DIR / "docs" / "MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.json"
+REPORTS_DIR = APP_DIR / "support_checks" / "reports"
+DEFAULT_OUTPUT = REPORTS_DIR / "MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md"
+DEFAULT_JSON_OUTPUT = REPORTS_DIR / "MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.json"
 CONTRACT_FILES = (
     "matcher_regression_cases.json",
     "matcher_rule_inventory.json",
@@ -62,6 +63,8 @@ def _iter_text_files(root: Path) -> list[Path]:
     files: list[Path] = []
     for path in root.rglob("*"):
         if any(part in SKIP_DIRS for part in path.parts):
+            continue
+        if "support_checks" in path.parts and "reports" in path.parts:
             continue
         if not path.is_file():
             continue
