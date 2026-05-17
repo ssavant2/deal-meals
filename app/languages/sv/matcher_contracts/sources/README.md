@@ -1,28 +1,39 @@
 # Matcher Contract TOML Sources
 
-This directory documents the proposed B3 TOML source schema for Swedish matcher
-contracts. The TOML files themselves are not authoritative or committed in B3.
-Generate them into `/tmp` with:
+This directory contains the B4 parallel TOML source schema for Swedish matcher
+contracts. The TOML files are checked in and kept in sync with JSON, but they
+are not authoritative until B5.
+
+Refresh the parallel TOML sources from current JSON with:
 
 ```bash
 python app/support_checks/audit_matcher_contract_toml_sources.py \
-  --output-dir /tmp/deal-meals-matcher-contract-sources \
+  --output-dir app/languages/sv/matcher_contracts/sources \
+  --allow-checkout-output \
+  --write-report \
   --fail-on-diff
+```
+
+Check that the TOML sources still generate the current JSON with:
+
+```bash
+python app/support_checks/generate_matcher_contract_json_from_toml_sources.py \
+  --check
 ```
 
 ## Authority
 
-During B3, the authored source of truth remains:
+During B4, the authored source of truth remains:
 
 - `app/languages/sv/matcher_contracts/matcher_regression_cases.json`
 - `app/languages/sv/matcher_contracts/matcher_rule_inventory.json`
 
-The TOML source files become eligible for authority only after B4 has a
-parallel generator and B5 flips the hand-edit guard.
+The TOML source files become eligible for authority only after B5 flips the
+hand-edit guard.
 
 ## File Layout
 
-The dry-run generator writes two native TOML files outside the checkout:
+The parallel source set contains two native TOML files:
 
 - `matcher_regression_cases.toml`
 - `matcher_rule_inventory.toml`
@@ -87,4 +98,4 @@ anchor = "example"
 - Optional fields remain absent when absent in JSON.
 - Canonical byte comparison uses `json.dumps(..., ensure_ascii=False,
   indent=2, sort_keys=True) + "\n"`.
-- B3 must not commit generated JSON or generated TOML source files.
+- B4 commits TOML sources but does not commit generated JSON rewrites.

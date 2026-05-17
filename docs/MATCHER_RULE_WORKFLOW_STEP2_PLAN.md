@@ -32,6 +32,7 @@ Shipped foundation:
 
 Current L3-C direct-reader status after B2: **passed**.
 Current B3 TOML-source round-trip status: **passed**.
+Current B4 parallel generated-JSON check status: **running in pre-flight**.
 
 The JSON contract files are still authoritative:
 
@@ -40,7 +41,8 @@ The JSON contract files are still authoritative:
 
 Direct Python readers have been migrated behind
 `app/support_checks/matcher_contracts.py`. JSON is still authored
-source-of-truth until B4-B5 exercise and flip TOML-source generation.
+source-of-truth until B5 exercises enough parallel checks and flips TOML-source
+generation.
 
 ## Implementation Governance
 
@@ -316,7 +318,7 @@ Only after B3 passes:
 - add a generator that writes JSON from TOML sources
 - run it in check mode during pre-flight
 - keep existing JSON authoritative during a parallel-running period
-- commit TOML sources and generated JSON only when the diff is reviewed
+- commit TOML sources; generated JSON rewrites wait for B5 flip review
 
 Acceptance:
 

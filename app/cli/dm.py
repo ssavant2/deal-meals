@@ -16,6 +16,7 @@ import unicodedata
 
 import typer
 
+from support_checks.audit_matcher_contract_toml_sources import audit_contract_sources
 from support_checks.matcher_contracts import (
     append_json_list_items,
     contract_paths,
@@ -477,6 +478,15 @@ def _run_track_b_change_plan(
     )
 
 
+def _sync_contract_toml_sources(paths: MatcherPaths) -> None:
+    output_dir = paths.app_dir / "languages" / "sv" / "matcher_contracts" / "sources"
+    audit_contract_sources(
+        output_dir,
+        tree_root=paths.repo_root,
+        allow_checkout_output=True,
+    )
+
+
 def _print_dry_run_preview(change: MatcherChangePlan) -> None:
     if change.toml_preview:
         typer.echo(change.toml_preview)
@@ -494,11 +504,13 @@ def _run_preflight(paths: MatcherPaths, report_root: Path | None) -> int:
 
 def _watch_files(paths: MatcherPaths) -> tuple[Path, ...]:
     entries_dir = paths.app_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
+    contract_sources_dir = paths.app_dir / "languages" / "sv" / "matcher_contracts" / "sources"
     files = [
         paths.fixture_file,
         paths.inventory_file,
         paths.deep_sanity_file,
         *sorted(entries_dir.glob("*.toml")),
+        *sorted(contract_sources_dir.glob("*.toml")),
     ]
     return tuple(path for path in files if path.exists())
 
@@ -642,6 +654,8 @@ def add_keyword_extra_parent(
     if dry_run:
         _print_dry_run_preview(change)
         return
+
+    _sync_contract_toml_sources(paths)
 
     typer.echo(f"Generated keyword_extra_parent rule: {change.policy_ref}")
     typer.echo(f"  entries: {', '.join(change.entry_ids)}")

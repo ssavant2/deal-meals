@@ -152,7 +152,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             report = run_preflight(tree_root=tree_root)
 
         self.assertFalse(report["summary"]["passed"], report)
-        self.assertEqual(report["summary"]["new_issue_count"], 3, report)
+        self.assertEqual(report["summary"]["new_issue_count"], 4, report)
         codes = {issue["code"] for issue in report["new_issues"]}
         self.assertEqual(
             codes,
@@ -160,6 +160,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
                 "fixture_missing_registry_coverage",
                 "fixture_positive_missing_expected_matches",
                 "generated_coverage_stale",
+                "matcher_contract_generated_json_drift",
             },
         )
         fixture_issues = [
@@ -172,7 +173,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             report,
         )
 
-    def test_phase2_coverage_generation_allows_json_only_fixture_and_inventory(self) -> None:
+    def test_phase2_coverage_generation_allows_fixture_inventory_and_synced_sources(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -225,6 +226,11 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
                 "notes": "Synthetic Phase 2 generated coverage row.",
             })
             inventory_file.write_text(json.dumps(inventory, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            audit_contract_sources(
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources",
+                tree_root=tree_root,
+                allow_checkout_output=True,
+            )
 
             generated = generate_coverage_files(tree_root=tree_root)
             changed_paths = {path.name for path in write_coverage_files(generated)}
@@ -356,6 +362,12 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
                 / "keyword_extra_parent.toml"
             )
             deep_sanity_file = app_dir / "support_checks" / "run_deep_matcher_sanity.py"
+            fixture_source_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            )
+            inventory_source_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
+            )
 
             fixtures = json.loads(fixture_file.read_text(encoding="utf-8"))
             inventory = json.loads(inventory_file.read_text(encoding="utf-8"))
@@ -363,6 +375,8 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             self.assertTrue(any(item["id"] == inventory_id for item in inventory))
             self.assertIn("phasefyraapelsin", keyword_extra_parent_file.read_text(encoding="utf-8"))
             self.assertIn(policy_ref, deep_sanity_file.read_text(encoding="utf-8"))
+            self.assertIn(fixture_id, fixture_source_file.read_text(encoding="utf-8"))
+            self.assertIn(inventory_id, inventory_source_file.read_text(encoding="utf-8"))
 
             generated = generate_coverage_files(tree_root=tree_root)
             self.assertFalse(any(item.changed for item in generated))
@@ -417,11 +431,19 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
                 / "keyword_extra_parent.toml"
             )
             deep_sanity_file = app_dir / "support_checks" / "run_deep_matcher_sanity.py"
+            fixture_source_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            )
+            inventory_source_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
+            )
             watched_files = (
                 fixture_file,
                 inventory_file,
                 keyword_extra_parent_file,
                 deep_sanity_file,
+                fixture_source_file,
+                inventory_source_file,
             )
             before = {path: path.read_text(encoding="utf-8") for path in watched_files}
 
@@ -521,7 +543,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         self.assertEqual(report["blocker_count"], 0)
         self.assertEqual(report["blocker_baseline_count"], 0)
         self.assertEqual(report["summary"]["contract_access_api"], 2)
-        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 3894)
+        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4125)
 
     def test_phase5_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -546,6 +568,27 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
 
             self.assertFalse((output_dir / "matcher_regression_cases.json").exists())
             self.assertFalse((output_dir / "matcher_rule_inventory.json").exists())
+
+    def test_phase5_preflight_rejects_stale_toml_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            fixture_source_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            )
+            fixture_source_file.write_text(
+                fixture_source_file.read_text(encoding="utf-8").replace(
+                    'id = "plan_initial_jordgubbssaft_positive"',
+                    'id = "plan_initial_jordgubbssaft_positive_drift"',
+                    1,
+                ),
+                encoding="utf-8",
+            )
+
+            report = run_preflight(tree_root=tree_root)
+
+        codes = {issue["code"] for issue in report["new_issues"]}
+        self.assertIn("matcher_contract_generated_json_drift", codes, report)
 
 
 if __name__ == "__main__":

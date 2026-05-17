@@ -22,6 +22,9 @@ from languages.sv.ingredient_matching.term_registry.registry import load_registr
 from support_checks.generate_matcher_registry_coverage import (  # noqa: E402
     generate_coverage_files,
 )
+from support_checks.generate_matcher_contract_json_from_toml_sources import (  # noqa: E402
+    check_generated_contract_json,
+)
 from support_checks.matcher_contracts import (  # noqa: E402
     app_dir_for_tree_root,
     contract_paths,
@@ -491,6 +494,51 @@ def _check_generated_coverage(
     return issues
 
 
+def _check_generated_contract_json(
+    *,
+    tree_root: Path | None,
+    fixture_file: Path,
+    inventory_file: Path,
+    repo_root: Path,
+) -> list[PreflightIssue]:
+    paths = contract_paths(tree_root)
+    if fixture_file.resolve() != paths.fixture_file.resolve() or inventory_file.resolve() != paths.inventory_file.resolve():
+        return []
+
+    issues: list[PreflightIssue] = []
+    try:
+        results = check_generated_contract_json(tree_root=tree_root)
+    except Exception as exc:  # noqa: BLE001
+        return [PreflightIssue(
+            "error",
+            "matcher_contract_toml_source_check_failed",
+            f"could not compare TOML sources with matcher contract JSON: {exc}",
+            _rel(paths.app_dir / "languages" / "sv" / "matcher_contracts" / "sources", repo_root=repo_root),
+            "matcher_contract_toml_sources",
+        )]
+    for result in results:
+        if not result.drifted:
+            continue
+        issues.append(PreflightIssue(
+            "error",
+            "matcher_contract_generated_json_drift",
+            (
+                "matcher contract TOML sources no longer generate the current JSON; "
+                "refresh sources from JSON before running gates"
+            ),
+            result.source_toml_path,
+            result.contract,
+            details={
+                "target_json_path": result.target_json_path,
+                "semantic_equal": result.semantic_equal,
+                "canonical_byte_equal": result.canonical_byte_equal,
+                "canonical_diff_line_count": result.canonical_diff_line_count,
+                "canonical_diff_preview": result.canonical_diff_preview,
+            },
+        ))
+    return issues
+
+
 def _check_expected_counts(baseline_file: Path, registry_entries_dir: Path, *, repo_root: Path) -> list[PreflightIssue]:
     issues: list[PreflightIssue] = []
     file_name = _rel(baseline_file, repo_root=repo_root)
@@ -586,6 +634,12 @@ def run_preflight(
         fixture_file=fixture_file,
         inventory_file=inventory_file,
         registry_entries_dir=registry_entries_dir,
+        repo_root=repo_root,
+    ))
+    issues.extend(_check_generated_contract_json(
+        tree_root=tree_root,
+        fixture_file=fixture_file,
+        inventory_file=inventory_file,
         repo_root=repo_root,
     ))
     # Promote-owned EXPECTED_* constants describe the live checkout. Synthetic

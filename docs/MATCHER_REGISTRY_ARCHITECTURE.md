@@ -28,10 +28,11 @@ through `app/support_checks/matcher_contracts.py`; the L3-C direct-reader audit
 in `docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md` currently passes with zero
 blocking consumers.
 
-The proposed B3 TOML source schema is documented in
-`app/languages/sv/matcher_contracts/sources/README.md`. Its current dry-run
-round-trip report is `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md`; no generated
-TOML sources or generated JSON are committed yet.
+The parallel B4 TOML sources live in
+`app/languages/sv/matcher_contracts/sources/` and are documented in that
+directory's README. The current round-trip report is
+`docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md`. Generated JSON rewrites are not
+committed yet; JSON remains authoritative until B5 flips the hand-edit guard.
 
 ## Verified-Term Variant IDs
 
