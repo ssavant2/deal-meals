@@ -2,10 +2,6 @@
 
 Swedish grocery deal aggregator with recipe suggestions.
 
-**How it works:** Choose the store you do your weekly shopping at. The app fetches their current offers and matches them against thousands of recipes. The result is a personalized list of meal suggestions based on what's actually on sale this week — organized by category (meat, fish, vegetarian, smart buys) and ranked by how much you save.
-
-> **Swedish stores and recipes only.** The scrapers, ingredient matching engine, and recipe sources are all built specifically for Sweden — Swedish grocery chains (Willys, ICA, Coop) and Swedish-language recipe sites. There is UK English UI/address support and a loadable UK matcher scaffold, but not a finished UK grocery/recipe implementation. Adding support for stores or recipe sites in other countries is possible and even encouraged, but requires writing new scrapers and adapting the matching logic to the local language & country. It's doable, but it's a significant amount of work.
-
 ## Project Status
 
 Deal Meals is a personal hobby project. I built it to help me plan weekly meals and grocery shopping when inspiration runs dry, and at the same time save some money by making the most of the store's weekly specials.
@@ -21,7 +17,13 @@ when I can, but maintenance is best-effort.
 
 
 **Built with AI.** The code is written by [Claude](https://claude.ai) and [Codex](https://openai.com/codex/). 
-The design, logic, product decisions, and direction are mine — I describe what I want, review the results, and decide what stays. But I don't write the actual code myself.
+The design, logic, product decisions, and direction are mine — I describe what I want, review the results, and decide what stays. I have technically written 4 or 5 lines of code, but the rest of it was done by AI.
+
+
+**How it works:** Choose the store you do your weekly shopping at. The app fetches their current offers and matches them against thousands of recipes. The result is a personalized list of meal suggestions based on what's actually on sale this week — organized by category (meat, fish, vegetarian, smart buys) and ranked by how much you save.
+
+> **Swedish stores and recipes only.** The scrapers, ingredient matching engine, and recipe sources are all built specifically for Sweden — Swedish grocery chains (Willys, ICA, Coop) and Swedish-language recipe sites. There is UK English UI/address support and a loadable UK matcher scaffold, but not a finished UK grocery/recipe implementation. Adding support for stores or recipe sites in other countries is possible and even encouraged, but requires writing new scrapers and adapting the matching logic to the local language & country. It's doable, but it's a significant amount of work.
+
 
 ## Screenshots
 
