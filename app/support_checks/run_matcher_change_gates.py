@@ -23,6 +23,7 @@ import sys
 
 APP_DIR = Path(__file__).resolve().parents[1]
 SUPPORT_CHECKS_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(APP_DIR))
 
 
 @dataclass(frozen=True)
@@ -298,6 +299,24 @@ def _preflight_step(args: argparse.Namespace) -> Step:
     )
 
 
+def _generated_coverage_step(args: argparse.Namespace) -> Step:
+    return Step(
+        "generate matcher registry coverage",
+        _command("generate_matcher_registry_coverage.py", *_tree_root_args(args), "--write"),
+        "updates derived coverage TOML from fixture/inventory JSON before validation",
+        cwd=_repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
+    )
+
+
+def _generated_coverage_is_stale(args: argparse.Namespace) -> bool:
+    from support_checks.generate_matcher_registry_coverage import generate_coverage_files  # noqa: PLC0415
+
+    return any(
+        item.changed
+        for item in generate_coverage_files(tree_root=args.tree_root)
+    )
+
+
 def _build_track_a_steps(args: argparse.Namespace) -> list[Step]:
     steps = [
         Step(
@@ -337,9 +356,6 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
     steps: list[Step] = []
     target_args = _target_filter_args(args)
 
-    if _stages_baseline(args, changes):
-        return [_baseline_promotion_step(args)]
-
     if _has_targets(args):
         steps.extend([
             Step(
@@ -376,9 +392,6 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
             "updates inventory anchors after moved Python/TOML line refs",
             cwd=_repo_root_for_tree_root(args.tree_root),
         ))
-
-    if changes.registry_changed and not args.skip_baseline_promotion:
-        steps.append(_baseline_promotion_step(args))
 
     if changes.registry_changed:
         steps.extend([
@@ -671,6 +684,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run support-check self-tests for fixture schema, diagnostics, and parity tooling.",
     )
+    parser.add_argument(
+        "--generate-coverage",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="For Track B fixture/inventory changes, refresh generated registry coverage TOML before pre-flight.",
+    )
     return parser.parse_args()
 
 
@@ -680,6 +699,20 @@ def main() -> int:
     changed_paths, git_error = _git_changed_paths(repo_root) if args.auto_detect else (set(), None)
     detected = _detect_change_flags(changed_paths)
     changes = _resolved_change_flags(args, detected)
+    generated_coverage_refresh = (
+        args.track == "B"
+        and args.generate_coverage
+        and (changes.fixtures_changed or changes.inventory_changed)
+    )
+    generated_coverage_stale = _generated_coverage_is_stale(args) if generated_coverage_refresh else False
+    if generated_coverage_stale and not changes.registry_changed:
+        changes = ChangeFlags(
+            registry_changed=True,
+            runtime_changed=changes.runtime_changed,
+            fixtures_changed=changes.fixtures_changed,
+            inventory_changed=changes.inventory_changed,
+            support_checks_changed=changes.support_checks_changed,
+        )
 
     print(f"Repo root: {repo_root}", flush=True)
     if git_error:
@@ -690,10 +723,19 @@ def main() -> int:
     _print_change_flags("Selected change flags:", changes)
     _warn_before_running(args, changes)
 
+    steps: list[Step] = []
+    if generated_coverage_refresh:
+        steps.append(_generated_coverage_step(args))
+    if args.track == "B" and _stages_baseline(args, changes):
+        steps.append(_baseline_promotion_step(args))
+        return _run_steps(steps, dry_run=args.dry_run)
+    if args.track == "B" and changes.registry_changed and not args.skip_baseline_promotion:
+        steps.append(_baseline_promotion_step(args))
+    steps.append(_preflight_step(args))
     if args.track == "A":
-        steps = [_preflight_step(args), *_build_track_a_steps(args)]
+        steps.extend(_build_track_a_steps(args))
     else:
-        steps = [_preflight_step(args), *_build_track_b_steps(args, changes)]
+        steps.extend(_build_track_b_steps(args, changes))
     return _run_steps(steps, dry_run=args.dry_run)
 
 

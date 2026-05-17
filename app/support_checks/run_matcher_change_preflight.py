@@ -19,6 +19,9 @@ from languages.sv.ingredient_matching.term_registry.add_term import (  # noqa: E
     build_add_term_export_plan,
 )
 from languages.sv.ingredient_matching.term_registry.registry import load_registry_entries  # noqa: E402
+from support_checks.generate_matcher_registry_coverage import (  # noqa: E402
+    generate_coverage_files,
+)
 from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
     ALLOWED_SOURCE_REF_PREFIXES,
     _load_fixture_payload,
@@ -470,6 +473,40 @@ def _check_source_coverage(
     return issues
 
 
+def _check_generated_coverage(
+    *,
+    tree_root: Path | None,
+    fixture_file: Path,
+    inventory_file: Path,
+    registry_entries_dir: Path,
+    repo_root: Path,
+) -> list[PreflightIssue]:
+    issues: list[PreflightIssue] = []
+    for generated_file in generate_coverage_files(
+        tree_root=tree_root,
+        fixture_file=fixture_file,
+        inventory_file=inventory_file,
+        entries_dir=registry_entries_dir,
+    ):
+        if not generated_file.changed:
+            continue
+        issues.append(PreflightIssue(
+            "error",
+            "generated_coverage_stale",
+            (
+                "generated registry coverage TOML is stale; run "
+                "python support_checks/generate_matcher_registry_coverage.py --write"
+            ),
+            _rel(generated_file.path, repo_root=repo_root),
+            generated_file.path.name,
+            details={
+                "generated_entry_count": generated_file.generated_entry_count,
+                "manual_block_count": generated_file.manual_block_count,
+            },
+        ))
+    return issues
+
+
 def _check_expected_counts(baseline_file: Path, registry_entries_dir: Path, *, repo_root: Path) -> list[PreflightIssue]:
     issues: list[PreflightIssue] = []
     file_name = _rel(baseline_file, repo_root=repo_root)
@@ -557,6 +594,13 @@ def run_preflight(
         registry_entries_dir=registry_entries_dir,
         fixtures=fixtures,
         inventory=inventory,
+        repo_root=repo_root,
+    ))
+    issues.extend(_check_generated_coverage(
+        tree_root=tree_root,
+        fixture_file=fixture_file,
+        inventory_file=inventory_file,
+        registry_entries_dir=registry_entries_dir,
         repo_root=repo_root,
     ))
     issues.extend(_check_expected_counts(baseline_file, registry_entries_dir, repo_root=repo_root))

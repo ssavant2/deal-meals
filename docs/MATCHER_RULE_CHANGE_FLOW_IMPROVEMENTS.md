@@ -203,7 +203,7 @@ into the L1-F acceptance test.
 
 **L2-A. Auto-emit coverage TOML from JSON** *(addresses E)*
 Instead of hand-authoring `matcher_regression_case.toml` and
-`matcher_rule_inventory.toml`, the promote/pre-flight script reads
+`matcher_rule_inventory.toml`, a support-check generator reads
 `matcher_regression_cases.json` and `matcher_rule_inventory.json` and
 generates the corresponding coverage TOML entries automatically.
 
@@ -223,10 +223,10 @@ This eliminates ~180 of the ~250 lines I wrote for Q54-2.
   does not touch it.
 - Any registry TOML entry under
   `app/languages/sv/ingredient_matching/term_registry/entries/` that
-  carries the `# manual-coverage` marker comment on a `[[entries.coverage]]`
-  row. The marker exempts that row from generator overwrite. Pre-flight
-  warns when a marker is present so authors know the coverage is
-  intentionally hand-curated.
+  carries the `# manual-coverage` marker comment immediately before a
+  manual `[[entries]]` block. The marker exempts that block from generator
+  overwrite. Pre-flight warns when a marker is present so authors know the
+  coverage is intentionally hand-curated.
 
 **L2-B. `dm matcher` CLI with per-pattern subcommands**
 A wizard-style CLI for the 4-5 most common patterns. Examples:

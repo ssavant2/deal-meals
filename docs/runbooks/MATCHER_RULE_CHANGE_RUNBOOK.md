@@ -67,8 +67,10 @@ for write-maintenance commands.
 For most changes, start here and only read the longer sections when the wrapper
 flags or a failing gate are unclear.
 
-The wrapper always runs `run_matcher_change_preflight.py` first. Fix any `NEW`
-pre-flight issue before spending time on slower fixture/parity gates.
+The wrapper runs generated-coverage refresh and baseline promotion maintenance
+before validation when Track B inputs require it. Its first validation gate is
+`run_matcher_change_preflight.py`; fix any `NEW` pre-flight issue before
+spending time on slower fixture/parity gates.
 
 **Where to run from:**
 
@@ -561,8 +563,6 @@ Common files:
 - `keyword_extra_parent.toml`
 - `keyword_synonym.toml`
 - `match_bridge.toml`
-- `matcher_regression_case.toml`
-- `matcher_rule_inventory.toml`
 - `no_match_policy.toml`
 - `offer_extra_keyword.toml`
 - `parent_match_only.toml`
@@ -572,6 +572,24 @@ Registry entries should include coverage rows and examples that describe the
 same decision as the fixture. For registry-owned `MatchBridge` and
 `NoMatchPolicy`, keep `fixture_refs` inside the language payload in sync with
 the fixture file.
+
+Do not hand-edit these two coverage files for ordinary fixture/inventory work:
+
+- `matcher_regression_case.toml`
+- `matcher_rule_inventory.toml`
+
+They are generated from `matcher_regression_cases.json` and
+`matcher_rule_inventory.json` by:
+
+```bash
+python3 app/support_checks/generate_matcher_registry_coverage.py --write
+```
+
+The Track B wrapper runs that generator automatically when fixture or inventory
+changes are selected. Pre-flight fails with `generated_coverage_stale` if the
+checked-in TOML no longer matches the JSON-derived output. Intentional manual
+coverage is allowed only as a narrow exception: put `# manual-coverage` directly
+before the manual `[[entries]]` block so the generator preserves it.
 
 The registry also supports local dev entry directories under
 `/app/data/term_registry/sv/entries` via `TERM_REGISTRY_LOCAL_ENTRIES_DIR`.
@@ -781,9 +799,12 @@ docker compose exec -T -u appuser -w /app web \
     --policy-ref plain_sensitive_filmjolk
 ```
 
-The first wrapper step is always the matcher change pre-flight. It aggregates
+For fixture/inventory Track B changes, the wrapper first refreshes generated
+coverage TOML. For registry changes, it then promotes the verified-term
+baseline unless you pass `--skip-baseline-promotion`. The first validation gate
+after those maintenance steps is matcher change pre-flight, which aggregates
 schema, prefix, line-ref, coverage, and expected-count problems before the
-slower gates run:
+slower matcher gates run:
 
 ```text
 Matcher change pre-flight
@@ -804,6 +825,8 @@ Useful wrapper options:
 - `--migrate-hashes` and `--allow-removals` are passed to
   `promote_term_baseline.py`.
 - `--refresh-line-refs` runs the host-only inventory line-ref refresher.
+- `--no-generate-coverage` disables the automatic derived coverage refresh
+  when you intentionally want pre-flight to report stale coverage.
 - `--baseline-output-dir` stages baseline promotion output and stops; apply the
   staged files, then rerun the wrapper without that flag.
 - `--reload-cache --fresh-cache-gates` adds `dev_reload.py` and final
@@ -818,6 +841,7 @@ choose the smallest complete gate set for the change.
 | `run_deep_matcher_sanity.py` | Every Track A fix and every Track B runtime semantic change. |
 | targeted `run_matcher_layer_fixture_cases.py` | Track B fixture/rule work for the affected `--policy-ref`, `--canonical`, or `--case-id`. |
 | targeted `run_matcher_layer_parity.py` | Track B route, bridge, no-match, canonical, cache-facing, or fixture behavior work. |
+| `generate_matcher_registry_coverage.py --write` | Fixture or inventory JSON changed. The wrapper runs this by default. |
 | full `run_matcher_layer_fixture_cases.py --skip-cache-freshness` | Every Track B behavior change before handoff. |
 | full `run_matcher_layer_parity.py --skip-cache-freshness` | Every Track A/Track B matcher behavior change before handoff. |
 | `promote_term_baseline.py` | Any tracked registry TOML change. Choose plain, `--migrate-hashes`, `--allow-removals`, or `--migrate-hashes --allow-removals`. |
