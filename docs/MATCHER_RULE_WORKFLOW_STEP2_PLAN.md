@@ -194,7 +194,7 @@ runtime-table decision is made.
 
 ### Goal
 
-Make matcher contract JSON generated artifacts only after all blocking readers
+Make matcher contract JSON generated artifacts only after all blocking consumers
 are migrated to a contract API and the authority audit passes.
 
 This workstream must not proceed by simply ignoring the veto. The veto is the
@@ -210,7 +210,7 @@ direct constants and references. Step 2 should make it more authoritative.
 
 Deliverables:
 
-- classify imported default-path readers, not only lines containing JSON
+- classify imported default-path consumers, not only lines containing JSON
   filenames
 - distinguish read-only consumers, writers, generated-output readers, docs,
   and tests

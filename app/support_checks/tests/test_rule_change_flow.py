@@ -22,7 +22,10 @@ from support_checks.generate_matcher_registry_coverage import (
     generate_coverage_files,
     write_coverage_files,
 )
-from support_checks.audit_matcher_contract_json_authority import audit as audit_json_authority
+from support_checks.audit_matcher_contract_json_authority import (
+    audit as audit_json_authority,
+    json_report as json_authority_report,
+)
 from support_checks.prefix_schema import allowed_prefixes
 from support_checks.run_verified_term_audit import (
     AuditVariant,
@@ -472,13 +475,21 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
 
     def test_phase5_json_authority_audit_vetoes_current_tree(self) -> None:
         hits = audit_json_authority(Path(__file__).resolve().parents[2])
+        blockers = [hit for hit in hits if hit.is_blocker]
         blocking_paths = {
             hit.path.name
-            for hit in hits
-            if hit.classification == "blocking_reader"
+            for hit in blockers
         }
+        self.assertEqual(len(blockers), 46)
         self.assertIn("generate_matcher_registry_coverage.py", blocking_paths)
         self.assertIn("run_matcher_change_preflight.py", blocking_paths)
+        self.assertTrue(all(hit.owner for hit in blockers))
+        self.assertTrue(all(hit.migration_path for hit in blockers))
+
+        report = json.loads(json_authority_report(hits))
+        self.assertEqual(report["decision"], "VETOED")
+        self.assertEqual(report["blocker_baseline_count"], 46)
+        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 3894)
 
 
 if __name__ == "__main__":
