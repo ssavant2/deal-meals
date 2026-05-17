@@ -349,6 +349,10 @@ Acceptance:
 - `keyword-extra-parent` is the regression canary for CLI refactors. Preserve
   its e2e behavior, dry-run behavior, tree-root behavior, generated coverage,
   and Track B gate invocation.
+- Every commit that touches shared CLI authoring core reruns
+  `test_phase4_cli_e2e` and asserts that `keyword-extra-parent` fixture,
+  inventory, TOML, deep-sanity, dry-run, and tree-root outputs are unchanged
+  unless the commit explicitly documents an intentional behavior change.
 - For B2, partial migration is acceptable only while the audit documents the
   remaining direct readers. Rollback is reverting the affected consumer to its
   previous direct-reader path and restoring the audit baseline.
@@ -427,5 +431,7 @@ Step 2 is complete when:
   Step 2, with a future migration/codemod decision recorded.
 - The JSON authority audit has either passed and the migration is complete, or
   remains vetoed with blocker count reduced from the B1 baseline and every
-  remaining blocker documented with owner, reason, and next action.
+  remaining blocker documented with owner, reason, and next action. The next
+  action must be either a concrete future phase/plan or an explicit decision to
+  leave that blocker as-is.
 - The runbook and architecture docs describe the resulting authoring model.
