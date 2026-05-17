@@ -12,11 +12,18 @@ import unittest
 
 from support_checks.run_matcher_change_preflight import (
     DEFAULT_BASELINE_FILE,
-    DEFAULT_FIXTURE_FILE,
-    DEFAULT_INVENTORY_FILE,
     DEFAULT_REGISTRY_ENTRIES_DIR,
     DEFAULT_SNAPSHOT_FILE,
     run_preflight,
+)
+from support_checks.matcher_contracts import (
+    contract_paths,
+    fixture_contract_path,
+    inventory_contract_path,
+    load_fixture_contract,
+    load_inventory_contract,
+    write_fixture_contract,
+    write_inventory_contract,
 )
 from support_checks.generate_matcher_registry_coverage import (
     generate_coverage_files,
@@ -39,6 +46,10 @@ from languages.sv.ingredient_matching.term_registry.exports import (
 from languages.sv.ingredient_matching.term_registry.registry import load_registry_entries
 
 
+DEFAULT_FIXTURE_FILE = fixture_contract_path()
+DEFAULT_INVENTORY_FILE = inventory_contract_path()
+
+
 def _copy_matcher_tree(tree_root: Path) -> Path:
     app_dir = tree_root / "app"
     shutil.copytree(
@@ -56,6 +67,29 @@ def _copy_matcher_tree(tree_root: Path) -> Path:
 
 
 class MatcherRuleChangePreflightTests(unittest.TestCase):
+    def test_phase5_contract_api_round_trip_preserves_payloads(self) -> None:
+        fixtures = load_fixture_contract(DEFAULT_FIXTURE_FILE)
+        inventory = load_inventory_contract(DEFAULT_INVENTORY_FILE)
+        with tempfile.TemporaryDirectory() as tmp:
+            fixture_copy = Path(tmp) / "fixture.json"
+            inventory_copy = Path(tmp) / "inventory.json"
+
+            write_fixture_contract(fixtures, fixture_copy)
+            write_inventory_contract(inventory, inventory_copy)
+
+            self.assertEqual(load_fixture_contract(fixture_copy), fixtures)
+            self.assertEqual(load_inventory_contract(inventory_copy), inventory)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            app_dir = _copy_matcher_tree(Path(tmp))
+            paths = contract_paths(Path(tmp))
+
+            self.assertEqual(paths.app_dir, app_dir)
+            self.assertTrue(paths.fixture_file.exists())
+            self.assertTrue(paths.inventory_file.exists())
+            self.assertEqual(len(load_fixture_contract(tree_root=Path(tmp))), len(fixtures))
+            self.assertEqual(len(load_inventory_contract(tree_root=Path(tmp))), len(inventory))
+
     def test_current_tree_preflight_is_clean(self) -> None:
         report = run_preflight()
 
@@ -473,22 +507,16 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             {"phasefemapelsin": "phasefemfrukt"},
         )
 
-    def test_phase5_json_authority_audit_vetoes_current_tree(self) -> None:
+    def test_phase5_json_authority_audit_passes_current_tree(self) -> None:
         hits = audit_json_authority(Path(__file__).resolve().parents[2])
         blockers = [hit for hit in hits if hit.is_blocker]
-        blocking_paths = {
-            hit.path.name
-            for hit in blockers
-        }
-        self.assertEqual(len(blockers), 46)
-        self.assertIn("generate_matcher_registry_coverage.py", blocking_paths)
-        self.assertIn("run_matcher_change_preflight.py", blocking_paths)
-        self.assertTrue(all(hit.owner for hit in blockers))
-        self.assertTrue(all(hit.migration_path for hit in blockers))
+        self.assertEqual(blockers, [])
 
         report = json.loads(json_authority_report(hits))
-        self.assertEqual(report["decision"], "VETOED")
-        self.assertEqual(report["blocker_baseline_count"], 46)
+        self.assertEqual(report["decision"], "PASS")
+        self.assertEqual(report["blocker_count"], 0)
+        self.assertEqual(report["blocker_baseline_count"], 0)
+        self.assertEqual(report["summary"]["contract_access_api"], 2)
         self.assertEqual(report["omitted_findings"]["generated_output_reference"], 3894)
 
 

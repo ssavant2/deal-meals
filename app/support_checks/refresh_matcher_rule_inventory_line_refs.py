@@ -12,24 +12,23 @@ from typing import Any
 
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = APP_DIR.parent
-DEFAULT_INVENTORY_FILE = (
-    APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+import sys
+
+sys.path.insert(0, str(APP_DIR))
+
+from support_checks.matcher_contracts import (  # noqa: E402
+    inventory_contract_path,
+    load_inventory_contract,
+    write_inventory_contract,
 )
 
 
 def _load_inventory(path: Path) -> list[dict[str, Any]]:
-    with path.open("r", encoding="utf-8") as handle:
-        payload = json.load(handle)
-    if not isinstance(payload, list):
-        raise ValueError(f"inventory file must contain a list: {path}")
-    return payload
+    return load_inventory_contract(path)
 
 
 def _write_inventory(path: Path, payload: list[dict[str, Any]]) -> None:
-    path.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    write_inventory_contract(payload, path, sort_keys=True)
 
 
 def _line_start_offsets(source_text: str) -> list[int]:
@@ -143,7 +142,7 @@ def refresh_line_refs(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--inventory-file", type=Path, default=DEFAULT_INVENTORY_FILE)
+    parser.add_argument("--inventory-file", type=Path, default=inventory_contract_path())
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     parser.add_argument("--write", action="store_true", help="write refreshed line refs")
     parser.add_argument("--format", choices=("text", "json"), default="text")

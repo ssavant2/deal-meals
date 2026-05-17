@@ -10,8 +10,9 @@ import sys
 APP_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(APP_DIR))
 
+from support_checks.matcher_contracts import fixture_contract_path  # noqa: E402
 from support_checks.run_matcher_layer_fixture_cases import _load_fixture_payload  # noqa: E402
-from support_checks.run_matcher_layer_parity import DEFAULT_FIXTURE_FILE, run_parity  # noqa: E402
+from support_checks.run_matcher_layer_parity import run_parity  # noqa: E402
 
 
 def check(name: str, actual, expected) -> None:
@@ -21,7 +22,7 @@ def check(name: str, actual, expected) -> None:
 
 
 def main() -> int:
-    fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))
+    fixture_payloads = _load_fixture_payload(fixture_contract_path())
     expected_case_count = len(fixture_payloads)
     report = run_parity(fixture_payloads)
     summary = report["summary"]

@@ -1,468 +1,8 @@
 {
-  "blocker_baseline_count": 46,
-  "blockers": [
-    {
-      "classification": "blocking_path_resolver",
-      "consumer_type": "path_resolver",
-      "is_blocker": true,
-      "line": 69,
-      "migration_path": "Move fixture/inventory path construction behind app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_gates.py",
-      "text": "return _app_dir_for_tree_root(args.tree_root) / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_path_resolver",
-      "consumer_type": "path_resolver",
-      "is_blocker": true,
-      "line": 73,
-      "migration_path": "Move fixture/inventory path construction behind app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_gates.py",
-      "text": "return _app_dir_for_tree_root(args.tree_root) / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 20,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_inventory_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 29,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_inventory_checks.py",
-      "text": "DEFAULT_INVENTORY_FILE = ("
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 408,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_inventory_checks.py",
-      "text": "parser.add_argument(\"--inventory-file\", default=str(DEFAULT_INVENTORY_FILE))"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 409,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_inventory_checks.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 47,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_guard_bridge_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 52,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_guard_bridge_checks.py",
-      "text": "DEFAULT_INVENTORY_FILE,"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 589,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_guard_bridge_checks.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 590,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_guard_bridge_checks.py",
-      "text": "parser.add_argument(\"--inventory-file\", default=str(DEFAULT_INVENTORY_FILE))"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 19,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/generate_matcher_registry_coverage.py",
-      "text": "DEFAULT_FIXTURE_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 20,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/generate_matcher_registry_coverage.py",
-      "text": "DEFAULT_INVENTORY_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 328,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/generate_matcher_registry_coverage.py",
-      "text": "fixture_file = fixture_file or app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 329,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/generate_matcher_registry_coverage.py",
-      "text": "inventory_file = inventory_file or app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 46,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_preflight.py",
-      "text": "DEFAULT_FIXTURE_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 47,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_preflight.py",
-      "text": "DEFAULT_INVENTORY_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 570,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_preflight.py",
-      "text": "fixture_file = fixture_file or app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 571,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_preflight.py",
-      "text": "inventory_file = inventory_file or app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 14,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_parity_checks.py",
-      "text": "from support_checks.run_matcher_layer_parity import DEFAULT_FIXTURE_FILE, run_parity  # noqa: E402"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 24,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_parity_checks.py",
-      "text": "fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 34,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_model_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 41,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_model_checks.py",
-      "text": "DEFAULT_INVENTORY_FILE,"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 64,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_model_checks.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 65,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_model_checks.py",
-      "text": "parser.add_argument(\"--inventory-file\", default=str(DEFAULT_INVENTORY_FILE))"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 52,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_contract_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 53,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_contract_checks.py",
-      "text": "DEFAULT_INVENTORY_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 517,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_contract_checks.py",
-      "text": "fixture_payloads = _load_json(DEFAULT_FIXTURE_FILE)"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 518,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_contract_checks.py",
-      "text": "inventory_payloads = _load_json(DEFAULT_INVENTORY_FILE)"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 15,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_fixture_schema_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 54,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_fixture_schema_checks.py",
-      "text": "fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 56,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "RULE_INVENTORY_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 57,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "REGRESSION_CASES_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 317,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "rel_path = _repo_rel(RULE_INVENTORY_FILE)"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 318,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "for index, entry in enumerate(_load_json_list(RULE_INVENTORY_FILE), start=1):"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 346,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "rel_path = _repo_rel(REGRESSION_CASES_FILE)"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 347,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "for case in _load_json_list(REGRESSION_CASES_FILE):"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 785,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "return {str(case[\"id\"]) for case in _load_json_list(REGRESSION_CASES_FILE)}"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 789,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "return {str(case[\"id\"]): case for case in _load_json_list(REGRESSION_CASES_FILE)}"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 15,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/refresh_matcher_rule_inventory_line_refs.py",
-      "text": "DEFAULT_INVENTORY_FILE = ("
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 146,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/refresh_matcher_rule_inventory_line_refs.py",
-      "text": "parser.add_argument(\"--inventory-file\", type=Path, default=DEFAULT_INVENTORY_FILE)"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 37,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_parity.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 493,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_parity.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 30,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_fixture_cases.py",
-      "text": "DEFAULT_FIXTURE_FILE = ("
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 397,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_fixture_cases.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 25,
-      "migration_path": "Use app/support_checks/matcher_contracts.py for path resolution and JSON read/write helpers.",
-      "owner": "cli",
-      "path": "app/cli/dm.py",
-      "text": "DEFAULT_FIXTURE_FILE = SV_DIR / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 26,
-      "migration_path": "Use app/support_checks/matcher_contracts.py for path resolution and JSON read/write helpers.",
-      "owner": "cli",
-      "path": "app/cli/dm.py",
-      "text": "DEFAULT_INVENTORY_FILE = SV_DIR / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    }
-  ],
-  "decision": "VETOED",
+  "blocker_baseline_count": 0,
+  "blocker_count": 0,
+  "blockers": [],
+  "decision": "PASS",
   "findings": [
     {
       "classification": "documentation",
@@ -685,30 +225,10 @@
       "text": "`app/languages/sv/matcher_contracts/matcher_rule_inventory.json`."
     },
     {
-      "classification": "blocking_path_resolver",
-      "consumer_type": "path_resolver",
-      "is_blocker": true,
-      "line": 69,
-      "migration_path": "Move fixture/inventory path construction behind app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_gates.py",
-      "text": "return _app_dir_for_tree_root(args.tree_root) / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_path_resolver",
-      "consumer_type": "path_resolver",
-      "is_blocker": true,
-      "line": 73,
-      "migration_path": "Move fixture/inventory path construction behind app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_gates.py",
-      "text": "return _app_dir_for_tree_root(args.tree_root) / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
       "classification": "python_reference",
       "consumer_type": "python_reference",
       "is_blocker": false,
-      "line": 206,
+      "line": 197,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/run_matcher_change_gates.py",
@@ -718,137 +238,37 @@
       "classification": "python_reference",
       "consumer_type": "python_reference",
       "is_blocker": false,
-      "line": 210,
+      "line": 201,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/run_matcher_change_gates.py",
       "text": "\"app/languages/sv/matcher_contracts/matcher_rule_inventory.json\","
     },
     {
-      "classification": "python_reference",
-      "consumer_type": "python_reference",
+      "classification": "contract_access_api",
+      "consumer_type": "contract_access_api",
       "is_blocker": false,
-      "line": 577,
+      "line": 15,
       "migration_path": "",
       "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_gates.py",
-      "text": "inventory_file = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
+      "path": "app/support_checks/matcher_contracts.py",
+      "text": "FIXTURE_CONTRACT_FILENAME = \"matcher_regression_cases.json\""
     },
     {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 20,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_inventory_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 29,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_inventory_checks.py",
-      "text": "DEFAULT_INVENTORY_FILE = ("
-    },
-    {
-      "classification": "python_reference",
-      "consumer_type": "python_reference",
+      "classification": "contract_access_api",
+      "consumer_type": "contract_access_api",
       "is_blocker": false,
-      "line": 30,
+      "line": 16,
       "migration_path": "",
       "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_inventory_checks.py",
-      "text": "APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 408,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_inventory_checks.py",
-      "text": "parser.add_argument(\"--inventory-file\", default=str(DEFAULT_INVENTORY_FILE))"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 409,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_inventory_checks.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 47,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_guard_bridge_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 52,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_guard_bridge_checks.py",
-      "text": "DEFAULT_INVENTORY_FILE,"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 589,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_guard_bridge_checks.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 590,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_guard_bridge_checks.py",
-      "text": "parser.add_argument(\"--inventory-file\", default=str(DEFAULT_INVENTORY_FILE))"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 19,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/generate_matcher_registry_coverage.py",
-      "text": "DEFAULT_FIXTURE_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 20,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/generate_matcher_registry_coverage.py",
-      "text": "DEFAULT_INVENTORY_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
+      "path": "app/support_checks/matcher_contracts.py",
+      "text": "INVENTORY_CONTRACT_FILENAME = \"matcher_rule_inventory.json\""
     },
     {
       "classification": "python_reference",
       "consumer_type": "python_reference",
       "is_blocker": false,
-      "line": 29,
+      "line": 35,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/generate_matcher_registry_coverage.py",
@@ -858,7 +278,7 @@
       "classification": "python_reference",
       "consumer_type": "python_reference",
       "is_blocker": false,
-      "line": 32,
+      "line": 38,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/generate_matcher_registry_coverage.py",
@@ -868,7 +288,7 @@
       "classification": "python_reference",
       "consumer_type": "python_reference",
       "is_blocker": false,
-      "line": 39,
+      "line": 45,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/generate_matcher_registry_coverage.py",
@@ -878,351 +298,11 @@
       "classification": "python_reference",
       "consumer_type": "python_reference",
       "is_blocker": false,
-      "line": 42,
+      "line": 48,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/generate_matcher_registry_coverage.py",
       "text": "\"# Registry coverage for matcher_rule_inventory.json rows.\","
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 328,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/generate_matcher_registry_coverage.py",
-      "text": "fixture_file = fixture_file or app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 329,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/generate_matcher_registry_coverage.py",
-      "text": "inventory_file = inventory_file or app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 46,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_preflight.py",
-      "text": "DEFAULT_FIXTURE_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 47,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_preflight.py",
-      "text": "DEFAULT_INVENTORY_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 570,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_preflight.py",
-      "text": "fixture_file = fixture_file or app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 571,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_change_preflight.py",
-      "text": "inventory_file = inventory_file or app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 14,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_parity_checks.py",
-      "text": "from support_checks.run_matcher_layer_parity import DEFAULT_FIXTURE_FILE, run_parity  # noqa: E402"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 24,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_parity_checks.py",
-      "text": "fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 34,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_model_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 41,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_model_checks.py",
-      "text": "DEFAULT_INVENTORY_FILE,"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 64,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_model_checks.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 65,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_rule_model_checks.py",
-      "text": "parser.add_argument(\"--inventory-file\", default=str(DEFAULT_INVENTORY_FILE))"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 52,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_contract_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 53,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_contract_checks.py",
-      "text": "DEFAULT_INVENTORY_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 517,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_contract_checks.py",
-      "text": "fixture_payloads = _load_json(DEFAULT_FIXTURE_FILE)"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 518,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_term_registry_contract_checks.py",
-      "text": "inventory_payloads = _load_json(DEFAULT_INVENTORY_FILE)"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 15,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_fixture_schema_checks.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 54,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_fixture_schema_checks.py",
-      "text": "fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 56,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "RULE_INVENTORY_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 57,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "REGRESSION_CASES_FILE = APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 317,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "rel_path = _repo_rel(RULE_INVENTORY_FILE)"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 318,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "for index, entry in enumerate(_load_json_list(RULE_INVENTORY_FILE), start=1):"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 346,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "rel_path = _repo_rel(REGRESSION_CASES_FILE)"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 347,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "for case in _load_json_list(REGRESSION_CASES_FILE):"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 785,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "return {str(case[\"id\"]) for case in _load_json_list(REGRESSION_CASES_FILE)}"
-    },
-    {
-      "classification": "blocking_reader",
-      "consumer_type": "reader",
-      "is_blocker": true,
-      "line": 789,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_verified_term_audit.py",
-      "text": "return {str(case[\"id\"]): case for case in _load_json_list(REGRESSION_CASES_FILE)}"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 15,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/refresh_matcher_rule_inventory_line_refs.py",
-      "text": "DEFAULT_INVENTORY_FILE = ("
-    },
-    {
-      "classification": "python_reference",
-      "consumer_type": "python_reference",
-      "is_blocker": false,
-      "line": 16,
-      "migration_path": "",
-      "owner": "support_checks",
-      "path": "app/support_checks/refresh_matcher_rule_inventory_line_refs.py",
-      "text": "APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 146,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/refresh_matcher_rule_inventory_line_refs.py",
-      "text": "parser.add_argument(\"--inventory-file\", type=Path, default=DEFAULT_INVENTORY_FILE)"
-    },
-    {
-      "classification": "blocking_imported_default_path",
-      "consumer_type": "imported_default_path",
-      "is_blocker": true,
-      "line": 37,
-      "migration_path": "Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_parity.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 493,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_parity.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 30,
-      "migration_path": "Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_fixture_cases.py",
-      "text": "DEFAULT_FIXTURE_FILE = ("
-    },
-    {
-      "classification": "python_reference",
-      "consumer_type": "python_reference",
-      "is_blocker": false,
-      "line": 31,
-      "migration_path": "",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_fixture_cases.py",
-      "text": "APP_DIR / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_cli_default_path",
-      "consumer_type": "cli_default",
-      "is_blocker": true,
-      "line": 397,
-      "migration_path": "Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.",
-      "owner": "support_checks",
-      "path": "app/support_checks/run_matcher_layer_fixture_cases.py",
-      "text": "parser.add_argument(\"--fixture-file\", default=str(DEFAULT_FIXTURE_FILE))"
     },
     {
       "classification": "python_reference",
@@ -1285,70 +365,30 @@
       "text": "\"REGRESSION_CASES_FILE\","
     },
     {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 25,
-      "migration_path": "Use app/support_checks/matcher_contracts.py for path resolution and JSON read/write helpers.",
-      "owner": "cli",
-      "path": "app/cli/dm.py",
-      "text": "DEFAULT_FIXTURE_FILE = SV_DIR / \"matcher_contracts\" / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "blocking_default_path",
-      "consumer_type": "default_path",
-      "is_blocker": true,
-      "line": 26,
-      "migration_path": "Use app/support_checks/matcher_contracts.py for path resolution and JSON read/write helpers.",
-      "owner": "cli",
-      "path": "app/cli/dm.py",
-      "text": "DEFAULT_INVENTORY_FILE = SV_DIR / \"matcher_contracts\" / \"matcher_rule_inventory.json\""
-    },
-    {
-      "classification": "python_reference",
-      "consumer_type": "python_reference",
-      "is_blocker": false,
-      "line": 85,
-      "migration_path": "",
-      "owner": "cli",
-      "path": "app/cli/dm.py",
-      "text": "fixture_file=app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\","
-    },
-    {
-      "classification": "python_reference",
-      "consumer_type": "python_reference",
-      "is_blocker": false,
-      "line": 86,
-      "migration_path": "",
-      "owner": "cli",
-      "path": "app/cli/dm.py",
-      "text": "inventory_file=app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_rule_inventory.json\","
-    },
-    {
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 15,
+      "line": 49,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
-      "text": "DEFAULT_FIXTURE_FILE,"
+      "text": "DEFAULT_FIXTURE_FILE = fixture_contract_path()"
     },
     {
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 16,
+      "line": 50,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
-      "text": "DEFAULT_INVENTORY_FILE,"
+      "text": "DEFAULT_INVENTORY_FILE = inventory_contract_path()"
     },
     {
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 45,
+      "line": 56,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1358,31 +398,21 @@
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 67,
+      "line": 71,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
-      "text": "fixtures = json.loads(DEFAULT_FIXTURE_FILE.read_text(encoding=\"utf-8\"))"
+      "text": "fixtures = load_fixture_contract(DEFAULT_FIXTURE_FILE)"
     },
     {
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 78,
+      "line": 72,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
-      "text": "fixture_file = Path(tmp) / \"matcher_regression_cases.json\""
-    },
-    {
-      "classification": "test_reference",
-      "consumer_type": "test",
-      "is_blocker": false,
-      "line": 85,
-      "migration_path": "",
-      "owner": "support_checks",
-      "path": "app/support_checks/tests/test_rule_change_flow.py",
-      "text": "inventory_file=DEFAULT_INVENTORY_FILE,"
+      "text": "inventory = load_inventory_contract(DEFAULT_INVENTORY_FILE)"
     },
     {
       "classification": "test_reference",
@@ -1392,13 +422,43 @@
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
+      "text": "fixtures = json.loads(DEFAULT_FIXTURE_FILE.read_text(encoding=\"utf-8\"))"
+    },
+    {
+      "classification": "test_reference",
+      "consumer_type": "test",
+      "is_blocker": false,
+      "line": 112,
+      "migration_path": "",
+      "owner": "support_checks",
+      "path": "app/support_checks/tests/test_rule_change_flow.py",
+      "text": "fixture_file = Path(tmp) / \"matcher_regression_cases.json\""
+    },
+    {
+      "classification": "test_reference",
+      "consumer_type": "test",
+      "is_blocker": false,
+      "line": 119,
+      "migration_path": "",
+      "owner": "support_checks",
+      "path": "app/support_checks/tests/test_rule_change_flow.py",
+      "text": "inventory_file=DEFAULT_INVENTORY_FILE,"
+    },
+    {
+      "classification": "test_reference",
+      "consumer_type": "test",
+      "is_blocker": false,
+      "line": 135,
+      "migration_path": "",
+      "owner": "support_checks",
+      "path": "app/support_checks/tests/test_rule_change_flow.py",
       "text": "fixture_file = app_dir / \"languages\" / \"sv\" / \"matcher_contracts\" / \"matcher_regression_cases.json\""
     },
     {
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 133,
+      "line": 167,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1408,7 +468,7 @@
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 142,
+      "line": 176,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1418,7 +478,7 @@
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 143,
+      "line": 177,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1428,7 +488,7 @@
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 181,
+      "line": 215,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1438,7 +498,7 @@
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 232,
+      "line": 266,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1448,7 +508,7 @@
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 309,
+      "line": 343,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1458,7 +518,7 @@
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 310,
+      "line": 344,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1468,7 +528,7 @@
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 370,
+      "line": 404,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1478,7 +538,7 @@
       "classification": "test_reference",
       "consumer_type": "test",
       "is_blocker": false,
-      "line": 371,
+      "line": 405,
       "migration_path": "",
       "owner": "support_checks",
       "path": "app/support_checks/tests/test_rule_change_flow.py",
@@ -1910,15 +970,11 @@
     "generated_output_reference": 3894
   },
   "summary": {
-    "blocking_cli_default_path": 9,
-    "blocking_default_path": 19,
-    "blocking_imported_default_path": 8,
-    "blocking_path_resolver": 2,
-    "blocking_reader": 8,
+    "contract_access_api": 2,
     "documentation": 33,
     "generated_output_reference": 3894,
     "planning_doc": 2,
-    "python_reference": 21,
-    "test_reference": 42
+    "python_reference": 15,
+    "test_reference": 44
   }
 }

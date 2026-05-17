@@ -38,6 +38,12 @@ from languages.sv.ingredient_matching.match_bridges import MATCH_BRIDGES  # noqa
 from languages.sv.ingredient_matching.no_match_policies import NO_MATCH_POLICIES  # noqa: E402
 from languages.sv.ingredient_matching.parent_maps import KEYWORD_EXTRA_PARENTS, PARENT_MATCH_ONLY  # noqa: E402
 from languages.sv.ingredient_matching.synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS  # noqa: E402
+from support_checks.matcher_contracts import (  # noqa: E402
+    fixture_contract_path,
+    inventory_contract_path,
+    load_fixture_contract,
+    load_inventory_contract,
+)
 from support_checks.prefix_schema import diagnostic_prefixes  # noqa: E402
 
 
@@ -53,8 +59,6 @@ DEFAULT_REPORT_DIR = (
     Path(os.environ.get("DEAL_MEALS_SUPPORT_REPORT_ROOT", "/tmp/deal-meals-support-checks"))
     / "verified_term_audit"
 )
-RULE_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
-REGRESSION_CASES_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
 EXTRACTION_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "extraction.py"
 TERM_INDEXES_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_indexes.py"
 WORKING_TABLE = "tmp_verified_term_audit_variants"
@@ -171,13 +175,6 @@ def _json_default(value: Any) -> Any:
     if isinstance(value, (set, frozenset, tuple)):
         return sorted(value)
     return str(value)
-
-
-def _load_json_list(path: Path) -> list[dict[str, Any]]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, list):
-        raise ValueError(f"Expected list payload in {path}")
-    return payload
 
 
 def _literal_strings(node: ast.AST | None) -> list[str]:
@@ -314,8 +311,9 @@ def _expected_canonicals(case: dict[str, Any]) -> list[str]:
 
 
 def _iter_rule_inventory_variants() -> Iterable[AuditVariant]:
-    rel_path = _repo_rel(RULE_INVENTORY_FILE)
-    for index, entry in enumerate(_load_json_list(RULE_INVENTORY_FILE), start=1):
+    inventory_file = inventory_contract_path()
+    rel_path = _repo_rel(inventory_file)
+    for index, entry in enumerate(load_inventory_contract(inventory_file), start=1):
         canonical = str(entry.get("canonical") or "")
         source_id = str(entry.get("id") or f"inventory-{index}")
         yield AuditVariant(
@@ -343,8 +341,9 @@ def _iter_rule_inventory_variants() -> Iterable[AuditVariant]:
 
 
 def _iter_regression_case_variants() -> Iterable[AuditVariant]:
-    rel_path = _repo_rel(REGRESSION_CASES_FILE)
-    for case in _load_json_list(REGRESSION_CASES_FILE):
+    fixture_file = fixture_contract_path()
+    rel_path = _repo_rel(fixture_file)
+    for case in load_fixture_contract(fixture_file):
         case_id = str(case["id"])
         offer = case.get("offer") or {}
         ingredients = [str(value) for value in case.get("ingredients") or []]
@@ -782,11 +781,11 @@ def rebuild_working_table(variants: list[AuditVariant]) -> None:
 
 
 def _fixture_ids() -> set[str]:
-    return {str(case["id"]) for case in _load_json_list(REGRESSION_CASES_FILE)}
+    return {str(case["id"]) for case in load_fixture_contract()}
 
 
 def _fixture_by_id() -> dict[str, dict[str, Any]]:
-    return {str(case["id"]): case for case in _load_json_list(REGRESSION_CASES_FILE)}
+    return {str(case["id"]): case for case in load_fixture_contract()}
 
 
 def _valid_adapter_refs() -> set[str]:

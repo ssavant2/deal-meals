@@ -25,6 +25,11 @@ APP_DIR = Path(__file__).resolve().parents[1]
 SUPPORT_CHECKS_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(APP_DIR))
 
+from support_checks.matcher_contracts import (  # noqa: E402
+    contract_paths,
+    repo_root_for_tree_root,
+)
+
 
 @dataclass(frozen=True)
 class Step:
@@ -51,26 +56,12 @@ def _command(name: str, *args: str) -> tuple[str, ...]:
     return (sys.executable, _script(name), *args)
 
 
-def _app_dir_for_tree_root(tree_root: Path | None) -> Path:
-    if tree_root is None:
-        return APP_DIR
-    root = tree_root.resolve()
-    if (root / "app").is_dir():
-        return root / "app"
-    return root
-
-
-def _repo_root_for_tree_root(tree_root: Path | None) -> Path:
-    app_dir = _app_dir_for_tree_root(tree_root)
-    return app_dir.parent if app_dir.name == "app" else app_dir
-
-
 def _fixture_file_for_args(args: argparse.Namespace) -> Path:
-    return _app_dir_for_tree_root(args.tree_root) / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+    return contract_paths(args.tree_root).fixture_file
 
 
 def _inventory_file_for_args(args: argparse.Namespace) -> Path:
-    return _app_dir_for_tree_root(args.tree_root) / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+    return contract_paths(args.tree_root).inventory_file
 
 
 def _fixture_file_args(args: argparse.Namespace) -> list[str]:
@@ -85,7 +76,7 @@ def _inventory_file_args(args: argparse.Namespace) -> list[str]:
     return [
         "--inventory-file", str(_inventory_file_for_args(args)),
         "--fixture-file", str(_fixture_file_for_args(args)),
-        "--repo-root", str(_repo_root_for_tree_root(args.tree_root)),
+        "--repo-root", str(repo_root_for_tree_root(args.tree_root)),
     ]
 
 
@@ -295,7 +286,7 @@ def _preflight_step(args: argparse.Namespace) -> Step:
         "matcher change pre-flight",
         _command("run_matcher_change_preflight.py", *_tree_root_args(args)),
         "collects matcher rule-change infrastructure issues before slower gates",
-        cwd=_repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
+        cwd=repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
     )
 
 
@@ -304,7 +295,7 @@ def _generated_coverage_step(args: argparse.Namespace) -> Step:
         "generate matcher registry coverage",
         _command("generate_matcher_registry_coverage.py", *_tree_root_args(args), "--write"),
         "updates derived coverage TOML from fixture/inventory JSON before validation",
-        cwd=_repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
+        cwd=repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
     )
 
 
@@ -387,10 +378,10 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
                 "refresh_matcher_rule_inventory_line_refs.py",
                 "--write",
                 "--repo-root",
-                str(_repo_root_for_tree_root(args.tree_root)),
+                str(repo_root_for_tree_root(args.tree_root)),
             ),
             "updates inventory anchors after moved Python/TOML line refs",
-            cwd=_repo_root_for_tree_root(args.tree_root),
+            cwd=repo_root_for_tree_root(args.tree_root),
         ))
 
     if changes.registry_changed:
@@ -574,7 +565,7 @@ def _warn_before_running(args: argparse.Namespace, changes: ChangeFlags) -> None
             flush=True,
         )
     if args.refresh_line_refs:
-        inventory_file = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+        inventory_file = contract_paths().inventory_file
         if not os.access(inventory_file, os.W_OK):
             print(
                 "\nNOTE: inventory line-ref refresh needs a writable checkout. Run this wrapper from the host "
@@ -695,7 +686,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    repo_root = _repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else _discover_repo_root()
+    repo_root = repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else _discover_repo_root()
     changed_paths, git_error = _git_changed_paths(repo_root) if args.auto_detect else (set(), None)
     detected = _detect_change_flags(changed_paths)
     changes = _resolved_change_flags(args, detected)

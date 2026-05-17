@@ -86,6 +86,10 @@ def _is_generated_reference_path(path: Path) -> bool:
     )
 
 
+def _is_contract_access_api_path(path: Path) -> bool:
+    return path.name == "matcher_contracts.py" and path.parent.name == "support_checks"
+
+
 def _owner(path: Path) -> str:
     rel = _rel(path)
     if rel.startswith("app/cli/"):
@@ -117,6 +121,8 @@ def _classify(path: Path, line: str) -> tuple[str, str]:
     suffix = path.suffix.lower()
     lower = line.lower()
     stripped = line.strip()
+    if _is_contract_access_api_path(path):
+        return "contract_access_api", "contract_access_api"
     if _is_test_path(path):
         return "test_reference", "test"
     if _is_generated_reference_path(path):
@@ -205,7 +211,7 @@ def markdown(hits: list[Hit]) -> str:
         "migration is vetoed until those consumers are migrated first.",
         "",
         f"Decision: {'VETOED' if blocking else 'PASS'}",
-        f"Blocker baseline count: {len(blocking)}",
+        f"Blocker count: {len(blocking)}",
         "",
         "## Summary",
         "",
@@ -273,6 +279,7 @@ def json_report(hits: list[Hit]) -> str:
     payload = {
         "generated": date.today().isoformat(),
         "decision": "VETOED" if blocking else "PASS",
+        "blocker_count": len(blocking),
         "blocker_baseline_count": len(blocking),
         "summary": dict(sorted(counts.items())),
         "omitted_findings": dict(sorted(omitted_counts.items())),

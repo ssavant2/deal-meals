@@ -33,8 +33,8 @@ from support_checks.matcher_layer_diagnostics import (  # noqa: E402
     check_cache_freshness,
     diagnose_case,
 )
+from support_checks.matcher_contracts import fixture_contract_path  # noqa: E402
 from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
-    DEFAULT_FIXTURE_FILE,
     _diagnostic_case_from_fixture,
     _load_fixture_payload,
     _validate_fixture_payload,
@@ -490,7 +490,7 @@ def _format_text(report: dict[str, Any]) -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run matcher-layer fixture parity.")
-    parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))
+    parser.add_argument("--fixture-file", default=str(fixture_contract_path()))
     parser.add_argument("--case-id", action="append", help="Run only this fixture id. Can be repeated.")
     parser.add_argument("--policy-ref", action="append", help="Run only fixtures with this policy_ref. Can be repeated.")
     parser.add_argument("--canonical", action="append", help="Run only fixtures expecting this canonical. Can be repeated.")

@@ -11,8 +11,8 @@ import sys
 APP_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(APP_DIR))
 
+from support_checks.matcher_contracts import fixture_contract_path  # noqa: E402
 from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
-    DEFAULT_FIXTURE_FILE,
     _load_fixture_payload,
     _validate_fixture_payload,
     evaluate_match_expectation,
@@ -51,7 +51,7 @@ def _minimal_fixture() -> dict:
 
 
 def main() -> int:
-    fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))
+    fixture_payloads = _load_fixture_payload(fixture_contract_path())
     for payload in fixture_payloads:
         _validate_fixture_payload(payload)
     check("default fixture file schema", True)

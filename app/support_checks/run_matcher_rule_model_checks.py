@@ -30,17 +30,19 @@ from languages.sv.ingredient_matching.rule_models import (  # noqa: E402
     NoMatchPolicy,
     RouteExpansion,
 )
+from support_checks.matcher_contracts import (  # noqa: E402
+    fixture_contract_path,
+    inventory_contract_path,
+    load_fixture_contract,
+    load_inventory_contract,
+)
 from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
-    DEFAULT_FIXTURE_FILE,
-    _load_fixture_payload,
     has_temporary_fixture_id,
     has_temporary_policy_ref,
 )
 from support_checks.prefix_schema import diagnostic_prefixes  # noqa: E402
 from support_checks.run_matcher_rule_inventory_checks import (  # noqa: E402
-    DEFAULT_INVENTORY_FILE,
     _entry_adapter_refs,
-    load_inventory,
 )
 
 
@@ -61,17 +63,17 @@ def check_raises(name: str, factory, expected_fragment: str) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))
-    parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))
+    parser.add_argument("--fixture-file", default=str(fixture_contract_path()))
+    parser.add_argument("--inventory-file", default=str(inventory_contract_path()))
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    fixture_payloads = _load_fixture_payload(Path(args.fixture_file))
+    fixture_payloads = load_fixture_contract(Path(args.fixture_file))
     fixture_ids = {str(payload["id"]) for payload in fixture_payloads}
     fixture_by_id = {str(payload["id"]): payload for payload in fixture_payloads}
-    inventory_entries = load_inventory(Path(args.inventory_file))
+    inventory_entries = load_inventory_contract(Path(args.inventory_file))
     inventory_ids = {str(entry["id"]) for entry in inventory_entries}
     inventory_by_id = {str(entry["id"]): entry for entry in inventory_entries}
 

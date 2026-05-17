@@ -43,14 +43,14 @@ from languages.sv.ingredient_matching.synonyms import (  # noqa: E402
     INGREDIENT_PARENTS,
     KEYWORD_SYNONYMS,
 )
-from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
-    DEFAULT_FIXTURE_FILE,
-    _load_fixture_payload,
-    run_fixtures,
+from support_checks.matcher_contracts import (  # noqa: E402
+    fixture_contract_path,
+    inventory_contract_path,
+    load_fixture_contract,
+    load_inventory_contract,
 )
-from support_checks.run_matcher_rule_inventory_checks import (  # noqa: E402
-    DEFAULT_INVENTORY_FILE,
-    load_inventory,
+from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
+    run_fixtures,
 )
 
 
@@ -514,9 +514,9 @@ def _sample_refs(refs: set[str], max_cases: int) -> list[str]:
 
 
 def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssue]]:
-    fixture_payloads = _load_fixture_payload(Path(args.fixture_file))
+    fixture_payloads = load_fixture_contract(Path(args.fixture_file))
     fixture_by_id = {str(payload["id"]): payload for payload in fixture_payloads}
-    inventory_entries = load_inventory(Path(args.inventory_file))
+    inventory_entries = load_inventory_contract(Path(args.inventory_file))
     inventory_by_id = {str(entry["id"]): entry for entry in inventory_entries}
 
     issues: list[CheckIssue] = []
@@ -586,8 +586,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--language", default="sv")
     parser.add_argument("--market", default="SE")
-    parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))
-    parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))
+    parser.add_argument("--fixture-file", default=str(fixture_contract_path()))
+    parser.add_argument("--inventory-file", default=str(inventory_contract_path()))
     parser.add_argument("--max-diagnostic-cases", type=int, default=DEFAULT_DIAGNOSTIC_SAMPLE_SIZE)
     parser.add_argument(
         "--bridge-wiring-baseline",

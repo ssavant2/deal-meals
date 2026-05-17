@@ -16,14 +16,19 @@ import unicodedata
 
 import typer
 
+from support_checks.matcher_contracts import (
+    append_json_list_items,
+    contract_paths,
+    load_fixture_contract,
+    load_inventory_contract,
+)
+
 
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_DIR = APP_DIR.parent
 SUPPORT_CHECKS_DIR = APP_DIR / "support_checks"
 SV_DIR = APP_DIR / "languages" / "sv"
 
-DEFAULT_FIXTURE_FILE = SV_DIR / "matcher_contracts" / "matcher_regression_cases.json"
-DEFAULT_INVENTORY_FILE = SV_DIR / "matcher_contracts" / "matcher_rule_inventory.json"
 DEFAULT_KEYWORD_EXTRA_PARENT_FILE = (
     SV_DIR / "ingredient_matching" / "term_registry" / "entries" / "keyword_extra_parent.toml"
 )
@@ -66,24 +71,16 @@ class MatcherChangePlan:
         return self.fixture_ids[0]
 
 
-def _app_dir_for_tree_root(tree_root: Path | None) -> Path:
-    if tree_root is None:
-        return APP_DIR
-    root = tree_root.resolve()
-    if (root / "app").is_dir():
-        return root / "app"
-    return root
-
-
 def _paths(tree_root: Path | None) -> MatcherPaths:
-    app_dir = _app_dir_for_tree_root(tree_root)
-    repo_root = app_dir.parent if app_dir.name == "app" else app_dir
+    contracts = contract_paths(tree_root)
+    app_dir = contracts.app_dir
+    repo_root = contracts.repo_root
     return MatcherPaths(
         tree_root=repo_root,
         app_dir=app_dir,
         repo_root=repo_root,
-        fixture_file=app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json",
-        inventory_file=app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json",
+        fixture_file=contracts.fixture_file,
+        inventory_file=contracts.inventory_file,
         keyword_extra_parent_file=(
             app_dir
             / "languages"
@@ -137,22 +134,8 @@ def _toml_array(values: tuple[str, ...] | list[str]) -> str:
     return "[" + ", ".join(_toml_string(value) for value in values) + "]"
 
 
-def _load_json_list(path: Path) -> list[dict]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, list):
-        raise typer.BadParameter(f"{path} must contain a JSON list")
-    return payload
-
-
-def _write_json_list(path: Path, payload: list[dict]) -> None:
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
 def _append_json_list_items(path: Path, items: tuple[dict, ...], *, dry_run: bool) -> None:
-    payload = _load_json_list(path)
-    payload.extend(items)
-    if not dry_run:
-        _write_json_list(path, payload)
+    append_json_list_items(path, items, dry_run=dry_run)
 
 
 def _append_text_block(path: Path, block: str, *, dry_run: bool, trim_existing: bool = False) -> None:
@@ -180,13 +163,13 @@ def _ensure_can_add_keyword_extra_parent(
     fixture_ids: tuple[str, ...],
     inventory_id: str,
 ) -> None:
-    fixtures = _load_json_list(paths.fixture_file)
+    fixtures = load_fixture_contract(paths.fixture_file)
     existing_fixture_ids = {str(item.get("id") or "") for item in fixtures if isinstance(item, dict)}
     duplicate_fixtures = sorted(set(fixture_ids) & existing_fixture_ids)
     if duplicate_fixtures:
         raise typer.BadParameter(f"fixture already exists: {', '.join(duplicate_fixtures)}")
 
-    inventory = _load_json_list(paths.inventory_file)
+    inventory = load_inventory_contract(paths.inventory_file)
     existing_inventory_ids = {str(item.get("id") or "") for item in inventory if isinstance(item, dict)}
     if inventory_id in existing_inventory_ids:
         raise typer.BadParameter(f"inventory entry already exists: {inventory_id}")

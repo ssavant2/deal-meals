@@ -22,17 +22,21 @@ from languages.sv.ingredient_matching.term_registry.registry import load_registr
 from support_checks.generate_matcher_registry_coverage import (  # noqa: E402
     generate_coverage_files,
 )
+from support_checks.matcher_contracts import (  # noqa: E402
+    app_dir_for_tree_root,
+    contract_paths,
+    load_fixture_contract,
+    load_inventory_contract,
+)
 from support_checks.prefix_schema import allowed_prefixes, prefix_hint  # noqa: E402
 from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
     ALLOWED_SOURCE_REF_PREFIXES,
-    _load_fixture_payload,
     _validate_fixture_payload,
     has_temporary_policy_ref,
     has_temporary_source_ref,
     source_ref_prefix_hint,
 )
 from support_checks.run_matcher_rule_inventory_checks import (  # noqa: E402
-    load_inventory,
     validate_inventory,
 )
 from support_checks.run_term_registry_add_term_checks import (  # noqa: E402
@@ -43,8 +47,6 @@ from support_checks.run_term_registry_contract_checks import (  # noqa: E402
 )
 
 
-DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
 DEFAULT_REGISTRY_ENTRIES_DIR = (
     APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
 )
@@ -83,20 +85,6 @@ class PreflightIssue:
         if payload["details"] is None:
             payload["details"] = {}
         return payload
-
-
-def _app_dir_for_tree_root(tree_root: Path | None) -> Path:
-    if tree_root is None:
-        return APP_DIR
-    root = tree_root.resolve()
-    if (root / "app").is_dir():
-        return root / "app"
-    return root
-
-
-def _repo_root_for_tree_root(tree_root: Path | None) -> Path:
-    app_dir = _app_dir_for_tree_root(tree_root)
-    return app_dir.parent if app_dir.name == "app" else app_dir
 
 
 def _rel(path: Path, *, repo_root: Path) -> str:
@@ -565,10 +553,11 @@ def run_preflight(
     baseline_file: Path | None = None,
     snapshot_file: Path | None = None,
 ) -> dict[str, Any]:
-    app_dir = _app_dir_for_tree_root(tree_root)
-    repo_root = _repo_root_for_tree_root(tree_root)
-    fixture_file = fixture_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-    inventory_file = inventory_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+    paths = contract_paths(tree_root)
+    app_dir = paths.app_dir
+    repo_root = paths.repo_root
+    fixture_file = fixture_file or paths.fixture_file
+    inventory_file = inventory_file or paths.inventory_file
     registry_entries_dir = (
         registry_entries_dir
         or app_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
@@ -579,8 +568,8 @@ def run_preflight(
     )
     snapshot_file = snapshot_file or app_dir / "support_checks" / "baselines" / "known_infrastructure_issues.json"
 
-    fixtures = _load_fixture_payload(fixture_file)
-    inventory = load_inventory(inventory_file)
+    fixtures = load_fixture_contract(fixture_file)
+    inventory = load_inventory_contract(inventory_file)
     issues = []
     issues.extend(_check_fixtures(fixture_file, fixtures, repo_root=repo_root))
     issues.extend(_check_inventory(inventory_file, inventory, fixtures, repo_root=repo_root))
@@ -697,7 +686,7 @@ def main() -> int:
             for item in [*report["new_issues"], *report["known_issues"]]
         ]
         snapshot_file = args.snapshot_file or (
-            _app_dir_for_tree_root(args.tree_root) / "support_checks" / "baselines" / "known_infrastructure_issues.json"
+            app_dir_for_tree_root(args.tree_root) / "support_checks" / "baselines" / "known_infrastructure_issues.json"
         )
         _write_snapshot(snapshot_file, issues)
     if args.format == "json":

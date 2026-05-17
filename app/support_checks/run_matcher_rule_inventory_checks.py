@@ -15,20 +15,20 @@ APP_DIR = Path(__file__).resolve().parents[1]
 REPO_DIR = APP_DIR.parent
 sys.path.insert(0, str(APP_DIR))
 
+from support_checks.matcher_contracts import (  # noqa: E402
+    fixture_contract_path,
+    inventory_contract_path,
+    load_fixture_contract,
+    load_inventory_contract,
+)
 from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
     ALLOWED_SOURCE_REF_PREFIXES,
-    DEFAULT_FIXTURE_FILE,
-    _load_fixture_payload,
     has_temporary_fixture_id,
     has_temporary_policy_ref,
     has_temporary_source_ref,
     source_ref_prefix_hint,
 )
 
-
-DEFAULT_INVENTORY_FILE = (
-    APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
-)
 
 REQUIRED_FIELDS = frozenset({
     "id",
@@ -96,11 +96,7 @@ def _entry_adapter_refs(entry: dict[str, Any]) -> list[str]:
 
 
 def load_inventory(path: Path) -> list[dict[str, Any]]:
-    with path.open("r", encoding="utf-8") as handle:
-        payload = json.load(handle)
-    if not isinstance(payload, list):
-        raise ValueError(f"inventory file must contain a list: {path}")
-    return payload
+    return load_inventory_contract(path)
 
 
 def _validate_line_ref(entry_id: str, line_ref: Any, *, repo_root: Path = REPO_DIR) -> list[str]:
@@ -405,8 +401,8 @@ def _format_text(report: dict[str, Any]) -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate matcher rule inventory.")
-    parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))
-    parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))
+    parser.add_argument("--inventory-file", default=str(inventory_contract_path()))
+    parser.add_argument("--fixture-file", default=str(fixture_contract_path()))
     parser.add_argument("--repo-root", type=Path, default=REPO_DIR)
     parser.add_argument("--format", choices=("text", "json"), default="text")
     return parser.parse_args()
@@ -416,7 +412,7 @@ def main() -> int:
     args = parse_args()
     report = validate_inventory(
         load_inventory(Path(args.inventory_file)),
-        _load_fixture_payload(Path(args.fixture_file)),
+        load_fixture_contract(Path(args.fixture_file)),
         repo_root=args.repo_root,
     )
     if args.format == "json":

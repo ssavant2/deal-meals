@@ -15,9 +15,15 @@ from typing import Any, Iterable
 
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_DIR = APP_DIR.parent
+sys.path.insert(0, str(APP_DIR))
 
-DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+from support_checks.matcher_contracts import (  # noqa: E402
+    contract_paths,
+    load_fixture_contract,
+    load_inventory_contract,
+    repo_root_for_tree_root,
+)
+
 DEFAULT_ENTRIES_DIR = APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
 REGRESSION_COVERAGE_FILE = "matcher_regression_case.toml"
 INVENTORY_COVERAGE_FILE = "matcher_rule_inventory.toml"
@@ -74,32 +80,11 @@ class GeneratedCoverageFile:
         }
 
 
-def _app_dir_for_tree_root(tree_root: Path | None) -> Path:
-    if tree_root is None:
-        return APP_DIR
-    root = tree_root.resolve()
-    if (root / "app").is_dir():
-        return root / "app"
-    return root
-
-
-def _repo_root_for_tree_root(tree_root: Path | None) -> Path:
-    app_dir = _app_dir_for_tree_root(tree_root)
-    return app_dir.parent if app_dir.name == "app" else app_dir
-
-
 def _rel(path: Path, *, repo_root: Path) -> str:
     try:
         return str(path.resolve().relative_to(repo_root.resolve()))
     except ValueError:
         return str(path)
-
-
-def _load_json_list(path: Path) -> list[dict[str, Any]]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, list):
-        raise ValueError(f"expected list payload in {path}")
-    return payload
 
 
 def _slug(value: str, *, fallback: str = "term") -> str:
@@ -324,15 +309,16 @@ def generate_coverage_files(
     inventory_file: Path | None = None,
     entries_dir: Path | None = None,
 ) -> list[GeneratedCoverageFile]:
-    app_dir = _app_dir_for_tree_root(tree_root)
-    fixture_file = fixture_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-    inventory_file = inventory_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+    paths = contract_paths(tree_root)
+    app_dir = paths.app_dir
+    fixture_file = fixture_file or paths.fixture_file
+    inventory_file = inventory_file or paths.inventory_file
     entries_dir = entries_dir or app_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
     regression_path = entries_dir / REGRESSION_COVERAGE_FILE
     inventory_path = entries_dir / INVENTORY_COVERAGE_FILE
 
-    fixtures = _load_json_list(fixture_file)
-    inventory = _load_json_list(inventory_file)
+    fixtures = load_fixture_contract(fixture_file)
+    inventory = load_inventory_contract(inventory_file)
     outputs = [
         (
             regression_path,
@@ -390,7 +376,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    repo_root = _repo_root_for_tree_root(args.tree_root)
+    repo_root = repo_root_for_tree_root(args.tree_root)
     files = generate_coverage_files(
         tree_root=args.tree_root,
         fixture_file=args.fixture_file,

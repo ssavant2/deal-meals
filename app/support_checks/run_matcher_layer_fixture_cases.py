@@ -20,16 +20,16 @@ from support_checks.matcher_layer_diagnostics import (  # noqa: E402
     check_cache_freshness,
     diagnose_case,
 )
+from support_checks.matcher_contracts import (  # noqa: E402
+    fixture_contract_path,
+    load_fixture_contract,
+)
 from support_checks.prefix_schema import (  # noqa: E402
     allowed_prefixes,
     prefix_hint,
     temporary_re,
 )
 
-
-DEFAULT_FIXTURE_FILE = (
-    APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-)
 
 ALLOWED_SOURCE_REF_PREFIXES = allowed_prefixes("source_ref")
 TEMPORARY_POLICY_REF_RE = temporary_re("policy_ref")
@@ -54,11 +54,7 @@ def source_ref_prefix_hint() -> str:
 
 
 def _load_fixture_payload(path: Path) -> list[dict[str, Any]]:
-    with path.open("r", encoding="utf-8") as handle:
-        payload = json.load(handle)
-    if not isinstance(payload, list):
-        raise ValueError(f"fixture file must contain a list: {path}")
-    return payload
+    return load_fixture_contract(path)
 
 
 def _diagnostic_case_from_fixture(payload: dict[str, Any]) -> DiagnosticCase:
@@ -394,7 +390,7 @@ def _format_text(report: dict[str, Any]) -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run matcher-layer decision fixtures.")
-    parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))
+    parser.add_argument("--fixture-file", default=str(fixture_contract_path()))
     parser.add_argument("--case-id", action="append", help="Run only this fixture id. Can be repeated.")
     parser.add_argument("--policy-ref", action="append", help="Run only fixtures with this policy_ref. Can be repeated.")
     parser.add_argument("--canonical", action="append", help="Run only fixtures expecting this canonical. Can be repeated.")

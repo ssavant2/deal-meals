@@ -32,6 +32,10 @@ from languages.term_registry.checks import (  # noqa: E402
 )
 from languages.term_registry.models import CheckIssue, RegistryEntry, RegistryVariant  # noqa: E402
 from languages.term_registry.reports import write_json_and_markdown_report  # noqa: E402
+from support_checks.matcher_contracts import (  # noqa: E402
+    load_fixture_contract,
+    load_inventory_contract,
+)
 
 
 DEFAULT_VERIFIED_TERMS_BASELINE_JSON = (
@@ -49,8 +53,6 @@ DEFAULT_REPORT_ROOT = (
     / "term_registry"
 )
 DEFAULT_SHARED_REGISTRY_DIR = APP_DIR / "languages" / "term_registry"
-DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
 EXPECTED_VERIFIED_TERM_VARIANT_COUNT = 5517  # updated by support_checks/promote_term_baseline.py
 FORBIDDEN_BASELINE_SUMMARY_KEYS = {
     "batch_count",
@@ -514,8 +516,8 @@ def _load_coverage_exceptions(path: Path, *, language: str, market: str) -> tupl
 def _load_registry_source_ref_indexes(language: str) -> dict[str, set[str]]:
     if language != "sv":
         return {}
-    fixture_payloads = _load_json(DEFAULT_FIXTURE_FILE)
-    inventory_payloads = _load_json(DEFAULT_INVENTORY_FILE)
+    fixture_payloads = load_fixture_contract()
+    inventory_payloads = load_inventory_contract()
     from languages.sv.ingredient_matching.match_bridges import MATCH_BRIDGES  # noqa: PLC0415
     from languages.sv.ingredient_matching.no_match_policies import NO_MATCH_POLICIES  # noqa: PLC0415
 

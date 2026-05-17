@@ -30,15 +30,16 @@ Shipped foundation:
 - prefix allow-lists in `app/support_checks/schemas/prefixes.yml`
 - JSON authority audit at `docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md`
 
-Current L3-C status: **vetoed**.
+Current L3-C direct-reader status after B2: **passed**.
 
 The JSON contract files are still authoritative:
 
 - `app/languages/sv/matcher_contracts/matcher_regression_cases.json`
 - `app/languages/sv/matcher_contracts/matcher_rule_inventory.json`
 
-The audit found direct Python readers that must be migrated before JSON can
-become generated.
+Direct Python readers have been migrated behind
+`app/support_checks/matcher_contracts.py`. JSON is still authored
+source-of-truth until B3-B5 add, exercise, and flip TOML-source generation.
 
 ## Implementation Governance
 
@@ -332,7 +333,7 @@ Only after enough parallel activity has exercised the generator:
 
 Acceptance:
 
-- JSON-authority audit decision changes to PASS
+- JSON-authority direct-reader audit remains PASS
 - all readers go through the contract API or generated JSON path
 - at least 5 successful generated-JSON check-mode runs, including at least 3
   Track B runs across distinct matcher-rule changes or branches

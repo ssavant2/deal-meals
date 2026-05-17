@@ -22,9 +22,11 @@ support-check contracts that keep them in sync.
   permanent `source_ref`, temporary fixture/policy/source refs, and inventory
   `adapter_ref` prefixes.
 
-The JSON contract files remain authored source-of-truth. L3-C was audited in
-`docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md` and vetoed for now because
-support checks and the CLI still read those JSON files directly.
+The JSON contract files remain authored source-of-truth until the TOML-source
+generator work is complete. Support checks and the CLI now access those files
+through `app/support_checks/matcher_contracts.py`; the L3-C direct-reader audit
+in `docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md` currently passes with zero
+blocking consumers.
 
 ## Verified-Term Variant IDs
 

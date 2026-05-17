@@ -6,168 +6,19 @@ This audit is the L3-C gate for making matcher contract JSON derived
 from TOML sources. If any blocking consumers exist, the JSON-as-derived
 migration is vetoed until those consumers are migrated first.
 
-Decision: VETOED
-Blocker baseline count: 46
+Decision: PASS
+Blocker count: 0
 
 ## Summary
 
 | Classification | Count |
 |---|---:|
-| blocking_cli_default_path | 9 |
-| blocking_default_path | 19 |
-| blocking_imported_default_path | 8 |
-| blocking_path_resolver | 2 |
-| blocking_reader | 8 |
+| contract_access_api | 2 |
 | documentation | 33 |
 | generated_output_reference | 3894 |
 | planning_doc | 2 |
-| python_reference | 21 |
-| test_reference | 42 |
-
-## Blocking Consumers
-
-These Python consumers still read, resolve, or import default paths
-for the JSON contracts directly. The JSON files therefore remain
-authored source-of-truth for now.
-
-- `app/support_checks/run_matcher_change_gates.py:69` — `blocking_path_resolver`; owner: `support_checks`; consumer: `path_resolver`
-  - text: `return _app_dir_for_tree_root(args.tree_root) / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-  - migration: Move fixture/inventory path construction behind app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_change_gates.py:73` — `blocking_path_resolver`; owner: `support_checks`; consumer: `path_resolver`
-  - text: `return _app_dir_for_tree_root(args.tree_root) / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-  - migration: Move fixture/inventory path construction behind app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_rule_inventory_checks.py:20` — `blocking_imported_default_path`; owner: `support_checks`; consumer: `imported_default_path`
-  - text: `DEFAULT_FIXTURE_FILE,`
-  - migration: Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.
-- `app/support_checks/run_matcher_rule_inventory_checks.py:29` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `DEFAULT_INVENTORY_FILE = (`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_rule_inventory_checks.py:408` — `blocking_cli_default_path`; owner: `support_checks`; consumer: `cli_default`
-  - text: `parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))`
-  - migration: Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_rule_inventory_checks.py:409` — `blocking_cli_default_path`; owner: `support_checks`; consumer: `cli_default`
-  - text: `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
-  - migration: Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_term_registry_guard_bridge_checks.py:47` — `blocking_imported_default_path`; owner: `support_checks`; consumer: `imported_default_path`
-  - text: `DEFAULT_FIXTURE_FILE,`
-  - migration: Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.
-- `app/support_checks/run_term_registry_guard_bridge_checks.py:52` — `blocking_imported_default_path`; owner: `support_checks`; consumer: `imported_default_path`
-  - text: `DEFAULT_INVENTORY_FILE,`
-  - migration: Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.
-- `app/support_checks/run_term_registry_guard_bridge_checks.py:589` — `blocking_cli_default_path`; owner: `support_checks`; consumer: `cli_default`
-  - text: `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
-  - migration: Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_term_registry_guard_bridge_checks.py:590` — `blocking_cli_default_path`; owner: `support_checks`; consumer: `cli_default`
-  - text: `parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))`
-  - migration: Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.
-- `app/support_checks/generate_matcher_registry_coverage.py:19` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/generate_matcher_registry_coverage.py:20` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/generate_matcher_registry_coverage.py:328` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `fixture_file = fixture_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/generate_matcher_registry_coverage.py:329` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `inventory_file = inventory_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_change_preflight.py:46` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_change_preflight.py:47` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_change_preflight.py:570` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `fixture_file = fixture_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_change_preflight.py:571` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `inventory_file = inventory_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_layer_parity_checks.py:14` — `blocking_imported_default_path`; owner: `support_checks`; consumer: `imported_default_path`
-  - text: `from support_checks.run_matcher_layer_parity import DEFAULT_FIXTURE_FILE, run_parity  # noqa: E402`
-  - migration: Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.
-- `app/support_checks/run_matcher_layer_parity_checks.py:24` — `blocking_reader`; owner: `support_checks`; consumer: `reader`
-  - text: `fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_rule_model_checks.py:34` — `blocking_imported_default_path`; owner: `support_checks`; consumer: `imported_default_path`
-  - text: `DEFAULT_FIXTURE_FILE,`
-  - migration: Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.
-- `app/support_checks/run_matcher_rule_model_checks.py:41` — `blocking_imported_default_path`; owner: `support_checks`; consumer: `imported_default_path`
-  - text: `DEFAULT_INVENTORY_FILE,`
-  - migration: Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.
-- `app/support_checks/run_matcher_rule_model_checks.py:64` — `blocking_cli_default_path`; owner: `support_checks`; consumer: `cli_default`
-  - text: `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
-  - migration: Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_rule_model_checks.py:65` — `blocking_cli_default_path`; owner: `support_checks`; consumer: `cli_default`
-  - text: `parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))`
-  - migration: Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_term_registry_contract_checks.py:52` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_term_registry_contract_checks.py:53` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_term_registry_contract_checks.py:517` — `blocking_reader`; owner: `support_checks`; consumer: `reader`
-  - text: `fixture_payloads = _load_json(DEFAULT_FIXTURE_FILE)`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_term_registry_contract_checks.py:518` — `blocking_reader`; owner: `support_checks`; consumer: `reader`
-  - text: `inventory_payloads = _load_json(DEFAULT_INVENTORY_FILE)`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_layer_fixture_schema_checks.py:15` — `blocking_imported_default_path`; owner: `support_checks`; consumer: `imported_default_path`
-  - text: `DEFAULT_FIXTURE_FILE,`
-  - migration: Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.
-- `app/support_checks/run_matcher_layer_fixture_schema_checks.py:54` — `blocking_reader`; owner: `support_checks`; consumer: `reader`
-  - text: `fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_verified_term_audit.py:56` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `RULE_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_verified_term_audit.py:57` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `REGRESSION_CASES_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_verified_term_audit.py:317` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `rel_path = _repo_rel(RULE_INVENTORY_FILE)`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_verified_term_audit.py:318` — `blocking_reader`; owner: `support_checks`; consumer: `reader`
-  - text: `for index, entry in enumerate(_load_json_list(RULE_INVENTORY_FILE), start=1):`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_verified_term_audit.py:346` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `rel_path = _repo_rel(REGRESSION_CASES_FILE)`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_verified_term_audit.py:347` — `blocking_reader`; owner: `support_checks`; consumer: `reader`
-  - text: `for case in _load_json_list(REGRESSION_CASES_FILE):`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_verified_term_audit.py:785` — `blocking_reader`; owner: `support_checks`; consumer: `reader`
-  - text: `return {str(case["id"]) for case in _load_json_list(REGRESSION_CASES_FILE)}`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_verified_term_audit.py:789` — `blocking_reader`; owner: `support_checks`; consumer: `reader`
-  - text: `return {str(case["id"]): case for case in _load_json_list(REGRESSION_CASES_FILE)}`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/refresh_matcher_rule_inventory_line_refs.py:15` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `DEFAULT_INVENTORY_FILE = (`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/refresh_matcher_rule_inventory_line_refs.py:146` — `blocking_cli_default_path`; owner: `support_checks`; consumer: `cli_default`
-  - text: `parser.add_argument("--inventory-file", type=Path, default=DEFAULT_INVENTORY_FILE)`
-  - migration: Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_layer_parity.py:37` — `blocking_imported_default_path`; owner: `support_checks`; consumer: `imported_default_path`
-  - text: `DEFAULT_FIXTURE_FILE,`
-  - migration: Import contract paths/loaders from app/support_checks/matcher_contracts.py instead of another consumer module.
-- `app/support_checks/run_matcher_layer_parity.py:493` — `blocking_cli_default_path`; owner: `support_checks`; consumer: `cli_default`
-  - text: `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
-  - migration: Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_layer_fixture_cases.py:30` — `blocking_default_path`; owner: `support_checks`; consumer: `default_path`
-  - text: `DEFAULT_FIXTURE_FILE = (`
-  - migration: Load and write matcher contract JSON through app/support_checks/matcher_contracts.py.
-- `app/support_checks/run_matcher_layer_fixture_cases.py:397` — `blocking_cli_default_path`; owner: `support_checks`; consumer: `cli_default`
-  - text: `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
-  - migration: Resolve CLI/parser defaults through app/support_checks/matcher_contracts.py.
-- `app/cli/dm.py:25` — `blocking_default_path`; owner: `cli`; consumer: `default_path`
-  - text: `DEFAULT_FIXTURE_FILE = SV_DIR / "matcher_contracts" / "matcher_regression_cases.json"`
-  - migration: Use app/support_checks/matcher_contracts.py for path resolution and JSON read/write helpers.
-- `app/cli/dm.py:26` — `blocking_default_path`; owner: `cli`; consumer: `default_path`
-  - text: `DEFAULT_INVENTORY_FILE = SV_DIR / "matcher_contracts" / "matcher_rule_inventory.json"`
-  - migration: Use app/support_checks/matcher_contracts.py for path resolution and JSON read/write helpers.
+| python_reference | 15 |
+| test_reference | 44 |
 
 ## All References
 
@@ -193,86 +44,38 @@ authored source-of-truth for now.
 - `ref` `documentation` `docs/MATCHER_RULE_WORKFLOW_STEP2_PLAN.md:38` — `- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
 - `ref` `test_reference` `app/tests/batch_review_questions.md:1361` — ``app/languages/sv/matcher_contracts/matcher_regression_cases.json` and`
 - `ref` `test_reference` `app/tests/batch_review_questions.md:1362` — ``app/languages/sv/matcher_contracts/matcher_rule_inventory.json`.`
-- `BLOCKER` `blocking_path_resolver` `app/support_checks/run_matcher_change_gates.py:69` — `return _app_dir_for_tree_root(args.tree_root) / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `BLOCKER` `blocking_path_resolver` `app/support_checks/run_matcher_change_gates.py:73` — `return _app_dir_for_tree_root(args.tree_root) / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `ref` `python_reference` `app/support_checks/run_matcher_change_gates.py:206` — `"app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
-- `ref` `python_reference` `app/support_checks/run_matcher_change_gates.py:210` — `"app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
-- `ref` `python_reference` `app/support_checks/run_matcher_change_gates.py:577` — `inventory_file = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `BLOCKER` `blocking_imported_default_path` `app/support_checks/run_matcher_rule_inventory_checks.py:20` — `DEFAULT_FIXTURE_FILE,`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_matcher_rule_inventory_checks.py:29` — `DEFAULT_INVENTORY_FILE = (`
-- `ref` `python_reference` `app/support_checks/run_matcher_rule_inventory_checks.py:30` — `APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `BLOCKER` `blocking_cli_default_path` `app/support_checks/run_matcher_rule_inventory_checks.py:408` — `parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))`
-- `BLOCKER` `blocking_cli_default_path` `app/support_checks/run_matcher_rule_inventory_checks.py:409` — `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
-- `BLOCKER` `blocking_imported_default_path` `app/support_checks/run_term_registry_guard_bridge_checks.py:47` — `DEFAULT_FIXTURE_FILE,`
-- `BLOCKER` `blocking_imported_default_path` `app/support_checks/run_term_registry_guard_bridge_checks.py:52` — `DEFAULT_INVENTORY_FILE,`
-- `BLOCKER` `blocking_cli_default_path` `app/support_checks/run_term_registry_guard_bridge_checks.py:589` — `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
-- `BLOCKER` `blocking_cli_default_path` `app/support_checks/run_term_registry_guard_bridge_checks.py:590` — `parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))`
-- `BLOCKER` `blocking_default_path` `app/support_checks/generate_matcher_registry_coverage.py:19` — `DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `BLOCKER` `blocking_default_path` `app/support_checks/generate_matcher_registry_coverage.py:20` — `DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:29` — `"# Source: app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
-- `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:32` — `"# Registry coverage for matcher_regression_cases.json fixtures.",`
-- `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:39` — `"# Source: app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
-- `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:42` — `"# Registry coverage for matcher_rule_inventory.json rows.",`
-- `BLOCKER` `blocking_default_path` `app/support_checks/generate_matcher_registry_coverage.py:328` — `fixture_file = fixture_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `BLOCKER` `blocking_default_path` `app/support_checks/generate_matcher_registry_coverage.py:329` — `inventory_file = inventory_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_matcher_change_preflight.py:46` — `DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_matcher_change_preflight.py:47` — `DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_matcher_change_preflight.py:570` — `fixture_file = fixture_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_matcher_change_preflight.py:571` — `inventory_file = inventory_file or app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `BLOCKER` `blocking_imported_default_path` `app/support_checks/run_matcher_layer_parity_checks.py:14` — `from support_checks.run_matcher_layer_parity import DEFAULT_FIXTURE_FILE, run_parity  # noqa: E402`
-- `BLOCKER` `blocking_reader` `app/support_checks/run_matcher_layer_parity_checks.py:24` — `fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))`
-- `BLOCKER` `blocking_imported_default_path` `app/support_checks/run_matcher_rule_model_checks.py:34` — `DEFAULT_FIXTURE_FILE,`
-- `BLOCKER` `blocking_imported_default_path` `app/support_checks/run_matcher_rule_model_checks.py:41` — `DEFAULT_INVENTORY_FILE,`
-- `BLOCKER` `blocking_cli_default_path` `app/support_checks/run_matcher_rule_model_checks.py:64` — `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
-- `BLOCKER` `blocking_cli_default_path` `app/support_checks/run_matcher_rule_model_checks.py:65` — `parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_term_registry_contract_checks.py:52` — `DEFAULT_FIXTURE_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_term_registry_contract_checks.py:53` — `DEFAULT_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `BLOCKER` `blocking_reader` `app/support_checks/run_term_registry_contract_checks.py:517` — `fixture_payloads = _load_json(DEFAULT_FIXTURE_FILE)`
-- `BLOCKER` `blocking_reader` `app/support_checks/run_term_registry_contract_checks.py:518` — `inventory_payloads = _load_json(DEFAULT_INVENTORY_FILE)`
-- `BLOCKER` `blocking_imported_default_path` `app/support_checks/run_matcher_layer_fixture_schema_checks.py:15` — `DEFAULT_FIXTURE_FILE,`
-- `BLOCKER` `blocking_reader` `app/support_checks/run_matcher_layer_fixture_schema_checks.py:54` — `fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_verified_term_audit.py:56` — `RULE_INVENTORY_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_verified_term_audit.py:57` — `REGRESSION_CASES_FILE = APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_verified_term_audit.py:317` — `rel_path = _repo_rel(RULE_INVENTORY_FILE)`
-- `BLOCKER` `blocking_reader` `app/support_checks/run_verified_term_audit.py:318` — `for index, entry in enumerate(_load_json_list(RULE_INVENTORY_FILE), start=1):`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_verified_term_audit.py:346` — `rel_path = _repo_rel(REGRESSION_CASES_FILE)`
-- `BLOCKER` `blocking_reader` `app/support_checks/run_verified_term_audit.py:347` — `for case in _load_json_list(REGRESSION_CASES_FILE):`
-- `BLOCKER` `blocking_reader` `app/support_checks/run_verified_term_audit.py:785` — `return {str(case["id"]) for case in _load_json_list(REGRESSION_CASES_FILE)}`
-- `BLOCKER` `blocking_reader` `app/support_checks/run_verified_term_audit.py:789` — `return {str(case["id"]): case for case in _load_json_list(REGRESSION_CASES_FILE)}`
-- `BLOCKER` `blocking_default_path` `app/support_checks/refresh_matcher_rule_inventory_line_refs.py:15` — `DEFAULT_INVENTORY_FILE = (`
-- `ref` `python_reference` `app/support_checks/refresh_matcher_rule_inventory_line_refs.py:16` — `APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `BLOCKER` `blocking_cli_default_path` `app/support_checks/refresh_matcher_rule_inventory_line_refs.py:146` — `parser.add_argument("--inventory-file", type=Path, default=DEFAULT_INVENTORY_FILE)`
-- `BLOCKER` `blocking_imported_default_path` `app/support_checks/run_matcher_layer_parity.py:37` — `DEFAULT_FIXTURE_FILE,`
-- `BLOCKER` `blocking_cli_default_path` `app/support_checks/run_matcher_layer_parity.py:493` — `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
-- `BLOCKER` `blocking_default_path` `app/support_checks/run_matcher_layer_fixture_cases.py:30` — `DEFAULT_FIXTURE_FILE = (`
-- `ref` `python_reference` `app/support_checks/run_matcher_layer_fixture_cases.py:31` — `APP_DIR / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `BLOCKER` `blocking_cli_default_path` `app/support_checks/run_matcher_layer_fixture_cases.py:397` — `parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))`
+- `ref` `python_reference` `app/support_checks/run_matcher_change_gates.py:197` — `"app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `python_reference` `app/support_checks/run_matcher_change_gates.py:201` — `"app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `ref` `contract_access_api` `app/support_checks/matcher_contracts.py:15` — `FIXTURE_CONTRACT_FILENAME = "matcher_regression_cases.json"`
+- `ref` `contract_access_api` `app/support_checks/matcher_contracts.py:16` — `INVENTORY_CONTRACT_FILENAME = "matcher_rule_inventory.json"`
+- `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:35` — `"# Source: app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:38` — `"# Registry coverage for matcher_regression_cases.json fixtures.",`
+- `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:45` — `"# Source: app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `ref` `python_reference` `app/support_checks/generate_matcher_registry_coverage.py:48` — `"# Registry coverage for matcher_rule_inventory.json rows.",`
 - `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:23` — `"matcher_regression_cases.json",`
 - `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:24` — `"matcher_rule_inventory.json",`
 - `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:27` — `"DEFAULT_FIXTURE_FILE",`
 - `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:28` — `"DEFAULT_INVENTORY_FILE",`
 - `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:29` — `"RULE_INVENTORY_FILE",`
 - `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:30` — `"REGRESSION_CASES_FILE",`
-- `BLOCKER` `blocking_default_path` `app/cli/dm.py:25` — `DEFAULT_FIXTURE_FILE = SV_DIR / "matcher_contracts" / "matcher_regression_cases.json"`
-- `BLOCKER` `blocking_default_path` `app/cli/dm.py:26` — `DEFAULT_INVENTORY_FILE = SV_DIR / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `ref` `python_reference` `app/cli/dm.py:85` — `fixture_file=app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json",`
-- `ref` `python_reference` `app/cli/dm.py:86` — `inventory_file=app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json",`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:15` — `DEFAULT_FIXTURE_FILE,`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:16` — `DEFAULT_INVENTORY_FILE,`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:45` — `DEFAULT_FIXTURE_FILE.parents[1],`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:67` — `fixtures = json.loads(DEFAULT_FIXTURE_FILE.read_text(encoding="utf-8"))`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:78` — `fixture_file = Path(tmp) / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:85` — `inventory_file=DEFAULT_INVENTORY_FILE,`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:101` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:133` — `all(issue["file"].endswith("matcher_regression_cases.json") for issue in fixture_issues),`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:142` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:143` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:181` — `"path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:232` — `source_file="app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:309` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:310` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:370` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:371` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:49` — `DEFAULT_FIXTURE_FILE = fixture_contract_path()`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:50` — `DEFAULT_INVENTORY_FILE = inventory_contract_path()`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:56` — `DEFAULT_FIXTURE_FILE.parents[1],`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:71` — `fixtures = load_fixture_contract(DEFAULT_FIXTURE_FILE)`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:72` — `inventory = load_inventory_contract(DEFAULT_INVENTORY_FILE)`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:101` — `fixtures = json.loads(DEFAULT_FIXTURE_FILE.read_text(encoding="utf-8"))`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:112` — `fixture_file = Path(tmp) / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:119` — `inventory_file=DEFAULT_INVENTORY_FILE,`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:135` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:167` — `all(issue["file"].endswith("matcher_regression_cases.json") for issue in fixture_issues),`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:176` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:177` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:215` — `"path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:266` — `source_file="app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:343` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:344` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:404` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:405` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
 - `ref` `python_reference` `app/languages/sv/ingredient_matching/term_registry/add_term.py:148` — `description="matcher_regression_cases.json positive fixture",`
 - `ref` `python_reference` `app/languages/sv/ingredient_matching/term_registry/add_term.py:156` — `description="matcher_regression_cases.json negative fixture",`
 - `ref` `python_reference` `app/languages/sv/ingredient_matching/term_registry/add_term.py:180` — `description=f"matcher_rule_inventory.json {_inventory_role}",`
@@ -331,4 +134,52 @@ authored source-of-truth for now.
 - `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3310` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
 - `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3352` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
 - `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3373` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
-- ... 3878 additional reference(s)
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3394` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3436` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3499` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3583` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3604` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3646` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3688` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3751` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3793` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3856` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:3898` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:4024` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:4192` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:4255` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:4486` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:4738` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:4780` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:4906` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:4927` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5137` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5200` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5242` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5263` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5347` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5473` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5536` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5557` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5620` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5641` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5662` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5704` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5725` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5767` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5809` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5830` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5872` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:5977` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6040` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6061` — `"source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6103` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6145` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6166` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6208` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6229` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6271` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6355` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6397` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `generated_output_reference` `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json:6439` — `"source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- ... 3830 additional reference(s)
