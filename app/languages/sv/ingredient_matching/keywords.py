@@ -108,6 +108,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'teskedar',  # measurement unit
     'bruttovikt',  # weight descriptor, not ingredient
     'förpackningen', 'förpackning',  # "vatten enligt förpackningen" / "1 förpackning skumtomtar" — packaging descriptor
+    'storpack',  # packaging size ("Parmigiano Reggiano grovriven storpack") — matched random "Spenat i storpack" etc.
     'packning',  # gasket/seal — "Plastknopp m packning till perkulator" is not food
     'färger',  # "gärna olika sorter och färger" — color descriptor, not food keyword
     'grytbitar',  # styckning, inte köttsort — alla recept anger köttsort separat (nöt/fläsk/lamm/fisk)

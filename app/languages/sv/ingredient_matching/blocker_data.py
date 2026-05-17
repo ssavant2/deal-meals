@@ -2508,6 +2508,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     'estragon': {
         'fraiche', 'creme fraiche',  # "Creme Fraiche Dragon" — dairy ≠ dried tarragon herb
+        'twin dragon', 'twin', 'kafe baby', 'baby dragon', 'kafe',  # non-herb products containing "dragon" that extract to estragon via dragon→estragon synonym
     },
     'surdegsbröd': {'pinsa'},
     'surdegsbrod': {'pinsa'},
@@ -2813,10 +2814,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'gräddsås', 'graddsas',  # "Köttbullar i Gräddsås" is a complete dish
         'potatismos',             # "Köttbullar Potatismos Gräddsås" is a complete meal
         'med mos',                # "Köttbullar med mos 400g Findus" is a complete meal
+        'stuvade makaroner',      # "Delikatessköttbullar med stuvade makaroner Felix" is a ready meal
         'stekta', 'stekt',        # "Köttbullar Mini Deli Stekta" = pre-cooked ≠ raw färska (batch 48)
     },
     'kottbullar': {
-        'gräddsås', 'graddsas', 'potatismos', 'med mos',
+        'gräddsås', 'graddsas', 'potatismos', 'med mos', 'stuvade makaroner',
         'stekta', 'stekt',
     },
     # Ready meals containing currysås in name ≠ plain currysås sauce ingredient
@@ -3822,7 +3824,15 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'gradde': {'fraiche'},
     'hamburgerbröd': {'korvbröd', 'korvbrod', 'fries', 'soup', 'soppa', 'hamburgare', 'burgare'},
     'vegobacon': {'baconost', 'mjukost'},
-    'sodavatten': {'citron', 'lime', 'citrus', 'apelsin', 'jordgubb', 'hallon', 'mango', 'päron', 'paron', 'äpple', 'apple'},
+    'sodavatten': {
+        'citron', 'lime', 'citrus', 'apelsin', 'jordgubb', 'hallon', 'mango',
+        'päron', 'paron', 'äpple', 'apple',
+        # synced from kolsyrat PNB — sodavatten is the alias keyword that matches
+        # the same flavored-sparkling-water products
+        'vattenmelon', 'ananas', 'drakfrukt', 'granatäpple', 'granatapple',
+        'kaktus', 'björnbär', 'bjornbar', 'rabarber', 'körsbär', 'korsbar',
+        'crush', 'smaksatt', 'skogsbär', 'skogsbar',
+    },
     'snabbkaffe': {'3in 1', 'cappuccino', 'cappucino', 'choklad', 'karamell', 'vanilla', 'vanilj', 'latte'},
     'apelsinskal': {'kanderat', 'kanderade', 'syltat', 'syltade'},
     'vaniljkvarg': {'blåbär', 'blabar', 'fläder', 'flader', 'hallon', 'jordgubb'},

@@ -5963,6 +5963,16 @@ test("PNB mandel → saltade", 'saltade' in PRODUCT_NAME_BLOCKERS.get('mandel', 
 test("SW mustig", 'mustig' in STOP_WORDS, True)
 test("SW smokey", 'smokey' in STOP_WORDS, True)
 
+# STOP_WORDS: storpack — packaging-size descriptor ("Parmigiano Reggiano grovriven storpack")
+# previously matched random products like "Spenat i storpack", "Rostbiff Grillad Storpack"
+test("SW storpack", 'storpack' in STOP_WORDS, True)
+test("Spenat i storpack ≠ parmigiano storpack",
+     match("Spenat i storpack Sköljd 200g ICA", "1 frp Zeta Parmigiano Reggiano grovriven storpack"), None)
+test("Rostbiff Storpack ≠ parmigiano storpack",
+     match("Rostbiff Grillad Storpack 170g Charkuterifabriken", "1 frp Zeta Parmigiano Reggiano grovriven storpack"), None)
+test("Parmigiano Reggiano = parmigiano storpack",
+     match("Parmigiano Reggiano 150g Wernerssons", "1 frp Zeta Parmigiano Reggiano grovriven storpack") is not None, True)
+
 # Gurka PPR: finhackad/tunnskivad removed (prep methods, not product types)
 test("PPR gurka no finhackad", 'finhackad' not in PROCESSED_PRODUCT_RULES.get('gurka', set()), True)
 test("PPR gurka no tunnskivad", 'tunnskivad' not in PROCESSED_PRODUCT_RULES.get('gurka', set()), True)
@@ -9877,6 +9887,12 @@ test("Batch 14 kolsyrat mineralvatten normalizes to sodavatten", extract_keyword
 test("Batch 14 kolsyrat mineralvatten accepts plain sparkling mineral water", recipe_match_num(["1/2 dl kolsyrat mineralvatten"], {"name": "San Pellegrino Mineralvatten Kolsyrat Vatten Pet", "category": "beverages"}), 1)
 test("Batch 14 kolsyrat mineralvatten blocks flavored sparkling water", recipe_match_num_cached(["1/2 dl kolsyrat mineralvatten"], {"name": "Citron Kolsyrat Vatten Pet Loka", "category": "beverages"}), 0)
 test("Batch 14 kolsyrat mineralvatten blocks smultron sparkling water", recipe_match_num(["1/2 dl kolsyrat mineralvatten"], {"name": "Smultron Kolsyrat Vatten Pet Premier", "category": "beverages"}), 0)
+# sodavatten PNB synced with kolsyrat PNB — alias keyword matches flavored products too
+test("PNB sodavatten has vattenmelon", 'vattenmelon' in PRODUCT_NAME_BLOCKERS.get('sodavatten', set()), True)
+test("PNB sodavatten has ananas", 'ananas' in PRODUCT_NAME_BLOCKERS.get('sodavatten', set()), True)
+test("PNB sodavatten has drakfrukt", 'drakfrukt' in PRODUCT_NAME_BLOCKERS.get('sodavatten', set()), True)
+test("kolsyrat vatten blocks vattenmelon-flavored", recipe_match_num_cached(["1 1/2 dl kolsyrat vatten"], {"name": "Kolsyrat vatten Vattenmelon 50cl ICA", "category": "beverages"}), 0)
+test("kolsyrat vatten blocks ananas-drakfrukt-flavored", recipe_match_num_cached(["1 1/2 dl kolsyrat vatten"], {"name": "Kolsyrat vatten Ananas Drakfrukt 50cl Loka", "category": "beverages"}), 0)
 test("Batch 14 pitted kalamata accepts pitted kalamata olives", recipe_match_num(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Oliver Kalamata Urkärnade 350g Fontana", "category": "spices"}), 1)
 test("Batch 14 pitted kalamata accepts pitted black olive fallback", recipe_match_num_cached(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Svarta Oliver Utan Kärnor Eldorado", "category": "spices"}), 1)
 test("Batch 14 pitted kalamata pragmatically accepts kalamata with pits", recipe_match_num(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Kalamata Oliver med Kärnor Fontana", "category": "spices"}), 1)
@@ -9905,6 +9921,10 @@ test("Step 0 plain wokmix blocks Thai Style", recipe_match_num(["400 g wokmix"],
 test("Step 0 thai wokmix accepts Thai Style", recipe_match_num_cached(["thai wokmix"], {"name": "Wokmix Thai Style Findus 750g", "category": "frozen", "brand": "Findus"}), 1)
 test("Step 0 plain köttbullar still blocks stekta", recipe_match_num(["köttbullar"], {"name": "Köttbullar Stekta 300g", "category": "meat"}), 0)
 test("Step 0 färdiga köttbullar accepts stekta", recipe_match_num_cached(["färdiga köttbullar"], {"name": "Köttbullar Stekta 300g", "category": "meat"}), 1)
+# köttbullar PNB: ready meal with stuvade makaroner = complete dish, not raw köttbullar
+test("PNB köttbullar has stuvade makaroner", 'stuvade makaroner' in PRODUCT_NAME_BLOCKERS.get('köttbullar', set()), True)
+test("plain köttbullar blocks Delikatessköttbullar med stuvade makaroner", recipe_match_num_cached(["20 köttbullar"], {"name": "Delikatessköttbullar med stuvade makaroner 380g Felix", "category": "frozen"}), 0)
+test("plain köttbullar still accepts ICA Basic köttbullar", recipe_match_num(["20 köttbullar"], {"name": "Köttbullar 750g ICA Basic", "category": "meat"}), 1)
 test("Batch 14 Polly exact candy matches Polly", recipe_match_num(["340 g Polly"], {"name": "Original Polly Blå Påse Cloetta", "category": "candy"}), 1)
 test("Batch 14 named candy filter includes Polly", _is_recipe_named_candy_offer("Original Polly Blå Påse Cloetta", "candy"), True)
 test("Batch 14 named candy filter includes strössel", _is_recipe_named_candy_offer("Strössel Blandat Dr Oetker", "candy"), True)
@@ -10207,9 +10227,35 @@ test("dragon PNB has fraiche", 'fraiche' in PRODUCT_NAME_BLOCKERS.get('dragon', 
 test("dragon PNB has creme fraiche", 'creme fraiche' in PRODUCT_NAME_BLOCKERS.get('dragon', set()), True)
 test("estragon PNB has fraiche", 'fraiche' in PRODUCT_NAME_BLOCKERS.get('estragon', set()), True)
 
+# "Kafe Baby Dragon" is a non-herb product whose name contains "dragon".
+# It extracts to keyword `estragon` via the dragon→estragon synonym, so the
+# dragon PNB additions from batch 51 do not block it — the estragon PNB key
+# must also list the same blocker words.
+test("estragon PNB has baby dragon", 'baby dragon' in PRODUCT_NAME_BLOCKERS.get('estragon', set()), True)
+test("estragon PNB has kafe baby", 'kafe baby' in PRODUCT_NAME_BLOCKERS.get('estragon', set()), True)
+test("estragon PNB has kafe", 'kafe' in PRODUCT_NAME_BLOCKERS.get('estragon', set()), True)
+test("estragon PNB has twin dragon", 'twin dragon' in PRODUCT_NAME_BLOCKERS.get('estragon', set()), True)
+test("estragon PNB has twin", 'twin' in PRODUCT_NAME_BLOCKERS.get('estragon', set()), True)
+
+# Sanity: real dragon-herb product still extracts to keyword estragon and
+# matches a Fransk dragon ingredient (PNB blockers are name-specific, not
+# blanket on the keyword).
+test("Real dragon herb still matches Fransk dragon",
+     match("Dragon 9g Santa Maria", "1 msk Fransk dragon", "pantry"), "estragon")
+
 # Batch 51: PNB lasagnette — Middagskit is ready-meal kit, not raw pasta
 test("lasagnette PNB has middagskit", 'middagskit' in PRODUCT_NAME_BLOCKERS.get('lasagnette', set()), True)
 test("lasagnette PNB has kit", 'kit' in PRODUCT_NAME_BLOCKERS.get('lasagnette', set()), True)
+
+# KSBC chili — chiligelé is sweet chili jelly/jam used as condiment,
+# not the dried hot pepper spice. Suppress generic chili keyword when the
+# ingredient names the jelly form.
+test("chiligele blocks chiliflakes spice",
+     match("Chili Flakes Ekologisk 27g Santa Maria", "4 tsk Chiligelé", "pantry"), None)
+test("chiligele blocks chilipulver spice",
+     match("Chilipulver 40g ICA", "4 tsk Chiligelé", "pantry"), None)
+test("chiligele blocks chilipeppar malen",
+     match("Chilipeppar malen 40g ICA", "4 tsk Chiligelé", "pantry"), None)
 
 # Batch 51: PNB skruvar — pretzel-snack twists ≠ pasta skruvar
 test("skruvar PNB has snacks", 'snacks' in PRODUCT_NAME_BLOCKERS.get('skruvar', set()), True)
