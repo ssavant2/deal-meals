@@ -16,6 +16,9 @@ from support_checks.run_matcher_change_preflight import (
     DEFAULT_SNAPSHOT_FILE,
     run_preflight,
 )
+from support_checks.refresh_matcher_rule_inventory_line_refs import (
+    refresh_inventory_line_refs_from_contract_source,
+)
 from support_checks.matcher_contracts import (
     contract_paths,
     fixture_contract_path,
@@ -607,6 +610,52 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
 
         codes = {issue["code"] for issue in report["new_issues"]}
         self.assertIn("matcher_contract_generated_json_drift", codes, report)
+
+    def test_phase5_line_ref_refresh_updates_toml_source_and_generated_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            _copy_matcher_tree(tree_root)
+            inventory_spec = contract_spec_by_name("matcher_rule_inventory", tree_root=tree_root)
+            inventory = load_contract_source(inventory_spec)
+            target_entry = next(
+                entry
+                for entry in inventory
+                if any(
+                    isinstance(line_ref, dict)
+                    and int(line_ref.get("start") or 0) != 1
+                    for line_ref in entry.get("line_refs") or []
+                )
+            )
+            target_id = target_entry["id"]
+            target_ref = next(
+                line_ref
+                for line_ref in target_entry["line_refs"]
+                if int(line_ref.get("start") or 0) != 1
+            )
+            expected_start = target_ref["start"]
+            expected_end = target_ref["end"]
+            target_ref["start"] = 1
+            target_ref["end"] = 1
+            write_contract_source(inventory_spec, inventory)
+            check_generated_contract_json(tree_root=tree_root, write=True)
+
+            summary = refresh_inventory_line_refs_from_contract_source(
+                tree_root=tree_root,
+                repo_root=tree_root,
+                write=True,
+            )
+
+            refreshed_inventory = load_contract_source(inventory_spec)
+            refreshed_entry = next(entry for entry in refreshed_inventory if entry["id"] == target_id)
+            refreshed_ref = next(
+                line_ref
+                for line_ref in refreshed_entry["line_refs"]
+                if line_ref["anchor"] == target_ref["anchor"]
+            )
+            self.assertGreaterEqual(summary["updated"], 1)
+            self.assertEqual(refreshed_ref["start"], expected_start)
+            self.assertEqual(refreshed_ref["end"], expected_end)
+            self.assertFalse(any(result.drifted for result in check_generated_contract_json(tree_root=tree_root)))
 
 
 if __name__ == "__main__":

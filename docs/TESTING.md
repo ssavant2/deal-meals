@@ -135,10 +135,10 @@ the live app behavior:
 ## Matcher Rule Changes
 
 For matcher semantic changes, the durable regression source of truth is the
-tracked fixture and rule inventory pair:
+tracked fixture and rule inventory TOML source pair:
 
-- `app/languages/sv/matcher_contracts/matcher_regression_cases.json`
-- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json`
+- `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml`
+- `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml`
 
 A matcher rule is not done just because a local diagnostic, batch-review note,
 or live-data check looks right. Promote accepted positive and relevant negative
@@ -147,10 +147,14 @@ the matcher parity/inventory checks. Generated batch-question files and local
 `test_*.py` workbench tests are staging/debugging surfaces, not the permanent
 regression contract.
 
-These JSON files are read-only contract inputs in production-style environments.
-Runtime code does not update them. The only writer is the manual dev maintenance
-script `support_checks/refresh_matcher_rule_inventory_line_refs.py --write`, which should
-not be run against a read-only production filesystem.
+The corresponding JSON files under `app/languages/sv/matcher_contracts/` are
+generated, committed contract inputs for existing readers and reports. Runtime
+code does not update them. Dev maintenance writes the TOML sources and
+regenerates JSON with
+`support_checks/generate_matcher_contract_json_from_toml_sources.py --write`.
+`support_checks/refresh_matcher_rule_inventory_line_refs.py --write` also
+updates the inventory TOML source and regenerates its generated JSON, so it
+should not be run against a read-only production filesystem.
 
 The Swedish term registry is now the vocabulary coverage surface for matcher
 terms. After adding or changing a registry TOML entry, run:
@@ -211,12 +215,16 @@ has been retired. The read-only full DB diff does not need that table.
 
 ## Matcher Fixture Files
 
-The tracked matcher JSON contracts under `app/languages/sv/matcher_contracts/`
-are part of the regression surface, not temporary batch-question output:
+The tracked matcher TOML sources under
+`app/languages/sv/matcher_contracts/sources/` are part of the regression
+surface, not temporary batch-question output:
 
-- `matcher_regression_cases.json` is the main matcher parity corpus.
-- `matcher_rule_inventory.json` is the rule/source inventory checked by
-  the inventory support scripts.
+- `matcher_regression_cases.toml` is the authored main matcher parity corpus.
+- `matcher_rule_inventory.toml` is the authored rule/source inventory checked
+  by the inventory support scripts.
+
+The sibling JSON files are generated from those TOML sources and remain
+committed for existing matcher checks.
 
 Do not keep generated review-import staging files in the production tree once
 their pass-clean decisions have been promoted into the main fixture and

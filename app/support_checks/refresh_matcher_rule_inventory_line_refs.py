@@ -16,8 +16,15 @@ import sys
 
 sys.path.insert(0, str(APP_DIR))
 
+from support_checks.audit_matcher_contract_toml_sources import (  # noqa: E402
+    contract_spec_by_name,
+    load_contract_source,
+    write_contract_source,
+)
+from support_checks.generate_matcher_contract_json_from_toml_sources import (  # noqa: E402
+    check_generated_contract_json,
+)
 from support_checks.matcher_contracts import (  # noqa: E402
-    inventory_contract_path,
     load_inventory_contract,
     write_inventory_contract,
 )
@@ -29,6 +36,14 @@ def _load_inventory(path: Path) -> list[dict[str, Any]]:
 
 def _write_inventory(path: Path, payload: list[dict[str, Any]]) -> None:
     write_inventory_contract(payload, path, sort_keys=True)
+
+
+def _tree_root_from_args(tree_root: Path | None, repo_root: Path) -> Path | None:
+    if tree_root is not None:
+        return tree_root
+    if repo_root.resolve() != REPO_ROOT.resolve():
+        return repo_root
+    return None
 
 
 def _line_start_offsets(source_text: str) -> list[int]:
@@ -140,9 +155,30 @@ def refresh_line_refs(
     return summary
 
 
+def refresh_inventory_line_refs_from_contract_source(
+    *,
+    tree_root: Path | None,
+    repo_root: Path,
+    write: bool,
+) -> dict[str, Any]:
+    spec = contract_spec_by_name("matcher_rule_inventory", tree_root=tree_root)
+    inventory = load_contract_source(spec)
+    summary = refresh_line_refs(inventory, repo_root=repo_root)
+    if write:
+        write_contract_source(spec, inventory)
+        check_generated_contract_json(tree_root=tree_root, write=True)
+    return summary
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--inventory-file", type=Path, default=inventory_contract_path())
+    parser.add_argument("--tree-root", type=Path, default=None)
+    parser.add_argument(
+        "--inventory-file",
+        type=Path,
+        default=None,
+        help="Legacy/custom JSON inventory path. Omit for authoritative TOML source refresh.",
+    )
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     parser.add_argument("--write", action="store_true", help="write refreshed line refs")
     parser.add_argument("--format", choices=("text", "json"), default="text")
@@ -151,11 +187,18 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    inventory = _load_inventory(args.inventory_file)
-    summary = refresh_line_refs(inventory, repo_root=args.repo_root)
-
-    if args.write:
-        _write_inventory(args.inventory_file, inventory)
+    tree_root = _tree_root_from_args(args.tree_root, args.repo_root)
+    if args.inventory_file is None:
+        summary = refresh_inventory_line_refs_from_contract_source(
+            tree_root=tree_root,
+            repo_root=args.repo_root,
+            write=args.write,
+        )
+    else:
+        inventory = _load_inventory(args.inventory_file)
+        summary = refresh_line_refs(inventory, repo_root=args.repo_root)
+        if args.write:
+            _write_inventory(args.inventory_file, inventory)
 
     if args.format == "json":
         print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))

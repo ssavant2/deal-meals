@@ -7643,9 +7643,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_haricot_fryst_fresh_positive",
-        "end": 8774,
+        "end": 8782,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 8774
+        "start": 8782
       }
     ],
     "notes": "Fresh and frozen haricot verts are accepted as the same grocery family for recipe matching.",
@@ -7772,9 +7772,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_musslor_lake_frozen_positive",
-        "end": 8921,
+        "end": 8929,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 8921
+        "start": 8929
       }
     ],
     "notes": "Mussels in brine/water and frozen mussels are accepted as the same usable mussel family.",
@@ -7881,9 +7881,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_fresh_champ_preserved_sliced_negative",
-        "end": 9208,
+        "end": 9209,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9208
+        "start": 9209
       }
     ],
     "notes": "Fresh champignon recipe wording accepts Klass 1 fresh mushrooms while preserved sliced/whole jar products remain blocked.",
@@ -7907,9 +7907,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_creme_fraiche_franska_orter_positive",
-        "end": 9257,
+        "end": 9265,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9257
+        "start": 9265
       }
     ],
     "notes": "Flavored creme-fraiche wording must stay on the creme-fraiche carrier; standalone Franska Örter spice jars do not satisfy that ingredient.",
@@ -7944,9 +7944,9 @@
       },
       {
         "anchor": "matcher_regression_chili_sambal_malen_negative",
-        "end": 9292,
+        "end": 9293,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9292
+        "start": 9293
       }
     ],
     "notes": "A fresh chili or Sambal Oelek alternative line accepts fresh chili produce and sambal, but not dried chili spice jars.",
@@ -7969,9 +7969,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_frozen_fish_fillets_positive",
-        "end": 9362,
+        "end": 9370,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9362
+        "start": 9370
       }
     ],
     "notes": "Generic diced deep-frozen fish wording can route to ordinary frozen fish-fillet offers.",
@@ -8001,9 +8001,9 @@
       },
       {
         "anchor": "matcher_regression_flavored_fresh_cheese_positive",
-        "end": 9383,
+        "end": 9391,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9383
+        "start": 9391
       }
     ],
     "notes": "Generic smaksatt färskost accepts flavored cream-cheese products and blocks plain naturell/original cream cheese.",
@@ -8027,9 +8027,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_sliced_beet_fresh_positive",
-        "end": 9418,
+        "end": 9426,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9418
+        "start": 9426
       }
     ],
     "notes": "Fresh beetroot that will be sliced in the recipe stays fresh produce; preserved sliced beet jars are blocked.",
@@ -8059,9 +8059,9 @@
       },
       {
         "anchor": "matcher_regression_tandoori_sauce_positive",
-        "end": 9453,
+        "end": 9461,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9453
+        "start": 9461
       }
     ],
     "notes": "Tandoori matlagningssås accepts sauce/paste-style products and blocks small dry-spice jars.",
@@ -8084,9 +8084,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_mandarins_canned_positive",
-        "end": 9488,
+        "end": 9496,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9488
+        "start": 9496
       }
     ],
     "notes": "Mandariner i fruktkonserver routes to canned mandarin segments in syrup.",
@@ -8117,9 +8117,9 @@
       },
       {
         "anchor": "matcher_regression_kalkon_palagg_raw_negative_20be8510",
-        "end": 9509,
+        "end": 9510,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9509
+        "start": 9510
       }
     ],
     "notes": "Explicit deli-meat pålägg wording stays on ready sliced deli products and blocks raw kalkon/rostbiff cuts.",
@@ -8142,9 +8142,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_red_paprika_later_positive",
-        "end": 9558,
+        "end": 9566,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9558
+        "start": 9566
       }
     ],
     "notes": "A later röd paprika ingredient remains routable even when the same recipe has an earlier grön paprika line.",
@@ -8175,9 +8175,9 @@
       },
       {
         "anchor": "matcher_regression_maccaronetti_prepared_pesto_negative",
-        "end": 9580,
+        "end": 9581,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9580
+        "start": 9581
       }
     ],
     "notes": "Zeta Maccaronetti is treated as an exact dry-shape request: exact maccaronetti products match, but generic pasta and prepared pasta meals do not.",
@@ -8200,9 +8200,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_feferoni_kebab_positive",
-        "end": 9629,
+        "end": 9637,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9629
+        "start": 9637
       }
     ],
     "notes": "Plain feferoni recipe wording can route to the live Feferoni Kebab product variant.",
@@ -8237,9 +8237,9 @@
       },
       {
         "anchor": "matcher_regression_chili_spice_malen_positive",
-        "end": 9650,
+        "end": 9658,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9650
+        "start": 9658
       }
     ],
     "notes": "Small measured chilipeppar is treated as dried spice, while explicit red/fresh chili wording stays on fresh chili produce and blocks dried spice products.",
@@ -8270,9 +8270,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_fiskgrytbitar_sushi_negative",
-        "end": 9720,
+        "end": 9721,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9720
+        "start": 9721
       }
     ],
     "notes": "Recovered Batch 67 fixes cover the fiskgrytbitar sushi blocker/raw fish fallback, kaka inside skaka, yeast-type matbröd wording, and osthyvel as a non-food tool cue.",
@@ -8299,9 +8299,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_paskcheesecake_smor_positive",
-        "end": 9818,
+        "end": 9826,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 9818
+        "start": 9826
       }
     ],
     "notes": "The former Påskcheesecake zero-cache issue is represented by live-positive common ingredient checks for butter and Philadelphia/färskost.",

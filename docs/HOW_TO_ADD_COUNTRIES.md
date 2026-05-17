@@ -34,7 +34,7 @@ app/
 │   │   ├── spell_check.py     # Spell-check exclusions and inflection data
 │   │   ├── store_units.py     # Store unit aliases/default unit
 │   │   ├── ingredient_matching_audit.py   # Audit tooling (not part of runtime)
-│   │   ├── matcher_contracts/ # Read-only matcher regression contracts
+│   │   ├── matcher_contracts/ # Matcher regression contracts + generated JSON
 │   │   └── ingredient_matching/
 │   │       ├── engine.py               # Pipeline orchestrator + MATCHER_VERSION
 │   │       ├── matching.py             # matches_ingredient() / matches_ingredient_fast()
@@ -97,7 +97,7 @@ This is useful as a smoke-test path, not as a production-ready UK matcher.
 | File | Purpose | Effort |
 |------|---------|--------|
 | `ingredient_matching/` | The big one: keyword extraction, matching rules, all constants | **High** |
-| `matcher_contracts/` | Read-only matcher regression cases and rule/source inventory | Medium |
+| `matcher_contracts/` | Matcher regression cases and rule/source inventory | Medium |
 | `ingredient_matching/term_registry/` | TOML vocabulary coverage, export specs, add-term checks | Medium |
 | `recipe_filters.py` | Boring recipe patterns, junk food keywords, kitchen tools | Low |
 | `recipe_matcher_backend.py` | Adapter that imports the country-specific matching functions | Medium |
@@ -170,15 +170,18 @@ a new language package. Start with `ingredient_data.py` (the `INGREDIENTS` dict)
 ### `matcher_contracts/`
 This directory contains the permanent matcher regression contract for a language:
 
-- `matcher_regression_cases.json` — accepted positive and relevant negative
-  recipe/offer cases.
-- `matcher_rule_inventory.json` — rule/source ownership, fixture refs, line refs,
-  risk classification, and migration status.
+- `sources/matcher_regression_cases.toml` — authored accepted positive and
+  relevant negative recipe/offer cases.
+- `sources/matcher_rule_inventory.toml` — authored rule/source ownership,
+  fixture refs, line refs, risk classification, and migration status.
+- `matcher_regression_cases.json` and `matcher_rule_inventory.json` — generated
+  JSON artifacts committed for existing readers and reports.
 
-These files are read-only inputs in production-style environments. Runtime code
-does not update them. For Swedish, the maintenance/check scripts read them from
-`app/languages/sv/matcher_contracts/`; future production languages should keep
-the same shape under their own `app/languages/<code>/matcher_contracts/`.
+The generated JSON files are read-only inputs in production-style environments.
+Runtime code does not update them. For Swedish, the maintenance/check scripts
+read them from `app/languages/sv/matcher_contracts/`; future production
+languages should keep the same shape under their own
+`app/languages/<code>/matcher_contracts/`.
 
 ### `ingredient_matching/term_registry/`
 The term registry is the source-of-truth layer for matcher vocabulary coverage.

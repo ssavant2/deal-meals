@@ -194,10 +194,12 @@ def _detect_change_flags(paths: set[str]) -> ChangeFlags:
     )
     fixtures_changed = _has_path(
         paths,
+        "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
         "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
     )
     inventory_changed = _has_path(
         paths,
+        "app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml",
         "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",
     )
     support_checks_changed = _has_path(paths, "app/support_checks/")
@@ -294,7 +296,7 @@ def _generated_coverage_step(args: argparse.Namespace) -> Step:
     return Step(
         "generate matcher registry coverage",
         _command("generate_matcher_registry_coverage.py", *_tree_root_args(args), "--write"),
-        "updates derived coverage TOML from fixture/inventory JSON before validation",
+        "updates derived coverage TOML from generated fixture/inventory JSON before validation",
         cwd=repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
     )
 

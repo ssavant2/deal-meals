@@ -40,7 +40,8 @@ The main repo map:
 | Area | What it is |
 | --- | --- |
 | `app/languages/sv/ingredient_matching/` | Swedish matcher runtime rules, registry exports, extraction, routing, validators, and versioning. |
-| `app/languages/sv/matcher_contracts/` | Permanent matcher fixture and inventory JSON contracts. |
+| `app/languages/sv/matcher_contracts/sources/` | Authoritative matcher fixture and inventory TOML contracts. |
+| `app/languages/sv/matcher_contracts/*.json` | Generated matcher fixture and inventory JSON contracts used by existing readers/reports. |
 | `app/languages/sv/ingredient_matching/term_registry/entries/` | Tracked TOML registry entries for vocabulary/rule surfaces. |
 | `app/support_checks/` | Deterministic support checks and matcher diagnostics. |
 | `app/tests/` | Ignored local workbench/review material. Useful for investigation, not permanent proof. |
@@ -125,8 +126,8 @@ docker compose exec -T -u appuser -w /app web \
 Add only the flags that match the change:
 
 - `--runtime-changed` when matcher Python changed.
-- `--fixtures-changed` when `matcher_regression_cases.json` changed.
-- `--inventory-changed` when `matcher_rule_inventory.json` changed.
+- `--fixtures-changed` when the regression-case TOML source or generated JSON changed.
+- `--inventory-changed` when the rule-inventory TOML source or generated JSON changed.
 - `--allow-removals` only after confirming intentional TOML inactivation or
   removal.
 - `--refresh-line-refs` when inventory anchors moved; run from a writable host
@@ -163,9 +164,9 @@ how to choose files, fixtures, inventory fields, and failure interpretation.
 
 ### Common CLI Workflows
 
-Use the CLI for supported rule shapes. It writes the registry TOML, fixture
-JSON, inventory JSON, focused deep-sanity regression, generated coverage TOML,
-and then runs Track B gates by default.
+Use the CLI for supported rule shapes. It writes the registry TOML,
+fixture/inventory TOML sources, generated JSON, focused deep-sanity regression,
+generated coverage TOML, and then runs Track B gates by default.
 
 Keyword extra parent fan-out:
 
@@ -228,9 +229,11 @@ broad/systemic, release-facing, or meant to be permanent contract proof.
 
 1. Reproduce the current behavior.
 2. Add or update the runtime/TOML rule.
-3. Add the minimum fixture set: one positive, one negative or blocked sibling,
-   and any positive guard needed to prove you did not over-block.
-4. Update inventory and refresh inventory line refs if anchors moved.
+3. Add the minimum fixture set in the TOML source: one positive, one negative or
+   blocked sibling, and any positive guard needed to prove you did not
+   over-block.
+4. Update inventory in the TOML source and refresh inventory line refs if
+   anchors moved.
 5. Run the Track B gate wrapper from a writable host checkout or the dev
    container as `appuser`, targeting by `--policy-ref`, `--canonical`, or
    `--case-id` when possible:
@@ -259,7 +262,7 @@ decision in the runbook.
 | Track | Use for | Typical files | Required proof |
 | --- | --- | --- | --- |
 | Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/GPB additions and tiny runtime guards. | `blocker_data.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
-| Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, `matcher_contracts/`, bridge/no-match/routing exports, support-check contracts. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
+| Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
 
 Escalate Track A to Track B when the fix is broad, semantic, cross-canonical,
 registry-owned, route-affecting, cache/release-facing, or likely to be useful as
@@ -295,8 +298,11 @@ For Track B, the semantic decision and the regression proof land together:
 Do not treat a live diagnostic, an ad hoc note, or a one-off sanity test as the
 durable source of truth for Track B. The durable contract is:
 
-- `app/languages/sv/matcher_contracts/matcher_regression_cases.json`
-- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json`
+- `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml`
+- `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml`
+
+The corresponding JSON files are generated artifacts and must match those TOML
+sources byte-for-byte. Pre-flight rejects generated JSON drift.
 
 The term registry is the durable vocabulary surface. Runtime modules such as
 `synonyms.py`, `parent_maps.py`, `keywords.py`, `match_bridges.py`, and
@@ -329,8 +335,8 @@ These terms are used throughout the matcher and this runbook:
 | Term | Meaning |
 | --- | --- |
 | canonical | The normalized ingredient family the matcher materializes, such as `filmjölk` or `kalkon`. |
-| fixture | A durable JSON recipe/offer case proving expected match or no-match behavior. |
-| inventory | The durable JSON list explaining which rule/source owns each fixture. |
+| fixture | A durable recipe/offer case in the matcher contract TOML source, proving expected match or no-match behavior. |
+| inventory | The durable TOML rule/source inventory explaining which rule/source owns each fixture. |
 | policy_ref | Stable semantic family name for a rule decision. |
 | source_ref | Stable provenance/reference for why a fixture or inventory entry exists. |
 | route term | Term-index vocabulary used to decide whether an offer should be considered for an ingredient. |
@@ -492,10 +498,10 @@ where the fix is a narrow runtime dictionary/guard.
 
 7. Re-check the affected examples against the refreshed runtime/cache.
 
-Do not add `matcher_regression_cases.json` or `matcher_rule_inventory.json`
-entries for Track A fixes by default. Escalate to Track B first if the rule
-becomes broad, registry-owned, route-affecting, release-facing, or valuable
-permanent regression documentation.
+Do not add matcher contract fixture or inventory entries for Track A fixes by
+default. Escalate to Track B first if the rule becomes broad, registry-owned,
+route-affecting, release-facing, or valuable permanent regression
+documentation.
 
 ## Track B Required Artifacts
 
@@ -507,7 +513,7 @@ A tactical fixes unless you explicitly escalate them.
 Add or update cases in:
 
 ```text
-app/languages/sv/matcher_contracts/matcher_regression_cases.json
+app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml
 ```
 
 Use stable IDs. Do not use temporary import/review IDs for permanent fixtures.
@@ -527,26 +533,23 @@ names; they describe how data moved, not what behavior the rule protects.
 
 Common fields:
 
-```json
-{
-  "id": "matcher_regression_example_positive",
-  "policy_ref": "plain_sensitive_filmjolk",
-  "source_ref": "current_review:plain_sensitive_filmjolk",
-  "recipe_name": "Sanity Recipe",
-  "ingredients": ["3 dl filmjölk"],
-  "offer": {
-    "name": "Filmjölk Naturell Arla",
-    "category": "dairy"
-  },
-  "expected": 1,
-  "expected_matches": [
-    {
-      "ingredient_index": 0,
-      "canonical": "filmjölk",
-      "must_match_keyword": "filmjölk"
-    }
-  ]
-}
+```toml
+[[fixtures]]
+id = "matcher_regression_example_positive"
+policy_ref = "plain_sensitive_filmjolk"
+source_ref = "current_review:plain_sensitive_filmjolk"
+recipe_name = "Sanity Recipe"
+ingredients = ["3 dl filmjölk"]
+expected = 1
+
+[fixtures.offer]
+name = "Filmjölk Naturell Arla"
+category = "dairy"
+
+[[fixtures.expected_matches]]
+ingredient_index = 0
+canonical = "filmjölk"
+must_match_keyword = "filmjölk"
 ```
 
 For negative cases, omit `expected_matches` and set `expected` to `0`.
@@ -571,7 +574,7 @@ inventory checks, and audit checks read from it.
 Update:
 
 ```text
-app/languages/sv/matcher_contracts/matcher_rule_inventory.json
+app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml
 ```
 
 Every fixture should be connected to at least one inventory rule. Inventory
@@ -598,7 +601,8 @@ python3 app/support_checks/refresh_matcher_rule_inventory_line_refs.py --write
 This is the deliberate exception to the mostly-containerized commands in this
 runbook. Use the host command above because the normal compose web service
 mounts `/app` read-only. If you run this inside a container, make sure that
-container has a writeable checkout mounted.
+container has a writeable checkout mounted. The refresh updates the authoritative
+inventory TOML source and regenerates the generated inventory JSON.
 
 ### Registry Entries
 
@@ -631,18 +635,26 @@ Do not hand-edit these two coverage files for ordinary fixture/inventory work:
 - `matcher_regression_case.toml`
 - `matcher_rule_inventory.toml`
 
-They are generated from `matcher_regression_cases.json` and
-`matcher_rule_inventory.json` by:
+They are generated from the generated JSON contracts by:
 
 ```bash
 python3 app/support_checks/generate_matcher_registry_coverage.py --write
 ```
 
 The Track B wrapper runs that generator automatically when fixture or inventory
-changes are selected. Pre-flight fails with `generated_coverage_stale` if the
-checked-in TOML no longer matches the JSON-derived output. Intentional manual
-coverage is allowed only as a narrow exception: put `# manual-coverage` directly
-before the manual `[[entries]]` block so the generator preserves it.
+changes are selected. The JSON contracts themselves are generated from the TOML
+sources by:
+
+```bash
+python3 app/support_checks/generate_matcher_contract_json_from_toml_sources.py --write
+```
+
+Pre-flight fails with `matcher_contract_generated_json_drift` if generated JSON
+does not match the TOML sources, and with `generated_coverage_stale` if the
+checked-in registry coverage TOML no longer matches the generated JSON-derived
+output. Intentional manual coverage is allowed only as a narrow exception: put
+`# manual-coverage` directly before the manual `[[entries]]` block so the
+generator preserves it.
 
 The registry also supports local dev entry directories under
 `/app/data/term_registry/sv/entries` via `TERM_REGISTRY_LOCAL_ENTRIES_DIR`.
@@ -888,7 +900,7 @@ choose the smallest complete gate set for the change.
 | `run_deep_matcher_sanity.py` | Every Track A fix and every Track B runtime semantic change. |
 | targeted `run_matcher_layer_fixture_cases.py` | Track B fixture/rule work for the affected `--policy-ref`, `--canonical`, or `--case-id`. |
 | targeted `run_matcher_layer_parity.py` | Track B route, bridge, no-match, canonical, cache-facing, or fixture behavior work. |
-| `generate_matcher_registry_coverage.py --write` | Fixture or inventory JSON changed. The wrapper runs this by default. |
+| `generate_matcher_registry_coverage.py --write` | Fixture or inventory contract changed. The wrapper runs this by default after JSON generation. |
 | full `run_matcher_layer_fixture_cases.py --skip-cache-freshness` | Every Track B behavior change before handoff. |
 | full `run_matcher_layer_parity.py --skip-cache-freshness` | Every Track A/Track B matcher behavior change before handoff. |
 | `promote_term_baseline.py` | Any tracked registry TOML change. Use the plain command unless confirmed TOML inactivation/removal requires `--allow-removals`. |

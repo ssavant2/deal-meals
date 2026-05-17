@@ -23,7 +23,7 @@
       "row_count": 457,
       "semantic_equal": true,
       "source_json_path": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",
-      "source_json_sha256": "a1c8525892fa37b6168ee1f35f53cf7a5eddfd285410b04b4a24f910f6c6518b",
+      "source_json_sha256": "5d95df4cbab98353d26f6bd9deaaf26d387babfec4abccb4e7082175fe55e7e0",
       "source_toml_bytes": 519457,
       "source_toml_path": "app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml"
     }
