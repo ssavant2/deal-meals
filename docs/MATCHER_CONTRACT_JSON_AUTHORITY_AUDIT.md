@@ -19,7 +19,7 @@ Blocker count: 0
 | planning_doc | 2 |
 | python_reference | 15 |
 | reference | 3 |
-| test_reference | 48 |
+| test_reference | 49 |
 
 ## All References
 
@@ -35,16 +35,16 @@ Blocker count: 0
 - `ref` `documentation` `docs/MATCHER_SYSTEMIC_FP_PLAN.md:1000` — `Any new regression case must be added to `matcher_regression_cases.json` BEFORE committing.`
 - `ref` `documentation` `docs/MATCHER_SYSTEMIC_FP_PLAN.md:1093` — `| `app/languages/sv/matcher_contracts/matcher_regression_cases.json` | Add positive + negative fixture for every new keyword | A, B, C |`
 - `ref` `documentation` `docs/MATCHER_SYSTEMIC_FP_PLAN.md:1094` — `| `app/languages/sv/matcher_contracts/matcher_rule_inventory.json` | Add entry per new mechanism | A, B, C |`
-- `ref` `documentation` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md:21` — `- `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml` from `app/languages/sv/matcher_contracts/matcher_regression_cases.json``
-- `ref` `documentation` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md:22` — `- `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml` from `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
+- `ref` `documentation` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md:21` — `- `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml` generates `app/languages/sv/matcher_contracts/matcher_regression_cases.json``
+- `ref` `documentation` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md:22` — `- `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml` generates `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
 - `ref` `documentation` `docs/TESTING.md:140` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json``
 - `ref` `documentation` `docs/TESTING.md:141` — `- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
 - `ref` `documentation` `docs/TESTING.md:217` — `- `matcher_regression_cases.json` is the main matcher parity corpus.`
 - `ref` `documentation` `docs/TESTING.md:218` — `- `matcher_rule_inventory.json` is the rule/source inventory checked by`
-- `ref` `planning_doc` `docs/MATCHER_REGISTRY_ARCHITECTURE.md:8` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json` stores`
-- `ref` `planning_doc` `docs/MATCHER_REGISTRY_ARCHITECTURE.md:10` — `- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json` stores the`
-- `ref` `documentation` `docs/MATCHER_RULE_WORKFLOW_STEP2_PLAN.md:39` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json``
-- `ref` `documentation` `docs/MATCHER_RULE_WORKFLOW_STEP2_PLAN.md:40` — `- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
+- `ref` `planning_doc` `docs/MATCHER_REGISTRY_ARCHITECTURE.md:13` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json` and`
+- `ref` `planning_doc` `docs/MATCHER_REGISTRY_ARCHITECTURE.md:14` — ``app/languages/sv/matcher_contracts/matcher_rule_inventory.json` are`
+- `ref` `documentation` `docs/MATCHER_RULE_WORKFLOW_STEP2_PLAN.md:45` — `- `app/languages/sv/matcher_contracts/matcher_regression_cases.json``
+- `ref` `documentation` `docs/MATCHER_RULE_WORKFLOW_STEP2_PLAN.md:46` — `- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json``
 - `ref` `reference` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.json:13` — `"source_json_path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
 - `ref` `reference` `docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.json:25` — `"source_json_path": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",`
 - `ref` `test_reference` `app/tests/batch_review_questions.md:1361` — ``app/languages/sv/matcher_contracts/matcher_regression_cases.json` and`
@@ -63,124 +63,124 @@ Blocker count: 0
 - `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:28` — `"DEFAULT_INVENTORY_FILE",`
 - `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:29` — `"RULE_INVENTORY_FILE",`
 - `ref` `python_reference` `app/support_checks/audit_matcher_contract_json_authority.py:30` — `"REGRESSION_CASES_FILE",`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:53` — `DEFAULT_FIXTURE_FILE = fixture_contract_path()`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:54` — `DEFAULT_INVENTORY_FILE = inventory_contract_path()`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:60` — `DEFAULT_FIXTURE_FILE.parents[1],`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:75` — `fixtures = load_fixture_contract(DEFAULT_FIXTURE_FILE)`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:76` — `inventory = load_inventory_contract(DEFAULT_INVENTORY_FILE)`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:105` — `fixtures = json.loads(DEFAULT_FIXTURE_FILE.read_text(encoding="utf-8"))`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:116` — `fixture_file = Path(tmp) / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:123` — `inventory_file=DEFAULT_INVENTORY_FILE,`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:139` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:172` — `all(issue["file"].endswith("matcher_regression_cases.json") for issue in fixture_issues),`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:181` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:182` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:220` — `"path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:276` — `source_file="app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:353` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:354` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:422` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:423` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:559` — `"matcher_regression_cases": len(load_fixture_contract(DEFAULT_FIXTURE_FILE)),`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:560` — `"matcher_rule_inventory": len(load_inventory_contract(DEFAULT_INVENTORY_FILE)),`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:569` — `self.assertFalse((output_dir / "matcher_regression_cases.json").exists())`
-- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:570` — `self.assertFalse((output_dir / "matcher_rule_inventory.json").exists())`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:57` — `DEFAULT_FIXTURE_FILE = fixture_contract_path()`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:58` — `DEFAULT_INVENTORY_FILE = inventory_contract_path()`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:64` — `DEFAULT_FIXTURE_FILE.parents[1],`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:79` — `fixtures = load_fixture_contract(DEFAULT_FIXTURE_FILE)`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:80` — `inventory = load_inventory_contract(DEFAULT_INVENTORY_FILE)`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:109` — `fixtures = json.loads(DEFAULT_FIXTURE_FILE.read_text(encoding="utf-8"))`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:120` — `fixture_file = Path(tmp) / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:127` — `inventory_file=DEFAULT_INVENTORY_FILE,`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:143` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:176` — `all(issue["file"].endswith("matcher_regression_cases.json") for issue in fixture_issues),`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:185` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:186` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:227` — `"path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:279` — `source_file="app/languages/sv/matcher_contracts/matcher_regression_cases.json",`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:356` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:357` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:425` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:426` — `inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:562` — `"matcher_regression_cases": len(load_fixture_contract(DEFAULT_FIXTURE_FILE)),`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:563` — `"matcher_rule_inventory": len(load_inventory_contract(DEFAULT_INVENTORY_FILE)),`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:572` — `self.assertFalse((output_dir / "matcher_regression_cases.json").exists())`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:573` — `self.assertFalse((output_dir / "matcher_rule_inventory.json").exists())`
+- `ref` `test_reference` `app/support_checks/tests/test_rule_change_flow.py:579` — `fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"`
 - `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6` — `source_json_path = "app/languages/sv/matcher_contracts/matcher_rule_inventory.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:5809` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:5909` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:5990` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6009` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6034` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6053` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6078` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6097` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6122` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6141` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6166` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6185` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6210` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6229` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6254` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6273` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6292` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6311` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6330` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6349` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6368` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6387` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6406` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6425` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6444` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6463` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6482` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6501` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6520` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6539` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6558` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6577` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6596` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6615` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6634` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6653` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6672` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6691` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6710` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6729` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6748` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6767` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6786` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6805` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6824` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6843` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6862` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6881` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6900` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6919` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6938` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6957` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6976` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6995` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7014` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7033` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7052` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7071` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7090` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7109` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7128` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7147` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7166` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7185` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7204` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7223` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7242` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7261` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7280` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7299` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7318` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7337` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7356` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7375` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7394` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7413` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7432` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7451` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7470` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7489` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7508` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7527` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7546` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7565` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7584` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7603` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7622` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7641` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7660` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7679` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7698` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7717` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7736` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7755` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7774` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7793` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7812` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
-- ... 4073 additional reference(s)
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:5808` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:5908` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:5989` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6008` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6033` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6052` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6077` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6096` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6121` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6140` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6165` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6184` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6209` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6228` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6253` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6272` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6291` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6310` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6329` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6348` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6367` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6386` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6405` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6424` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6443` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6462` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6481` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6500` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6519` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6538` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6557` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6576` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6595` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6614` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6633` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6652` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6671` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6690` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6709` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6728` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6747` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6766` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6785` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6804` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6823` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6842` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6861` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6880` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6899` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6918` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6937` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6956` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6975` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:6994` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7013` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7032` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7051` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7070` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7089` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7108` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7127` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7146` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7165` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7184` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7203` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7222` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7241` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7260` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7279` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7298` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7317` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7336` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7355` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7374` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7393` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7412` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7431` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7450` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7469` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7488` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7507` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7526` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7545` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7564` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7583` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7602` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7621` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7640` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7659` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7678` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7697` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7716` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7735` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7754` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7773` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- `ref` `generated_output_reference` `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml:7792` — `path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"`
+- ... 4074 additional reference(s)

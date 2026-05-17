@@ -32,17 +32,22 @@ Shipped foundation:
 
 Current L3-C direct-reader status after B2: **passed**.
 Current B3 TOML-source round-trip status: **passed**.
-Current B4 parallel generated-JSON check status: **running in pre-flight**.
+Current B4 parallel generated-JSON check status: **passed**.
+Current B5 authority status: **flipped with Stefan sign-off on 2026-05-17**.
 
-The JSON contract files are still authoritative:
+The authoritative contract files are now:
+
+- `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml`
+- `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml`
+
+The generated JSON contract files are still committed for readers/reports:
 
 - `app/languages/sv/matcher_contracts/matcher_regression_cases.json`
 - `app/languages/sv/matcher_contracts/matcher_rule_inventory.json`
 
 Direct Python readers have been migrated behind
-`app/support_checks/matcher_contracts.py`. JSON is still authored
-source-of-truth until B5 exercises enough parallel checks and flips TOML-source
-generation.
+`app/support_checks/matcher_contracts.py`. Pre-flight rejects generated JSON
+that no longer matches the TOML sources byte-for-byte.
 
 ## Implementation Governance
 
@@ -328,7 +333,10 @@ Acceptance:
 
 ### Phase B5: Flip Authority
 
-Only after enough parallel activity has exercised the generator:
+B5 was implemented immediately after B4 by explicit Stefan sign-off on
+2026-05-17. The original parallel-activity wait criterion was intentionally
+waived for this repository state; the resulting guard is stricter than B4
+because generated JSON must now match TOML byte-for-byte.
 
 - mark JSON files as generated in docs and support-check messages
 - make TOML source files the authored contract
@@ -338,9 +346,8 @@ Acceptance:
 
 - JSON-authority direct-reader audit remains PASS
 - all readers go through the contract API or generated JSON path
-- at least 5 successful generated-JSON check-mode runs, including at least 3
-  Track B runs across distinct matcher-rule changes or branches
-- calendar time alone is not sufficient evidence for the flip
+- generated-JSON check-mode runs in pre-flight and fails on semantic,
+  canonical, or raw-byte drift
 - full matcher Track B gates green
 
 ## Risk And Rollback

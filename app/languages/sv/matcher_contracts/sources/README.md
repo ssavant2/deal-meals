@@ -1,20 +1,16 @@
 # Matcher Contract TOML Sources
 
-This directory contains the B4 parallel TOML source schema for Swedish matcher
-contracts. The TOML files are checked in and kept in sync with JSON, but they
-are not authoritative until B5.
+This directory contains the authoritative TOML sources for Swedish matcher
+contracts. The JSON contract files are generated from these sources.
 
-Refresh the parallel TOML sources from current JSON with:
+After editing TOML sources, regenerate JSON with:
 
 ```bash
-python app/support_checks/audit_matcher_contract_toml_sources.py \
-  --output-dir app/languages/sv/matcher_contracts/sources \
-  --allow-checkout-output \
-  --write-report \
-  --fail-on-diff
+python app/support_checks/generate_matcher_contract_json_from_toml_sources.py \
+  --write
 ```
 
-Check that the TOML sources still generate the current JSON with:
+Check that generated JSON is byte-for-byte current with:
 
 ```bash
 python app/support_checks/generate_matcher_contract_json_from_toml_sources.py \
@@ -23,17 +19,20 @@ python app/support_checks/generate_matcher_contract_json_from_toml_sources.py \
 
 ## Authority
 
-During B4, the authored source of truth remains:
+The authored source of truth is:
+
+- `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml`
+- `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml`
+
+These generated JSON files are still committed for existing readers and reports,
+but hand-edits are rejected by pre-flight:
 
 - `app/languages/sv/matcher_contracts/matcher_regression_cases.json`
 - `app/languages/sv/matcher_contracts/matcher_rule_inventory.json`
 
-The TOML source files become eligible for authority only after B5 flips the
-hand-edit guard.
-
 ## File Layout
 
-The parallel source set contains two native TOML files:
+The source set contains two native TOML files:
 
 - `matcher_regression_cases.toml`
 - `matcher_rule_inventory.toml`
@@ -44,7 +43,6 @@ Each file starts with metadata:
 schema_version = 1
 contract = "matcher_regression_cases"
 source_json_path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-source_json_sha256 = "..."
 ```
 
 Fixture rows use `[[fixtures]]`:
@@ -98,4 +96,4 @@ anchor = "example"
 - Optional fields remain absent when absent in JSON.
 - Canonical byte comparison uses `json.dumps(..., ensure_ascii=False,
   indent=2, sort_keys=True) + "\n"`.
-- B4 commits TOML sources but does not commit generated JSON rewrites.
+- Generated JSON must match the TOML sources byte-for-byte.

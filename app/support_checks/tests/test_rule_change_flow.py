@@ -35,8 +35,12 @@ from support_checks.audit_matcher_contract_json_authority import (
 )
 from support_checks.audit_matcher_contract_toml_sources import (
     audit_contract_sources,
+    contract_spec_by_name,
     json_report as toml_source_json_report,
+    load_contract_source,
+    write_contract_source,
 )
+from support_checks.generate_matcher_contract_json_from_toml_sources import check_generated_contract_json
 from support_checks.prefix_schema import allowed_prefixes
 from support_checks.run_verified_term_audit import (
     AuditVariant,
@@ -183,7 +187,8 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             fixture_id = "matcher_regression_positive_phase2_generated_coverage"
             inventory_id = "legacy_synonym_phase2_generated_coverage"
 
-            fixtures = json.loads(fixture_file.read_text(encoding="utf-8"))
+            fixture_spec = contract_spec_by_name("matcher_regression_cases", tree_root=tree_root)
+            fixtures = load_contract_source(fixture_spec)
             fixtures.append({
                 "id": fixture_id,
                 "policy_ref": "phase2_generated_coverage",
@@ -200,10 +205,12 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
                     }
                 ],
             })
-            fixture_file.write_text(json.dumps(fixtures, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            write_contract_source(fixture_spec, fixtures)
+            check_generated_contract_json(tree_root=tree_root, write=True)
 
             line_count = len(fixture_file.read_text(encoding="utf-8").splitlines())
-            inventory = json.loads(inventory_file.read_text(encoding="utf-8"))
+            inventory_spec = contract_spec_by_name("matcher_rule_inventory", tree_root=tree_root)
+            inventory = load_contract_source(inventory_spec)
             inventory.append({
                 "id": inventory_id,
                 "status": "wrapped_adapter",
@@ -225,12 +232,8 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
                 ],
                 "notes": "Synthetic Phase 2 generated coverage row.",
             })
-            inventory_file.write_text(json.dumps(inventory, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            audit_contract_sources(
-                app_dir / "languages" / "sv" / "matcher_contracts" / "sources",
-                tree_root=tree_root,
-                allow_checkout_output=True,
-            )
+            write_contract_source(inventory_spec, inventory)
+            check_generated_contract_json(tree_root=tree_root, write=True)
 
             generated = generate_coverage_files(tree_root=tree_root)
             changed_paths = {path.name for path in write_coverage_files(generated)}
@@ -552,7 +555,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
 
             report = json.loads(toml_source_json_report(results))
             self.assertEqual(report["decision"], "PASS")
-            self.assertFalse(report["generated_json_committed"])
+            self.assertTrue(report["generated_json_committed"])
             self.assertEqual(
                 {result.contract: result.row_count for result in results},
                 {
@@ -568,6 +571,21 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
 
             self.assertFalse((output_dir / "matcher_regression_cases.json").exists())
             self.assertFalse((output_dir / "matcher_rule_inventory.json").exists())
+
+    def test_phase5_preflight_rejects_hand_edited_generated_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+            fixture_file.write_text(
+                fixture_file.read_text(encoding="utf-8").rstrip("\n"),
+                encoding="utf-8",
+            )
+
+            report = run_preflight(tree_root=tree_root)
+
+        codes = {issue["code"] for issue in report["new_issues"]}
+        self.assertEqual(codes, {"matcher_contract_generated_json_drift"}, report)
 
     def test_phase5_preflight_rejects_stale_toml_sources(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

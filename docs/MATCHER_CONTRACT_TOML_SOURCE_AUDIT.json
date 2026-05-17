@@ -1,7 +1,7 @@
 {
   "decision": "PASS",
   "generated": "2026-05-17",
-  "generated_json_committed": false,
+  "generated_json_committed": true,
   "results": [
     {
       "canonical_byte_equal": true,
@@ -11,8 +11,8 @@
       "row_count": 1488,
       "semantic_equal": true,
       "source_json_path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_json_sha256": "a305d19a6b49d207ea4edb02162e95932c2239b43878d5abcccaa5a84a637267",
-      "source_toml_bytes": 896746,
+      "source_json_sha256": "9c2131a1c4bbcb987c2454d8b8b2dfab7082df24efc7d501d67ec8bf868258cf",
+      "source_toml_bytes": 896643,
       "source_toml_path": "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml"
     },
     {
@@ -24,7 +24,7 @@
       "semantic_equal": true,
       "source_json_path": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",
       "source_json_sha256": "a1c8525892fa37b6168ee1f35f53cf7a5eddfd285410b04b4a24f910f6c6518b",
-      "source_toml_bytes": 519560,
+      "source_toml_bytes": 519457,
       "source_toml_path": "app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml"
     }
   ],

@@ -523,8 +523,8 @@ def _check_generated_contract_json(
             "error",
             "matcher_contract_generated_json_drift",
             (
-                "matcher contract TOML sources no longer generate the current JSON; "
-                "refresh sources from JSON before running gates"
+                "matcher contract JSON is generated and no longer matches the TOML source; "
+                "edit TOML sources and regenerate JSON before running gates"
             ),
             result.source_toml_path,
             result.contract,
@@ -532,6 +532,7 @@ def _check_generated_contract_json(
                 "target_json_path": result.target_json_path,
                 "semantic_equal": result.semantic_equal,
                 "canonical_byte_equal": result.canonical_byte_equal,
+                "raw_byte_equal": result.raw_byte_equal,
                 "canonical_diff_line_count": result.canonical_diff_line_count,
                 "canonical_diff_preview": result.canonical_diff_preview,
             },

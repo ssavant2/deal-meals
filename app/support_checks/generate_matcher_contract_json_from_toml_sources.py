@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate/check matcher contract JSON from parallel TOML sources."""
+"""Generate/check matcher contract JSON from authoritative TOML sources."""
 
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ class GeneratedContractResult:
 
     @property
     def drifted(self) -> bool:
-        return not self.semantic_equal or not self.canonical_byte_equal
+        return not self.semantic_equal or not self.canonical_byte_equal or not self.raw_byte_equal
 
 
 def _current_payload(spec: ContractSpec) -> list[dict[str, Any]]:
@@ -67,12 +67,13 @@ def check_generated_contract_json(
     results: list[GeneratedContractResult] = []
     for spec in contract_specs(tree_root, source_dir=source_dir):
         generated_payload = _generated_payload(spec)
-        current_payload = _current_payload(spec)
         generated_canonical = canonical_json(generated_payload)
-        current_canonical = canonical_json(current_payload)
-        diff = _diff_lines(current_canonical, generated_canonical) if current_canonical != generated_canonical else []
         if write:
             spec.source_json_path.write_text(generated_canonical, encoding="utf-8")
+        current_payload = _current_payload(spec)
+        current_canonical = canonical_json(current_payload)
+        diff = _diff_lines(current_canonical, generated_canonical) if current_canonical != generated_canonical else []
+        raw_json = spec.source_json_path.read_text(encoding="utf-8") if spec.source_json_path.exists() else ""
         results.append(GeneratedContractResult(
             contract=spec.contract,
             source_toml_path=_repo_rel(spec.source_toml_path, repo_root=spec.repo_root),
@@ -80,11 +81,7 @@ def check_generated_contract_json(
             row_count=len(generated_payload),
             semantic_equal=current_payload == generated_payload,
             canonical_byte_equal=current_canonical == generated_canonical,
-            raw_byte_equal=(
-                spec.source_json_path.read_text(encoding="utf-8") == generated_canonical
-                if spec.source_json_path.exists()
-                else False
-            ),
+            raw_byte_equal=raw_json == generated_canonical,
             canonical_diff_line_count=len(diff),
             canonical_diff_preview=diff[:80],
         ))
@@ -130,7 +127,7 @@ def main() -> int:
     parser.add_argument("--tree-root", type=Path, default=None)
     parser.add_argument("--source-dir", type=Path, default=None)
     parser.add_argument("--write", action="store_true", help="Write canonical generated JSON from TOML sources.")
-    parser.add_argument("--check", action="store_true", help="Fail if TOML sources drift from current JSON.")
+    parser.add_argument("--check", action="store_true", help="Fail if generated JSON bytes drift from TOML sources.")
     parser.add_argument("--format", choices=("text", "json"), default="text")
     args = parser.parse_args()
 

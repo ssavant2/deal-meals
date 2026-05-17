@@ -5,10 +5,14 @@ support-check contracts that keep them in sync.
 
 ## Source Layers
 
-- `app/languages/sv/matcher_contracts/matcher_regression_cases.json` stores
-  durable positive/negative fixture cases.
-- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json` stores the
-  rule owner, risk, adapter, fixture refs, and source provenance.
+- `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml`
+  stores authored durable positive/negative fixture cases.
+- `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml`
+  stores authored rule owner, risk, adapter, fixture refs, and source
+  provenance.
+- `app/languages/sv/matcher_contracts/matcher_regression_cases.json` and
+  `app/languages/sv/matcher_contracts/matcher_rule_inventory.json` are
+  generated from the TOML sources and committed for existing readers/reports.
 - `app/languages/sv/ingredient_matching/term_registry/entries/*.toml` stores
   authored registry entries. Simple mapping families may omit `entry_id` and
   `[[entries.coverage]]`; the registry loader derives them from language,
@@ -22,17 +26,16 @@ support-check contracts that keep them in sync.
   permanent `source_ref`, temporary fixture/policy/source refs, and inventory
   `adapter_ref` prefixes.
 
-The JSON contract files remain authored source-of-truth until the TOML-source
-generator work is complete. Support checks and the CLI now access those files
-through `app/support_checks/matcher_contracts.py`; the L3-C direct-reader audit
-in `docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md` currently passes with zero
+Support checks and readers access generated JSON through
+`app/support_checks/matcher_contracts.py`; the L3-C direct-reader audit in
+`docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md` currently passes with zero
 blocking consumers.
 
-The parallel B4 TOML sources live in
+The authoritative TOML sources live in
 `app/languages/sv/matcher_contracts/sources/` and are documented in that
-directory's README. The current round-trip report is
-`docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md`. Generated JSON rewrites are not
-committed yet; JSON remains authoritative until B5 flips the hand-edit guard.
+directory's README. The current source/generation report is
+`docs/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md`. Pre-flight rejects generated JSON
+that no longer matches the TOML sources byte-for-byte.
 
 ## Verified-Term Variant IDs
 
@@ -64,9 +67,9 @@ For Track B matcher-rule work, prefer the wrapper:
 ./bin/dm matcher gates --track B
 ```
 
-The wrapper refreshes generated coverage when fixture or inventory JSON changes,
-runs pre-flight checks before slower gates, and promotes the verified-term
-baseline when registry changes require it.
+The wrapper refreshes generated coverage when fixture or inventory contracts
+change, runs pre-flight checks before slower gates, and promotes the
+verified-term baseline when registry changes require it.
 
 During authoring, `./bin/dm matcher dev-watch` polls matcher contract and
 registry files and reruns pre-flight after saves. The default interval is one
