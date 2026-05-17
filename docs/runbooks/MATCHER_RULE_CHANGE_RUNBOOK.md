@@ -14,6 +14,20 @@ with fixtures, inventory, parity coverage, and cache expectations.
 Track A is a narrow runtime fix. Track B is durable registry/contract work.
 Start with the CLI wrapper; use raw support-check commands only when debugging.
 
+Plain-language rule:
+
+- **Track A** is "fix the small bug where the matcher already has the right kind
+  of runtime mechanism." Example: add one PNB/FPB blocker so a supplement,
+  baby-formula product, flavor, carrier, or product form stops matching one
+  ingredient by accident. Proof is a focused `run_deep_matcher_sanity.py`
+  regression plus parity.
+- **Track B** is "add or change a rule that should become permanent matcher
+  contract knowledge." Example: add `citron`, `lime`, and `apelsin` as
+  `keyword-extra-parent` children of `citrusfrukter`, or add a no-match/plain
+  policy that needs positive and negative fixtures. Proof is TOML source,
+  fixtures, inventory, generated coverage, baseline promotion when registry
+  entries changed, and Track B gates.
+
 Known CLI rule shape:
 
 ```bash
