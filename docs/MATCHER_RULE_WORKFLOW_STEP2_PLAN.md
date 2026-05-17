@@ -9,8 +9,8 @@ JSON-as-derived while JSON contracts still have direct readers.
 
 Step 2 has two workstreams:
 
-1. Expand `dm matcher add ...` so common rule changes become one-command
-   authoring flows.
+1. Expand `dm matcher add ...` one registry-owned command at a time so common
+   low-ambiguity changes become one-command authoring flows.
 2. Remove the blockers to JSON-as-derived, then rerun the authority audit and
    only migrate if it passes.
 
@@ -39,6 +39,23 @@ The JSON contract files are still authoritative:
 
 The audit found direct Python readers that must be migrated before JSON can
 become generated.
+
+## Implementation Governance
+
+This plan is the implementation contract for Step 2.
+
+- Work in small phase commits. Do not combine A and B workstreams in the same
+  behavior-changing commit.
+- Do not silently expand scope. If implementation discovers that a command needs
+  a different source model, a broader migration, or a policy decision, stop and
+  update this plan before building past it.
+- New `dm matcher add` commands are iterative. Ship one command, use it on real
+  matcher work, then decide the next command from evidence.
+- Deviations that change scope, authority, generated-file ownership, or runtime
+  rule semantics require Stefan sign-off and a plan update.
+- After each phase, run the phase gates, update runbook/architecture docs when
+  the user-facing workflow changes, and confirm the phase is accepted before
+  starting the next one.
 
 ## Workstream A: More Registry-Owned `dm matcher add` Commands
 
@@ -96,24 +113,39 @@ Acceptance:
 - `test_phase4_cli_e2e` still green
 - no command-specific file-writing logic duplicated in new commands
 
-### Phase A2: Low-Risk Registry-Owned Commands
+### Phase A2: First Low-Risk Registry-Owned Command
 
-Add commands for common simple TOML families:
+Add exactly one new command for a common simple TOML family first.
+
+Candidate families:
 
 - `ingredient-parent`
 - `keyword-synonym`
 - `offer-extra-keyword`
-- `recipe-routing-helper`
 
 These should use the Phase 5 convention support so simple entries do not need
 hand-authored `entry_id` or coverage rows.
 
+Selection rule:
+
+- Before implementation, extend or rerun the frequency analysis so simple TOML
+  families are broken out instead of grouped under `Other/manual`.
+- Pick a family with at least 5 distinct observed uses, at least 5% share, or a
+  current real matcher change waiting for that exact command.
+- If no family meets that bar, implement only one pilot command from the next
+  real registry-owned rule change and record why it was chosen.
+- Do not include `recipe-routing-helper` unless frequency analysis or an active
+  real change justifies it. It is valid as a future command, but not yet proven
+  as an A2 default.
+
 Acceptance:
 
-- each command has a temp-tree e2e test
+- the command has a temp-tree e2e test
 - generated entries pass registry export checks
 - generated fixtures/inventory pass pre-flight
 - Track B gates green when fixture/inventory contracts are authored
+- after at least one real use, the runbook documents the command and any design
+  corrections discovered during use
 
 ### Phase A3: No-Match Policy Command
 
@@ -121,9 +153,13 @@ Acceptance:
 has nested `language_payload.no_match_policy`, negative guards, fixture refs,
 and explicit coverage rows.
 
-Build this command only after A1 has a shared plan object and after the command
-shape is expressed as a real no-match-policy schema, not as an ad-hoc TOML
-string append.
+Build this command only after:
+
+- A1 has a shared plan object.
+- The A2 command has been used on real work without exposing a core design flaw,
+  or Stefan explicitly accepts starting A3 before that real-use feedback.
+- The command shape is expressed as a real no-match-policy schema, not as an
+  ad-hoc TOML string append.
 
 Acceptance:
 
@@ -164,6 +200,9 @@ are migrated to a contract API and the authority audit passes.
 This workstream must not proceed by simply ignoring the veto. The veto is the
 safety mechanism.
 
+B3-B5 are conditional phases. If B1/B2 still find real blockers, stop with a
+documented veto and do not start TOML-source generation or authority flipping.
+
 ### Phase B1: Strengthen The Audit
 
 The current audit is intentionally conservative but shallow. It catches obvious
@@ -177,6 +216,8 @@ Deliverables:
   and tests
 - write machine-readable JSON output alongside Markdown
 - CI/test assertion that the current audit decision is expected
+- establish a baseline blocker count and name every blocker with owner,
+  consumer type, and migration path
 
 Acceptance:
 
@@ -217,7 +258,20 @@ Migration target:
 - `run_matcher_change_gates.py`
 - `app/cli/dm.py`
 
-Acceptance:
+Incremental strategy:
+
+- Migrate consumers in slices, not as one large hidden rewrite.
+- The contract API may coexist with direct readers during B2, but the audit JSON
+  must make the mixed state explicit.
+- Every migrated consumer gets a focused test or existing gate that proves it
+  uses the same tree-root/default-path behavior as before.
+- Pre-flight or the audit self-test must fail only when blocker count regresses
+  above the phase baseline, not merely because B2 is partially complete.
+- B2 is not done until the blocker count has dropped from the B1 baseline, or
+  every remaining blocker has a documented reason why it could not be migrated
+  in Step 2.
+
+Acceptance to proceed to B3:
 
 - no support-check or CLI code opens the JSON files directly except the access
   API
@@ -235,7 +289,17 @@ Deliverables:
   `app/languages/sv/matcher_contracts/sources/README.md`
 - generator dry-run: JSON to TOML source files in `/tmp`
 - round-trip dry-run: JSON to TOML to JSON
+- deterministic semantic compare tool
 - report of byte-level and semantic diffs
+
+Semantic compare definition:
+
+- Load both JSON payloads and compare normalized Python objects.
+- Object key order is ignored.
+- List order is preserved unless a specific list is documented as orderless.
+- Byte-level diffs are produced from a canonical dump
+  (`ensure_ascii=False`, sorted object keys, stable indentation) and are only
+  allowed when semantic equality already passed.
 
 Acceptance:
 
@@ -260,7 +324,7 @@ Acceptance:
 
 ### Phase B5: Flip Authority
 
-Only after at least one working week with clean parallel checks:
+Only after enough parallel activity has exercised the generator:
 
 - mark JSON files as generated in docs and support-check messages
 - make TOML source files the authored contract
@@ -270,7 +334,27 @@ Acceptance:
 
 - JSON-authority audit decision changes to PASS
 - all readers go through the contract API or generated JSON path
+- at least 5 successful generated-JSON check-mode runs, including at least 3
+  Track B runs across distinct matcher-rule changes or branches
+- calendar time alone is not sufficient evidence for the flip
 - full matcher Track B gates green
+
+## Risk And Rollback
+
+- A1 is a behavior-preserving refactor. Rollback is reverting the A1 commit; no
+  contract files or generated artifacts should change in that commit.
+- For every new `dm matcher add` command, keep the implementation and tests in a
+  separate commit. Rollback is reverting that command while leaving the shared
+  core intact if `keyword-extra-parent` still passes.
+- `keyword-extra-parent` is the regression canary for CLI refactors. Preserve
+  its e2e behavior, dry-run behavior, tree-root behavior, generated coverage,
+  and Track B gate invocation.
+- For B2, partial migration is acceptable only while the audit documents the
+  remaining direct readers. Rollback is reverting the affected consumer to its
+  previous direct-reader path and restoring the audit baseline.
+- For B4, rollback is deleting the generator hook and TOML sources; JSON remains
+  authoritative until B5 is complete.
+- B5 must be a small flip commit after parallel checks are already clean.
 
 ## Test Strategy
 
@@ -310,17 +394,38 @@ Add Track A/Track B gates depending on the files touched by each phase.
 - Do not remove the raw support-check wrappers; `dm matcher` remains a friendly
   entry point, not the only callable API.
 
+## Time Estimates
+
+Rough implementation budget:
+
+| Phase | Estimate |
+|---|---:|
+| A1 shared CLI authoring core | 2-4 h |
+| A2 first registry-owned command | 2-4 h |
+| A2 additional command, after real use | 2-4 h each |
+| A3 no-match-policy command | 4-6 h, or defer |
+| B1 stronger authority audit | 2-3 h |
+| B2 contract access API + migrations | 4-8 h |
+| B3 TOML source schema dry-run | 4-6 h |
+| B4 parallel generated JSON | 4-8 h |
+| B5 authority flip | 2-4 h after acceptance evidence |
+
+The smaller useful slice is A1 plus one A2 command. The JSON-authority workstream
+can remain vetoed if blockers are reduced and documented honestly.
+
 ## Done Criteria
 
 Step 2 is complete when:
 
 - The shared CLI authoring core is in place.
 - At least two low-risk registry-owned commands use convention-derived
-  `entry_id` and coverage.
+  `entry_id` and coverage, unless A2 real-use evidence shows only one command is
+  currently worth keeping.
 - The no-match-policy command is either production-ready or deferred with a
-  documented schema blocker.
+  documented schema blocker and Stefan sign-off.
 - Runtime-table rule variants are explicitly documented as out of scope for
   Step 2, with a future migration/codemod decision recorded.
 - The JSON authority audit has either passed and the migration is complete, or
-  remains vetoed with all blockers documented and reduced as far as practical.
+  remains vetoed with blocker count reduced from the B1 baseline and every
+  remaining blocker documented with owner, reason, and next action.
 - The runbook and architecture docs describe the resulting authoring model.
