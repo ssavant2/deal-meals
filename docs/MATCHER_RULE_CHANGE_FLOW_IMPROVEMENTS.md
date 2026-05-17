@@ -38,7 +38,7 @@ The 11 iterations grouped into seven distinct root causes:
 | **A. Late, narrow error reports** | 5, 8, 11 | Each gate fails on one prefix mismatch and aborts. The wrapper does not collect all prefix problems upfront. |
 | **B. Stale `EXPECTED_*` constants** | 7, 9 | `promote_term_baseline.py` **already** auto-updates three constants (`EXPECTED_VERIFIED_TERM_VARIANT_COUNT`, `EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS`, `_EXPECTED_UNIQUE_COVERAGE_KEYS`). The friction I hit in Q54-2 was user error — I bumped constants by hand instead of re-running promote after a new bridge changed the count. What is *genuinely* still hardcoded: `seed match bridge count` and the `expected_bridge_ids` set in `run_matcher_rule_model_checks.py:340/624`, plus `EXPECTED_SV_EXPORT_LAYER_COUNT = 25` in `run_term_registry_add_term_checks.py:39` (drifts when a new `ExportLayerSpec` is added). |
 | **C. Hardcoded lists of registry contents** | 10 | `expected_bridge_ids` is a large hand-maintained set in `run_matcher_rule_model_checks.py`. Adding any bridge requires bumping the list manually. |
-| **D. Hash-shift sensitivity** | 4, 6 | `variant_id` is derived from `source_ref` content (`run_verified_term_audit.py:113`). Any text change to `source_ref` shifts the hash. Promote already has a `_content_key` helper (`promote_term_baseline.py:302`) that recognizes content-equivalent variants and offers migration, but the user must explicitly pass `--migrate-hashes` to accept the migration. The friction is that the flag must be remembered; the underlying detection already exists. |
+| **D. Hash-shift sensitivity** | 4, 6 | Before Phase 3, `variant_id` was derived from `source_ref` content. Any text change to `source_ref` shifted the hash and required explicit hash migration. Phase 3 moves identity to a stable v2 payload that excludes `source_ref`; content-equivalent ID migrations are automatic. |
 | **E. Coverage TOML is boilerplate** | 2 | For every new fixture and inventory entry in JSON, a separate registry coverage row must be hand-authored in `matcher_regression_case.toml` and `matcher_rule_inventory.toml`. The content is fully derivable from the source JSON. |
 | **F. Audit derivation has silent failure modes** | 3 | When a positive fixture forgets the top-level `expected_matches` field (or puts it under `metadata`), audit derives `canonical=None` and coverage matching fails with a generic "lacks coverage" error that does not point at the underlying problem. |
 | **G. Baseline write fails on execution-user mismatch** | (every promote) | The `./app:/app` bind-mount **is already writable** in `docker-compose.dev.yml`, but only for the file-owning `appuser` in the current dev setup. `docker compose exec` defaults to `root`; on this bind-mounted checkout, root is not writable while `appuser` is. Writes fail with `PermissionError`. The workaround that Q54-2 used (`--baseline-output-dir /tmp/...` then four `docker cp`) is fixable by running the wrapper/promote with `-u appuser` instead. |
@@ -736,13 +736,17 @@ coverage TOML.
 
 **Phase 3** (target: 4-6 hours, **the real fix**, medium risk):
 
+Status 2026-05-17: implemented. `variant_id` now uses the stable v2 identity
+payload by default, the v1→v2 baseline migration file is committed, and
+`--migrate-hashes` is retained only as a backward-compatible no-op alias.
+
 *Code:*
 - L3-A `variant_id` hash refactor — derive identity from
   the current audit identity payload minus `source_ref` (or an explicitly
   documented equivalent) and assert that the v2 key has no collisions before
   migration.
-- Parallel-running flag (`--use-stable-hash-v2`) for at least one working
-  week.
+- Parallel-running flag (`--use-stable-hash-v2`) is accepted; v2 is the default
+  after the one-shot migration, with `--legacy-hash-v1` available for debugging.
 - One-shot migration script writes `baselines/variant_id_migration_v1_to_v2.json`
   mapping every old → new ID.
 - `--migrate-hashes` becomes a no-op alias for backward compat, then
@@ -996,6 +1000,14 @@ part of this plan. Developer-facing docs (`README.md` § Development,
 the relevant phase deliverables above.
 
 ## Revision History
+
+**2026-05-17 — Phase 3 implementation**
+
+Implemented L3-A. Verified the v2 identity payload is collision-free on the
+current 5517 variants, migrated the verified-term baseline to v2 IDs, and
+committed `variant_id_migration_v1_to_v2.json` as the old→new mapping. The
+runbook now omits hash-migration instructions; true removals still require
+`--allow-removals`.
 
 **2026-05-17 — Codex code-review pass**
 

@@ -41,6 +41,13 @@ from languages.sv.ingredient_matching.synonyms import INGREDIENT_PARENTS, KEYWOR
 
 
 DEFAULT_BATCH_SIZE = 60
+IDENTITY_HASH_VERSION_V1 = "v1_source_ref"
+IDENTITY_HASH_VERSION_V2 = "v2_stable_without_source_ref"
+DEFAULT_IDENTITY_HASH_VERSION = IDENTITY_HASH_VERSION_V2
+SUPPORTED_IDENTITY_HASH_VERSIONS = frozenset({
+    IDENTITY_HASH_VERSION_V1,
+    IDENTITY_HASH_VERSION_V2,
+})
 DEFAULT_REPORT_DIR = (
     Path(os.environ.get("DEAL_MEALS_SUPPORT_REPORT_ROOT", "/tmp/deal-meals-support-checks"))
     / "verified_term_audit"
@@ -88,11 +95,19 @@ class AuditVariant:
     batch_index: int = 0
     row_index: int = 0
 
-    def identity_payload(self) -> dict[str, Any]:
+    def identity_payload_v1(self) -> dict[str, Any]:
+        """Legacy hash payload; retained for one-cycle migration tooling."""
+        payload = self.identity_payload_v2()
+        return {
+            **payload,
+            "source_ref": self.source_ref,
+        }
+
+    def identity_payload_v2(self) -> dict[str, Any]:
+        """Stable semantic identity. source_ref is provenance, not identity."""
         return {
             "source_type": self.source_type,
             "source_file": self.source_file,
-            "source_ref": self.source_ref,
             "source_id": self.source_id,
             "variant_role": self.variant_role,
             "variant_text": self.variant_text,
@@ -103,19 +118,51 @@ class AuditVariant:
             "expected": self.expected,
         }
 
-    def with_identity(self, *, row_index: int, batch_size: int) -> "AuditVariant":
+    def identity_payload(self, hash_version: str = DEFAULT_IDENTITY_HASH_VERSION) -> dict[str, Any]:
+        if hash_version == IDENTITY_HASH_VERSION_V1:
+            return self.identity_payload_v1()
+        if hash_version == IDENTITY_HASH_VERSION_V2:
+            return self.identity_payload_v2()
+        raise ValueError(f"Unsupported verified-term identity hash version: {hash_version}")
+
+    def identity_key(self, hash_version: str = DEFAULT_IDENTITY_HASH_VERSION) -> str:
+        return json.dumps(
+            self.identity_payload(hash_version),
+            sort_keys=True,
+            ensure_ascii=False,
+        )
+
+    def variant_id_for_hash_version(self, hash_version: str = DEFAULT_IDENTITY_HASH_VERSION) -> str:
         digest = sha1(
-            json.dumps(self.identity_payload(), sort_keys=True, ensure_ascii=False).encode("utf-8")
+            self.identity_key(hash_version).encode("utf-8")
         ).hexdigest()
+        return f"vterm-{digest[:16]}"
+
+    def with_identity(
+        self,
+        *,
+        row_index: int,
+        batch_size: int,
+        hash_version: str = DEFAULT_IDENTITY_HASH_VERSION,
+    ) -> "AuditVariant":
         return AuditVariant(
             **{
                 **asdict(self),
-                "variant_id": f"vterm-{digest[:16]}",
+                "variant_id": self.variant_id_for_hash_version(hash_version),
                 "batch_id": f"VT{((row_index - 1) // batch_size) + 1:03d}",
                 "batch_index": ((row_index - 1) % batch_size) + 1,
                 "row_index": row_index,
             }
         )
+
+
+def _validate_hash_version(hash_version: str) -> str:
+    if hash_version not in SUPPORTED_IDENTITY_HASH_VERSIONS:
+        raise ValueError(
+            f"Unsupported verified-term identity hash version {hash_version!r}; "
+            f"expected one of {sorted(SUPPORTED_IDENTITY_HASH_VERSIONS)}"
+        )
+    return hash_version
 
 
 def _repo_rel(path: Path) -> str:
@@ -463,7 +510,45 @@ def _iter_mapping_variants(
             )
 
 
-def build_variants(batch_size: int) -> list[AuditVariant]:
+def _identity_collision_sample(variants: list[AuditVariant], *, hash_version: str) -> list[dict[str, Any]]:
+    groups: dict[str, list[AuditVariant]] = {}
+    for variant in variants:
+        groups.setdefault(variant.identity_key(hash_version), []).append(variant)
+
+    collisions: list[dict[str, Any]] = []
+    for identity_key, grouped in groups.items():
+        if len(grouped) <= 1:
+            continue
+        legacy_keys = {variant.identity_key(IDENTITY_HASH_VERSION_V1) for variant in grouped}
+        # Exact duplicate source rows are already de-duplicated below. The
+        # migration blocker is a v2 key shared by distinct legacy identities.
+        if len(legacy_keys) <= 1:
+            continue
+        collisions.append({
+            "identity_key": identity_key,
+            "variants": [
+                {
+                    "source_type": variant.source_type,
+                    "source_id": variant.source_id,
+                    "source_ref": variant.source_ref,
+                    "variant_role": variant.variant_role,
+                    "variant_text": variant.variant_text,
+                    "canonical": variant.canonical,
+                    "expected": variant.expected,
+                }
+                for variant in grouped[:5]
+            ],
+            "count": len(grouped),
+        })
+    return collisions
+
+
+def build_variants(
+    batch_size: int,
+    *,
+    hash_version: str = DEFAULT_IDENTITY_HASH_VERSION,
+) -> list[AuditVariant]:
+    hash_version = _validate_hash_version(hash_version)
     variants: list[AuditVariant] = []
     variants.extend(_iter_rule_inventory_variants())
     variants.extend(_iter_regression_case_variants())
@@ -540,16 +625,27 @@ def build_variants(batch_size: int) -> list[AuditVariant]:
             item.expected if item.expected is not None else -1,
         ),
     )
+    collisions = _identity_collision_sample(variants, hash_version=hash_version)
+    if collisions:
+        sample = json.dumps(collisions[:3], ensure_ascii=False, sort_keys=True)
+        raise RuntimeError(
+            f"Verified-term {hash_version} identity payload is not unique; "
+            f"sample collisions: {sample}"
+        )
+
     seen_identity_keys: set[str] = set()
     unique_variants: list[AuditVariant] = []
     for variant in variants:
-        identity_key = json.dumps(variant.identity_payload(), sort_keys=True, ensure_ascii=False)
+        identity_key = variant.identity_key(hash_version)
         if identity_key in seen_identity_keys:
             continue
         seen_identity_keys.add(identity_key)
         unique_variants.append(variant)
     variants = unique_variants
-    return [variant.with_identity(row_index=index, batch_size=batch_size) for index, variant in enumerate(variants, 1)]
+    return [
+        variant.with_identity(row_index=index, batch_size=batch_size, hash_version=hash_version)
+        for index, variant in enumerate(variants, 1)
+    ]
 
 
 CREATE_TABLE_SQL = f"""
@@ -1084,17 +1180,30 @@ def main() -> int:
     parser.add_argument("--report-dir", type=Path, default=DEFAULT_REPORT_DIR)
     parser.add_argument("--audit-batch", help="Run static contract checks for one generated batch id, e.g. VT001.")
     parser.add_argument("--apply-audit", action="store_true", help="Persist audit status/classification to the table.")
+    parser.add_argument(
+        "--use-stable-hash-v2",
+        action="store_true",
+        help="Use stable v2 variant ids that ignore source_ref provenance text. This is the default.",
+    )
+    parser.add_argument(
+        "--legacy-hash-v1",
+        action="store_true",
+        help="Debug-only: generate legacy variant ids whose hash input includes source_ref.",
+    )
     args = parser.parse_args()
 
     if args.batch_size <= 0:
         raise ValueError("--batch-size must be positive")
+    if args.use_stable_hash_v2 and args.legacy_hash_v1:
+        raise ValueError("--use-stable-hash-v2 and --legacy-hash-v1 are mutually exclusive")
+    hash_version = IDENTITY_HASH_VERSION_V1 if args.legacy_hash_v1 else DEFAULT_IDENTITY_HASH_VERSION
 
     if args.audit_batch:
         report = audit_batch(args.audit_batch, apply=args.apply_audit, report_dir=args.report_dir)
         print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True, default=_json_default))
         return 0
 
-    variants = build_variants(args.batch_size)
+    variants = build_variants(args.batch_size, hash_version=hash_version)
     summary = summarize_variants(variants, batch_size=args.batch_size)
 
     if args.rebuild_table:
@@ -1106,6 +1215,7 @@ def main() -> int:
 
     print(json.dumps({
         **summary,
+        "identity_hash_version": hash_version,
         "table_rebuilt": bool(args.rebuild_table),
         "reports": [str(path) for path in report_paths] if report_paths else [],
     }, ensure_ascii=False, indent=2, sort_keys=True))

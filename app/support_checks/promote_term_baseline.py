@@ -18,6 +18,7 @@ Usage:
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --dry-run
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --allow-removals
+    docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --migrate-hashes
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --language sv --market SE
 
 The script does not require a dev-only DB table. For the current Swedish
@@ -69,9 +70,13 @@ DEFAULT_SWEDISH_BASELINE_PATH = (
     / "baselines"
     / "verified_matcher_terms.json"
 )
+DEFAULT_SWEDISH_VARIANT_ID_MIGRATION_PATH = (
+    DEFAULT_SWEDISH_BASELINE_PATH.parent / "variant_id_migration_v1_to_v2.json"
+)
 DEFAULT_SWEDISH_ADD_TERM_CHECKS_PATH = APP_DIR / "support_checks" / "run_term_registry_add_term_checks.py"
 DEFAULT_SWEDISH_CONTRACT_CHECKS_PATH = APP_DIR / "support_checks" / "run_term_registry_contract_checks.py"
 DEFAULT_SWEDISH_SANITY_CHECKS_PATH = APP_DIR / "support_checks" / "run_sanity_checks.py"
+VARIANT_ID_MIGRATION_SCHEMA_VERSION = 1
 BASELINE_VARIANT_OMIT_KEYS = {"batch_id", "batch_index"}
 BASELINE_SUMMARY_OMIT_KEYS = {
     "batch_count",
@@ -100,6 +105,7 @@ class PromotionConfig:
     add_term_checks_path: Path | None = None
     contract_checks_path: Path | None = None
     sanity_checks_path: Path | None = None
+    variant_id_migration_path: Path | None = None
 
 
 def _language_key(language: str, market: str) -> tuple[str, str]:
@@ -164,6 +170,11 @@ def _build_config(args: argparse.Namespace) -> PromotionConfig:
         add_term_checks_path=_resolve_app_path(args.add_term_checks_path) or add_term_checks_path,
         contract_checks_path=_resolve_app_path(args.contract_checks_path) or contract_checks_path,
         sanity_checks_path=_resolve_app_path(args.sanity_checks_path) or sanity_checks_path,
+        variant_id_migration_path=(
+            DEFAULT_SWEDISH_VARIANT_ID_MIGRATION_PATH
+            if (language, market) == (DEFAULT_LANGUAGE, DEFAULT_MARKET)
+            else _default_baseline_path(language).parent / "variant_id_migration_v1_to_v2.json"
+        ),
     )
 
 
@@ -245,6 +256,21 @@ def _normalize_baseline_payload(baseline: dict[str, Any]) -> bool:
 
 def _get_unique_coverage_key_count(config: PromotionConfig) -> int:
     """Count unique registry TOML coverage keys for the frozen term gate."""
+    if _language_key(config.language, config.market) == (DEFAULT_LANGUAGE, DEFAULT_MARKET):
+        from languages.sv.ingredient_matching.term_registry.add_term import build_add_term_export_plan
+
+        registry_module = importlib.import_module(config.registry_module)
+        entries = registry_module.load_registry_entries(include_local=False)
+        payload, issues = build_add_term_export_plan(
+            entries=entries,
+            language=config.language,
+            market=config.market,
+        )
+        errors = [issue for issue in issues if issue.severity == "error"]
+        if errors:
+            details = "; ".join(f"{issue.code}:{issue.item_id}" for issue in errors[:5])
+            raise RuntimeError(f"registry coverage has export-plan errors; refusing to promote: {details}")
+        return int(payload["summary"]["unique_coverage_key_count"])
     return len(_registry_coverage_keys(config))
 
 
@@ -297,6 +323,51 @@ def _write_output_manifest(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+
+
+def _variant_id_migration_record(
+    *,
+    old_id: str,
+    new_id: str,
+    old_variant: dict[str, Any],
+    fresh_variant: dict[str, Any],
+    config: PromotionConfig,
+) -> dict[str, Any]:
+    language, market, source_family, canonical, variant, layer_role = _coverage_key(fresh_variant, config)
+    return {
+        "old_variant_id": old_id,
+        "new_variant_id": new_id,
+        "language": language,
+        "market": market,
+        "source_family": source_family,
+        "canonical": canonical,
+        "variant": variant,
+        "layer_role": layer_role,
+        "source_file": str(fresh_variant.get("source_file") or old_variant.get("source_file") or ""),
+        "source_id": str(fresh_variant.get("source_id") or old_variant.get("source_id") or ""),
+        "source_ref": str(fresh_variant.get("source_ref") or old_variant.get("source_ref") or ""),
+    }
+
+
+def _write_variant_id_migration_map(
+    *,
+    path: Path,
+    records: list[dict[str, Any]],
+    output_dir: Path | None,
+) -> Path:
+    payload = {
+        "schema_version": VARIANT_ID_MIGRATION_SCHEMA_VERSION,
+        "from_hash_version": "v1_source_ref",
+        "to_hash_version": "v2_stable_without_source_ref",
+        "description": (
+            "One-shot verified-term baseline migration. v2 variant_id hashes "
+            "exclude source_ref provenance text so source_ref edits do not "
+            "force future baseline hash migrations."
+        ),
+        "variant_count": len(records),
+        "migrations": sorted(records, key=lambda item: item["old_variant_id"]),
+    }
+    return _write_json(path, payload, output_dir=output_dir)
 
 
 def _content_key(v: dict, config: PromotionConfig) -> tuple:
@@ -462,6 +533,8 @@ def promote(
     if output_dir is not None:
         output_dir = output_dir.resolve()
         print(f"Staging writes under: {output_dir}")
+    if migrate_hashes:
+        print("--migrate-hashes is accepted for compatibility; hash-equivalent ID migrations are automatic.")
 
     print(f"Language/market: {config.language}/{config.market}")
     print("Loading current baseline …")
@@ -478,55 +551,54 @@ def promote(
     all_new_variants = [v for v in fresh_variants if v.get("variant_id") and v["variant_id"] not in current_ids]
     removed_ids = current_ids - fresh_ids
 
-    hash_migrations: list[tuple[str, str]] = []  # (old_id, new_id)
+    hash_migrations: list[tuple[str, str, dict[str, Any], dict[str, Any]]] = []  # old_id, new_id, old, fresh
     migrated_new_ids: set[str] = set()
     allowed_removed_ids: set[str] = set()
     removed_variants: list[dict] = []
     if removed_ids:
         baseline_by_id = {v["variant_id"]: v for v in baseline["variants"] if v.get("variant_id")}
-        if migrate_hashes:
-            # Build a FIFO queue per content_key so duplicates are matched 1:1
-            from collections import defaultdict
-            fresh_queues: dict[tuple, list] = defaultdict(list)
-            for v in fresh_variants:
-                if v.get("variant_id") and v["variant_id"] not in current_ids:
-                    fresh_queues[_content_key(v, config)].append(v)
-            truly_removed = []
-            for vid in removed_ids:
-                old_v = baseline_by_id[vid]
-                queue = fresh_queues.get(_content_key(old_v, config))
-                if queue:
-                    fresh_v = queue.pop(0)  # FIFO: match oldest fresh entry first
-                    if fresh_v["variant_id"] != vid:
-                        hash_migrations.append((vid, fresh_v["variant_id"]))
-                        migrated_new_ids.add(fresh_v["variant_id"])
-                else:
-                    truly_removed.append(vid)
-            if truly_removed:
-                print(f"\n⚠️  WARNING: {len(truly_removed)} variant(s) truly removed (no content match in fresh):")
-                for vid in sorted(truly_removed)[:10]:
-                    v = baseline_by_id[vid]
-                    print(f"   {vid}: {v.get('variant_text','')!r} ({v.get('source_type','')})")
-                if not allow_removals:
-                    print("Investigate before promoting, or re-run with --allow-removals after confirming.")
-                    print("Aborting.")
-                    return 1
-                allowed_removed_ids.update(truly_removed)
-                print("Removal approval enabled: these truly removed variants will be dropped from the baseline.")
-            print(f"\nHash migration: {len(hash_migrations)} variant(s) will get new IDs (same content, source_order shifted).")
-        else:
-            print(f"\n⚠️  WARNING: {len(removed_ids)} variant(s) in baseline are MISSING from fresh scan:")
-            for vid in sorted(removed_ids)[:10]:
-                v = baseline_by_id.get(vid) or {}
+        # Build a FIFO queue per content_key so duplicates are matched 1:1.
+        # Content-equivalent ID changes are safe to migrate automatically; true
+        # removals still require explicit --allow-removals approval.
+        from collections import defaultdict
+        fresh_queues: dict[tuple, list] = defaultdict(list)
+        for v in fresh_variants:
+            if v.get("variant_id") and v["variant_id"] not in current_ids:
+                fresh_queues[_content_key(v, config)].append(v)
+
+        truly_removed = []
+        removed_id_order = [
+            v["variant_id"]
+            for v in baseline["variants"]
+            if v.get("variant_id") in removed_ids
+        ]
+        for vid in removed_id_order:
+            old_v = baseline_by_id[vid]
+            queue = fresh_queues.get(_content_key(old_v, config))
+            if queue:
+                fresh_v = queue.pop(0)
+                if fresh_v["variant_id"] != vid:
+                    hash_migrations.append((vid, fresh_v["variant_id"], old_v, fresh_v))
+                    migrated_new_ids.add(fresh_v["variant_id"])
+            else:
+                truly_removed.append(vid)
+
+        if truly_removed:
+            print(f"\n⚠️  WARNING: {len(truly_removed)} variant(s) truly removed (no content match in fresh):")
+            for vid in sorted(truly_removed)[:10]:
+                v = baseline_by_id[vid]
                 print(f"   {vid}: {v.get('variant_text','')!r} ({v.get('source_type','')})")
             if not allow_removals:
                 print("This usually means a TOML entry or extraction function was removed.")
-                print("Re-run with --migrate-hashes if extraction.py source_order shifted, or investigate.")
                 print("Re-run with --allow-removals only after confirming the removals are intentional.")
                 print("Aborting.")
                 return 1
-            allowed_removed_ids.update(removed_ids)
-            print("Removal approval enabled: missing variants will be dropped from the baseline.")
+            allowed_removed_ids.update(truly_removed)
+            print("Removal approval enabled: these truly removed variants will be dropped from the baseline.")
+        print(
+            "\nHash migration: "
+            f"{len(hash_migrations)} variant(s) will get new IDs with unchanged coverage/content."
+        )
 
     # Truly new variants = fresh entries not in baseline AND not just hash-migrated old ones
     new_variants = [v for v in all_new_variants if v["variant_id"] not in migrated_new_ids]
@@ -560,14 +632,25 @@ def promote(
             )
 
     # Apply hash migrations: replace old-hash entries with new-hash entries in-place
+    hash_migration_records: list[dict[str, Any]] = []
     if hash_migrations:
-        migration_map = {old_id: new_id for old_id, new_id in hash_migrations}
+        migration_map = {old_id: new_id for old_id, new_id, _old_v, _fresh_v in hash_migrations}
         fresh_by_id = {v["variant_id"]: v for v in fresh_variants}
         baseline["variants"] = [
             _baseline_variant(fresh_by_id[migration_map[v["variant_id"]]])
             if v.get("variant_id") in migration_map
             else _baseline_variant(v)
             for v in baseline["variants"]
+        ]
+        hash_migration_records = [
+            _variant_id_migration_record(
+                old_id=old_id,
+                new_id=new_id,
+                old_variant=old_v,
+                fresh_variant=fresh_v,
+                config=config,
+            )
+            for old_id, new_id, old_v, fresh_v in hash_migrations
         ]
         current_count = len(baseline["variants"])
 
@@ -619,6 +702,11 @@ def promote(
                 f"{len(allowed_removed_ids)} removal(s), "
                 f"{len(new_variants)} addition(s))"
             )
+            if hash_migrations and config.variant_id_migration_path:
+                print(
+                    "[dry-run] Would write variant-id migration map: "
+                    f"{config.variant_id_migration_path}"
+                )
         else:
             print(f"\n[dry-run] Would update baseline: {starting_count} → {new_count} variants")
         print("[dry-run] No files written.")
@@ -637,6 +725,14 @@ def promote(
     print(f"\nWriting baseline: {config.baseline_path.name} ({new_count} variants) …")
     changed_files: list[tuple[Path, Path]] = []
     changed_files.append((config.baseline_path, _write_json(config.baseline_path, baseline, output_dir=output_dir)))
+    if hash_migration_records and config.variant_id_migration_path:
+        target = _write_variant_id_migration_map(
+            path=config.variant_id_migration_path,
+            records=hash_migration_records,
+            output_dir=output_dir,
+        )
+        changed_files.append((config.variant_id_migration_path, target))
+        print(f"Wrote variant-id migration map → {config.variant_id_migration_path.name}")
 
     # --- Update the frozen verified-term variant count in contract checks ---
     if config.contract_checks_path:
@@ -758,9 +854,8 @@ def main() -> int:
         "--migrate-hashes",
         action="store_true",
         help=(
-            "Allow hash-ID migration when extraction.py source_order shifted (e.g. after inserting a new "
-            "extraction block). Entries with matching content (coverage key + source_id/source_file/expected) are "
-            "re-hashed in place. Truly removed entries (no content match) still abort unless --allow-removals is set."
+            "Backward-compatible alias. Hash-equivalent ID migrations are automatic; "
+            "truly removed entries still abort unless --allow-removals is set."
         ),
     )
     parser.add_argument(

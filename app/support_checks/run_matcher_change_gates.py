@@ -648,7 +648,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--migrate-hashes",
         action="store_true",
-        help="Pass --migrate-hashes to promote_term_baseline.py.",
+        help="Backward-compatible no-op alias; baseline hash-equivalent ID migrations are automatic.",
     )
     parser.add_argument(
         "--allow-removals",

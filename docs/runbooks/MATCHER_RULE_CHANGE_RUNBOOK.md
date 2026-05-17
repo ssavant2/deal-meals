@@ -110,7 +110,6 @@ Add only the flags that match the change:
 - `--runtime-changed` when matcher Python changed.
 - `--fixtures-changed` when `matcher_regression_cases.json` changed.
 - `--inventory-changed` when `matcher_rule_inventory.json` changed.
-- `--migrate-hashes` when extraction/source order shifted verified-term IDs.
 - `--allow-removals` only after confirming intentional TOML inactivation or
   removal.
 - `--refresh-line-refs` when inventory anchors moved; run from a writable host
@@ -192,9 +191,8 @@ broad/systemic, release-facing, or meant to be permanent contract proof.
        --policy-ref plain_sensitive_filmjolk
    ```
 
-   Add `--registry-changed` for TOML edits, `--migrate-hashes` for verified-term
-   source-order shifts, and `--allow-removals` for confirmed intentional TOML
-   inactivation/removal.
+   Add `--registry-changed` for TOML edits and `--allow-removals` for confirmed
+   intentional TOML inactivation/removal.
 6. Run full fixture/parity and only the conditionally relevant gates from the
    gate matrix below if you are not using the wrapper.
 7. Run `dev_reload.py` before cache/UI/cache-gated validation or handoff that
@@ -617,9 +615,9 @@ specific varieties from inactive `färskpotatis`/`bakpotatis` registry rows."
 4. Update inventory to explain the owner and reason for the inactivation.
 5. Run `promote_term_baseline.py`.
 
-If `promote_term_baseline.py` aborts with "truly removed" variants, do not use
-`--migrate-hashes` unless the variants merely got re-hashed by extraction
-source-order movement. `--migrate-hashes` is not a removal approval mechanism.
+If `promote_term_baseline.py` aborts with "truly removed" variants, treat that
+as a semantic deletion until proven otherwise. Content-equivalent verified-term
+ID changes are migrated automatically; only true removals need approval.
 
 The accepted intentional-removal flow is:
 
@@ -628,14 +626,8 @@ The accepted intentional-removal flow is:
 2. Re-run promotion with explicit removal approval:
 
    ```bash
-   # Choose exactly one:
    docker compose exec -T -w /app web \
      python support_checks/promote_term_baseline.py --allow-removals
-
-   # OR, when an extraction block/source-order change also shifted hash IDs:
-   docker compose exec -T -w /app web \
-     python support_checks/promote_term_baseline.py \
-       --migrate-hashes --allow-removals
    ```
 
 3. Run the registry contract checks and full Track B gates.
@@ -822,8 +814,8 @@ Useful wrapper options:
 - `--registry-changed`, `--runtime-changed`, `--fixtures-changed`, and
   `--inventory-changed` override git auto-detection when the worktree contains
   unrelated edits.
-- `--migrate-hashes` and `--allow-removals` are passed to
-  `promote_term_baseline.py`.
+- `--allow-removals` is passed to `promote_term_baseline.py` after confirmed
+  intentional TOML inactivation/removal.
 - `--refresh-line-refs` runs the host-only inventory line-ref refresher.
 - `--no-generate-coverage` disables the automatic derived coverage refresh
   when you intentionally want pre-flight to report stale coverage.
@@ -844,7 +836,7 @@ choose the smallest complete gate set for the change.
 | `generate_matcher_registry_coverage.py --write` | Fixture or inventory JSON changed. The wrapper runs this by default. |
 | full `run_matcher_layer_fixture_cases.py --skip-cache-freshness` | Every Track B behavior change before handoff. |
 | full `run_matcher_layer_parity.py --skip-cache-freshness` | Every Track A/Track B matcher behavior change before handoff. |
-| `promote_term_baseline.py` | Any tracked registry TOML change. Choose plain, `--migrate-hashes`, `--allow-removals`, or `--migrate-hashes --allow-removals`. |
+| `promote_term_baseline.py` | Any tracked registry TOML change. Use the plain command unless confirmed TOML inactivation/removal requires `--allow-removals`. |
 | term-registry checks | Any tracked registry TOML or baseline change. |
 | `run_matcher_rule_model_checks.py` | Track B rule-model, bridge, no-match, inventory, or registry-owned rule changes. |
 | `run_matcher_rule_inventory_checks.py` | Any inventory change or Track B rule that should be inventory-owned. |
@@ -871,35 +863,25 @@ docker compose exec -T -w /app web \
 
 If the term registry TOML changed, run the verified-term baseline promotion
 before final registry gates. It may report no changes, but it is still the
-standard gate after TOML edits. `--migrate-hashes` is required when an
-extraction block/source-order change shifts existing hash IDs.
+standard gate after TOML edits. Verified-term IDs are stable across `source_ref`
+provenance edits; content-equivalent ID migrations are automatic.
 
-In a writable checkout/container, use the plain command as `appuser` unless an
-extraction block/source-order change requires hash migration or intentional TOML
-inactivation/removal requires removal approval:
+In a writable checkout/container, use the plain command as `appuser` unless
+intentional TOML inactivation/removal requires removal approval:
 
 ```bash
 # Choose exactly one:
 docker compose exec -T -u appuser -w /app web \
   python support_checks/promote_term_baseline.py
 
-# OR, when an extraction block/source-order change shifted hash IDs:
-docker compose exec -T -u appuser -w /app web \
-  python support_checks/promote_term_baseline.py --migrate-hashes
-
 # OR, when TOML inactivation/removal intentionally removed verified variants:
 docker compose exec -T -u appuser -w /app web \
   python support_checks/promote_term_baseline.py --allow-removals
-
-# OR, when both source-order hash migration and intentional removal are needed:
-docker compose exec -T -u appuser -w /app web \
-  python support_checks/promote_term_baseline.py \
-    --migrate-hashes --allow-removals
 ```
 
 If the checkout is read-only, stage the generated files under a writable
-directory, again choosing either the plain hash-migration, removal, or combined
-variant as appropriate, and then apply the staged changes to the real checkout:
+directory, again choosing either the plain or removal-approved variant as
+appropriate, and then apply the staged changes to the real checkout:
 
 ```bash
 # Choose exactly one:
@@ -907,22 +889,9 @@ docker compose exec -T -w /app web \
   python support_checks/promote_term_baseline.py \
   --output-dir /tmp/term-baseline-promotion
 
-# OR, when an extraction block/source-order change shifted hash IDs:
-docker compose exec -T -w /app web \
-  python support_checks/promote_term_baseline.py \
-  --migrate-hashes \
-  --output-dir /tmp/term-baseline-promotion
-
 # OR, when TOML inactivation/removal intentionally removed verified variants:
 docker compose exec -T -w /app web \
   python support_checks/promote_term_baseline.py \
-  --allow-removals \
-  --output-dir /tmp/term-baseline-promotion
-
-# OR, when both source-order hash migration and intentional removal are needed:
-docker compose exec -T -w /app web \
-  python support_checks/promote_term_baseline.py \
-  --migrate-hashes \
   --allow-removals \
   --output-dir /tmp/term-baseline-promotion
 ```
@@ -1077,10 +1046,8 @@ each other. It does not mean fixture expectations are satisfied.
 - Treating TOML inactivation/removal as a pure cleanup when it changes matcher
   behavior. It needs fixture/inventory proof, and intentional verified-term
   removals need the explicit removal workflow.
-- Forgetting `--migrate-hashes` when an extraction block/source-order change
-  shifts verified-term hash IDs.
-- Using `--migrate-hashes` to approve true removals. Hash migration only handles
-  content-preserving rehashes, not deleted/inactivated variants.
+- Treating a "truly removed" promotion warning as harmless. Content-preserving
+  verified-term ID changes are automatic; true removals need explicit approval.
 - Using raw substring checks for words that need word boundaries.
 - Fixing backend validation but forgetting `matches_ingredient_fast`.
 - Broadening a bridge without a negative sibling.
@@ -1139,7 +1106,6 @@ Before calling a Track B matcher rule change done:
 - A corresponding focused regression was added or confirmed in
   `run_deep_matcher_sanity.py`.
 - `promote_term_baseline.py` was run after registry TOML changes, using
-  `--migrate-hashes` when extraction block/source-order changes require it and
   `--allow-removals` only for confirmed intentional TOML inactivation/removal.
 - Intentional TOML inactivation/removal followed the removal workflow if
   `promote_term_baseline.py` reported truly removed variants.

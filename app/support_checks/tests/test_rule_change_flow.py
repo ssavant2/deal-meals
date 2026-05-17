@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import replace
 import json
 from pathlib import Path
 import shutil
@@ -18,6 +19,12 @@ from support_checks.run_matcher_change_preflight import (
 from support_checks.generate_matcher_registry_coverage import (
     generate_coverage_files,
     write_coverage_files,
+)
+from support_checks.run_verified_term_audit import (
+    AuditVariant,
+    IDENTITY_HASH_VERSION_V1,
+    IDENTITY_HASH_VERSION_V2,
+    build_variants,
 )
 
 
@@ -212,6 +219,43 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         self.assertNotIn("inventory_missing_registry_coverage", codes, report)
         self.assertNotIn("generated_coverage_stale", codes, report)
         self.assertEqual(codes, {"expected_verified_term_unique_coverage_keys_stale"})
+
+    def test_phase3_hash_tolerance_ignores_source_ref(self) -> None:
+        variant = AuditVariant(
+            source_order=20,
+            source_type="matcher_regression_case",
+            source_file="app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+            source_ref="manual:phase3_before",
+            source_id="matcher_regression_positive_phase3_source_ref_edit",
+            variant_role="positive_regression",
+            variant_text="matcher_regression_positive_phase3_source_ref_edit: Phase 3",
+            canonical="phase3stable",
+            expected_family="phase3stable",
+            ingredient_text="1 dl phase3stable",
+            product_text="Phase3stable",
+            expected=1,
+        )
+
+        before = variant.with_identity(row_index=1, batch_size=60, hash_version=IDENTITY_HASH_VERSION_V2)
+        after = replace(variant, source_ref="manual:phase3_after").with_identity(
+            row_index=1,
+            batch_size=60,
+            hash_version=IDENTITY_HASH_VERSION_V2,
+        )
+
+        self.assertEqual(before.variant_id, after.variant_id)
+        self.assertNotEqual(
+            variant.variant_id_for_hash_version(IDENTITY_HASH_VERSION_V1),
+            replace(variant, source_ref="manual:phase3_after").variant_id_for_hash_version(
+                IDENTITY_HASH_VERSION_V1
+            ),
+        )
+
+    def test_phase3_current_stable_variant_ids_are_unique(self) -> None:
+        variants = build_variants(batch_size=60, hash_version=IDENTITY_HASH_VERSION_V2)
+        variant_ids = [variant.variant_id for variant in variants]
+
+        self.assertEqual(len(variant_ids), len(set(variant_ids)))
 
 
 if __name__ == "__main__":
