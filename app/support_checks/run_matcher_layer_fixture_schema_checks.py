@@ -66,7 +66,7 @@ def main() -> int:
         "fixture prefilters match policy and canonical",
         fixture_matches_filters(
             salsa_fixture,
-            policy_refs={"current_queue_matcher_regression"},
+            policy_refs={"current_review_matcher_regression"},
             canonicals={"salsa"},
         ),
     )

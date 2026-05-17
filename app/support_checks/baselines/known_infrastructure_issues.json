@@ -1,0 +1,5 @@
+{
+  "doctrine": "main should have an empty snapshot; entries are temporary tolerances only",
+  "issues": [],
+  "version": 1
+}

@@ -22,6 +22,7 @@ from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
     has_temporary_fixture_id,
     has_temporary_policy_ref,
     has_temporary_source_ref,
+    source_ref_prefix_hint,
 )
 
 
@@ -102,7 +103,7 @@ def load_inventory(path: Path) -> list[dict[str, Any]]:
     return payload
 
 
-def _validate_line_ref(entry_id: str, line_ref: Any) -> list[str]:
+def _validate_line_ref(entry_id: str, line_ref: Any, *, repo_root: Path = REPO_DIR) -> list[str]:
     failures = []
     if not isinstance(line_ref, dict):
         return [f"{entry_id}: line_refs entries must be objects"]
@@ -133,7 +134,7 @@ def _validate_line_ref(entry_id: str, line_ref: Any) -> list[str]:
         failures.append(f"{entry_id}: line_ref anchor must be a non-empty string")
         return failures
 
-    target = REPO_DIR / path
+    target = repo_root / path
     if not target.exists():
         failures.append(f"{entry_id}: line_ref path does not exist: {path}")
         return failures
@@ -148,7 +149,7 @@ def _validate_line_ref(entry_id: str, line_ref: Any) -> list[str]:
     return failures
 
 
-def _line_ref_anchor_in_recorded_range(line_ref: Any) -> bool:
+def _line_ref_anchor_in_recorded_range(line_ref: Any, *, repo_root: Path = REPO_DIR) -> bool:
     if not isinstance(line_ref, dict):
         return False
     try:
@@ -160,7 +161,7 @@ def _line_ref_anchor_in_recorded_range(line_ref: Any) -> bool:
     anchor = line_ref.get("anchor")
     if not isinstance(anchor, str) or not anchor.strip():
         return False
-    target = REPO_DIR / path
+    target = repo_root / path
     if not target.exists() or start < 1 or end < start:
         return False
     lines = target.read_text(encoding="utf-8").splitlines()
@@ -169,7 +170,13 @@ def _line_ref_anchor_in_recorded_range(line_ref: Any) -> bool:
     return anchor in "\n".join(lines[start - 1:end])
 
 
-def _validate_entry(entry: Any, fixture_ids: set[str], seen_ids: set[str]) -> list[str]:
+def _validate_entry(
+    entry: Any,
+    fixture_ids: set[str],
+    seen_ids: set[str],
+    *,
+    repo_root: Path = REPO_DIR,
+) -> list[str]:
     failures = []
     if not isinstance(entry, dict):
         return ["inventory entries must be objects"]
@@ -210,7 +217,10 @@ def _validate_entry(entry: Any, fixture_ids: set[str], seen_ids: set[str]) -> li
                 failures.append(f"{entry_id}: source_refs entries must be non-empty strings")
                 continue
             if not source_ref.startswith(ALLOWED_SOURCE_REF_PREFIXES):
-                failures.append(f"{entry_id}: unknown source_ref prefix: {source_ref}")
+                failures.append(
+                    f"{entry_id}: unknown source_ref prefix: {source_ref}. "
+                    f"{source_ref_prefix_hint()}"
+                )
             if has_temporary_source_ref(source_ref):
                 failures.append(f"{entry_id}: source_ref must be stable: {source_ref}")
 
@@ -233,7 +243,7 @@ def _validate_entry(entry: Any, fixture_ids: set[str], seen_ids: set[str]) -> li
         failures.append(f"{entry_id}: line_refs must be a non-empty list")
     else:
         for line_ref in line_refs:
-            failures.extend(_validate_line_ref(entry_id, line_ref))
+            failures.extend(_validate_line_ref(entry_id, line_ref, repo_root=repo_root))
 
     if entry.get("status") == "wrapped_adapter":
         adapter_ref = entry.get("adapter_ref")
@@ -259,13 +269,15 @@ def _validate_entry(entry: Any, fixture_ids: set[str], seen_ids: set[str]) -> li
 def validate_inventory(
     inventory_payload: list[dict[str, Any]],
     fixture_payloads: list[dict[str, Any]],
+    *,
+    repo_root: Path = REPO_DIR,
 ) -> dict[str, Any]:
     fixture_ids = {str(payload["id"]) for payload in fixture_payloads}
     seen_ids: set[str] = set()
     failures = []
 
     for entry in inventory_payload:
-        failures.extend(_validate_entry(entry, fixture_ids, seen_ids))
+        failures.extend(_validate_entry(entry, fixture_ids, seen_ids, repo_root=repo_root))
 
     covered_fixture_ids = {
         str(fixture_ref)
@@ -311,7 +323,7 @@ def validate_inventory(
         for entry in inventory_payload
         if isinstance(entry, dict)
         for line_ref in entry.get("line_refs", [])
-        if _line_ref_anchor_in_recorded_range(line_ref)
+        if _line_ref_anchor_in_recorded_range(line_ref, repo_root=repo_root)
     )
     legacy_rules_total = len(inventory_payload)
     legacy_rules_with_fixture = sum(
@@ -395,6 +407,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate matcher rule inventory.")
     parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))
     parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))
+    parser.add_argument("--repo-root", type=Path, default=REPO_DIR)
     parser.add_argument("--format", choices=("text", "json"), default="text")
     return parser.parse_args()
 
@@ -404,6 +417,7 @@ def main() -> int:
     report = validate_inventory(
         load_inventory(Path(args.inventory_file)),
         _load_fixture_payload(Path(args.fixture_file)),
+        repo_root=args.repo_root,
     )
     if args.format == "json":
         print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))

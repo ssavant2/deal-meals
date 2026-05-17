@@ -805,13 +805,30 @@ def main() -> int:
     )
     args = parser.parse_args()
     config = _build_config(args)
-    return promote(
-        config=config,
-        dry_run=args.dry_run,
-        migrate_hashes=args.migrate_hashes,
-        allow_removals=args.allow_removals,
-        output_dir=args.output_dir,
-    )
+    try:
+        return promote(
+            config=config,
+            dry_run=args.dry_run,
+            migrate_hashes=args.migrate_hashes,
+            allow_removals=args.allow_removals,
+            output_dir=args.output_dir,
+        )
+    except PermissionError as exc:
+        if args.output_dir is not None or args.dry_run:
+            raise
+        fallback_dir = Path(os.environ.get("DEAL_MEALS_BASELINE_OUTPUT_DIR", "/tmp/term-baseline-promotion"))
+        print(
+            "\nWARNING: baseline promotion could not write to the checkout "
+            f"({exc}). Staging generated files instead."
+        )
+        print("Tip: in dev, prefer running the wrapper with `docker compose exec -T -u appuser -w /app web ...`.")
+        return promote(
+            config=config,
+            dry_run=args.dry_run,
+            migrate_hashes=args.migrate_hashes,
+            allow_removals=args.allow_removals,
+            output_dir=fallback_dir,
+        )
 
 
 if __name__ == "__main__":

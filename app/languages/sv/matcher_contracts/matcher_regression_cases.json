@@ -29215,6 +29215,13 @@
   },
   {
     "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "havssalt",
+        "ingredient_index": 0,
+        "must_match_keyword": "havssalt"
+      }
+    ],
     "id": "matcher_regression_positive_havssalt_250g_maldon",
     "ingredients": [
       "1 tsk Havssalt"

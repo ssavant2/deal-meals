@@ -56,22 +56,27 @@ There may be active user or agent changes. Do not revert unrelated edits. If the
 working tree is already dirty, keep your change scoped and mention the relevant
 pre-existing files in your handoff.
 
-The normal compose `web` service mounts `/app` read-only. Read-only checks run
-there. File edits and write-maintenance scripts usually need the host checkout
-or a write-enabled dev container.
+The production-style compose service mounts `/app` read-only. The dev overlay is
+writable in the current setup, but baseline writes belong to the file-owning
+`appuser`; a plain `docker compose exec web ...` may run as root and hit
+`PermissionError`. Use the host checkout or `docker compose exec -T -u appuser`
+for write-maintenance commands.
 
 ## Command First
 
 For most changes, start here and only read the longer sections when the wrapper
 flags or a failing gate are unclear.
 
+The wrapper always runs `run_matcher_change_preflight.py` first. Fix any `NEW`
+pre-flight issue before spending time on slower fixture/parity gates.
+
 **Where to run from:**
 
 - **Track A:** run from inside the container (`docker compose exec -T -w /app web ...`).
   Track A gates are read-only and tolerate the default `/app` read-only mount.
-- **Track B:** run from the host (`python3 app/support_checks/...`). Track B may
-  need to write baseline files, refresh inventory line refs, or stage promotion
-  output, all of which require a writable checkout.
+- **Track B:** run from a writable host checkout or the dev container as
+  `appuser`. Track B may need to write baseline files, refresh inventory line
+  refs, or stage promotion output.
 
 Track A runtime blocker/guard fix:
 
@@ -80,19 +85,22 @@ docker compose exec -T -w /app web \
   python support_checks/run_matcher_change_gates.py --track A
 ```
 
-Track B durable registry/fixture/inventory rule, from a writable host checkout:
+Track B durable registry/fixture/inventory rule, from the writable dev
+container:
 
 ```bash
-python3 app/support_checks/run_matcher_change_gates.py --track B \
-  --policy-ref <policy_ref>
+docker compose exec -T -u appuser -w /app web \
+  python support_checks/run_matcher_change_gates.py --track B \
+    --policy-ref <policy_ref>
 ```
 
 Track B with registry TOML changes:
 
 ```bash
-python3 app/support_checks/run_matcher_change_gates.py --track B \
-  --policy-ref <policy_ref> \
-  --registry-changed
+docker compose exec -T -u appuser -w /app web \
+  python support_checks/run_matcher_change_gates.py --track B \
+    --policy-ref <policy_ref> \
+    --registry-changed
 ```
 
 Add only the flags that match the change:
@@ -105,11 +113,13 @@ Add only the flags that match the change:
   removal.
 - `--refresh-line-refs` when inventory anchors moved; run from a writable host
   checkout or write-enabled dev container.
-- `--baseline-output-dir /tmp/term-baseline-promotion` only when `/app` is
+- `--baseline-output-dir /tmp/term-baseline-promotion` only when the checkout is
   read-only; the wrapper stages generated files and stops so you can apply them
-  before rerunning gates.
+  before rerunning gates. If promote is accidentally run as a user that cannot
+  write the checkout, it falls back to this staged-output mode automatically.
 - `--reload-cache --fresh-cache-gates` when cache/UI/cache-backed validation is
   part of the handoff.
+- `--include-support-self-checks` when support-check code or schemas changed.
 - `--dry-run` to print the exact gate list before running it.
 
 If the host worktree is clean enough for git auto-detection, the wrapper can
@@ -170,13 +180,14 @@ broad/systemic, release-facing, or meant to be permanent contract proof.
 3. Add the minimum fixture set: one positive, one negative or blocked sibling,
    and any positive guard needed to prove you did not over-block.
 4. Update inventory and refresh inventory line refs if anchors moved.
-5. Run the Track B gate wrapper from a writable host checkout or write-enabled
-   dev container, targeting by `--policy-ref`, `--canonical`, or `--case-id`
-   when possible:
+5. Run the Track B gate wrapper from a writable host checkout or the dev
+   container as `appuser`, targeting by `--policy-ref`, `--canonical`, or
+   `--case-id` when possible:
 
    ```bash
-   python3 app/support_checks/run_matcher_change_gates.py --track B \
-     --policy-ref plain_sensitive_filmjolk
+   docker compose exec -T -u appuser -w /app web \
+     python support_checks/run_matcher_change_gates.py --track B \
+       --policy-ref plain_sensitive_filmjolk
    ```
 
    Add `--registry-changed` for TOML edits, `--migrate-hashes` for verified-term
@@ -765,9 +776,25 @@ not use Track B fixture/inventory edits unless the work is escalated.
 Prefer the gate wrapper for standard Track B work:
 
 ```bash
-python3 app/support_checks/run_matcher_change_gates.py --track B \
-  --policy-ref plain_sensitive_filmjolk
+docker compose exec -T -u appuser -w /app web \
+  python support_checks/run_matcher_change_gates.py --track B \
+    --policy-ref plain_sensitive_filmjolk
 ```
+
+The first wrapper step is always the matcher change pre-flight. It aggregates
+schema, prefix, line-ref, coverage, and expected-count problems before the
+slower gates run:
+
+```text
+Matcher change pre-flight
+NEW=0 KNOWN=0 FIXED=0
+```
+
+`NEW` issues block the wrapper. `KNOWN` issues come only from the safety-valve
+snapshot at `app/support_checks/baselines/known_infrastructure_issues.json`.
+That snapshot should normally be empty on `main`; do not add to it unless there
+is a short-lived tracked cleanup reason. `FIXED` means a previously tolerated
+issue disappeared and the snapshot should be refreshed.
 
 Useful wrapper options:
 
@@ -823,33 +850,32 @@ before final registry gates. It may report no changes, but it is still the
 standard gate after TOML edits. `--migrate-hashes` is required when an
 extraction block/source-order change shifts existing hash IDs.
 
-In a writable checkout/container, use the plain command unless an extraction
-block/source-order change requires hash migration or intentional TOML
+In a writable checkout/container, use the plain command as `appuser` unless an
+extraction block/source-order change requires hash migration or intentional TOML
 inactivation/removal requires removal approval:
 
 ```bash
 # Choose exactly one:
-docker compose exec -T -w /app web \
+docker compose exec -T -u appuser -w /app web \
   python support_checks/promote_term_baseline.py
 
 # OR, when an extraction block/source-order change shifted hash IDs:
-docker compose exec -T -w /app web \
+docker compose exec -T -u appuser -w /app web \
   python support_checks/promote_term_baseline.py --migrate-hashes
 
 # OR, when TOML inactivation/removal intentionally removed verified variants:
-docker compose exec -T -w /app web \
+docker compose exec -T -u appuser -w /app web \
   python support_checks/promote_term_baseline.py --allow-removals
 
 # OR, when both source-order hash migration and intentional removal are needed:
-docker compose exec -T -w /app web \
+docker compose exec -T -u appuser -w /app web \
   python support_checks/promote_term_baseline.py \
     --migrate-hashes --allow-removals
 ```
 
-The normal compose `web` service may mount `/app` read-only. In that case, stage
-the generated files under a writable directory, again choosing either the plain
-hash-migration, removal, or combined variant as appropriate, and then apply the
-staged changes to the real checkout:
+If the checkout is read-only, stage the generated files under a writable
+directory, again choosing either the plain hash-migration, removal, or combined
+variant as appropriate, and then apply the staged changes to the real checkout:
 
 ```bash
 # Choose exactly one:

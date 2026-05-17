@@ -20703,10 +20703,10 @@ variant = "matcher_regression_positive_havskattfile: Havskattfilé"
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.legacy_review_regression.matcher_regression_positive_havssalt_250g_maldon"
+entry_id = "sv-se.policy.havssalt.matcher_regression_positive_havssalt_250g_maldon"
 language = "sv"
 market = "SE"
-canonical = "legacy_review_regression"
+canonical = "havssalt"
 status = "active"
 variants = ["matcher_regression_positive_havssalt_250g_maldon: Havssalt 250g Maldon"]
 ingredient_terms = []
@@ -20718,7 +20718,7 @@ notes = "Registry coverage for matcher regression fixture matcher_regression_pos
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "legacy_review_regression"
+canonical = "havssalt"
 variant = "matcher_regression_positive_havssalt_250g_maldon: Havssalt 250g Maldon"
 layer_role = "positive_regression"
 

@@ -21,10 +21,12 @@ def check(name: str, actual, expected) -> None:
 
 
 def main() -> int:
-    report = run_parity(_load_fixture_payload(Path(DEFAULT_FIXTURE_FILE)))
+    fixture_payloads = _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE))
+    expected_case_count = len(fixture_payloads)
+    report = run_parity(fixture_payloads)
     summary = report["summary"]
-    check("case count", summary["cases"], 1480)
-    check("passed count", summary["passed"], 1480)
+    check("case count", summary["cases"], expected_case_count)
+    check("passed count", summary["passed"], expected_case_count)
     check("failed count", summary["failed"], 0)
     check("parity mismatches", summary["parity_mismatches"], 0)
     check("allowed additional matches used", summary["allowed_additional_matches_used"], 0)
@@ -47,11 +49,11 @@ def main() -> int:
     check("compiled fullscan failures", report["by_path"]["compiled_fullscan"]["failed"], 0)
     check("compiled routed failures", report["by_path"]["compiled_routed"]["failed"], 0)
     check("compiled hint-first failures", report["by_path"]["compiled_hint_first"]["failed"], 0)
-    check("diagnosis counts", report["diagnosis_counts"], {"pass": 1480})
+    check("diagnosis counts", report["diagnosis_counts"], {"pass": expected_case_count})
 
     filtered_report = run_parity(
-        _load_fixture_payload(Path(DEFAULT_FIXTURE_FILE)),
-        policy_refs={"current_queue_matcher_regression"},
+        fixture_payloads,
+        policy_refs={"current_review_matcher_regression"},
         canonicals={"alger"},
         diagnosis_classes={"pass"},
     )

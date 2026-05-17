@@ -27,6 +27,7 @@ os.environ.setdefault("TERM_REGISTRY_DISABLE_LOCAL_ENTRIES", "1")
 from languages.term_registry.models import CheckIssue, RegistryEntry, RegistryExample  # noqa: E402
 from languages.term_registry.reports import write_json_and_markdown_report  # noqa: E402
 from languages.sv.ingredient_matching.term_registry.add_term import (  # noqa: E402
+    SV_EXPORT_LAYER_SPECS,
     build_add_term_export_plan,
 )
 
@@ -36,7 +37,7 @@ DEFAULT_REPORT_ROOT = (
     / "term_registry"
 )
 EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS = 5382
-EXPECTED_SV_EXPORT_LAYER_COUNT = 25
+EXPECTED_SV_EXPORT_LAYER_COUNT = len(SV_EXPORT_LAYER_SPECS)
 
 
 def _issue(

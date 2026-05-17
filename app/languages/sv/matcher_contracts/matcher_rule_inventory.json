@@ -13572,9 +13572,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_havssalt_250g_maldon",
-        "end": 29218,
+        "end": 29225,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29218
+        "start": 29225
       }
     ],
     "notes": "Corrected legacy import for legacy_review:explicit_havssalt_still_extracts_nothing_even_when_a_real_sea_salt_offer_exists: Maldon Havssalt 250g is valid sea salt/flake salt and is positive for havssalt and flingsalt wording, while Ört Havssalt Herbamare remains a herb-salt/spice-mix negative.",
@@ -13599,9 +13599,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_cooking_spice_sauce_korma_360g_santa_maria",
-        "end": 29271,
+        "end": 29278,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29271
+        "start": 29278
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:kormasas_exact_sauce_products_still_emit_no_usable_product_keyword. Selected cases passed fixture diagnostics. Titles: `kormasås` exact sauce products still emit no usable product keyword.",
@@ -13626,9 +13626,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_tomatsoppa_400g_heinz",
-        "end": 29358,
+        "end": 29365,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29358
+        "start": 29365
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:mild_tomatsoppa_exact_soup_products_still_emit_no_usable_product_keyword. Selected cases passed fixture diagnostics. Titles: `mild tomatsoppa` exact soup products still emit no usable product keyword.",
@@ -13651,9 +13651,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_chipotle_paste_100g_santa_maria",
-        "end": 29445,
+        "end": 29452,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29445
+        "start": 29452
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:chipotlepasta_still_blocks_the_exact_paste_product_because_generic_chipotle_is_already_false_positive_blocked. Selected cases passed fixture diagnostics. Titles: `chipotlepasta` still blocks the exact paste product because generic `chipotle` is already false-positive-blocked.",
@@ -13677,9 +13677,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_boveteflingor",
-        "end": 29503,
+        "end": 29510,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29503
+        "start": 29510
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:exact_boveteflingor_still_block_because_naturens_skafferi_leaks_bogus_kaffe_context. Selected cases passed fixture diagnostics. Titles: Exact `Boveteflingor` still block because `Naturens skafferi` leaks bogus `kaffe` context.",
@@ -13703,9 +13703,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_mynta_i_kruka",
-        "end": 29561,
+        "end": 29568,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29561
+        "start": 29568
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:grouped_herb_leaf_wording_still_collapses_to_generic_ortblad_and_loses_the_actual_herbs. Selected cases passed fixture diagnostics. Titles: Grouped herb-leaf wording still collapses to generic `örtblad` and loses the actual herbs.",
@@ -13732,9 +13732,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_pasta_fettuccine_farsk_500g_ica",
-        "end": 29590,
+        "end": 29597,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29590
+        "start": 29597
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:fresh_fettuccine_exact_products_still_fail_because_the_ingredient_falls_into_generic_langpasta_and_gets_blocked_by_pasta. Selected cases passed fixture diagnostics. Titles: Fresh `fettuccine` exact products still fail because the ingredient falls into generic `långpasta` and gets blocked by `pasta`.",
@@ -13760,9 +13760,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_jast_for_sota_degar_3ff8a7cc",
-        "end": 29722,
+        "end": 29729,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29722
+        "start": 29729
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:generic_fresh_yeast_wording_still_blocks_bread_yeast_while_allowing_sweet_dough_yeast. Selected cases passed fixture diagnostics. Titles: Generic fresh-yeast wording still blocks bread yeast while allowing sweet-dough yeast.",
@@ -13787,9 +13787,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_pasta_bacon_parmesansas_390g_findus",
-        "end": 29826,
+        "end": 29833,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29826
+        "start": 29833
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:exact_parmesansas_still_accepts_a_ready_meal_instead_of_staying_near_sauce_products. Selected cases passed fixture diagnostics. Titles: Exact `parmesansås` still accepts a ready meal instead of staying near sauce products.",
@@ -13815,9 +13815,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_kantareller_i_vatten_200g_borgens_41a051c1",
-        "end": 29900,
+        "end": 29907,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29900
+        "start": 29907
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:explicit_rensad_farsk_svamp_still_accepts_preserved_and_dried_mushrooms_through_generic_svamp. Selected cases passed fixture diagnostics. Titles: Explicit `rensad färsk svamp` still accepts preserved and dried mushrooms through generic `svamp`.",
@@ -13840,9 +13840,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_dumpling_biff_chili_ingefara_200g_beijing8",
-        "end": 29988,
+        "end": 29995,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 29988
+        "start": 29995
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:prep_phrase_delad_i_4_biffar_still_leaks_generic_biff_and_matches_prepared_beef_dishes. Selected cases passed fixture diagnostics. Titles: Prep phrase `delad i 4 biffar` still leaks generic `biff` and matches prepared beef dishes.",
@@ -13870,9 +13870,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_tagliatelle_500g_ica_basic",
-        "end": 30010,
+        "end": 30017,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 30010
+        "start": 30017
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:subrecipe_reference_line_pastadeg_se_lank_i_ingress_still_matches_dry_pasta_products. Selected cases passed fixture diagnostics. Titles: Subrecipe/reference line `pastadeg (se länk i ingress)` still matches dry pasta products.",
@@ -13901,9 +13901,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_ansjovisfileer",
-        "end": 30265,
+        "end": 30272,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 30265
+        "start": 30272
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:exact_ansjovisfileer_offers_exist_live_but_still_stayed_at_0_cached_matches. Selected cases passed fixture diagnostics. Titles: Exact `Ansjovisfiléer` offers exist live but still stayed at `0 cached matches`.",
@@ -13931,9 +13931,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_ananas_krossad_6b0eec41",
-        "end": 30352,
+        "end": 30359,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 30352
+        "start": 30359
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:explicit_ananas_krossad_still_widens_to_whole_and_frozen_pineapple. Selected cases passed fixture diagnostics. Titles: Explicit `Ananas Krossad` still widens to whole and frozen pineapple.",
@@ -13963,9 +13963,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_harissa_het_chilipasta_380g_sevan",
-        "end": 30501,
+        "end": 30508,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 30501
+        "start": 30508
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:gochujang_chilipasta_still_collapses_onto_generic_chili_paste_products. Selected cases passed fixture diagnostics. Titles: `gochujang chilipasta` still collapses onto generic chili-paste products.",
@@ -13992,9 +13992,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_sweet_chili_16af68a9",
-        "end": 30716,
+        "end": 30723,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 30716
+        "start": 30723
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:plain_sweet_chili_line_still_stayed_at_0_cached_matches_even_though_live_sweet_chili_sauce_offers_exist. Selected cases passed fixture diagnostics. Titles: Plain `Sweet Chili` line still stayed at `0 cached matches` even though live sweet-chili sauce offers exist.",
@@ -14021,9 +14021,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_salladsarta",
-        "end": 30884,
+        "end": 30891,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 30884
+        "start": 30891
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:salladsartor_still_misses_the_live_exact_salladsarta_offer. Selected cases passed fixture diagnostics. Titles: `salladsärtor` still misses the live exact `Salladsärta` offer.",
@@ -14056,9 +14056,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_falukorv",
-        "end": 30993,
+        "end": 31000,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 30993
+        "start": 31000
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:explicit_farskkorv_still_widens_to_an_extremely_broad_generic_sausage_family. Selected cases passed fixture diagnostics. Titles: Explicit `färskkorv` still widens to an extremely broad generic sausage family.",
@@ -14083,9 +14083,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_ol_porter_3_5_50cl_carnegie",
-        "end": 31290,
+        "end": 31297,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 31290
+        "start": 31297
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:explicit_porter_beer_wording_still_extracts_no_ingredient_keywords. Selected cases passed fixture diagnostics. Titles: Explicit `porter` beer wording still extracts no ingredient keywords.",
@@ -14109,9 +14109,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_green_chili_mild_113g_santa_maria",
-        "end": 31364,
+        "end": 31371,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 31364
+        "start": 31371
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:explicit_green_chili_still_misses_the_live_branded_seasoning_product. Selected cases passed fixture diagnostics. Titles: Explicit `Green Chili` still misses the live branded seasoning product.",
@@ -14139,9 +14139,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_salami_300g_ica_basic",
-        "end": 31423,
+        "end": 31430,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 31423
+        "start": 31430
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:explicit_salami_palagg_now_blocks_exact_salami_products_instead_of_surfacing_them. Selected cases passed fixture diagnostics. Titles: Explicit `salami pålägg` now blocks exact salami products instead of surfacing them.",
@@ -14167,9 +14167,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_steklok",
-        "end": 31649,
+        "end": 31656,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 31649
+        "start": 31656
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:generic_steklok_still_blocks_the_live_steklok_rod_produce_offer. Selected cases passed fixture diagnostics. Titles: Generic `Steklök` still blocks the live `Steklök röd` produce offer.",
@@ -14197,9 +14197,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_romsas",
-        "end": 31701,
+        "end": 31708,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 31701
+        "start": 31708
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:romsas_still_falls_through_to_plain_roe_caviar_products_via_the_generic_rom_bridge. Selected cases passed fixture diagnostics. Titles: `Romsås` still falls through to plain roe/caviar products via the generic `rom` bridge.",
@@ -14227,9 +14227,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_champinjoner_skivade_290g_ica",
-        "end": 31834,
+        "end": 31841,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 31834
+        "start": 31841
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:explicit_skogschampinjoner_skivade_still_accepts_preserved_sliced_champignons. Selected cases passed fixture diagnostics. Titles: Explicit `skogschampinjoner, skivade` still accepts preserved sliced champignons.",
@@ -14258,9 +14258,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_vitkal_klass_1_ica",
-        "end": 31997,
+        "end": 32004,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 31997
+        "start": 32004
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:generic_kalhuvud_still_misses_live_cabbage_head_offers. Selected cases passed fixture diagnostics. Titles: Generic `kålhuvud` still misses live cabbage-head offers.",
@@ -14288,9 +14288,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_negative_grona_oliver_farskostfyllda_250g_gourmet_gruppen",
-        "end": 32169,
+        "end": 32176,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 32169
+        "start": 32176
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:explicit_olive_variety_plain_green_olive_lines_still_accept_stuffed_green_olives. Selected cases passed fixture diagnostics. Titles: Explicit olive-variety / plain green-olive lines still accept stuffed green olives.",
@@ -14316,9 +14316,9 @@
     "line_refs": [
       {
         "anchor": "matcher_regression_positive_chilisas_original",
-        "end": 32332,
+        "end": 32339,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 32332
+        "start": 32339
       }
     ],
     "notes": "Migrated legacy review cases for legacy_review:explicit_chilisas_original_still_accepts_other_chili_sauce_families. Selected cases passed fixture diagnostics. Titles: Explicit `Chilisås Original` still accepts other chili-sauce families.",
@@ -14368,9 +14368,9 @@
       },
       {
         "anchor": "matcher_regression_positive_persilja_i_kruka_ekologisk_1_p_krav_klass_1",
-        "end": 32458,
+        "end": 32465,
         "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-        "start": 32458
+        "start": 32465
       }
     ],
     "notes": "Persiljekvistar follows the fresh/frozen parsley policy while prepared parsley-flavored carriers and standalone synthetic terms stay negative. Migrated confirmed legacy staging cases passed fixture diagnostics before migration.",

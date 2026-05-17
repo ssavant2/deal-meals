@@ -34,6 +34,7 @@ ALLOWED_SOURCE_REF_PREFIXES = (
     "plan_initial:",
     "sanity:",
 )
+ALLOWED_SOURCE_REF_PREFIXES_TEXT = ", ".join(ALLOWED_SOURCE_REF_PREFIXES)
 TEMPORARY_POLICY_REF_RE = re.compile(r"^(?:batch\d+(?:_\d+)?|legacy_questions_old(?:_|:).*)$")
 TEMPORARY_FIXTURE_ID_RE = re.compile(r"^(?:batch\d+(?:_\d+)?_|legacy_old_batch)")
 TEMPORARY_SOURCE_REF_RE = re.compile(
@@ -51,6 +52,10 @@ def has_temporary_fixture_id(fixture_id: str) -> bool:
 
 def has_temporary_source_ref(source_ref: str) -> bool:
     return bool(TEMPORARY_SOURCE_REF_RE.match(source_ref))
+
+
+def source_ref_prefix_hint() -> str:
+    return f"Allowed: {ALLOWED_SOURCE_REF_PREFIXES_TEXT}"
 
 
 def _load_fixture_payload(path: Path) -> list[dict[str, Any]]:
@@ -90,7 +95,10 @@ def _validate_fixture_payload(payload: dict[str, Any]) -> None:
     if has_temporary_source_ref(payload["source_ref"]):
         raise ValueError(f"fixture {payload['id']} source_ref must be stable: {payload['source_ref']}")
     if not payload["source_ref"].startswith(ALLOWED_SOURCE_REF_PREFIXES):
-        raise ValueError(f"fixture {payload['id']} source_ref has unknown prefix: {payload['source_ref']}")
+        raise ValueError(
+            f"fixture {payload['id']} source_ref has unknown prefix: "
+            f"{payload['source_ref']}. {source_ref_prefix_hint()}"
+        )
     if not isinstance(payload["ingredients"], list) or not payload["ingredients"]:
         raise ValueError(f"fixture {payload['id']} requires a non-empty ingredients list")
     if payload["expected"] not in (0, 1):

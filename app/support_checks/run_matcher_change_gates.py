@@ -50,6 +50,50 @@ def _command(name: str, *args: str) -> tuple[str, ...]:
     return (sys.executable, _script(name), *args)
 
 
+def _app_dir_for_tree_root(tree_root: Path | None) -> Path:
+    if tree_root is None:
+        return APP_DIR
+    root = tree_root.resolve()
+    if (root / "app").is_dir():
+        return root / "app"
+    return root
+
+
+def _repo_root_for_tree_root(tree_root: Path | None) -> Path:
+    app_dir = _app_dir_for_tree_root(tree_root)
+    return app_dir.parent if app_dir.name == "app" else app_dir
+
+
+def _fixture_file_for_args(args: argparse.Namespace) -> Path:
+    return _app_dir_for_tree_root(args.tree_root) / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+
+
+def _inventory_file_for_args(args: argparse.Namespace) -> Path:
+    return _app_dir_for_tree_root(args.tree_root) / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+
+
+def _fixture_file_args(args: argparse.Namespace) -> list[str]:
+    if args.tree_root is None:
+        return []
+    return ["--fixture-file", str(_fixture_file_for_args(args))]
+
+
+def _inventory_file_args(args: argparse.Namespace) -> list[str]:
+    if args.tree_root is None:
+        return []
+    return [
+        "--inventory-file", str(_inventory_file_for_args(args)),
+        "--fixture-file", str(_fixture_file_for_args(args)),
+        "--repo-root", str(_repo_root_for_tree_root(args.tree_root)),
+    ]
+
+
+def _tree_root_args(args: argparse.Namespace) -> list[str]:
+    if args.tree_root is None:
+        return []
+    return ["--tree-root", str(args.tree_root)]
+
+
 def _target_filter_args(args: argparse.Namespace) -> list[str]:
     filters: list[str] = []
     for case_id in args.case_id or []:
@@ -245,6 +289,15 @@ def _baseline_promotion_step(args: argparse.Namespace) -> Step:
     )
 
 
+def _preflight_step(args: argparse.Namespace) -> Step:
+    return Step(
+        "matcher change pre-flight",
+        _command("run_matcher_change_preflight.py", *_tree_root_args(args)),
+        "collects matcher rule-change infrastructure issues before slower gates",
+        cwd=_repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
+    )
+
+
 def _build_track_a_steps(args: argparse.Namespace) -> list[Step]:
     steps = [
         Step(
@@ -254,7 +307,7 @@ def _build_track_a_steps(args: argparse.Namespace) -> list[Step]:
         ),
         Step(
             "full matcher parity",
-            _command("run_matcher_layer_parity.py", "--skip-cache-freshness"),
+            _command("run_matcher_layer_parity.py", *_fixture_file_args(args), "--skip-cache-freshness"),
             "proves the narrow runtime fix did not break existing contracts",
         ),
     ]
@@ -268,12 +321,12 @@ def _build_track_a_steps(args: argparse.Namespace) -> list[Step]:
         steps.extend([
             Step(
                 "full fixture cases with cache freshness",
-                _command("run_matcher_layer_fixture_cases.py"),
+                _command("run_matcher_layer_fixture_cases.py", *_fixture_file_args(args)),
                 "final cache-aware fixture gate",
             ),
             Step(
                 "full parity with cache freshness",
-                _command("run_matcher_layer_parity.py"),
+                _command("run_matcher_layer_parity.py", *_fixture_file_args(args)),
                 "final cache-aware parity gate",
             ),
         ])
@@ -291,12 +344,22 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
         steps.extend([
             Step(
                 "targeted fixture cases",
-                _command("run_matcher_layer_fixture_cases.py", *target_args, "--skip-cache-freshness"),
+                _command(
+                    "run_matcher_layer_fixture_cases.py",
+                    *_fixture_file_args(args),
+                    *target_args,
+                    "--skip-cache-freshness",
+                ),
                 "checks the affected fixture/policy/canonical first",
             ),
             Step(
                 "targeted matcher parity",
-                _command("run_matcher_layer_parity.py", *target_args, "--skip-cache-freshness"),
+                _command(
+                    "run_matcher_layer_parity.py",
+                    *_fixture_file_args(args),
+                    *target_args,
+                    "--skip-cache-freshness",
+                ),
                 "checks the affected fixture/policy/canonical across matcher paths",
             ),
         ])
@@ -304,9 +367,14 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
     if args.refresh_line_refs:
         steps.append(Step(
             "refresh inventory line refs",
-            _command("refresh_matcher_rule_inventory_line_refs.py", "--write"),
+            _command(
+                "refresh_matcher_rule_inventory_line_refs.py",
+                "--write",
+                "--repo-root",
+                str(_repo_root_for_tree_root(args.tree_root)),
+            ),
             "updates inventory anchors after moved Python/TOML line refs",
-            cwd=_discover_repo_root(),
+            cwd=_repo_root_for_tree_root(args.tree_root),
         ))
 
     if changes.registry_changed and not args.skip_baseline_promotion:
@@ -353,12 +421,12 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
     steps.extend([
         Step(
             "full fixture cases",
-            _command("run_matcher_layer_fixture_cases.py", "--skip-cache-freshness"),
+            _command("run_matcher_layer_fixture_cases.py", *_fixture_file_args(args), "--skip-cache-freshness"),
             "required Track B fixture contract gate",
         ),
         Step(
             "full matcher parity",
-            _command("run_matcher_layer_parity.py", "--skip-cache-freshness"),
+            _command("run_matcher_layer_parity.py", *_fixture_file_args(args), "--skip-cache-freshness"),
             "required Track B parity gate across matcher paths",
         ),
     ])
@@ -367,12 +435,16 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
         steps.extend([
             Step(
                 "matcher rule model checks",
-                _command("run_matcher_rule_model_checks.py"),
+                _command(
+                    "run_matcher_rule_model_checks.py",
+                    *_fixture_file_args(args),
+                    *(["--inventory-file", str(_inventory_file_for_args(args))] if args.tree_root is not None else []),
+                ),
                 "validates rule-model and fixture/inventory structure",
             ),
             Step(
                 "matcher rule inventory checks",
-                _command("run_matcher_rule_inventory_checks.py"),
+                _command("run_matcher_rule_inventory_checks.py", *_inventory_file_args(args)),
                 "validates fixture to inventory ownership",
             ),
         ])
@@ -385,6 +457,11 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
 
     if args.include_support_self_checks:
         steps.extend([
+            Step(
+                "matcher rule-change flow tests",
+                (sys.executable, "-m", "unittest", "support_checks.tests.test_rule_change_flow"),
+                "support-check self-test for the pre-flight rule-change flow",
+            ),
             Step(
                 "matcher fixture schema checks",
                 _command("run_matcher_layer_fixture_schema_checks.py"),
@@ -412,12 +489,12 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
         steps.extend([
             Step(
                 "full fixture cases with cache freshness",
-                _command("run_matcher_layer_fixture_cases.py"),
+                _command("run_matcher_layer_fixture_cases.py", *_fixture_file_args(args)),
                 "final cache-aware fixture gate",
             ),
             Step(
                 "full parity with cache freshness",
-                _command("run_matcher_layer_parity.py"),
+                _command("run_matcher_layer_parity.py", *_fixture_file_args(args)),
                 "final cache-aware parity gate",
             ),
         ])
@@ -470,8 +547,10 @@ def _warn_before_running(args: argparse.Namespace, changes: ChangeFlags) -> None
         baseline_dir = APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_registry" / "baselines"
         if not os.access(baseline_dir, os.W_OK):
             print(
-                "\nNOTE: baseline promotion may need a writable checkout. If /app is read-only, "
-                "rerun with --baseline-output-dir /tmp/term-baseline-promotion and apply the staged files.",
+                "\nNOTE: baseline promotion may need the file-owning dev user. Prefer:\n"
+                "  docker compose exec -T -u appuser -w /app web "
+                "python support_checks/run_matcher_change_gates.py ...\n"
+                "If that is not available, promotion will stage files under /tmp/term-baseline-promotion.",
                 flush=True,
             )
     if _stages_baseline(args, changes):
@@ -528,6 +607,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--track", choices=("A", "B"), required=True)
     parser.add_argument("--dry-run", action="store_true", help="Print planned gates without running them.")
+    parser.add_argument(
+        "--tree-root",
+        type=Path,
+        default=None,
+        help="Run path-aware gates against this checkout/tree root instead of the live /app tree.",
+    )
     parser.add_argument("--case-id", action="append", help="Target this fixture id. Can be repeated.")
     parser.add_argument("--policy-ref", action="append", help="Target this policy_ref. Can be repeated.")
     parser.add_argument("--canonical", action="append", help="Target this canonical. Can be repeated.")
@@ -591,7 +676,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    repo_root = _discover_repo_root()
+    repo_root = _repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else _discover_repo_root()
     changed_paths, git_error = _git_changed_paths(repo_root) if args.auto_detect else (set(), None)
     detected = _detect_change_flags(changed_paths)
     changes = _resolved_change_flags(args, detected)
@@ -606,9 +691,9 @@ def main() -> int:
     _warn_before_running(args, changes)
 
     if args.track == "A":
-        steps = _build_track_a_steps(args)
+        steps = [_preflight_step(args), *_build_track_a_steps(args)]
     else:
-        steps = _build_track_b_steps(args, changes)
+        steps = [_preflight_step(args), *_build_track_b_steps(args, changes)]
     return _run_steps(steps, dry_run=args.dry_run)
 
 
