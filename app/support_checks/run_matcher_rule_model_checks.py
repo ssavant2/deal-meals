@@ -620,8 +620,9 @@ def main() -> int:
         "bridge_worcestersas_worcestershire",
         "bridge_yoghurt_alt_naturell",
         "bridge_white_dark_chocolate_color_list",
+        "bridge_citrusfrukter_family",
     }
-    check("seed match bridge count", len(MATCH_BRIDGES) == 282)
+    check("seed match bridge count", len(MATCH_BRIDGES) == 283)
     check("seed match bridge ids", set(MATCH_BRIDGES_BY_ID) == expected_bridge_ids)
     dill_bridge_hits = find_match_bridge_hits(
         ingredient_texts=("1 tsk Dillfrö",),

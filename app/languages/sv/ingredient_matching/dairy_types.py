@@ -1,5 +1,6 @@
 """Dairy type matching rules for Swedish ingredient matching."""
 
+import re
 from typing import FrozenSet
 
 try:
@@ -147,6 +148,17 @@ def check_yoghurt_match(keyword: str, ingredient_lower: str,
 
     is_vanilj_recipe = any(v in ingredient_lower for v in _YOGHURT_VANILJ_INDICATORS)
     is_vego_recipe = any(v in ingredient_lower for v in _YOGHURT_VEGO_INDICATORS)
+
+    # "Eller"-construction: recipe presents two alternatives (e.g.
+    # "yoghurt eller havrefraiche"). Both branches should match. Detect by checking
+    # that 'eller' appears together with a standalone 'yoghurt' word — then both
+    # plain dairy AND vego products are acceptable.
+    if (
+        is_vego_recipe
+        and ' eller ' in ingredient_lower
+        and re.search(r'\byoghurt\b', ingredient_lower)
+    ):
+        return is_vanilj_product or is_vego_product or is_plain_product or is_cooking_product
 
     if is_vanilj_recipe:
         return is_vanilj_product

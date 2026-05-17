@@ -3565,7 +3565,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'adelost': {'mjukost'},
     # Sherry style "manzanilla" ≠ manzanilla olive products
     'manzanilla': {'oliver'},
-    # Q105: pepparrot processed forms (kräm/visp/spread) ≠ fresh root. Fresh whole root
+    # Pepparrot processed forms (kräm/visp/spread) ≠ fresh root. Fresh whole root
     # AND fresh riven root (= grated fresh root) both match plain "pepparrot färsk" recipe.
     # Only true cheese-spread / cream forms are blocked.
     'pepparrot': {

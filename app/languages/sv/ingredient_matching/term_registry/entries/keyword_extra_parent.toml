@@ -1949,3 +1949,187 @@ layer_role = "keyword_extra_parent_mapping"
 ingredient = "kronartskockshjarta"
 offer_name = "Kronartskockshjarta"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.citrusfrukter.citron_083"
+language = "sv"
+market = "SE"
+canonical = "citrusfrukter"
+status = "active"
+variants = ["citron"]
+route_terms = ["citrusfrukter"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "citrusfrukter"
+variant = "citron"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "citrusfrukter"
+offer_name = "Citron"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.citrusfrukter.lime_084"
+language = "sv"
+market = "SE"
+canonical = "citrusfrukter"
+status = "active"
+variants = ["lime"]
+route_terms = ["citrusfrukter"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "citrusfrukter"
+variant = "lime"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "citrusfrukter"
+offer_name = "Lime"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.citrusfrukter.apelsin_085"
+language = "sv"
+market = "SE"
+canonical = "citrusfrukter"
+status = "active"
+variants = ["apelsin"]
+route_terms = ["citrusfrukter"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "citrusfrukter"
+variant = "apelsin"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "citrusfrukter"
+offer_name = "Apelsin"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.citrusfrukter.mandarin_086"
+language = "sv"
+market = "SE"
+canonical = "citrusfrukter"
+status = "active"
+variants = ["mandarin"]
+route_terms = ["citrusfrukter"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "citrusfrukter"
+variant = "mandarin"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "citrusfrukter"
+offer_name = "Mandarin"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.citrusfrukter.clementin_087"
+language = "sv"
+market = "SE"
+canonical = "citrusfrukter"
+status = "active"
+variants = ["clementin"]
+route_terms = ["citrusfrukter"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "citrusfrukter"
+variant = "clementin"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "citrusfrukter"
+offer_name = "Clementin"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.citrusfrukter.klementin_088"
+language = "sv"
+market = "SE"
+canonical = "citrusfrukter"
+status = "active"
+variants = ["klementin"]
+route_terms = ["citrusfrukter"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "citrusfrukter"
+variant = "klementin"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "citrusfrukter"
+offer_name = "Klementin"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.citrusfrukter.grapefrukt_089"
+language = "sv"
+market = "SE"
+canonical = "citrusfrukter"
+status = "active"
+variants = ["grapefrukt"]
+route_terms = ["citrusfrukter"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "citrusfrukter"
+variant = "grapefrukt"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "citrusfrukter"
+offer_name = "Grapefrukt"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.family.citrusfrukter.blodapelsin_090"
+language = "sv"
+market = "SE"
+canonical = "citrusfrukter"
+status = "active"
+variants = ["blodapelsin"]
+route_terms = ["citrusfrukter"]
+source_refs = ["code:term_registry_entries:keyword_extra_parent.toml"]
+layer_policy = ["route_only"]
+notes = "Registry-owned keyword extra parent mapping."
+
+[[entries.coverage]]
+source_family = "keyword_extra_parent"
+canonical = "citrusfrukter"
+variant = "blodapelsin"
+layer_role = "keyword_extra_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "citrusfrukter"
+offer_name = "Blodapelsin"
+expected = 1

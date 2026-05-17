@@ -875,8 +875,9 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # "potatisskalare" = potato peeler (kitchen tool), not potatoes
     'potatis': {
         'potatisskalare', 'sötpotatis', 'sotpotatis',
-        # Q79/Q104 specific variety policy: when recipe names a specific variety,
-        # suppress generic 'potatis' so plain potatis products don't bridge.
+        # Specific potato varieties (bakpotatis/mandelpotatis/färskpotatis) are
+        # named specialty products — when the recipe names one, suppress generic
+        # 'potatis' so plain potatis products don't bridge into the specific recipe.
         # The specific variety still matches its own keyword.
         'bakpotatis', 'bakpotatisar',
         'mandelpotatis', 'mandelpotatisar',

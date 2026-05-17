@@ -10,7 +10,7 @@ from typing import Any
 import re
 
 
-ENTRY_STATUSES = frozenset({"active", "planned", "watchlist", "deprecated"})
+ENTRY_STATUSES = frozenset({"active", "planned", "watchlist", "deprecated", "inactive"})
 ENTRY_TYPES = frozenset({"family", "alias", "guard", "bridge", "policy", "watchlist"})
 LAYER_POLICIES = frozenset({
     "normal",

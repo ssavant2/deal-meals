@@ -664,7 +664,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     'jordgubbar': {'frystorkad', 'frystorkade'},
     'körsbär': {'torkad', 'torkade'},
     # 'dadlar' removed — dried is the default form in Sweden. "Dadlar" = torkade dadlar.
-    # NOTE: pepparrot SVF rule removed 2026-05-16 (Q105). Was `'pepparrot': {'färsk', 'farsk'}`
+    # NOTE: pepparrot SVF rule removed 2026-05-16. Was `'pepparrot': {'färsk', 'farsk'}`
     # but blocked legitimate fresh products like "Pepparrot Riven" (= fresh grated root).
     # Replaced by PNB on pepparrot to block only true preserved forms (kräm/visp/spread).
     # Food coloring: when recipe specifies a color (gul, röd, svart...), only that color should match.

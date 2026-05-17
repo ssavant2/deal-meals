@@ -193,9 +193,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bchoco\\s+corns\\b", "\\bfullkornsmajspuffar\\b"]
 allowed_specifics = []
 reason = "Chocolate coffee beans must not match chocolate-flavored breakfast cereal carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_choco_corns_fullkornsmajspuffar_med_choklad", "matcher_regression_negative_choco_corns_fullkornsmajspuffar_med_choklad_glutenfri_375g_naturens_skafferi"]
-supersedes = ["legacy_auto_promoted_batch15_test_batch_q1"]
+supersedes = ["legacy_review_choco_corns_fullkornsmajspuffar_med_choklad_matching_choklad_keyword_d389d225"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -236,9 +236,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bhallon\\b"]
 allowed_specifics = []
 reason = "Raspberry-flavored chocolate wording must not expose fresh or frozen raspberry fruit."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_hallon_125g", "matcher_regression_negative_hallon_fryst_500g"]
-supersedes = ["legacy_auto_promoted_batch15_test_batch_q2"]
+supersedes = ["legacy_review_fresh_hallon_matching_hallonsmak_keyword_742f4b1e"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -273,9 +273,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bjäst\\b.*\\bmatbröd\\b", "\\bjast\\b.*\\bmatbrod\\b"]
 allowed_specifics = []
 reason = "Bjäst/nutritional-yeast wording must not collapse to ordinary baker's yeast."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_jast_for_matbrod_50g_kronjast"]
-supersedes = ["legacy_auto_promoted_batch15_test_batch_q3"]
+supersedes = ["legacy_review_baker_s_yeast_matching_bjast_ingredient_99d3d6eb"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -316,9 +316,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["(?=.*\\bmandlar\\b)(?=.*\\brostade?\\b)(?=.*\\bsaltade?\\b).*", "(?=.*\\bmandlar\\b)(?=.*\\brostade?\\b)(?=.*\\bsaltade?\\b).*"]
 allowed_specifics = []
 reason = "Plain natural sweet almonds stay separate from roasted and salted snack almonds."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_mandlar_rostade_och_saltade", "matcher_regression_negative_mandlar_rostade_och_saltade_200g_exotic_snacks", "matcher_regression_negative_mandlar_rostade_saltade_100g_ica"]
-supersedes = ["legacy_auto_promoted_batch15_full_review_q1"]
+supersedes = ["legacy_review_mandlar_rostade_och_saltade_matching_sotmandel_keyword_multiple_recipes"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -359,9 +359,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bbearnaise\\b", "\\bremoulade\\b", "\\bmajonnäs\\b", "\\bmajonnas\\b", "\\beriks\\s+såser\\b", "\\beriks\\s+saser\\b"]
 allowed_specifics = []
 reason = "Prepared meat-sauce wording must not match unrelated table sauces or mayonnaise carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_bearnaise_de058459", "matcher_regression_negative_bearnaise_remoulade_majonnas_5129a3b2", "matcher_regression_negative_eriks_remoulade", "matcher_regression_negative_eriks_saser_25c7897c", "matcher_regression_negative_majonnas_049457f8"]
-supersedes = ["legacy_auto_promoted_batch15_full_review_q2"]
+supersedes = ["legacy_review_bearnaise_remoulade_majonnas_from_eriks_saser_matching_saser_keyword_34ef9680"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -426,9 +426,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["(?=.*\\brom\\b)(?=.*\\bröd\\b).*", "(?=.*\\brom\\b)(?=.*\\brod\\b).*", "(?=.*\\brom\\b)(?=.*\\bsvart\\b).*", "(?=.*\\brom\\b)(?=.*\\bfinkorn)", "\\bcaviarmix\\b"]
 allowed_specifics = []
 reason = "Cocktail rum wording must not route to fish-roe products that also use the word rom."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_caviarmix_svart_rom_av_sill_och_lodda_75g_ica", "matcher_regression_negative_rod_rom_finkorning_70g_ica", "matcher_regression_negative_rom_rod_finkornig_80g_abba", "matcher_regression_negative_rom_svart_finkornig_78g_abba"]
-supersedes = ["legacy_auto_promoted_batch14_q1"]
+supersedes = ["legacy_review_rom_keyword_matches_fish_roe_for_cocktail_recipe_5b96a5eb"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -487,9 +487,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bgurkmeja\\b", "\\bgazpacho\\b", "\\bhummus\\b"]
 allowed_specifics = []
 reason = "Fresh ginger must not match turmeric products or unrelated prepared-food carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_farsk_gurkmeja", "matcher_regression_negative_gazpacho", "matcher_regression_negative_gurkmeja", "matcher_regression_negative_gurkmeja_80g_ica_basic", "matcher_regression_negative_gurkmeja_malen", "matcher_regression_negative_gurkmeja_malen_43g_ica", "matcher_regression_negative_hummus_with_traditionell_in_name"]
-supersedes = ["legacy_auto_promoted_batch17_q2"]
+supersedes = ["legacy_review_ground_turmeric_matching_farsk_gurkmeja_4cbc845d"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -536,9 +536,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bcrispy\\s+chicken\\s+spice\\s+mix\\b"]
 allowed_specifics = []
 reason = "A chili-fruit alternative note must not match chicken spice-mix carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_crispy_chicken_spice_mix", "matcher_regression_negative_crispy_chicken_spice_mix_mild_50g_santa_maria"]
-supersedes = ["legacy_auto_promoted_batch18_q2"]
+supersedes = ["legacy_review_crispy_chicken_spice_mix_matching_chili_spice_mix_67ef18f8"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -573,9 +573,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bpepparsås\\b", "\\bpepparsas\\b"]
 allowed_specifics = []
 reason = "Explicit Tabasco Sriracha must not degrade to generic pepper sauce."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_pepparsas", "matcher_regression_negative_pepparsas_250ml_lohmanders"]
-supersedes = ["legacy_auto_promoted_batch18_q3"]
+supersedes = ["legacy_review_pepparsas_matching_tabasco_sriracha_58d2787c"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -616,9 +616,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["(?=.*\\boregano\\b)(?=.*\\b(?:\\d+\\s*g|santa\\s+maria|torkad|krydda)\\b).*", "prod[_\\s-]*is[_\\s-]*fresh"]
 allowed_specifics = []
 reason = "Fresh oregano requests must not accept dried spice jars or diagnostic fresh-flag carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_oregano_65g", "matcher_regression_negative_oregano_65g_santa_maria_2d227da0", "matcher_regression_negative_oregano_65g_santa_maria_d286d92e", "matcher_regression_negative_prod_is_fresh_true"]
-supersedes = ["legacy_auto_promoted_batch19_q1", "legacy_auto_promoted_batch25_q1"]
+supersedes = ["legacy_review_dried_oregano_matching_farsk_oregano_svf_gap_7b0dbeea", "legacy_review_dried_oregano_65g_santa_maria_matching_farsk_oregano_1_2_kruka_oregano"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -659,9 +659,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bsmoothie\\b", "\\bbrämhults\\b", "\\bbramhults\\b", "\\binnocent\\b", "\\bfroosh\\b"]
 allowed_specifics = []
 reason = "Fruit intended for making smoothies must not match ready smoothie drinks or drink brands."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_bramhults", "matcher_regression_negative_froosh", "matcher_regression_negative_innocent", "matcher_regression_negative_smoothie"]
-supersedes = ["legacy_auto_promoted_batch20_q1"]
+supersedes = ["legacy_review_smoothie_drinks_matching_frukt_till_smoothie_ingredient_89df0c87"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -720,9 +720,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bvisp\\b"]
 allowed_specifics = []
 reason = "Plant milk requests stay separate from plant cream/whipping products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_vegetabilisk_visp", "matcher_regression_negative_vegetabilisk_visp_250ml_fazer_aito", "matcher_regression_negative_visp"]
-supersedes = ["legacy_auto_promoted_batch21_q1"]
+supersedes = ["legacy_review_vegetabilisk_visp_matching_vegetabilisk_mjolk_bca32ce1"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -757,9 +757,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bmellanmjölkdryck\\b", "\\bmellanmjolkdryck\\b", "\\blaktosfri\\b"]
 allowed_specifics = []
 reason = "Oat-based barista drink wording must not match lactose-free dairy milk drink rows."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_mellanmjolkdryck_laktosfri"]
-supersedes = ["legacy_auto_promoted_batch23_q1"]
+supersedes = ["legacy_review_havrebaserad_dryck_barista_matching_lactose_free_milk_drinks_d95950c1_mjolkfri_kolasas"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -806,9 +806,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bolivolja\\b"]
 allowed_specifics = []
 reason = "Rapsolja with a chips-purpose parenthetical must not match olive-oil purpose text."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_olivolja_till_formen_och_potatisen"]
-supersedes = ["legacy_auto_promoted_batch25_q2"]
+supersedes = ["legacy_review_cooking_instruction_parenthetical_till_chips_leaking_chips_keyword"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -843,9 +843,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\brosmarin\\b.*\\btorkad\\b", "\\btorkad\\b.*\\brosmarin\\b", "^\\s*stjälk\\s*$", "^\\s*stjalk\\s*$"]
 allowed_specifics = []
 reason = "Rosemary stalk wording must not match dried rosemary jars or a standalone stalk carrier."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_rosmarin_torkad_20g_ica", "matcher_regression_negative_stjalk"]
-supersedes = ["legacy_auto_promoted_batch26_q3"]
+supersedes = ["legacy_review_dried_rosemary_matching_rosmarinstjalk_b8ae9a57"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -898,9 +898,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkalkon", "\\btofu\\b"]
 allowed_specifics = []
 reason = "Herb-marinated chicken thigh fillet must not match turkey or tofu carriers that only share the marinade adjective."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_kalkonbrost_ortmarinerad_i_skivor", "matcher_regression_negative_tofu_ortmarinerad"]
-supersedes = ["legacy_auto_promoted_batch27_questions_q1"]
+supersedes = ["legacy_review_ortmarinerad_as_keyword_matching_unrelated_products"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -941,9 +941,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bolja\\b.*\\btryffel\\b", "\\btryffel\\b.*\\bolja\\b"]
 allowed_specifics = []
 reason = "Truffle-flavored cheese must not match truffle oil."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_olja_med_smak_av_svart_tryffel_100ml_plantin"]
-supersedes = ["legacy_auto_promoted_batch27_questions_q2"]
+supersedes = ["legacy_review_truffle_oil_matching_truffle_cheese_ingredient"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -984,9 +984,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bbearnaise\\b", "\\bremoulade\\b", "\\bmajonnäs\\b", "\\bmajonnas\\b", "\\beriks\\s+såser\\b", "\\beriks\\s+saser\\b"]
 allowed_specifics = []
 reason = "Sauce context in maizena wording must not route to finished sauces or mayonnaise."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_bearnaise_941fb024", "matcher_regression_negative_bearnaise_provencale", "matcher_regression_negative_bearnaise_remoulade_majonnas_54189e55", "matcher_regression_negative_eriks_majonnas", "matcher_regression_negative_eriks_saser_39e0b528", "matcher_regression_negative_remoulade"]
-supersedes = ["legacy_auto_promoted_batch41_q1"]
+supersedes = ["legacy_review_bearnaise_remoulade_majonnas_from_eriks_saser_matching_saser_keyword_87f4cfb2"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1051,9 +1051,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bost\\b", "\\bpaprika\\b", "\\bärter\\b", "\\barter\\b", "\\bmajs\\b"]
 allowed_specifics = []
 reason = "Chicken dumpling wording must not match unrelated cheese, paprika, pea, or corn products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_arter_majs_paprika_600g_apetit", "matcher_regression_negative_ost_och_olivfyllda_minipaprikor", "matcher_regression_negative_paprika_ekologisk_36g_santa_maria", "matcher_regression_negative_tarnad_ost_i_olja_paprika_100g_ica_e1cedee0"]
-supersedes = ["legacy_auto_promoted_batch41_q2"]
+supersedes = ["legacy_review_raw_chicken_matching_dumplings_kyckling_d7c98e31"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1112,9 +1112,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bsorbet\\b", "\\bkakao\\b", "\\bniche\\s+single-recipe\\s+fp\\b"]
 allowed_specifics = []
 reason = "Optional egg-white notes for sorbet texture must not expose sorbet or cocoa products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_kakao", "matcher_regression_negative_kakao_200g_ica", "matcher_regression_negative_niche_single_recipe_fp", "matcher_regression_negative_sorbet", "matcher_regression_negative_sorbet_hallon_0_5l_triumf_glass", "matcher_regression_negative_sorbet_mango_passionsorbet_500ml_triumf_glass"]
-supersedes = ["legacy_auto_promoted_batch44_q1"]
+supersedes = ["legacy_review_sorbet_products_matching_aggvita_valfritt_sorbeten_blir_luftigare_d4c13246"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1161,9 +1161,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkombucha\\b.*\\b(?:äpple|apple|humm|\\d+\\s*ml)\\b"]
 allowed_specifics = []
 reason = "Kombucha starter culture must not match ready kombucha drinks."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_kombucha_apple_330ml_humm"]
-supersedes = ["legacy_auto_promoted_batch48_q1"]
+supersedes = ["legacy_review_kombucha_apple_330ml_humm_matching_kombucha_keyword_for_kombuchasvamp_9baffb04"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1198,9 +1198,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bplommon\\b", "\\bsushi\\b", "\\blax\\b"]
 allowed_specifics = []
 reason = "Prune puree must not match fresh plums or unrelated sushi carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_plommon_roda_korg_500g", "matcher_regression_negative_plommon_urkarnade_250g_ica", "matcher_regression_negative_sushi_lax_crunch_roll", "matcher_regression_negative_sushi_meny_tva_seared_lax"]
-supersedes = ["legacy_auto_promoted_batch48_q2"]
+supersedes = ["legacy_review_fresh_plommon_matching_katrinplommonpure_d010d522"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1247,9 +1247,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\btoppingsås\\b", "\\btoppingsas\\b", "\\bcommit\\s+89fa11d\\b"]
 allowed_specifics = []
 reason = "Dried crumbled peperoncino must not match peperoncino topping sauce carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_commit_89fa11d", "matcher_regression_negative_toppingsas_peperoncino", "matcher_regression_negative_toppingsas_peperoncino_250ml_pop_bakery"]
-supersedes = ["legacy_auto_promoted_batch52_q1"]
+supersedes = ["legacy_review_toppingsas_peperoncino_250ml_pop_bakery_matching_peperoncino_torkad_smulad_3370a03e"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1296,9 +1296,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*mjöl)(?!.*mjol)(?=.*\\bfullkornsris\\b).*", "\\bkladdkaka\\b"]
 allowed_specifics = []
 reason = "Whole-grain rice flour must not match whole-grain rice grains or unrelated cake carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_fullkornsris", "matcher_regression_negative_fullkornsris_2kg_ica", "matcher_regression_negative_marabou_schweizernot_kladdkaka_420g_almondy"]
-supersedes = ["legacy_auto_promoted_batch52_q2"]
+supersedes = ["legacy_review_fullkornsris_products_matching_fullkornsrismjol_ingredient_f21510bb"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1339,9 +1339,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bbasmatiris\\b", "\\bjasminris\\b", "\\bcitron\\b"]
 allowed_specifics = []
 reason = "A noodle type parenthetical must not expose plain rice or unrelated lemon products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_basmatiris_622b850b", "matcher_regression_negative_citron_500g", "matcher_regression_negative_jasminris_ab2d0401"]
-supersedes = ["legacy_auto_promoted_batch53_q1"]
+supersedes = ["legacy_review_plain_rice_matching_nudlar_glas_ris_eller_agg_ingredient_bd714f85"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1388,9 +1388,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bfil\\b.*\\bnaturell\\b"]
 allowed_specifics = []
 reason = "English file wording in juice text must not match Swedish fil dairy products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_fil_naturell"]
-supersedes = ["legacy_auto_promoted_batch57_q1"]
+supersedes = ["legacy_review_fil_naturell_matching_juice_marbles_thick_cut_file_via_keyword_fil_95177b72"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1425,9 +1425,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bmarinad\\b"]
 allowed_specifics = []
 reason = "Oil-for-marinade purpose text must not match ready marinade products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_marinad_086c7a4e"]
-supersedes = ["legacy_auto_promoted_batch65_q1"]
+supersedes = ["legacy_review_olja_till_marinad_extracting_keyword_marinad_and_matching_pre_made_marinades_b67bbc75"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1462,9 +1462,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bsaltgurka\\b", "\\bsmörgåsgurka\\b", "\\bsmorgasgurka\\b"]
 allowed_specifics = []
 reason = "Bostongurka relish must not match other pickled-cucumber families."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_saltgurka", "matcher_regression_negative_smorgasgurka"]
-supersedes = ["legacy_auto_promoted_batch84_q3"]
+supersedes = ["legacy_review_bostongurka_matching_saltgurka_smorgasgurka_67885562"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1511,9 +1511,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bfjällfil\\b", "\\bfjallfil\\b", "\\bfil\\b.*\\b(?:blåbär|blabar|hallon)\\b", "\\bcarrier_context\\.py\\b"]
 allowed_specifics = []
 reason = "Plain filmjölk must not match flavored fil/Fjällfil products or diagnostic carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_carrier_context_py_f4ec4bbf", "matcher_regression_negative_fil_blabar_3_7_1l_fjallfil", "matcher_regression_negative_fil_hallon_3_7_1000g_fjallfil", "matcher_regression_negative_fjallfil"]
-supersedes = ["legacy_auto_promoted_batch101_questions_q3"]
+supersedes = ["legacy_review_filmjolk_naturell_still_accepts_flavored_fil_products_via_the_generic_fallback"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1566,9 +1566,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bprotein\\b.*\\bpudding\\b", "^\\s*pudding\\s*$", "\\bvaniljpudding\\b"]
 allowed_specifics = []
 reason = "Chocolate pudding must not match protein, plain, or vanilla pudding products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_protein_salted_caramel_pudding", "matcher_regression_negative_pudding", "matcher_regression_negative_vaniljpudding"]
-supersedes = ["legacy_auto_promoted_batch102_q1"]
+supersedes = ["legacy_review_protein_salted_caramel_pudding_surfaces_through_generic_pudding"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1615,9 +1615,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bgurka\\b.*\\b(?:klass|krav|ca\\s+\\d+g)\\b"]
 allowed_specifics = []
 reason = "Fermented cucumber wording must not match fresh cucumber products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_gurka_ca_300g_krav_klass_1_ica"]
-supersedes = ["legacy_auto_promoted_batch103_q1"]
+supersedes = ["legacy_review_syrlig_potatissallad_400_g_syrade_gurkor_matches_fresh_gurka"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1652,9 +1652,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bprotein\\b.*\\bsalted\\s+caramel\\b.*\\bpudding\\b"]
 allowed_specifics = []
 reason = "Chocolate protein-pudding compound wording must not match salted-caramel protein pudding."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_protein_salted_caramel_pudding_laktosfri_200g_arla"]
-supersedes = ["legacy_auto_promoted_batch104_q2"]
+supersedes = ["legacy_review_proteinpudding_compounds_still_degrade_through_plain_pudding"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1689,9 +1689,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bsalami\\b.*\\bchorizo\\b", "\\bfuet\\b.*\\bchorizo\\b"]
 allowed_specifics = []
 reason = "Cooking chorizo ingredients must not match cured salami/fuet chorizo products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_fuet_chorizo", "matcher_regression_negative_salami_chorizo_skivad"]
-supersedes = ["legacy_auto_promoted_batch106_q4"]
+supersedes = ["legacy_review_cooking_chorizo_lines_still_accept_charcuterie_style_chorizo_products"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1732,9 +1732,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkalkon\\b.*\\bbröstfilé\\b", "\\bkalkon\\b.*\\bbrostfile\\b"]
 allowed_specifics = []
 reason = "Chicken fillet alternatives must not match turkey breast fillet through the generic fillet word."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_kalkon_brostfile_600g_ingelsta_kalkon"]
-supersedes = ["legacy_auto_promoted_batch109_q5"]
+supersedes = ["legacy_review_chicken_breast_fillet_lines_can_still_accept_turkey_breast_fillet_through_generic_brostfile"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1775,9 +1775,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*\\brökt\\b)(?!.*\\brokt\\b)\\s*fläsk\\s*$", "^(?!.*\\brökt\\b)(?!.*\\brokt\\b)\\s*flask\\s*$", "^(?!.*\\brökt\\b)(?!.*\\brokt\\b)(?=.*\\bfläskfilé\\b).*", "^(?!.*\\brökt\\b)(?!.*\\brokt\\b)(?=.*\\bflaskfile\\b).*", "^(?!.*\\brökt\\b)(?!.*\\brokt\\b)(?=.*\\bfläskkarré\\b).*", "^(?!.*\\brökt\\b)(?!.*\\brokt\\b)(?=.*\\bflaskkarre\\b).*"]
 allowed_specifics = []
 reason = "Smoked pork wording must not degrade to plain pork cuts."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_flask", "matcher_regression_negative_flaskfile_d35969df", "matcher_regression_negative_flaskkarre_55409d17"]
-supersedes = ["legacy_auto_promoted_batch110_q4"]
+supersedes = ["legacy_review_rokt_flask_still_degrades_to_plain_pork_cuts"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1842,9 +1842,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^\\s*pesto\\s*$"]
 allowed_specifics = []
 reason = "Kantarellpesto compound wording must not collapse to plain pesto."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_pesto"]
-supersedes = ["legacy_auto_promoted_batch117_q18"]
+supersedes = ["legacy_review_kantarellpesto_cooked_chanterelle_lines_still_have_unresolved_compound_handling"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1879,9 +1879,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bolivolja\\b.*\\bcitron\\b", "\\bolivolja\\b.*\\bspray\\b", "^\\s*citron\\s*$", "\\blimone\\b", "\\btryffel\\b", "\\bsolros\\b", "\\bfraiche\\b", "\\bfranska\\s*örter\\b", "\\bfranskaorter\\b"]
 allowed_specifics = []
 reason = "Plain extra-virgin olive oil must not match flavored, spray, sunflower, or dairy/herb carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_citron", "matcher_regression_negative_creme_fraiche_franska_orter", "matcher_regression_negative_fraiche", "matcher_regression_negative_franska_orter", "matcher_regression_negative_franskaorter", "matcher_regression_negative_limone", "matcher_regression_negative_olivolja_citron_250ml_zeta", "matcher_regression_negative_olivolja_spray_200ml_zeta", "matcher_regression_negative_solros", "matcher_regression_negative_tryffel"]
-supersedes = ["legacy_auto_promoted_batch119_q1"]
+supersedes = ["legacy_review_explicit_extra_jungfruolivolja_still_accepts_citrus_flavored_and_spray_olive_oil_products"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -1964,9 +1964,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\blaxfilé\\b", "\\blaxfile\\b", "\\blax\\b"]
 allowed_specifics = []
 reason = "Oil purpose text for salmon must not expose salmon as the ingredient being matched."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_laxfile_farsk_800g_pacific_brand"]
-supersedes = ["legacy_auto_promoted_batch122_q2"]
+supersedes = ["legacy_review_unparenthesized_till_ingredient_purpose_phrases_can_leak_the_target_food_into_the_wrong_ingredient_line"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -2013,9 +2013,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*\\bflytande\\b)(?=.*\\bsmör\\b)(?=.*\\b(?:normalsaltat|osaltat|82%)).*", "^(?!.*\\bflytande\\b)(?=.*\\bsmor\\b)(?=.*\\b(?:normalsaltat|osaltat|82%)).*"]
 allowed_specifics = []
 reason = "Liquid butter must not collapse to ordinary solid butter packs."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_smor_normalsaltat", "matcher_regression_negative_smor_normalsaltat_82_500g_ica", "matcher_regression_negative_smor_osaltat"]
-supersedes = ["legacy_auto_promoted_batch133_q1"]
+supersedes = ["legacy_review_flytande_smor_still_collapses_to_ordinary_solid_butter"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -2056,9 +2056,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*\\bdurum\\b)(?=.*\\bvetemjöl\\b).*", "^(?!.*\\bdurum\\b)(?=.*\\bvetemjol\\b).*"]
 allowed_specifics = []
 reason = "Durum wheat flour must not match ordinary wheat flour."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_vetemjol", "matcher_regression_negative_vetemjol_1kg_ica"]
-supersedes = ["legacy_auto_promoted_batch134_q1"]
+supersedes = ["legacy_review_explicit_durumvetemjol_still_accepts_ordinary_wheat_flour"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -2099,9 +2099,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*\\bsojamajonn)(?!.*\\bsoja\\b)(?=.*\\bmajonnäs\\b).*", "^(?!.*\\bsojamajonn)(?!.*\\bsoja\\b)(?=.*\\bmajonnas\\b).*", "^\\s*soja\\s*$", "\\bjapansk\\s+soja\\b"]
 allowed_specifics = []
 reason = "Soy mayonnaise compound wording must not fan out into soy sauce or plain mayonnaise components."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_japansk_soja_500ml_mrs_chengs", "matcher_regression_negative_majonnas_450g_ica", "matcher_regression_negative_majonnas_621e8abc", "matcher_regression_negative_soja"]
-supersedes = ["legacy_auto_promoted_batch137_q2"]
+supersedes = ["legacy_review_sojamajonnas_still_fans_out_into_separate_soy_sauce_and_plain_mayonnaise_matches"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -2154,9 +2154,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bnaan\\b", "\\bliba\\b", "^\\s*bröd\\s*$", "^\\s*brod\\s*$"]
 allowed_specifics = []
 reason = "Steam-buns bread wording must not fall through to generic naan, liba, or bread products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_brod_7b194a7a", "matcher_regression_negative_liba_original", "matcher_regression_negative_naan_brod_original", "matcher_regression_negative_naan_brod_original_260g_santa_maria"]
-supersedes = ["legacy_auto_promoted_batch137_q11"]
+supersedes = ["legacy_review_steam_buns_brod_still_falls_through_to_generic_bread_products"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -2209,9 +2209,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkycklinginnerfilé\\b", "\\bkycklinginnerfile\\b", "\\bkycklingbröstfilé\\b", "\\bkycklingbrostfile\\b", "\\bkycklinglårfilé\\b", "\\bkycklinglarfile\\b"]
 allowed_specifics = []
 reason = "Whole-chicken wording must not match cut chicken fillet products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_kycklingbrostfile", "matcher_regression_negative_kycklinginnerfile_farsk_600g_kronfagel", "matcher_regression_negative_kycklinglarfile"]
-supersedes = ["legacy_auto_promoted_batch140_q3"]
+supersedes = ["legacy_review_whole_chicken_recipes_still_accept_cut_chicken_products_when_the_ingredient_wording_implies_a_whole_bird_without_saying_hel"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -2276,9 +2276,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bi\\s+vatten\\b", "\\btorkad\\b"]
 allowed_specifics = []
 reason = "Cleaned fresh mushroom wording must not match preserved-in-water or dried mushroom products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_kantareller_i_vatten_200g_borgens_41a051c1", "matcher_regression_negative_kantareller_i_vatten_6e7d3a17", "matcher_regression_negative_trattkantarell_torkad_082224f0", "matcher_regression_negative_trattkantarell_torkad_klass_1"]
-supersedes = ["legacy_auto_promoted_batch142_q8"]
+supersedes = ["legacy_review_explicit_rensad_farsk_svamp_still_accepts_preserved_and_dried_mushrooms_through_generic_svamp"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -2319,9 +2319,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bbiff\\b"]
 allowed_specifics = []
 reason = "Preparation phrase 'divided into patties' must not expose beef as a grocery ingredient."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_dumpling_biff_chili_ingefara_200g_beijing8"]
-supersedes = ["legacy_auto_promoted_batch142_q9"]
+supersedes = ["legacy_review_prep_phrase_delad_i_4_biffar_still_leaks_generic_biff_and_matches_prepared_beef_dishes"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -2356,9 +2356,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\btagliatelle\\b", "\\bgrundrecept\\b", "\\bse\\s+ovan\\b", "\\bpastadeg\\b", "\\bskip\\s+subrecipe\\s+ingress\\s+reference\\s+lines\\b"]
 allowed_specifics = []
 reason = "Subrecipe/reference-line pasta dough text must not match dry pasta products or reference placeholders."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_grundrecept", "matcher_regression_negative_pastadeg_se_lank_i_ingress", "matcher_regression_negative_se_ovan", "matcher_regression_negative_skip_subrecipe_ingress_reference_lines", "matcher_regression_negative_tagliatelle", "matcher_regression_negative_tagliatelle_500g_ica_basic"]
-supersedes = ["legacy_auto_promoted_batch144_q4"]
+supersedes = ["legacy_review_subrecipe_reference_line_pastadeg_se_lank_i_ingress_still_matches_dry_pasta_products"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -2460,7 +2460,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bcrispy\\s+chili\\s+oil\\b"]
 allowed_specifics = []
 reason = "Fresh chili wording must not match crispy chili oil condiment products."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_chili_crispy_chili_oil_negative"]
 supersedes = ["legacy_no_match_chili_crispy_chili_oil"]
 
@@ -2497,7 +2497,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bcoca-?cola\\b", "\\bcola\\b", "\\bläsk\\b", "\\blask\\b"]
 allowed_specifics = []
 reason = "Fläskkött must not expose a läsk route through the fläsk/läsk substring."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_flask_lask_substring_negative"]
 supersedes = ["legacy_no_match_lask_flask_substring"]
 
@@ -2552,7 +2552,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bsouvlaki\\b"]
 allowed_specifics = []
 reason = "Plain raw fläskkött must not match prepared souvlaki pork products."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_flaskkott_souvlaki_negative"]
 supersedes = ["legacy_no_match_raw_flaskkott_prepared_product"]
 
@@ -2589,7 +2589,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bbacon\\b"]
 allowed_specifics = []
 reason = "Salted potato chips stay separate from bacon-flavored chips."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_saltade_potatischips_bacon_negative"]
 supersedes = ["legacy_no_match_salted_potato_chips_flavors"]
 
@@ -2626,7 +2626,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkummin\\b"]
 allowed_specifics = []
 reason = "Kumminstekt is a preparation modifier and must not expose standalone cumin spice."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_kumminstekt_fejkon_kummin_negative"]
 supersedes = ["legacy_no_match_kumminstekt_modifier"]
 
@@ -2663,7 +2663,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bdill\\b.*\\bburk\\b"]
 allowed_specifics = []
 reason = "Dillpicklad is a pickled-cucumber modifier and must not expose standalone dill spice."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_dillpicklad_gurka_dill_negative"]
 supersedes = ["legacy_no_match_dillpicklad_modifier"]
 
@@ -2700,7 +2700,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["(?=.*\\boregano\\b)(?=.*\\bvegansk\\b).*", "\\bgreenvie\\b"]
 allowed_specifics = []
 reason = "Standalone dried oregano must not match oregano-flavored vegan cheese carriers."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_torkad_oregano_vegan_cheese_negative"]
 supersedes = ["legacy_no_match_oregano_carrier"]
 
@@ -2743,7 +2743,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bfinhackad\\b"]
 allowed_specifics = []
 reason = "Plain fresh cucumber must not match finely chopped preserved cucumber products."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_gurka_finhackad_negative"]
 supersedes = ["legacy_no_match_fresh_gurka_preserved"]
 
@@ -2780,7 +2780,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bjordgubb\\b", "\\brosa\\b", "\\bchoklad\\b", "\\bprotein\\b"]
 allowed_specifics = []
 reason = "Plain cooking milk must not match flavored or protein milk drinks."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_mellanmjolk_flavored_negative"]
 supersedes = ["legacy_no_match_plain_milk_flavored_drinks"]
 
@@ -2835,7 +2835,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bcashew", "\\bnötter\\b", "\\bnotter\\b", "\\bkex\\b", "\\bchoklad\\b"]
 allowed_specifics = []
 reason = "Sea salt as a cooking salt must not match sea-salt flavored snacks, crackers, nuts, or chocolate."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_havssalt_cashew_negative", "matcher_regression_havssalt_chocolate_negative", "matcher_regression_havssalt_kex_negative"]
 supersedes = ["legacy_no_match_havssalt_carriers"]
 
@@ -2896,7 +2896,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*\\bgrillkrydda\\b)(?=.*\\bvitlök\\b).*", "^(?!.*\\bgrillkrydda\\b)(?=.*\\bvitlok\\b).*"]
 allowed_specifics = []
 reason = "Vitlök in a grill-seasoning phrase must not expose standalone garlic products."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_grillkrydda_vitlok_garlic_negative"]
 supersedes = ["legacy_no_match_grillkrydda_flavor_component"]
 
@@ -2939,7 +2939,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bbaguette\\b", "\\bsandwich\\b"]
 allowed_specifics = []
 reason = "Feferoni pepper wording must not match ready baguette or sandwich carriers."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_feferoni_baguette_negative"]
 supersedes = ["legacy_no_match_feferoni_ready_carrier"]
 
@@ -2982,7 +2982,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bdumle\\b", "\\bchoklad\\b", "\\bcarame", "\\bhazeln", "\\bmaple\\s+walnut\\b"]
 allowed_specifics = []
 reason = "Plain plant-drink ingredients must not match flavored oat or soy drink variants."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_havremjolk_dumle_negative", "matcher_regression_sojadryck_choklad_negative", "matcher_regression_vaxtdryck_caramel_negative", "matcher_regression_vaxtdryck_hazelnut_negative", "matcher_regression_vaxtdryck_maple_walnut_negative"]
 supersedes = ["legacy_no_match_plain_plant_drinks_flavored"]
 
@@ -3043,9 +3043,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bpasta\\b", "\\briscossa\\b"]
 allowed_specifics = []
 reason = "Glass-noodle/vermicelli noodle wording must not match ordinary pasta vermicelli."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_glasnudlar_pasta_vermicelli_negative"]
-supersedes = ["legacy_no_match_batch10_noodle_type_and_prepared_carriers"]
+supersedes = ["legacy_no_match_noodle_type_and_prepared_carriers"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3086,9 +3086,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bbeef\\s+flavou?r\\b", "\\bpho\\s+bo\\b"]
 allowed_specifics = []
 reason = "Plain rice noodles must not match flavored instant rice-noodle meals."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_risnudlar_flavored_instant_negative"]
-supersedes = ["legacy_no_match_batch10_noodle_type_and_prepared_carriers"]
+supersedes = ["legacy_no_match_noodle_type_and_prepared_carriers"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3129,9 +3129,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\brisnudlar\\b"]
 allowed_specifics = []
 reason = "Egg-noodle requests must not match rice noodles."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_aggnudlar_risnudlar_negative"]
-supersedes = ["legacy_no_match_batch10_noodle_type_and_prepared_carriers"]
+supersedes = ["legacy_no_match_noodle_type_and_prepared_carriers"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3166,9 +3166,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bchicken\\s+flavou?r?\\b", "\\bdemae\\b.*\\bbiff\\b", "\\bkimchi\\b"]
 allowed_specifics = []
 reason = "Generic noodle requests accept plain noodles but block flavored instant/prepared carriers."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_generic_nudlar_chicken_flavour_negative", "matcher_regression_generic_nudlar_demae_biff_negative", "matcher_regression_generic_nudlar_kimchi_udon_negative"]
-supersedes = ["legacy_no_match_batch10_noodle_type_and_prepared_carriers"]
+supersedes = ["legacy_no_match_noodle_type_and_prepared_carriers"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3217,7 +3217,7 @@ allowed_specifics = []
 reason = "Explicit snabbnudlar/instantnudlar lines are staged as intentional no-match."
 policy_ref = "legacy_import_curated_regression"
 fixture_refs = ["matcher_regression_snabbnudlar_block_negative"]
-supersedes = ["legacy_no_match_batch10_noodle_type_and_prepared_carriers"]
+supersedes = ["legacy_no_match_noodle_type_and_prepared_carriers"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3252,7 +3252,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkyckling\\b.*\\bburgare\\b"]
 allowed_specifics = []
 reason = "Explicit plant-based burger wording must not match chicken burger products."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_vegan_burger_chicken_negative"]
 supersedes = ["legacy_no_match_explicit_plant_based_base_foods"]
 
@@ -3289,7 +3289,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bknäckebröd\\b", "\\bknackebrod\\b"]
 allowed_specifics = []
 reason = "Poppy seeds in a crispbread carrier must not satisfy a raw poppy-seed ingredient."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_vallmofro_crispbread_negative"]
 supersedes = ["legacy_no_match_crispbread_carrier_seed_context"]
 
@@ -3332,7 +3332,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bsalsa\\b.*\\bvodka\\b"]
 allowed_specifics = []
 reason = "Vodka as a liquor ingredient must not match vodka-flavored salsa carriers."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_salsa_vodka_carrier_negative"]
 supersedes = ["legacy_no_match_salsa_carrier_flavor_context"]
 
@@ -3369,7 +3369,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\btripleshot\\b", "\\bstarbucks\\b", "\\bready\\s+drink\\b"]
 allowed_specifics = []
 reason = "Measured brewed coffee or espresso lines are cooking inputs, not ready coffee drinks."
-policy_ref = "current_queue_matcher_regression"
+policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_brewed_espresso_ready_drink_negative"]
 supersedes = ["legacy_no_match_brewed_coffee_volume"]
 
@@ -3469,7 +3469,7 @@ allowed_specifics = []
 reason = "Root-veg spaghetti describes a cut shape, not a buyable ingredient family."
 policy_ref = "legacy_import_curated_regression"
 fixture_refs = ["matcher_regression_morotsspaghetti_dry_pasta_negative", "matcher_regression_morotsspaghetti_exact_negative", "matcher_regression_negative_langpasta_47c34789", "matcher_regression_negative_precompute_offer_data_4c632bad", "matcher_regression_negative_spagetti_37d099a1", "matcher_regression_negative_spagetti_e935d683", "matcher_regression_negative_spaghetti_500g_barilla", "matcher_regression_negative_spaghetti_a9d44bb8", "matcher_regression_negative_spaghetti_fa98a4db", "matcher_regression_negative_vaniljpulver_bourbon_ekologiskt"]
-supersedes = ["legacy_auto_promoted_batch32_q1", "legacy_auto_promoted_batch87_q2", "legacy_no_match_morotsspaghetti_non_buyable"]
+supersedes = ["legacy_review_kalrotsspaghetti_matching_43_pasta_spaghetti_products_c39d4287", "legacy_review_kalrotsspaghetti_matching_43_pasta_products_3327945f", "legacy_no_match_morotsspaghetti_non_buyable"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3558,9 +3558,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\btorkad\\s+persika\\b", "\\bcashew", "\\bgyros\\b", "stop_word.*saser"]
 allowed_specifics = []
 reason = "Pickled peach wording must not match dried peaches or unrelated cashew/prepared carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_365906f5_grekiska_gyros_pa_cashewmeetly", "matcher_regression_negative_cashewapplen", "matcher_regression_negative_stop_word_saser_exists", "matcher_regression_negative_torkad_persika", "matcher_regression_negative_torkad_persika_200g_sunshine_delights"]
-supersedes = ["legacy_auto_promoted_batch21_q2"]
+supersedes = ["legacy_review_torkad_persika_matching_inlagda_persikor_1a18b3b4"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3613,9 +3613,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*\\bmozzarella\\b)(?=.*\\blimpa\\b).*", "\\bsingle\\s+product\\s+fp\\b", "\\bbjorkris\\b", "\\bbjorklofsstek\\b", "\\bpasta\\b.*\\bmezze\\s+lune\\b"]
 allowed_specifics = []
 reason = "Loaf-size notes on mozzarella must not expose bread, decorative, roast, or filled-pasta carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_bjorklofsstek", "matcher_regression_negative_bjorkris", "matcher_regression_negative_carlssons_fyrkant_limpa", "matcher_regression_negative_carlssons_fyrkant_limpa_skivad_700g_skogaholms", "matcher_regression_negative_limpa", "matcher_regression_negative_pasta_mezze_lune_karl_johansvamp_farsk_250g_ica_selection", "matcher_regression_negative_single_product_fp_in_one_recipe"]
-supersedes = ["legacy_auto_promoted_batch42_q1"]
+supersedes = ["legacy_review_carlssons_fyrkant_limpa_bread_matching_mozzarella_ingredient_via_limpa_keyword_24e309ce"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3674,9 +3674,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bmalen\\b", "\\brecipe_form_count\\b", "\\blök\\s+granulerad\\b", "\\blok\\s+granulerad\\b"]
 allowed_specifics = []
 reason = "Fresh chili pepper must not match ground spice jars or unrelated granulated onion carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_chilipeppar_malen_40g_ica_5a92600e", "matcher_regression_negative_chilipeppar_malen_cdd087d5", "matcher_regression_negative_lok_granulerad_41g_santa_maria", "matcher_regression_negative_malen", "matcher_regression_negative_recipe_form_count"]
-supersedes = ["legacy_auto_promoted_batch43_q1"]
+supersedes = ["legacy_review_chilipeppar_malen_40g_ica_matching_fresh_chili_ingredients_systemic_svf_issue"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3729,9 +3729,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^\\s*vaniljsmak\\s*$", "\\bkvarg\\b", "\\bproteinshake\\b", "\\bdrickkvarg\\b", "\\btårtmousse\\b", "\\btartmousse\\b"]
 allowed_specifics = []
 reason = "Soy vanilla ice cream must not match dairy vanilla carriers, protein drinks, drink quark, or cake mousse."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_drickkvarg", "matcher_regression_negative_kvarg_vaniljsmak_0_2_500g_lindahls", "matcher_regression_negative_proteinshake", "matcher_regression_negative_proteinshake_vaniljsmak_laktosfri_500g_arla", "matcher_regression_negative_tartmousse", "matcher_regression_negative_vaniljsmak"]
-supersedes = ["legacy_auto_promoted_batch80_q1"]
+supersedes = ["legacy_review_vaniljsmak_keyword_matching_kvarg_proteinshake_for_sojaglass_recipe_bc9a40ec"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3796,9 +3796,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bbakchoklad\\b", "\\bchokladknappar\\b", "^\\s*varm\\s+choklad\\s*$"]
 allowed_specifics = []
 reason = "A prepared hot-chocolate drink line must not expose baking chocolate or chocolate-button products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_bakchoklad", "matcher_regression_negative_chokladknappar", "matcher_regression_negative_varm_choklad"]
-supersedes = ["legacy_auto_promoted_batch84_q1"]
+supersedes = ["legacy_review_varm_choklad_matching_baking_chocolate_4db8909b"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3845,9 +3845,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*\\bphiladelphia\\b)(?=.*\\bsweet\\s+chili\\b).*", "^\\s*cream\\s+cheese\\s*$", "^\\s*färskost\\s*$", "^\\s*farskost\\s*$"]
 allowed_specifics = []
 reason = "Philadelphia sweet-chili cream cheese must not match sauces, meat/pasta carriers, or plain cream cheese."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_cream_cheese", "matcher_regression_negative_farskost", "matcher_regression_negative_kycklinglarfile_sweet_chili_strimlad_600g_guldfageln", "matcher_regression_negative_marinad_bbq_sweet_chili_75g_santa_maria", "matcher_regression_negative_pasta_sweet_chili_450g_ica", "matcher_regression_negative_sweet_chili", "matcher_regression_negative_vegeta_sweet_chili_200g_podravka"]
-supersedes = ["legacy_auto_promoted_batch85_q1"]
+supersedes = ["legacy_review_chilisas_keyword_matching_non_cream_cheese_products_when_ingredient_is_cream_cheese_3a70ac98"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3900,9 +3900,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\brågmackor\\b", "\\bragmackor\\b", "\\bhönökaka\\b", "\\bhonokaka\\b"]
 allowed_specifics = []
 reason = "White sticky-cake mix must not match bread products that only share bakery vocabulary."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_honokaka", "matcher_regression_negative_ragmackor_450g_akes_akta_honokaka"]
-supersedes = ["legacy_auto_promoted_batch87_q1"]
+supersedes = ["legacy_review_ragmackor_450g_akes_akta_honokaka_matching_kladdkaka_recipe_019d2b4e_7944"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3955,9 +3955,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["sill\\b", "\\btaco\\b"]
 allowed_specifics = []
 reason = "Imported diagnostic placeholder text must not materialize offer terms from the explanation trace."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_taco_kryddmix_original_mild", "matcher_regression_negative_taco_kryddmix_veg", "matcher_regression_negative_vegetarisk_taco", "matcher_regression_negative_vinbars_och_rodlokssill"]
-supersedes = ["legacy_auto_promoted_batch93_q3"]
+supersedes = ["legacy_review_some_current_cache_results_disagree_with_current_rule_behavior"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -3998,9 +3998,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\btablett", "\\bstädpaketet\\b", "\\bstadpaketet\\b", "\\bdukningspaketet\\b", "^\\s*recipes\\s*$", "keywords\\.py"]
 allowed_specifics = []
 reason = "Dishwasher tablet text is non-food and must not materialize household/package or diagnostic terms."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_dukningspaketet", "matcher_regression_negative_keywords_py", "matcher_regression_negative_lilla_stadpaketet", "matcher_regression_negative_recipes", "matcher_regression_negative_stora_stadpaketet", "matcher_regression_negative_tablett_irma_gron", "matcher_regression_negative_tabletter"]
-supersedes = ["legacy_auto_promoted_batch93_q16"]
+supersedes = ["legacy_review_non_food_rows_can_still_enter_the_recipe_review_queue"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4065,9 +4065,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bhasselnöt\\b", "\\bhasselnot\\b", "^\\s*mandel\\b", "\\bapelsin\\s+klass\\b"]
 allowed_specifics = []
 reason = "Compound candy, bitter almond, and candied peel lines must not fan out to raw nut or fresh citrus components."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_apelsin_klass_1", "matcher_regression_negative_hasselnot_750g_start_7683f09d", "matcher_regression_negative_mandel_500g"]
-supersedes = ["legacy_auto_promoted_batch99_questions_q6"]
+supersedes = ["legacy_review_several_compound_specific_fps_look_like_ksc_candidates_but_that_mechanism_did_not_verify_cleanly_here"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4120,9 +4120,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bjäst\\b.*\\bmatbröd\\b", "\\bjast\\b.*\\bmatbrod\\b"]
 allowed_specifics = []
 reason = "Fermented black beans must not match ordinary baker's yeast."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_jast_for_matbrod_6e6c70d7"]
-supersedes = ["legacy_auto_promoted_batch100_questions_q6"]
+supersedes = ["legacy_review_jasta_svarta_bonor_degrades_into_plain_black_beans_and_baker_s_yeast"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4163,9 +4163,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bpapaya\\b"]
 allowed_specifics = []
 reason = "Natural cashew wording must not match papaya fruit or dried papaya carriers."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_papaya", "matcher_regression_negative_papaya_torkad_tarningar"]
-supersedes = ["legacy_auto_promoted_batch100_questions_q8"]
+supersedes = ["legacy_review_plain_naturella_fresh_pantry_wording_is_still_too_loose_for_some_snack_fruit_products"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4200,9 +4200,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^\\s*rödbeta\\b", "^\\s*rodbeta\\b", "processed_rules\\.py", "matching\\.py", "^\\s*inlagd/inlagda\\s*$", "^\\s*gammaldags\\s*$"]
 allowed_specifics = []
 reason = "Pickled beets must not match raw beet products or imported diagnostic terms."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_gammaldags", "matcher_regression_negative_inlagd_inlagda", "matcher_regression_negative_matching_py", "matcher_regression_negative_processed_rules_py", "matcher_regression_negative_rodbeta", "matcher_regression_negative_rodbeta_klass_1_ica"]
-supersedes = ["legacy_auto_promoted_batch101_questions_q4"]
+supersedes = ["legacy_review_inlagda_rodbetor_still_accepts_fresh_beet_products"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4267,9 +4267,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bjalapenos\\b.*\\b225g\\b", "\\bgrön\\s+peppar\\b", "\\bgron\\s+peppar\\b", "^\\s*grön\\s*$", "^\\s*gron\\s*$", "^\\s*chilifrukt\\s*$", "^\\s*glaze\\s+chili\\s*$"]
 allowed_specifics = []
 reason = "Fresh jalapeno/red chili and glaze-chili wording must not collapse to jarred, green, or sparse chili products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_chilifrukt", "matcher_regression_negative_glaze_chili", "matcher_regression_negative_gron", "matcher_regression_negative_gron_peppar_40g_klass_1_ica", "matcher_regression_negative_jalapenos_225g", "matcher_regression_negative_jalapenos_225g_ica"]
-supersedes = ["legacy_auto_promoted_batch104_q4"]
+supersedes = ["legacy_review_explicit_fresh_color_chili_variants_still_bypass_the_intended_specificity_logic"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4340,9 +4340,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bchili\\s+original\\b", "\\bchilipeppar\\b.*\\bmalen\\b"]
 allowed_specifics = []
 reason = "Plain counted chili means fresh chili, not chili spice blends or ground chili pepper."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_chili_original", "matcher_regression_negative_chili_original_34g_santa_maria", "matcher_regression_negative_chilipeppar_malen_40g_ica_27a446aa", "matcher_regression_negative_chilipeppar_malen_6c832f1d"]
-supersedes = ["legacy_auto_promoted_batch105_q1"]
+supersedes = ["legacy_review_ground_chili_spice_matching_fresh_chili_peppers"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4383,9 +4383,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bpistachio\\b", "\\bsvartvinbärsglass\\b", "\\bsvartvinbarsglass\\b", "\\bmango\\b.*\\bpassionfruktsås\\b", "\\bmango\\b.*\\bpassionfruktsas\\b", "^\\s*glass\\s*$"]
 allowed_specifics = []
 reason = "Plain vanilla ice cream must not match other flavored ice creams, sauce variants, or sparse glass placeholders."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_glass", "matcher_regression_negative_glass_vanilla_pistachio", "matcher_regression_negative_glass_vanilla_pistachio_465ml_lily_hanna_s", "matcher_regression_negative_vanilj_med_mango_passionfruktsas", "matcher_regression_negative_vanilj_svartvinbarsglass", "matcher_regression_negative_vanilla_pistachio"]
-supersedes = ["legacy_auto_promoted_batch107_q1"]
+supersedes = ["legacy_review_vaniljglass_still_accepts_mixed_flavor_vanilla_ice_creams"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4450,9 +4450,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkronärtskock", "\\bkronartskock", "^\\s*konserv(?:erad)?\\s*$"]
 allowed_specifics = []
 reason = "Imported placeholder and canned-soybean context must not materialize artichoke or sparse canned-form tokens."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_konserv_c0c43bad", "matcher_regression_negative_konserverad_1440e431", "matcher_regression_negative_kronartskocka_0bfd253c", "matcher_regression_negative_kronartskockshjarta", "matcher_regression_negative_kronartskockshjartan"]
-supersedes = ["legacy_auto_promoted_batch110_q5"]
+supersedes = ["legacy_review_prepared_vegetable_form_specificity_is_still_rough_for_some_preserved_products"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4499,9 +4499,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\basian\\s+spices\\b", "\\bindian\\s+spices\\b", "^\\s*spices\\s*$", "\\bpizza\\s+spices\\b", "^\\s*pizza\\s*$", "\\bpizzakrydda\\b"]
 allowed_specifics = []
 reason = "Imported pizza-spice wording must not materialize sparse spice carrier terms or other spice mixes."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_asian_spices", "matcher_regression_negative_asian_spices_korean_bbq_bulgogi", "matcher_regression_negative_asian_spices_korean_bbq_bulgogi_35g_santa_maria", "matcher_regression_negative_indian_spices_raita", "matcher_regression_negative_pizza", "matcher_regression_negative_pizza_spices", "matcher_regression_negative_pizza_spices_herbs_chili", "matcher_regression_negative_pizzakrydda", "matcher_regression_negative_spices"]
-supersedes = ["legacy_auto_promoted_batch111_q2"]
+supersedes = ["legacy_review_branded_pizza_spices_ingredients_still_degrade_through_generic_english_spices"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4566,9 +4566,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bbabyspenat\\b", "\\bspenat\\s+i\\s+storpack\\b", "^\\s*hackad\\s+fryst\\s+spenat\\s*$"]
 allowed_specifics = []
 reason = "Explicit chopped frozen spinach must not match fresh bagged spinach or sparse imported placeholders."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_babyspenat", "matcher_regression_negative_finbladig_babyspenat_skoljd_65g_ica", "matcher_regression_negative_hackad_fryst_spenat", "matcher_regression_negative_spenat_i_storpack"]
-supersedes = ["legacy_auto_promoted_batch112_q1"]
+supersedes = ["legacy_review_explicit_hackad_fryst_spenat_still_accepts_fresh_bagged_spinach"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4615,9 +4615,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkycklingklubba\\b.*\\bfärsk\\b", "\\bkycklingklubba\\b.*\\bfarsk\\b", "^\\s*kycklingklubba\\s*$", "^\\s*grillade?\\s*$", "^\\s*stekt\\s*$", "^\\s*tillagad\\s*$", "^\\s*sous\\s+vide\\s*$"]
 allowed_specifics = []
 reason = "Cooked drumstick wording must not match raw drumsticks or sparse form-only placeholders."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_grillad", "matcher_regression_negative_grillade", "matcher_regression_negative_kycklingklubba", "matcher_regression_negative_kycklingklubba_farsk", "matcher_regression_negative_sous_vide", "matcher_regression_negative_stekt", "matcher_regression_negative_tillagad"]
-supersedes = ["legacy_auto_promoted_batch114_q2"]
+supersedes = ["legacy_review_cooked_fardiggrillad_kycklingklubba_still_accepts_raw_drumstick_products"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4688,9 +4688,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bchampinjoner\\b.*\\btetra\\b", "^\\s*champinjoner\\s+(?:hela|skivade)\\s*$"]
 allowed_specifics = []
 reason = "Generic mushroom pieces with chanterelle examples must not match preserved/sparse champignon products."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_champinjoner_hela", "matcher_regression_negative_champinjoner_i_tetra_hela", "matcher_regression_negative_champinjoner_skivade"]
-supersedes = ["legacy_auto_promoted_batch114_q4"]
+supersedes = ["legacy_review_generic_svamp_still_leaks_preserved_champinjon_products_through_the_fresh_mushroom_fallback"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4731,9 +4731,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkörsbärstomater\\b.*\\bklass\\b", "\\bkorsbarstomater\\b.*\\bklass\\b", "^\\s*konserv\\s*$"]
 allowed_specifics = []
 reason = "Canned cherry tomatoes must not match fresh tomato packs or sparse canned-form placeholders."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_konserv_862be78a", "matcher_regression_negative_korsbarstomater_250g_klass_1_ica"]
-supersedes = ["legacy_auto_promoted_batch117_q9"]
+supersedes = ["legacy_review_explicit_canned_korsbarstomater_wording_still_accepts_fresh_cherry_tomatoes"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4780,9 +4780,9 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bmakrillfil", "\\bportugisiskt\\b", "^\\s*röda\\s+linser\\s*$", "^\\s*roda\\s+linser\\s*$", "^\\s*linser\\s+röda\\s+delade\\s*$", "^\\s*linser\\s+roda\\s+delade\\s*$"]
 allowed_specifics = []
 reason = "Grill-sausage and pre-cooked red-lentil lines must not match fish, sparse style text, or dry lentils."
-policy_ref = "legacy_import_auto_regression"
+policy_ref = "legacy_review_regression"
 fixture_refs = ["matcher_regression_negative_linser_roda_delade_6b3831e0", "matcher_regression_negative_makrillfile", "matcher_regression_negative_pa_portugisiskt_vis", "matcher_regression_negative_roda_linser_b9f8ac26"]
-supersedes = ["legacy_auto_promoted_batch143_q7"]
+supersedes = ["legacy_review_explicit_roda_linser_forkokta_still_falls_back_to_dry_red_lentils"]
 
 [[entries.coverage]]
 source_family = "no_match_policy"
@@ -4847,7 +4847,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bpesto\\b.*\\b(?:genovese|grön|gron|basilico|basilika)\\b", "\\b(?:genovese|grön|gron|basilico|basilika)\\b.*\\bpesto\\b"]
 allowed_specifics = []
 reason = "Tomato pesto must stay on red/tomato pesto, not green basil/genovese pesto."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_tomatpesto_green_pesto_negative"]
 supersedes = ["legacy_no_match_tomatpesto_green_pesto"]
 
@@ -4890,7 +4890,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\b(?:vegansk|vegan|växtbaserad|vaxtbaserad|violife|greenvie|flavou?r)\\b"]
 allowed_specifics = []
 reason = "Explicit bufala/fresh mozzarella must not match vegan mozzarella-flavour substitutes."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_bufala_mozzarella_vegan_negative"]
 supersedes = ["legacy_no_match_bufala_mozzarella_vegan"]
 
@@ -4927,7 +4927,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bansjoviskrydda\\b", "\\banjoviskr\\b"]
 allowed_specifics = []
 reason = "Herring ingredients must not match herring-seasoning spice mixes."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_5_minuterssill_ansjoviskrydda_negative"]
 supersedes = ["legacy_no_match_sill_ansjoviskrydda_carrier"]
 
@@ -4970,7 +4970,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\btorsk", "\\bsej\\b", "\\bkolja\\b", "\\bvit\\s+fisk"]
 allowed_specifics = []
 reason = "Sushi fish context should not fall back to generic frozen white fish."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_sushi_fish_white_fish_negative"]
 supersedes = ["legacy_no_match_sushi_fish_generic_white_fish"]
 
@@ -5025,7 +5025,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkycklingfärs\\b", "\\bkycklingfars\\b", "\\bvegofärs\\b", "\\bvegofars\\b", "\\bvegetarisk\\b"]
 allowed_specifics = []
 reason = "Household mince or beef mince alternatives must not match chicken or vegetarian mince."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_hushallsfars_chicken_mince_negative"]
 supersedes = ["legacy_no_match_hushallsfars_chicken_mince"]
 
@@ -5086,7 +5086,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\b(?:äpple|apple|hallon|raspberry|mango|passion|jordgubb|strawberry|blåbär|blueberry)\\b"]
 allowed_specifics = []
 reason = "Plain/savory havregurt must not match fruit-flavored havregurt."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_plain_havregurt_fruit_negative"]
 supersedes = ["legacy_no_match_plain_havregurt_fruit"]
 
@@ -5123,7 +5123,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkalkonlår", "\\bkalkonlar", "\\blårfilé\\b", "\\blarfile\\b"]
 allowed_specifics = []
 reason = "Turkey breast fillet must not match turkey thigh fillet."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_kalkonbrostfile_thigh_negative"]
 supersedes = ["legacy_no_match_kalkonbrostfile_thigh"]
 
@@ -5178,7 +5178,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bhårt\\b", "\\bhart\\b", "\\bhård\\b", "\\bhard\\b"]
 allowed_specifics = []
 reason = "Soft tunnbröd must not match hard crisp tunnbröd."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_mjukt_tunnbrod_hard_negative"]
 supersedes = ["legacy_no_match_mjukt_tunnbrod_hard"]
 
@@ -5233,7 +5233,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\b(?:1[89]|[2-9]\\d)\\s*%"]
 allowed_specifics = []
 reason = "Hard cheese capped at max 17% fat must not match higher-fat cheese rows."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_hardost_max_17_high_fat_negative"]
 supersedes = ["legacy_no_match_hardost_max_17_high_fat"]
 
@@ -5270,7 +5270,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkalles\\b", "\\bsvennes\\b", "\\bkaviar\\b.*\\b(?:original|mild|dill|guld|randig)\\b"]
 allowed_specifics = []
 reason = "Large-grain red roe must not match Kalles/Svennes tube-style kaviar spreads."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_storkornskaviar_tube_kaviar_negative"]
 supersedes = ["legacy_no_match_storkornskaviar_tube_kaviar"]
 
@@ -5319,7 +5319,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bchil(?:i|li)\\s+habanero\\b", "\\bhabanero\\b.*\\b(?:klass|färsk|farsk)\\b"]
 allowed_specifics = []
 reason = "Habanero hot-sauce wording must not match fresh habanero chili produce."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_tabasco_habanero_fresh_chili_negative"]
 supersedes = ["legacy_no_match_habanero_hot_sauce_fresh_chili"]
 
@@ -5362,7 +5362,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkex\\b", "\\bcracker", "\\bbröd\\b", "\\bbrod\\b", "\\bhickory\\b", "\\bsmoke\\b"]
 allowed_specifics = []
 reason = "Liquid-smoke extract wording must not match smoke-flavored crackers or bread carriers."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_rokextrakt_smoke_carrier_negative"]
 supersedes = ["legacy_no_match_rokextrakt_smoke_carrier"]
 
@@ -5429,7 +5429,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\blöjrom\\b", "\\blojrom\\b", "\\bstenbitsrom\\b", "\\bforellrom\\b", "\\blaxrom\\b", "\\bcaviar\\b"]
 allowed_specifics = []
 reason = "Measured cooking/cocktail rum is spirit rum, not fish roe."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_measured_spirit_rom_fish_roe_negative"]
 supersedes = ["legacy_no_match_measured_rom_fish_roe"]
 
@@ -5496,7 +5496,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*\\btryffel\\b)(?=.*\\bburrata\\b).*"]
 allowed_specifics = []
 reason = "Truffle burrata must not fall back to plain burrata."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_tryffelburrata_plain_burrata_negative"]
 supersedes = ["legacy_no_match_tryffelburrata_plain_burrata"]
 
@@ -5533,7 +5533,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bfärskost\\b", "\\bfarskost\\b", "\\bmjukost\\b", "\\bspread\\b", "\\bcreamy\\b"]
 allowed_specifics = []
 reason = "Grated vegan cheese must not match creamy/spreadable vegan cheese products."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_riven_veganost_spread_negative"]
 supersedes = ["legacy_no_match_riven_veganost_spread"]
 
@@ -5594,7 +5594,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["^(?!.*\\bmorot)(?=.*(?:sylt|marmelad)).*"]
 allowed_specifics = []
 reason = "Carrot jam must not fall back to non-carrot jams or marmalades."
-policy_ref = "track_a_batch_4_15_wave_2"
+policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_morotssylt_other_jam_negative"]
 supersedes = ["legacy_no_match_morotssylt_other_jam"]
 
@@ -5631,7 +5631,7 @@ blocked_offer_keywords = []
 blocked_offer_patterns = ["\\bkärnor\\b"]
 allowed_specifics = []
 reason = "Pitted-olive recipe ingredient must not match olives sold with pits."
-policy_ref = "batch_16_18_wave_3"
+policy_ref = "urkarnade_oliver_with_pits_no_match"
 fixture_refs = ["matcher_regression_urkarnade_oliver_with_pits_negative"]
 supersedes = []
 

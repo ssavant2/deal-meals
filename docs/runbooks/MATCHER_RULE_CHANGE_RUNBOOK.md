@@ -297,7 +297,7 @@ can be the correct surface.
 | Change type | Prefer | Use when | Avoid |
 | --- | --- | --- | --- |
 | Exact synonym or spelling alias | `term_registry/entries/keyword_synonym.toml` or parent/routing registry entry | One term is the same ingredient family as another. | Ad-hoc extraction code for a plain alias. |
-| Ingredient/offer bridge | `term_registry/entries/match_bridge.toml` | Ingredient wording and offer wording differ but should match. | Broad synonym tables without negative fixtures. |
+| Ingredient/offer bridge (recipe wording differs from product wording) | `term_registry/entries/keyword_extra_parent.toml` (preferred) or `ingredient_parent.toml` | Recipe term and product term differ but should match (e.g. `nori` → `alger`, `citrusfrukter` → `citron`/`lime`/`apelsin`). These TWO surfaces are wired into the runtime matcher today. | Adding only to `match_bridge.toml`. That surface is **declarative-only / staged for migration** — it does not affect runtime routing on its own. See the match_bridge note below the table. |
 | No-match/blocking policy | `term_registry/entries/no_match_policy.toml` | Ingredient pattern plus offer keyword/pattern should never match. | One-off Python if a declarative policy can express it. |
 | Offer keyword extraction | `term_registry/entries/offer_extra_keyword.toml` or `extraction.py` | Product wording should expose an additional canonical offer keyword. | Adding recipe synonyms when only offer extraction is missing. |
 | Recipe extraction helper | `term_registry/entries/extraction_helper.toml` or `extraction.py` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures. |
@@ -314,6 +314,33 @@ can be the correct surface.
 
 If the right surface is unclear, write the fixture first and run diagnostics.
 Let the failing layer choose the implementation point.
+
+### Important: `match_bridge.toml` is declarative-only today
+
+`app/languages/sv/ingredient_matching/match_bridges.py` is staged for matcher
+migration. Adding a new entry to `match_bridge.toml` does **not** affect the
+production matcher — `find_match_bridge_hits` is only called from support_checks
+(diagnostics, audit), never from `recipe_matcher_backend.py` or the runtime
+matcher. The script `run_term_registry_guard_bridge_checks.py` enforces this:
+any active bridge whose `(canonical, plain offer_pattern)` pair is not covered
+by `KEYWORD_EXTRA_PARENTS`, `INGREDIENT_PARENTS`, `KEYWORD_SYNONYMS`, or
+`OFFER_EXTRA_KEYWORDS` fails with `match_bridge_not_runtime_wired` and tells you
+which dual-write TOML row to add.
+
+For new routing/aliasing work today, write to one of these wired surfaces
+instead:
+
+| You want to … | Write to |
+| --- | --- |
+| Roll an offer keyword up to a parent ingredient (e.g. `nori` → `alger`, `citron` → `citrusfrukter`) | `term_registry/entries/keyword_extra_parent.toml` |
+| Treat a recipe-side variant as a known parent ingredient (e.g. `noriblad` → `nori`) | `term_registry/entries/ingredient_parent.toml` |
+| Add a spelling/plural alias normalized on both sides | `term_registry/entries/keyword_synonym.toml` |
+| Add a product-side keyword that maps to an existing ingredient | `term_registry/entries/offer_extra_keyword.toml` |
+
+If you really need to add a `match_bridge.toml` entry (e.g. you are continuing
+the staged migration), dual-write the corresponding `keyword_extra_parent.toml`
+/ `ingredient_parent.toml` rows in the same change, otherwise the wiring check
+will fail.
 
 ## How To Decide Quickly
 
@@ -423,6 +450,19 @@ app/languages/sv/matcher_contracts/matcher_regression_cases.json
 ```
 
 Use stable IDs. Do not use temporary import/review IDs for permanent fixtures.
+Do not use batch numbers, question numbers, local queue names, or other
+ephemeral review coordinates in `id`, `policy_ref`, `source_ref`, TOML
+`entry_id`, `source_refs`, `supersedes`, or generated baseline metadata. Those
+coordinates are not persisted as durable context. Translate them to stable
+semantic names before committing, for example
+`current_review:plain_sensitive_filmjolk`,
+`legacy_review:fresh_champinjoner_preserved_products_guard`, or
+`manual:mozzarella_bufala_guard`.
+
+When migrating older review material, prefer "migrated legacy review" wording
+and `legacy_review:<semantic_case>` references. Do not introduce new
+`legacy_auto_promoted_*`, `batch*_q*`, `questions_q*`, or similar process-based
+names; they describe how data moved, not what behavior the rule protects.
 
 Common fields:
 
@@ -537,6 +577,8 @@ specific varieties from inactive `färskpotatis`/`bakpotatis` registry rows."
 
 1. Prefer `status = "inactive"` over deleting the TOML row. Keep enough
    context in comments/notes to explain why the entry is inactive.
+   (Allowed status values: `active`, `deprecated`, `planned`, `watchlist`,
+   `inactive`.)
 2. Add or confirm the runtime/sanity proof:
    - positive guard for the generic behavior that should remain
    - negative case proving the inactive/specific behavior is gone

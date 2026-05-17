@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import re
 import sys
 from typing import Any
 
@@ -25,6 +26,7 @@ os.environ.setdefault("TERM_REGISTRY_DISABLE_LOCAL_ENTRIES", "1")
 from languages.term_registry.models import CheckIssue  # noqa: E402
 from languages.term_registry.reports import write_json_and_markdown_report  # noqa: E402
 from languages.sv.ingredient_matching import build_offer_match_data  # noqa: E402
+from languages.sv.ingredient_matching.keywords import OFFER_EXTRA_KEYWORDS  # noqa: E402
 from languages.sv.ingredient_matching.match_bridges import (  # noqa: E402
     MATCH_BRIDGES,
     find_match_bridge_hits,
@@ -32,6 +34,14 @@ from languages.sv.ingredient_matching.match_bridges import (  # noqa: E402
 from languages.sv.ingredient_matching.no_match_policies import (  # noqa: E402
     NO_MATCH_POLICIES,
     find_no_match_policy_hits,
+)
+from languages.sv.ingredient_matching.parent_maps import (  # noqa: E402
+    KEYWORD_EXTRA_PARENTS,
+    PARENT_MATCH_ONLY,
+)
+from languages.sv.ingredient_matching.synonyms import (  # noqa: E402
+    INGREDIENT_PARENTS,
+    KEYWORD_SYNONYMS,
 )
 from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
     DEFAULT_FIXTURE_FILE,
@@ -49,6 +59,11 @@ DEFAULT_REPORT_ROOT = (
     / "term_registry"
 )
 DEFAULT_DIAGNOSTIC_SAMPLE_SIZE = 75
+DEFAULT_BRIDGE_WIRING_BASELINE = (
+    APP_DIR
+    / "languages" / "sv" / "ingredient_matching" / "term_registry" / "baselines"
+    / "match_bridge_runtime_wiring.json"
+)
 
 
 def _issue(
@@ -187,6 +202,160 @@ def _check_no_match_policies(
         "helper_hits": helper_hits,
     }
     return issues, summary, diagnostic_refs
+
+
+_BRIDGE_PLAIN_PATTERN = re.compile(r"^\\b(.+)\\b$")
+
+
+def _bridge_plain_offer_word(offer_pattern: str) -> str | None:
+    """Return the plain offer word for a bridge offer_pattern, or None if regex.
+
+    `match_bridge.offer_patterns` are regex strings. Only patterns shaped like
+    `\\bplain word\\b` (optionally with `\\s+` for spaces) can be checked against
+    the runtime routing dictionaries, which are keyed on plain words.
+    """
+
+    match = _BRIDGE_PLAIN_PATTERN.match(offer_pattern.strip())
+    if not match:
+        return None
+    inner = match.group(1).strip()
+    if re.search(r"[\[\](){}|+*?]", inner):
+        return None
+    inner = re.sub(r"\\s\+", " ", inner)
+    inner = re.sub(r"\\s\*", " ", inner)
+    inner = re.sub(r"\\\\", "", inner)
+    return inner.strip() or None
+
+
+def _runtime_routes_pair(canonical: str, plain_offer_word: str) -> str | None:
+    """Return the runtime routing surface covering (canonical, plain_offer_word).
+
+    Returns the surface name (e.g. ``keyword_extra_parent``), or ``None`` if no
+    runtime surface routes this pair. `match_bridges.py` itself is not consulted
+    because it is declarative-only / staged for migration and not wired into the
+    runtime matcher.
+    """
+
+    cur = KEYWORD_EXTRA_PARENTS.get(plain_offer_word)
+    if cur is not None:
+        parents = cur if isinstance(cur, list) else [cur]
+        if canonical in parents:
+            return "keyword_extra_parent"
+    if INGREDIENT_PARENTS.get(plain_offer_word) == canonical:
+        return "ingredient_parent"
+    if KEYWORD_SYNONYMS.get(plain_offer_word) == canonical:
+        return "keyword_synonym"
+    if PARENT_MATCH_ONLY.get(plain_offer_word) == canonical:
+        return "parent_match_only"
+    if canonical in (OFFER_EXTRA_KEYWORDS.get(plain_offer_word) or []):
+        return "offer_extra_keyword"
+    if plain_offer_word == canonical:
+        return "self_canonical"
+    return None
+
+
+def _load_bridge_wiring_baseline(path: Path) -> set[tuple[str, str, str]]:
+    if not path.exists():
+        return set()
+    raw = json.loads(path.read_text())
+    baseline = raw.get("baseline") if isinstance(raw, dict) else raw
+    grandfathered: set[tuple[str, str, str]] = set()
+    if not isinstance(baseline, list):
+        return grandfathered
+    for row in baseline:
+        if not isinstance(row, dict):
+            continue
+        bridge_id = str(row.get("bridge_id") or "")
+        canonical = str(row.get("canonical") or "")
+        plain = str(row.get("plain_offer_word") or "")
+        if bridge_id and canonical and plain:
+            grandfathered.add((bridge_id, canonical, plain))
+    return grandfathered
+
+
+def _check_match_bridge_runtime_wiring(
+    *,
+    baseline_path: Path,
+) -> tuple[list[CheckIssue], dict[str, Any]]:
+    """Flag active match_bridge entries that do not route at runtime.
+
+    `match_bridge.toml` is declarative-only / staged for matcher migration. A
+    bridge has no runtime effect unless every plain offer_pattern is also
+    covered by ``KEYWORD_EXTRA_PARENTS``, ``INGREDIENT_PARENTS``,
+    ``KEYWORD_SYNONYMS``, ``PARENT_MATCH_ONLY``, or ``OFFER_EXTRA_KEYWORDS`` for
+    the bridge canonical. Existing unwired pairs are grandfathered through the
+    baseline file so the check only fails on NEW unwired bridges.
+    """
+
+    issues: list[CheckIssue] = []
+    grandfathered = _load_bridge_wiring_baseline(baseline_path)
+    wired_pair_count = 0
+    grandfathered_pair_count = 0
+    new_unwired_pair_count = 0
+    skipped_regex_pair_count = 0
+    seen_grandfathered: set[tuple[str, str, str]] = set()
+
+    for bridge in MATCH_BRIDGES:
+        for offer_pattern in bridge.offer_patterns:
+            plain = _bridge_plain_offer_word(offer_pattern)
+            if plain is None:
+                skipped_regex_pair_count += 1
+                continue
+            surface = _runtime_routes_pair(bridge.canonical, plain)
+            if surface is not None:
+                wired_pair_count += 1
+                continue
+            key = (bridge.id, bridge.canonical, plain)
+            if key in grandfathered:
+                grandfathered_pair_count += 1
+                seen_grandfathered.add(key)
+                continue
+            new_unwired_pair_count += 1
+            issues.append(_issue(
+                "error",
+                "match_bridge_not_runtime_wired",
+                (
+                    "match_bridge offer_pattern is not routed by any runtime surface. "
+                    "match_bridge.toml is staged for matcher migration and is not "
+                    "wired into the production matcher today. Add ONE of: "
+                    f"keyword_extra_parent.toml (canonical={bridge.canonical!r}, "
+                    f"variant={plain!r}), ingredient_parent.toml, "
+                    "keyword_synonym.toml, or offer_extra_keyword.toml. See the "
+                    "match_bridge note in docs/runbooks/MATCHER_RULE_CHANGE_RUNBOOK.md."
+                ),
+                item_id=bridge.id,
+                details={
+                    "canonical": bridge.canonical,
+                    "plain_offer_word": plain,
+                    "offer_pattern": offer_pattern,
+                    "preferred_surface": "keyword_extra_parent",
+                    "runbook_section": "Important: match_bridge.toml is declarative-only today",
+                },
+            ))
+
+    stale_baseline_entries = sorted(grandfathered - seen_grandfathered)
+    if stale_baseline_entries:
+        issues.append(_issue(
+            "warning",
+            "match_bridge_wiring_baseline_stale",
+            (
+                "match_bridge_runtime_wiring baseline contains entries that no "
+                "longer exist or were wired through a runtime surface. Refresh "
+                "the baseline by removing these entries."
+            ),
+            details={"stale_entries": [list(item) for item in stale_baseline_entries[:50]]},
+        ))
+
+    summary = {
+        "baseline_path": str(baseline_path.relative_to(REPO_DIR)),
+        "baseline_pair_count": len(grandfathered),
+        "wired_pair_count": wired_pair_count,
+        "grandfathered_pair_count": grandfathered_pair_count,
+        "new_unwired_pair_count": new_unwired_pair_count,
+        "skipped_regex_pair_count": skipped_regex_pair_count,
+        "stale_baseline_entry_count": len(stale_baseline_entries),
+    }
+    return issues, summary
 
 
 def _check_match_bridges(
@@ -358,8 +527,12 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         fixture_by_id=fixture_by_id,
         inventory_by_id=inventory_by_id,
     )
+    wiring_issues, wiring_summary = _check_match_bridge_runtime_wiring(
+        baseline_path=Path(args.bridge_wiring_baseline),
+    )
     issues.extend(policy_issues)
     issues.extend(bridge_issues)
+    issues.extend(wiring_issues)
 
     diagnostic_refs = _sample_refs(
         policy_diagnostic_refs | bridge_diagnostic_refs,
@@ -392,6 +565,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
         "inventory_entry_count": len(inventory_entries),
         "no_match_policies": policy_summary,
         "match_bridges": bridge_summary,
+        "match_bridge_runtime_wiring": wiring_summary,
         "diagnostic_sample_cases": len(diagnostic_refs),
         "diagnostic_sample_passed": diagnostic_report["summary"]["passed"],
         "diagnostic_sample_failed": diagnostic_report["summary"]["failed"],
@@ -415,6 +589,14 @@ def main() -> int:
     parser.add_argument("--fixture-file", default=str(DEFAULT_FIXTURE_FILE))
     parser.add_argument("--inventory-file", default=str(DEFAULT_INVENTORY_FILE))
     parser.add_argument("--max-diagnostic-cases", type=int, default=DEFAULT_DIAGNOSTIC_SAMPLE_SIZE)
+    parser.add_argument(
+        "--bridge-wiring-baseline",
+        default=str(DEFAULT_BRIDGE_WIRING_BASELINE),
+        help=(
+            "Path to the grandfathered list of match_bridge offer_pattern pairs that "
+            "have no runtime routing surface yet. New unwired pairs fail the check."
+        ),
+    )
     parser.add_argument("--report-dir", type=Path, default=None)
     args = parser.parse_args()
 

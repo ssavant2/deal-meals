@@ -10323,6 +10323,41 @@ test("Mandelpotatis recipe still matches mandelpotatis product",
 test("Generic potatis recipe matches Potatis Fast",
      match("Potatis Fast 1kg Klass 1", "300 g potatis", "fruit"), "potatis")
 
+# Q54-1: "yoghurt eller havrefraiche" — both alternatives accepted in cache flow
+# (check_yoghurt_match used by recipe_matcher_backend, the path that drives the cache).
+from languages.sv.ingredient_matching.dairy_types import check_yoghurt_match
+test("check_yoghurt_match accepts plain yoghurt for 'yoghurt eller havrefraiche'",
+     check_yoghurt_match('yoghurt', '2 dl yoghurt eller havrefraiche', 'yoghurt mild naturell 3% 1000g'), True)
+test("check_yoghurt_match accepts plain yoghurt for 'havrefraiche eller yoghurt'",
+     check_yoghurt_match('yoghurt', '2 dl havrefraiche eller yoghurt', 'yoghurt mild naturell 3% 1000g'), True)
+test("check_yoghurt_match still blocks plain yoghurt for vego-only recipe (havreyoghurt)",
+     check_yoghurt_match('yoghurt', '2 dl havreyoghurt', 'yoghurt mild naturell 3% 1000g'), False)
+
+# Q54-2: "citrusfrukter (valfri sort)" — generic citrus recipe matches each citrus offer
+# via KEYWORD_EXTRA_PARENTS fan-out (citron/lime/apelsin/mandarin/clementin/klementin/
+# grapefrukt/blodapelsin -> citrusfrukter). The fan-out is offer-side only so a
+# specific citron recipe does NOT broaden to lime or apelsin.
+test("Citrusfrukter recipe matches citron",
+     match("Citron 500g Klass 1 ICA", "3-4 citrusfrukter (valfri sort)", "fruit"), "citrusfrukter")
+test("Citrusfrukter recipe matches lime",
+     match("Lime 1st Klass 1", "3-4 citrusfrukter (valfri sort)", "fruit"), "citrusfrukter")
+test("Citrusfrukter recipe matches apelsin",
+     match("Apelsin 1kg Klass 1", "3-4 citrusfrukter (valfri sort)", "fruit"), "citrusfrukter")
+test("Citrusfrukter recipe matches mandarin",
+     match("Mandarin 500g", "3-4 citrusfrukter (valfri sort)", "fruit"), "citrusfrukter")
+test("Citrusfrukter recipe matches clementin",
+     match("Clementin Klass 1", "3-4 citrusfrukter (valfri sort)", "fruit"), "citrusfrukter")
+test("Citrusfrukter recipe matches klementin",
+     match("Klementin 1kg", "3-4 citrusfrukter (valfri sort)", "fruit"), "citrusfrukter")
+test("Citrusfrukter recipe matches grapefrukt",
+     match("Grapefrukt Röd Klass 1", "3-4 citrusfrukter (valfri sort)", "fruit"), "citrusfrukter")
+test("Citrusfrukter recipe matches blodapelsin",
+     match("Blodapelsin Sicilien 1kg", "3-4 citrusfrukter (valfri sort)", "fruit"), "citrusfrukter")
+test("Specific citron recipe does NOT broaden to lime via citrusfrukter parent",
+     match("Lime 1st Klass 1", "1 citron", "fruit"), None)
+test("Specific lime recipe does NOT broaden to citron via citrusfrukter parent",
+     match("Citron 500g Klass 1 ICA", "1 lime", "fruit"), None)
+
 # Q106: yoghurt 'lätt'/'light' SPECIALTY_QUALIFIERS Direction A
 # Plain yoghurt recipe matches everything; lättyoghurt recipe constrains via slow-path
 # (live matcher). Fast-path Direction A only fires when product has the qualifier too.

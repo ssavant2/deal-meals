@@ -1,0 +1,794 @@
+{
+  "baseline": [
+    {
+      "bridge_id": "bridge_ansjovis_fileer_grouping",
+      "canonical": "ansjovisfileer",
+      "plain_offer_word": "ansjovis"
+    },
+    {
+      "bridge_id": "bridge_ansjovis_fileer_grouping",
+      "canonical": "ansjovisfileer",
+      "plain_offer_word": "ansjovisfiléer"
+    },
+    {
+      "bridge_id": "bridge_apelsinlask_soda",
+      "canonical": "läsk",
+      "plain_offer_word": "fanta"
+    },
+    {
+      "bridge_id": "bridge_apple_cider_exact",
+      "canonical": "äppelcider",
+      "plain_offer_word": "appelcider"
+    },
+    {
+      "bridge_id": "bridge_aromsmor_flavored_butter",
+      "canonical": "aromsmör",
+      "plain_offer_word": "aromsmor"
+    },
+    {
+      "bridge_id": "bridge_barjuice_exact",
+      "canonical": "juice",
+      "plain_offer_word": "svartvinbarsjuice"
+    },
+    {
+      "bridge_id": "bridge_barjuice_exact",
+      "canonical": "juice",
+      "plain_offer_word": "svartvinbärsjuice"
+    },
+    {
+      "bridge_id": "bridge_barjuice_exact",
+      "canonical": "juice",
+      "plain_offer_word": "tranbarsjuice"
+    },
+    {
+      "bridge_id": "bridge_barjuice_exact",
+      "canonical": "juice",
+      "plain_offer_word": "tranbärsjuice"
+    },
+    {
+      "bridge_id": "bridge_bjornbarssaft_cordial",
+      "canonical": "björnbärssaft",
+      "plain_offer_word": "bjornbarssaft"
+    },
+    {
+      "bridge_id": "bridge_bladkal_cabbage_alternatives",
+      "canonical": "kål",
+      "plain_offer_word": "rodkal"
+    },
+    {
+      "bridge_id": "bridge_bladkal_cabbage_alternatives",
+      "canonical": "kål",
+      "plain_offer_word": "rödkål"
+    },
+    {
+      "bridge_id": "bridge_bladkal_cabbage_alternatives",
+      "canonical": "kål",
+      "plain_offer_word": "spetskal"
+    },
+    {
+      "bridge_id": "bridge_bladkal_cabbage_alternatives",
+      "canonical": "kål",
+      "plain_offer_word": "spetskål"
+    },
+    {
+      "bridge_id": "bridge_bladkal_cabbage_alternatives",
+      "canonical": "kål",
+      "plain_offer_word": "vitkal"
+    },
+    {
+      "bridge_id": "bridge_bladkal_cabbage_alternatives",
+      "canonical": "kål",
+      "plain_offer_word": "vitkål"
+    },
+    {
+      "bridge_id": "bridge_blandade_bonor_bonmix",
+      "canonical": "bönor",
+      "plain_offer_word": "bonmix"
+    },
+    {
+      "bridge_id": "bridge_blomkalshuvud_fresh",
+      "canonical": "blomkål",
+      "plain_offer_word": "blomkal"
+    },
+    {
+      "bridge_id": "bridge_breoliv_spread_family",
+      "canonical": "margarin",
+      "plain_offer_word": "bregott"
+    },
+    {
+      "bridge_id": "bridge_breoliv_spread_family",
+      "canonical": "margarin",
+      "plain_offer_word": "breoliv"
+    },
+    {
+      "bridge_id": "bridge_brodskivor_formbrod",
+      "canonical": "formbröd",
+      "plain_offer_word": "formbrod"
+    },
+    {
+      "bridge_id": "bridge_brodskivor_formbrod",
+      "canonical": "formbröd",
+      "plain_offer_word": "skivad"
+    },
+    {
+      "bridge_id": "bridge_burgarbrod_hamburgerbrod",
+      "canonical": "hamburgerbröd",
+      "plain_offer_word": "hamburgerbrod"
+    },
+    {
+      "bridge_id": "bridge_chokladagg_exact",
+      "canonical": "chokladägg",
+      "plain_offer_word": "chokladagg"
+    },
+    {
+      "bridge_id": "bridge_durumvete_flour_family",
+      "canonical": "durumvetemjöl",
+      "plain_offer_word": "durumvete"
+    },
+    {
+      "bridge_id": "bridge_durumvete_flour_family",
+      "canonical": "durumvetemjöl",
+      "plain_offer_word": "durumvetemjol"
+    },
+    {
+      "bridge_id": "bridge_fankal_seed_spice_list",
+      "canonical": "fänkål",
+      "plain_offer_word": "fankalsfron"
+    },
+    {
+      "bridge_id": "bridge_fankal_seed_spice_list",
+      "canonical": "fänkål",
+      "plain_offer_word": "fänkålsfrön"
+    },
+    {
+      "bridge_id": "bridge_farsk_lok_salladslok_stalks",
+      "canonical": "salladslök",
+      "plain_offer_word": "salladslok"
+    },
+    {
+      "bridge_id": "bridge_farskkorv_salsiccia_family",
+      "canonical": "färskkorv",
+      "plain_offer_word": "chorizo"
+    },
+    {
+      "bridge_id": "bridge_farskkorv_salsiccia_family",
+      "canonical": "färskkorv",
+      "plain_offer_word": "salsiccia"
+    },
+    {
+      "bridge_id": "bridge_fish_roe_rom_products",
+      "canonical": "rom",
+      "plain_offer_word": "forellrom"
+    },
+    {
+      "bridge_id": "bridge_fiskgrytbitar_laxfile",
+      "canonical": "fiskgrytbitar",
+      "plain_offer_word": "laxfile"
+    },
+    {
+      "bridge_id": "bridge_fiskgrytbitar_laxfile",
+      "canonical": "fiskgrytbitar",
+      "plain_offer_word": "laxfilé"
+    },
+    {
+      "bridge_id": "bridge_fladerdryck_elderflower",
+      "canonical": "fläderdryck",
+      "plain_offer_word": "fladerblomsdryck"
+    },
+    {
+      "bridge_id": "bridge_fladerdryck_elderflower",
+      "canonical": "fläderdryck",
+      "plain_offer_word": "fladerblomssaft"
+    },
+    {
+      "bridge_id": "bridge_fladerdryck_elderflower",
+      "canonical": "fläderdryck",
+      "plain_offer_word": "fladerdryck"
+    },
+    {
+      "bridge_id": "bridge_fladerdryck_elderflower",
+      "canonical": "fläderdryck",
+      "plain_offer_word": "fladersaft"
+    },
+    {
+      "bridge_id": "bridge_fladerdryck_elderflower",
+      "canonical": "fläderdryck",
+      "plain_offer_word": "fläderblomssaft"
+    },
+    {
+      "bridge_id": "bridge_folkol_beer",
+      "canonical": "folköl",
+      "plain_offer_word": "folkol"
+    },
+    {
+      "bridge_id": "bridge_forkoktmajskolv_prepared",
+      "canonical": "förkoktmajskolv",
+      "plain_offer_word": "forkokt"
+    },
+    {
+      "bridge_id": "bridge_forkoktmajskolv_prepared",
+      "canonical": "förkoktmajskolv",
+      "plain_offer_word": "förkokt"
+    },
+    {
+      "bridge_id": "bridge_fransk_senap_dijon",
+      "canonical": "dijonsenap",
+      "plain_offer_word": "dijon"
+    },
+    {
+      "bridge_id": "bridge_gari_kalrotsgari_exact",
+      "canonical": "gari",
+      "plain_offer_word": "kalrotsgari"
+    },
+    {
+      "bridge_id": "bridge_gari_kalrotsgari_exact",
+      "canonical": "gari",
+      "plain_offer_word": "kålrotsgari"
+    },
+    {
+      "bridge_id": "bridge_gemsallad_hjartsallad_family",
+      "canonical": "gemsallad",
+      "plain_offer_word": "babygemsallad"
+    },
+    {
+      "bridge_id": "bridge_gemsallad_hjartsallad_family",
+      "canonical": "gemsallad",
+      "plain_offer_word": "hjartsallad"
+    },
+    {
+      "bridge_id": "bridge_gemsallad_hjartsallad_family",
+      "canonical": "gemsallad",
+      "plain_offer_word": "hjärtsallad"
+    },
+    {
+      "bridge_id": "bridge_generic_fron_seeds",
+      "canonical": "frön",
+      "plain_offer_word": "chiafron"
+    },
+    {
+      "bridge_id": "bridge_generic_sylt_berry_jams",
+      "canonical": "sylt",
+      "plain_offer_word": "drottningsylt"
+    },
+    {
+      "bridge_id": "bridge_generic_sylt_berry_jams",
+      "canonical": "sylt",
+      "plain_offer_word": "hallonsylt"
+    },
+    {
+      "bridge_id": "bridge_generic_sylt_berry_jams",
+      "canonical": "sylt",
+      "plain_offer_word": "lingonsylt"
+    },
+    {
+      "bridge_id": "bridge_graslok_fresh",
+      "canonical": "gräslök",
+      "plain_offer_word": "graslok"
+    },
+    {
+      "bridge_id": "bridge_gronsallad_salladsblad",
+      "canonical": "grönsallad",
+      "plain_offer_word": "gronsallad"
+    },
+    {
+      "bridge_id": "bridge_grotris_exact",
+      "canonical": "grötris",
+      "plain_offer_word": "grotris"
+    },
+    {
+      "bridge_id": "bridge_hackade_notter_generic",
+      "canonical": "nötter",
+      "plain_offer_word": "notter"
+    },
+    {
+      "bridge_id": "bridge_hasselnotsolja_exact",
+      "canonical": "hasselnötsolja",
+      "plain_offer_word": "hasselnotsolja"
+    },
+    {
+      "bridge_id": "bridge_havrebaserad_matlagning",
+      "canonical": "havregrädde",
+      "plain_offer_word": "havregradde"
+    },
+    {
+      "bridge_id": "bridge_havrebaserad_matlagning",
+      "canonical": "havregrädde",
+      "plain_offer_word": "imat"
+    },
+    {
+      "bridge_id": "bridge_hoisin_vegan_alternative_scope",
+      "canonical": "hoisinsås",
+      "plain_offer_word": "hoisinsas"
+    },
+    {
+      "bridge_id": "bridge_ingefarsshot_juice",
+      "canonical": "ingefärsjuice",
+      "plain_offer_word": "ingefarsjuice"
+    },
+    {
+      "bridge_id": "bridge_kalhuvud_vitkal",
+      "canonical": "kålhuvud",
+      "plain_offer_word": "kalhuvud"
+    },
+    {
+      "bridge_id": "bridge_kalhuvud_vitkal",
+      "canonical": "kålhuvud",
+      "plain_offer_word": "vitkal"
+    },
+    {
+      "bridge_id": "bridge_kalhuvud_vitkal",
+      "canonical": "kålhuvud",
+      "plain_offer_word": "vitkål"
+    },
+    {
+      "bridge_id": "bridge_kardemummakarnor_exact",
+      "canonical": "kardemummakärnor",
+      "plain_offer_word": "kardemummakarnor"
+    },
+    {
+      "bridge_id": "bridge_kardemummayoghurt_exact",
+      "canonical": "kardemummayoghurt",
+      "plain_offer_word": "kardemummayogurt"
+    },
+    {
+      "bridge_id": "bridge_kikartor_ready_packaged_guard",
+      "canonical": "kikärtor",
+      "plain_offer_word": "kikartor"
+    },
+    {
+      "bridge_id": "bridge_knipplok_bunch",
+      "canonical": "knipplök",
+      "plain_offer_word": "knippe"
+    },
+    {
+      "bridge_id": "bridge_knipplok_bunch",
+      "canonical": "knipplök",
+      "plain_offer_word": "salladslok"
+    },
+    {
+      "bridge_id": "bridge_knipplok_bunch",
+      "canonical": "knipplök",
+      "plain_offer_word": "salladslök"
+    },
+    {
+      "bridge_id": "bridge_kolasas_exact",
+      "canonical": "kolasås",
+      "plain_offer_word": "kolasas"
+    },
+    {
+      "bridge_id": "bridge_kormasas_sauce_products",
+      "canonical": "kormasås",
+      "plain_offer_word": "korma"
+    },
+    {
+      "bridge_id": "bridge_kormasas_sauce_products",
+      "canonical": "kormasås",
+      "plain_offer_word": "kormasas"
+    },
+    {
+      "bridge_id": "bridge_korsbarstomater_cocktail",
+      "canonical": "körsbärstomater",
+      "plain_offer_word": "cocktailtomater"
+    },
+    {
+      "bridge_id": "bridge_korsbarstomater_cocktail",
+      "canonical": "körsbärstomater",
+      "plain_offer_word": "korsbarstomater"
+    },
+    {
+      "bridge_id": "bridge_korvar_garna_lamm_family",
+      "canonical": "korv",
+      "plain_offer_word": "grillkorv"
+    },
+    {
+      "bridge_id": "bridge_korvar_garna_lamm_family",
+      "canonical": "korv",
+      "plain_offer_word": "lammkorv"
+    },
+    {
+      "bridge_id": "bridge_kruksallad_krispsallat",
+      "canonical": "kruksallad",
+      "plain_offer_word": "krispsallat"
+    },
+    {
+      "bridge_id": "bridge_kvibille_adel_blue_cheese",
+      "canonical": "ädelost",
+      "plain_offer_word": "adelost"
+    },
+    {
+      "bridge_id": "bridge_kvibille_adel_blue_cheese",
+      "canonical": "ädelost",
+      "plain_offer_word": "blamogelost"
+    },
+    {
+      "bridge_id": "bridge_lask_cola",
+      "canonical": "läsk",
+      "plain_offer_word": "cola"
+    },
+    {
+      "bridge_id": "bridge_lask_cola",
+      "canonical": "läsk",
+      "plain_offer_word": "lask"
+    },
+    {
+      "bridge_id": "bridge_libabrod_tunnbrod",
+      "canonical": "tunnbröd",
+      "plain_offer_word": "tunnbrod"
+    },
+    {
+      "bridge_id": "bridge_makrillfileer_plain",
+      "canonical": "makrillfileer",
+      "plain_offer_word": "makrillfiléer"
+    },
+    {
+      "bridge_id": "bridge_mandelspan_spelling",
+      "canonical": "mandelspån",
+      "plain_offer_word": "mandelspan"
+    },
+    {
+      "bridge_id": "bridge_maranger_toppers",
+      "canonical": "maräng",
+      "plain_offer_word": "marangtoppar"
+    },
+    {
+      "bridge_id": "bridge_micropopcorn_mikropopcorn",
+      "canonical": "micropopcorn",
+      "plain_offer_word": "mikropopcorn"
+    },
+    {
+      "bridge_id": "bridge_mixed_fresh_herbs_examples",
+      "canonical": "färska_örter",
+      "plain_offer_word": "ruccola"
+    },
+    {
+      "bridge_id": "bridge_mixed_fresh_herbs_examples",
+      "canonical": "färska_örter",
+      "plain_offer_word": "rucola"
+    },
+    {
+      "bridge_id": "bridge_moghrabiah_parlcouscous",
+      "canonical": "moghrabiah",
+      "plain_offer_word": "moghrabie"
+    },
+    {
+      "bridge_id": "bridge_mousserande_vitt_vin_exact",
+      "canonical": "mousserandevin",
+      "plain_offer_word": "champagne"
+    },
+    {
+      "bridge_id": "bridge_ol_beer",
+      "canonical": "öl",
+      "plain_offer_word": "folkol"
+    },
+    {
+      "bridge_id": "bridge_ol_beer",
+      "canonical": "öl",
+      "plain_offer_word": "folköl"
+    },
+    {
+      "bridge_id": "bridge_ol_beer",
+      "canonical": "öl",
+      "plain_offer_word": "lager"
+    },
+    {
+      "bridge_id": "bridge_ol_beer",
+      "canonical": "öl",
+      "plain_offer_word": "ol"
+    },
+    {
+      "bridge_id": "bridge_parmesansas_exact_sauce",
+      "canonical": "parmesansås",
+      "plain_offer_word": "parmesansas"
+    },
+    {
+      "bridge_id": "bridge_pickles_inlagdgurka",
+      "canonical": "inlagdgurka",
+      "plain_offer_word": "pickles"
+    },
+    {
+      "bridge_id": "bridge_pimientos_piquillo_exact",
+      "canonical": "pimientos",
+      "plain_offer_word": "piquillo"
+    },
+    {
+      "bridge_id": "bridge_potatischips_lantchips_family",
+      "canonical": "potatischips",
+      "plain_offer_word": "lantchips"
+    },
+    {
+      "bridge_id": "bridge_potatischips_lantchips_family",
+      "canonical": "potatischips",
+      "plain_offer_word": "mandelpotatischips"
+    },
+    {
+      "bridge_id": "bridge_potato_buns_hamburgerbrod",
+      "canonical": "hamburgerbröd",
+      "plain_offer_word": "hamburgerbrod"
+    },
+    {
+      "bridge_id": "bridge_prastost_abbreviated",
+      "canonical": "prästost",
+      "plain_offer_word": "prast"
+    },
+    {
+      "bridge_id": "bridge_prastost_abbreviated",
+      "canonical": "prästost",
+      "plain_offer_word": "präst"
+    },
+    {
+      "bridge_id": "bridge_pressad_ingefarsjuice",
+      "canonical": "ingefärsjuice",
+      "plain_offer_word": "ingefarsjuice"
+    },
+    {
+      "bridge_id": "bridge_quornfars_vegofars",
+      "canonical": "quornfärs",
+      "plain_offer_word": "vegofars"
+    },
+    {
+      "bridge_id": "bridge_quornfars_vegofars",
+      "canonical": "quornfärs",
+      "plain_offer_word": "vegofärs"
+    },
+    {
+      "bridge_id": "bridge_revbensspjall_spareribs",
+      "canonical": "revbensspjäll",
+      "plain_offer_word": "revbensspjall"
+    },
+    {
+      "bridge_id": "bridge_revbensspjall_spareribs",
+      "canonical": "revbensspjäll",
+      "plain_offer_word": "spareribs"
+    },
+    {
+      "bridge_id": "bridge_risotto_rice_family",
+      "canonical": "risottoris",
+      "plain_offer_word": "risotto"
+    },
+    {
+      "bridge_id": "bridge_rodbetor_fresh_sliced",
+      "canonical": "rödbeta",
+      "plain_offer_word": "rodbeta"
+    },
+    {
+      "bridge_id": "bridge_rodspatta_spattafile",
+      "canonical": "rödspättafilé",
+      "plain_offer_word": "rodspatta"
+    },
+    {
+      "bridge_id": "bridge_rodspatta_spattafile",
+      "canonical": "rödspättafilé",
+      "plain_offer_word": "rodspattafile"
+    },
+    {
+      "bridge_id": "bridge_rodspatta_spattafile",
+      "canonical": "rödspättafilé",
+      "plain_offer_word": "rödspätta"
+    },
+    {
+      "bridge_id": "bridge_romsas_exact",
+      "canonical": "romsås",
+      "plain_offer_word": "romsas"
+    },
+    {
+      "bridge_id": "bridge_sataysas_cooking_sauce",
+      "canonical": "sataysås",
+      "plain_offer_word": "sataysas"
+    },
+    {
+      "bridge_id": "bridge_shisoblad_herb_alternatives",
+      "canonical": "shisoblad",
+      "plain_offer_word": "thaibasilika"
+    },
+    {
+      "bridge_id": "bridge_sill_stromming_file_family",
+      "canonical": "strömmingsfileer",
+      "plain_offer_word": "strommingsfileer"
+    },
+    {
+      "bridge_id": "bridge_smor_plain_common",
+      "canonical": "smör",
+      "plain_offer_word": "smor"
+    },
+    {
+      "bridge_id": "bridge_smorrapsolja_blend",
+      "canonical": "smörrapsolja",
+      "plain_offer_word": "smorrapsolja"
+    },
+    {
+      "bridge_id": "bridge_sojabonor_generic_processed_allowance",
+      "canonical": "sojabönor",
+      "plain_offer_word": "sojabonor"
+    },
+    {
+      "bridge_id": "bridge_sommargronsaker_apetit",
+      "canonical": "sommargrönsaker",
+      "plain_offer_word": "apetit"
+    },
+    {
+      "bridge_id": "bridge_sommargronsaker_apetit",
+      "canonical": "sommargrönsaker",
+      "plain_offer_word": "sommar"
+    },
+    {
+      "bridge_id": "bridge_sotstro_lattstro",
+      "canonical": "lättströ",
+      "plain_offer_word": "lattstro"
+    },
+    {
+      "bridge_id": "bridge_spisbrod_knackebrod",
+      "canonical": "knäckebröd",
+      "plain_offer_word": "knackebrod"
+    },
+    {
+      "bridge_id": "bridge_standardmjolk_plain",
+      "canonical": "standardmjölk",
+      "plain_offer_word": "standardmjolk"
+    },
+    {
+      "bridge_id": "bridge_steklok_exact",
+      "canonical": "steklök",
+      "plain_offer_word": "steklok"
+    },
+    {
+      "bridge_id": "bridge_strosocker_exact",
+      "canonical": "strösocker",
+      "plain_offer_word": "strosocker"
+    },
+    {
+      "bridge_id": "bridge_surkal_exact",
+      "canonical": "surkål",
+      "plain_offer_word": "surkal"
+    },
+    {
+      "bridge_id": "bridge_syltad_ingefara_exact",
+      "canonical": "syltadingefära",
+      "plain_offer_word": "syltadingefara"
+    },
+    {
+      "bridge_id": "bridge_tacokrydda_spice_mix",
+      "canonical": "kryddmix",
+      "plain_offer_word": "tacokrydda"
+    },
+    {
+      "bridge_id": "bridge_teriyakisas_exact",
+      "canonical": "teriyakisås",
+      "plain_offer_word": "teriyakimarinad"
+    },
+    {
+      "bridge_id": "bridge_teriyakisas_exact",
+      "canonical": "teriyakisås",
+      "plain_offer_word": "teriyakisas"
+    },
+    {
+      "bridge_id": "bridge_tomatsas_pastasas_products",
+      "canonical": "tomatsås",
+      "plain_offer_word": "tomatsas"
+    },
+    {
+      "bridge_id": "bridge_tomatsas_pinsasas_alternative_line",
+      "canonical": "pinsasås",
+      "plain_offer_word": "pinsasas"
+    },
+    {
+      "bridge_id": "bridge_tomatsas_pinsasas_alternative_line",
+      "canonical": "pinsasås",
+      "plain_offer_word": "tomatsas"
+    },
+    {
+      "bridge_id": "bridge_tomatsas_pinsasas_alternative_line",
+      "canonical": "pinsasås",
+      "plain_offer_word": "tomatsås"
+    },
+    {
+      "bridge_id": "bridge_tomatsoppa_exact",
+      "canonical": "tomatsoppa",
+      "plain_offer_word": "tomatsoppor"
+    },
+    {
+      "bridge_id": "bridge_tzaybitar_vegobitar",
+      "canonical": "vegobitar",
+      "plain_offer_word": "tzay"
+    },
+    {
+      "bridge_id": "bridge_vaniljsas_alternative_line",
+      "canonical": "vaniljsås",
+      "plain_offer_word": "vaniljsas"
+    },
+    {
+      "bridge_id": "bridge_vaxtbaserad_mjolkryck",
+      "canonical": "växtdryck",
+      "plain_offer_word": "oatly"
+    },
+    {
+      "bridge_id": "bridge_vaxtbaserad_mjolkryck",
+      "canonical": "växtdryck",
+      "plain_offer_word": "vaxtdryck"
+    },
+    {
+      "bridge_id": "bridge_veganost_plant_cheese_family",
+      "canonical": "veganost",
+      "plain_offer_word": "greenvie"
+    },
+    {
+      "bridge_id": "bridge_veganost_plant_cheese_family",
+      "canonical": "veganost",
+      "plain_offer_word": "vegansk"
+    },
+    {
+      "bridge_id": "bridge_veganost_plant_cheese_family",
+      "canonical": "veganost",
+      "plain_offer_word": "violife"
+    },
+    {
+      "bridge_id": "bridge_vinbarsgele_variants",
+      "canonical": "vinbärsgele",
+      "plain_offer_word": "vinbarsgele"
+    },
+    {
+      "bridge_id": "bridge_vinbarsgele_variants",
+      "canonical": "vinbärsgele",
+      "plain_offer_word": "vinbärsgelé"
+    },
+    {
+      "bridge_id": "bridge_vit_fiskfile_white_fish",
+      "canonical": "fiskfilé",
+      "plain_offer_word": "havskattfile"
+    },
+    {
+      "bridge_id": "bridge_vit_fiskfile_white_fish",
+      "canonical": "fiskfilé",
+      "plain_offer_word": "havskattfilé"
+    },
+    {
+      "bridge_id": "bridge_vit_fiskfile_white_fish",
+      "canonical": "fiskfilé",
+      "plain_offer_word": "pangasiusmalfile"
+    },
+    {
+      "bridge_id": "bridge_vit_fiskfile_white_fish",
+      "canonical": "fiskfilé",
+      "plain_offer_word": "pangasiusmalfilé"
+    },
+    {
+      "bridge_id": "bridge_vit_fiskfile_white_fish",
+      "canonical": "fiskfilé",
+      "plain_offer_word": "sejfile"
+    },
+    {
+      "bridge_id": "bridge_vit_fiskfile_white_fish",
+      "canonical": "fiskfilé",
+      "plain_offer_word": "sejfilé"
+    },
+    {
+      "bridge_id": "bridge_vitlokssmor_exact",
+      "canonical": "vitlökssmör",
+      "plain_offer_word": "vitlokssmor"
+    },
+    {
+      "bridge_id": "bridge_vitt_brod_formbrod",
+      "canonical": "formbröd",
+      "plain_offer_word": "toast"
+    },
+    {
+      "bridge_id": "bridge_wokgronsaker_forms",
+      "canonical": "wokgrönsaker",
+      "plain_offer_word": "wokmix"
+    },
+    {
+      "bridge_id": "bridge_worcestersas_worcestershire",
+      "canonical": "worcestersås",
+      "plain_offer_word": "worcestersas"
+    },
+    {
+      "bridge_id": "bridge_worcestersas_worcestershire",
+      "canonical": "worcestersås",
+      "plain_offer_word": "worcestershiresas"
+    },
+    {
+      "bridge_id": "bridge_yoghurt_alt_naturell",
+      "canonical": "yoghurt",
+      "plain_offer_word": "yogurt"
+    }
+  ]
+}
