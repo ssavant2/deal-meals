@@ -31,6 +31,7 @@ Shipped foundation:
 - JSON authority audit at `docs/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md`
 
 Current L3-C direct-reader status after B2: **passed**.
+Current B3 TOML-source round-trip status: **passed**.
 
 The JSON contract files are still authoritative:
 
@@ -39,7 +40,7 @@ The JSON contract files are still authoritative:
 
 Direct Python readers have been migrated behind
 `app/support_checks/matcher_contracts.py`. JSON is still authored
-source-of-truth until B3-B5 add, exercise, and flip TOML-source generation.
+source-of-truth until B4-B5 exercise and flip TOML-source generation.
 
 ## Implementation Governance
 

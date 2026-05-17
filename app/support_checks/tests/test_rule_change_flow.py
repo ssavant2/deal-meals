@@ -33,6 +33,10 @@ from support_checks.audit_matcher_contract_json_authority import (
     audit as audit_json_authority,
     json_report as json_authority_report,
 )
+from support_checks.audit_matcher_contract_toml_sources import (
+    audit_contract_sources,
+    json_report as toml_source_json_report,
+)
 from support_checks.prefix_schema import allowed_prefixes
 from support_checks.run_verified_term_audit import (
     AuditVariant,
@@ -518,6 +522,30 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         self.assertEqual(report["blocker_baseline_count"], 0)
         self.assertEqual(report["summary"]["contract_access_api"], 2)
         self.assertEqual(report["omitted_findings"]["generated_output_reference"], 3894)
+
+    def test_phase5_toml_source_round_trip_is_lossless(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp)
+            results = audit_contract_sources(output_dir)
+
+            report = json.loads(toml_source_json_report(results))
+            self.assertEqual(report["decision"], "PASS")
+            self.assertFalse(report["generated_json_committed"])
+            self.assertEqual(
+                {result.contract: result.row_count for result in results},
+                {
+                    "matcher_regression_cases": len(load_fixture_contract(DEFAULT_FIXTURE_FILE)),
+                    "matcher_rule_inventory": len(load_inventory_contract(DEFAULT_INVENTORY_FILE)),
+                },
+            )
+            for result in results:
+                self.assertTrue(result.semantic_equal)
+                self.assertTrue(result.canonical_byte_equal)
+                self.assertEqual(result.canonical_diff_line_count, 0)
+                self.assertTrue(Path(result.source_toml_path).exists())
+
+            self.assertFalse((output_dir / "matcher_regression_cases.json").exists())
+            self.assertFalse((output_dir / "matcher_rule_inventory.json").exists())
 
 
 if __name__ == "__main__":

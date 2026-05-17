@@ -1,0 +1,32 @@
+{
+  "decision": "PASS",
+  "generated": "2026-05-17",
+  "generated_json_committed": false,
+  "results": [
+    {
+      "canonical_byte_equal": true,
+      "canonical_diff_line_count": 0,
+      "canonical_diff_preview": [],
+      "contract": "matcher_regression_cases",
+      "row_count": 1488,
+      "semantic_equal": true,
+      "source_json_path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_json_sha256": "a305d19a6b49d207ea4edb02162e95932c2239b43878d5abcccaa5a84a637267",
+      "source_toml_bytes": 896739,
+      "source_toml_path": "/tmp/deal-meals-matcher-contract-sources/matcher_regression_cases.toml"
+    },
+    {
+      "canonical_byte_equal": true,
+      "canonical_diff_line_count": 0,
+      "canonical_diff_preview": [],
+      "contract": "matcher_rule_inventory",
+      "row_count": 457,
+      "semantic_equal": true,
+      "source_json_path": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",
+      "source_json_sha256": "a1c8525892fa37b6168ee1f35f53cf7a5eddfd285410b04b4a24f910f6c6518b",
+      "source_toml_bytes": 519553,
+      "source_toml_path": "/tmp/deal-meals-matcher-contract-sources/matcher_rule_inventory.toml"
+    }
+  ],
+  "schema_readme": "app/languages/sv/matcher_contracts/sources/README.md"
+}
