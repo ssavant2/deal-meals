@@ -301,6 +301,15 @@ def _generated_coverage_step(args: argparse.Namespace) -> Step:
     )
 
 
+def _generated_contract_json_step(args: argparse.Namespace) -> Step:
+    return Step(
+        "generate matcher contract JSON",
+        _command("generate_matcher_contract_json_from_toml_sources.py", *_tree_root_args(args), "--write"),
+        "updates generated fixture/inventory JSON from authoritative TOML sources before coverage/pre-flight",
+        cwd=repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
+    )
+
+
 def _generated_coverage_is_stale(args: argparse.Namespace) -> bool:
     from support_checks.generate_matcher_registry_coverage import generate_coverage_files  # noqa: PLC0415
 
@@ -681,7 +690,10 @@ def parse_args() -> argparse.Namespace:
         "--generate-coverage",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="For Track B fixture/inventory changes, refresh generated registry coverage TOML before pre-flight.",
+        help=(
+            "For Track B fixture/inventory changes, refresh generated matcher contract JSON "
+            "and registry coverage TOML before pre-flight."
+        ),
     )
     return parser.parse_args()
 
@@ -698,7 +710,7 @@ def main() -> int:
         and (changes.fixtures_changed or changes.inventory_changed)
     )
     generated_coverage_stale = _generated_coverage_is_stale(args) if generated_coverage_refresh else False
-    if generated_coverage_stale and not changes.registry_changed:
+    if (generated_coverage_refresh or generated_coverage_stale) and not changes.registry_changed:
         changes = ChangeFlags(
             registry_changed=True,
             runtime_changed=changes.runtime_changed,
@@ -718,6 +730,7 @@ def main() -> int:
 
     steps: list[Step] = []
     if generated_coverage_refresh:
+        steps.append(_generated_contract_json_step(args))
         steps.append(_generated_coverage_step(args))
     if args.track == "B" and _stages_baseline(args, changes):
         steps.append(_baseline_promotion_step(args))

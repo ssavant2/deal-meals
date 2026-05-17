@@ -2573,3 +2573,37 @@ layer_role = "keyword_synonym_mapping"
 ingredient = "500 g savojkål, strimlad"
 offer_name = "Savoykål ca 1,15kg Klass 1 ICA"
 expected = 1
+
+[[entries]]
+language = "sv"
+market = "SE"
+canonical = "isbergssallat"
+status = "active"
+variants = ["isbergssalladshuvud"]
+offer_terms = ["isbergssallat"]
+source_refs = ["current_review:isbergssalladshuvud_routing"]
+layer_policy = ["offer_alias"]
+notes = "Normalize isbergssallad head-compound recipe wording to isbergssallat products without changing base product keyword priority."
+
+[[entries.positive_examples]]
+ingredient = "1 isbergssalladshuvud"
+offer_name = "Isbergssallat ca 440g Klass 1 ICA"
+offer_category = "vegetables"
+expected = 1
+
+[[entries]]
+language = "sv"
+market = "SE"
+canonical = "isbergssallad"
+status = "active"
+variants = ["isbergssallatshuvud"]
+offer_terms = ["isbergssallad"]
+source_refs = ["current_review:isbergssalladshuvud_routing"]
+layer_policy = ["offer_alias"]
+notes = "Normalize the reverse isbergssallat head-compound recipe wording for products labelled isbergssallad."
+
+[[entries.positive_examples]]
+ingredient = "1 isbergssallatshuvud"
+offer_name = "Isbergssallad 1-p Klass 1"
+offer_category = "vegetables"
+expected = 1

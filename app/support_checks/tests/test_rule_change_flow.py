@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from copy import deepcopy
 from dataclasses import replace
 import json
@@ -44,7 +45,8 @@ from support_checks.audit_matcher_contract_toml_sources import (
     write_contract_source,
 )
 from support_checks.generate_matcher_contract_json_from_toml_sources import check_generated_contract_json
-from support_checks.prefix_schema import allowed_prefixes
+from support_checks.prefix_schema import allowed_prefixes, non_registered_prefixes
+from support_checks.run_matcher_change_gates import _generated_contract_json_step
 from support_checks.run_verified_term_audit import (
     AuditVariant,
     IDENTITY_HASH_VERSION_V1,
@@ -186,7 +188,6 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             app_dir = _copy_matcher_tree(tree_root)
 
             fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-            inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
             fixture_id = "matcher_regression_positive_phase2_generated_coverage"
             inventory_id = "legacy_synonym_phase2_generated_coverage"
 
@@ -420,6 +421,11 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
                 text=True,
             )
             self.assertEqual(gate_result.returncode, 0, gate_result.stderr + gate_result.stdout)
+            self.assertIn("generate_matcher_contract_json_from_toml_sources.py", gate_result.stdout)
+            self.assertLess(
+                gate_result.stdout.find("generate_matcher_contract_json_from_toml_sources.py"),
+                gate_result.stdout.find("generate_matcher_registry_coverage.py"),
+            )
 
     def test_phase4_cli_dry_run_canary_does_not_write(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -500,6 +506,8 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
     def test_phase5_prefix_schema_and_convention_entry(self) -> None:
         self.assertIn("current_review:", allowed_prefixes("source_ref"))
         self.assertIn("matcher_layer_diagnostics:", allowed_prefixes("adapter_ref"))
+        self.assertIn("keyword_synonyms:", allowed_prefixes("adapter_ref"))
+        self.assertIn("keyword_synonyms:", non_registered_prefixes("adapter_ref"))
 
         with tempfile.TemporaryDirectory() as tmp:
             entries_dir = Path(tmp)
@@ -538,6 +546,35 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             build_keyword_extra_parents_export_from_entries(entries),
             {"phasefemapelsin": "phasefemfrukt"},
         )
+
+    def test_phase5_gate_json_generation_step_refreshes_toml_source_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            fixture_source_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            )
+            fixture_source_file.write_text(
+                fixture_source_file.read_text(encoding="utf-8").replace(
+                    'id = "plan_initial_jordgubbssaft_positive"',
+                    'id = "plan_initial_jordgubbssaft_positive_gate_json"',
+                    1,
+                ),
+                encoding="utf-8",
+            )
+            self.assertTrue(any(result.drifted for result in check_generated_contract_json(tree_root=tree_root)))
+
+            step = _generated_contract_json_step(argparse.Namespace(tree_root=tree_root))
+            result = subprocess.run(
+                list(step.argv),
+                cwd=step.cwd,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            self.assertFalse(any(result.drifted for result in check_generated_contract_json(tree_root=tree_root)))
 
     def test_phase5_json_authority_audit_passes_current_tree(self) -> None:
         hits = audit_json_authority(Path(__file__).resolve().parents[2])

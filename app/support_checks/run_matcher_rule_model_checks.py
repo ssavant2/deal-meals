@@ -40,7 +40,7 @@ from support_checks.run_matcher_layer_fixture_cases import (  # noqa: E402
     has_temporary_fixture_id,
     has_temporary_policy_ref,
 )
-from support_checks.prefix_schema import diagnostic_prefixes  # noqa: E402
+from support_checks.prefix_schema import non_registered_prefixes  # noqa: E402
 from support_checks.run_matcher_rule_inventory_checks import (  # noqa: E402
     _entry_adapter_refs,
 )
@@ -530,14 +530,14 @@ def main() -> int:
         if entry.get("status") == "wrapped_adapter"
         for adapter_ref in _entry_adapter_refs(entry)
     }
-    known_diagnostic_adapter_prefixes = diagnostic_prefixes("adapter_ref")
+    known_non_registered_adapter_prefixes = non_registered_prefixes("adapter_ref")
     unknown_inventory_adapter_refs = sorted(
         adapter_ref
         for adapter_ref in inventory_adapter_refs
         if adapter_ref not in valid_adapter_refs
-        and not adapter_ref.startswith(known_diagnostic_adapter_prefixes)
+        and not adapter_ref.startswith(known_non_registered_adapter_prefixes)
     )
-    check("wrapped adapter refs point to registered or known diagnostic adapters", not unknown_inventory_adapter_refs)
+    check("wrapped adapter refs point to registered or known non-registered adapters", not unknown_inventory_adapter_refs)
 
     print("ALL MATCHER RULE MODEL CHECKS PASSED")
     return 0

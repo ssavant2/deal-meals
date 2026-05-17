@@ -44,7 +44,7 @@ from support_checks.matcher_contracts import (  # noqa: E402
     load_fixture_contract,
     load_inventory_contract,
 )
-from support_checks.prefix_schema import diagnostic_prefixes  # noqa: E402
+from support_checks.prefix_schema import non_registered_prefixes  # noqa: E402
 
 
 DEFAULT_BATCH_SIZE = 60
@@ -62,7 +62,7 @@ DEFAULT_REPORT_DIR = (
 EXTRACTION_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "extraction.py"
 TERM_INDEXES_FILE = APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_indexes.py"
 WORKING_TABLE = "tmp_verified_term_audit_variants"
-KNOWN_DIAGNOSTIC_ADAPTER_PREFIXES = diagnostic_prefixes("adapter_ref")
+KNOWN_NON_REGISTERED_ADAPTER_PREFIXES = non_registered_prefixes("adapter_ref")
 MAPPING_SOURCE_TYPES = frozenset({
     "ingredient_parent",
     "keyword_synonym",
@@ -834,7 +834,7 @@ def _classify_static_variant(
                 unknown_adapter_refs = sorted(
                     ref
                     for ref in set(adapter_refs) - valid_adapter_refs
-                    if not any(ref.startswith(prefix) for prefix in KNOWN_DIAGNOSTIC_ADAPTER_PREFIXES)
+                    if not any(ref.startswith(prefix) for prefix in KNOWN_NON_REGISTERED_ADAPTER_PREFIXES)
                 )
                 if unknown_adapter_refs:
                     problems.append("unknown_adapter_refs:" + ",".join(unknown_adapter_refs[:5]))

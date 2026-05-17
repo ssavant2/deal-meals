@@ -40,6 +40,14 @@ def diagnostic_prefixes(kind: str = "adapter_ref") -> tuple[str, ...]:
     return tuple(prefixes)
 
 
+def non_registered_prefixes(kind: str = "adapter_ref") -> tuple[str, ...]:
+    section = load_prefix_schema().get(kind) or {}
+    prefixes = section.get("non_registered_prefixes") or section.get("diagnostic_prefixes") or []
+    if not isinstance(prefixes, list) or not all(isinstance(prefix, str) for prefix in prefixes):
+        raise ValueError(f"prefix schema {kind}.non_registered_prefixes must be a string list")
+    return tuple(prefixes)
+
+
 def temporary_patterns(kind: str) -> tuple[str, ...]:
     section = load_prefix_schema().get(kind) or {}
     patterns = section.get("temporary_patterns") or []

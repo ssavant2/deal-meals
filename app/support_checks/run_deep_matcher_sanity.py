@@ -10180,6 +10180,10 @@ test("galiamelon still matches galiamelon", match("Galiamelon ca 850g Klass 1 IC
 test("grönsallad matches isbergssallad", match("Isbergssallad 1-p Klass 1", "grönsallad", "fruit"), "grönsallad")
 test("salladsblad matches isbergssallad", match("Isbergssallad 1-p Klass 1", "salladsblad", "fruit"), "salladsblad")
 test("isbergssallad still matches isbergssallad", match("Isbergssallad 1-p Klass 1", "isbergssallad", "fruit"), "isbergssallad")
+test("isbergssalladshuvud matches isbergssallat spelling variant",
+     match("Isbergssallat ca 440g Klass 1 ICA", "1 isbergssalladshuvud", "vegetables"), "isbergssallat")
+test("isbergssallatshuvud matches isbergssallad spelling variant",
+     match("Isbergssallad 1-p Klass 1", "1 isbergssallatshuvud", "vegetables"), "isbergssallad")
 test("grönsallad still matches hjärtsallad", match("Hjärtsallad Eko 180g", "grönsallad", "fruit"), "grönsallad")
 # snabbkaffe: Nescafé Gold is plain instant coffee
 test("snabbkaffe matches Nescafé Gold", match("Nescafé Gold 200g", "snabbkaffe", "beverages"), "snabbkaffe")

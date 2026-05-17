@@ -53,7 +53,7 @@ DEFAULT_REPORT_ROOT = (
     / "term_registry"
 )
 DEFAULT_SHARED_REGISTRY_DIR = APP_DIR / "languages" / "term_registry"
-EXPECTED_VERIFIED_TERM_VARIANT_COUNT = 5517  # updated by support_checks/promote_term_baseline.py
+EXPECTED_VERIFIED_TERM_VARIANT_COUNT = 5519  # updated by support_checks/promote_term_baseline.py
 FORBIDDEN_BASELINE_SUMMARY_KEYS = {
     "batch_count",
     "batch_counts",

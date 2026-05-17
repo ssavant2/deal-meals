@@ -635,9 +635,9 @@ They are generated from the generated JSON contracts by:
 python3 app/support_checks/generate_matcher_registry_coverage.py --write
 ```
 
-The Track B wrapper runs that generator automatically when fixture or inventory
-changes are selected. The JSON contracts themselves are generated from the TOML
-sources by:
+The Track B wrapper automatically regenerates the JSON contracts first and
+then runs the coverage generator when fixture or inventory changes are selected.
+The JSON contracts themselves are generated from the TOML sources by:
 
 ```bash
 python3 app/support_checks/generate_matcher_contract_json_from_toml_sources.py --write
@@ -894,6 +894,7 @@ choose the smallest complete gate set for the change.
 | `run_deep_matcher_sanity.py` | Every Track A fix and every Track B runtime semantic change. |
 | targeted `run_matcher_layer_fixture_cases.py` | Track B fixture/rule work for the affected `--policy-ref`, `--canonical`, or `--case-id`. |
 | targeted `run_matcher_layer_parity.py` | Track B route, bridge, no-match, canonical, cache-facing, or fixture behavior work. |
+| `generate_matcher_contract_json_from_toml_sources.py --write` | Fixture or inventory TOML source changed. The wrapper runs this automatically before coverage. |
 | `generate_matcher_registry_coverage.py --write` | Fixture or inventory contract changed. The wrapper runs this by default after JSON generation. |
 | full `run_matcher_layer_fixture_cases.py --skip-cache-freshness` | Every Track B behavior change before handoff. |
 | full `run_matcher_layer_parity.py --skip-cache-freshness` | Every Track A/Track B matcher behavior change before handoff. |
