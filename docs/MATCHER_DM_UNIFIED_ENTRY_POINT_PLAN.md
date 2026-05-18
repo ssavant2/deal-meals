@@ -1,7 +1,8 @@
 # Matcher DM Unified Entry Point Plan
 
-Status: Phase 0/1, post-Phase-1 cleanup, and Phase 2 guide implemented on
-2026-05-18; Phase 3 remains future work.
+Status: Phase 0/1, post-Phase-1 cleanup, Phase 2 guide, and Phase 3 TOML
+surface authoring implemented on 2026-05-18. Runtime-table CLI remains a
+separate future workstream.
 
 ## Goal
 
@@ -65,6 +66,8 @@ Need one specific maintenance operation? Use dm matcher for that too.
 - Do not build large authoring commands before a real repeated need exists.
 - Do not add wrappers that change semantics compared with the underlying
   support check.
+- Do not create standalone `add` commands for generated TOML mirrors or
+  temporary coverage/contract support artifacts.
 
 ## Proposed Thin Wrappers
 
@@ -195,27 +198,98 @@ Run: ./bin/dm matcher gates --track A
 This may be enough to avoid prematurely adding risky `add` commands for runtime
 tables.
 
-## Phase 3: Future `add` Commands
+## Phase 3: Complete TOML-Surface Authoring
 
-Keep the existing discipline:
+Phase 3 should finish the simple mental model:
 
-- one new `add` command at a time
-- choose from real frequency/repetition
-- prefer deterministic append-only TOML surfaces
-- defer runtime-table commands until there is either a declarative source or a
-  very safe codemod surface
+```text
+TOML registry rule surface -> dm matcher add should exist.
+Python runtime table       -> manual edit + dm matcher gates.
+```
 
-Current authoring commands:
+This is a clearer boundary than choosing future `add` commands one at a time
+from a mixed TOML/Python candidate list. It makes `dm matcher add --help` the
+expected place to look for registry-TOML authoring, while keeping runtime-table
+codemods as a separate workstream.
+
+"TOML registry rule surface" means the term-registry entry files that define
+live matcher behavior. It does not mean every TOML file in the matcher tree.
+Generated mirrors, fixture/inventory contract sources, and temporary coverage
+exceptions remain support artifacts that are updated by `regen`, `refresh-*`,
+or by an `add` command as proof data; they are not standalone rule shapes.
+
+Supported after Phase 3:
 
 - `dm matcher add keyword-synonym`
 - `dm matcher add keyword-extra-parent`
+- `dm matcher add ingredient-parent`
+- `dm matcher add offer-extra-keyword`
+- `dm matcher add ingredient-routing-parent`
+- `dm matcher add parent-match-only`
+- `dm matcher add recipe-routing-helper`
+- `dm matcher add no-match-policy`
+- `dm matcher add extraction-helper`
 
-Likely future candidates:
+### Phase 3A: Simple TOML Mappings
+
+Implemented the remaining deterministic mapping-like TOML surfaces with a shared
+internal helper where practical:
 
 - `dm matcher add ingredient-parent`
 - `dm matcher add offer-extra-keyword`
-- `dm matcher add pnb` only after the runtime-table surface is made safe
-- `dm matcher add fpb` only after the runtime-table surface is made safe
+- `dm matcher add ingredient-routing-parent`
+- `dm matcher add parent-match-only`
+- `dm matcher add recipe-routing-helper`
+
+Expected default pattern:
+
+- append the relevant registry TOML entry
+- add or update a focused `run_deep_matcher_sanity.py` regression when the
+  surface affects runtime behavior
+- use convention-derived coverage when the registry loader supports it
+- run baseline promotion plus light registry/export/sanity gates
+- support `--dry-run`, `--tree-root`, duplicate guards, stable refs, and focused
+  sanity proof
+- keep fixture/inventory generation explicit to the commands that own it;
+  structured commands require existing durable refs when runtime models need
+  them
+
+### Phase 3B: Structured TOML Policies
+
+Implemented commands for TOML surfaces that need more schema/design care:
+
+- `dm matcher add no-match-policy`
+- `dm matcher add extraction-helper`
+
+These are not treated as lightweight mapping aliases. `no-match-policy`
+requires existing fixture refs before it writes, and `extraction-helper` is
+explicit that it covers a code-owned extraction output rather than replacing
+the extraction.py change itself.
+
+### Explicitly Out Of Scope
+
+- `match_bridge.toml`: staged/declarative-only; new bridge rows are not
+  runtime-wired by themselves and often require dual-write behavior.
+- Generated/contract support TOMLs: `matcher_regression_case.toml`,
+  `matcher_rule_inventory.toml`, `matcher_contracts/sources/*.toml`, and
+  `coverage_exceptions.toml`. They may be written as supporting proof, but
+  should not get standalone `dm matcher add` commands.
+- Python runtime tables and code surfaces: PNB, FPB, GPB, KSBC, BDPK,
+  `STOP_WORDS`, specialty rules, form/processed rules, and backend-only guards.
+
+Python runtime surfaces may deserve future CLI help, but that should be a
+separate plan around declarative migration or AST/codemod editing with strong
+format tests.
+
+Phase 3 implementation discipline still applies inside this clearer boundary:
+
+- shared helper built where it reduced duplication
+- small commands implemented in sensible batches, with each surface
+  independently tested
+- `no-match-policy` and `extraction-helper` did not force complexity into the
+  simple mapping helper
+- runbook, `CLAUDE.md`, memory, and `dm matcher guide` updated for supported
+  surfaces
 
 ## Open Questions
 
@@ -269,6 +343,8 @@ Rollback:
 - Manual-only rule shapes are discoverable through `dm matcher guide <shape>`.
 - Raw scripts remain documented as fallback/debug entry points.
 - `./bin/dm matcher --help` exposes the common operation list from Phase 1.
+- When Phase 3 is implemented, all live TOML registry rule surfaces except
+  `match_bridge.toml` have an `add` command and corresponding `guide` entry.
 
 ## Rough Estimate
 
@@ -277,4 +353,6 @@ Rollback:
 | Phase 0 | Shared runner/helper and tests | 1-2h |
 | Phase 1 | Thin wrappers, docs, memory updates | 3-5h |
 | Phase 2 | `guide` helper | implemented |
-| Phase 3 | Future authoring commands, one at a time | 2-4h each for simple TOML shapes; runtime-table commands need a separate estimate |
+| Phase 3A | Complete simple TOML mapping commands | implemented |
+| Phase 3B | Structured TOML policy/scaffold commands | implemented |
+| Runtime-table CLI | Separate future workstream, not Phase 3 | requires separate design/estimate |

@@ -36,9 +36,18 @@ Plain-language rule:
 Known CLI rule shapes:
 
 ```bash
-./bin/dm matcher add keyword-extra-parent <canonical> --kids <kid1,kid2,...> ...
 ./bin/dm matcher add keyword-synonym <canonical> --variants <variant1,variant2,...> \
   --sanity-offer "<offer name>" --offer-category <category>
+./bin/dm matcher add keyword-extra-parent <canonical> --kids <kid1,kid2,...> ...
+./bin/dm matcher add ingredient-parent <canonical> --variants <variant1,variant2,...> ...
+./bin/dm matcher add offer-extra-keyword <canonical> --variants <product-term1,...> ...
+./bin/dm matcher add ingredient-routing-parent <canonical> --variants <variant1,...> ...
+./bin/dm matcher add parent-match-only <canonical> --variants <product-term1,...> ...
+./bin/dm matcher add recipe-routing-helper <canonical> --variants <route-alias1,...> ...
+./bin/dm matcher add no-match-policy <canonical> --ingredient-patterns "<regex>" \
+  --blocked-offer-keywords <keyword> --fixture-refs <fixture_id> ...
+./bin/dm matcher add extraction-helper <canonical> --side product|ingredient|both \
+  --input "<text>" --source-refs <code-ref>
 ```
 
 Unsure whether a rule shape has an `add` command:
@@ -258,9 +267,55 @@ Keyword extra parent fan-out:
 
 Use `--dry-run` to preview generated TOML/sanity text, `--no-run-gates` only for
 isolated test trees, and `--inventory-id` only when deliberately adding a
-separate inventory row for a canonical that already has one. For all other rule
-types, follow the manual Track A, lightweight alias, or Track B workflow until a
-dedicated `dm matcher add ...` subcommand exists.
+separate inventory row for a canonical that already has one.
+
+Other TOML registry rule surfaces:
+
+```bash
+./bin/dm matcher add ingredient-parent ris \
+  --variants jasminris \
+  --sanity-offer "Ris"
+
+./bin/dm matcher add offer-extra-keyword potatis \
+  --variants sparrispotatis \
+  --sanity-ingredient "potatis"
+
+./bin/dm matcher add ingredient-routing-parent svamp \
+  --variants skogssvamp \
+  --sanity-offer "Skogssvamp"
+
+./bin/dm matcher add parent-match-only kalkon \
+  --variants kalkonbröst \
+  --sanity-offer "Kalkonbröst Rökt Skivad" \
+  --offer-category meat
+
+./bin/dm matcher add recipe-routing-helper ost \
+  --variants ost \
+  --sanity-ingredient "prästost" \
+  --sanity-offer "Prästost"
+```
+
+For structured TOML policies, create/choose durable proof first, then let the
+CLI write the registry row and focused sanity stub:
+
+```bash
+./bin/dm matcher add no-match-policy cheddarost \
+  --ingredient-patterns "\briven\b.*\bcheddarost\b" \
+  --blocked-offer-patterns "(?=.*\bcheddarost\b)(?=.*\bkavli\b).*" \
+  --fixture-refs matcher_regression_riven_cheddarost_spread_negative \
+  --reason "Riven cheddarost requires grated cheese, not spread." \
+  --negative-ingredient "100 g riven cheddarost" \
+  --negative-offer "Kavli Cheddarost"
+
+./bin/dm matcher add extraction-helper apelsinskal \
+  --side product \
+  --input "Apelsinskal 100g" \
+  --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:402
+```
+
+Python runtime tables are the remaining manual path: PNB, FPB, GPB, KSBC,
+`STOP_WORDS`, specialty/form/processed rules, and backend-only guards still use
+manual editing plus `./bin/dm matcher gates --track A|B`.
 
 ## Cold-Start Details
 
@@ -424,11 +479,11 @@ can be the correct surface.
 | Change type | Prefer | Use when | Avoid |
 | --- | --- | --- | --- |
 | Exact synonym or spelling alias | `./bin/dm matcher add keyword-synonym ...` for `keyword_synonym`; otherwise the matching parent/routing registry entry | One term is the same ingredient family as another. Default to the lightweight alias path for spelling/plural/compound aliases; escalate to Track B only for routing/parity/product-policy implications. | Ad-hoc extraction code or full fixture/inventory ceremony for a plain alias. |
-| Ingredient/offer bridge (recipe wording differs from product wording) | `term_registry/entries/keyword_extra_parent.toml` (preferred) or `ingredient_parent.toml` | Recipe term and product term differ but should match (e.g. `nori` → `alger`, `citrusfrukter` → `citron`/`lime`/`apelsin`). These TWO surfaces are wired into the runtime matcher today. | Adding only to `match_bridge.toml`. That surface is **declarative-only / staged for migration** — it does not affect runtime routing on its own. See the match_bridge note below the table. |
-| No-match/blocking policy | `term_registry/entries/no_match_policy.toml` | Ingredient pattern plus offer keyword/pattern should never match. | One-off Python if a declarative policy can express it. |
-| Offer keyword extraction | `term_registry/entries/offer_extra_keyword.toml` or `extraction.py` | Product wording should expose an additional canonical offer keyword. | Adding recipe synonyms when only offer extraction is missing. |
-| Recipe extraction helper | `term_registry/entries/extraction_helper.toml` or `extraction.py` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures. |
-| Parent/canonical fallback | `ingredient_parent.toml`, `parent_match_only.toml`, or `keyword_extra_parent.toml` | A child term should expose a broader canonical, sometimes only for matching. | Parent mappings that erase meaningful product-form differences. |
+| Ingredient/offer bridge (recipe wording differs from product wording) | `./bin/dm matcher add keyword-extra-parent ...` (preferred for fan-out) or `./bin/dm matcher add ingredient-parent ...` | Recipe term and product term differ but should match (e.g. `nori` → `alger`, `citrusfrukter` → `citron`/`lime`/`apelsin`). These surfaces are wired into the runtime matcher today. | Adding only to `match_bridge.toml`. That surface is **declarative-only / staged for migration** — it does not affect runtime routing on its own. See the match_bridge note below the table. |
+| No-match/blocking policy | `./bin/dm matcher add no-match-policy ...` after a durable negative fixture exists | Ingredient pattern plus offer keyword/pattern should never match. | One-off Python if a declarative policy can express it. |
+| Offer keyword extraction | `./bin/dm matcher add offer-extra-keyword ...` or `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Product wording should expose an additional canonical offer keyword. | Adding recipe synonyms when only offer extraction is missing. |
+| Recipe extraction helper | `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures. |
+| Parent/canonical fallback | `./bin/dm matcher add ingredient-parent ...`, `parent-match-only ...`, or `keyword-extra-parent ...` | A child term should expose a broader canonical, sometimes only for matching. | Parent mappings that erase meaningful product-form differences. |
 | Ingredient-context blocker | `blocker_data.py` / `FALSE_POSITIVE_BLOCKERS` | Ingredient wording contains a keyword only inside a context that should suppress it. Common Track A tactical fix. | Offer/product variant blocking; use a product-side blocker or form/specialty rule after confirming the issue is product-side. |
 | Product-name blocker | `blocker_data.py` / `PRODUCT_NAME_BLOCKERS` | Offer/product wording contains a per-keyword variant, carrier, product type, or flavor that should block the matched keyword. Common Track A tactical fix. | Large flavor/form families that should be modeled declaratively. |
 | Global product-name blocker | `blocker_data.py` / `GLOBAL_PRODUCT_NAME_BLOCKERS` | The product is globally non-food or globally out of matcher scope regardless of which keyword matched. Common for supplements, pet food, tools, tobacco, cleaning, and similar products. | Food products that can be legitimate for some recipe wording; use scoped PNB/no-match policy instead. |
@@ -436,7 +491,7 @@ can be the correct surface.
 | Qualifier or bidirectional variant | `specialty_rules.py` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. | Raw substring checks without word-boundary handling. |
 | Declarative bridge guard | `match_bridge.toml` nested `blockers` / `backend_allowances` | A bridge needs scoped negative guards or backend allowance metadata with fixture refs. | Hiding broad bridge behavior in unrelated backend code. |
 | Backend-only validation | `recipe_matcher_backend.py` | The rule needs recipe context, retry behavior, or materialization-time validation. | Fixing only backend when fast/fullscan/routing also need the rule. |
-| Routing-only gap | `ingredient_routing_parent.toml`, `recipe_routing_helper.toml`, or `term_indexes.py` helper | Fullscan matches but routed cache never sees the pair. | Backend allowances that hide missing route terms. |
+| Routing-only gap | `./bin/dm matcher add ingredient-routing-parent ...`, `recipe-routing-helper ...`, or `term_indexes.py` helper | Fullscan matches but routed cache never sees the pair. | Backend allowances that hide missing route terms. |
 | Canonical conflict | parent/equivalence/precedence metadata, or a narrower bridge | Diagnostics reports duplicate signal source or ambiguous canonical. | Accepting duplicate canonicals without a declared relationship. |
 
 If the right surface is unclear, write the fixture first and run diagnostics.
@@ -459,10 +514,10 @@ instead:
 
 | You want to … | Write to |
 | --- | --- |
-| Roll an offer keyword up to a parent ingredient (e.g. `nori` → `alger`, `citron` → `citrusfrukter`) | `term_registry/entries/keyword_extra_parent.toml` |
-| Treat a recipe-side variant as a known parent ingredient (e.g. `noriblad` → `nori`) | `term_registry/entries/ingredient_parent.toml` |
+| Roll an offer keyword up to a parent ingredient (e.g. `nori` → `alger`, `citron` → `citrusfrukter`) | `./bin/dm matcher add keyword-extra-parent ...` |
+| Treat a recipe-side variant as a known parent ingredient (e.g. `noriblad` → `nori`) | `./bin/dm matcher add ingredient-parent ...` |
 | Add a spelling/plural alias normalized on both sides | `./bin/dm matcher add keyword-synonym ...` |
-| Add a product-side keyword that maps to an existing ingredient | `term_registry/entries/offer_extra_keyword.toml` |
+| Add a product-side keyword that maps to an existing ingredient | `./bin/dm matcher add offer-extra-keyword ...` |
 
 If you really need to add a `match_bridge.toml` entry (e.g. you are continuing
 the staged migration), dual-write the corresponding `keyword_extra_parent.toml`
