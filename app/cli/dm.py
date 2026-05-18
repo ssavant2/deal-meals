@@ -77,6 +77,139 @@ class MatcherChangePlan:
         return self.fixture_ids[0]
 
 
+@dataclass(frozen=True)
+class MatcherGuide:
+    label: str
+    status: str
+    summary: str
+    steps: tuple[str, ...]
+
+
+GUIDE_SHAPES: dict[str, MatcherGuide] = {
+    "keyword-synonym": MatcherGuide(
+        label="keyword-synonym",
+        status="supported by dm matcher add",
+        summary="Plain spelling/plural/compound aliases on the keyword_synonym registry surface.",
+        steps=(
+            "Run: ./bin/dm matcher add keyword-synonym <canonical> --variants <variant> --sanity-offer \"<offer>\" --offer-category <category>",
+            "Use --with-fixture/--with-inventory only when the alias changes routing/parity/product-policy semantics.",
+        ),
+    ),
+    "keyword-extra-parent": MatcherGuide(
+        label="keyword-extra-parent",
+        status="supported by dm matcher add",
+        summary="Offer-side child/product terms that should roll up to a parent ingredient family.",
+        steps=(
+            "Run: ./bin/dm matcher add keyword-extra-parent <canonical> --kids <child1,child2> --recipe-name \"<recipe>\" --ingredient \"<ingredient>\"",
+            "The command writes registry, fixture/inventory, generated JSON/coverage, sanity, and Track B gates by default.",
+        ),
+    ),
+    "ingredient-parent": MatcherGuide(
+        label="ingredient-parent",
+        status="manual registry edit",
+        summary="Recipe-side variant should expose a known parent ingredient.",
+        steps=(
+            "Edit app/languages/sv/ingredient_matching/term_registry/entries/ingredient_parent.toml.",
+            "Add or update a focused run_deep_matcher_sanity.py regression.",
+            "Run: ./bin/dm matcher preflight",
+            "Finish with the appropriate ./bin/dm matcher gates --track A|B command.",
+        ),
+    ),
+    "offer-extra-keyword": MatcherGuide(
+        label="offer-extra-keyword",
+        status="manual registry edit",
+        summary="Product wording should expose an additional canonical offer keyword.",
+        steps=(
+            "Edit app/languages/sv/ingredient_matching/term_registry/entries/offer_extra_keyword.toml.",
+            "Add or update a focused run_deep_matcher_sanity.py regression.",
+            "Run: ./bin/dm matcher preflight",
+            "Finish with the appropriate ./bin/dm matcher gates --track A|B command.",
+        ),
+    ),
+    "pnb": MatcherGuide(
+        label="pnb",
+        status="manual Track A runtime edit",
+        summary="PRODUCT_NAME_BLOCKERS: product text blocks a matched keyword unless the ingredient asks for it.",
+        steps=(
+            "Edit app/languages/sv/ingredient_matching/blocker_data.py / PRODUCT_NAME_BLOCKERS.",
+            "Add a focused run_deep_matcher_sanity.py regression.",
+            "Run: ./bin/dm matcher gates --track A",
+        ),
+    ),
+    "fpb": MatcherGuide(
+        label="fpb",
+        status="manual Track A runtime edit",
+        summary="FALSE_POSITIVE_BLOCKERS: ingredient context suppresses a keyword.",
+        steps=(
+            "Edit app/languages/sv/ingredient_matching/blocker_data.py / FALSE_POSITIVE_BLOCKERS.",
+            "Add a focused run_deep_matcher_sanity.py regression.",
+            "Run: ./bin/dm matcher gates --track A",
+        ),
+    ),
+    "gpb": MatcherGuide(
+        label="gpb",
+        status="manual Track A runtime edit",
+        summary="GLOBAL_PRODUCT_NAME_BLOCKERS: product text is globally out of matcher scope.",
+        steps=(
+            "Edit app/languages/sv/ingredient_matching/blocker_data.py / GLOBAL_PRODUCT_NAME_BLOCKERS.",
+            "Add a focused run_deep_matcher_sanity.py regression.",
+            "Run: ./bin/dm matcher gates --track A",
+        ),
+    ),
+    "ksbc": MatcherGuide(
+        label="ksbc",
+        status="manual Track A runtime edit",
+        summary="KEYWORD_SUPPRESSED_BY_CONTEXT: ingredient context makes a generic keyword irrelevant.",
+        steps=(
+            "Edit the existing KSBC/runtime suppression surface beside related rules.",
+            "Add a focused run_deep_matcher_sanity.py regression.",
+            "Run: ./bin/dm matcher gates --track A",
+        ),
+    ),
+    "no-match-policy": MatcherGuide(
+        label="no-match-policy",
+        status="manual Track B registry/contract edit",
+        summary="Declarative ingredient pattern plus blocked offer keyword/pattern should never match.",
+        steps=(
+            "Edit app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml.",
+            "Add positive/negative fixtures in matcher_contracts/sources and inventory when behavior changes.",
+            "Run: ./bin/dm matcher regen",
+            "Run: ./bin/dm matcher gates --track B --policy-ref <policy_ref>",
+        ),
+    ),
+    "match-bridge": MatcherGuide(
+        label="match-bridge",
+        status="manual staged Track B edit",
+        summary="Declarative bridge diagnostics/guards; new bridge rows are not runtime-wired by themselves.",
+        steps=(
+            "Read the match_bridge callout in the matcher runbook before editing.",
+            "Dual-write the runtime-wired keyword_extra_parent/ingredient_parent/keyword_synonym/offer_extra_keyword row when needed.",
+            "Add fixture/inventory proof for durable behavior.",
+            "Run: ./bin/dm matcher gates --track B --policy-ref <policy_ref>",
+        ),
+    ),
+}
+
+GUIDE_ALIASES = {
+    "keyword_synonym": "keyword-synonym",
+    "synonym": "keyword-synonym",
+    "keyword_extra_parent": "keyword-extra-parent",
+    "extra-parent": "keyword-extra-parent",
+    "ingredient_parent": "ingredient-parent",
+    "offer_extra_keyword": "offer-extra-keyword",
+    "no_match_policy": "no-match-policy",
+    "no-match": "no-match-policy",
+    "match_bridge": "match-bridge",
+    "bridge": "match-bridge",
+    "product-name-blocker": "pnb",
+    "product_name_blocker": "pnb",
+    "false-positive-blocker": "fpb",
+    "false_positive_blocker": "fpb",
+    "global-product-name-blocker": "gpb",
+    "global_product_name_blocker": "gpb",
+}
+
+
 def _paths(tree_root: Path | None) -> MatcherPaths:
     contracts = contract_paths(tree_root)
     app_dir = contracts.app_dir
@@ -768,17 +901,22 @@ def _run_keyword_synonym_light_gates(
     paths: MatcherPaths,
     report_root: Path | None,
 ) -> int:
-    env = _gate_env(paths, report_root, None)
     commands = [
-        [sys.executable, str(SUPPORT_CHECKS_DIR / "promote_term_baseline.py")],
-        [sys.executable, str(SUPPORT_CHECKS_DIR / "run_matcher_change_preflight.py")],
-        [sys.executable, str(SUPPORT_CHECKS_DIR / "run_term_registry_contract_checks.py"), "--language", "sv"],
-        [sys.executable, str(SUPPORT_CHECKS_DIR / "run_term_registry_add_term_checks.py"), "--language", "sv"],
-        [sys.executable, str(SUPPORT_CHECKS_DIR / "run_term_registry_export_checks.py"), "--language", "sv"],
-        [sys.executable, str(SUPPORT_CHECKS_DIR / "run_deep_matcher_sanity.py")],
+        ("promote_term_baseline.py", []),
+        ("run_matcher_change_preflight.py", []),
+        ("run_term_registry_contract_checks.py", ["--language", "sv"]),
+        ("run_term_registry_add_term_checks.py", ["--language", "sv"]),
+        ("run_term_registry_export_checks.py", ["--language", "sv"]),
+        ("run_deep_matcher_sanity.py", []),
     ]
-    for argv in commands:
-        status = _run(argv, cwd=APP_DIR, env=env)
+    for script_name, args in commands:
+        status = _run_support_check(
+            script_name,
+            args,
+            tree_root=paths.repo_root if paths.app_dir != APP_DIR else None,
+            report_root=report_root,
+            cwd=APP_DIR,
+        )
         if status != 0:
             return status
     return 0
@@ -803,10 +941,14 @@ def _print_dry_run_preview(change: MatcherChangePlan) -> None:
 
 
 def _run_preflight(paths: MatcherPaths, report_root: Path | None) -> int:
-    argv = [sys.executable, str(SUPPORT_CHECKS_DIR / "run_matcher_change_preflight.py")]
-    if paths.app_dir != APP_DIR:
-        argv.extend(["--tree-root", str(paths.repo_root)])
-    return _run(argv, cwd=APP_DIR, env=_gate_env(paths, report_root, None))
+    tree_root = paths.repo_root if paths.app_dir != APP_DIR else None
+    return _run_support_check(
+        "run_matcher_change_preflight.py",
+        _tree_root_args(tree_root),
+        tree_root=tree_root,
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
 
 
 def _watch_files(paths: MatcherPaths) -> tuple[Path, ...]:
@@ -844,6 +986,19 @@ def _raw_args(ctx: typer.Context) -> list[str]:
 
 def _tree_root_args(tree_root: Path | None) -> list[str]:
     return ["--tree-root", str(tree_root)] if tree_root is not None else []
+
+
+def _guide_key(shape: str) -> str:
+    normalized = shape.strip().lower().replace("_", "-")
+    return GUIDE_ALIASES.get(shape.strip().lower(), GUIDE_ALIASES.get(normalized, normalized))
+
+
+def _print_guide(guide: MatcherGuide) -> None:
+    typer.echo(f"{guide.label}: {guide.status}")
+    typer.echo(guide.summary)
+    typer.echo("")
+    for index, step in enumerate(guide.steps, start=1):
+        typer.echo(f"{index}. {step}")
 
 
 @matcher_add_app.command("keyword-extra-parent")
@@ -1204,6 +1359,31 @@ def matcher_dev_watch(
         raise typer.Exit(status)
 
 
+@matcher_app.command("guide", help="Show the recommended matcher workflow for a rule shape.")
+def matcher_guide(
+    shape: Annotated[str | None, typer.Argument(help="Rule shape, e.g. pnb, keyword-synonym, no-match-policy.")] = None,
+    list_shapes: Annotated[bool, typer.Option("--list", help="List known rule shapes.")] = False,
+) -> None:
+    if list_shapes:
+        for key in sorted(GUIDE_SHAPES):
+            guide = GUIDE_SHAPES[key]
+            typer.echo(f"{guide.label}: {guide.status}")
+        return
+    if shape is None:
+        typer.echo("Pass a rule shape, or use --list to see known shapes.")
+        raise typer.Exit(2)
+
+    key = _guide_key(shape)
+    guide = GUIDE_SHAPES.get(key)
+    if guide is None:
+        known = ", ".join(sorted(GUIDE_SHAPES))
+        typer.echo(f"Unknown matcher rule shape: {shape}", err=True)
+        typer.echo(f"Known shapes: {known}", err=True)
+        typer.echo("Fallback: edit according to the runbook, then run ./bin/dm matcher preflight and gates.", err=True)
+        raise typer.Exit(2)
+    _print_guide(guide)
+
+
 @matcher_app.command(
     "preflight",
     context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
@@ -1410,14 +1590,11 @@ def matcher_gates(
         typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
     ] = None,
 ) -> None:
-    env = os.environ.copy()
-    env.setdefault("DEAL_MEALS_SUPPORT_REPORT_ROOT", "/tmp/deal-meals-support-checks-dm")
-    if report_root is not None:
-        env["DEAL_MEALS_SUPPORT_REPORT_ROOT"] = str(report_root)
-    status = _run(
-        [sys.executable, str(SUPPORT_CHECKS_DIR / "run_matcher_change_gates.py"), *ctx.args],
+    status = _run_support_check(
+        "run_matcher_change_gates.py",
+        _raw_args(ctx),
+        report_root=report_root,
         cwd=APP_DIR,
-        env=env,
     )
     raise typer.Exit(status)
 

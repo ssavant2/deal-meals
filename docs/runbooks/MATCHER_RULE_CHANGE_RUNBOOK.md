@@ -41,6 +41,13 @@ Known CLI rule shapes:
   --sanity-offer "<offer name>" --offer-category <category>
 ```
 
+Unsure whether a rule shape has an `add` command:
+
+```bash
+./bin/dm matcher guide <shape>
+./bin/dm matcher guide --list
+```
+
 Manual Track A:
 
 ```bash
@@ -199,6 +206,7 @@ Common single-operation wrappers:
 ./bin/dm matcher regen                  # generated JSON then coverage
 ./bin/dm matcher regen --check          # read-only generated-artifact drift check
 ./bin/dm matcher refresh-line-refs      # refresh inventory anchors + generated JSON
+./bin/dm matcher guide <shape>          # show the recommended path for a rule type
 ```
 
 Raw scripts are still valid fallback/debug entry points. Prefer the wrapper

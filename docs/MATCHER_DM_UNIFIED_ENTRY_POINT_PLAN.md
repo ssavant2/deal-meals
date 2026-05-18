@@ -1,6 +1,7 @@
 # Matcher DM Unified Entry Point Plan
 
-Status: Phase 0/1 implemented on 2026-05-18; Phase 2/3 remain future work.
+Status: Phase 0/1, post-Phase-1 cleanup, and Phase 2 guide implemented on
+2026-05-18; Phase 3 remains future work.
 
 ## Goal
 
@@ -19,6 +20,7 @@ The intended end state:
 Start with ./bin/dm matcher.
 
 dm matcher add <shape>    creates supported deterministic rule shapes
+dm matcher guide <shape>  explains supported and manual-only rule paths
 dm matcher gates ...      validates manual or generated changes
 dm matcher dev-watch      gives live pre-flight feedback while editing
 dm matcher <tool>         wraps common support-check operations
@@ -131,9 +133,8 @@ _run_support_check(script_name, args, tree_root=None, report_root=None, cwd=None
 Do not change existing `add`, `gates`, or `dev-watch` behavior while introducing
 this helper.
 
-After Phase 1 is green, consider a narrow cleanup that migrates existing wrapper
-internals to the shared runner where it removes duplicate argv/env/cwd logic
-without changing behavior. Do this only after the new wrappers are stable.
+Post-Phase-1 cleanup: migrate existing wrapper internals to the shared runner
+where it removes duplicate argv/env/cwd logic without changing behavior.
 
 ## Phase 1: Wrapper Basics
 
@@ -173,28 +174,12 @@ Acceptance:
 
 ## Phase 2: Discoverability For Manual Rule Shapes
 
-This phase is optional and should wait until Phase 1 wrappers are in use. Avoid
-creating a second documentation source unless agents/humans still have trouble
-finding the manual path from `dm matcher --help` and the runbook.
-
-Trigger Phase 2 only when real review work shows the gap. Concrete trigger
-signals:
-
-- an agent asks Stefan how to handle a manual-only matcher rule type
-- an agent invents a non-`dm matcher` workaround for a manual-only rule type
-- repeated review notes show uncertainty about whether a rule type has an `add`
-  command
-
-Consider a non-writing helper:
-
-```bash
-dm matcher guide <shape>
-```
-
-Example:
+Implemented as a non-writing helper:
 
 ```bash
 dm matcher guide pnb
+dm matcher guide keyword-synonym
+dm matcher guide --list
 ```
 
 Output should say whether a generated `add` command exists. If not, it should
@@ -245,17 +230,14 @@ Settled before Phase 0:
   subcommands. It runs both by default, with `--what json|coverage|all` for
   targeted maintenance.
 
-Remaining:
+Settled during implementation:
 
-- Should support-check self-checks stay only under
-  `dm matcher gates --include-support-self-checks`, or should Phase 1 add a
-  visible alias such as `dm matcher self-checks`? Preferred direction: keep the
-  existing flag. Support-check changes are rare, and a dedicated subcommand
-  would add discoverability noise.
-- Should `dm matcher regen --check` check both generated JSON and generated
-  coverage without writing, or should it remain a write-oriented fix command
-  only? Preferred direction: add `--check`. It gives a quick read-only drift
-  check without paying the full pre-flight cost.
+- Support-check self-checks stay under
+  `dm matcher gates --include-support-self-checks`. Support-check changes are
+  rare, and a dedicated subcommand would add discoverability noise.
+- `dm matcher regen --check` checks both generated JSON and generated coverage
+  without writing. It gives a quick read-only drift check without paying the
+  full pre-flight cost.
 
 Governance: deviations from the settled choices above should be noted in this
 plan before implementation continues. Larger behavior changes or new authoring
@@ -284,6 +266,7 @@ Rollback:
 - Common operations no longer require memorizing raw support-check script names.
 - Unsupported authoring shapes still feel like part of the same `dm matcher`
   workflow.
+- Manual-only rule shapes are discoverable through `dm matcher guide <shape>`.
 - Raw scripts remain documented as fallback/debug entry points.
 - `./bin/dm matcher --help` exposes the common operation list from Phase 1.
 
@@ -293,5 +276,5 @@ Rollback:
 | --- | --- | ---: |
 | Phase 0 | Shared runner/helper and tests | 1-2h |
 | Phase 1 | Thin wrappers, docs, memory updates | 3-5h |
-| Phase 2 | Optional `guide` helper if triggered | 2-3h |
+| Phase 2 | `guide` helper | implemented |
 | Phase 3 | Future authoring commands, one at a time | 2-4h each for simple TOML shapes; runtime-table commands need a separate estimate |

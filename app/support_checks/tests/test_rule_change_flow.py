@@ -771,6 +771,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             "add",
             "gates",
             "dev-watch",
+            "guide",
             "preflight",
             "sanity",
             "promote",
@@ -778,6 +779,44 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             "refresh-line-refs",
         ):
             self.assertIn(command, result.stdout)
+
+    def test_phase8_dm_matcher_guide_routes_manual_and_supported_shapes(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        pnb = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "pnb"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        synonym = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "keyword_synonym"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(pnb.returncode, 0, pnb.stderr + pnb.stdout)
+        self.assertIn("pnb: manual Track A runtime edit", pnb.stdout)
+        self.assertIn("./bin/dm matcher gates --track A", pnb.stdout)
+        self.assertEqual(synonym.returncode, 0, synonym.stderr + synonym.stdout)
+        self.assertIn("keyword-synonym: supported by dm matcher add", synonym.stdout)
+        self.assertIn("./bin/dm matcher add keyword-synonym", synonym.stdout)
+
+    def test_phase8_dm_matcher_guide_rejects_unknown_shape(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "phase8-unknown-shape"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
+        self.assertIn("Unknown matcher rule shape: phase8-unknown-shape", result.stderr + result.stdout)
+        self.assertIn("./bin/dm matcher preflight and gates", result.stderr + result.stdout)
 
     def test_phase7_dm_matcher_regen_check_runs_json_before_coverage(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
