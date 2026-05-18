@@ -23,7 +23,7 @@
       "negative_guard_keyword": 15,
       "negative_guard_pattern": 332,
       "negative_regression": 828,
-      "offer_extra_keyword_mapping": 374,
+      "offer_extra_keyword_mapping": 375,
       "parent_match_only_mapping": 17,
       "positive_regression": 662,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1490,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
-      "offer_extra_keyword": 374,
+      "offer_extra_keyword": 375,
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5527,
-    "variants_missing_product_text": 1716,
+    "variant_count": 5528,
+    "variants_missing_product_text": 1717,
     "variants_with_product_text": 3811
   },
   "variants": [
@@ -116113,11 +116113,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"balsamvinäger\"}"
+    },
+    {
+      "variant_id": "vterm-878e0e5ff9ded31a",
+      "row_index": 5272,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:vetemjöl",
+      "source_id": "vetemjöl",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "vetemjöl",
+      "canonical": "mjöl",
+      "expected_family": "mjöl",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"mjöl\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1505,
+      "no_product_text": 1506,
       "static_verified": 2532,
       "synthetic_verified": 1490
     },
@@ -116133,14 +116154,14 @@
       "matcher_regression_case": 1490,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
-      "offer_extra_keyword": 374,
+      "offer_extra_keyword": 375,
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5527
+      "audited": 5528
     },
-    "variant_count": 5527
+    "variant_count": 5528
   }
 }
