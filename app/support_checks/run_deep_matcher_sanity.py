@@ -10552,6 +10552,24 @@ test("sojasås product also suppressed by vegofärs context",
 test("plain soja recipe still matches soy sauce",
      match("Japansk soja 150ml Mrs Cheng's", "2 msk soja", "pantry"), "soja")
 
+# CUISINE_CONTEXT thaikryddad — recipe-name-based thai cue + narrow pantry cues.
+# Coriander used to be a trigger but is too pan-cuisine (mexican/indian/middle-east/
+# american all use it). Plain non-thai recipes that happen to contain koriander
+# should no longer pull in thaikryddad products.
+THAI_OFFER = {"name": "Thaikryddad kyckling 600g Guldfågeln", "category": "meat"}
+test("Thaikryddad blocked in plain non-thai recipe with koriander only",
+     recipe_match_num_named("Crunchy chicken", ["600 g kycklinglårfile", "1 msk koriander", "panko"], THAI_OFFER), 0)
+test("Thaikryddad allowed in Pad Thai recipe (dish-name trigger)",
+     recipe_match_num_named("Pad Thai med kyckling", ["400 g kycklingfilé", "risnudlar"], THAI_OFFER), 1)
+test("Thaikryddad allowed in Tom Yum Gai recipe (dish-name trigger)",
+     recipe_match_num_named("Tom Yum Gai", ["500 g kycklingbröstfilé", "buljong"], THAI_OFFER), 1)
+test("Thaikryddad allowed in Khao Pad recipe (dish-name trigger)",
+     recipe_match_num_named("Khao Pad med kyckling", ["400 g kycklingfilé", "ris"], THAI_OFFER), 1)
+test("Thaikryddad allowed in recipe with kaffirlime ingredient (pantry cue)",
+     recipe_match_num_named("Asiatisk kycklinggryta", ["500 g kycklingfilé", "2 kaffirlimeblad", "1 dl kokosmjölk"], THAI_OFFER), 1)
+test("Thaikryddad allowed when recipe mentions thai basilika (pantry cue)",
+     recipe_match_num_named("Krapow gai", ["400 g kycklingfilé", "1 knippe thai basilika"], THAI_OFFER), 1)
+
 # Q74: BDPK nötmix — flavored snack mixes only match flavor-matched ingredients
 # (BBQ product ↔ BBQ recipe; plain saltad/rostad ↔ plain products)
 test("nötmix BBQ blocked from plain saltad/rostad recipe",

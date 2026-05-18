@@ -72,10 +72,22 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
     # thaikryddad kycklingfilé would appear in French or Italian recipes
     # where the seasoning profile is completely wrong.
     'thaikryddad': {
+        # General cuisine/cooking-style cues
         'thai', 'thaikryddad', 'wok', 'pad', 'asiatisk', 'asian',
-        'kokosmjölk', 'lemongrass', 'citrongräs',
-        'fisksås', 'röd curry', 'grön curry', 'panang', 'massaman',
-        'sriracha', 'koriander',
+        # Thai pantry ingredients that are distinctive to thai/southeast-asian cooking
+        'kokosmjölk', 'lemongrass', 'citrongräs', 'fisksås',
+        'kaffirlime', 'kaffirlimeblad', 'palmsocker',
+        'thaibasilika', 'thai basilika',
+        # Thai curry names — recipe wording rather than just ingredient
+        'röd curry', 'grön curry', 'gul curry', 'panang', 'massaman', 'gaeng',
+        # Thai dish-name fragments — these phrases almost always indicate a thai recipe
+        'pad thai', 'pad krapow', 'pad see ew', 'pad kee mao',
+        'tom yum', 'tom kha',
+        'khao pad', 'khao soi', 'khao man gai',
+        'som tam', 'krapow',
+        # Thai chili sauce
+        'sriracha',
+        # 'koriander' removed — too generic (Mexican/Indian/Middle-Eastern/American also use it)
         # 'ingefära' removed — too generic, also used in Persian/Moroccan/Mediterranean
         # 'lime' removed — too generic, also used in Mexican/Caribbean/Mediterranean cuisines
     },
