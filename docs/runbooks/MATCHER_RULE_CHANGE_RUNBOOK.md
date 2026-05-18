@@ -68,6 +68,16 @@ Iterate with live pre-flight feedback:
 ./bin/dm matcher dev-watch
 ```
 
+Single maintenance/check operations:
+
+```bash
+./bin/dm matcher preflight
+./bin/dm matcher sanity
+./bin/dm matcher promote
+./bin/dm matcher regen --check
+./bin/dm matcher refresh-line-refs --dry-run
+```
+
 Generated-file rule: edit the authoritative TOML sources, not generated JSON or
 generated registry coverage TOML. In particular, do not hand-edit
 `matcher_regression_case.toml` or `matcher_rule_inventory.toml`. The wrapper
@@ -92,14 +102,16 @@ For most changes, start here and only read the longer sections when the wrapper
 flags or a failing gate are unclear.
 
 Use `./bin/dm matcher ...` from the host checkout when available. It forwards to
-the web container and keeps the old support-check wrapper available as
-`dm matcher gates ...`. The raw `python support_checks/run_matcher_change_gates.py`
-commands below are the fallback/debug form.
+the web container and exposes authoring, validation, and maintenance commands
+under one entry point. Raw `python support_checks/...` commands remain
+fallback/debug forms when a wrapper is unclear or a support-check script itself
+is being debugged.
 
-The wrapper runs generated-coverage refresh and baseline promotion maintenance
-before validation when Track B inputs require it. Its first validation gate is
-`run_matcher_change_preflight.py`; fix any `NEW` pre-flight issue before
-spending time on slower fixture/parity gates.
+`dm matcher gates` runs generated JSON/coverage refresh and baseline promotion
+maintenance before validation when Track B inputs require it. Its first
+validation gate is pre-flight; you can run that alone with
+`./bin/dm matcher preflight`. Fix any `NEW` pre-flight issue before spending
+time on slower fixture/parity gates.
 
 For live feedback while editing matcher contracts or registry TOML, keep this
 running in another terminal:
@@ -178,13 +190,25 @@ If the host worktree is clean enough for git auto-detection, the wrapper can
 select many flags itself. If the worktree contains unrelated edits, pass the
 explicit flags above so the gate set reflects only your change.
 
-**Commands NOT covered by the wrapper** (run these separately when needed):
+Common single-operation wrappers:
+
+```bash
+./bin/dm matcher preflight              # pre-flight only
+./bin/dm matcher sanity                 # deep matcher sanity only
+./bin/dm matcher promote                # verified-term baseline promotion
+./bin/dm matcher regen                  # generated JSON then coverage
+./bin/dm matcher regen --check          # read-only generated-artifact drift check
+./bin/dm matcher refresh-line-refs      # refresh inventory anchors + generated JSON
+```
+
+Raw scripts are still valid fallback/debug entry points. Prefer the wrapper
+forms above for normal work.
+
+**Commands NOT covered by `dm matcher`** (run these separately when needed):
 
 - `dev_reload.py` — cache rebuild; use `--reload-cache --fresh-cache-gates` on
   the wrapper if the gates themselves should also run on the refreshed cache,
   but the rebuild itself is its own command for ad-hoc cache work.
-- `refresh_matcher_rule_inventory_line_refs.py` — host-only; the wrapper accepts
-  `--refresh-line-refs` to trigger it.
 - `matcher_layer_diagnostics.py` — interactive reproduction tool used in
   triage, not a gate.
 - `run_matcher_full_db_diff.py` — heavy read-only DB diff for release work, not
@@ -487,8 +511,7 @@ where the fix is a narrow runtime dictionary/guard.
 4. Run the standard Track A gate wrapper:
 
    ```bash
-   docker compose exec -T -w /app web \
-     python support_checks/run_matcher_change_gates.py --track A
+   ./bin/dm matcher gates --track A
    ```
 
    This runs the primary deep matcher sanity gate and the full matcher parity
@@ -500,8 +523,7 @@ where the fix is a narrow runtime dictionary/guard.
    not the next agent:
 
    ```bash
-   docker compose exec -T -w /app web \
-     python support_checks/run_deep_matcher_sanity.py
+   ./bin/dm matcher sanity
 
    docker compose exec -T -w /app web \
      python support_checks/run_matcher_layer_parity.py --skip-cache-freshness
@@ -619,15 +641,13 @@ entries should include:
 After changing anchors or moving code, refresh line refs:
 
 ```bash
-# Host checkout only. Do NOT run this via docker compose exec.
-python3 app/support_checks/refresh_matcher_rule_inventory_line_refs.py --write
+./bin/dm matcher refresh-line-refs
 ```
 
-This is the deliberate exception to the mostly-containerized commands in this
-runbook. Use the host command above because the normal compose web service
-mounts `/app` read-only. If you run this inside a container, make sure that
-container has a writeable checkout mounted. The refresh updates the authoritative
-inventory TOML source and regenerates the generated inventory JSON.
+The refresh updates the authoritative inventory TOML source and regenerates the
+generated inventory JSON. Use `--dry-run` to inspect changes without writing.
+The raw `refresh_matcher_rule_inventory_line_refs.py --write` script remains a
+fallback/debug form.
 
 ### Registry Entries
 
@@ -663,7 +683,7 @@ Do not hand-edit these two coverage files for ordinary fixture/inventory work:
 They are generated from the generated JSON contracts by:
 
 ```bash
-python3 app/support_checks/generate_matcher_registry_coverage.py --write
+./bin/dm matcher regen --what coverage
 ```
 
 The Track B wrapper automatically regenerates the JSON contracts first and
@@ -671,7 +691,7 @@ then runs the coverage generator when fixture or inventory changes are selected.
 The JSON contracts themselves are generated from the TOML sources by:
 
 ```bash
-python3 app/support_checks/generate_matcher_contract_json_from_toml_sources.py --write
+./bin/dm matcher regen --what json
 ```
 
 Pre-flight fails with `matcher_contract_generated_json_drift` if generated JSON
@@ -680,6 +700,9 @@ checked-in registry coverage TOML no longer matches the generated JSON-derived
 output. Intentional manual coverage is allowed only as a narrow exception: put
 `# manual-coverage` directly before the manual `[[entries]]` block so the
 generator preserves it.
+
+Use `./bin/dm matcher regen --check` for a fast read-only drift check of both
+generated JSON and registry coverage.
 
 The registry also supports local dev entry directories under
 `/app/data/term_registry/sv/entries` via `TERM_REGISTRY_LOCAL_ENTRIES_DIR`.
@@ -705,7 +728,7 @@ specific varieties from inactive `färskpotatis`/`bakpotatis` registry rows."
    Inactivation that changes matching should have fixture/inventory proof just
    like adding a rule.
 4. Update inventory to explain the owner and reason for the inactivation.
-5. Run `promote_term_baseline.py`.
+5. Run `./bin/dm matcher promote`.
 
 If `promote_term_baseline.py` aborts with "truly removed" variants, treat that
 as a semantic deletion until proven otherwise. Content-equivalent verified-term
@@ -718,8 +741,7 @@ The accepted intentional-removal flow is:
 2. Re-run promotion with explicit removal approval:
 
    ```bash
-   docker compose exec -T -w /app web \
-     python support_checks/promote_term_baseline.py --allow-removals
+   ./bin/dm matcher promote --allow-removals
    ```
 
 3. Run the registry contract checks and full Track B gates.
@@ -922,14 +944,14 @@ choose the smallest complete gate set for the change.
 
 | Gate | Run when |
 | --- | --- |
-| `run_deep_matcher_sanity.py` | Every Track A fix and every Track B runtime semantic change. |
+| `dm matcher sanity` | Every Track A fix and every Track B runtime semantic change. Raw fallback: `run_deep_matcher_sanity.py`. |
 | targeted `run_matcher_layer_fixture_cases.py` | Track B fixture/rule work for the affected `--policy-ref`, `--canonical`, or `--case-id`. |
 | targeted `run_matcher_layer_parity.py` | Track B route, bridge, no-match, canonical, cache-facing, or fixture behavior work. |
-| `generate_matcher_contract_json_from_toml_sources.py --write` | Fixture or inventory TOML source changed. The wrapper runs this automatically before coverage. |
-| `generate_matcher_registry_coverage.py --write` | Fixture or inventory contract changed. The wrapper runs this by default after JSON generation. |
+| `dm matcher regen --what json` | Fixture or inventory TOML source changed. `dm matcher gates` runs this automatically before coverage. |
+| `dm matcher regen --what coverage` | Fixture or inventory contract changed. `dm matcher gates` runs this by default after JSON generation. |
 | full `run_matcher_layer_fixture_cases.py --skip-cache-freshness` | Every Track B behavior change before handoff. |
 | full `run_matcher_layer_parity.py --skip-cache-freshness` | Every Track A/Track B matcher behavior change before handoff. |
-| `promote_term_baseline.py` | Any tracked registry TOML change. Use the plain command unless confirmed TOML inactivation/removal requires `--allow-removals`. |
+| `dm matcher promote` | Any tracked registry TOML change. Use the plain command unless confirmed TOML inactivation/removal requires `--allow-removals`. |
 | term-registry checks | Any tracked registry TOML or baseline change. |
 | `run_matcher_rule_model_checks.py` | Track B rule-model, bridge, no-match, inventory, or registry-owned rule changes. |
 | `run_matcher_rule_inventory_checks.py` | Any inventory change or Track B rule that should be inventory-owned. |
@@ -964,12 +986,10 @@ intentional TOML inactivation/removal requires removal approval:
 
 ```bash
 # Choose exactly one:
-docker compose exec -T -u appuser -w /app web \
-  python support_checks/promote_term_baseline.py
+./bin/dm matcher promote
 
 # OR, when TOML inactivation/removal intentionally removed verified variants:
-docker compose exec -T -u appuser -w /app web \
-  python support_checks/promote_term_baseline.py --allow-removals
+./bin/dm matcher promote --allow-removals
 ```
 
 If the checkout is read-only, stage the generated files under a writable
@@ -978,13 +998,10 @@ appropriate, and then apply the staged changes to the real checkout:
 
 ```bash
 # Choose exactly one:
-docker compose exec -T -w /app web \
-  python support_checks/promote_term_baseline.py \
-  --output-dir /tmp/term-baseline-promotion
+./bin/dm matcher promote --output-dir /tmp/term-baseline-promotion
 
 # OR, when TOML inactivation/removal intentionally removed verified variants:
-docker compose exec -T -w /app web \
-  python support_checks/promote_term_baseline.py \
+./bin/dm matcher promote \
   --allow-removals \
   --output-dir /tmp/term-baseline-promotion
 ```
@@ -1024,8 +1041,7 @@ both the broad sanity suite and the deep matcher suite:
 docker compose exec -T -w /app web \
   python support_checks/run_sanity_checks.py
 
-docker compose exec -T -w /app web \
-  python support_checks/run_deep_matcher_sanity.py
+./bin/dm matcher sanity
 ```
 
 The parity self-check suite below is for support-check code, fixture schema

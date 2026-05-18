@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 import tomllib
-from typing import Annotated
+from typing import Annotated, Literal
 import unicodedata
 
 import typer
@@ -656,6 +656,23 @@ def _run(argv: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> in
     return subprocess.run(argv, cwd=cwd, env=env, check=False).returncode
 
 
+def _run_support_check(
+    script_name: str,
+    args: list[str],
+    *,
+    tree_root: Path | None = None,
+    report_root: Path | None = None,
+    cwd: Path | None = None,
+) -> int:
+    paths = _paths(tree_root)
+    env = _gate_env(paths, report_root, None)
+    return _run(
+        [sys.executable, str(SUPPORT_CHECKS_DIR / script_name), *args],
+        cwd=cwd or APP_DIR,
+        env=env,
+    )
+
+
 def _run_coverage_generator(paths: MatcherPaths) -> int:
     argv = [
         sys.executable,
@@ -819,6 +836,14 @@ def _validate_keyword_extra_parent_args(canonical: str, kids: tuple[str, ...]) -
         raise typer.BadParameter("kids must differ from canonical")
     if any(re.search(r"\s", kid) for kid in kids):
         raise typer.BadParameter("keyword-extra-parent currently supports single-token kids only")
+
+
+def _raw_args(ctx: typer.Context) -> list[str]:
+    return [str(arg) for arg in ctx.args]
+
+
+def _tree_root_args(tree_root: Path | None) -> list[str]:
+    return ["--tree-root", str(tree_root)] if tree_root is not None else []
 
 
 @matcher_add_app.command("keyword-extra-parent")
@@ -1177,6 +1202,201 @@ def matcher_dev_watch(
         typer.echo("")
         typer.echo("Stopped matcher dev-watch.")
         raise typer.Exit(status)
+
+
+@matcher_app.command(
+    "preflight",
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+    help="Run matcher change pre-flight only. Wraps support_checks/run_matcher_change_preflight.py.",
+)
+def matcher_preflight(
+    ctx: typer.Context,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to check instead of /app.")] = None,
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Report format."),
+    ] = "text",
+    refresh_snapshot: Annotated[
+        bool,
+        typer.Option("--refresh-snapshot", help="Refresh the known-issues snapshot."),
+    ] = False,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+) -> None:
+    args = [
+        *_tree_root_args(tree_root),
+        "--format",
+        output_format,
+    ]
+    if refresh_snapshot:
+        args.append("--refresh-snapshot")
+    args.extend(_raw_args(ctx))
+    status = _run_support_check(
+        "run_matcher_change_preflight.py",
+        args,
+        tree_root=tree_root,
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
+    raise typer.Exit(status)
+
+
+@matcher_app.command("sanity", help="Run deep matcher sanity only. Wraps support_checks/run_deep_matcher_sanity.py.")
+def matcher_sanity(
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+) -> None:
+    status = _run_support_check(
+        "run_deep_matcher_sanity.py",
+        [],
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
+    raise typer.Exit(status)
+
+
+@matcher_app.command(
+    "promote",
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+    help="Promote verified-term baseline. Wraps support_checks/promote_term_baseline.py.",
+)
+def matcher_promote(
+    ctx: typer.Context,
+    language: Annotated[str, typer.Option("--language", help="Language package code.")] = "sv",
+    market: Annotated[str, typer.Option("--market", help="Market code.")] = "SE",
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Show what would change without writing files.")] = False,
+    migrate_hashes: Annotated[
+        bool,
+        typer.Option("--migrate-hashes", help="Backward-compatible no-op alias for promote."),
+    ] = False,
+    allow_removals: Annotated[
+        bool,
+        typer.Option("--allow-removals", help="Allow confirmed intentional baseline removals."),
+    ] = False,
+    output_dir: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Stage changed files under this writable directory."),
+    ] = None,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+) -> None:
+    args = ["--language", language, "--market", market]
+    if dry_run:
+        args.append("--dry-run")
+    if migrate_hashes:
+        args.append("--migrate-hashes")
+    if allow_removals:
+        args.append("--allow-removals")
+    if output_dir is not None:
+        args.extend(["--output-dir", str(output_dir)])
+    args.extend(_raw_args(ctx))
+    status = _run_support_check(
+        "promote_term_baseline.py",
+        args,
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
+    raise typer.Exit(status)
+
+
+@matcher_app.command(
+    "regen",
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+    help="Regenerate matcher generated artifacts. Wraps generated JSON and registry coverage scripts.",
+)
+def matcher_regen(
+    ctx: typer.Context,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to update instead of /app.")] = None,
+    what: Annotated[
+        Literal["all", "json", "coverage"],
+        typer.Option("--what", help="Generated artifacts to refresh/check."),
+    ] = "all",
+    check: Annotated[
+        bool,
+        typer.Option("--check", help="Check for drift without writing."),
+    ] = False,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+) -> None:
+    raw_args = _raw_args(ctx)
+    if what == "all" and raw_args:
+        raise typer.BadParameter("raw pass-through args are only supported with --what json or --what coverage")
+
+    common_args = _tree_root_args(tree_root)
+    mode_arg = "--check" if check else "--write"
+    steps: list[tuple[str, list[str]]] = []
+    if what in {"all", "json"}:
+        steps.append((
+            "generate_matcher_contract_json_from_toml_sources.py",
+            [*common_args, mode_arg, *(raw_args if what == "json" else [])],
+        ))
+    if what in {"all", "coverage"}:
+        steps.append((
+            "generate_matcher_registry_coverage.py",
+            [*common_args, mode_arg, *(raw_args if what == "coverage" else [])],
+        ))
+
+    failed = False
+    for script_name, args in steps:
+        status = _run_support_check(
+            script_name,
+            args,
+            tree_root=tree_root,
+            report_root=report_root,
+            cwd=APP_DIR,
+        )
+        if status != 0:
+            failed = True
+            if not check:
+                raise typer.Exit(status)
+    raise typer.Exit(1 if failed else 0)
+
+
+@matcher_app.command(
+    "refresh-line-refs",
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+    help="Refresh matcher rule inventory line refs. Wraps support_checks/refresh_matcher_rule_inventory_line_refs.py.",
+)
+def matcher_refresh_line_refs(
+    ctx: typer.Context,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to update instead of /app.")] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Show refreshed line refs without writing.")] = False,
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Report format."),
+    ] = "text",
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+) -> None:
+    paths = _paths(tree_root)
+    args = [
+        *_tree_root_args(tree_root),
+        "--repo-root",
+        str(paths.repo_root),
+        "--format",
+        output_format,
+    ]
+    if not dry_run:
+        args.append("--write")
+    args.extend(_raw_args(ctx))
+    status = _run_support_check(
+        "refresh_matcher_rule_inventory_line_refs.py",
+        args,
+        tree_root=tree_root,
+        report_root=report_root,
+        cwd=paths.repo_root,
+    )
+    raise typer.Exit(status)
 
 
 @matcher_app.command(

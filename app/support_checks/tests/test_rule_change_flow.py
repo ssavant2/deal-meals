@@ -11,6 +11,7 @@ import sys
 import tempfile
 import unittest
 
+from cli import dm as dm_cli
 from support_checks.run_matcher_change_preflight import (
     DEFAULT_BASELINE_FILE,
     DEFAULT_REGISTRY_ENTRIES_DIR,
@@ -727,6 +728,139 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             self.assertIn("keyword_synonym mapping already exists", duplicate_output)
             self.assertIn("phasewritealias ->", duplicate_output)
             self.assertIn("phasealias", duplicate_output)
+
+    def test_phase7_support_check_runner_preserves_exit_code_and_env(self) -> None:
+        calls = []
+        original_run = dm_cli._run
+
+        def fake_run(argv, *, cwd, env=None):
+            calls.append({"argv": argv, "cwd": cwd, "env": env})
+            return 42
+
+        dm_cli._run = fake_run
+        try:
+            status = dm_cli._run_support_check(
+                "run_deep_matcher_sanity.py",
+                ["--synthetic-flag"],
+                tree_root=Path("/tmp/dm-matcher-tree"),
+                report_root=Path("/tmp/dm-matcher-reports"),
+                cwd=Path("/tmp/dm-matcher-cwd"),
+            )
+        finally:
+            dm_cli._run = original_run
+
+        self.assertEqual(status, 42)
+        self.assertEqual(len(calls), 1)
+        self.assertTrue(str(calls[0]["argv"][1]).endswith("support_checks/run_deep_matcher_sanity.py"))
+        self.assertIn("--synthetic-flag", calls[0]["argv"])
+        self.assertEqual(calls[0]["cwd"], Path("/tmp/dm-matcher-cwd"))
+        self.assertEqual(calls[0]["env"]["DEAL_MEALS_SUPPORT_REPORT_ROOT"], "/tmp/dm-matcher-reports")
+
+    def test_phase7_dm_matcher_help_lists_unified_entry_points(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "--help"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        for command in (
+            "add",
+            "gates",
+            "dev-watch",
+            "preflight",
+            "sanity",
+            "promote",
+            "regen",
+            "refresh-line-refs",
+        ):
+            self.assertIn(command, result.stdout)
+
+    def test_phase7_dm_matcher_regen_check_runs_json_before_coverage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "regen",
+                    "--tree-root",
+                    str(tree_root),
+                    "--check",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("generate_matcher_contract_json_from_toml_sources.py", result.stdout)
+        self.assertIn("generate_matcher_registry_coverage.py", result.stdout)
+        self.assertLess(
+            result.stdout.find("generate_matcher_contract_json_from_toml_sources.py"),
+            result.stdout.find("generate_matcher_registry_coverage.py"),
+        )
+
+    def test_phase7_dm_matcher_regen_rejects_all_with_raw_passthrough(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "regen",
+                "--what",
+                "all",
+                "--",
+                "--format",
+                "json",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("raw pass-through args are only supported", result.stderr + result.stdout)
+
+    def test_phase7_dm_matcher_preflight_tree_root_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "preflight",
+                    "--tree-root",
+                    str(tree_root),
+                    "--format",
+                    "json",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        json_start = result.stdout.find("{")
+        self.assertGreaterEqual(json_start, 0, result.stdout)
+        report = json.loads(result.stdout[json_start:])
+        self.assertTrue(report["summary"]["passed"], report)
 
     def test_phase5_prefix_schema_and_convention_entry(self) -> None:
         self.assertIn("current_review:", allowed_prefixes("source_ref"))
