@@ -14,6 +14,9 @@ with fixtures, inventory, parity coverage, and cache expectations.
 Track A is a narrow runtime fix. Track B is durable registry/contract work.
 Start with the CLI wrapper; use raw support-check commands only when debugging.
 
+For discovery, run `./bin/dm matcher --help` and `./bin/dm matcher guide --list`
+first to see what is supported before reading further.
+
 Plain-language rule:
 
 - **Track A** is "fix the small bug where the matcher already has the right kind
@@ -322,6 +325,11 @@ manual editing plus `./bin/dm matcher gates --track A|B`.
 Read this section first if you have never seen this runbook before. Also return
 here when you need repo orientation, when a gate fails in a layer you did not
 expect, or when you are deciding whether a one-off diagnostic is enough.
+
+For the underlying schema/layer model — what is authored, what is generated,
+where baselines and prefix schemas live, and how pre-flight enforces
+consistency — see `docs/MATCHER_REGISTRY_ARCHITECTURE.md`. This runbook
+documents the workflow; the architecture file documents the data model.
 
 The Swedish matcher is deliberately layered. A pair can appear correct in a
 single live check but still fail in routed cache, compiled data, backend
@@ -1223,6 +1231,11 @@ each other. It does not mean fixture expectations are satisfied.
   routine Track A gates. These are Track B/tooling checks.
 - Track B: adding a runtime rule without a fixture.
 - Track B: adding a fixture without inventory coverage.
+- Track B: hand-editing a TOML registry rule when a `dm matcher add` command
+  exists for that surface. Use the CLI as default. Run
+  `./bin/dm matcher guide <shape>` or `--list` to confirm whether your rule
+  shape has an authoring command; manual TOML editing is the fallback for
+  unsupported shapes only.
 - Track B: hand-editing generated JSON or generated registry coverage TOML
   instead of editing the authoritative TOML source and regenerating.
 - Track B: updating registry TOML without running `promote_term_baseline.py` and

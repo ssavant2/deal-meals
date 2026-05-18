@@ -22,6 +22,12 @@ support-check contracts that keep them in sync.
   `app/support_checks/generate_matcher_registry_coverage.py`.
 - `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json`
   is the frozen verified-term baseline used by registry contract checks.
+- `app/languages/sv/ingredient_matching/term_registry/baselines/known_infrastructure_issues.json`
+  is the pre-flight safety-valve snapshot for tolerated infrastructure issues.
+  Normally empty on `main`; growth requires an explicit reason and tracking ref.
+- `app/languages/sv/ingredient_matching/term_registry/baselines/match_bridge_runtime_wiring.json`
+  records grandfathered unwired `match_bridge.toml` entries so the runtime-
+  wiring check only fails on new unwired bridges.
 - `app/support_checks/schemas/prefixes.yml` is the single prefix schema for
   permanent `source_ref`, temporary fixture/policy/source refs, and inventory
   `adapter_ref` prefixes.
@@ -36,6 +42,23 @@ The authoritative TOML sources live in
 directory's README. The current source/generation report is
 `app/support_checks/reports/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md`. Pre-flight
 rejects generated JSON that no longer matches the TOML sources byte-for-byte.
+
+### Pre-flight as the consistency gate
+
+`app/support_checks/run_matcher_change_preflight.py` is the gate that keeps
+all source layers consistent. Pre-flight rejects, among other things:
+
+- generated JSON drift from the TOML sources
+- generated registry coverage drift from the JSON contracts
+- stale `EXPECTED_*` constants (variant count, unique coverage keys)
+- unknown `source_ref` / `policy_ref` / `adapter_ref` prefixes
+- broken positive match-bridge fixture refs
+- new unwired `match_bridge.toml` entries (vs the wiring baseline)
+
+It runs as the first validation step inside `./bin/dm matcher gates` so cheap
+schema problems surface before slow fixture/parity gates. Pre-flight failures
+are categorised as `NEW`, `KNOWN`, or `FIXED` relative to
+`known_infrastructure_issues.json`; only `NEW` blocks the wrapper.
 
 ## Verified-Term Variant IDs
 
@@ -92,7 +115,17 @@ The wrapper refreshes generated coverage when fixture or inventory contracts
 change, runs pre-flight checks before slower gates, and promotes the
 verified-term baseline when registry changes require it.
 
-During authoring, `./bin/dm matcher dev-watch` polls matcher contract and
-registry files and reruns pre-flight after saves. The default interval is one
-second, so infrastructure issues should surface within five seconds on normal
-dev machines.
+During authoring, `./bin/dm matcher dev-watch` polls the matcher source layers
+listed above and reruns pre-flight after saves. Watched paths (per
+`_watch_files` in `app/cli/dm.py`):
+
+- `app/languages/sv/matcher_contracts/sources/*.toml` (fixture/inventory TOML
+  sources and any additional source TOMLs in the same directory)
+- `app/languages/sv/matcher_contracts/*.json` (generated JSON contracts, so
+  drift is detected the moment they are written)
+- `app/languages/sv/ingredient_matching/term_registry/entries/*.toml`
+  (registry entries for every rule shape)
+- `app/support_checks/run_deep_matcher_sanity.py` (focused regression script)
+
+The default interval is one second, so infrastructure issues should surface
+within five seconds on normal dev machines.
