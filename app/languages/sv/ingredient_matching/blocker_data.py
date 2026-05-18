@@ -1534,6 +1534,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'svampkrydda',  # mushroom spice/seasoning ≠ fresh mushrooms ("1 dl svampkrydda")
         'svampkryddor',  # plural form of mushroom spice
         'crème av svamp', 'creme av svamp',  # ready-to-use mushroom cream ≠ raw mushrooms
+        'kombuchasvamp',  # SCOBY (kombucha culture) — not a culinary mushroom; ingredient text "kombuchasvamp" should not match champinjoner/kantareller etc.
     },
 
     # "Inläggning Snabb" (pickling liquid) ≠ "inläggningssill" (pickled herring)

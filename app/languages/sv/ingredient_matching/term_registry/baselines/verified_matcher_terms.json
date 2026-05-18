@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 397,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 101,
-      "keyword_synonym_mapping": 114,
+      "keyword_synonym_mapping": 115,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 101,
-      "keyword_synonym": 114,
+      "keyword_synonym": 115,
       "match_bridge": 1974,
       "matcher_regression_case": 1488,
       "matcher_rule_inventory": 457,
@@ -42,8 +42,8 @@
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5519,
-    "variants_missing_product_text": 1710,
+    "variant_count": 5520,
+    "variants_missing_product_text": 1711,
     "variants_with_product_text": 3809
   },
   "variants": [
@@ -115945,11 +115945,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"isbergssallad\"}"
+    },
+    {
+      "variant_id": "vterm-0910562293415406",
+      "row_index": 4728,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:pakchoy",
+      "source_id": "pakchoy",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "pakchoy",
+      "canonical": "pakchoi",
+      "expected_family": "pakchoi",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"pakchoi\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1499,
+      "no_product_text": 1500,
       "static_verified": 2532,
       "synthetic_verified": 1488
     },
@@ -115960,7 +115981,7 @@
       "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 101,
-      "keyword_synonym": 114,
+      "keyword_synonym": 115,
       "match_bridge": 1974,
       "matcher_regression_case": 1488,
       "matcher_rule_inventory": 457,
@@ -115971,8 +115992,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5519
+      "audited": 5520
     },
-    "variant_count": 5519
+    "variant_count": 5520
   }
 }
