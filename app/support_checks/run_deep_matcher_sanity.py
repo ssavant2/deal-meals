@@ -10239,6 +10239,16 @@ test("pie PNB blocks Kewpie mayo from krispies recipe",
      recipe_match_num(["3 dl rice krispies"], {"name": "Majonnäs QP Japan 355ml Kewpie", "category": "pantry"}), 0)
 test("sesamkakor PNB blocks Sport energi bar",
      recipe_match_num(["sesamkakor"], {"name": "Sesamkakor Sport energi 40g ICA", "category": "pantry"}), 0)
+# Wine-to-matlagningsvin normalization is volume-aware: cl-volumes and bottle
+# wording skip the mapping (drink-context). dl-volumes keep it (cooking).
+test("glögg recipe (75 cl rödvin) does NOT match Rött matlagningsvin",
+     match("Rött matlagningsvin 25cl Zeta", "75 cl rödvin (gärna kraftigt)", "pantry"), None)
+test("glögg recipe (1 flaska rödvin) does NOT match Matlagningsvin",
+     match("Matlagningsvin Rött 250ml ICA", "1 flaska rödvin", "pantry"), None)
+test("cooking recipe (1 dl rödvin) still matches Rött matlagningsvin",
+     match("Rött matlagningsvin 25cl Zeta", "1 dl rödvin", "pantry"), "matlagningsvin")
+test("cooking recipe (5 dl rödvin reducerat) still matches matlagningsvin",
+     match("Rött matlagningsvin 25cl Zeta", "5 dl rödvin reducerat", "pantry"), "matlagningsvin")
 # snabbkaffe: Nescafé Gold is plain instant coffee
 test("snabbkaffe matches Nescafé Gold", match("Nescafé Gold 200g", "snabbkaffe", "beverages"), "snabbkaffe")
 test("snabbkaffe matches Nescafe Classic", match("Nescafe Classic 100g", "snabbkaffe", "beverages"), "snabbkaffe")

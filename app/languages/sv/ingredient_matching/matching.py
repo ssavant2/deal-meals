@@ -4181,8 +4181,10 @@ def _prepare_fast_ingredient_text(
     ingredient_lower = ingredient_text if _prenormalized else fix_swedish_chars(ingredient_text).lower()
 
     # Apply space normalization so compound keywords match spaced ingredient text
-    # e.g., keyword "rödcurrypasta" matches ingredient "röd currypasta"
-    ingredient_lower = _SPACE_NORM_PATTERN.sub(lambda m: _SPACE_NORM_LOOKUP[m.group()], ingredient_lower)
+    # e.g., keyword "rödcurrypasta" matches ingredient "röd currypasta".
+    # Route through the helper so context-aware rules (e.g. drink-wine skip)
+    # apply consistently on both fast and slow paths.
+    ingredient_lower = _apply_space_normalizations(ingredient_lower)
     ingredient_lower = preserve_cheese_preference_parentheticals(ingredient_lower)
     ingredient_lower = preserve_parenthetical_chili_alias(ingredient_lower)
     ingredient_lower = preserve_fresh_pasta_parenthetical(ingredient_lower)

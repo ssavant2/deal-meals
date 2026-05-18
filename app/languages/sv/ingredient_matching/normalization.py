@@ -898,11 +898,57 @@ _SPRING_ONION_STALKS_RE = re.compile(r'\bfärsk(?:a)?\s+lök(?:ar)?\s*,?\s*stjä
 _MEASURED_DURUM_FLOUR_RE = re.compile(r'\b\d+(?:[.,]\d+)?\s*(?:dl|l|g|kg)\s+durumvete\b')
 _MEASURED_RISOTTO_RICE_RE = re.compile(r'\b\d+(?:[.,]\d+)?\s*(?:dl|l|g|kg)\s+risotto\b')
 
+# Wine mapping keys that target matlagningsvin (cooking-wine substitution).
+# When the ingredient line is a drink-context line (large cl-volumes, bottle
+# wording, drink-quality descriptors), these mappings should be skipped so
+# the wine keyword stays as 'rödvin'/'vitvin' rather than 'matlagningsvin'.
+_WINE_TO_MATLAGNINGSVIN_KEYS = frozenset({
+    'rödvin', 'rodvin', 'vitvin',
+    'rött vin', 'vitt vin',
+})
+# Cooking-wine recipes use dl-volumes (1-2 dl typical). Drink recipes use
+# cl-volumes (50/75 cl ≈ half/full bottle). This regex catches both.
+_DRINK_WINE_CL_VOLUME_RE = re.compile(
+    r'\b\d+(?:[.,]\d+)?\s*cl\s+(?:r[öo]dvin|r[öo]tt\s+vin|vitvin|vitt\s+vin)\b',
+    re.IGNORECASE,
+)
+# "1 flaska rödvin" / "en flaska vitt vin" — bottle wording is drink-context.
+_DRINK_WINE_BOTTLE_RE = re.compile(
+    r'\b(?:\d+(?:[.,]\d+)?|en|ett|två|tre)\s*flask(?:a|or)\b.*\b(?:r[öo]dvin|r[öo]tt\s+vin|vitvin|vitt\s+vin)\b',
+    re.IGNORECASE,
+)
+
+
+def _is_drink_wine_line(text: str) -> bool:
+    """Return True when the ingredient line refers to wine in a drink context.
+
+    Used to skip wine→matlagningsvin normalization for drink/glögg/punsch
+    recipes where the wine is the drinking base, not a cooking substitute.
+    Heuristic: cl-volumes and bottle wording. Cooking recipes use dl-volumes
+    (1-2 dl typical). Quality descriptors like 'fyllig'/'kraftigt' overlap
+    with cooking wording and are deliberately not used as triggers.
+    """
+
+    return bool(
+        _DRINK_WINE_CL_VOLUME_RE.search(text)
+        or _DRINK_WINE_BOTTLE_RE.search(text)
+    )
+
 
 def _apply_space_normalizations(text: str) -> str:
     """Apply all space normalizations in a single regex pass."""
     if _SPACE_NORM_PATTERN is not None:
-        text = _SPACE_NORM_PATTERN.sub(lambda m: _SPACE_NORM_LOOKUP[m.group()], text)
+        if _is_drink_wine_line(text):
+            # Drink-context line: keep wine words as-is so they don't get mapped
+            # to 'matlagningsvin'. All other normalizations still apply.
+            def _replace_skip_wine(m: 're.Match[str]') -> str:
+                key = m.group()
+                if key.lower() in _WINE_TO_MATLAGNINGSVIN_KEYS:
+                    return key
+                return _SPACE_NORM_LOOKUP[key]
+            text = _SPACE_NORM_PATTERN.sub(_replace_skip_wine, text)
+        else:
+            text = _SPACE_NORM_PATTERN.sub(lambda m: _SPACE_NORM_LOOKUP[m.group()], text)
     text = _SALAMI_CHIPS_HYPHEN_RE.sub('salamichips', text)
     # Spring-onion style recipe wording should normalize before punctuation/number
     # stripping, so use regexes that tolerate commas and leading quantities.
