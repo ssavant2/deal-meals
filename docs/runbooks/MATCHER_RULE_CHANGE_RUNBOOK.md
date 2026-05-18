@@ -27,11 +27,18 @@ Plain-language rule:
   policy that needs positive and negative fixtures. Proof is TOML source,
   fixtures, inventory, generated coverage, baseline promotion when registry
   entries changed, and Track B gates.
+- **Lightweight registry alias** is "add a low-risk spelling/plural/compound
+  synonym to an existing matcher surface." Example: `isbergssalladshuvud` should
+  normalize to `isbergssallat`. Use the CLI, prove it with focused sanity plus
+  registry/baseline/export checks, and skip fixture/inventory unless the alias
+  changes routing/parity semantics or carries product-policy risk.
 
-Known CLI rule shape:
+Known CLI rule shapes:
 
 ```bash
 ./bin/dm matcher add keyword-extra-parent <canonical> --kids <kid1,kid2,...> ...
+./bin/dm matcher add keyword-synonym <canonical> --variants <variant1,variant2,...> \
+  --sanity-offer "<offer name>" --offer-category <category>
 ```
 
 Manual Track A:
@@ -185,9 +192,26 @@ explicit flags above so the gate set reflects only your change.
 
 ## Common CLI Workflows
 
-Use the CLI for supported rule shapes. It writes the registry TOML,
-fixture/inventory TOML sources, generated JSON, focused deep-sanity regression,
-generated coverage TOML, and then runs Track B gates by default.
+Use the CLI for supported rule shapes. It writes the right artifacts for the
+shape: small aliases stay lightweight by default, while contract-worthy fan-out
+rules generate fixture/inventory proof and run Track B gates.
+
+Keyword synonym / spelling alias:
+
+```bash
+./bin/dm matcher add keyword-synonym isbergssallat \
+  --variants isbergssalladshuvud \
+  --sanity-offer "Isbergssallat ca 440g Klass 1 ICA" \
+  --offer-category vegetables
+```
+
+Default behavior: append `keyword_synonym.toml`, add a focused
+`run_deep_matcher_sanity.py` row, promote the verified-term baseline, and run
+the light registry/export/sanity gates. It intentionally does **not** create
+fixture/inventory rows for routine spelling/plural/compound aliases. Add
+`--with-fixture` or `--with-inventory` only when the alias changes
+routing/parity semantics, documents a product-policy decision, or needs durable
+contract evidence beyond the sanity regression.
 
 Keyword extra parent fan-out:
 
@@ -203,8 +227,8 @@ Keyword extra parent fan-out:
 Use `--dry-run` to preview generated TOML/sanity text, `--no-run-gates` only for
 isolated test trees, and `--inventory-id` only when deliberately adding a
 separate inventory row for a canonical that already has one. For all other rule
-types, follow the manual Track A or Track B workflow until a dedicated
-`dm matcher add ...` subcommand exists.
+types, follow the manual Track A, lightweight alias, or Track B workflow until a
+dedicated `dm matcher add ...` subcommand exists.
 
 ## Cold-Start Details
 
@@ -260,6 +284,13 @@ decision in the runbook.
 | --- | --- | --- | --- |
 | Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/GPB additions and tiny runtime guards. | `blocker_data.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
 | Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
+
+There is one deliberately small path between those two: **lightweight registry
+alias**. Use it for exact spelling/plural/compound aliases on already-wired
+registry surfaces such as `keyword_synonym`. It is still registry-owned TOML,
+but it does not need fixture/inventory proof unless it changes routing/parity
+behavior or encodes a product-policy decision. For a plain alias, expect one CLI
+command, one sanity regression, baseline/export checks, done.
 
 Escalate Track A to Track B when the fix is broad, semantic, cross-canonical,
 registry-owned, route-affecting, cache/release-facing, or likely to be useful as
@@ -360,7 +391,7 @@ can be the correct surface.
 
 | Change type | Prefer | Use when | Avoid |
 | --- | --- | --- | --- |
-| Exact synonym or spelling alias | `term_registry/entries/keyword_synonym.toml` or parent/routing registry entry | One term is the same ingredient family as another. | Ad-hoc extraction code for a plain alias. |
+| Exact synonym or spelling alias | `./bin/dm matcher add keyword-synonym ...` for `keyword_synonym`; otherwise the matching parent/routing registry entry | One term is the same ingredient family as another. Default to the lightweight alias path for spelling/plural/compound aliases; escalate to Track B only for routing/parity/product-policy implications. | Ad-hoc extraction code or full fixture/inventory ceremony for a plain alias. |
 | Ingredient/offer bridge (recipe wording differs from product wording) | `term_registry/entries/keyword_extra_parent.toml` (preferred) or `ingredient_parent.toml` | Recipe term and product term differ but should match (e.g. `nori` → `alger`, `citrusfrukter` → `citron`/`lime`/`apelsin`). These TWO surfaces are wired into the runtime matcher today. | Adding only to `match_bridge.toml`. That surface is **declarative-only / staged for migration** — it does not affect runtime routing on its own. See the match_bridge note below the table. |
 | No-match/blocking policy | `term_registry/entries/no_match_policy.toml` | Ingredient pattern plus offer keyword/pattern should never match. | One-off Python if a declarative policy can express it. |
 | Offer keyword extraction | `term_registry/entries/offer_extra_keyword.toml` or `extraction.py` | Product wording should expose an additional canonical offer keyword. | Adding recipe synonyms when only offer extraction is missing. |
@@ -398,7 +429,7 @@ instead:
 | --- | --- |
 | Roll an offer keyword up to a parent ingredient (e.g. `nori` → `alger`, `citron` → `citrusfrukter`) | `term_registry/entries/keyword_extra_parent.toml` |
 | Treat a recipe-side variant as a known parent ingredient (e.g. `noriblad` → `nori`) | `term_registry/entries/ingredient_parent.toml` |
-| Add a spelling/plural alias normalized on both sides | `term_registry/entries/keyword_synonym.toml` |
+| Add a spelling/plural alias normalized on both sides | `./bin/dm matcher add keyword-synonym ...` |
 | Add a product-side keyword that maps to an existing ingredient | `term_registry/entries/offer_extra_keyword.toml` |
 
 If you really need to add a `match_bridge.toml` entry (e.g. you are continuing

@@ -375,8 +375,20 @@ def _write_variant_id_migration_map(
 
 def _content_key(v: dict, config: PromotionConfig) -> tuple:
     """Stable content key for matching variants across source-order hash changes."""
+    coverage_key = _coverage_key(v, config)
+    if (
+        str(v.get("source_family") or v.get("source_type") or "") == "matcher_regression_case"
+        and str(v.get("source_id") or "")
+    ):
+        language, market, source_family, _canonical, variant, layer_role = coverage_key
+        return (
+            (language, market, source_family, "<fixture-canonical-revision>", variant, layer_role),
+            v.get("source_id", ""),
+            v.get("source_file", ""),
+            v.get("expected", None),
+        )
     return (
-        _coverage_key(v, config),
+        coverage_key,
         v.get("source_id", ""),
         v.get("source_file", ""),
         v.get("expected", None),

@@ -48,6 +48,9 @@ from support_checks.run_term_registry_add_term_checks import (  # noqa: E402
 from support_checks.run_term_registry_contract_checks import (  # noqa: E402
     EXPECTED_VERIFIED_TERM_VARIANT_COUNT,
 )
+from support_checks.run_term_registry_guard_bridge_checks import (  # noqa: E402
+    find_match_bridge_positive_fixture_misses,
+)
 
 
 DEFAULT_REGISTRY_ENTRIES_DIR = (
@@ -540,6 +543,41 @@ def _check_generated_contract_json(
     return issues
 
 
+def _check_match_bridge_positive_fixture_hits(
+    fixture_file: Path,
+    fixtures: list[dict[str, Any]],
+    *,
+    repo_root: Path,
+) -> list[PreflightIssue]:
+    issues: list[PreflightIssue] = []
+    fixture_by_id = {
+        str(item.get("id") or ""): item
+        for item in fixtures
+        if isinstance(item, dict)
+    }
+    file_name = _rel(fixture_file, repo_root=repo_root)
+    for miss in find_match_bridge_positive_fixture_misses(fixture_by_id):
+        bridge_id = str(miss["bridge_id"])
+        fixture_ref = str(miss["fixture_ref"])
+        issues.append(PreflightIssue(
+            "error",
+            "match_bridge_positive_fixture_miss",
+            (
+                "match bridge helper did not hit its positive fixture; adjust the "
+                "bridge ingredient/offer patterns or the fixture text before running full gates"
+            ),
+            file_name,
+            f"{bridge_id}:{fixture_ref}",
+            _line_for_id(fixture_file, fixture_ref),
+            {
+                "bridge_id": bridge_id,
+                "fixture_ref": fixture_ref,
+                "hit_ids": miss["hit_ids"],
+            },
+        ))
+    return issues
+
+
 def _check_expected_counts(baseline_file: Path, registry_entries_dir: Path, *, repo_root: Path) -> list[PreflightIssue]:
     issues: list[PreflightIssue] = []
     file_name = _rel(baseline_file, repo_root=repo_root)
@@ -646,6 +684,11 @@ def run_preflight(
     # Promote-owned EXPECTED_* constants describe the live checkout. Synthetic
     # tree-root tests intentionally mutate copied registries without promoting.
     if app_dir.resolve() == APP_DIR.resolve():
+        issues.extend(_check_match_bridge_positive_fixture_hits(
+            fixture_file,
+            fixtures,
+            repo_root=repo_root,
+        ))
         issues.extend(_check_expected_counts(baseline_file, registry_entries_dir, repo_root=repo_root))
 
     known = _load_known_fingerprints(snapshot_file)

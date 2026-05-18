@@ -99,7 +99,7 @@ def _markdown(source: Path, counts: Counter[str], examples: dict[str, list[tuple
         "bdpk": "`dm matcher add bdpk <keyword>` (future)",
         "keyword_extra_parent": "`dm matcher add keyword-extra-parent <canonical>`",
         "ingredient_parent": "`dm matcher add ingredient-parent ...` (candidate)",
-        "keyword_synonym": "`dm matcher add keyword-synonym ...` (candidate)",
+        "keyword_synonym": "`dm matcher add keyword-synonym <canonical>`",
         "offer_extra_keyword": "`dm matcher add offer-extra-keyword ...` (candidate)",
         "recipe_routing_helper": "`dm matcher add recipe-routing-helper ...` (future candidate)",
         "no_match_policy": "`dm matcher add no-match-policy <policy>` (future)",

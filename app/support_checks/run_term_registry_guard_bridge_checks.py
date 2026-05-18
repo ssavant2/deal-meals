@@ -108,6 +108,32 @@ def _fixture_expected(payload: dict[str, Any] | None) -> int | None:
     return int(expected) if expected in (0, 1) else None
 
 
+def find_match_bridge_positive_fixture_misses(fixture_by_id: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    misses: list[dict[str, Any]] = []
+    for bridge in MATCH_BRIDGES:
+        positive_refs = sorted(
+            ref
+            for ref in bridge.fixture_refs
+            if _fixture_expected(fixture_by_id.get(ref)) == 1
+        )
+        for fixture_ref in positive_refs:
+            payload = fixture_by_id[fixture_ref]
+            offer = payload["offer"]
+            hits = find_match_bridge_hits(
+                ingredient_texts=payload["ingredients"],
+                offer_keywords=_offer_keywords(offer),
+                offer_text=_offer_text(offer),
+            )
+            hit_ids = [str(hit["id"]) for hit in hits]
+            if bridge.id not in set(hit_ids):
+                misses.append({
+                    "bridge_id": bridge.id,
+                    "fixture_ref": fixture_ref,
+                    "hit_ids": hit_ids,
+                })
+    return misses
+
+
 def _superseded_fixture_refs(rule, inventory_by_id: dict[str, dict[str, Any]]) -> set[str]:
     refs: set[str] = set()
     for legacy_id in rule.supersedes:
@@ -370,6 +396,10 @@ def _check_match_bridges(
     helper_positive_hits = 0
     policy_ref_only_negative_contracts: list[dict[str, Any]] = []
     bridges_with_negative_declarations = 0
+    positive_misses = {
+        (str(miss["bridge_id"]), str(miss["fixture_ref"])): miss
+        for miss in find_match_bridge_positive_fixture_misses(fixture_by_id)
+    }
 
     for bridge in MATCH_BRIDGES:
         missing = sorted(ref for ref in bridge.fixture_refs if ref not in fixture_by_id)
@@ -406,20 +436,14 @@ def _check_match_bridges(
         diagnostic_refs.update(positive_refs)
 
         for fixture_ref in positive_refs:
-            payload = fixture_by_id[fixture_ref]
-            offer = payload["offer"]
-            hits = find_match_bridge_hits(
-                ingredient_texts=payload["ingredients"],
-                offer_keywords=_offer_keywords(offer),
-                offer_text=_offer_text(offer),
-            )
-            if bridge.id not in {str(hit["id"]) for hit in hits}:
+            miss = positive_misses.get((bridge.id, fixture_ref))
+            if miss:
                 issues.append(_issue(
                     "error",
                     "match_bridge_positive_fixture_miss",
                     "match bridge helper did not hit its positive fixture",
                     item_id=bridge.id,
-                    details={"fixture_ref": fixture_ref, "hit_ids": [hit["id"] for hit in hits]},
+                    details={"fixture_ref": fixture_ref, "hit_ids": miss["hit_ids"]},
                 ))
             else:
                 helper_positive_hits += 1
