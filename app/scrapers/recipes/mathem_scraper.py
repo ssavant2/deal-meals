@@ -98,8 +98,17 @@ NON_FOOD_INGREDIENTS = {
 # still pass through normally. Matching the ID keeps the block stable if Mathem
 # changes the title slug.
 BLOCKED_NON_RECIPE_PACKAGE_IDS = frozenset({
+    '39',    # Mathems stora frukostpaket
+    '528',   # Mathems lilla frukostpaket
     '6862',  # Delipaketet
+    '1023',  # Clean Eating stora frukostpaket
+    '1873',  # Clean Eating lilla frukostpaket
+    '2364',  # Mathems nyttiga fikapaket - litet
+    '2743',  # Mathems nyttiga fikapaket - stort
+    '2842',  # Mathems klassiska fikapaket - litet
+    '2843',  # Mathems klassiska fikapaket - stort
     '3182',  # Dryckespaketet
+    '3262',  # Mathems snackspaket
     '6865',  # Dukningspaketet
     '6864',  # Hamburgerpaketet
     '6863',  # Korvpaketet
@@ -109,12 +118,30 @@ BLOCKED_NON_RECIPE_PACKAGE_IDS = frozenset({
     '2182',  # Stora städpaketet
 })
 
+NON_RECIPE_PACKAGE_SLUG_PATTERNS = (
+    # Mathem shopping-box pages currently live under /recipes/ but are not
+    # cooking recipes. Keep these narrow so real "laxpaket"/"fiskpaket" recipes
+    # are not caught by a generic "*paket" rule.
+    r'(?:^|-)mathems-(?:klassiska-|nyttiga-)?fikapaket(?:-|$)',
+    r'(?:^|-)mathems-snackspaket(?:-|$)',
+    r'(?:^|-)mathems-(?:lilla|stora)-frukostpaket(?:-|$)',
+    r'(?:^|-)clean-eating-(?:lilla|stora)-frukostpaket(?:-|$)',
+    r'(?:^|-)mathems-kaffepaket(?:-|$)',
+    r'(?:^|-)mathem-(?:delipaketet|dryckespaketet|dukningspaketet|hamburgerpaketet|korvpaketet|lilla-stadpaketet|stora-stadpaketet)(?:-|$)',
+)
+
 
 def is_blocked_non_recipe_package_url(url: str) -> bool:
     """Return True for known Mathem product-bundle pages masquerading as recipes."""
     path = urlsplit(url).path.rstrip('/').lower()
-    match = re.match(r'^/se/recipes/(\d+)(?:-|$)', path)
-    return bool(match and match.group(1) in BLOCKED_NON_RECIPE_PACKAGE_IDS)
+    match = re.match(r'^/se/recipes/(\d+)(?:-([^/]+))?$', path)
+    if not match:
+        return False
+    recipe_id = match.group(1)
+    if recipe_id in BLOCKED_NON_RECIPE_PACKAGE_IDS:
+        return True
+    slug = match.group(2) or ''
+    return any(re.search(pattern, slug) for pattern in NON_RECIPE_PACKAGE_SLUG_PATTERNS)
 
 
 class MathemScraper:
