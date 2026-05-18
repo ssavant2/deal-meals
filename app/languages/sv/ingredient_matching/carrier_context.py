@@ -12,6 +12,8 @@ try:
 except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
+from .runtime_rule_overlays import KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES
+
 
 # ============================================================================
 # FLAVORED PRODUCTS - Carrier products + flavors = don't extract flavor as keyword
@@ -1184,3 +1186,19 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     'granatäpple': {'granatäpplejuice', 'granatapplejuice', 'granatäppeljuice', 'granatappeljuice'},
     'granatapple': {'granatäpplejuice', 'granatapplejuice', 'granatäppeljuice', 'granatappeljuice'},
 }
+
+
+def _merge_normalized_context_updates(
+    target: Dict[str, Set[str]],
+    updates: Dict[str, Set[str]],
+) -> None:
+    for keyword, suppressors in updates.items():
+        target.setdefault(fix_swedish_chars(keyword).lower(), set()).update(
+            {fix_swedish_chars(suppressor).lower() for suppressor in suppressors}
+        )
+
+
+_merge_normalized_context_updates(
+    KEYWORD_SUPPRESSED_BY_CONTEXT,
+    KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES,
+)

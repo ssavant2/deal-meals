@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
@@ -69,6 +70,7 @@ DEFAULT_SNAPSHOT_FILE = APP_DIR / "support_checks" / "baselines" / "known_infras
 
 ALLOWED_ADAPTER_REF_PREFIXES = allowed_prefixes("adapter_ref")
 CoverageKey = tuple[str, str, str, str, str, str]
+_SPACE_NORM_PRIVATE_NAMES = frozenset({"_SPACE_NORM_PATTERN", "_SPACE_NORM_LOOKUP"})
 
 
 @dataclass(frozen=True)
@@ -152,6 +154,75 @@ def _write_snapshot(snapshot_file: Path, issues: list[PreflightIssue]) -> None:
         ],
     }
     snapshot_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _check_space_norm_private_usage(app_dir: Path, *, repo_root: Path) -> list[PreflightIssue]:
+    root = app_dir / "languages" / "sv" / "ingredient_matching"
+    issues: list[PreflightIssue] = []
+    if not root.exists():
+        return issues
+
+    for path in sorted(root.rglob("*.py")):
+        if path.name == "normalization.py":
+            continue
+        try:
+            source = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            issues.append(PreflightIssue(
+                "error",
+                "space_norm_source_unreadable",
+                f"Could not read source file: {exc}",
+                _rel(path, repo_root=repo_root),
+                path.name,
+            ))
+            continue
+        try:
+            tree = ast.parse(source, filename=str(path))
+        except SyntaxError as exc:
+            issues.append(PreflightIssue(
+                "error",
+                "space_norm_source_unparseable",
+                f"Could not parse source file: {exc.msg}",
+                _rel(path, repo_root=repo_root),
+                path.name,
+                line=exc.lineno,
+            ))
+            continue
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                imported = sorted(
+                    alias.name
+                    for alias in node.names
+                    if alias.name in _SPACE_NORM_PRIVATE_NAMES
+                )
+                if imported:
+                    issues.append(PreflightIssue(
+                        "error",
+                        "space_norm_private_import",
+                        (
+                            "Use _apply_space_normalizations() instead of importing compiled "
+                            f"space-normalization internals: {', '.join(imported)}"
+                        ),
+                        _rel(path, repo_root=repo_root),
+                        ",".join(imported),
+                        line=node.lineno,
+                    ))
+            if (
+                isinstance(node, ast.Attribute)
+                and node.attr == "sub"
+                and isinstance(node.value, ast.Name)
+                and node.value.id == "_SPACE_NORM_PATTERN"
+            ):
+                issues.append(PreflightIssue(
+                    "error",
+                    "space_norm_direct_pattern_sub",
+                    "Use _apply_space_normalizations() instead of _SPACE_NORM_PATTERN.sub(...).",
+                    _rel(path, repo_root=repo_root),
+                    "_SPACE_NORM_PATTERN.sub",
+                    line=node.lineno,
+                ))
+    return issues
 
 
 def _fixture_expected_canonicals(payload: dict[str, Any]) -> list[str]:
@@ -658,6 +729,7 @@ def run_preflight(
     fixtures = load_fixture_contract(fixture_file)
     inventory = load_inventory_contract(inventory_file)
     issues = []
+    issues.extend(_check_space_norm_private_usage(app_dir, repo_root=repo_root))
     issues.extend(_check_fixtures(fixture_file, fixtures, repo_root=repo_root))
     issues.extend(_check_inventory(inventory_file, inventory, fixtures, repo_root=repo_root))
     issues.extend(_check_source_coverage(

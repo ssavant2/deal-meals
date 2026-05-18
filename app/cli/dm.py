@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 import tomllib
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 import unicodedata
 
 import typer
@@ -57,6 +57,7 @@ class MatcherPaths:
     registry_entries_dir: Path
     keyword_extra_parent_file: Path
     keyword_synonym_file: Path
+    runtime_overlay_file: Path
     deep_sanity_file: Path
 
 
@@ -97,6 +98,15 @@ class SimpleTomlSurface:
     notes: str
     default_sanity_ingredient: Literal["canonical", "variant"]
     default_sanity_offer: Literal["canonical", "variant"]
+
+
+@dataclass(frozen=True)
+class RuntimeOverlaySurface:
+    command: str
+    section: str
+    value_field: str
+    mapping_name: str
+    guide_label: str
 
 
 SIMPLE_TOML_SURFACES: dict[str, SimpleTomlSurface] = {
@@ -156,6 +166,31 @@ SIMPLE_TOML_SURFACES: dict[str, SimpleTomlSurface] = {
         default_sanity_offer="variant",
     ),
 }
+
+RUNTIME_OVERLAY_SURFACES: dict[str, RuntimeOverlaySurface] = {
+    "pnb": RuntimeOverlaySurface(
+        command="pnb",
+        section="product_name_blockers",
+        value_field="blockers",
+        mapping_name="PRODUCT_NAME_BLOCKERS",
+        guide_label="Product-name blocker",
+    ),
+    "fpb": RuntimeOverlaySurface(
+        command="fpb",
+        section="false_positive_blockers",
+        value_field="blockers",
+        mapping_name="FALSE_POSITIVE_BLOCKERS",
+        guide_label="Ingredient false-positive blocker",
+    ),
+    "ksbc": RuntimeOverlaySurface(
+        command="ksbc",
+        section="keyword_suppressed_by_context",
+        value_field="context",
+        mapping_name="KEYWORD_SUPPRESSED_BY_CONTEXT",
+        guide_label="Keyword suppressed by context",
+    ),
+}
+_RUNTIME_OVERLAY_SECTION_ORDER = tuple(surface.section for surface in RUNTIME_OVERLAY_SURFACES.values())
 
 
 GUIDE_SHAPES: dict[str, MatcherGuide] = {
@@ -224,22 +259,20 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
     ),
     "pnb": MatcherGuide(
         label="pnb",
-        status="manual Track A runtime edit",
+        status="supported by dm matcher add",
         summary="PRODUCT_NAME_BLOCKERS: product text blocks a matched keyword unless the ingredient asks for it.",
         steps=(
-            "Edit app/languages/sv/ingredient_matching/blocker_data.py / PRODUCT_NAME_BLOCKERS.",
-            "Add a focused run_deep_matcher_sanity.py regression.",
-            "Run: ./bin/dm matcher gates --track A",
+            "Run: ./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason \"<why>\"",
+            "The command writes runtime_rule_overlays.toml, appends a focused sanity canary, and runs Track A gates by default.",
         ),
     ),
     "fpb": MatcherGuide(
         label="fpb",
-        status="manual Track A runtime edit",
+        status="supported by dm matcher add",
         summary="FALSE_POSITIVE_BLOCKERS: ingredient context suppresses a keyword.",
         steps=(
-            "Edit app/languages/sv/ingredient_matching/blocker_data.py / FALSE_POSITIVE_BLOCKERS.",
-            "Add a focused run_deep_matcher_sanity.py regression.",
-            "Run: ./bin/dm matcher gates --track A",
+            "Run: ./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason \"<why>\"",
+            "The command writes runtime_rule_overlays.toml, appends a focused sanity canary, and runs Track A gates by default.",
         ),
     ),
     "gpb": MatcherGuide(
@@ -254,12 +287,11 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
     ),
     "ksbc": MatcherGuide(
         label="ksbc",
-        status="manual Track A runtime edit",
+        status="supported by dm matcher add",
         summary="KEYWORD_SUPPRESSED_BY_CONTEXT: ingredient context makes a generic keyword irrelevant.",
         steps=(
-            "Edit the existing KSBC/runtime suppression surface beside related rules.",
-            "Add a focused run_deep_matcher_sanity.py regression.",
-            "Run: ./bin/dm matcher gates --track A",
+            "Run: ./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason \"<why>\"",
+            "Use this carefully: KSBC is semantic and can suppress useful generic fallbacks.",
         ),
     ),
     "no-match-policy": MatcherGuide(
@@ -355,6 +387,9 @@ def _paths(tree_root: Path | None) -> MatcherPaths:
             / "term_registry"
             / "entries"
             / "keyword_synonym.toml"
+        ),
+        runtime_overlay_file=(
+            app_dir / "languages" / "sv" / "ingredient_matching" / "runtime_rule_overlays.toml"
         ),
         deep_sanity_file=app_dir / "support_checks" / "run_deep_matcher_sanity.py",
     )
@@ -1684,6 +1719,251 @@ def _validate_keyword_extra_parent_args(canonical: str, kids: tuple[str, ...]) -
         raise typer.BadParameter("keyword-extra-parent currently supports single-token kids only")
 
 
+def _runtime_rule_normalize_text(value: str) -> str:
+    try:
+        from languages.sv.normalization import fix_swedish_chars
+    except ModuleNotFoundError:
+        from app.languages.sv.normalization import fix_swedish_chars
+
+    return fix_swedish_chars(value).lower()
+
+
+def _space_normalized_keyword_text(value: str) -> str:
+    try:
+        from languages.sv.normalization import fix_swedish_chars
+        from languages.sv.ingredient_matching.normalization import _apply_space_normalizations
+    except ModuleNotFoundError:
+        from app.languages.sv.normalization import fix_swedish_chars
+        from app.languages.sv.ingredient_matching.normalization import _apply_space_normalizations
+
+    return _apply_space_normalizations(fix_swedish_chars(value).lower())
+
+
+def _keyword_synonym_space_norm_warnings(canonical: str, variants: tuple[str, ...]) -> tuple[str, ...]:
+    canonical_norm = _space_normalized_keyword_text(canonical)
+    entered_variant_terms = {
+        _space_normalized_keyword_text(variant) if not re.search(r"[\s-]", variant) else variant.strip().lower()
+        for variant in variants
+    }
+    warnings: list[str] = []
+    for variant in variants:
+        variant_text = variant.strip().lower()
+        if not re.search(r"[\s-]", variant_text):
+            continue
+        normalized = _space_normalized_keyword_text(variant_text)
+        if normalized == variant_text or normalized == canonical_norm or normalized in entered_variant_terms:
+            continue
+        warnings.append(
+            f"variant {variant!r} space-normalizes to {normalized!r}; add {normalized!r} "
+            "as a synonym variant too if extraction produces that token."
+        )
+    return tuple(warnings)
+
+
+def _runtime_overlay_value_field(section: str) -> str:
+    for surface in RUNTIME_OVERLAY_SURFACES.values():
+        if surface.section == section:
+            return surface.value_field
+    raise typer.BadParameter(f"unknown runtime overlay section: {section}")
+
+
+def _read_runtime_overlay_sections(path: Path) -> dict[str, list[dict[str, Any]]]:
+    try:
+        from languages.sv.ingredient_matching.runtime_rule_overlays import load_runtime_rule_overlays
+    except ModuleNotFoundError:
+        from app.languages.sv.ingredient_matching.runtime_rule_overlays import load_runtime_rule_overlays
+
+    try:
+        load_runtime_rule_overlays(path)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    if not path.exists():
+        return {section: [] for section in _RUNTIME_OVERLAY_SECTION_ORDER}
+    with path.open("rb") as handle:
+        payload = tomllib.load(handle)
+    return {
+        section: [dict(entry) for entry in payload.get(section, [])]
+        for section in _RUNTIME_OVERLAY_SECTION_ORDER
+    }
+
+
+def _runtime_overlay_entry_values(entry: dict[str, Any], value_field: str) -> tuple[str, ...]:
+    raw_values = entry.get(value_field, [])
+    return tuple(_runtime_rule_normalize_text(str(value)) for value in raw_values)
+
+
+def _runtime_overlay_existing_values(
+    sections: dict[str, list[dict[str, Any]]],
+    surface: RuntimeOverlaySurface,
+    keyword: str,
+) -> set[str]:
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    values: set[str] = set()
+    for entry in sections.get(surface.section, []):
+        entry_keyword = str(entry.get("keyword", "")).strip()
+        if _runtime_rule_normalize_text(entry_keyword) != normalized_keyword:
+            continue
+        values.update(
+            _runtime_rule_normalize_text(value)
+            for value in _runtime_overlay_entry_values(entry, surface.value_field)
+        )
+    return values
+
+
+def _live_runtime_mapping_values(surface: RuntimeOverlaySurface, keyword: str, paths: MatcherPaths) -> set[str]:
+    if paths.app_dir != APP_DIR:
+        return set()
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    if surface.command == "pnb":
+        from languages.sv.ingredient_matching.blocker_data import PRODUCT_NAME_BLOCKERS
+
+        return set(PRODUCT_NAME_BLOCKERS.get(normalized_keyword, set()))
+    if surface.command == "fpb":
+        from languages.sv.ingredient_matching.blocker_data import FALSE_POSITIVE_BLOCKERS
+
+        return set(FALSE_POSITIVE_BLOCKERS.get(normalized_keyword, set()))
+    if surface.command == "ksbc":
+        from languages.sv.ingredient_matching.carrier_context import KEYWORD_SUPPRESSED_BY_CONTEXT
+
+        return set(KEYWORD_SUPPRESSED_BY_CONTEXT.get(normalized_keyword, set()))
+    return set()
+
+
+def _runtime_overlay_entry_block(surface: RuntimeOverlaySurface, entry: dict[str, Any]) -> str:
+    return "\n".join([
+        f"[[{surface.section}]]",
+        f"keyword = {_toml_string(str(entry['keyword']))}",
+        f"{surface.value_field} = {_toml_array(list(entry[surface.value_field]))}",
+        f"reason = {_toml_string(str(entry['reason']))}",
+        "",
+    ])
+
+
+def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str:
+    lines = [
+        "# CLI-managed Track A runtime-rule overlays.",
+        "#",
+        "# This file is tracked production source. Add entries through:",
+        "#   ./bin/dm matcher add pnb|fpb|ksbc ...",
+        "#",
+        "# Supported sections:",
+        "#   [[product_name_blockers]]",
+        "#   [[false_positive_blockers]]",
+        "#   [[keyword_suppressed_by_context]]",
+        "",
+    ]
+    for section in _RUNTIME_OVERLAY_SECTION_ORDER:
+        surface = next(item for item in RUNTIME_OVERLAY_SURFACES.values() if item.section == section)
+        for entry in sections.get(section, []):
+            lines.append(_runtime_overlay_entry_block(surface, entry).rstrip())
+            lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _append_runtime_overlay_entry(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeOverlaySurface,
+    keyword: str,
+    values: tuple[str, ...],
+    reason: str,
+    dry_run: bool,
+) -> str:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    normalized_values = tuple(_runtime_rule_normalize_text(value) for value in values)
+    duplicate_values = sorted(
+        set(normalized_values)
+        & (
+            _runtime_overlay_existing_values(sections, surface, keyword)
+            | _live_runtime_mapping_values(surface, keyword, paths)
+        )
+    )
+    if duplicate_values:
+        raise typer.BadParameter(
+            f"{surface.command} already contains {', '.join(duplicate_values)} for {keyword}"
+        )
+
+    entry: dict[str, Any] | None = None
+    for candidate in sections.get(surface.section, []):
+        if _runtime_rule_normalize_text(str(candidate.get("keyword", ""))) == normalized_keyword:
+            entry = candidate
+            break
+    if entry is None:
+        entry = {
+            "keyword": normalized_keyword,
+            surface.value_field: list(normalized_values),
+            "reason": reason.strip(),
+        }
+    else:
+        existing_values = list(_runtime_overlay_entry_values(entry, surface.value_field))
+        existing_value_set = set(existing_values)
+        for value in normalized_values:
+            if value not in existing_value_set:
+                existing_values.append(value)
+                existing_value_set.add(value)
+        entry["keyword"] = normalized_keyword
+        entry[surface.value_field] = existing_values
+        existing_reason = str(entry.get("reason", "")).strip()
+        if reason.strip() and reason.strip() not in existing_reason:
+            entry["reason"] = f"{existing_reason}; {reason.strip()}" if existing_reason else reason.strip()
+
+    preview = _runtime_overlay_entry_block(surface, entry)
+    if dry_run:
+        return preview
+
+    if entry not in sections.setdefault(surface.section, []):
+        sections[surface.section].append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_runtime_overlay_deep_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeOverlaySurface,
+    keyword: str,
+    values: tuple[str, ...],
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    mapping_import = f"from languages.sv.ingredient_matching import {surface.mapping_name}"
+    lines = [
+        "",
+        f"# {policy_ref}: generated by dm matcher add {surface.command}",
+        mapping_import,
+    ]
+    for value in values:
+        normalized_value = _runtime_rule_normalize_text(value)
+        lines.extend([
+            f"test({_toml_string(surface.command.upper() + ' ' + normalized_keyword + ' has ' + normalized_value)},",
+            f"     {_toml_string(normalized_value)} in {surface.mapping_name}.get({_toml_string(normalized_keyword)}, set()), True)",
+        ])
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+def _run_track_a_runtime_gates(paths: MatcherPaths, report_root: Path | None) -> int:
+    args = [
+        "--track",
+        "A",
+        "--runtime-changed",
+        "--no-registry-changed",
+        "--no-fixtures-changed",
+        "--no-inventory-changed",
+        "--no-support-checks-changed",
+    ]
+    return _run_support_check(
+        "run_matcher_change_gates.py",
+        args,
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
+
+
 def _raw_args(ctx: typer.Context) -> list[str]:
     return [str(arg) for arg in ctx.args]
 
@@ -1899,6 +2179,8 @@ def add_keyword_synonym(
         raise typer.BadParameter("--variants must differ from canonical")
     if ingredient_override is not None and not ingredient_override.strip():
         raise typer.BadParameter("--ingredient must not be empty")
+    for warning in _keyword_synonym_space_norm_warnings(canonical, variants):
+        typer.secho(f"WARNING: {warning}", fg=typer.colors.YELLOW, err=True)
 
     paths = _paths(tree_root)
     canonical_slug = _slug(canonical)
@@ -2017,6 +2299,188 @@ def add_keyword_synonym(
     else:
         gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
     raise typer.Exit(gate_status)
+
+
+def _add_runtime_overlay_rule(
+    *,
+    surface: RuntimeOverlaySurface,
+    keyword: str,
+    values_csv: str,
+    reason: str,
+    policy_ref: str | None,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    keyword = keyword.strip().lower()
+    if not keyword:
+        raise typer.BadParameter("keyword must not be empty")
+    values = _split_csv(values_csv, label=f"--{surface.value_field}")
+    reason = reason.strip()
+    if not reason:
+        raise typer.BadParameter("--reason must not be empty")
+
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+
+    policy_ref = policy_ref or f"runtime_{surface.command}_{_slug(keyword)}_{_slug(values[0])}"
+    overlay_preview = _append_runtime_overlay_entry(
+        paths=paths,
+        surface=surface,
+        keyword=keyword,
+        values=values,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_runtime_overlay_deep_sanity_stub(
+            paths=paths,
+            surface=surface,
+            keyword=keyword,
+            values=values,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+
+    typer.echo(f"Generated runtime {surface.command} rule: {policy_ref}")
+    typer.echo(f"  keyword: {keyword}")
+    typer.echo(f"  {surface.value_field}: {', '.join(values)}")
+    if write_sanity:
+        typer.echo("  sanity: appended")
+    else:
+        typer.echo("  sanity: skipped")
+
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+
+    gate_status = _run_track_a_runtime_gates(paths=paths, report_root=report_root)
+    raise typer.Exit(gate_status)
+
+
+@matcher_add_app.command("pnb")
+def add_pnb(
+    keyword: Annotated[str, typer.Argument(help="Keyword whose product matches should be blocked.")],
+    blockers_csv: Annotated[
+        str,
+        typer.Option("--blockers", help="Comma-separated product-name blockers for this keyword."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why this runtime blocker is needed.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_overlay_rule(
+        surface=RUNTIME_OVERLAY_SURFACES["pnb"],
+        keyword=keyword,
+        values_csv=blockers_csv,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("fpb")
+def add_fpb(
+    keyword: Annotated[str, typer.Argument(help="Keyword to suppress in ingredient blocker contexts.")],
+    blockers_csv: Annotated[
+        str,
+        typer.Option("--blockers", help="Comma-separated ingredient-side blockers for this keyword."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why this runtime blocker is needed.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_overlay_rule(
+        surface=RUNTIME_OVERLAY_SURFACES["fpb"],
+        keyword=keyword,
+        values_csv=blockers_csv,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("ksbc")
+def add_ksbc(
+    keyword: Annotated[str, typer.Argument(help="Generic keyword to suppress in specific ingredient contexts.")],
+    context_csv: Annotated[
+        str,
+        typer.Option("--context", help="Comma-separated ingredient context terms that suppress this keyword."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why this semantic suppression is needed.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_overlay_rule(
+        surface=RUNTIME_OVERLAY_SURFACES["ksbc"],
+        keyword=keyword,
+        values_csv=context_csv,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
 
 
 @matcher_add_app.command("ingredient-parent")

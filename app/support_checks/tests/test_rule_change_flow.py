@@ -4,6 +4,7 @@ import argparse
 from copy import deepcopy
 from dataclasses import replace
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -17,6 +18,7 @@ from support_checks.run_matcher_change_preflight import (
     DEFAULT_REGISTRY_ENTRIES_DIR,
     DEFAULT_SNAPSHOT_FILE,
     _check_match_bridge_positive_fixture_hits,
+    _check_space_norm_private_usage,
     run_preflight,
 )
 from support_checks import run_term_registry_guard_bridge_checks as guard_bridge_checks
@@ -58,6 +60,10 @@ from support_checks.run_verified_term_audit import (
 )
 from support_checks.promote_term_baseline import PromotionConfig, _content_key
 from languages.sv.ingredient_matching.rule_models import MatchBridge
+from languages.sv.ingredient_matching.runtime_rule_overlays import (
+    RuntimeRuleOverlayError,
+    load_runtime_rule_overlays,
+)
 from languages.sv.ingredient_matching.term_registry.exports import (
     build_ingredient_parents_export_from_entries,
     build_ingredient_routing_parent_export_from_entries,
@@ -90,6 +96,45 @@ def _copy_matcher_tree(tree_root: Path) -> Path:
     return app_dir
 
 
+def _runtime_overlay_probe(app_dir: Path, expression: str) -> dict:
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(app_dir)
+    script = f"""
+import json
+import sys
+import types
+from pathlib import Path
+
+app_dir = Path({str(app_dir)!r})
+for name, path in (
+    ("languages", app_dir / "languages"),
+    ("languages.sv", app_dir / "languages" / "sv"),
+    (
+        "languages.sv.ingredient_matching",
+        app_dir / "languages" / "sv" / "ingredient_matching",
+    ),
+):
+    module = types.ModuleType(name)
+    module.__path__ = [str(path)]
+    sys.modules[name] = module
+
+from languages.sv.ingredient_matching.blocker_data import FALSE_POSITIVE_BLOCKERS, PRODUCT_NAME_BLOCKERS
+from languages.sv.ingredient_matching.carrier_context import KEYWORD_SUPPRESSED_BY_CONTEXT
+print(json.dumps({expression}, ensure_ascii=False, sort_keys=True))
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=app_dir,
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise AssertionError(result.stderr + result.stdout)
+    return json.loads(result.stdout)
+
+
 class MatcherRuleChangePreflightTests(unittest.TestCase):
     def test_phase5_contract_api_round_trip_preserves_payloads(self) -> None:
         fixtures = load_fixture_contract(DEFAULT_FIXTURE_FILE)
@@ -120,6 +165,141 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         self.assertTrue(report["summary"]["passed"], report)
         self.assertEqual(report["summary"]["new_issue_count"], 0)
         self.assertEqual(report["summary"]["known_issue_count"], 0)
+
+    def test_phase10_runtime_overlay_loader_validates_schema_and_merges_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            overlay_file = Path(tmp) / "runtime_rule_overlays.toml"
+            overlay_file.write_text(
+                """
+[[product_name_blockers]]
+keyword = "Färskost"
+blockers = ["Chips"]
+reason = "Synthetic merge test."
+
+[[product_name_blockers]]
+keyword = "farskost"
+blockers = ["Snacks"]
+reason = "Synthetic normalized-key merge test."
+
+[[false_positive_blockers]]
+keyword = "Ost"
+blockers = ["Ostron"]
+reason = "Synthetic FPB test."
+
+[[keyword_suppressed_by_context]]
+keyword = "Ris"
+context = ["Glas, ris"]
+reason = "Synthetic KSBC test."
+""",
+                encoding="utf-8",
+            )
+
+            overlays = load_runtime_rule_overlays(overlay_file)
+            self.assertEqual(overlays.product_name_blockers["färskost"], {"chips", "snacks"})
+            self.assertEqual(overlays.false_positive_blockers["ost"], {"ostron"})
+            self.assertEqual(overlays.keyword_suppressed_by_context["ris"], {"glas, ris"})
+
+            overlay_file.write_text(
+                """
+[[product_name_blockers]]
+keyword = "phasebad"
+blockers = ["x"]
+reason = "Synthetic bad key."
+unexpected = true
+""",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(RuntimeRuleOverlayError, "unknown keys"):
+                load_runtime_rule_overlays(overlay_file)
+
+            overlay_file.write_text(
+                """
+[[false_positive_blockers]]
+keyword = "phasebad"
+blockers = []
+reason = "Synthetic empty list."
+""",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(RuntimeRuleOverlayError, "must not be empty"):
+                load_runtime_rule_overlays(overlay_file)
+
+    def test_phase10_runtime_overlay_preserves_pnb_merge_order_in_temp_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            overlay_file = app_dir / "languages" / "sv" / "ingredient_matching" / "runtime_rule_overlays.toml"
+            blocker_data_file = app_dir / "languages" / "sv" / "ingredient_matching" / "blocker_data.py"
+
+            probe_expression = """
+{
+    "havregryn": sorted(PRODUCT_NAME_BLOCKERS.get("havregryn", [])),
+}
+"""
+            baseline = _runtime_overlay_probe(app_dir, probe_expression)
+
+            overlay_file.write_text(
+                """
+[[product_name_blockers]]
+keyword = "havregryn"
+blockers = ["phaseoverlay"]
+reason = "Synthetic CLI-overlay merge-order canary."
+""",
+                encoding="utf-8",
+            )
+            merged = _runtime_overlay_probe(app_dir, probe_expression)
+            self.assertIn("phaseoverlay", merged["havregryn"])
+            self.assertIn("wasa", merged["havregryn"])
+            self.assertTrue(set(baseline["havregryn"]).issubset(set(merged["havregryn"])))
+
+            historical_havregryn = (
+                "    'havregryn': {'knäcke', 'knacke', 'knäckebröd', 'knackebrod', 'wasa', 'kex',\n"
+                "                  'quinoa'},  # \"Gröt Havregryn & quinoa\" = blend ≠ plain rolled oats for smulpaj (batch 50)\n"
+            )
+            blocker_data_text = blocker_data_file.read_text(encoding="utf-8")
+            self.assertIn(historical_havregryn, blocker_data_text)
+            blocker_data_file.write_text(
+                blocker_data_text.replace(historical_havregryn, ""),
+                encoding="utf-8",
+            )
+            overlay_file.write_text(
+                """
+[[product_name_blockers]]
+keyword = "havregryn"
+blockers = ["knäcke", "knacke", "knäckebröd", "knackebrod", "wasa", "kex", "quinoa"]
+reason = "Synthetic temp-tree move of the historical havregryn overlay entry."
+""",
+                encoding="utf-8",
+            )
+            moved = _runtime_overlay_probe(app_dir, probe_expression)
+            self.assertEqual(moved["havregryn"], baseline["havregryn"])
+
+    def test_phase11_preflight_flags_direct_space_norm_private_usage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            probe_file = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "space_norm_private_probe.py"
+            )
+            probe_file.write_text(
+                """
+from .normalization import _SPACE_NORM_LOOKUP, _SPACE_NORM_PATTERN
+
+
+def normalize_probe(text: str) -> str:
+    return _SPACE_NORM_PATTERN.sub(lambda match: _SPACE_NORM_LOOKUP[match.group()], text)
+""",
+                encoding="utf-8",
+            )
+
+            issues = _check_space_norm_private_usage(app_dir, repo_root=tree_root)
+            codes = {issue.code for issue in issues}
+            self.assertIn("space_norm_private_import", codes)
+            self.assertIn("space_norm_direct_pattern_sub", codes)
 
     def test_positive_fixture_missing_expected_matches_is_actionable(self) -> None:
         fixtures = json.loads(DEFAULT_FIXTURE_FILE.read_text(encoding="utf-8"))
@@ -657,6 +837,84 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             self.assertIn(f"# {policy_ref}: generated by dm matcher add keyword-synonym", result.stdout)
             self.assertIn("Dry run only; no files written.", result.stdout)
 
+    def test_phase12_keyword_synonym_space_norm_warning_only_for_spaced_variants(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            keyword_synonym_file = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "keyword_synonym.toml"
+            )
+            deep_sanity_file = app_dir / "support_checks" / "run_deep_matcher_sanity.py"
+            before = {
+                keyword_synonym_file: keyword_synonym_file.read_text(encoding="utf-8"),
+                deep_sanity_file: deep_sanity_file.read_text(encoding="utf-8"),
+            }
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            spaced = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "keyword-synonym",
+                    "pakchoi",
+                    "--variants",
+                    "pak choy",
+                    "--sanity-offer",
+                    "Pak Choi 250g klass 1 ICA",
+                    "--tree-root",
+                    str(tree_root),
+                    "--dry-run",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(spaced.returncode, 0, spaced.stderr + spaced.stdout)
+            self.assertIn("WARNING:", spaced.stderr)
+            self.assertIn("space-normalizes to 'pakchoy'", spaced.stderr)
+
+            single_token = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "keyword-synonym",
+                    "phasealias",
+                    "--variants",
+                    "phasealiasvariant",
+                    "--sanity-offer",
+                    "Phasealias",
+                    "--tree-root",
+                    str(tree_root),
+                    "--dry-run",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(single_token.returncode, 0, single_token.stderr + single_token.stdout)
+            self.assertNotIn("space-normalizes", single_token.stderr)
+            after = {
+                keyword_synonym_file: keyword_synonym_file.read_text(encoding="utf-8"),
+                deep_sanity_file: deep_sanity_file.read_text(encoding="utf-8"),
+            }
+            self.assertEqual(after, before)
+
     def test_phase6_keyword_synonym_cli_tree_root_and_duplicate_guard(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
@@ -735,6 +993,172 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
             self.assertIn("phasewritealias ->", duplicate_output)
             self.assertIn("phasealias", duplicate_output)
 
+    def test_phase13_runtime_overlay_add_commands_write_expected_surfaces(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            overlay_file = app_dir / "languages" / "sv" / "ingredient_matching" / "runtime_rule_overlays.toml"
+            deep_sanity_file = app_dir / "support_checks" / "run_deep_matcher_sanity.py"
+            before = {
+                overlay_file: overlay_file.read_text(encoding="utf-8"),
+                deep_sanity_file: deep_sanity_file.read_text(encoding="utf-8"),
+            }
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            dry_run = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "pnb",
+                    "phasedrypnb",
+                    "--blockers",
+                    "phasedryblocker",
+                    "--reason",
+                    "Synthetic dry-run runtime overlay.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--dry-run",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(dry_run.returncode, 0, dry_run.stderr + dry_run.stdout)
+            self.assertIn("[[product_name_blockers]]", dry_run.stdout)
+            self.assertEqual(overlay_file.read_text(encoding="utf-8"), before[overlay_file])
+            self.assertEqual(deep_sanity_file.read_text(encoding="utf-8"), before[deep_sanity_file])
+
+            commands = [
+                [
+                    "pnb",
+                    "phasepnb",
+                    "--blockers",
+                    "phaseproductblocker",
+                    "--reason",
+                    "Synthetic product blocker.",
+                    "--policy-ref",
+                    "runtime_pnb_phasepnb_phaseproductblocker",
+                ],
+                [
+                    "fpb",
+                    "phasefpb",
+                    "--blockers",
+                    "phaseingredientblocker",
+                    "--reason",
+                    "Synthetic ingredient blocker.",
+                    "--policy-ref",
+                    "runtime_fpb_phasefpb_phaseingredientblocker",
+                ],
+                [
+                    "ksbc",
+                    "phaseksbc",
+                    "--context",
+                    "phasecontext",
+                    "--reason",
+                    "Synthetic context suppressor.",
+                    "--policy-ref",
+                    "runtime_ksbc_phaseksbc_phasecontext",
+                ],
+            ]
+            for command in commands:
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "cli.dm",
+                        "matcher",
+                        "add",
+                        *command,
+                        "--tree-root",
+                        str(tree_root),
+                        "--no-run-gates",
+                    ],
+                    cwd=live_app_dir,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            merge = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "pnb",
+                    "phasepnb",
+                    "--blockers",
+                    "phaseproductblocker2",
+                    "--reason",
+                    "Synthetic second product blocker.",
+                    "--policy-ref",
+                    "runtime_pnb_phasepnb_phaseproductblocker2",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(merge.returncode, 0, merge.stderr + merge.stdout)
+
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "pnb": sorted(PRODUCT_NAME_BLOCKERS.get("phasepnb", [])),
+    "fpb": sorted(FALSE_POSITIVE_BLOCKERS.get("phasefpb", [])),
+    "ksbc": sorted(KEYWORD_SUPPRESSED_BY_CONTEXT.get("phaseksbc", [])),
+}
+""",
+            )
+            self.assertEqual(runtime["pnb"], ["phaseproductblocker", "phaseproductblocker2"])
+            self.assertEqual(runtime["fpb"], ["phaseingredientblocker"])
+            self.assertEqual(runtime["ksbc"], ["phasecontext"])
+
+            overlay_text = overlay_file.read_text(encoding="utf-8")
+            self.assertEqual(overlay_text.count('keyword = "phasepnb"'), 1)
+            self.assertIn('blockers = ["phaseproductblocker", "phaseproductblocker2"]', overlay_text)
+
+            sanity_text = deep_sanity_file.read_text(encoding="utf-8")
+            self.assertIn("# runtime_pnb_phasepnb_phaseproductblocker: generated by dm matcher add pnb", sanity_text)
+            self.assertIn("# runtime_pnb_phasepnb_phaseproductblocker2: generated by dm matcher add pnb", sanity_text)
+            self.assertIn("# runtime_fpb_phasefpb_phaseingredientblocker: generated by dm matcher add fpb", sanity_text)
+            self.assertIn("# runtime_ksbc_phaseksbc_phasecontext: generated by dm matcher add ksbc", sanity_text)
+
+            duplicate = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "pnb",
+                    "phasepnb",
+                    "--blockers",
+                    "phaseproductblocker",
+                    "--reason",
+                    "Synthetic duplicate.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(duplicate.returncode, 0, duplicate.stderr + duplicate.stdout)
+            self.assertIn("pnb already contains phaseproductblocker", duplicate.stderr + duplicate.stdout)
+
     def test_phase7_support_check_runner_preserves_exit_code_and_env(self) -> None:
         calls = []
         original_run = dm_cli._run
@@ -804,8 +1228,8 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         )
 
         self.assertEqual(pnb.returncode, 0, pnb.stderr + pnb.stdout)
-        self.assertIn("pnb: manual Track A runtime edit", pnb.stdout)
-        self.assertIn("./bin/dm matcher gates --track A", pnb.stdout)
+        self.assertIn("pnb: supported by dm matcher add", pnb.stdout)
+        self.assertIn("./bin/dm matcher add pnb", pnb.stdout)
         self.assertEqual(synonym.returncode, 0, synonym.stderr + synonym.stdout)
         self.assertIn("keyword-synonym: supported by dm matcher add", synonym.stdout)
         self.assertIn("./bin/dm matcher add keyword-synonym", synonym.stdout)
@@ -990,7 +1414,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         self.assertEqual(report["blocker_count"], 0)
         self.assertEqual(report["blocker_baseline_count"], 0)
         self.assertEqual(report["summary"]["contract_access_api"], 2)
-        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4125)
+        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4129)
 
     def test_phase5_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

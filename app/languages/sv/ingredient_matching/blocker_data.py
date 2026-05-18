@@ -17,6 +17,11 @@ try:
 except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
+from .runtime_rule_overlays import (
+    FALSE_POSITIVE_BLOCKER_CLI_UPDATES,
+    PRODUCT_NAME_BLOCKER_CLI_UPDATES,
+)
+
 
 _SPECIALTY_MINCE_PRODUCT_CUES: Set[str] = {
     'chorizofärs', 'chorizofars',
@@ -1644,12 +1649,23 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
 
 }
 
+def _merge_normalized_blocker_updates(
+    target: Dict[str, Set[str]],
+    updates: Dict[str, Set[str]],
+) -> None:
+    for keyword, blockers in updates.items():
+        target.setdefault(fix_swedish_chars(keyword).lower(), set()).update(
+            {fix_swedish_chars(blocker).lower() for blocker in blockers}
+        )
+
+
 # Intentionally selective — not exhaustive. Add new blockers when actual false
 # positives are observed in production data via the normal manual cache review flow.
 FALSE_POSITIVE_BLOCKERS: Dict[str, Set[str]] = {
     fix_swedish_chars(k).lower(): {fix_swedish_chars(w).lower() for w in v}
     for k, v in _FALSE_POSITIVE_BLOCKERS_RAW.items()
 }
+_merge_normalized_blocker_updates(FALSE_POSITIVE_BLOCKERS, FALSE_POSITIVE_BLOCKER_CLI_UPDATES)
 
 # ============================================================================
 # PRODUCT NAME BLOCKERS (reverse of FALSE_POSITIVE_BLOCKERS)
@@ -3954,10 +3970,8 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
     'flader': {'tonic', 'tonicvatten'},
 }
 
-for _keyword, _blockers in _PRODUCT_NAME_BLOCKER_UPDATES.items():
-    PRODUCT_NAME_BLOCKERS.setdefault(fix_swedish_chars(_keyword).lower(), set()).update(
-        {fix_swedish_chars(w).lower() for w in _blockers}
-    )
+_merge_normalized_blocker_updates(PRODUCT_NAME_BLOCKERS, _PRODUCT_NAME_BLOCKER_UPDATES)
+_merge_normalized_blocker_updates(PRODUCT_NAME_BLOCKERS, PRODUCT_NAME_BLOCKER_CLI_UPDATES)
 
 # Products whose name contains any of these strings are non-food and should
 # never match any recipe ingredient, regardless of which keyword triggered the match.

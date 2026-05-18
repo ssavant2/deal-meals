@@ -66,8 +66,6 @@ from .match_filters import (
 )
 from .no_match_policies import find_no_match_policy_hits
 from .normalization import (
-    _SPACE_NORM_LOOKUP,
-    _SPACE_NORM_PATTERN,
     _apply_space_normalizations,
     normalize_measured_durumvete_flour,
     normalize_measured_risotto_rice,

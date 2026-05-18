@@ -145,8 +145,6 @@ from .match_filters import (
     check_secondary_ingredient_patterns,
 )
 from .normalization import (
-    _SPACE_NORM_LOOKUP,
-    _SPACE_NORM_PATTERN,
     _SPACE_NORMALIZATIONS,
     _apply_space_normalizations,
 )
@@ -278,8 +276,6 @@ __all__ = [
     '_DESCRIPTOR_PHRASE_MARKERS',
     '_EMBEDDED_PROTECTED_KEYWORDS',
     '_PROCESSED_PRODUCT_INDICATORS',
-    '_SPACE_NORM_LOOKUP',
-    '_SPACE_NORM_PATTERN',
     '_SPACE_NORMALIZATIONS',
     '_SUFFIX_PROTECTED_KEYWORDS',
     '_WORD_PATTERN',

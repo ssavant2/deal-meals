@@ -51,6 +51,9 @@ Known CLI rule shapes:
   --blocked-offer-keywords <keyword> --fixture-refs <fixture_id> ...
 ./bin/dm matcher add extraction-helper <canonical> --side product|ingredient|both \
   --input "<text>" --source-refs <code-ref>
+./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason "<why>"
+./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason "<why>"
+./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason "<why>"
 ```
 
 Unsure whether a rule shape has an `add` command:
@@ -60,7 +63,7 @@ Unsure whether a rule shape has an `add` command:
 ./bin/dm matcher guide --list
 ```
 
-Manual Track A:
+Manual Track A, when no `dm matcher add` command fits:
 
 ```bash
 # edit narrow Python runtime rule + focused run_deep_matcher_sanity.py case
@@ -316,7 +319,8 @@ CLI write the registry row and focused sanity stub:
   --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:402
 ```
 
-Python runtime tables are the remaining manual path: PNB, FPB, GPB, KSBC,
+Common Python runtime blockers now have CLI coverage: use
+`./bin/dm matcher add pnb|fpb|ksbc ...` for PNB, FPB, and KSBC. GPB,
 `STOP_WORDS`, specialty/form/processed rules, and backend-only guards still use
 manual editing plus `./bin/dm matcher gates --track A|B`.
 
@@ -377,7 +381,7 @@ decision in the runbook.
 
 | Track | Use for | Typical files | Required proof |
 | --- | --- | --- | --- |
-| Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/GPB additions and tiny runtime guards. | `blocker_data.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
+| Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/KSBC/GPB additions and tiny runtime guards. | `dm matcher add pnb|fpb|ksbc`, `runtime_rule_overlays.toml`, `blocker_data.py` for GPB, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
 | Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
 
 There is one deliberately small path between those two: **lightweight registry
@@ -492,8 +496,9 @@ can be the correct surface.
 | Offer keyword extraction | `./bin/dm matcher add offer-extra-keyword ...` or `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Product wording should expose an additional canonical offer keyword. | Adding recipe synonyms when only offer extraction is missing. |
 | Recipe extraction helper | `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures. |
 | Parent/canonical fallback | `./bin/dm matcher add ingredient-parent ...`, `parent-match-only ...`, or `keyword-extra-parent ...` | A child term should expose a broader canonical, sometimes only for matching. | Parent mappings that erase meaningful product-form differences. |
-| Ingredient-context blocker | `blocker_data.py` / `FALSE_POSITIVE_BLOCKERS` | Ingredient wording contains a keyword only inside a context that should suppress it. Common Track A tactical fix. | Offer/product variant blocking; use a product-side blocker or form/specialty rule after confirming the issue is product-side. |
-| Product-name blocker | `blocker_data.py` / `PRODUCT_NAME_BLOCKERS` | Offer/product wording contains a per-keyword variant, carrier, product type, or flavor that should block the matched keyword. Common Track A tactical fix. | Large flavor/form families that should be modeled declaratively. |
+| Ingredient-context blocker | `./bin/dm matcher add fpb ...` | Ingredient wording contains a keyword only inside a context that should suppress it. Common Track A tactical fix. | Offer/product variant blocking; use a product-side blocker or form/specialty rule after confirming the issue is product-side. |
+| Product-name blocker | `./bin/dm matcher add pnb ...` | Offer/product wording contains a per-keyword variant, carrier, product type, or flavor that should block the matched keyword. Common Track A tactical fix. | Large flavor/form families that should be modeled declaratively. |
+| Generic keyword suppressed by specific context | `./bin/dm matcher add ksbc ...` | Ingredient text names a more specific context and the generic keyword should not fall back. Use narrowly; this is semantic. | Broad high-traffic suppressions without a focused sanity canary. |
 | Global product-name blocker | `blocker_data.py` / `GLOBAL_PRODUCT_NAME_BLOCKERS` | The product is globally non-food or globally out of matcher scope regardless of which keyword matched. Common for supplements, pet food, tools, tobacco, cleaning, and similar products. | Food products that can be legitimate for some recipe wording; use scoped PNB/no-match policy instead. |
 | Form or processed-state rule | `form_rules.py`, `processed_rules.py`, or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
 | Qualifier or bidirectional variant | `specialty_rules.py` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. | Raw substring checks without word-boundary handling. |
@@ -571,10 +576,17 @@ where the fix is a narrow runtime dictionary/guard.
 
 1. Reproduce the example enough to identify the keyword/canonical, offer name,
    and ingredient text. A small inline diagnostic is fine.
-2. Patch the narrow existing mechanism: usually `FALSE_POSITIVE_BLOCKERS`,
-   `PRODUCT_NAME_BLOCKERS`, `GLOBAL_PRODUCT_NAME_BLOCKERS`,
-   specialty/form/processed rules, or a local backend guard that already owns
-   the pattern.
+2. Patch the narrow existing mechanism. For the common PNB/FPB/KSBC cases,
+   prefer the CLI so the runtime overlay and focused sanity canary are generated:
+
+   ```bash
+   ./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason "<why>"
+   ./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason "<why>"
+   ./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason "<why>"
+   ```
+
+   For GPB, specialty/form/processed rules, STOP_WORDS, or local backend guards,
+   edit the owning Python surface beside the existing local pattern.
 3. Add or adjust a focused regression inside `run_deep_matcher_sanity.py` for
    every new rule. If a nearby case already asserts the exact same behavior,
    keep or extend that case rather than duplicating it. This script is the
@@ -979,7 +991,7 @@ docker compose exec -T -w /app web \
 ```
 
 Targeted parity is required for Track B route, bridge, no-match, canonical, and
-cache-facing changes. For a plain Track A PNB/FPB/GPB fix, use the Track A
+cache-facing changes. For a plain Track A PNB/FPB/KSBC/GPB fix, use the Track A
 workflow instead. Track A still runs the full fixture parity gate, but it should
 not use Track B fixture/inventory edits unless the work is escalated.
 
@@ -1218,7 +1230,7 @@ each other. It does not mean fixture expectations are satisfied.
 
 ## Common Pitfalls
 
-- Track A: forcing every PNB/FPB/GPB runtime fix through fixture/inventory before
+- Track A: forcing every PNB/FPB/KSBC/GPB runtime fix through fixture/inventory before
   it can land.
 - Track A: calling a tactical fix durable without escalating it to Track B and
   adding contract proof.

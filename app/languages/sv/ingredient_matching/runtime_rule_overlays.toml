@@ -1,0 +1,9 @@
+# CLI-managed Track A runtime-rule overlays.
+#
+# This file is tracked production source. Add entries through:
+#   ./bin/dm matcher add pnb|fpb|ksbc ...
+#
+# Supported sections:
+#   [[product_name_blockers]]
+#   [[false_positive_blockers]]
+#   [[keyword_suppressed_by_context]]
