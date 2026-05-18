@@ -10542,6 +10542,16 @@ test("äggulor → ägg parent match", match("Ägg Ekologiska KRAV 12-p Stjärn�
 test("äggula → ägg parent match", match("Ägg Ekologiska KRAV 12-p Stjärnägg", "2 äggula", "dairy"), "ägg")
 test("äggvita → ägg parent match", match("Ägg Ekologiska KRAV 12-p Stjärnägg", "1 äggvita", "dairy"), "ägg")
 
+# KSBC soja — "vegofärs soja" means soy-based mince (the protein form), not
+# the soy sauce condiment. Suppress soja keyword when vegofärs context word is
+# present so soy sauce products don't surface as protein-mince matches.
+test("soja suppressed by vegofärs context",
+     match("Japansk soja 150ml Mrs Cheng's", "300 g fryst vegofärs soja", "pantry"), None)
+test("sojasås product also suppressed by vegofärs context",
+     match("Sojasås 150ml Kikkoman", "fryst vegofärs soja", "pantry"), None)
+test("plain soja recipe still matches soy sauce",
+     match("Japansk soja 150ml Mrs Cheng's", "2 msk soja", "pantry"), "soja")
+
 # Q74: BDPK nötmix — flavored snack mixes only match flavor-matched ingredients
 # (BBQ product ↔ BBQ recipe; plain saltad/rostad ↔ plain products)
 test("nötmix BBQ blocked from plain saltad/rostad recipe",

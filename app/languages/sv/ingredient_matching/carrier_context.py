@@ -1074,7 +1074,8 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     'morotter': {'juice'},
     # "Tångpärlor Soja" should keep the specialty tångpärlor product, not degrade
     # into ordinary soy sauce matches through the flavor word.
-    'soja': {'tångpärlor', 'tangparlor'},
+    # "vegofärs soja" = soy-based mince (the protein), not soy sauce.
+    'soja': {'tångpärlor', 'tangparlor', 'vegofärs', 'vegofars'},
     # "shiitake-svamp" should prefer shiitake offers instead of generic
     # mushroom fallback like champinjoner or kantareller.
     'svamp': {'shiitake'},
