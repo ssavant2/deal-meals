@@ -2142,6 +2142,21 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'dijonsenap': {
         'sill',  # "Dijonsenapssill" — herring with dijon, not dijon mustard
     },
+    # Whisky-flavored herring ≠ whisky liquor
+    'maltwhisky': {
+        'sill', 'senapssill',  # "Senapssill med maltwhisky" — pickled herring flavored with whisky, not the spirit itself
+    },
+    # Cream-cheese flavored with spring onion ≠ fresh spring onion
+    'vårlök': {
+        'färskost', 'farskost', 'cream cheese',  # "Färskost gräslök & vårlök Castello" — cream cheese, not fresh onion
+    },
+    'varlok': {
+        'färskost', 'farskost', 'cream cheese',
+    },
+    # Herb butter with chimichurri flavor ≠ chimichurri sauce
+    'chimichurri': {
+        'kryddsmör', 'kryddsmor', 'smaksatt smör', 'smaksatt smor',  # "Kryddsmör Chimichurri" — herb butter, not the sauce itself
+    },
     # Cayenne pepper sauce ≠ cayenne pepper spice
     'cayennepeppar': {
         'sauce',  # "Cayenne Pepper Sauce 177ml Bulliard's" — hot sauce, not cayenne powder

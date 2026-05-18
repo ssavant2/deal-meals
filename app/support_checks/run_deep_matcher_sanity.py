@@ -10203,6 +10203,17 @@ test("kokta linser does NOT match 800g dry bulk ICA Basic",
      match("Röda Linser 800g ICA Basic", "2 förp kokta röda linser", "pantry"), None)
 test("dry linser ingredient still matches dry product",
      match("Gröna linser 900g Forum", "200 g torra gröna linser", "pantry"), "linser")
+
+# Whisky-flavored herring should not satisfy whisky liquor ingredient. PNB on
+# maltwhisky-keyword blocks sill/senapssill products from a whisky recipe.
+test("maltwhisky PNB blocks Senapssill",
+     recipe_match_num(["maltwhisky"], {"name": "Senapssill med maltwhisky 420g Klädesholmen", "category": "pantry"}), 0)
+# Vårlök/färskost: cream cheese with spring onion ≠ fresh spring onion
+test("vårlök PNB blocks Färskost gräslök & vårlök",
+     recipe_match_num(["vårlök"], {"name": "Färskost gräslök & vårlök 125g Castello", "category": "dairy"}), 0)
+# Chimichurri kryddsmör ≠ chimichurri sauce
+test("chimichurri PNB blocks Kryddsmör Chimichurri",
+     recipe_match_num(["chimichurri"], {"name": "Kryddsmör Chimichurri 70g Butter", "category": "dairy"}), 0)
 # snabbkaffe: Nescafé Gold is plain instant coffee
 test("snabbkaffe matches Nescafé Gold", match("Nescafé Gold 200g", "snabbkaffe", "beverages"), "snabbkaffe")
 test("snabbkaffe matches Nescafe Classic", match("Nescafe Classic 100g", "snabbkaffe", "beverages"), "snabbkaffe")
