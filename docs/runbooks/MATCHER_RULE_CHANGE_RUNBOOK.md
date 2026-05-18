@@ -229,9 +229,11 @@ forms above for normal work.
 
 **Commands NOT covered by `dm matcher`** (run these separately when needed):
 
-- `dev_reload.py` — cache rebuild; use `--reload-cache --fresh-cache-gates` on
-  the wrapper if the gates themselves should also run on the refreshed cache,
-  but the rebuild itself is its own command for ad-hoc cache work.
+- `dev_reload.py` — cache rebuild; use `dev_reload_high_resources.py` for
+  end-of-batch review reloads on the dev machine. Use
+  `--reload-cache --fresh-cache-gates` on the wrapper if the gates themselves
+  should also run on the refreshed cache, but ad-hoc rebuilds remain separate
+  commands.
 - `matcher_layer_diagnostics.py` — interactive reproduction tool used in
   triage, not a gate.
 - `run_matcher_full_db_diff.py` — heavy read-only DB diff for release work, not
@@ -320,9 +322,21 @@ CLI write the registry row and focused sanity stub:
 ```
 
 Common Python runtime blockers now have CLI coverage: use
-`./bin/dm matcher add pnb|fpb|ksbc ...` for PNB, FPB, and KSBC. GPB,
-`STOP_WORDS`, specialty/form/processed rules, and backend-only guards still use
-manual editing plus `./bin/dm matcher gates --track A|B`.
+`./bin/dm matcher add pnb|fpb|ksbc ...` for PNB, FPB, and KSBC:
+
+```bash
+./bin/dm matcher add pnb citron --blockers lemonad --reason "Lemonade is a drink product, not lemon."
+./bin/dm matcher add fpb ost --blockers ostronsås --reason "Oyster sauce contains ost as a substring but is not cheese."
+./bin/dm matcher add ksbc ris --context risotto --reason "Risotto context should not fall back to plain rice."
+```
+
+These runtime commands currently generate a table-level sanity canary that
+proves the normalized mapping contains the new value. They do not yet accept
+`--sanity-offer` / `--sanity-ingredient`; add a richer manual sanity case beside
+the generated one when behavior-level proof is needed. GPB, `STOP_WORDS`,
+`CUISINE_CONTEXT`, compound/subword protection, specialty/form/processed rules,
+and backend-only guards still use manual editing plus
+`./bin/dm matcher gates --track A|B`.
 
 ## Cold-Start Details
 
@@ -381,7 +395,7 @@ decision in the runbook.
 
 | Track | Use for | Typical files | Required proof |
 | --- | --- | --- | --- |
-| Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/KSBC/GPB additions and tiny runtime guards. | `dm matcher add pnb|fpb|ksbc`, `runtime_rule_overlays.toml`, `blocker_data.py` for GPB, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
+| Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/KSBC/GPB additions, cuisine-context restrictions, compound/subword protection, and tiny runtime guards. | `dm matcher add pnb|fpb|ksbc`, `runtime_rule_overlays.toml`, `blocker_data.py` for GPB, `recipe_context.py` for `CUISINE_CONTEXT`, `compound_text.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
 | Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
 
 There is one deliberately small path between those two: **lightweight registry
@@ -500,6 +514,8 @@ can be the correct surface.
 | Product-name blocker | `./bin/dm matcher add pnb ...` | Offer/product wording contains a per-keyword variant, carrier, product type, or flavor that should block the matched keyword. Common Track A tactical fix. | Large flavor/form families that should be modeled declaratively. |
 | Generic keyword suppressed by specific context | `./bin/dm matcher add ksbc ...` | Ingredient text names a more specific context and the generic keyword should not fall back. Use narrowly; this is semantic. | Broad high-traffic suppressions without a focused sanity canary. |
 | Global product-name blocker | `blocker_data.py` / `GLOBAL_PRODUCT_NAME_BLOCKERS` | The product is globally non-food or globally out of matcher scope regardless of which keyword matched. Common for supplements, pet food, tools, tobacco, cleaning, and similar products. | Food products that can be legitimate for some recipe wording; use scoped PNB/no-match policy instead. |
+| Cuisine-specific seasoned product | `recipe_context.py` / `CUISINE_CONTEXT` | A product trigger such as `thaikryddad`, `taco`, or `texmex` should remain valid only when the recipe text contains matching cuisine context. This is better than a blanket PNB because the product stays visible for the right cuisine. | Using PNB for cuisine-seasoning products that are legitimate in matching cuisine recipes. |
+| Compound/subword bleed | `compound_text.py` / `_SUFFIX_PROTECTED_KEYWORDS`, `_EMBEDDED_PROTECTED_KEYWORDS`, or `_COMPOUND_STRICT_KEYWORDS` | A keyword is matching as an unwanted substring or compound suffix/prefix, e.g. a compound word carries another ingredient name but should require stricter word/prefix proof. | FPB/PNB when the real problem is token/compound shape rather than a semantic product or ingredient context. |
 | Form or processed-state rule | `form_rules.py`, `processed_rules.py`, or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
 | Qualifier or bidirectional variant | `specialty_rules.py` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. | Raw substring checks without word-boundary handling. |
 | Declarative bridge guard | `match_bridge.toml` nested `blockers` / `backend_allowances` | A bridge needs scoped negative guards or backend allowance metadata with fixture refs. | Hiding broad bridge behavior in unrelated backend code. |
@@ -585,8 +601,13 @@ where the fix is a narrow runtime dictionary/guard.
    ./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason "<why>"
    ```
 
-   For GPB, specialty/form/processed rules, STOP_WORDS, or local backend guards,
-   edit the owning Python surface beside the existing local pattern.
+   The CLI writes `runtime_rule_overlays.toml`; do not append new manual PNB
+   entries to the historical `_PRODUCT_NAME_BLOCKER_UPDATES` overlay in
+   `blocker_data.py`.
+
+   For GPB, `CUISINE_CONTEXT`, compound/subword protection,
+   specialty/form/processed rules, STOP_WORDS, or local backend guards, edit the
+   owning Python surface beside the existing local pattern.
 3. Add or adjust a focused regression inside `run_deep_matcher_sanity.py` for
    every new rule. If a nearby case already asserts the exact same behavior,
    keep or extend that case rather than duplicating it. This script is the
@@ -1023,6 +1044,12 @@ That snapshot should normally be empty on `main`; do not add to it unless there
 is a short-lived tracked cleanup reason. `FIXED` means a previously tolerated
 issue disappeared and the snapshot should be refreshed.
 
+Pre-flight also enforces matcher runtime guardrails. In particular, direct
+imports or calls of `_SPACE_NORM_PATTERN` / `_SPACE_NORM_LOOKUP` outside
+`ingredient_matching/normalization.py` are blockers; use
+`_apply_space_normalizations()` so space-normalization behavior stays
+single-sourced.
+
 Useful wrapper options:
 
 - `--registry-changed`, `--runtime-changed`, `--fixtures-changed`, and
@@ -1058,7 +1085,7 @@ choose the smallest complete gate set for the change.
 | `run_matcher_version_checks.py` | After final generated/contract state for matcher behavior changes. |
 | `run_sanity_checks.py` | Runtime Python changes with broader app-support risk, or after baseline promotion if the promotion script updates support-check expectations. |
 | support-check self-checks | Support-check code/schema/diagnostics/parity tooling changes only. |
-| `dev_reload.py` | Cache/UI/cache-gated validation, or when handing off a change that must be visible in active dev cache. |
+| `dev_reload.py` | Cache/UI/cache-gated validation, or when handing off a change that must be visible in active dev cache. Use `dev_reload_high_resources.py` for end-of-batch review reloads on the dev machine. |
 
 Full Track B fixture and inventory gates:
 
@@ -1188,6 +1215,13 @@ hot-reload matcher modules and rebuild the dev cache:
 docker compose exec -T -w /app web python support_checks/dev_reload.py
 ```
 
+During batch reviews on the dev machine, prefer the high-resource variant for
+the end-of-batch reload:
+
+```bash
+docker compose exec -T -w /app web python support_checks/dev_reload_high_resources.py
+```
+
 Then rerun freshness diagnostics. Do not treat cache-backed validation as final
 until cache freshness is clean.
 
@@ -1272,6 +1306,15 @@ each other. It does not mean fixture expectations are satisfied.
 - General: letting stale cache explain away a semantic fixture failure.
 - General: forgetting `dev_reload.py` before cache-backed validation after
   matcher runtime changes.
+- General: using direct `_SPACE_NORM_PATTERN.sub(...)` or importing
+  `_SPACE_NORM_LOOKUP` outside `ingredient_matching/normalization.py`; pre-flight
+  flags this because `_apply_space_normalizations()` is the supported entry
+  point.
+- General: adding new PNB entries to `_PRODUCT_NAME_BLOCKER_UPDATES` instead of
+  using `./bin/dm matcher add pnb ...`.
+- General: using PNB for cuisine-specific seasoned products that should remain
+  valid in matching recipes; use `CUISINE_CONTEXT` when the product needs recipe
+  cuisine context rather than a blanket block.
 - General: treating `app/tests/` workbench files as permanent regression
   contracts.
 - General: leaving experimental local registry files under

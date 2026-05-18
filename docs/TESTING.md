@@ -186,9 +186,9 @@ terms. For live registry rule surfaces, prefer `dm matcher add`:
 
 Use `./bin/dm matcher guide <shape>` when the right authoring surface is
 unclear. PNB/FPB/KSBC runtime blockers should go through `dm matcher add` so the
-runtime overlay and focused sanity canary are generated. GPB, STOP_WORDS, and
-specialty/form/processed runtime tables remain manual edits plus
-`./bin/dm matcher gates --track A|B`.
+runtime overlay and focused sanity canary are generated. GPB, STOP_WORDS,
+CUISINE_CONTEXT, compound/subword protection, and specialty/form/processed
+runtime tables remain manual edits plus `./bin/dm matcher gates --track A|B`.
 
 After adding or changing registry TOML manually, run `./bin/dm matcher gates`
 for the chosen track. For targeted registry-only troubleshooting, the underlying
