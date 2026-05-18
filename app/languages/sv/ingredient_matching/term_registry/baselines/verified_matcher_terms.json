@@ -23,7 +23,7 @@
       "negative_guard_keyword": 15,
       "negative_guard_pattern": 332,
       "negative_regression": 828,
-      "offer_extra_keyword_mapping": 375,
+      "offer_extra_keyword_mapping": 378,
       "parent_match_only_mapping": 17,
       "positive_regression": 662,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1490,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
-      "offer_extra_keyword": 375,
+      "offer_extra_keyword": 378,
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5528,
-    "variants_missing_product_text": 1717,
+    "variant_count": 5531,
+    "variants_missing_product_text": 1720,
     "variants_with_product_text": 3811
   },
   "variants": [
@@ -116134,11 +116134,74 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"mjöl\"}"
+    },
+    {
+      "variant_id": "vterm-a2476aa3164f7f3f",
+      "row_index": 4912,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:asparagespotatis",
+      "source_id": "asparagespotatis",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "asparagespotatis",
+      "canonical": "potatis",
+      "expected_family": "potatis",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"potatis\"}"
+    },
+    {
+      "variant_id": "vterm-84b7c354330452af",
+      "row_index": 4983,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:gourmetpotatis",
+      "source_id": "gourmetpotatis",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "gourmetpotatis",
+      "canonical": "potatis",
+      "expected_family": "potatis",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"potatis\"}"
+    },
+    {
+      "variant_id": "vterm-d68fd9048e9da781",
+      "row_index": 5161,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:prinsesspotatis",
+      "source_id": "prinsesspotatis",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "prinsesspotatis",
+      "canonical": "potatis",
+      "expected_family": "potatis",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"potatis\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1506,
+      "no_product_text": 1509,
       "static_verified": 2532,
       "synthetic_verified": 1490
     },
@@ -116154,14 +116217,14 @@
       "matcher_regression_case": 1490,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
-      "offer_extra_keyword": 375,
+      "offer_extra_keyword": 378,
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5528
+      "audited": 5531
     },
-    "variant_count": 5528
+    "variant_count": 5531
   }
 }
