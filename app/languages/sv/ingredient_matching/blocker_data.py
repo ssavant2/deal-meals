@@ -407,6 +407,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'mangochutney',  # mango chutney (condiment) ≠ fresh mango
         'mangorajasås', 'mangorajasas',  # mango raita sauce ≠ fresh mango
         'mangosalsa',  # mango salsa (prepared) ≠ fresh mango
+        'mangocurry',  # mango-curry spice mix (e.g. "40 g mangocurry") ≠ fresh mango fruit
     },
 
     # Butter - "smör" != nut/seed butters (completely different products)
@@ -1635,6 +1636,11 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'pepparsås': {'tabasco'},
     'pepparsas': {'tabasco'},
 
+    # Unpasteurized recipes negate the pasteurized keyword. Without this FPB,
+    # 'opastöriserad' ingredient text contains 'pastöriserad' as substring and
+    # matches pasteurized products (e.g. Äggvita Pastöriserad).
+    'pastöriserad': {'opastöriserad', 'opastoriserad'},
+    'pastoriserad': {'opastöriserad', 'opastoriserad'},
 
 }
 
@@ -2142,6 +2148,15 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'dijonsenap': {
         'sill',  # "Dijonsenapssill" — herring with dijon, not dijon mustard
     },
+    # Kewpie (Japanese mayo brand) — brand-strip residual 'pie' substring-matches
+    # 'krispies' in recipe text. PNB on the 'pie' keyword blocks Kewpie products.
+    'pie': {
+        'kewpie',  # "Majonnäs QP Japan 355ml Kewpie" — Japanese mayo brand, not pie/krispies
+    },
+    # Sport energy bars labeled "sesamkakor" ≠ Greek/Cypriot sesame cookies/halva
+    'sesamkakor': {
+        'sport', 'energi',  # "Sesamkakor Sport energi 40g ICA" — energy bar, not pastry
+    },
     # Whisky-flavored herring ≠ whisky liquor
     'maltwhisky': {
         'sill', 'senapssill',  # "Senapssill med maltwhisky" — pickled herring flavored with whisky, not the spirit itself
@@ -2438,12 +2453,31 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'pommes': {
         'friteskrydd', 'friteskrydda', 'kryddmix',  # "Pommes Friteskrydd/a" is seasoning, not fries
     },
+    # Cuisine-specific grytbas — distinct named dishes (no red/green curry; svenska↔engelska translation conflict)
+    'grytbas': {
+        'panaeng', 'paneng',
+        'massaman',
+        'satay',
+        'korma',
+        'madras',
+        'tikka',
+        'tom kha',
+    },
     'kryddmix': {
         'stroganoff',           # "Korv Stroganoff Kryddmix 50g Knorr" — too specific for generic kryddmix
         'gulasch',              # "Kryddmix för Gulasch 25g Kamis" — Hungarian stew spice ≠ taco/tandoori kryddmix
         'guacamole',            # "Guacamole Kryddmix 20g ICA" — guacamole spice ≠ enchilada/fajita kryddmix
         'köftekrydda',          # "Köftekrydda Kryddmix 50g Sevan" — köfte spice ≠ generic kryddmix
         'enchilada',            # "Enchilada Kryddmix" ≠ "five spice kryddmix" etc.
+        # Curry cuisine variants — distinct named dishes (no red/green; svenska↔engelska translation conflict)
+        'panaeng', 'paneng',             # Thai panaeng/penang curry — distinct
+        'massaman',                      # Massaman curry (Thai-Muslim) — distinct
+        'satay',                         # Satay sauce/paste ≠ curry kryddmix
+        'korma',                         # Korma (Indian) — distinct
+        'madras',                        # Madras (Indian) — distinct
+        'tikka',                         # Tikka masala (Indian) — distinct
+        # Note: 'tandoori' intentionally omitted — existing test allows tandori (typo) → tandoori match
+        'tom kha',                       # Tom Kha (Thai coconut soup) — distinct
     },
     'persika': {
         'mimosasallad',  # same product

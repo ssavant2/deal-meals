@@ -29766,3 +29766,43 @@ source_family = "matcher_regression_case"
 canonical = "citrusfrukter"
 variant = "keyword_extra_parent_citrusfrukter_blodapelsin_positive: Blodapelsin Sicilien 1kg"
 layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_tomat_family.smatomat_positive"
+language = "sv"
+market = "SE"
+canonical = "tomat"
+status = "active"
+variants = ["keyword_extra_parent_tomat_smatomat_positive: Cocktailtomater 250g"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_tomat_smatomat_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_tomat_smatomat_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "tomat"
+variant = "keyword_extra_parent_tomat_smatomat_positive: Cocktailtomater 250g"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_smatomat_family.snacktomater_positive"
+language = "sv"
+market = "SE"
+canonical = "småtomat"
+status = "active"
+variants = ["keyword_extra_parent_smatomat_snacktomater_positive: Snacktomater 250g"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_smatomat_snacktomater_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_smatomat_snacktomater_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "småtomat"
+variant = "keyword_extra_parent_smatomat_snacktomater_positive: Snacktomater 250g"
+layer_role = "positive_regression"

@@ -33007,5 +33007,47 @@
     "policy_ref": "keyword_extra_parent_citrusfrukter_family",
     "recipe_name": "Citrussallad",
     "source_ref": "current_review:keyword_extra_parent_citrusfrukter_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "tomat",
+        "ingredient_index": 0,
+        "must_match_keyword": "tomat"
+      }
+    ],
+    "id": "keyword_extra_parent_tomat_smatomat_positive",
+    "ingredients": [
+      "400 g små tomater"
+    ],
+    "offer": {
+      "category": "vegetables",
+      "name": "Cocktailtomater 250g"
+    },
+    "policy_ref": "keyword_extra_parent_tomat_family",
+    "recipe_name": "Tomatsallad",
+    "source_ref": "current_review:keyword_extra_parent_tomat_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "småtomat",
+        "ingredient_index": 0,
+        "must_match_keyword": "småtomat"
+      }
+    ],
+    "id": "keyword_extra_parent_smatomat_snacktomater_positive",
+    "ingredients": [
+      "400 g småtomater"
+    ],
+    "offer": {
+      "category": "vegetables",
+      "name": "Snacktomater 250g"
+    },
+    "policy_ref": "keyword_extra_parent_smatomat_family",
+    "recipe_name": "Tomatsallad",
+    "source_ref": "current_review:keyword_extra_parent_smatomat_routing"
   }
 ]

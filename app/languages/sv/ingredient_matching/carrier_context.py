@@ -907,8 +907,13 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     'chilisås': {'färskost', 'cream cheese'},
     # NOTE: 'pastasås' removed from chili/tomat/basilika — handled by CARRIER_CONTEXT_REQUIRED
     # ingredient carrier restriction in matches_ingredient_fast() STEP 2b.
-    'vitlök': {'vitlökssås', 'vitlokssas', 'parmesansås', 'parmesansas'},
-    'vitlok': {'vitlökssås', 'vitlokssas', 'parmesansås', 'parmesansas'},
+    'vitlök': {'vitlökssås', 'vitlokssas', 'parmesansås', 'parmesansas', 'bruschetta', 'crostini'},
+    'vitlok': {'vitlökssås', 'vitlokssas', 'parmesansås', 'parmesansas', 'bruschetta', 'crostini'},
+    # Zeta Bruschetta/Crostini are ready-spread bread products. When recipe asks
+    # for the bruschetta/crostini directly, plain persilja/vitlök ingredient
+    # keywords leaked from the carrier description must be suppressed.
+    'persilja': {'bruschetta', 'crostini'},
+    'persilj': {'bruschetta', 'crostini'},
     # "bbq-sås med smak av honung" / "grillkrydda honung" — honung is a flavor
     # descriptor there, not a standalone honey ingredient.
     'honung': {'bbq-sås', 'bbqsås', 'bbq-sas', 'bbqsas', 'grillkrydda'},

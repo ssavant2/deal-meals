@@ -28712,3 +28712,38 @@ name = "Blodapelsin Sicilien 1kg"
 canonical = "citrusfrukter"
 ingredient_index = 0
 must_match_keyword = "citrusfrukter"
+
+[[fixtures]]
+id = "keyword_extra_parent_tomat_smatomat_positive"
+policy_ref = "keyword_extra_parent_tomat_family"
+source_ref = "current_review:keyword_extra_parent_tomat_routing"
+recipe_name = "Tomatsallad"
+ingredients = ["400 g små tomater"]
+expected = 1
+
+[fixtures.offer]
+name = "Cocktailtomater 250g"
+category = "vegetables"
+
+[[fixtures.expected_matches]]
+canonical = "tomat"
+ingredient_index = 0
+must_match_keyword = "tomat"
+
+[[fixtures]]
+id = "keyword_extra_parent_smatomat_snacktomater_positive"
+policy_ref = "keyword_extra_parent_smatomat_family"
+source_ref = "current_review:keyword_extra_parent_smatomat_routing"
+recipe_name = "Tomatsallad"
+ingredients = ["400 g småtomater"]
+expected = 1
+
+[fixtures.offer]
+name = "Snacktomater 250g"
+category = "vegetables"
+
+[[fixtures.expected_matches]]
+canonical = "småtomat"
+ingredient_index = 0
+must_match_keyword = "småtomat"
+

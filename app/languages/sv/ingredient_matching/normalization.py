@@ -771,6 +771,7 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('gulartor', 'gulaärtor'),
     ('sju kryddor', 'sjukryddor'),
     ('pak choi', 'pakchoi'),
+    ('pak choy', 'pakchoy'),  # English/UK spelling; keyword_synonym then rolls to pakchoi
     ('bananschalottenlök', 'schalottenlök'),
     ('bananschalottenlökar', 'schalottenlök'),
     ('bananscharlottenlök', 'schalottenlök'),
