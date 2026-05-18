@@ -10185,6 +10185,22 @@ test("isbergssalladshuvud matches isbergssallat spelling variant",
 test("isbergssallatshuvud matches isbergssallad spelling variant",
      match("Isbergssallad 1-p Klass 1", "1 isbergssallatshuvud", "vegetables"), "isbergssallad")
 test("grönsallad still matches hjärtsallad", match("Hjärtsallad Eko 180g", "grönsallad", "fruit"), "grönsallad")
+
+# Q54-4: "kokta gröna linser i förp" — 380g tetra-pak across brands is the
+# standard ready-to-serve format; 400g+ is dry. Distinguish by weight signal so
+# tetra-pak offers match cooked-lentil recipes while dry-bulk packs do not.
+test("kokta linser matches 380g tetra-pak ICA",
+     match("Gröna linser 380g ICA", "2 förp kokta gröna linser (à 380 g)", "pantry"), "linser")
+test("kokta linser matches 380g tetra-pak Zeta",
+     match("Gröna linser Ekologisk 380g Zeta", "2 förp kokta gröna linser (à 380 g)", "pantry"), "linser")
+test("kokta linser does NOT match 400g dry pack",
+     match("Gröna linser 400g KRAV ICA I love eco", "2 förp kokta gröna linser (à 380 g)", "pantry"), None)
+test("kokta linser does NOT match 900g dry bulk Forum",
+     match("Gröna linser 900g Forum", "2 förp kokta gröna linser (à 380 g)", "pantry"), None)
+test("kokta linser does NOT match 800g dry bulk ICA Basic",
+     match("Röda Linser 800g ICA Basic", "2 förp kokta röda linser", "pantry"), None)
+test("dry linser ingredient still matches dry product",
+     match("Gröna linser 900g Forum", "200 g torra gröna linser", "pantry"), "linser")
 # snabbkaffe: Nescafé Gold is plain instant coffee
 test("snabbkaffe matches Nescafé Gold", match("Nescafé Gold 200g", "snabbkaffe", "beverages"), "snabbkaffe")
 test("snabbkaffe matches Nescafe Classic", match("Nescafe Classic 100g", "snabbkaffe", "beverages"), "snabbkaffe")

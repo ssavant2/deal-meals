@@ -769,6 +769,12 @@ _BLOCKED_READY_LENTIL_PRODUCT_CUES = frozenset({
     'torkad', 'torkade',
     'delad', 'delade',
     'fryst', 'frysta',
+    # Weight signals for dry bulk packs: 400g, 500g, 800g, 900g (1kg also seen)
+    '400g', '400 g',
+    '500g', '500 g',
+    '800g', '800 g',
+    '900g', '900 g',
+    '1kg', '1 kg',
 })
 _READY_PACKAGED_LENTIL_PRODUCT_CUES = frozenset({
     'kokt', 'kokta',
@@ -776,6 +782,9 @@ _READY_PACKAGED_LENTIL_PRODUCT_CUES = frozenset({
     'färdigkokt', 'fardigkokt',
     'färdigkokta', 'fardigkokta',
     'burk', 'tetra',
+    # 380g is the standard tetra-pak weight for cooked/ready-to-serve lentils
+    # across brands (ICA, Zeta, Garant, GoGreen). Stefan-confirmed convention.
+    '380g', '380 g',
 })
 _DRY_LENTIL_INGREDIENT_CUES = frozenset({
     'torr', 'torra',
