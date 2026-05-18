@@ -714,24 +714,41 @@ fallback/debug form.
 
 ### Registry Entries
 
-If the change uses the term registry, edit the relevant TOML file under:
+If the change uses a live term-registry rule surface, prefer the matching
+authoring command:
+
+```bash
+./bin/dm matcher add keyword-synonym ...
+./bin/dm matcher add keyword-extra-parent ...
+./bin/dm matcher add ingredient-parent ...
+./bin/dm matcher add offer-extra-keyword ...
+./bin/dm matcher add ingredient-routing-parent ...
+./bin/dm matcher add parent-match-only ...
+./bin/dm matcher add recipe-routing-helper ...
+./bin/dm matcher add no-match-policy ...
+./bin/dm matcher add extraction-helper ...
+```
+
+Use `./bin/dm matcher guide <shape>` when unsure. Manual TOML editing is still
+valid for careful fallback/debug work, inactivation/removal, or changes outside
+the supported authoring shapes. Those files live under:
 
 ```text
 app/languages/sv/ingredient_matching/term_registry/entries/
 ```
 
-Common files:
+Common files and their normal authoring path:
 
-- `extraction_helper.toml`
-- `ingredient_parent.toml`
-- `ingredient_routing_parent.toml`
-- `keyword_extra_parent.toml`
-- `keyword_synonym.toml`
-- `match_bridge.toml`
-- `no_match_policy.toml`
-- `offer_extra_keyword.toml`
-- `parent_match_only.toml`
-- `recipe_routing_helper.toml`
+- `extraction_helper.toml` — `dm matcher add extraction-helper`
+- `ingredient_parent.toml` — `dm matcher add ingredient-parent`
+- `ingredient_routing_parent.toml` — `dm matcher add ingredient-routing-parent`
+- `keyword_extra_parent.toml` — `dm matcher add keyword-extra-parent`
+- `keyword_synonym.toml` — `dm matcher add keyword-synonym`
+- `match_bridge.toml` — staged/declarative-only; see the match_bridge callout
+- `no_match_policy.toml` — `dm matcher add no-match-policy`
+- `offer_extra_keyword.toml` — `dm matcher add offer-extra-keyword`
+- `parent_match_only.toml` — `dm matcher add parent-match-only`
+- `recipe_routing_helper.toml` — `dm matcher add recipe-routing-helper`
 
 Registry entries should include coverage rows and examples that describe the
 same decision as the fixture. For registry-owned `MatchBridge` and

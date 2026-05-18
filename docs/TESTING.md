@@ -150,14 +150,44 @@ regression contract.
 The corresponding JSON files under `app/languages/sv/matcher_contracts/` are
 generated, committed contract inputs for existing readers and reports. Runtime
 code does not update them. Dev maintenance writes the TOML sources and
-regenerates JSON with
-`support_checks/generate_matcher_contract_json_from_toml_sources.py --write`.
-`support_checks/refresh_matcher_rule_inventory_line_refs.py --write` also
-updates the inventory TOML source and regenerates its generated JSON, so it
-should not be run against a read-only production filesystem.
+regenerates JSON with:
+
+```bash
+./bin/dm matcher regen --what json
+```
+
+Refresh moved inventory anchors with:
+
+```bash
+./bin/dm matcher refresh-line-refs
+```
+
+`refresh-line-refs` updates the inventory TOML source and regenerates its
+generated JSON, so it should not be run against a read-only production
+filesystem. The raw support-check scripts remain fallback/debug forms.
 
 The Swedish term registry is now the vocabulary coverage surface for matcher
-terms. After adding or changing a registry TOML entry, run:
+terms. For live registry rule surfaces, prefer `dm matcher add`:
+
+```bash
+./bin/dm matcher add keyword-synonym ...
+./bin/dm matcher add keyword-extra-parent ...
+./bin/dm matcher add ingredient-parent ...
+./bin/dm matcher add offer-extra-keyword ...
+./bin/dm matcher add ingredient-routing-parent ...
+./bin/dm matcher add parent-match-only ...
+./bin/dm matcher add recipe-routing-helper ...
+./bin/dm matcher add no-match-policy ...
+./bin/dm matcher add extraction-helper ...
+```
+
+Use `./bin/dm matcher guide <shape>` when the right authoring surface is
+unclear. Python runtime tables such as PNB/FPB/GPB/KSBC remain manual edits plus
+`./bin/dm matcher gates --track A|B`.
+
+After adding or changing registry TOML manually, run `./bin/dm matcher gates`
+for the chosen track. For targeted registry-only troubleshooting, the underlying
+checks are still:
 
 ```bash
 docker compose exec -T -w /app web python support_checks/run_term_registry_contract_checks.py --language sv
