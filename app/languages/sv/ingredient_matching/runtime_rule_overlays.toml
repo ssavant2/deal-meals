@@ -22,6 +22,8 @@
 #   [[compound_protection_updates]]
 #   [[specialty_qualifiers]]
 #   [[qualifier_equivalents]]
+#   [[product_name_substitutions]]
+#   [[secondary_ingredient_patterns]]
 
 [[product_name_blockers]]
 keyword = "rom"

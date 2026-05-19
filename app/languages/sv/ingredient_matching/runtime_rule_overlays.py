@@ -43,6 +43,8 @@ class RuntimeRuleOverlays:
     specialty_qualifier_updates: Dict[str, Set[str]]
     specialty_bidirectional_updates: Dict[str, Set[str]]
     qualifier_equivalent_updates: Dict[str, Set[str]]
+    product_name_substitutions: tuple[tuple[frozenset[str], str, str], ...]
+    secondary_ingredient_patterns: Dict[str, tuple[Set[str], Set[str]]]
 
 
 _SECTION_VALUE_FIELDS = {
@@ -107,6 +109,12 @@ _ALLOWED_SPECIALTY_ENTRY_KEYS = frozenset({
 })
 _ALLOWED_QUALIFIER_EQUIVALENT_ENTRY_KEYS = frozenset({
     "id", "status", "qualifier", "equivalents", "reason", "inactive_reason",
+})
+_ALLOWED_PRODUCT_NAME_SUBSTITUTION_ENTRY_KEYS = frozenset({
+    "id", "status", "required_words", "old_keyword", "new_keyword", "reason", "inactive_reason",
+})
+_ALLOWED_SECONDARY_INGREDIENT_PATTERN_ENTRY_KEYS = frozenset({
+    "id", "status", "keyword", "blockers", "exceptions", "reason", "inactive_reason",
 })
 _VALID_STATUSES = frozenset({"active", "inactive"})
 
@@ -702,6 +710,132 @@ def _load_qualifier_equivalent_updates(
     return updates
 
 
+def _load_product_name_substitutions(
+    payload: dict[str, Any],
+    *,
+    path: Path,
+    seen_ids: set[str],
+    seen_effective_updates: set[tuple[frozenset[str], str, str]],
+) -> tuple[tuple[frozenset[str], str, str], ...]:
+    section = "product_name_substitutions"
+    raw_entries = payload.get(section, [])
+    if not isinstance(raw_entries, list):
+        raise RuntimeRuleOverlayError(f"{path}:{section} must be a list of tables")
+    updates: list[tuple[frozenset[str], str, str]] = []
+    for index, entry in enumerate(raw_entries, start=1):
+        if not isinstance(entry, dict):
+            raise RuntimeRuleOverlayError(f"{_path_label(path, section, index)} must be a table")
+        unknown_keys = sorted(set(entry) - _ALLOWED_PRODUCT_NAME_SUBSTITUTION_ENTRY_KEYS)
+        if unknown_keys:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} has unknown keys: {', '.join(unknown_keys)}"
+            )
+        missing_keys = sorted({"required_words", "old_keyword", "new_keyword", "reason"} - set(entry))
+        if missing_keys:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} is missing keys: {', '.join(missing_keys)}"
+            )
+        status = _entry_status(entry, path=path, section=section, index=index)
+        entry_id = entry.get("id")
+        if entry_id is not None:
+            normalized_id = _require_string(entry_id, path=path, section=section, index=index, field="id")
+            if normalized_id in seen_ids:
+                raise RuntimeRuleOverlayError(f"{_path_label(path, section, index)} has duplicate id: {normalized_id}")
+            seen_ids.add(normalized_id)
+        required_words = frozenset(
+            _normalize_text(item)
+            for item in _require_string_list(
+                entry["required_words"],
+                path=path,
+                section=section,
+                index=index,
+                field="required_words",
+            )
+        )
+        old_keyword = _normalize_text(_require_string(entry["old_keyword"], path=path, section=section, index=index, field="old_keyword"))
+        new_keyword = _normalize_text(_require_string(entry["new_keyword"], path=path, section=section, index=index, field="new_keyword"))
+        _require_string(entry["reason"], path=path, section=section, index=index, field="reason")
+        if status == "inactive":
+            continue
+        effective_update = (required_words, old_keyword, new_keyword)
+        if effective_update in seen_effective_updates:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} duplicates active product substitution"
+            )
+        seen_effective_updates.add(effective_update)
+        updates.append(effective_update)
+    return tuple(updates)
+
+
+def _load_secondary_ingredient_patterns(
+    payload: dict[str, Any],
+    *,
+    path: Path,
+    seen_ids: set[str],
+    seen_effective_updates: set[tuple[str, str]],
+) -> Dict[str, tuple[Set[str], Set[str]]]:
+    section = "secondary_ingredient_patterns"
+    raw_entries = payload.get(section, [])
+    if not isinstance(raw_entries, list):
+        raise RuntimeRuleOverlayError(f"{path}:{section} must be a list of tables")
+    updates: Dict[str, tuple[Set[str], Set[str]]] = {}
+    for index, entry in enumerate(raw_entries, start=1):
+        if not isinstance(entry, dict):
+            raise RuntimeRuleOverlayError(f"{_path_label(path, section, index)} must be a table")
+        unknown_keys = sorted(set(entry) - _ALLOWED_SECONDARY_INGREDIENT_PATTERN_ENTRY_KEYS)
+        if unknown_keys:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} has unknown keys: {', '.join(unknown_keys)}"
+            )
+        missing_keys = sorted({"keyword", "blockers", "reason"} - set(entry))
+        if missing_keys:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} is missing keys: {', '.join(missing_keys)}"
+            )
+        status = _entry_status(entry, path=path, section=section, index=index)
+        entry_id = entry.get("id")
+        if entry_id is not None:
+            normalized_id = _require_string(entry_id, path=path, section=section, index=index, field="id")
+            if normalized_id in seen_ids:
+                raise RuntimeRuleOverlayError(f"{_path_label(path, section, index)} has duplicate id: {normalized_id}")
+            seen_ids.add(normalized_id)
+        keyword = _normalize_text(_require_string(entry["keyword"], path=path, section=section, index=index, field="keyword"))
+        blockers = {
+            _normalize_text(item)
+            for item in _require_string_list(
+                entry["blockers"],
+                path=path,
+                section=section,
+                index=index,
+                field="blockers",
+            )
+        }
+        exceptions = {
+            _normalize_text(item)
+            for item in _require_string_list(
+                entry.get("exceptions", []),
+                path=path,
+                section=section,
+                index=index,
+                field="exceptions",
+            )
+        } if "exceptions" in entry else set()
+        _require_string(entry["reason"], path=path, section=section, index=index, field="reason")
+        if status == "inactive":
+            continue
+        target_blockers, target_exceptions = updates.setdefault(keyword, (set(), set()))
+        for blocker in blockers:
+            effective_update = (keyword, blocker)
+            if effective_update in seen_effective_updates:
+                raise RuntimeRuleOverlayError(
+                    f"{_path_label(path, section, index)} duplicates active {keyword!r} blocker {blocker!r}"
+                )
+            seen_effective_updates.add(effective_update)
+            target_blockers.add(blocker)
+        target_exceptions.update(exceptions)
+    return updates
+
+
 def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays:
     payload = _load_toml(path)
     known_sections = (
@@ -712,6 +846,7 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
         | set(_CONTEXT_SECTION_FIELDS)
         | {"compound_protection_updates"}
         | {"specialty_qualifiers", "qualifier_equivalents"}
+        | {"product_name_substitutions", "secondary_ingredient_patterns"}
     )
     unknown_sections = sorted(set(payload) - known_sections)
     if unknown_sections:
@@ -725,6 +860,8 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
     seen_effective_compound_updates: set[tuple[str, str]] = set()
     seen_effective_specialty_updates: set[tuple[str, str]] = set()
     seen_effective_equivalent_updates: set[tuple[str, str]] = set()
+    seen_effective_substitutions: set[tuple[frozenset[str], str, str]] = set()
+    seen_effective_secondary_patterns: set[tuple[str, str]] = set()
     specialty_updates, specialty_bidirectional_updates = _load_specialty_qualifier_updates(
         payload,
         path=path,
@@ -830,6 +967,18 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
             seen_ids=seen_ids,
             seen_effective_updates=seen_effective_equivalent_updates,
         ),
+        product_name_substitutions=_load_product_name_substitutions(
+            payload,
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_updates=seen_effective_substitutions,
+        ),
+        secondary_ingredient_patterns=_load_secondary_ingredient_patterns(
+            payload,
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_updates=seen_effective_secondary_patterns,
+        ),
     )
 
 
@@ -851,3 +1000,5 @@ COMPOUND_PROTECTION_CLI_UPDATES = _OVERLAYS.compound_protection_updates
 SPECIALTY_QUALIFIER_CLI_UPDATES = _OVERLAYS.specialty_qualifier_updates
 SPECIALTY_BIDIRECTIONAL_CLI_UPDATES = _OVERLAYS.specialty_bidirectional_updates
 QUALIFIER_EQUIVALENT_CLI_UPDATES = _OVERLAYS.qualifier_equivalent_updates
+PRODUCT_NAME_SUBSTITUTION_CLI_UPDATES = _OVERLAYS.product_name_substitutions
+SECONDARY_INGREDIENT_PATTERN_CLI_UPDATES = _OVERLAYS.secondary_ingredient_patterns

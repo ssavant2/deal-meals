@@ -390,6 +390,8 @@ _RUNTIME_OVERLAY_SECTION_ORDER = (
     *(surface.section for surface in RUNTIME_CONTEXT_SURFACES.values()),
     *(surface.section for surface in RUNTIME_COMPOUND_SURFACES.values()),
     *(surface.section for surface in RUNTIME_SPECIALTY_SURFACES.values()),
+    "product_name_substitutions",
+    "secondary_ingredient_patterns",
 )
 
 
@@ -603,6 +605,24 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "Use when ingredient wording names a form/carrier that should not match a plain product.",
         ),
     ),
+    "product-name-substitution": MatcherGuide(
+        label="product-name-substitution",
+        status="supported by dm matcher add",
+        summary="Rewrite an extracted product keyword when required product words are present.",
+        steps=(
+            "Run: ./bin/dm matcher add product-name-substitution --required-words <w1,w2> --old-keyword <old> --new-keyword <new> --reason \"<why>\"",
+            "Use when product naming implies a more specific canonical keyword than extraction would otherwise keep.",
+        ),
+    ),
+    "secondary-ingredient-pattern": MatcherGuide(
+        label="secondary-ingredient-pattern",
+        status="supported by dm matcher add",
+        summary="Block a matched keyword when product text contains secondary-ingredient blockers.",
+        steps=(
+            "Run: ./bin/dm matcher add secondary-ingredient-pattern <keyword> --blockers <w1,w2> [--exceptions <w3>] --reason \"<why>\"",
+            "Use when the product is primarily something else and the matched keyword is only a secondary ingredient.",
+        ),
+    ),
     "cuisine-context": MatcherGuide(
         label="cuisine-context",
         status="supported by dm matcher add",
@@ -709,6 +729,8 @@ GUIDE_ALIASES = {
     "ingredient_requires_product_context": "ingredient-requires-product-context",
     "keyword_suppressed_by_context": "ksbc",
     "keyword-suppressed-by-context": "ksbc",
+    "product_name_substitution": "product-name-substitution",
+    "secondary_ingredient_pattern": "secondary-ingredient-pattern",
     "compound_strict": "compound-protection",
     "compound_protection": "compound-protection",
     "specialty": "specialty-qualifier",
@@ -2475,6 +2497,43 @@ def _runtime_specialty_entry_block(surface: RuntimeSpecialtySurface, entry: dict
     return "\n".join(lines)
 
 
+def _runtime_product_substitution_entry_block(entry: dict[str, Any]) -> str:
+    lines = ["[[product_name_substitutions]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.extend([
+        f"required_words = {_toml_array(list(entry['required_words']))}",
+        f"old_keyword = {_toml_string(str(entry['old_keyword']))}",
+        f"new_keyword = {_toml_string(str(entry['new_keyword']))}",
+        f"reason = {_toml_string(str(entry['reason']))}",
+    ])
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _runtime_secondary_pattern_entry_block(entry: dict[str, Any]) -> str:
+    lines = ["[[secondary_ingredient_patterns]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.extend([
+        f"keyword = {_toml_string(str(entry['keyword']))}",
+        f"blockers = {_toml_array(list(entry['blockers']))}",
+    ])
+    if entry.get("exceptions"):
+        lines.append(f"exceptions = {_toml_array(list(entry['exceptions']))}")
+    lines.append(f"reason = {_toml_string(str(entry['reason']))}")
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str:
     lines = [
         "# CLI-managed Track A runtime-rule overlays.",
@@ -2501,6 +2560,8 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
         "#   [[compound_protection_updates]]",
         "#   [[specialty_qualifiers]]",
         "#   [[qualifier_equivalents]]",
+        "#   [[product_name_substitutions]]",
+        "#   [[secondary_ingredient_patterns]]",
         "",
     ]
     mapping_by_section = {surface.section: surface for surface in RUNTIME_OVERLAY_SURFACES.values()}
@@ -2525,6 +2586,10 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
                 lines.append(_runtime_compound_entry_block(compound_by_section[section], entry).rstrip())
             elif section in specialty_by_section:
                 lines.append(_runtime_specialty_entry_block(specialty_by_section[section], entry).rstrip())
+            elif section == "product_name_substitutions":
+                lines.append(_runtime_product_substitution_entry_block(entry).rstrip())
+            elif section == "secondary_ingredient_patterns":
+                lines.append(_runtime_secondary_pattern_entry_block(entry).rstrip())
             lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
@@ -2798,6 +2863,96 @@ def _runtime_specialty_matching_entries(
             matches.append(entry)
             continue
         if selector_norm in {_runtime_rule_normalize_text(value) for value in values}:
+            matches.append(entry)
+    return matches
+
+
+def _runtime_product_substitution_entry_id(required_words: tuple[str, ...], old_keyword: str, new_keyword: str) -> str:
+    required_slug = "_".join(_slug(word) for word in required_words[:3])
+    return f"runtime_product_name_substitution_{_slug(old_keyword)}_{_slug(new_keyword)}_{required_slug}"
+
+
+def _runtime_product_substitution_entry_label(entry: dict[str, Any]) -> str:
+    required_words = tuple(str(word) for word in entry.get("required_words", []))
+    old_keyword = str(entry.get("old_keyword", ""))
+    new_keyword = str(entry.get("new_keyword", ""))
+    entry_id = str(entry.get("id") or _runtime_product_substitution_entry_id(required_words, old_keyword, new_keyword))
+    status = str(entry.get("status", "active"))
+    return f"{entry_id}\t{status}\tproduct-name-substitution\t{sorted(required_words)}\t{old_keyword} -> {new_keyword}"
+
+
+def _runtime_product_substitution_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get("product_name_substitutions", []):
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        required_words = tuple(str(word) for word in entry.get("required_words", []))
+        old_keyword = str(entry.get("old_keyword", ""))
+        new_keyword = str(entry.get("new_keyword", ""))
+        entry_id = str(entry.get("id") or _runtime_product_substitution_entry_id(required_words, old_keyword, new_keyword))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id:
+            matches.append(entry)
+            continue
+        searchable = {
+            _runtime_rule_normalize_text(old_keyword),
+            _runtime_rule_normalize_text(new_keyword),
+            *(_runtime_rule_normalize_text(word) for word in required_words),
+        }
+        if selector_norm in searchable:
+            matches.append(entry)
+    return matches
+
+
+def _runtime_secondary_pattern_entry_id(keyword: str) -> str:
+    return f"runtime_secondary_ingredient_pattern_{_slug(keyword)}"
+
+
+def _runtime_secondary_pattern_entry_label(entry: dict[str, Any]) -> str:
+    keyword = str(entry.get("keyword", ""))
+    blockers = ", ".join(str(value) for value in entry.get("blockers", []))
+    exceptions = ", ".join(str(value) for value in entry.get("exceptions", []))
+    entry_id = str(entry.get("id") or _runtime_secondary_pattern_entry_id(keyword))
+    status = str(entry.get("status", "active"))
+    suffix = f"\texcept {exceptions}" if exceptions else ""
+    return f"{entry_id}\t{status}\tsecondary-ingredient-pattern\t{keyword} blocks {blockers}{suffix}"
+
+
+def _runtime_secondary_pattern_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get("secondary_ingredient_patterns", []):
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        keyword = str(entry.get("keyword", ""))
+        blockers = tuple(str(value) for value in entry.get("blockers", []))
+        exceptions = tuple(str(value) for value in entry.get("exceptions", []))
+        entry_id = str(entry.get("id") or _runtime_secondary_pattern_entry_id(keyword))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id:
+            matches.append(entry)
+            continue
+        searchable = {
+            _runtime_rule_normalize_text(keyword),
+            *(_runtime_rule_normalize_text(value) for value in blockers),
+            *(_runtime_rule_normalize_text(value) for value in exceptions),
+        }
+        if selector_norm in searchable:
             matches.append(entry)
     return matches
 
@@ -3506,6 +3661,159 @@ def _append_runtime_specialty_sanity_stub(
             lines.extend([
                 f"test({_toml_string('specialty bidirectional ' + normalized_key + ' has ' + normalized_value)},",
                 f"     {_toml_string(normalized_value)} in BIDIRECTIONAL_PER_KEYWORD.get({_toml_string(normalized_key)}, set()), True)",
+            ])
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+def _append_product_substitution_entry(
+    *,
+    paths: MatcherPaths,
+    required_words: tuple[str, ...],
+    old_keyword: str,
+    new_keyword: str,
+    reason: str,
+    dry_run: bool,
+) -> str:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_required = tuple(_runtime_rule_normalize_text(word) for word in required_words)
+    normalized_old = _runtime_rule_normalize_text(old_keyword)
+    normalized_new = _runtime_rule_normalize_text(new_keyword)
+    required_set = set(normalized_required)
+    for entry in sections.get("product_name_substitutions", []):
+        if not _runtime_overlay_entry_is_active(entry):
+            continue
+        if (
+            {_runtime_rule_normalize_text(str(word)) for word in entry.get("required_words", [])} == required_set
+            and _runtime_rule_normalize_text(str(entry.get("old_keyword", ""))) == normalized_old
+            and _runtime_rule_normalize_text(str(entry.get("new_keyword", ""))) == normalized_new
+        ):
+            raise typer.BadParameter("product-name-substitution already contains this active rule")
+    entry = {
+        "id": _runtime_product_substitution_entry_id(normalized_required, normalized_old, normalized_new),
+        "status": "active",
+        "required_words": list(normalized_required),
+        "old_keyword": normalized_old,
+        "new_keyword": normalized_new,
+        "reason": reason.strip(),
+    }
+    preview = _runtime_product_substitution_entry_block(entry)
+    if dry_run:
+        return preview
+    sections.setdefault("product_name_substitutions", []).append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_product_substitution_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    required_words: tuple[str, ...],
+    old_keyword: str,
+    new_keyword: str,
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    normalized_required = tuple(_runtime_rule_normalize_text(word) for word in required_words)
+    normalized_old = _runtime_rule_normalize_text(old_keyword)
+    normalized_new = _runtime_rule_normalize_text(new_keyword)
+    lines = [
+        "",
+        f"# {policy_ref}: generated by dm matcher add product-name-substitution",
+        "from languages.sv.ingredient_matching.match_filters import PRODUCT_NAME_SUBSTITUTIONS",
+        f"test({_toml_string('product-name-substitution ' + normalized_old + ' -> ' + normalized_new)},",
+        "     any(",
+        f"         set(required_words) == set({_toml_array(list(normalized_required))})",
+        f"         and old_keyword == {_toml_string(normalized_old)}",
+        f"         and new_keyword == {_toml_string(normalized_new)}",
+        "         for required_words, old_keyword, new_keyword in PRODUCT_NAME_SUBSTITUTIONS",
+        "     ), True)",
+    ]
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+def _append_secondary_pattern_entry(
+    *,
+    paths: MatcherPaths,
+    keyword: str,
+    blockers: tuple[str, ...],
+    exceptions: tuple[str, ...],
+    reason: str,
+    dry_run: bool,
+) -> str:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    normalized_blockers = tuple(_runtime_rule_normalize_text(blocker) for blocker in blockers)
+    normalized_exceptions = tuple(_runtime_rule_normalize_text(exception) for exception in exceptions)
+    entry: dict[str, Any] | None = None
+    existing_blockers: set[str] = set()
+    for candidate in sections.get("secondary_ingredient_patterns", []):
+        if _runtime_rule_normalize_text(str(candidate.get("keyword", ""))) != normalized_keyword:
+            continue
+        if _runtime_overlay_entry_is_active(candidate):
+            existing_blockers.update(_runtime_rule_normalize_text(str(blocker)) for blocker in candidate.get("blockers", []))
+        if entry is None:
+            entry = candidate
+    duplicates = sorted(set(normalized_blockers) & existing_blockers)
+    if duplicates:
+        raise typer.BadParameter(f"secondary-ingredient-pattern already contains blockers for {keyword}: {', '.join(duplicates)}")
+    if entry is None:
+        entry = {
+            "id": _runtime_secondary_pattern_entry_id(normalized_keyword),
+            "status": "active",
+            "keyword": normalized_keyword,
+            "blockers": list(normalized_blockers),
+            "exceptions": list(normalized_exceptions),
+            "reason": reason.strip(),
+        }
+    else:
+        entry["id"] = str(entry.get("id") or _runtime_secondary_pattern_entry_id(normalized_keyword))
+        entry["status"] = "active"
+        entry.pop("inactive_reason", None)
+        entry["keyword"] = normalized_keyword
+        entry["blockers"] = list(dict.fromkeys([*entry.get("blockers", []), *normalized_blockers]))
+        entry["exceptions"] = list(dict.fromkeys([*entry.get("exceptions", []), *normalized_exceptions]))
+        existing_reason = str(entry.get("reason", "")).strip()
+        if reason.strip() and reason.strip() not in existing_reason:
+            entry["reason"] = f"{existing_reason}; {reason.strip()}" if existing_reason else reason.strip()
+    preview = _runtime_secondary_pattern_entry_block(entry)
+    if dry_run:
+        return preview
+    if entry not in sections.setdefault("secondary_ingredient_patterns", []):
+        sections["secondary_ingredient_patterns"].append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_secondary_pattern_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    keyword: str,
+    blockers: tuple[str, ...],
+    exceptions: tuple[str, ...],
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    lines = [
+        "",
+        f"# {policy_ref}: generated by dm matcher add secondary-ingredient-pattern",
+        "from languages.sv.ingredient_matching.match_filters import check_secondary_ingredient_patterns",
+    ]
+    for blocker in blockers:
+        normalized_blocker = _runtime_rule_normalize_text(blocker)
+        lines.extend([
+            f"test({_toml_string('secondary pattern blocks ' + normalized_keyword + ' via ' + normalized_blocker)},",
+            f"     check_secondary_ingredient_patterns({_toml_string(normalized_blocker)}, {_toml_string(normalized_keyword)}, {_toml_string(normalized_keyword)}), False)",
+        ])
+        for exception in exceptions:
+            normalized_exception = _runtime_rule_normalize_text(exception)
+            lines.extend([
+                f"test({_toml_string('secondary pattern allows ' + normalized_keyword + ' via ' + normalized_exception)},",
+                f"     check_secondary_ingredient_patterns({_toml_string(normalized_blocker + ' ' + normalized_exception)}, {_toml_string(normalized_keyword)}, {_toml_string(normalized_keyword)}), True)",
             ])
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
@@ -4851,6 +5159,143 @@ def add_context_word_exemption(
     raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
 
 
+@matcher_add_app.command("product-name-substitution")
+def add_product_name_substitution(
+    required_words_csv: Annotated[
+        str,
+        typer.Option("--required-words", help="Comma-separated words that must appear in the product name."),
+    ],
+    old_keyword: Annotated[str, typer.Option("--old-keyword", help="Keyword to replace when required words match.")],
+    new_keyword: Annotated[str, typer.Option("--new-keyword", help="Replacement keyword.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why this product-name substitution is needed.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    required_words = _split_csv(required_words_csv, label="--required-words")
+    if not old_keyword.strip():
+        raise typer.BadParameter("--old-keyword must not be empty")
+    if not new_keyword.strip():
+        raise typer.BadParameter("--new-keyword must not be empty")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+    normalized_old = _runtime_rule_normalize_text(old_keyword)
+    normalized_new = _runtime_rule_normalize_text(new_keyword)
+    policy_ref = policy_ref or f"runtime_product_name_substitution_{_slug(normalized_old)}_{_slug(normalized_new)}"
+    overlay_preview = _append_product_substitution_entry(
+        paths=paths,
+        required_words=required_words,
+        old_keyword=old_keyword,
+        new_keyword=new_keyword,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_product_substitution_sanity_stub(
+            paths=paths,
+            required_words=required_words,
+            old_keyword=old_keyword,
+            new_keyword=new_keyword,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+    typer.echo(f"Generated product_name_substitution rule: {policy_ref}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+@matcher_add_app.command("secondary-ingredient-pattern")
+def add_secondary_ingredient_pattern(
+    keyword: Annotated[str, typer.Argument(help="Matched keyword to block when product contains blockers.")],
+    blockers_csv: Annotated[str, typer.Option("--blockers", help="Comma-separated product-side blockers.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why this secondary pattern is needed.")],
+    exceptions_csv: Annotated[
+        str | None,
+        typer.Option("--exceptions", help="Comma-separated product-side exceptions that keep the match allowed."),
+    ] = None,
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    keyword = keyword.strip()
+    blockers = _split_csv(blockers_csv, label="--blockers")
+    exceptions = _split_csv(exceptions_csv, label="--exceptions") if exceptions_csv else ()
+    if not keyword:
+        raise typer.BadParameter("keyword must not be empty")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    policy_ref = policy_ref or f"runtime_secondary_ingredient_pattern_{_slug(normalized_keyword)}"
+    overlay_preview = _append_secondary_pattern_entry(
+        paths=paths,
+        keyword=keyword,
+        blockers=blockers,
+        exceptions=exceptions,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_secondary_pattern_sanity_stub(
+            paths=paths,
+            keyword=keyword,
+            blockers=blockers,
+            exceptions=exceptions,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+    typer.echo(f"Generated secondary_ingredient_pattern rule: {policy_ref}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
 @matcher_add_app.command("compound-protection")
 def add_compound_protection(
     keywords_csv: Annotated[str, typer.Option("--keywords", help="Comma-separated keywords to protect.")],
@@ -5875,6 +6320,69 @@ def matcher_list(
             typer.echo("No entries found.")
         return
 
+    if surface_key == "product-name-substitution":
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_product_substitution_matching_entries(
+            sections,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(
+                        entry.get("id")
+                        or _runtime_product_substitution_entry_id(
+                            tuple(str(word) for word in entry.get("required_words", [])),
+                            str(entry.get("old_keyword", "")),
+                            str(entry.get("new_keyword", "")),
+                        )
+                    ),
+                    "status": str(entry.get("status", "active")),
+                    "surface": "product-name-substitution",
+                    "required_words": list(entry.get("required_words", [])),
+                    "old_keyword": str(entry.get("old_keyword", "")),
+                    "new_keyword": str(entry.get("new_keyword", "")),
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_product_substitution_entry_label(entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
+    if surface_key == "secondary-ingredient-pattern":
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_secondary_pattern_matching_entries(
+            sections,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(entry.get("id") or _runtime_secondary_pattern_entry_id(str(entry.get("keyword", "")))),
+                    "status": str(entry.get("status", "active")),
+                    "surface": "secondary-ingredient-pattern",
+                    "keyword": str(entry.get("keyword", "")),
+                    "blockers": list(entry.get("blockers", [])),
+                    "exceptions": list(entry.get("exceptions", [])),
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_secondary_pattern_entry_label(entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
     surface, path = _registry_surface_file(paths, surface_name)
     matches = _registry_matching_records(
         _registry_entry_records(surface, path),
@@ -6123,6 +6631,66 @@ def matcher_inactivate(
         entry["status"] = "inactive"
         entry["inactive_reason"] = reason.strip()
         preview = _runtime_specialty_entry_block(surface, entry)
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    if surface_key == "product-name-substitution":
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_product_substitution_matching_entries(
+            sections,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_product_substitution_entry_label(entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one product-name-substitution entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        required_words = tuple(str(word) for word in entry.get("required_words", []))
+        entry["id"] = str(
+            entry.get("id")
+            or _runtime_product_substitution_entry_id(
+                required_words,
+                str(entry.get("old_keyword", "")),
+                str(entry.get("new_keyword", "")),
+            )
+        )
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_product_substitution_entry_block(entry)
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    if surface_key == "secondary-ingredient-pattern":
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_secondary_pattern_matching_entries(
+            sections,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_secondary_pattern_entry_label(entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one secondary-ingredient-pattern entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        entry["id"] = str(entry.get("id") or _runtime_secondary_pattern_entry_id(str(entry.get("keyword", ""))))
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_secondary_pattern_entry_block(entry)
         if dry_run:
             typer.echo(preview)
             return

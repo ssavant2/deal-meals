@@ -15,6 +15,7 @@ except ModuleNotFoundError:
 
 from .blocker_data import FALSE_POSITIVE_BLOCKERS
 from .compound_text import _WORD_PATTERN
+from .runtime_rule_overlays import PRODUCT_NAME_SUBSTITUTION_CLI_UPDATES, SECONDARY_INGREDIENT_PATTERN_CLI_UPDATES
 
 
 _SECONDARY_INGREDIENT_PATTERNS_RAW: Dict[str, tuple] = {
@@ -148,6 +149,10 @@ PRODUCT_NAME_SUBSTITUTIONS: List[tuple] = [
     ({'bbq', 'sauce'}, 'sauce', 'bbqsås'),
     ({'bbq', 'glaze'}, 'glaze', 'bbqsås'),
 ]
+PRODUCT_NAME_SUBSTITUTIONS.extend(
+    (set(required_words), old_keyword, new_keyword)
+    for required_words, old_keyword, new_keyword in PRODUCT_NAME_SUBSTITUTION_CLI_UPDATES
+)
 
 
 SECONDARY_INGREDIENT_PATTERNS: Dict[str, tuple] = {
@@ -157,6 +162,10 @@ SECONDARY_INGREDIENT_PATTERNS: Dict[str, tuple] = {
     )
     for k, (blockers, exceptions) in _SECONDARY_INGREDIENT_PATTERNS_RAW.items()
 }
+for _keyword, (_blockers, _exceptions) in SECONDARY_INGREDIENT_PATTERN_CLI_UPDATES.items():
+    existing_blockers, existing_exceptions = SECONDARY_INGREDIENT_PATTERNS.setdefault(_keyword, (set(), set()))
+    existing_blockers.update(_blockers)
+    existing_exceptions.update(_exceptions)
 
 
 def check_secondary_ingredient_patterns(product_lower: str, ingredient_lower: str,
