@@ -932,8 +932,9 @@ NON_FOOD_KEYWORDS: FrozenSet[str] = frozenset({
 })
 
 PROCESSED_FOODS: FrozenSet[str] = frozenset({
-    # Heavily processed meats (not usable as fresh meat in recipes)
-    'ölkorv', 'olkorv',  # Not used in Swedish cooking
+    # ölkorv/olkorv removed from PROCESSED_FOODS — it IS used in Swedish cooking
+    # (paprika-soppa, korvgryta etc.). Isolation handled via FPB 'korv': {ölkorv}
+    # so plain korv/salami/chorizo don't match ölkorv recipes.
 
     # Instant/ready-made meals (not fresh ingredients)
     'snabbnudlar', 'snabb nudlar',
@@ -1621,7 +1622,8 @@ FLAVOR_WORDS: FrozenSet[str] = frozenset({
     'nektarin',
     # Citrus
     'citron', 'lime', 'apelsin', 'orange',
-    'grapefrukt', 'clementin', 'mandarin', 'blodapelsin',
+    'grapefrukt', 'grapefruit', 'grape', 'blodgrape',
+    'clementin', 'mandarin', 'blodapelsin',
     # Tropical fruits
     'mango', 'ananas', 'pineapple', 'papaya', 'passionsfrukt', 'passion',
     'kokos', 'coconut', 'kiwi', 'guava', 'lychee', 'litchi', 'avokado', 'drakfrukt',
@@ -1690,6 +1692,9 @@ FLAVOR_WORDS: FrozenSet[str] = frozenset({
     # Condiments as flavors (in mayo, dressing, etc)
     'soja', 'soy',  # "Mayo Sesame & soy" - soja is flavor in mayo, not standalone soy sauce
     'sesam', 'sesame',  # "Mayo Sesame & soy" - sesame is flavor, not ingredient
+    'mörkrostad', 'morkrostad',  # "Sesamolja Mörkrostad" — process/flavor descriptor, not ingredient
+    'mörkrostade', 'morkrostade',
+    'mörkrostat', 'morkrostat',
 
     # Sweeteners as flavors (in nut mixes, cereals, etc)
     'honung',  # "Nötmix Honung & Salt" - honung is the flavor
@@ -1993,6 +1998,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     # Bread brand names (needed for OFFER_EXTRA_KEYWORDS mapping)
     # NOTE: 'rosta' NOT here — collides with cooking method "rostad/rostade" causing FPs in 12+ recipes
     'sarek',  # Norrländskt tunnbröd brand (5 chars) — maps to tunnbröd
+    'njalla', 'abisko',  # Polarbröd tunnbröd varieties — map to tunnbröd
     'liba',   # Liba tunnbröd brand (4 chars) — maps to tunnbröd
     'cider',  # alcoholic/non-alcoholic cider (5 chars) — FPB already blocks cidervinäger collision
     'dumle',  # candy brand used as ingredient in baking

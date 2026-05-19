@@ -165,16 +165,20 @@ def _is_chipotle_spice_product_text(text: str, category: Optional[str] = None) -
 
 
 def _is_plain_sparkling_water_product_text(text: str, category: Optional[str] = None) -> bool:
+    """Plain sparkling water is cooking-water-acceptable; any flavored variant
+    is a soft drink and should not match cooking-water recipes. Uses the
+    centralized FLAVOR_WORDS set so new product flavors (papaya, guava,
+    drakfrukt, vattenmelon, etc.) are picked up automatically as they are
+    added to that list — no per-flavor maintenance here."""
     if not re.search(r'\b(?:kolsyrat\s+vatten|mineralvatten|sparkling\s+water)\b', text):
         return False
-    return not any(token in text for token in (
-        'citron', 'lime', 'citrus', 'apelsin', 'mandarin', 'jordgubb', 'hallon',
-        'granatäpple', 'granatapple', 'mango', 'päron', 'paron',
-        'persika', 'peach', 'smultron',
-        'skogsbär', 'skogsbar', 'björnbär', 'bjornbar', 'rabarber',
-        'körsbär', 'korsbar', 'fläder', 'flader', 'passion', 'äpple', 'apple',
-        'kaktus',
-    ))
+    # Lazy import to avoid circular dependency
+    from .keywords import FLAVOR_WORDS
+    # Tokenize and check for any flavor word. Plain-water descriptors like
+    # 'soda', 'vichy', 'naturell', 'original' are NOT in FLAVOR_WORDS so they
+    # pass through correctly.
+    tokens = re.findall(r'\b[\wåäöÅÄÖéèüÜ]+\b', text)
+    return not any(t in FLAVOR_WORDS for t in tokens)
 
 
 def _is_tonic_mixer_product_text(text: str, category: Optional[str] = None) -> bool:
@@ -1745,6 +1749,20 @@ def extract_keywords_from_ingredient(
     # Fix Swedish chars first (don't use normalize_ingredient as it removes too much)
     name = fix_swedish_chars(ingredient)
     name = name.lower()
+
+    # Strip count/quantity parentheticals like "(8 kex)", "(2 st)", "(ca 500g)",
+    # "(à 380 g)". These are recipe-author clarifications about portion count
+    # or weight, not ingredient names. Without this, "(8 kex)" would inject a
+    # plain 'kex' keyword into the digestivekex ingredient, matching every
+    # cookie/cracker in the assortment. Word-form parentheticals like
+    # "(t ex citron)" or "(med saft)" are NOT stripped — they have no leading
+    # digit and are handled by other example/preference helpers.
+    name = re.sub(
+        r'\(\s*(?:ca\.?\s*|à\s*|cirka\s*|ungefär\s*|omkring\s*)?'
+        r'\d[\d.,/]*\s*[a-zåäö]+\s*\)',
+        ' ',
+        name,
+    )
 
     # Normalize space variants (e.g., "corn flakes" -> "cornflakes")
     name = _apply_space_normalizations(name)

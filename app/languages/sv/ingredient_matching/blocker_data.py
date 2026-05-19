@@ -288,6 +288,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'körsbärslöv', 'körsbärslov', 'körsbärsblad',  # cherry leaves (pickling)
         'korsbarslov', 'korsbarsblad',  # normalized forms
         'sylt',  # "körsbärssylt" ingredient ≠ fresh cherry fruit (batch 48)
+        'körsbärsmarmelad',  # cherry marmalade (jam) ≠ fresh cherries
     },
 
     # Pasta (noodles) != currypasta/misopasta (paste) or pastafärg (food coloring)
@@ -336,6 +337,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'citronsorbet',  # lemon sorbet (dessert) ≠ lemon fruit
         'citronsyra',  # citric acid (powder) ≠ lemon fruit
         'citronjuice', 'citronjuicen',  # bottled juice form — whole lemon blocks via FPB; juice product matches via _BOTTLED_JUICE_KEYWORDS check
+        'citronmarmelad',  # lemon marmalade (jam) ≠ fresh whole lemons
     },
 
     # Heart (meat) != artichoke hearts (kronärtskockshjärtan)
@@ -414,6 +416,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'mangorajasås', 'mangorajasas',  # mango raita sauce ≠ fresh mango
         'mangosalsa',  # mango salsa (prepared) ≠ fresh mango
         'mangocurry',  # mango-curry spice mix (e.g. "40 g mangocurry") ≠ fresh mango fruit
+        'mangomarmelad',  # mango marmalade (jam) ≠ fresh mango
     },
 
     # Butter - "smör" != nut/seed butters (completely different products)
@@ -613,13 +616,15 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'köttfärssås', 'köttfärssåser',  # ready sauce ≠ raw mince ("150g färdiga köttfärssåser")
     },
 
-    # Berries - fresh berries should NOT match jam/sylt recipes
+    # Berries - fresh berries should NOT match jam/sylt/marmelad recipes
     'blåbär': {
         'blåbärssylt', 'blabarssylt',
+        'blåbärsmarmelad', 'blabarsmarmelad',  # blueberry marmalade ≠ fresh
         'boost',        # "Berry Boost Blåbär" — snack bar, not blueberries
     },
     'hallon': {
         'hallonsylt',
+        'hallonmarmelad',  # raspberry marmalade ≠ fresh raspberries
         'hallonsaft',      # raspberry juice/concentrate ≠ fresh raspberries
         'hallonsmak',      # raspberry-flavored product ≠ fresh raspberries
         'hallongrotta', 'hallongrottor',  # cookie compound, not fresh/frozen raspberries
@@ -628,20 +633,25 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     'lingon': {
         'lingonsylt',
+        'lingonmarmelad',  # lingonberry marmalade ≠ fresh
         'lingon 35',  # budget lingonsylt without "sylt" in name ("Lingon 35%")
     },
     'jordgubb': {
         'jordgubbssylt',
+        'jordgubbsmarmelad',  # strawberry marmalade ≠ fresh
         'torkad frukt',    # "Torkad Frukt Bara Jordgubb hallon" — dried fruit mix, not fresh
     },
     'rabarber': {
         'rabarbersaft',  # rhubarb cordial/concentrate ≠ fresh rhubarb stalks
+        'rabarbermarmelad',  # rhubarb marmalade ≠ fresh rhubarb
     },
     'hjortron': {
         'hjortronsylt',    # "Hjortron Eko 225g" (fresh/frozen berries) ≠ hjortronsylt (jam)
+        'hjortronmarmelad',  # cloudberry marmalade ≠ fresh
     },
     'björnbär': {
         'björnbärssylt', 'bjornbarssylt',
+        'björnbärsmarmelad', 'bjornbarsmarmelad',  # blackberry marmalade ≠ fresh
     },
     'bjornbar': {
         'björnbärssylt', 'bjornbarssylt',
@@ -673,6 +683,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'kokosgrädde', 'kokosgradule',  # coconut cream (plant-based)
         'sojagrädde', 'sojagradule',  # soy cream (plant-based)
         'havregrädde', 'havregradule',  # oat cream (plant-based)
+        'vaniljgrädde', 'vaniljgradde',  # ready-made vanilla cream — recipe asks for the specific product, plain whipping cream is not a substitute
     },
 
     # Anis - "anis" should NOT match "manis" (ketjap manis ≠ anise spice)
@@ -937,7 +948,19 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
 
     # Plommon (plum) should NOT match plommontomat (plum tomato) or plommonvin (plum wine)
     # "plommontomater" is a tomato variety, not plums — recipe wants tomatoes
-    'plommon': {'plommontomat', 'plommonvin'},
+    'plommon': {'plommontomat', 'plommonvin', 'plommonmarmelad'},
+
+    # Fresh fruits should NOT match marmalade recipes — analogous to
+    # apelsinmarmelad/citronmarmelad pattern. Marmalade is a distinct jam-style
+    # product, not a fresh-fruit substitute.
+    'aprikos': {'aprikosmarmelad'},
+    'aprikoser': {'aprikosmarmelad'},
+    'fikon': {'fikonmarmelad'},
+    'tranbär': {'tranbärsmarmelad', 'tranbarsmarmelad'},
+    'tranbar': {'tranbärsmarmelad', 'tranbarsmarmelad'},
+    'grapefrukt': {'grapefruktmarmelad'},
+    'päron': {'päronmarmelad', 'paronmarmelad'},
+    'paron': {'päronmarmelad', 'paronmarmelad'},
 
     # Vinäger should NOT match pickled/prepared items — recipe wants the prepared food, not plain vinegar
     'vinäger': {'vinägerinlagd', 'vinägerpicklad', 'vinägerpicklade', 'vinägerpicklat', 'vinägerchips'},
@@ -950,13 +973,15 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'vinbär': {'vinbärsblad', 'svartvinbärsblad', 'vinbarsblad', 'svartvinbarsblad'},
 
     # Curry powder should NOT match when ingredient is a distinct curry family:
-    # curry leaves, sauces, or colored Thai curry bases/pastes.
+    # curry leaves, sauces, colored Thai curry bases/pastes, or flavored
+    # compound blends (mangocurry).
     'curry': {
         'curryblad',
         'currysås', 'currysas',
         'röd curry', 'rod curry', 'red curry', 'rödcurry', 'rodcurry',
         'grön curry', 'gron curry', 'green curry', 'gröncurry', 'groncurry',
         'gul curry', 'yellow curry', 'gulcurry',
+        'mangocurry',  # mango curry is a specific flavored blend, plain curry is not a substitute
     },
     'vinbar': {'vinbarsblad', 'svartvinbarsblad', 'vinbärsblad', 'svartvinbärsblad'},
 
@@ -1030,6 +1055,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'limeblad',  # kaffir lime leaves (Thai cooking) ≠ lime fruit
         'jordgubblime',  # strawberry-lime flavor ≠ lime fruit
         'limejuice',  # "2 msk limejuice" = bottled juice, not whole lime
+        'limemarmelad',  # lime marmalade (jam) ≠ fresh lime
     },
 
     # Lager (beer) != lagerblad (bay leaf)
@@ -1254,6 +1280,10 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'bröden', 'broden',  # definite plural ("till bröden" = serving instruction)
         'korvbrödsbagarn', 'korvbrodsbagarn',  # brand name containing "bröd"
         'bao',  # "bao bröd" = Asian steamed buns ≠ regular bread
+        # Polarbröd loaf-style products — these are sandwich/toast bread, not
+        # the flatbread (tunnbröd) variants. A recipe asking for tunnbröd
+        # (Njalla/Sarek/Abisko/Liba) must not match these.
+        'polarvete', 'polarråg', 'polarrag', 'pärlan', 'parlan', 'polarkaka',
     },
 
     # Korvbröd offer keyword should not match brand name "Korvbrödsbagarn"
@@ -1515,9 +1545,26 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'lammytterfilé', 'lammytterfile',
     },
 
-    # Beef innanlår should not match veal innanlår
+    # Beef innanlår should not match veal innanlår or pork (skink)innanlår
     'innanlår': {
         'kalvinnanlår', 'kalvinnanlar',  # veal shank ≠ beef innanlår (Rostbiff Innanlår)
+        'skinkinnanlår', 'skinkinnanlar',  # pork (skink)innanlår ≠ beef innanlår — different species, different cooking
+    },
+
+    # Spinach noodles/pasta are dry pasta (spinach-flour-colored), not the
+    # fresh/frozen spinach vegetable. When recipe text says spenatnudlar or
+    # spenatpasta, the plain spenat keyword should be suppressed.
+    'spenat': {
+        'spenatnudlar', 'spenatnudel', 'spenatnudla',
+        'spenatpasta',
+    },
+    'bladspenat': {
+        'spenatnudlar', 'spenatnudel', 'spenatnudla',
+        'spenatpasta',
+    },
+    'babyspenat': {
+        'spenatnudlar', 'spenatnudel', 'spenatnudla',
+        'spenatpasta',
     },
 
     # Whole buckwheat grain ≠ buckwheat flour
@@ -1579,6 +1626,9 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'vego', 'vegansk', 'växtbaserad',  # vegan sausage ≠ meat sausage
         'lammkorv', 'lammkorvar',  # generic korv ≠ lammkorv (COMPOUND_STRICT
         # catches 'korv' in 'lammkorv' but NOT 'korv' in 'lammkorvar' plural)
+        'ölkorv', 'olkorv',  # ölkorv is a specific Swedish beer-flavored sausage —
+        # a recipe asking for ölkorv should match only ölkorv-named products
+        # (or zero, if none in assortment), not plain korv/salami/chorizo
     },
 
     # Flour (mjöl) != milk (mjölk) — "mjöl" is substring of "mjölk"

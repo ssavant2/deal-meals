@@ -12,3 +12,8 @@
 keyword = "rom"
 blockers = ["sikrom"]
 reason = "Sikrom (white-fish roe) is not rum or rum-aroma; recipes wanting sikrom use compound keyword"
+
+[[product_name_blockers]]
+keyword = "spannmål"
+blockers = ["entrecote", "uppfödd", "gräs", "oxfilé", "kött", "nötkött", "nötfärs", "fläsk", "kyckling", "lamm", "kalvkött"]
+reason = "Meat products are 'uppfödd på gräs och spannmål' (grass-fed and grain-fed) — spannmål describes the animal feed, not a cooking ingredient. Spannmål as recipe ingredient means a carbohydrate base (rice/oats/wheat), not meat."

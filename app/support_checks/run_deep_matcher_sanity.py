@@ -10677,6 +10677,253 @@ test("plain pasta recipe still matches penne",
 test("gochujang paste product matches gochujang pasta ingredient",
      match("Gochujang 250g", "0.5 msk Gochujang Pasta"), "gochujang")
 
+# Ölkorv (Swedish beer-flavored sausage) — recipes asking for "ölkorv" should
+# match only ölkorv-named products (or zero if none in assortment), not plain
+# korv/salami/chorizo. Implemented via FPB 'korv': {'ölkorv', 'olkorv'} so the
+# generic korv keyword is suppressed when the ingredient text contains ölkorv.
+test("plain korv blocked from ölkorv recipe",
+     match("Korv Höllenwurst 380g Helmut Walch", "50 g Ölkorv"), None)
+test("salami chorizo blocked from ölkorv recipe",
+     match("Salami Chorizo skivad 150g Göl", "50 g Ölkorv"), None)
+test("falukorv blocked from ölkorv recipe",
+     match("Falukorv 800g Scan", "50 g Ölkorv"), None)
+test("plain korv recipe still matches Korv Höllenwurst",
+     match("Korv Höllenwurst 380g Helmut Walch", "500 g korv"), "korv")
+
+# Gyros CUISINE_CONTEXT — 'pita' removed (too broad: shawarma/kebab/dürüm
+# all use it). Greek-named dish words (moussaka, pastitsio, spanakopita,
+# dolmades) and Greek-specific cues (tzatziki, kalamata) keep genuine
+# Greek recipes triggering the gyros cuisine gate.
+GYRO_OFFER = {"name": "Gyroskyckling 600g Guldfågeln", "category": "meat"}
+test("Gyroskyckling blocked in Middle-Eastern shawarma recipe (pita no longer triggers)",
+     recipe_match_num_named("Chicken shawarma med örtig vitlökssås", ["600 g Kycklinglårfilé Fryst", "pitabröd", "vitlök", "koriander"], GYRO_OFFER), 0)
+test("Gyroskyckling allowed in Greek gyros recipe (tzatziki trigger)",
+     recipe_match_num_named("Grekisk gyros med tzatziki", ["600 g kycklingfilé", "tzatziki"], GYRO_OFFER), 1)
+test("Gyroskyckling allowed in moussaka recipe (dish-name trigger)",
+     recipe_match_num_named("Moussaka", ["600 g kycklingfilé", "aubergine"], GYRO_OFFER), 1)
+test("Gyroskyckling allowed in souvlaki recipe (dish-name trigger)",
+     recipe_match_num_named("Souvlaki med pita", ["600 g kycklingfilé"], GYRO_OFFER), 1)
+test("Gyroskyckling allowed with kalamata trigger",
+     recipe_match_num_named("Grekisk kycklingsallad", ["600 g kycklingfilé", "kalamataoliver"], GYRO_OFFER), 1)
+test("Gyroskyckling blocked in plain French chicken recipe",
+     recipe_match_num_named("Kyckling i vitt vin", ["600 g kycklingfilé", "vitt vin", "lök"], GYRO_OFFER), 0)
+
+# Grape/grapefruit added to FLAVOR_WORDS so carrier-strip removes them from
+# tonic products. Grape Tonic / Grapefruit Tonic / Tonic Lime & Grape now
+# extract only 'tonic' keyword, not the fruit keyword that previously leaked
+# into plain blodgrape/grapefrukt recipes.
+test("Grape Tonic does not extract grape keyword", kw("Grape Tonic 1,5l Spendrups"), ["tonic"])
+test("Tonic Lime & Grape does not extract grape", kw("Tonic Lime & Grape 200ml Åhus Tonics & Mixers"), ["tonic"])
+test("blodgrape recipe blocked from Grape Tonic",
+     match("Grape Tonic 1,5l Spendrups", "1 blodgrape"), None)
+test("plain tonic recipe still matches Grape Tonic",
+     match("Grape Tonic 1,5l Spendrups", "15 cl tonic"), "tonic")
+
+# Torkade vs fresh tomato/cherry-tomato — recipe saying "torkade" must match a
+# dried product, not fresh. Added 'torkad'/'torkade' to tomat/tomater/
+# körsbärstomat/körsbärstomater/småtomat specialty qualifier sets and made
+# 'torkad'/'torkade' QUALIFIER_EQUIVALENTS for 'soltorkad' (sun-dried is a
+# sub-type of dried).
+# Note: specialty-qualifier validation runs in the backend pipeline, not the
+# fast-path match() helper — use recipe_match_num_named for these tests.
+test("fresh körsbärstomater blocked from torkade recipe (backend)",
+     recipe_match_num_named("Kycklingballoutine", ["körsbärstomater, torkade"], {"name": "Körsbärstomater 250g Klass 1 ICA", "category": "vegetables"}), 0)
+test("fresh babyplommontomater blocked from torkade körsbärstomater recipe (backend)",
+     recipe_match_num_named("Kycklingballoutine", ["körsbärstomater, torkade"], {"name": "Babyplommontomater 250g Klass 1", "category": "vegetables"}), 0)
+test("soltorkade körsbärstomater allowed in torkade recipe (qualifier equivalent)",
+     recipe_match_num_named("Kycklingballoutine", ["körsbärstomater, torkade"], {"name": "Soltorkade Körsbärstomater Olja 200g Zeta", "category": "spices"}), 1)
+test("plain körsbärstomater recipe still matches fresh produce",
+     recipe_match_num_named("Tomatsallad", ["250 g körsbärstomater"], {"name": "Körsbärstomater 250g Klass 1 ICA", "category": "vegetables"}), 1)
+
+# Vit choklad isolation — distinct ingredient (cocoa butter + milk, no cocoa
+# solids). Space normalization joins "vit choklad" → "vitchoklad" compound so
+# white-chocolate recipes match only Vit Choklad products. Mörk choklad stays
+# generic — "mörk choklad" recipe still matches plain Choklad products.
+test("Vit Choklad extracts vitchoklad compound", kw("Vit Choklad 100g Marabou"), ["vitchoklad"])
+test("vit choklad recipe matches Vit Choklad",
+     match("Vit Choklad 100g Marabou", "strössel eller vit choklad"), "vitchoklad")
+# Note: vit-choklad isolation relies on space-norm + parent_match — fast-path
+# substring check still matches plain choklad via 'choklad' substring inside
+# 'vit choklad'. Backend specialty-validation enforces the isolation; use
+# recipe_match_num_named for these tests.
+test("vit choklad recipe blocked from plain Choklad (backend)",
+     recipe_match_num_named("Krispig nachochoklad", ["strössel eller vit choklad"], {"name": "Choklad 100g Marabou", "category": "candy"}), 0)
+test("vit choklad recipe blocked from Valrhona Guanaja (backend)",
+     recipe_match_num_named("Krispig nachochoklad", ["strössel eller vit choklad"], {"name": "Choklad Valrhona Guanaja 70% 250g Valrhona", "category": "candy"}), 0)
+test("mörk choklad recipe still matches plain Choklad (default-dark policy)",
+     match("Choklad 100g Marabou", "100 g mörk choklad"), "choklad")
+
+# Coleslaw as flavor carrier — Coleslaw deli salads with chili/peppar flavor
+# names should not match generic chili/peppar recipes. Chili is the flavoring
+# of the deli salad, not the actual ingredient.
+test("Coleslaw Chili Pepper extracts only coleslaw (chili stripped)",
+     kw("Coleslaw Chili Pepper 200g Texas Longhorn"), ["coleslaw"])
+test("Coleslaw Chili Pepper blocked from chili recipe",
+     match("Coleslaw Chili Pepper 200g Texas Longhorn", "tabasco eller rökig chili"), None)
+
+# Vaniljgrädde isolation — same compound-strict + FPB pattern as vaniljsocker.
+# Ready-made vanilla cream is a specific product, plain whipping cream is not
+# a substitute. Implemented via _COMPOUND_STRICT_KEYWORDS += vaniljgrädde
+# and FPB 'grädde': {vaniljgrädde}.
+test("Vispgrädde blocked from vaniljgrädde recipe",
+     match("Vispgrädde 40% 5dl Arla", "5 dl Vaniljgrädde"), None)
+test("Matlagningsgrädde blocked from vaniljgrädde recipe",
+     match("Matlagningsgrädde 13% 5dl Arla Köket", "5 dl Vaniljgrädde"), None)
+test("Arla Vaniljgrädde matches vaniljgrädde recipe",
+     match("Arla Vaniljgrädde 4dl", "5 dl Vaniljgrädde"), "vaniljgrädde")
+test("plain grädde recipe still matches Vispgrädde",
+     match("Vispgrädde 40% 5dl Arla", "5 dl grädde"), "grädde")
+
+# Innanlår species isolation — skinkinnanlår (pork) ≠ innanlår (beef).
+# FPB 'innanlår': {skinkinnanlår} so beef innanlår products are blocked
+# from pork skinkinnanlår recipes.
+test("beef innanlår blocked from skinkinnanlår recipe",
+     match("Lövbiff innanlår ca 450g KRAV ICA I love eco", "4 skivor skinkinnanlår"), None)
+test("rostbiff innanlår blocked from skinkinnanlår recipe",
+     match("Rostbiff Innanlår 500g Scan", "4 skivor skinkinnanlår"), None)
+test("plain innanlår recipe (beef) still matches Lövbiff innanlår",
+     match("Lövbiff innanlår ca 450g KRAV ICA I love eco", "500 g innanlår"), "innanlår")
+
+# Mörkrostad as flavor descriptor — sesamolja-mörkrostad ≠ sesamdressing
+# (different product types). Added sesamolja as flavor-carrier, mörkrostad
+# variants as FLAVOR_WORDS so the descriptor is stripped during extraction.
+test("Sesamolja Mörkrostad extracts only sesamolja (mörkrostad stripped)",
+     kw("Sesamolja Mörkrostad 125ml Risberg"), ["sesamolja"])
+test("Felix Mörkrostad Sesamdressing extracts only sesamdressing",
+     kw("Felix Mörkrostad Sesamdressing 335ml"), ["sesamdressing"])
+test("Sesamolja blocked from Sesamdressing recipe",
+     match("Sesamolja Mörkrostad 125ml Risberg", "1 förp Felix Mörkrostad Sesamdressing"), None)
+test("Sesamolja Mörkrostad still matches plain sesamolja recipe",
+     match("Sesamolja Mörkrostad 125ml Risberg", "1 msk sesamolja"), "sesamolja")
+
+# Mango curry compound-isolation — space-norm "mango curry" → "mangocurry"
+# plus FPB 'curry': {mangocurry}. Specific flavor → exact match or zero.
+test("Mango Curry product extracts mangocurry (space-norm)",
+     kw("Mango Curry 75g Santa Maria"), ["mangocurry"])
+test("plain Curry blocked from Mango Curry recipe",
+     match("Curry 80g ICA Basic", "1 msk Mango Curry"), None)
+test("Mango Curry recipe matches Mangocurry product",
+     match("Mangocurry 80g Santa Maria", "1 msk Mango Curry"), "mangocurry")
+test("plain curry recipe still matches plain Curry",
+     match("Curry 80g ICA Basic", "1 msk curry"), "curry")
+
+# Vegan recipe context blocks dairy fraiche/grädde/yoghurt/etc. when the recipe
+# is explicit-vegan. Extended _EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES with dairy
+# keywords and _EXPLICIT_VEGAN_PRODUCT_CUES with plant-based brand cues
+# (iMat/Dream/Oatly/Alpro/Naturli/Violife/Greenvie/Sheese).
+test("vegan recipe blocks dairy Crème Fraiche from ifraiche ingredient",
+     recipe_match_num_named("Vegansk Örtsås", ["2 dl ifraiche", "färska örter"], {"name": "Crème Fraiche 32% 2dl Arla Köket", "category": "dairy"}), 0)
+test("vegan recipe allows plant fraiche (iMat) from ifraiche ingredient",
+     recipe_match_num_named("Vegansk Örtsås", ["2 dl ifraiche", "färska örter"], {"name": "iMat Fraiche 2dl Oatly", "category": "dairy"}), 1)
+test("vegan recipe allows Dream Fraiche from ifraiche ingredient",
+     recipe_match_num_named("Vegansk Örtsås", ["2 dl ifraiche", "färska örter"], {"name": "Dream Fraiche Naturell 2dl", "category": "dairy"}), 1)
+test("non-vegan recipe still matches dairy Crème Fraiche from creme fraiche",
+     recipe_match_num_named("Klassisk örtsås", ["2 dl creme fraiche", "färska örter"], {"name": "Crème Fraiche 32% 2dl Arla Köket", "category": "dairy"}), 1)
+
+# Saltgurka isolation — saltgurka is lake-fermented (Polish/Russian style),
+# distinct in taste and texture from ättiks-pickled inlagdgurka. Removed the
+# normalization saltgurka → inlagdgurka and inactivated the ingredient_parent
+# mapping so Saltgurka products extract a saltgurka keyword (plus the generic
+# inlagdgurka for plain-inlagdgurka recipe matching).
+test("Saltgurka product extracts saltgurka keyword",
+     "saltgurka" in kw("Saltgurka 720g Felix"), True)
+test("Saltgurka matches saltgurka recipe (specific)",
+     match("Saltgurka 720g Felix", "2 msk Finhackad saltgurka"), "saltgurka")
+test("Smörgåsgurka blocked from saltgurka recipe",
+     match("Smörgåsgurka 715g Felix", "2 msk Finhackad saltgurka"), None)
+test("Cornichons blocked from saltgurka recipe",
+     match("Cornichons 650g Plivit Trade", "2 msk Finhackad saltgurka"), None)
+test("Ättiksgurka blocked from saltgurka recipe",
+     match("Ättiksgurka Hel 700g Felix", "2 msk Finhackad saltgurka"), None)
+test("Saltgurka still matches plain smörgåsgurka recipe (inlagdgurka family)",
+     match("Saltgurka 720g Felix", "1 msk smörgåsgurka"), "inlagdgurka")
+
+# Tunnbröd family — Polarbröd Njalla/Sarek/Abisko + Liba + generic tunnbröd
+# all cross-match within the tunnbröd family. Loaf-style Polarbröd products
+# (PolarVete/PolarRåg/Pärlan) are blocked from tunnbröd recipes via PNB bröd.
+test("Tunnbröd Njalla matches Polarbröd Njalla recipe",
+     match("Tunnbröd Njalla 250g Polarbröd", "1 förp Polarbröd Njalla", "bread"), "tunnbröd")
+test("Tunnbröd Sarek matches Polarbröd Njalla recipe (tunnbröd family)",
+     match("Tunnbröd Sarek 375g Polarbröd", "1 förp Polarbröd Njalla", "bread"), "tunnbröd")
+test("Tunnbröd Abisko matches Polarbröd Njalla recipe (tunnbröd family)",
+     match("Tunnbröd Abisko Mjölkfri 8-p 360g Polarbröd", "1 förp Polarbröd Njalla", "bread"), "tunnbröd")
+test("PolarVete blocked from Polarbröd Njalla recipe (loaf != tunnbröd)",
+     match("PolarVete 800g Polarbröd", "1 förp Polarbröd Njalla", "bread"), None)
+test("PolarRåg blocked from Polarbröd Njalla recipe",
+     match("PolarRåg 800g Polarbröd", "1 förp Polarbröd Njalla", "bread"), None)
+test("Pärlan Fullkorn blocked from Polarbröd Njalla recipe",
+     match("Pärlan Fullkorn 600g Polarbröd", "1 förp Polarbröd Njalla", "bread"), None)
+test("plain bröd recipe still matches PolarVete",
+     match("PolarVete 800g Polarbröd", "500 g bröd", "bread"), "bröd")
+
+# Mineralvatten/kolsyrat vatten flavor isolation — extended
+# _is_plain_sparkling_water_product_text with more fruit/herb flavors so
+# Vattenmelon/Ananas/Drakfrukt/Lingon/Ingefära variants don't pass as plain.
+# Plain (Soda/Vichy/Original) and Mineralvatten still match cooking-water recipes.
+test("plain mineralvatten recipe blocks Vattenmelon-flavored sparkling water",
+     recipe_match_num_named("Kalvfärs- och myntaköttbullar", ["1 dl mineralvatten eller vanligt vatten"], {"name": "Kolsyrat vatten Vattenmelon 50cl ICA", "category": "beverages"}), 0)
+test("plain mineralvatten recipe blocks Ananas Drakfrukt-flavored",
+     recipe_match_num_named("Kalvfärs- och myntaköttbullar", ["1 dl mineralvatten eller vanligt vatten"], {"name": "Kolsyrat vatten Ananas Drakfrukt 50cl Loka", "category": "beverages"}), 0)
+test("plain mineralvatten recipe matches Soda sparkling water",
+     recipe_match_num_named("Kalvfärs- och myntaköttbullar", ["1 dl mineralvatten eller vanligt vatten"], {"name": "Kolsyrat vatten Soda 33cl Spendrups", "category": "beverages"}), 1)
+test("plain mineralvatten recipe matches Mineralvatten Ramlösa",
+     recipe_match_num_named("Kalvfärs- och myntaköttbullar", ["1 dl mineralvatten eller vanligt vatten"], {"name": "Mineralvatten 1l Ramlösa", "category": "beverages"}), 1)
+
+# Spenatnudlar/spenatpasta — dry pasta colored with spinach flour, NOT fresh
+# spinach vegetable. FPB 'spenat'/'bladspenat'/'babyspenat' suppress those
+# keywords when ingredient text contains a spinach-noodle/pasta compound.
+test("plain Spenat blocked from spenatnudlar recipe",
+     match("Spenat 200g Klass 1 ICA", "4 port spenatnudlar"), None)
+test("Bladspenat blocked from spenatnudlar recipe",
+     match("Bladspenat 200g Felix", "4 port spenatnudlar"), None)
+test("Hackad spenat blocked from spenatnudlar recipe",
+     match("Hackad spenat Fryst 250g Findus", "4 port spenatnudlar"), None)
+test("plain spenat recipe still matches Spenat",
+     match("Spenat 200g Klass 1 ICA", "200 g spenat"), "spenat")
+
+# Marmelad section — fresh fruit should NOT match marmalade recipes (analogous
+# to existing apelsinmarmelad pattern). FPB entries for every relevant fruit
+# keyword with its <frukt>marmelad blocker. Marmalade is a distinct jam-style
+# product, not a fresh-fruit substitute.
+test("fresh citron blocked from citronmarmelad recipe",
+     match("Citron 200g Klass 1 ICA", "2 cl citronmarmelad"), None)
+test("citronmarmelad product matches citronmarmelad recipe",
+     match("Citronmarmelad Silver shred 340g Robertson", "2 cl citronmarmelad"), "citronmarmelad")
+test("plain citron recipe still matches fresh Citron",
+     match("Citron 200g Klass 1 ICA", "1 citron"), "citron")
+test("fresh hallon blocked from hallonmarmelad recipe",
+     match("Hallon 200g Felix Fryst", "2 msk hallonmarmelad"), None)
+test("fresh aprikos blocked from aprikosmarmelad recipe",
+     match("Aprikos 200g Klass 1", "2 msk aprikosmarmelad"), None)
+test("fresh fikon blocked from fikonmarmelad recipe",
+     match("Fikon Färska 200g", "2 msk fikonmarmelad"), None)
+test("plain hallon recipe still matches fresh Hallon",
+     match("Hallon 200g Felix Fryst", "1 dl hallon"), "hallon")
+
+# Parenthetical count-strip + kex compound-strict — digestive-kex recipe with
+# "(8 kex)" parenthetical no longer leaks plain kex keyword. And compound
+# 'kex' as suffix of '<typ>kex' requires the type prefix in product name.
+test("Mariekex blocked from digestivekex recipe with paren count",
+     match("Mariekex 200g ICA", "120 g digestivekex, (8 kex)", "candy"), None)
+test("Saltiner blocked from digestivekex recipe",
+     match("Saltiner 150g Göteborgs", "120 g digestivekex, (8 kex)", "candy"), None)
+test("Digestivekex matches digestivekex recipe",
+     match("Digestivekex 400g McVities", "120 g digestivekex, (8 kex)", "candy"), "digestivekex")
+test("plain kex recipe still matches all kex products",
+     match("Mariekex 200g ICA", "1 paket kex", "candy"), "kex")
+
+# Spannmål — two-part fix: (1) PNB blocks meat products where 'spannmål'
+# describes animal feed; (2) offer_extra_keyword maps grain-types to spannmål
+# so generic "valfritt spannmål" recipes match the actual grain pantry items.
+test("Entrecote blocked from spannmål recipe (animal feed context)",
+     recipe_match_num_named("Gröncurrygryta", ["4 port valfritt spannmål tex. havreris"], {"name": "Entrecote Uppfödd På Gräs & Spannmål ca 240g Köttkultur", "category": "meat"}), 0)
+test("Havreris matches spannmål recipe",
+     recipe_match_num_named("Gröncurrygryta", ["4 port valfritt spannmål tex. havreris"], {"name": "Havreris 500g Risenta", "category": "pantry"}), 1)
+test("Quinoa matches spannmål recipe",
+     recipe_match_num_named("Gröncurrygryta", ["4 port valfritt spannmål tex. havreris"], {"name": "Quinoa 500g Risenta", "category": "pantry"}), 1)
+test("Bulgur matches spannmål recipe",
+     recipe_match_num_named("Gröncurrygryta", ["4 port valfritt spannmål tex. havreris"], {"name": "Bulgur 500g Risenta", "category": "pantry"}), 1)
+
 # Q74: BDPK nötmix — flavored snack mixes only match flavor-matched ingredients
 # (BBQ product ↔ BBQ recipe; plain saltad/rostad ↔ plain products)
 test("nötmix BBQ blocked from plain saltad/rostad recipe",
@@ -10729,3 +10976,42 @@ test("offer-extra-keyword Proteinmilkshake matches milkshake",
 from languages.sv.ingredient_matching import PRODUCT_NAME_BLOCKERS
 test("PNB rom has sikrom",
      "sikrom" in PRODUCT_NAME_BLOCKERS.get("rom", set()), True)
+
+# fläskfiléer plural → fläskfilé (recipe "2 fläskfiléer" should match fläskfilé
+# products). Match returns the ASCII-normalized form 'fläskfileer' since
+# fix_swedish_chars strips mid-compound accents.
+test("Fläskfilé Färsk matches fläskfiléer ingredient",
+     match("Fläskfilé Färsk ca 500g ICA", "Fläskfiléer", "meat"), "fläskfileer")
+
+# ingredient_parent_tunnbrod_njalla: generated by dm matcher add ingredient-parent
+test("ingredient-parent Tunnbröd Njalla 250g Polarbröd matches tunnbröd",
+     match("Tunnbröd Njalla 250g Polarbröd", "Njalla", "bread"), "tunnbröd")
+
+# runtime_pnb_spannmal_entrecote: generated by dm matcher add pnb
+from languages.sv.ingredient_matching import PRODUCT_NAME_BLOCKERS
+test("PNB spannmål has entrecote",
+     "entrecote" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has uppfödd",
+     "uppfödd" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has gräs",
+     "gräs" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has oxfilé",
+     "oxfilé" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has kött",
+     "kött" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has nötkött",
+     "nötkött" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has nötfärs",
+     "nötfärs" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has fläsk",
+     "fläsk" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has kyckling",
+     "kyckling" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has lamm",
+     "lamm" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+test("PNB spannmål has kalvkött",
+     "kalvkött" in PRODUCT_NAME_BLOCKERS.get("spannmål", set()), True)
+
+# offer_extra_keyword_spannmal_havreris: generated by dm matcher add offer-extra-keyword
+test("offer-extra-keyword Havreris matches spannmål",
+     match("Havreris", "valfritt spannmål", "pantry"), "spannmål")

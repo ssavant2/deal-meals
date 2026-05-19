@@ -358,12 +358,40 @@ _EXPLICIT_VEGAN_PRODUCT_CUES = frozenset({
     'vego', 'vegetarisk', 'vegetariskt', 'vegetariska',
     'anamma', 'jävligtgott', 'javligtgott', 'formbar',
     'beyond', 'peas of heaven', 'oumph',
+    # Plant-based dairy/spread brands
+    'imat', 'i mat',  # iMat fraiche, iMat Yoghurt
+    'dream',  # Dream Fraiche, Dream Yoghurt
+    'oatly',  # Oatly cream/milk products
+    'alpro',  # Alpro plant drinks/yoghurts/creams
+    'planti', 'plantli',  # Arla Plantli, generic plant
+    'havre', 'havredryck',  # generic oat-based plant indicator
+    'soja', 'sojadryck',  # generic soy-based plant indicator
+    'kokos', 'kokosdryck',  # coconut-based plant indicator
+    'mandel', 'mandeldryck',  # almond-based plant indicator
+    'naturli',  # Naturli plant brand
+    'greenvie',  # Greenvie vegan cheese
+    'violife',  # Violife vegan cheese
+    'sheese',  # Bute Island Sheese vegan cheese
 })
 _EXPLICIT_VEGAN_RECIPE_INGREDIENT_CUES = frozenset({
     'burgare', 'hamburgare',
     'färs', 'fars',
     'vego', 'vegoburgare', 'vegofärs', 'vegofars',
     'formbar',
+    # Dairy ingredients in an explicit-vegan recipe require a plant-based
+    # product (the recipe author chose vegan deliberately — dairy fallback
+    # would break the dietary intent).
+    'fraiche', 'créme fraiche', 'creme fraiche', 'crème fraiche',
+    'ifraiche', 'imat',
+    'mjölk', 'mjolk',
+    'grädde', 'gradde',
+    'yoghurt', 'gurt',
+    'kvarg',
+    'keso',
+    'cottage cheese',
+    'ost', 'ostar',
+    'smör', 'smor',
+    'färskost', 'farskost',
 })
 # Word-boundary regex pattern for ingredient cues. The substring 'färs' would
 # otherwise match 'färska' (fresh), causing vegan recipes with 'färska tomater'

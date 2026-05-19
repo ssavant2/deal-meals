@@ -35,6 +35,7 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     'dumplings',  # "Dumplings Biff/Kyckling/Vegetarisk" — flavor is filling type, not ingredient
     'edamame',  # "Edamame Rostade Havssalt & Olivolja" — roasted snack, olivolja/salt are preparation
     'olivolja',  # "Olivolja Citron Extra Virgin" — citron is flavor
+    'sesamolja',  # "Sesamolja Mörkrostad" — mörkrostad is the process/flavor, not ingredient
     'breoliv',  # "BreOliv Olivolja & sheanötter" — spread, olivolja is component not standalone oil
     'breton',  # "Breton Olivolja & basilika" — crackers, olivolja is flavor
     'pommes',  # "Pommes Wavy Blends Paprika" - paprika is flavoring
@@ -441,6 +442,7 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
 
     # Preserved/marinated items where chili/herbs are flavors
     'vitlöksklyftor', 'vitloksklyftor',  # "Vitlöksklyftor Chili" — chili is flavoring
+    'coleslaw',  # "Coleslaw Chili Pepper" — chili is flavoring on the deli salad
 
     # Kaviar — "Kaviar Dill" has dill as flavoring, not herb ingredient
     'kaviar',

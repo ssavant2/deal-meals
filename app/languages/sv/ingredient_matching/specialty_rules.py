@@ -47,7 +47,8 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     'tomat': {
         'körsbär', 'körsbärs', 'cherry',  # cherry tomatoes ≠ regular
         'plommon', 'plommontomater',  # plum tomatoes ≠ small tomatoes
-        'soltorkad', 'soltorkade',  # sun-dried ≠ fresh/canned
+        'torkad', 'torkade',  # plain dried tomatoes ≠ fresh — recipes saying "tomater, torkade" should not match fresh tomatoes
+        'soltorkad', 'soltorkade',  # sun-dried (more specific variant of dried) ≠ fresh/canned
         'solt', 'secchi',  # abbreviated/Italian for sun-dried
         'krossad', 'krossade', 'passerade',  # canned forms
         'finkrossad', 'finkrossade',  # "Tomater Finkrossade" variant of krossade
@@ -60,6 +61,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     'tomater': {
         'körsbär', 'körsbärs', 'cherry',
         'plommon', 'plommontomater',
+        'torkad', 'torkade',  # plain dried ≠ fresh
         'soltorkad', 'soltorkade',
         'solt', 'secchi',  # abbreviated/Italian for sun-dried
         'krossad', 'krossade', 'passerade',
@@ -68,16 +70,19 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'burk', 'konserverad', 'konserverade',
         'dop',  # DOP = Italian canned-quality cert
     },
-    # Cherry tomatoes: sun-dried ≠ canned/fresh
+    # Cherry tomatoes: dried ≠ fresh
     'körsbärstomat': {
+        'torkad', 'torkade',
         'soltorkad', 'soltorkade', 'solt', 'secchi',
         'tomatjuice', 'juice',
     },
     'körsbärstomater': {
+        'torkad', 'torkade',
         'soltorkad', 'soltorkade', 'solt', 'secchi',
         'tomatjuice', 'juice',
     },
     'småtomat': {
+        'torkad', 'torkade',
         'soltorkad', 'soltorkade', 'solt', 'secchi',
         'tomatjuice', 'juice',
     },
@@ -1433,10 +1438,13 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'stänger': {'stång', 'stänger', 'hel'},
     'hel': {'stång', 'stänger', 'hel'},
     # Sun-dried tomatoes: recipe says "soltorkade", product may say "solt" or "secchi" (Italian)
-    'soltorkade': {'soltorkade', 'soltorkad', 'solt', 'secchi'},
-    'soltorkad': {'soltorkade', 'soltorkad', 'solt', 'secchi'},
-    'solt': {'soltorkade', 'soltorkad', 'solt', 'secchi'},
-    'secchi': {'soltorkade', 'soltorkad', 'solt', 'secchi'},
+    'soltorkade': {'soltorkade', 'soltorkad', 'solt', 'secchi', 'torkad', 'torkade'},
+    'soltorkad': {'soltorkade', 'soltorkad', 'solt', 'secchi', 'torkad', 'torkade'},
+    'solt': {'soltorkade', 'soltorkad', 'solt', 'secchi', 'torkad', 'torkade'},
+    'secchi': {'soltorkade', 'soltorkad', 'solt', 'secchi', 'torkad', 'torkade'},
+    # Recipes saying plain "torkad/torkade" accept any dried form (soltorkad sub-type)
+    'torkad': {'torkad', 'torkade', 'torkat', 'soltorkad', 'soltorkade', 'solt', 'secchi'},
+    'torkade': {'torkad', 'torkade', 'torkat', 'soltorkad', 'soltorkade', 'solt', 'secchi'},
     # Ground spice adjective forms: malen/mald/malet/malda are the same word in different grammatical forms
     'malen': {'malen', 'mald', 'malet', 'malda'},
     'mald': {'malen', 'mald', 'malet', 'malda'},

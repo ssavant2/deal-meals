@@ -3200,12 +3200,12 @@ entry_id = "sv-se.alias.saltgurka_140"
 language = "sv"
 market = "SE"
 canonical = "inlagdgurka"
-status = "active"
+status = "inactive"
 variants = ["saltgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated: saltgurka is lake-fermented (Polish/Russian style), distinct in taste and texture from ättiks-pickled smörgåsgurka/bordsgurka/cornichons. Specific recipe ingredient → exact match or zero, no fallback to generic inlagdgurka."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -9156,4 +9156,70 @@ layer_role = "ingredient_parent_mapping"
 [[entries.positive_examples]]
 ingredient = "paprikapulver"
 offer_name = "Krydda Paprika"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.flaskfile.flaskfileer"
+language = "sv"
+market = "SE"
+canonical = "fläskfilé"
+status = "active"
+variants = ["fläskfiléer", "fläskfileer"]
+ingredient_terms = ["fläskfilé"]
+source_refs = ["manual:ingredient_parent_flaskfile_flaskfileer"]
+layer_policy = ["ingredient_alias"]
+notes = "Plural fläskfiléer normalizes mid-compound to fläskfileer (accent stripped); both forms map to fläskfilé."
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "fläskfilé"
+variant = "fläskfiléer"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "fläskfilé"
+variant = "fläskfileer"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "Fläskfiléer"
+offer_name = "Fläskfilé Färsk ca 500g ICA"
+offer_category = "meat"
+expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.tunnbrod.njalla"
+language = "sv"
+market = "SE"
+canonical = "tunnbröd"
+status = "inactive"
+variants = ["njalla", "sarek", "abisko"]
+ingredient_terms = ["tunnbröd"]
+source_refs = ["manual:ingredient_parent_tunnbrod_njalla"]
+layer_policy = ["ingredient_alias"]
+notes = "Polarbröd tunnbröd-varieties (Njalla, Sarek, Abisko) — all map to tunnbröd so recipes naming a specific variety match the broader tunnbröd family."
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "tunnbröd"
+variant = "njalla"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "tunnbröd"
+variant = "sarek"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.coverage]]
+source_family = "ingredient_parent"
+canonical = "tunnbröd"
+variant = "abisko"
+layer_role = "ingredient_parent_mapping"
+
+[[entries.positive_examples]]
+ingredient = "Njalla"
+offer_name = "Tunnbröd Njalla 250g Polarbröd"
+offer_category = "bread"
 expected = 1

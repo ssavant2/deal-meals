@@ -124,7 +124,9 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('smörgåsgurkor', 'inlagdgurka'),
     ('smorgasgurkor', 'inlagdgurka'),
     ('pressgurka', 'inlagdgurka'),
-    ('saltgurka', 'inlagdgurka'),
+    # saltgurka removed from inlagdgurka mapping — saltgurka is lake-fermented
+    # (Polish/Russian style), distinct in taste/texture from ättiks-pickled
+    # smörgåsgurka/bordsgurka/cornichons. Stefan policy: specific → exact or zero.
     ('saltgurkor', 'inlagdgurka'),
     ('pickles', 'inlagdgurka'),
     ('pickle', 'inlagdgurka'),
@@ -859,6 +861,22 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('balsamico tryffel', 'balsamicotryffel'),
     ('balsamico ingefära', 'balsamicoingefära'),
     ('balsamico ingefara', 'balsamicoingefara'),
+    # Vit choklad is a distinct ingredient (cocoa butter + milk + sugar, no
+    # cocoa solids) — must not match plain or dark chocolate. Compound-isolate
+    # via space normalization so "vit choklad" recipes match only "Vit Choklad"
+    # products. Mörk choklad stays generic (matches plain choklad as fallback).
+    ('vit choklad', 'vitchoklad'),
+    ('vita choklad', 'vitchoklad'),
+    # Mango curry is a specific flavored spice blend (Santa Maria Mangocurry),
+    # not plain curry. Compound-isolate so "Mango Curry" recipes match only
+    # mangocurry-named products.
+    ('mango curry', 'mangocurry'),
+    # Polarbröd tunnbröd varieties (Njalla, Sarek, Abisko) — substitute to
+    # 'tunnbröd' so all varieties cross-match within the tunnbröd family.
+    # Liba tunnbröd brand has its own native 'tunnbröd' keyword extraction.
+    ('njalla', 'tunnbröd'),
+    ('sarek', 'tunnbröd'),
+    ('abisko', 'tunnbröd'),
     ('earl grey', 'earlgrey'),
     ('pad thai sås', 'padthaisås'),
     ('pad thai-sås', 'padthaisås'),

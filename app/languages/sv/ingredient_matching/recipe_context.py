@@ -63,9 +63,18 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
         'mexikansk', 'burrito', 'fajita', 'enchilada',
         'quesadilla', 'nacho', 'nachos', 'wrap',
     },
+    # Gyros / Greek-marinated chicken products require a Greek recipe context.
+    # 'pita' removed — pita is shared across Greek/Middle-Eastern/Turkish
+    # cuisines (shawarma, kebab, dürüm all use it). Genuine Greek recipes
+    # should still trigger via gyros/souvlaki/tzatziki/grekisk/kalamata or
+    # named dish words (moussaka, pastitsio, spanakopita, dolmades).
     'gyros': {
-        'gyros', 'souvlaki', 'grekisk', 'pita',
-        'tzatziki', 'medelhav',
+        'gyros', 'souvlaki', 'grekisk', 'medelhav',
+        'tzatziki', 'kalamata',
+        'moussaka', 'pastitsio',
+        'dolma', 'dolmades',
+        'spanakopita', 'tiropita',
+        'taramosalata',
     },
     # Thaikryddad products require a Thai/Asian recipe context.
     # Without thai context (wok, pad thai, curry, kokosmjölk, etc.) a

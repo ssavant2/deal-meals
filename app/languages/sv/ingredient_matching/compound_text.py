@@ -64,6 +64,7 @@ _COMPOUND_WORDS_SET: FrozenSet[str] = frozenset({
     'vaniljextrakt',  # vanilla extract
     'vaniljstång', 'vaniljstang',  # vanilla pod
     'vaniljpulver',  # vanilla powder
+    'vaniljgrädde', 'vaniljgradde',  # ready-made vanilla cream - NOT plain whipping cream
 
     # Cereal/flake compounds
     'cornflakes',  # "corn flakes" = "cornflakes", not just "flakes"
@@ -169,6 +170,8 @@ _COMPOUND_STRICT_KEYWORDS: FrozenSet[str] = frozenset({
         'lökar',     # silverlökar vs lökar — silver prefix must match
         'korv',      # kycklingkorv, falukorv — type prefix must match
         'korvar',    # vegokorvar (plural) — same as korv
+        'kex',       # digestivekex, mariekex, smörgåskex — type prefix must match
+                     # standalone "kex" matches all (no compound restriction)
         'chorizo',   # vegochorizo → product must have "vego" prefix
                      # standalone "chorizo" matches all (no compound restriction)
         'burgare',   # vegoburgare → product must have "vego" prefix
