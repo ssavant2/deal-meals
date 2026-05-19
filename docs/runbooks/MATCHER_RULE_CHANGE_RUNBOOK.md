@@ -340,6 +340,17 @@ Common Python runtime data surfaces now have CLI-backed overlay coverage. Use
 ./bin/dm matcher add ksbc ris --context risotto --reason "Risotto context should not fall back to plain rice."
 ```
 
+Watch for space-normalized compound blockers. If a space-normalization joins the
+problem phrase, for example `balsamico ingefära` -> `balsamicoingefära`, a plain
+FPB/PNB/KSBC blocker such as `balsamico` may not fire on the joined runtime
+token. `dm matcher add pnb|fpb|ksbc` warns when it sees this shape; include the
+suggested joined blocker as well when the rule is meant to block that compound.
+
+PNB and GPB are product/backend proof surfaces. Do not treat a passing or
+failing `matches_ingredient()` check alone as enough evidence for a product-name
+blocker; use backend/product diagnostics or a focused behavior sanity when the
+generated table canary is not enough.
+
 The same overlay file also backs space-normalization, flavor/carrier,
 processed-food, cuisine-context, compound-protection, specialty-qualifier, and
 qualifier-equivalent commands. These commands generate table-level or
@@ -620,6 +631,11 @@ where the fix is a narrow runtime dictionary/guard.
    FPB, KSBC, cuisine, compound, specialty, flavor/carrier, processed-food, or
    space-normalization data to historical Python tables unless no CLI surface
    fits.
+
+   If the CLI warns that a blocker/context is hidden by a joined
+   space-normalized compound, add the suggested joined form too. This is common
+   when a visible product phrase becomes one runtime token before FPB/PNB/KSBC
+   checks.
 
    For GPB, `STOP_WORDS`, form rules, or local backend guards, edit the owning
    Python surface beside the existing local pattern.

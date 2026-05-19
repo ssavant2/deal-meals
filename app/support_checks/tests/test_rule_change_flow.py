@@ -1454,6 +1454,91 @@ def normalize_probe(text: str) -> str:
             )
             self.assertEqual(after_inactivate["normalized"], "phase space")
 
+    def test_phase14_runtime_blocker_warns_for_space_normalized_compound(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            space_norm = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "space-normalization",
+                    "phase blocker",
+                    "--target",
+                    "phaseblocker",
+                    "--reason",
+                    "Synthetic joined compound warning setup.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(space_norm.returncode, 0, space_norm.stderr + space_norm.stdout)
+
+            warning = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "fpb",
+                    "blocker",
+                    "--blockers",
+                    "phase",
+                    "--reason",
+                    "Synthetic missing joined blocker warning.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--dry-run",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(warning.returncode, 0, warning.stderr + warning.stdout)
+            warning_output = warning.stderr + warning.stdout
+            self.assertIn(
+                "space-normalization joins 'phase blocker' -> 'phaseblocker'",
+                warning_output,
+            )
+            self.assertIn("Add 'phaseblocker' too", warning_output)
+
+            covered = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "fpb",
+                    "blocker",
+                    "--blockers",
+                    "phase,phaseblocker",
+                    "--reason",
+                    "Synthetic joined blocker covered.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--dry-run",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(covered.returncode, 0, covered.stderr + covered.stdout)
+            self.assertNotIn("may not fire on the joined form", covered.stderr + covered.stdout)
+
     def test_phase15_runtime_set_update_cli_writes_keyword_and_carrier_overlays(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)

@@ -399,6 +399,8 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         summary="PRODUCT_NAME_BLOCKERS: product text blocks a matched keyword unless the ingredient asks for it.",
         steps=(
             "Run: ./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason \"<why>\"",
+            "PNB is product-side proof; do not treat matches_ingredient() alone as sufficient behavior evidence.",
+            "If active space-normalization joins the product phrase into a compound, also cover the joined blocker form when warned.",
             "The command writes runtime_rule_overlays.toml, appends a focused sanity canary, and runs Track A gates by default.",
         ),
     ),
@@ -408,6 +410,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         summary="FALSE_POSITIVE_BLOCKERS: ingredient context suppresses a keyword.",
         steps=(
             "Run: ./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason \"<why>\"",
+            "If active space-normalization joins the ingredient phrase into a compound, also cover the joined blocker form when warned.",
             "The command writes runtime_rule_overlays.toml, appends a focused sanity canary, and runs Track A gates by default.",
         ),
     ),
@@ -427,6 +430,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         summary="KEYWORD_SUPPRESSED_BY_CONTEXT: ingredient context makes a generic keyword irrelevant.",
         steps=(
             "Run: ./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason \"<why>\"",
+            "If active space-normalization joins the context phrase into a compound, also cover the joined context form when warned.",
             "Use this carefully: KSBC is semantic and can suppress useful generic fallbacks.",
         ),
     ),
@@ -2048,6 +2052,93 @@ def _keyword_synonym_space_norm_warnings(canonical: str, variants: tuple[str, ..
     return tuple(warnings)
 
 
+def _text_contains_runtime_term(text: str, term: str) -> bool:
+    if not text or not term:
+        return False
+    return re.search(rf"(?<!\w){re.escape(term)}(?!\w)", text) is not None
+
+
+def _space_normalization_pairs_for_tree(paths: MatcherPaths) -> tuple[tuple[str, str], ...]:
+    try:
+        from languages.sv.ingredient_matching.normalization import _SPACE_NORMALIZATIONS
+    except ModuleNotFoundError:
+        from app.languages.sv.ingredient_matching.normalization import _SPACE_NORMALIZATIONS
+
+    pairs: list[tuple[str, str]] = [
+        (_runtime_rule_normalize_text(source), _runtime_rule_normalize_text(target))
+        for source, target in _SPACE_NORMALIZATIONS
+    ]
+
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    for entry in sections.get("space_normalizations", []):
+        if not _runtime_overlay_entry_is_active(entry):
+            continue
+        source = _runtime_rule_normalize_text(str(entry.get("source", "")))
+        target = _runtime_rule_normalize_text(str(entry.get("target", "")))
+        if source and target:
+            pairs.append((source, target))
+
+    deduped: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for source, target in pairs:
+        key = (source, target)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(key)
+    return tuple(deduped)
+
+
+def _runtime_space_norm_compound_warnings(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeOverlaySurface,
+    keyword: str,
+    values: tuple[str, ...],
+) -> tuple[str, ...]:
+    if surface.command not in {"pnb", "fpb", "ksbc"}:
+        return ()
+
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    normalized_values = tuple(_runtime_rule_normalize_text(value) for value in values)
+    value_set = set(normalized_values)
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    existing_values = (
+        _runtime_overlay_existing_values(sections, surface, keyword)
+        | _live_runtime_mapping_values(surface, keyword, paths)
+        | value_set
+    )
+
+    warnings: list[str] = []
+    for source, target in _space_normalization_pairs_for_tree(paths):
+        if source == target or not source or not target:
+            continue
+        if re.search(r"[\s-]", target):
+            continue
+        if target in existing_values:
+            continue
+        if not _text_contains_runtime_term(source, normalized_keyword):
+            continue
+        matched_values = [
+            value for value in normalized_values
+            if value != target and _text_contains_runtime_term(source, value)
+        ]
+        if not matched_values:
+            continue
+        warnings.append(
+            "space-normalization joins "
+            f"{source!r} -> {target!r}; {surface.command} {surface.value_field} "
+            f"{', '.join(repr(value) for value in matched_values)} may not fire on the joined form. "
+            f"Add {target!r} too if this rule must block that compound."
+        )
+    return tuple(warnings)
+
+
+def _emit_runtime_authoring_warnings(warnings: tuple[str, ...]) -> None:
+    for warning in warnings:
+        typer.secho(f"Warning: {warning}", fg=typer.colors.YELLOW, err=True)
+
+
 def _runtime_overlay_value_field(section: str) -> str:
     for surface in RUNTIME_OVERLAY_SURFACES.values():
         if surface.section == section:
@@ -3503,6 +3594,15 @@ def _add_runtime_overlay_rule(
     paths = _paths(tree_root)
     if paths.app_dir != APP_DIR and run_gates and not dry_run:
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+
+    _emit_runtime_authoring_warnings(
+        _runtime_space_norm_compound_warnings(
+            paths=paths,
+            surface=surface,
+            keyword=keyword,
+            values=values,
+        )
+    )
 
     policy_ref = policy_ref or f"runtime_{surface.command}_{_slug(keyword)}_{_slug(values[0])}"
     overlay_preview = _append_runtime_overlay_entry(
