@@ -7,3 +7,8 @@
 #   [[product_name_blockers]]
 #   [[false_positive_blockers]]
 #   [[keyword_suppressed_by_context]]
+
+[[product_name_blockers]]
+keyword = "rom"
+blockers = ["sikrom"]
+reason = "Sikrom (white-fish roe) is not rum or rum-aroma; recipes wanting sikrom use compound keyword"
