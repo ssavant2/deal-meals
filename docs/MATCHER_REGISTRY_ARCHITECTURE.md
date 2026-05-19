@@ -1,7 +1,9 @@
 # Matcher Registry Architecture
 
 This note describes the durable Swedish matcher-registry artifacts and the
-support-check contracts that keep them in sync.
+support-check contracts that keep them in sync. For the day-to-day workflow,
+track choice, and command recipes, see
+`docs/runbooks/MATCHER_RULE_CHANGE_RUNBOOK.md`.
 
 ## Source Layers
 
@@ -31,6 +33,10 @@ support-check contracts that keep them in sync.
 - `app/support_checks/schemas/prefixes.yml` is the single prefix schema for
   permanent `source_ref`, temporary fixture/policy/source refs, and inventory
   `adapter_ref` prefixes.
+- `app/languages/sv/ingredient_matching/runtime_rule_overlays.toml` stores
+  CLI-authored Track A runtime data overlays. It is tracked production source,
+  hash-covered by matcher/offer/recipe compiler versions, and loaded through
+  `runtime_rule_overlays.py`.
 
 Support checks and readers access generated JSON through
 `app/support_checks/matcher_contracts.py`; the L3-C direct-reader audit in
@@ -42,6 +48,63 @@ The authoritative TOML sources live in
 directory's README. The current source/generation report is
 `app/support_checks/reports/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md`. Pre-flight
 rejects generated JSON that no longer matches the TOML sources byte-for-byte.
+
+## Runtime Rule Overlay TOML
+
+`runtime_rule_overlays.toml` is the declarative authoring surface for new
+runtime data rules that used to require hand-editing large Python literals.
+Use `./bin/dm matcher add <shape>` rather than editing it by hand.
+
+New CLI-authored rows use v2 metadata:
+
+- `id`: stable overlay entry id
+- `status`: usually `active`; `inactive` keeps the row but removes it from the
+  effective runtime overlay
+- `reason`: why the rule exists
+- `inactive_reason`: required context when an entry is intentionally disabled
+
+Statusless historical overlay rows are treated as active only for backwards
+compatibility. Do not add new statusless rows.
+
+Supported sections are:
+
+```text
+product_name_blockers, false_positive_blockers,
+keyword_suppressed_by_context, global_product_name_blockers,
+keyword_set_updates, carrier_set_updates, space_normalizations,
+carrier_context_required, context_required_words,
+ingredient_requires_in_product, context_word_keyword_exemptions,
+cuisine_context, compound_protection_updates, specialty_qualifiers,
+qualifier_equivalents, processed_product_rules,
+processed_rule_compound_exemptions, strict_processed_rules,
+spice_fresh_rules, product_name_substitutions,
+secondary_ingredient_patterns
+```
+
+Runtime merge order is intentionally simple:
+
+```text
+historical Python table + active overlay additions - active overlay removals
+```
+
+Most map/set sections are additive; `keyword_set_updates` and
+`carrier_set_updates` carry explicit `action = "add"|"remove"`. Inactivation
+removes only the overlay row from the effective overlay; it does not mutate the
+historical Python base tables.
+
+Owning runtime readers:
+
+| Module | Overlay sections read |
+| --- | --- |
+| `blocker_data.py` | PNB, FPB, GPB |
+| `keywords.py` | stop words, non-food keywords, flavor words, important short keywords, processed-food and qualifier-required keyword updates |
+| `carrier_context.py` | carrier products, carrier/context requirements, context exemptions, ingredient-requires-product context, KSBC |
+| `normalization.py` | space normalizations |
+| `recipe_context.py` | cuisine context |
+| `compound_text.py` | compound/subword protection updates |
+| `specialty_rules.py` | specialty qualifier and qualifier-equivalent updates |
+| `processed_rules.py` | processed, strict-processed, compound exemption, and spice/fresh rules |
+| `match_filters.py` | product-name substitutions, secondary ingredient patterns, qualifier-required keyword exports |
 
 ### Pre-flight as the consistency gate
 
@@ -99,11 +162,11 @@ For live TOML registry rule authoring, prefer the unified CLI:
 ./bin/dm matcher add extraction-helper ...
 ```
 
-For runtime data-rule authoring, prefer the same CLI entry point:
-`pnb`, `fpb`, `ksbc`, `space-normalization`, `flavor-word`,
-`carrier-product`, `important-short-keyword`, `processed-food`,
-`cuisine-context`, `compound-protection`, `specialty-qualifier`, and
-`qualifier-equivalent` all write `runtime_rule_overlays.toml`.
+For runtime data-rule authoring, prefer the same CLI entry point. Supported
+runtime shapes include `pnb`, `fpb`, `ksbc`, `gpb`, stop/non-food filters,
+space-normalization, flavor/carrier, context, cuisine, compound, specialty,
+processed/form, substitution, and secondary-pattern commands; all write
+`runtime_rule_overlays.toml`.
 
 Use `./bin/dm matcher guide <shape>` to see whether a rule shape has an
 authoring command or remains a manual runtime-table change. `match_bridge.toml`

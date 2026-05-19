@@ -347,6 +347,45 @@ table-level or deterministic sanity canaries. Add a richer manual behavior case
 beside the generated one when backend-only proof is needed. Local backend guards
 still use manual editing plus `./bin/dm matcher gates --track A|B`.
 
+### Read-Only Explain Trace
+
+Use `dm matcher explain` when a pair surprises you, especially before reading
+large blocker tables by hand:
+
+```bash
+./bin/dm matcher explain \
+  --offer "Crema di Balsamico Ingefära" \
+  --ingredient "ingefära"
+```
+
+Typical output is intentionally narrow:
+
+```text
+Ingredient: ingefära
+Product: Crema di Balsamico Ingefära
+Normalized product: crema di balsamicoingefära
+Ingredient keywords:
+  - ingefära
+Product keywords:
+  - balsamicoingefära
+Fast matcher result: NO MATCH
+Recipe-style validator result: BLOCKED / NO MATCH
+```
+
+When a blocker fires, the trace also includes lines like:
+
+```text
+Likely blocking reasons in fast matcher:
+  - ost: false-positive blockers present -> ostron, ostronsås
+Post-match validator notes:
+  - blocked by false-positive blockers in fast matcher: ost
+```
+
+Read `explain` as a trace of the high-friction path: normalization, extracted
+product and ingredient keywords, relevant blocker context, and the current
+fast/backend-style result. It is an audit helper, not a second matcher
+implementation.
+
 ## Cold-Start Details
 
 Read this section first if you have never seen this runbook before. Also return
@@ -497,6 +536,9 @@ These terms are used throughout the matcher and this runbook:
 | GPB | `GLOBAL_PRODUCT_NAME_BLOCKERS`: product text blocks all recipe matches for globally excluded non-food, supplement, pet-food, tool, or similar product families. |
 | BDPK | `BIDIRECTIONAL_PER_KEYWORD`: product and ingredient qualifiers must agree for a keyword. |
 | KSBC | `KEYWORD_SUPPRESSED_BY_CONTEXT`: suppresses a generic keyword when ingredient context makes it irrelevant. |
+| effective rule | The merged runtime rule after historical Python data and active overlay TOML entries have been combined. `dm matcher list --effective` shows this view and its origins. |
+| post-normalized compound | A joined runtime token created by space-normalization, such as `balsamico ingefära` becoming `balsamicoingefära`; blockers may need to cover this joined form. |
+| proof mode | The behavior layer a command or sanity row proves: `table`, `extraction`, `fast-match`, or `backend-match`. Product-side blockers usually need backend/product proof, not only `matches_ingredient()`. |
 | parity | Agreement between live/fullscan, compiled/fullscan, compiled/routed, and compiled/hint-first paths. |
 | freshness | Whether compiled recipe/offer data, term indexes, and active cache use current matcher/compiler versions. |
 
@@ -510,6 +552,10 @@ blocker for every new flavor.
 Prefer the highest-level surface that fits the chosen track. For Track B, favor
 durable registry/contract surfaces. For Track A, a narrow legacy runtime dict
 can be the correct surface.
+
+If you do not yet know which matcher layer is failing, start with the Layer
+Decision Tree below or run `dm matcher explain` before choosing a row in this
+table.
 
 | Change type | Prefer | Use when | Avoid |
 | --- | --- | --- | --- |
@@ -1299,6 +1345,14 @@ the new canonical is the desired one.
   plain-sensitive rule is the actual model.
 - General: letting stale cache explain away a semantic fixture failure; run
   `dev_reload.py` before cache-backed validation after matcher runtime changes.
+- General: using FPB for a product-side problem. Check `dm matcher explain` and
+  `dm matcher list pnb|gpb --effective --term <term>` before choosing FPB.
+- General: assuming FPB should fire just because the visible blocker word is in
+  the product/ingredient text. Space-normalization may have joined the words
+  into a post-normalized compound before the blocker check.
+- General: adding a new PNB key without first checking
+  `dm matcher list pnb --effective --term <term>`; an effective rule may already
+  exist in the historical base, historical updates, or overlay TOML.
 - General: using direct `_SPACE_NORM_PATTERN.sub(...)` or importing
   `_SPACE_NORM_LOOKUP` outside `ingredient_matching/normalization.py`; pre-flight
   flags this because `_apply_space_normalizations()` is the supported entry
