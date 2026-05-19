@@ -2913,6 +2913,45 @@ def validate_offer_match_candidate(
             )
             matched_keyword = None
 
+        # Dried-vs-canned chickpeas: when recipe explicitly asks for dried/raw
+        # kikärtor (e.g. for roasting from raw), block the canned/ready-to-eat
+        # product variants. The Swedish ICA assortment sells canned/tetra
+        # kikärtor in 380–560g pack sizes (with liquid weight), while dried
+        # raw kikärtor come in 500g+ pouches — but only one ICA product spells
+        # out "Torra" in the name. Classify by name first, then fall back to
+        # weight ≥ 800g for unlabeled dried pouches.
+        if matched_keyword == 'kikärtor' and (
+            'torkade' in ing_norm or 'torkad' in ing_norm
+            or 'torra' in ing_norm or 'torr ' in ing_norm
+        ):
+            product_lower = (
+                offer_precomputed.get('name_normalized', '')
+                if offer_precomputed is not None
+                else offer_name_normalized
+            )
+            name_says_dried = 'torra' in product_lower or 'torkade' in product_lower or 'torkad' in product_lower
+            name_says_canned = (
+                'kokta' in product_lower or 'kokt ' in product_lower
+                or 'i lag' in product_lower or 'saltlake' in product_lower
+            )
+            offer_weight = (
+                offer_precomputed.get('weight_grams')
+                if offer_precomputed is not None
+                else getattr(offer, 'weight_grams', None)
+            )
+            weight_says_dried = offer_weight is not None and offer_weight >= 800
+            is_dried_product = name_says_dried or (weight_says_dried and not name_says_canned)
+            if not is_dried_product:
+                _record_validation_event(
+                    validation_events,
+                    'validation_reject',
+                    rule='carrier_flavor_context',
+                    detail='dried_kikartor_required',
+                    ing_idx=matched_ing_idx,
+                    keyword=matched_keyword,
+                )
+                matched_keyword = None
+
     if not matched_keyword:
         return None
 

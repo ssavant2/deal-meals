@@ -10570,6 +10570,28 @@ test("Thaikryddad allowed in recipe with kaffirlime ingredient (pantry cue)",
 test("Thaikryddad allowed when recipe mentions thai basilika (pantry cue)",
      recipe_match_num_named("Krapow gai", ["400 g kycklingfilé", "1 knippe thai basilika"], THAI_OFFER), 1)
 
+# Kikärtor dried-vs-canned: when recipe explicitly asks for dried (torkade/torra)
+# kikärtor (e.g. for roasting from raw), block ready-to-eat / canned-in-brine variants.
+# Classification by name signal first ('Torra'/'Torkade' or 'Kokta'/'i lag'), then
+# weight fallback: ≥ 800g = dried, otherwise canned. ICA/Zeta/Sedir 380–560g pack
+# sizes are canned-in-tetra/jar even when the name does not say so explicitly.
+def _kikartor_offer(name, weight):
+    return {"name": name, "weight_grams": weight, "category": "pantry"}
+test("kikärtor canned-i-lag blocked from torkade recipe",
+     recipe_match_num_named("Rostade gråärtor", ["torkade gråärtor (eller kikärtor)"], _kikartor_offer("Kikärtor Kokta I Lag 540g Forum", 540)), 0)
+test("kikärtor unlabeled 380g blocked from torkade recipe (canned by weight)",
+     recipe_match_num_named("Rostade kikärtor", ["torkade kikärtor"], _kikartor_offer("Kikärtor 380g ICA", 380)), 0)
+test("kikärtor unlabeled 540g blocked from torkade recipe (canned by weight)",
+     recipe_match_num_named("Rostade kikärtor", ["torkade kikärtor"], _kikartor_offer("Kikärtor 540g Sedir Food", 540)), 0)
+test("kikärtor explicit 'Torra' allowed in torkade recipe (name override)",
+     recipe_match_num_named("Rostade kikärtor", ["torkade kikärtor"], _kikartor_offer("Kikärtor Torra Ekologiska 500g ICA", 500)), 1)
+test("kikärtor 800g+ allowed in torkade recipe (weight signal)",
+     recipe_match_num_named("Rostade kikärtor", ["torkade kikärtor"], _kikartor_offer("Kikärtor 800g ICA Basic", 800)), 1)
+test("kikärtor unlabeled 540g still matches plain kikärtor recipe (no dried qualifier)",
+     recipe_match_num_named("Kikärtgryta", ["400 g kikärtor"], _kikartor_offer("Kikärtor Kokta I Lag 540g Forum", 540)), 1)
+test("kikärtor 380g matches kokta-kikärtor recipe",
+     recipe_match_num_named("Hummus", ["kokta kikärtor"], _kikartor_offer("Kikärtor 380g ICA", 380)), 1)
+
 # Q74: BDPK nötmix — flavored snack mixes only match flavor-matched ingredients
 # (BBQ product ↔ BBQ recipe; plain saltad/rostad ↔ plain products)
 test("nötmix BBQ blocked from plain saltad/rostad recipe",
