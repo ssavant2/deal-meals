@@ -60,6 +60,13 @@ keyword = "philadelphiaost"
 blockers = ["tomatsopp", "chips", "dessertost", "salad", "mediterranean", "vegansk", "kajmak", "pineapple", "almond", "chevre", "pepper", "4 peppar", "plant based", "växtbaserad"]
 reason = "Philadelphiaost route inherits all färskost PNB blockers — same product types (flavored/plant cream cheese, soup products) must be excluded via this keyword path too"
 
+[[product_name_blockers]]
+id = "runtime_pnb_persiljestjalkar"
+status = "active"
+keyword = "persiljestjälkar"
+blockers = ["kryddsmör", "bruschetta", "krutonger"]
+reason = "persiljestjälkar ingredient should not match flavored butter/croutons — PNB on parent keyword persilja does not fire for child keyword (pre-resolution lookup)"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -80,6 +87,13 @@ status = "active"
 keyword = "körsbär"
 blockers = ["körsbärssylt"]
 reason = "Smart-blocker allows körsbär when it appears as a prefix in compound 'körsbärssylt' — compound form needed explicitly so startswith check blocks it"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_fiskfile"
+status = "active"
+keyword = "fiskfilé"
+blockers = ["tonfiskfilé", "tonfiskfilé"]
+reason = "tonfiskfilé recipe should not match generic white fish filé products — tonfisk (tuna) is a specific saltwater fish with distinct texture; compound substring 'fiskfilé' in 'tonfiskfilé' causes bleed from torsk/kolja/lax/etc"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
@@ -102,3 +116,11 @@ surface = "important_short_keywords"
 action = "add"
 terms = ["hirs"]
 reason = "Hirs (millet) is a 4-char keyword that gets filtered — real offers exist (Hirs 500g Saltå Kvarn) so it must be in IMPORTANT_SHORT_KEYWORDS"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_kommer"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["kommer"]
+reason = "Verb 'kommer' (comes) leaks as keyword from children's book/toy product names like 'Halvan Här kommer flygplanet', 'Vems rumpa kommer här?' — non-food items that match ingredient text containing 'kommer'."

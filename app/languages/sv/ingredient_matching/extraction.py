@@ -1833,6 +1833,9 @@ def extract_keywords_from_ingredient(
     ):
         return ['förkoktmajskolv', 'majskolv']
 
+    if 'rotfruktschips' in name:
+        return ['rotfruktschips']
+
     if 'rotfrukter' in name or 'rotfrukt' in name:
         return ['rotfruktsmix', 'morot', 'palsternacka', 'kålrot', 'rotselleri', 'rödbeta']
 

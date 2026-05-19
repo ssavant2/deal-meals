@@ -2757,12 +2757,14 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'fond du chef',  # stock concentrate ≠ beef meat
         'hamburgare',    # "Hamburgare Nötkött 900g Julles" — pre-formed patties ≠ raw strips
         'deliköttbullar',  # "Deliköttbullar Nötkött & grönsaker Felix" — pre-made meatballs ≠ raw beef
+        'corned',        # "Corned beef 340g Sevan" — cured/canned ≠ fresh raw beef for soups/stews
     },
     'notkott': {
         'fruktmix', 'bärmix', 'oumph', 'gelatinblad',
         'fågelmatare', 'ekosalami', 'salami', 'oxpytt',
         'jerky', 'beef jerky', 'torkat kött', 'märgben', 'fond du chef',
         'hamburgare', 'deliköttbullar',
+        'corned',
     },
     # fix_swedish_chars normalizes ASCII `farskost` to the same key as `färskost`,
     # so only a single combined färskost entry should exist here.
