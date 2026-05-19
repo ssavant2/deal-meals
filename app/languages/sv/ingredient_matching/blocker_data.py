@@ -1944,9 +1944,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'flarn',
         'tunnbrödskex',  # "Tunnbrödskex Parmigiano Reggiano Wernerssons" — cracker, not cheese
         'pomamore',      # "Pomamore Basilika Parmesan" — pesto/tomato sauce, not cheese
+        'ölkorv',        # "Ölkorv Tryffel & Parmesan" — Swedish beer sausage with parmesan flavor ≠ cheese
     },
     # Compound keyword variant — same blockers must apply when matched via full compound
-    'parmigiano reggiano': {'flarn', 'tunnbrödskex', 'pomamore'},
+    'parmigiano reggiano': {'flarn', 'tunnbrödskex', 'pomamore', 'ölkorv'},
     # Grana Padano — same cheese-chip form issue as parmigiano
     'padano': {
         'flarn',
@@ -2875,6 +2876,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'svartpeppar',    # "Cheddar svartpeppar lagrad" — pepper-flavored
         'rökt', 'rokt',   # "Cheddar Rökt" — smoked variant
         'chili',          # "Hamburgerost Cheddar Chili" — chili-flavored
+        'ölkorv', 'olkorv',  # "Ölkorv Cheddar Snack Strings" — Swedish beer-sausage product, not cheese
     },
     'cheddarost': {
         'sauce',
@@ -2882,6 +2884,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'mjukost',   # tube soft-cheese spread ≠ cheddar cheese for sandwiches/grating
         'ostcreme',  # "Cheddar Ostcreme Middagsmagi" — cheese spread ≠ block/sliced cheddar
         'babybel',   # "Mini Cheddar Babybel" — snack-cheese ball, not sliced burger cheddar
+        'ölkorv', 'olkorv',  # "Ölkorv Cheddar Snack Strings" — Swedish beer-sausage product, not cheese
     },
     'brie': {
         'mjukost',  # tube soft-cheese spread ≠ whole/served brie
@@ -3245,27 +3248,28 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'dumpling', 'dumplings',  # dumpling filling/flavor ≠ fresh garlic
         'krutonger',             # "Krutonger Vitlök & persilja" — croutons ≠ fresh garlic
         'kryddsmör',             # "Kryddsmör Vitlök" — herb butter condiment ≠ raw garlic
+        'ölkorv',                # "Ölkorv Vitlök" — Swedish beer sausage flavored with garlic ≠ raw garlic
     },
     'vitlok': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu', 'dumpling', 'dumplings',
-        'krutonger', 'kryddsmor',
+        'krutonger', 'kryddsmor', 'olkorv',
     },
     # Compound forms of vitlök — same blockers apply
     'vitlöksklyftor': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu', 'dumpling', 'dumplings',
-        'krutonger', 'kryddsmör',
+        'krutonger', 'kryddsmör', 'ölkorv',  # "Ölkorv Vitlök" — Swedish beer sausage flavored with garlic ≠ raw garlic
     },
     'vitloksklyftor': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu',
-        'krutonger', 'kryddsmor',
+        'krutonger', 'kryddsmor', 'olkorv',
     },
     'vitlöksklyfta': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu',
-        'krutonger', 'kryddsmör',
+        'krutonger', 'kryddsmör', 'ölkorv',
     },
     'vitloksklyfta': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu',
-        'krutonger', 'kryddsmor',
+        'krutonger', 'kryddsmor', 'olkorv',
     },
     'vitlöksklyft': {
         'roule', 'bruschetta', 'rapsolja', 'marinerad', 'marinerade', 'tofu',
