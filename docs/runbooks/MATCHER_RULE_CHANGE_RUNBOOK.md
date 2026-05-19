@@ -382,6 +382,19 @@ through large Python tables. The first version is read-only and intentionally
 narrow: it shows extraction, precomputed product keywords, likely PNB/FPB/KSBC
 blockers, and the current fast/recipe-style result for that pair.
 
+Before hand-reading `blocker_data.py`, ask the CLI where an effective blocker
+comes from:
+
+```bash
+./bin/dm matcher list pnb --effective --term <keyword-or-blocker>
+./bin/dm matcher list fpb --effective --term <keyword-or-blocker>
+./bin/dm matcher list ksbc --effective --term <keyword-or-context>
+```
+
+The output distinguishes historical base tables, historical update tables, and
+`runtime_rule_overlays.toml`, which avoids the "nearby dict section" trap in
+large Python files.
+
 The same overlay file also backs stop/non-food filters, space-normalization,
 flavor/carrier, processed-food, cuisine-context, compound-protection,
 specialty-qualifier, qualifier-equivalent, product-name-substitution, and

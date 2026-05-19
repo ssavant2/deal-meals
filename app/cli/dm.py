@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 import tomllib
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Iterable, Literal, Mapping
 import unicodedata
 
 import typer
@@ -3222,6 +3222,102 @@ def _registry_entry_label(record: RegistryEntryRecord) -> str:
     if len(record.terms) > 6:
         term_text += f", ... (+{len(record.terms) - 6})"
     return f"{record.entry_id}\t{record.status}\t{record.surface}\t{record.canonical}\t{term_text}"
+
+
+def _normalized_mapping_origin_rows(
+    *,
+    surface: str,
+    mapping: Mapping[str, Iterable[str]],
+    origin: str,
+) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for keyword, values in mapping.items():
+        normalized_keyword = _runtime_rule_normalize_text(str(keyword))
+        for value in values:
+            rows.append({
+                "surface": surface,
+                "keyword": normalized_keyword,
+                "value": _runtime_rule_normalize_text(str(value)),
+                "origin": origin,
+            })
+    return rows
+
+
+def _filter_origin_rows(rows: list[dict[str, str]], selector: str | None) -> list[dict[str, str]]:
+    if selector is None:
+        return rows
+    selector_norm = _runtime_rule_normalize_text(selector)
+    return [
+        row for row in rows
+        if selector_norm in {row["keyword"], row["value"], row["origin"]}
+    ]
+
+
+def _runtime_effective_origin_rows(surface_key: str, selector: str | None) -> list[dict[str, str]] | None:
+    rows: list[dict[str, str]] = []
+    if surface_key == "pnb":
+        from languages.sv.ingredient_matching.blocker_data import (
+            PRODUCT_NAME_BLOCKER_CLI_UPDATES,
+            _PRODUCT_NAME_BLOCKER_UPDATES,
+            _PRODUCT_NAME_BLOCKERS_RAW,
+        )
+
+        rows.extend(_normalized_mapping_origin_rows(
+            surface="pnb",
+            mapping=_PRODUCT_NAME_BLOCKERS_RAW,
+            origin="historical_base:_PRODUCT_NAME_BLOCKERS_RAW",
+        ))
+        rows.extend(_normalized_mapping_origin_rows(
+            surface="pnb",
+            mapping=_PRODUCT_NAME_BLOCKER_UPDATES,
+            origin="historical_update:_PRODUCT_NAME_BLOCKER_UPDATES",
+        ))
+        rows.extend(_normalized_mapping_origin_rows(
+            surface="pnb",
+            mapping=PRODUCT_NAME_BLOCKER_CLI_UPDATES,
+            origin="runtime_overlay:runtime_rule_overlays.toml",
+        ))
+        return _filter_origin_rows(rows, selector)
+    if surface_key == "fpb":
+        from languages.sv.ingredient_matching.blocker_data import (
+            FALSE_POSITIVE_BLOCKER_CLI_UPDATES,
+            _FALSE_POSITIVE_BLOCKERS_RAW,
+        )
+
+        rows.extend(_normalized_mapping_origin_rows(
+            surface="fpb",
+            mapping=_FALSE_POSITIVE_BLOCKERS_RAW,
+            origin="historical_base:_FALSE_POSITIVE_BLOCKERS_RAW",
+        ))
+        rows.extend(_normalized_mapping_origin_rows(
+            surface="fpb",
+            mapping=FALSE_POSITIVE_BLOCKER_CLI_UPDATES,
+            origin="runtime_overlay:runtime_rule_overlays.toml",
+        ))
+        return _filter_origin_rows(rows, selector)
+    if surface_key == "ksbc":
+        from languages.sv.ingredient_matching.carrier_context import KEYWORD_SUPPRESSED_BY_CONTEXT
+        from languages.sv.ingredient_matching.runtime_rule_overlays import KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES
+
+        overlay_values = {
+            (keyword, value)
+            for keyword, values in KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES.items()
+            for value in values
+        }
+        for row in _normalized_mapping_origin_rows(
+            surface="ksbc",
+            mapping=KEYWORD_SUPPRESSED_BY_CONTEXT,
+            origin="historical_base:KEYWORD_SUPPRESSED_BY_CONTEXT",
+        ):
+            if (row["keyword"], row["value"]) not in overlay_values:
+                rows.append(row)
+        rows.extend(_normalized_mapping_origin_rows(
+            surface="ksbc",
+            mapping=KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES,
+            origin="runtime_overlay:runtime_rule_overlays.toml",
+        ))
+        return _filter_origin_rows(rows, selector)
+    return None
 
 
 def _inactive_reason_comment(reason: str) -> str:
@@ -6657,6 +6753,10 @@ def matcher_list(
         bool,
         typer.Option("--include-inactive", help="Include entries with status = inactive."),
     ] = False,
+    effective: Annotated[
+        bool,
+        typer.Option("--effective", help="List effective runtime values with base/update/overlay origin where supported."),
+    ] = False,
     output_format: Annotated[
         Literal["text", "json"],
         typer.Option("--format", help="Output format."),
@@ -6664,6 +6764,18 @@ def matcher_list(
 ) -> None:
     paths = _paths(tree_root)
     surface_key = surface_name.strip().lower().replace("_", "-")
+    if effective:
+        rows = _runtime_effective_origin_rows(surface_key, term)
+        if rows is None:
+            raise typer.BadParameter(f"--effective is only supported for pnb, fpb, and ksbc; got {surface_name}")
+        if output_format == "json":
+            typer.echo(json.dumps(rows, ensure_ascii=False, indent=2))
+            return
+        for row in rows:
+            typer.echo(f"{row['surface']}\t{row['keyword']}\t{row['value']}\t{row['origin']}")
+        if not rows:
+            typer.echo("No entries found.")
+        return
     if surface_key in RUNTIME_OVERLAY_SURFACES:
         surface = RUNTIME_OVERLAY_SURFACES[surface_key]
         sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)

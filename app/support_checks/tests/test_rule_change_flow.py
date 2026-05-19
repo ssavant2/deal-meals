@@ -2780,6 +2780,67 @@ def normalize_probe(text: str) -> str:
         self.assertIn("keyword-synonym: supported by dm matcher add", synonym.stdout)
         self.assertIn("./bin/dm matcher add keyword-synonym", synonym.stdout)
 
+    def test_phase8_dm_matcher_list_effective_blocker_origins(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        pnb = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "list",
+                "pnb",
+                "--effective",
+                "--term",
+                "havregryn",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        fpb = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "list",
+                "fpb",
+                "--effective",
+                "--term",
+                "ostron",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        overlay = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "list",
+                "pnb",
+                "--effective",
+                "--term",
+                "sikrom",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(pnb.returncode, 0, pnb.stderr + pnb.stdout)
+        self.assertIn("historical_update:_PRODUCT_NAME_BLOCKER_UPDATES", pnb.stdout)
+        self.assertEqual(fpb.returncode, 0, fpb.stderr + fpb.stdout)
+        self.assertIn("historical_base:_FALSE_POSITIVE_BLOCKERS_RAW", fpb.stdout)
+        self.assertEqual(overlay.returncode, 0, overlay.stderr + overlay.stdout)
+        self.assertIn("runtime_overlay:runtime_rule_overlays.toml", overlay.stdout)
+
     def test_phase8_dm_matcher_guide_rejects_unknown_shape(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         result = subprocess.run(
