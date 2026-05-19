@@ -662,6 +662,11 @@ where the fix is a narrow runtime dictionary/guard.
    when a visible product phrase becomes one runtime token before FPB/PNB/KSBC
    checks.
 
+   If `dm matcher add ingredient-parent` warns that parent PNB blockers are not
+   inherited, add the suggested explicit child PNB when the child should share
+   the parent's product-side exclusions. Do not assume blocker inheritance
+   through parent resolution.
+
    For form rules or local backend guards, edit the owning Python surface beside
    the existing local pattern.
 3. Add or adjust a focused regression inside `run_deep_matcher_sanity.py` for
@@ -1353,6 +1358,10 @@ the new canonical is the desired one.
 - General: adding a new PNB key without first checking
   `dm matcher list pnb --effective --term <term>`; an effective rule may already
   exist in the historical base, historical updates, or overlay TOML.
+- General: assuming ingredient-parent mappings inherit parent PNB blockers. PNB
+  lookup can run before parent resolution; use the CLI warning and suggested
+  `dm matcher add pnb ...` command to mirror needed product-side blockers
+  explicitly.
 - General: using direct `_SPACE_NORM_PATTERN.sub(...)` or importing
   `_SPACE_NORM_LOOKUP` outside `ingredient_matching/normalization.py`; pre-flight
   flags this because `_apply_space_normalizations()` is the supported entry
