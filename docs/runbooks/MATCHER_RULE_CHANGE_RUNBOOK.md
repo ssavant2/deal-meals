@@ -1364,6 +1364,13 @@ Use the diagnosis class to choose the next move:
 `parity_mismatches=0` means the live/fullscan/compiled/routed paths agree with
 each other. It does not mean fixture expectations are satisfied.
 
+If `run_deep_matcher_sanity.py` fails with a non-empty `Got` canonical and a
+different non-empty `Expected` canonical, treat it as a canonical-drift review
+before changing runtime code. Synonym, parent, or canonical-rule changes can
+make an older sanity row expect the pre-change spelling even though the matcher
+now resolves the intended family. Update the assertion only after confirming
+the new canonical is the desired one.
+
 ## Common Pitfalls
 
 - Track A: forcing every PNB/FPB/KSBC/GPB runtime fix through fixture/inventory before

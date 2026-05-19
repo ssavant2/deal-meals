@@ -67,6 +67,12 @@ def test(desc, actual, expected):
         print(f"  FAIL: {desc}")
         print(f"    Got:      {actual}")
         print(f"    Expected: {expected}")
+        if isinstance(actual, str) and isinstance(expected, str) and actual and expected:
+            print(
+                "    Hint: observed canonical differs from expected canonical. "
+                "If this follows a synonym/parent/canonical rule change, review "
+                "whether the sanity row should now expect the new canonical."
+            )
 
 
 def kw(product, category=""):
