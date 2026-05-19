@@ -387,6 +387,7 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('mango chutney', 'mangochutney'),
     ('go chu jang', 'gochujang'),
     ('go-chu-jang', 'gochujang'),
+    ('gochujang pasta', 'gochujangpasta'),
     ('orange juice', 'apelsinjuice'),
     ('apelsin dryck', 'apelsinläsk'),
     ('apelsindryck', 'apelsinläsk'),

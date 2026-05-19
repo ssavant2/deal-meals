@@ -314,6 +314,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'wasabipasta',  # wasabi paste
         'tahinipasta',  # tahini paste
         'bönpasta', 'bonpasta',  # bean paste (e.g., Korean doenjang)
+        'gochujangpasta',  # Korean fermented chili paste ≠ pasta noodles
         'pastasås', 'pastasas',  # pasta sauce ≠ dry pasta noodles
         'pastakrydda',  # pasta spice mix ≠ dry pasta noodles
         'vaniljpasta',  # vanilla paste ≠ pasta noodles

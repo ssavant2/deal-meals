@@ -10666,6 +10666,17 @@ test("plain äpple recipe blocked from Tonic Grönt Äpple",
 test("plain citron recipe blocked from Tonic Water Hallon & Citron",
      match("Tonic Water Hallon & Citron 33cl Spirit of Sweden", "1 citron"), None)
 
+# Gochujangpasta (Korean fermented chili paste) — paste ingredient, not pasta noodles.
+# Fits the existing pasta-FPB compound pattern (misopasta, chilipasta, tamarindpasta,
+# wasabipasta, sesampasta). Space normalization joins "gochujang pasta" → "gochujangpasta"
+# so the FPB compound matches even when ingredient text uses a space.
+test("gochujang pasta ingredient blocks plain pasta noodles match",
+     match("Pasta Svensk Penne 500g Kungsörnen", "0.5 msk Gochujang Pasta"), None)
+test("plain pasta recipe still matches penne",
+     match("Pasta Svensk Penne 500g Kungsörnen", "500 g pasta"), "pasta")
+test("gochujang paste product matches gochujang pasta ingredient",
+     match("Gochujang 250g", "0.5 msk Gochujang Pasta"), "gochujang")
+
 # Q74: BDPK nötmix — flavored snack mixes only match flavor-matched ingredients
 # (BBQ product ↔ BBQ recipe; plain saltad/rostad ↔ plain products)
 test("nötmix BBQ blocked from plain saltad/rostad recipe",
