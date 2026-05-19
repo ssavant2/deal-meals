@@ -66,6 +66,10 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     'juice', 'saft', 'läsk', 'lask',
     'soda',   # "Pepsi Max Lime Soda Mix" — soft drink, not ingredient
     'zingo',  # soft drink brand ("Zingo Citron" is NOT citron)
+    'tonic', 'tonic water',  # "Tonic Apelsin", "Tonic Water Hallon & Citron" —
+                              # cocktail mixer, fruit/herb words are flavor variants,
+                              # not standalone ingredients. Plain "tonic" recipes still
+                              # match all tonic products (Q58-7 beverage allowlist).
     'korv',  # "paprikakorv" etc - flavor words shouldn't match recipes
     'bratwurst',  # "Bratwurst Kummin & vitlök" - spices are flavoring
     'ketchup',  # "Ketchup Svartpeppar" — svartpeppar is flavor variant

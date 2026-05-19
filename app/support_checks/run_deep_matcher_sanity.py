@@ -10650,6 +10650,22 @@ test("flavored balsamico tryffel blocked from plain balsamico recipe",
 test("plain balsamico still matches plain recipe",
      match("Crema di Balsamico 180g Zeta", "1 dl balsamico"), "balsamvinäger")
 
+# Tonic as flavor carrier: flavored tonic-water products (Tonic Apelsin, Tonic
+# Grönt Äpple, Tonic Water Hallon & Citron etc.) must not leak fruit/herb
+# keywords into plain fruit recipes. Plain tonic recipes should still match
+# all tonic products (Q58-7 beverage allowlist preserved).
+test("Tonic Apelsin does not extract apelsin keyword", kw("Tonic Apelsin 200ml Åhus Tonics & Mixers"), ["tonic"])
+test("Tonic Grönt Äpple does not extract äpple keyword", kw("Tonic Grönt Äpple Eko 200ml Ekobryggeriet"), ["tonic"])
+test("Tonic Water Hallon & Citron does not extract hallon/citron", kw("Tonic Water Hallon & Citron 33cl Spirit of Sweden"), ["tonic"])
+test("plain tonic recipe still matches Tonic Apelsin product",
+     match("Tonic Apelsin 200ml Åhus Tonics & Mixers", "15 cl tonic"), "tonic")
+test("plain apelsin recipe blocked from Tonic Apelsin",
+     match("Tonic Apelsin 200ml Åhus Tonics & Mixers", "2 apelsiner"), None)
+test("plain äpple recipe blocked from Tonic Grönt Äpple",
+     match("Tonic Grönt Äpple Eko 200ml Ekobryggeriet", "3 äpplen"), None)
+test("plain citron recipe blocked from Tonic Water Hallon & Citron",
+     match("Tonic Water Hallon & Citron 33cl Spirit of Sweden", "1 citron"), None)
+
 # Q74: BDPK nötmix — flavored snack mixes only match flavor-matched ingredients
 # (BBQ product ↔ BBQ recipe; plain saltad/rostad ↔ plain products)
 test("nötmix BBQ blocked from plain saltad/rostad recipe",
