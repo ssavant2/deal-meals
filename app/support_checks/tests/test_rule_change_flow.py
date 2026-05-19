@@ -2776,6 +2776,7 @@ def normalize_probe(text: str) -> str:
         self.assertIn("pnb: supported by dm matcher add", pnb.stdout)
         self.assertIn("./bin/dm matcher add pnb", pnb.stdout)
         self.assertIn("./bin/dm matcher explain", pnb.stdout)
+        self.assertIn("--no-run-gates", pnb.stdout)
         self.assertEqual(synonym.returncode, 0, synonym.stderr + synonym.stdout)
         self.assertIn("keyword-synonym: supported by dm matcher add", synonym.stdout)
         self.assertIn("./bin/dm matcher add keyword-synonym", synonym.stdout)

@@ -4345,6 +4345,12 @@ def _print_guide(guide: MatcherGuide) -> None:
     typer.echo("")
     for index, step in enumerate(guide.steps, start=1):
         typer.echo(f"{index}. {step}")
+    if guide.status == "supported by dm matcher add":
+        typer.echo("")
+        typer.echo(
+            "Batch review: add --no-run-gates to each add command, then run one final "
+            "./bin/dm matcher gates command before handoff."
+        )
 
 
 @matcher_add_app.command("keyword-extra-parent")

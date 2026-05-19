@@ -270,9 +270,12 @@ Keyword extra parent fan-out:
   --offer-category fruit
 ```
 
-Use `--dry-run` to preview generated TOML/sanity text, `--no-run-gates` only for
-isolated test trees, and `--inventory-id` only when deliberately adding a
-separate inventory row for a canonical that already has one.
+Use `--dry-run` to preview generated TOML/sanity text. During batch-review fix
+phases, pass `--no-run-gates` on each `dm matcher add ...` command and run one
+final `./bin/dm matcher gates --track A` or Track B gate after the grouped
+changes. Outside batch mode, leave the default gates on. Use `--inventory-id`
+only when deliberately adding a separate inventory row for a canonical that
+already has one.
 
 Other TOML registry rule surfaces follow the same pattern:
 `ingredient-parent`, `offer-extra-keyword`, `ingredient-routing-parent`,
@@ -304,8 +307,17 @@ Common Python runtime data surfaces now have CLI-backed overlay coverage:
 ./bin/dm matcher add fpb ost --blockers ostronsås --reason "Oyster sauce contains ost as a substring but is not cheese."
 ./bin/dm matcher add ksbc ris --context risotto --reason "Risotto context should not fall back to plain rice."
 ./bin/dm matcher add gpb --terms kattsnack --reason "Pet snacks should never match cooking recipes."
-./bin/dm matcher add stop-word portionsstorlek --reason "Package-size wording should not become a recipe keyword."
-./bin/dm matcher add non-food-keyword skurborste --reason "Cleaning tools are not recipe ingredients."
+./bin/dm matcher add stop-word --terms portionsstorlek --reason "Package-size wording should not become a recipe keyword."
+./bin/dm matcher add non-food-keyword --terms skurborste --reason "Cleaning tools are not recipe ingredients."
+```
+
+Batch-review grouped fix phase:
+
+```bash
+./bin/dm matcher add pnb citron --blockers lemonad --reason "Lemonade is a drink product, not lemon." --no-run-gates
+./bin/dm matcher add fpb ost --blockers ostronsås --reason "Oyster sauce contains ost as a substring but is not cheese." --no-run-gates
+./bin/dm matcher add stop-word --terms portionsstorlek --reason "Package-size wording should not become a recipe keyword." --no-run-gates
+./bin/dm matcher gates --track A
 ```
 
 Watch for space-normalized compound blockers. If a space-normalization joins the
@@ -681,6 +693,11 @@ where the fix is a narrow runtime dictionary/guard.
 
    This runs the primary deep matcher sanity gate and the full matcher parity
    gate with cache freshness skipped.
+
+   During batch reviews, this should be the single final gate for the grouped
+   fix phase. Use `--no-run-gates` on each individual `dm matcher add ...`
+   command in that batch so the same Track A gate suite is not repeated for
+   every small rule.
 
 5. If you run manually instead of using the wrapper, run the fixture parity check
    to confirm no existing fixture contracts were broken by the change. This is
