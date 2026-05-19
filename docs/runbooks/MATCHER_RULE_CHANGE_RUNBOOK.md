@@ -100,6 +100,12 @@ Iterate with live pre-flight feedback:
 ./bin/dm matcher dev-watch
 ```
 
+Explain one product/ingredient decision before hand-reading large matcher tables:
+
+```bash
+./bin/dm matcher explain --offer "<offer name>" --ingredient "<ingredient text>"
+```
+
 Single maintenance/check operations:
 
 ```bash
@@ -350,6 +356,11 @@ PNB and GPB are product/backend proof surfaces. Do not treat a passing or
 failing `matches_ingredient()` check alone as enough evidence for a product-name
 blocker; use backend/product diagnostics or a focused behavior sanity when the
 generated table canary is not enough.
+
+When the failure mode is unclear, run `dm matcher explain` before digging
+through large Python tables. The first version is read-only and intentionally
+narrow: it shows extraction, precomputed product keywords, likely PNB/FPB/KSBC
+blockers, and the current fast/recipe-style result for that pair.
 
 The same overlay file also backs space-normalization, flavor/carrier,
 processed-food, cuisine-context, compound-protection, specialty-qualifier, and

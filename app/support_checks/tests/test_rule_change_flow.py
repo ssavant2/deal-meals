@@ -1955,8 +1955,39 @@ def normalize_probe(text: str) -> str:
             "refresh-line-refs",
             "list",
             "inactivate",
+            "explain",
         ):
             self.assertIn(command, result.stdout)
+
+    def test_phase0b_dm_matcher_explain_wraps_matcher_audit(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "explain",
+                "--offer",
+                "Ost 500g",
+                "--ingredient",
+                "ostronsås",
+                "--format",
+                "json",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["offer"], "Ost 500g")
+        self.assertEqual(payload["ingredient"], "ostronsås")
+        self.assertIn("Product keywords:", payload["trace"])
+        self.assertIn("Fast matcher result: NO MATCH", payload["trace"])
+        self.assertIn("false-positive blockers", payload["trace"])
 
     def test_phase8_dm_matcher_guide_routes_manual_and_supported_shapes(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
@@ -1978,6 +2009,7 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(pnb.returncode, 0, pnb.stderr + pnb.stdout)
         self.assertIn("pnb: supported by dm matcher add", pnb.stdout)
         self.assertIn("./bin/dm matcher add pnb", pnb.stdout)
+        self.assertIn("./bin/dm matcher explain", pnb.stdout)
         self.assertEqual(synonym.returncode, 0, synonym.stderr + synonym.stdout)
         self.assertIn("keyword-synonym: supported by dm matcher add", synonym.stdout)
         self.assertIn("./bin/dm matcher add keyword-synonym", synonym.stdout)

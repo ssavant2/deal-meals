@@ -398,6 +398,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         status="supported by dm matcher add",
         summary="PRODUCT_NAME_BLOCKERS: product text blocks a matched keyword unless the ingredient asks for it.",
         steps=(
+            "When the mechanism is unclear, run: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Run: ./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason \"<why>\"",
             "PNB is product-side proof; do not treat matches_ingredient() alone as sufficient behavior evidence.",
             "If active space-normalization joins the product phrase into a compound, also cover the joined blocker form when warned.",
@@ -409,6 +410,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         status="supported by dm matcher add",
         summary="FALSE_POSITIVE_BLOCKERS: ingredient context suppresses a keyword.",
         steps=(
+            "When the mechanism is unclear, run: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Run: ./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason \"<why>\"",
             "If active space-normalization joins the ingredient phrase into a compound, also cover the joined blocker form when warned.",
             "The command writes runtime_rule_overlays.toml, appends a focused sanity canary, and runs Track A gates by default.",
@@ -419,6 +421,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         status="manual Track A runtime edit",
         summary="GLOBAL_PRODUCT_NAME_BLOCKERS: product text is globally out of matcher scope.",
         steps=(
+            "When the mechanism is unclear, run: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Edit app/languages/sv/ingredient_matching/blocker_data.py / GLOBAL_PRODUCT_NAME_BLOCKERS.",
             "Add a focused run_deep_matcher_sanity.py regression.",
             "Run: ./bin/dm matcher gates --track A",
@@ -429,6 +432,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         status="supported by dm matcher add",
         summary="KEYWORD_SUPPRESSED_BY_CONTEXT: ingredient context makes a generic keyword irrelevant.",
         steps=(
+            "When the mechanism is unclear, run: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Run: ./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason \"<why>\"",
             "If active space-normalization joins the context phrase into a compound, also cover the joined context form when warned.",
             "Use this carefully: KSBC is semantic and can suppress useful generic fallbacks.",
@@ -4772,6 +4776,67 @@ def matcher_dev_watch(
         typer.echo("")
         typer.echo("Stopped matcher dev-watch.")
         raise typer.Exit(status)
+
+
+@matcher_app.command("explain", help="Explain one offer/ingredient matcher decision.")
+def matcher_explain(
+    offer: Annotated[
+        str,
+        typer.Option("--offer", "--product", help="Offer/product name to inspect."),
+    ],
+    ingredient: Annotated[str, typer.Option("--ingredient", help="Recipe ingredient text to inspect.")],
+    offer_category: Annotated[
+        str,
+        typer.Option("--offer-category", "--category", help="Optional offer category."),
+    ] = "",
+    brand: Annotated[str, typer.Option("--brand", help="Optional offer/product brand.")] = "",
+    weight_grams: Annotated[
+        float | None,
+        typer.Option("--weight-grams", help="Optional offer/product weight in grams."),
+    ] = None,
+    recipe_name: Annotated[
+        str | None,
+        typer.Option("--recipe-name", help="Optional recipe name for batch-review trace context."),
+    ] = None,
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Output format."),
+    ] = "text",
+) -> None:
+    if not offer.strip():
+        raise typer.BadParameter("--offer must not be empty")
+    if not ingredient.strip():
+        raise typer.BadParameter("--ingredient must not be empty")
+
+    try:
+        from languages.sv.ingredient_matching_audit import _explain_pair
+    except ModuleNotFoundError:
+        from app.languages.sv.ingredient_matching_audit import _explain_pair
+
+    trace = _explain_pair(
+        ingredient.strip(),
+        offer.strip(),
+        category=offer_category.strip(),
+        brand=brand.strip(),
+        weight_grams=weight_grams,
+    )
+    if recipe_name:
+        trace = f"Recipe: {recipe_name.strip()}\n\n{trace}"
+
+    if output_format == "json":
+        payload = {
+            "offer": offer.strip(),
+            "ingredient": ingredient.strip(),
+            "offer_category": offer_category.strip(),
+            "brand": brand.strip(),
+            "weight_grams": weight_grams,
+            "recipe_name": recipe_name.strip() if recipe_name else "",
+            "trace": trace,
+        }
+        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return
+
+    typer.echo(trace)
 
 
 @matcher_app.command("guide", help="Show the recommended matcher workflow for a rule shape.")
