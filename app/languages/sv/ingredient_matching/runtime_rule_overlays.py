@@ -30,7 +30,10 @@ class RuntimeRuleOverlays:
     product_name_blockers: Dict[str, Set[str]]
     false_positive_blockers: Dict[str, Set[str]]
     keyword_suppressed_by_context: Dict[str, Set[str]]
+    processed_product_rules: Dict[str, Set[str]]
+    processed_rule_compound_exemptions: Dict[str, Set[str]]
     global_product_name_blockers: Set[str]
+    strict_processed_rules: Set[str]
     carrier_context_required: Set[str]
     context_required_words: Set[str]
     ingredient_requires_in_product: Set[str]
@@ -51,12 +54,15 @@ _SECTION_VALUE_FIELDS = {
     "product_name_blockers": "blockers",
     "false_positive_blockers": "blockers",
     "keyword_suppressed_by_context": "context",
+    "processed_product_rules": "blocked_product_words",
+    "processed_rule_compound_exemptions": "compounds",
 }
 _TERM_SET_SECTIONS = {
     "carrier_context_required": "terms",
     "context_required_words": "terms",
     "global_product_name_blockers": "terms",
     "ingredient_requires_in_product": "terms",
+    "strict_processed_rules": "terms",
 }
 _PAIR_SECTION_FIELDS = {
     "space_normalizations": ("source", "target"),
@@ -891,9 +897,30 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
             seen_ids=seen_ids,
             seen_effective_values=seen_effective_values,
         ),
+        processed_product_rules=_merge_section(
+            payload,
+            "processed_product_rules",
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_values=seen_effective_values,
+        ),
+        processed_rule_compound_exemptions=_merge_section(
+            payload,
+            "processed_rule_compound_exemptions",
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_values=seen_effective_values,
+        ),
         global_product_name_blockers=_load_term_set_section(
             payload,
             "global_product_name_blockers",
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_terms=seen_effective_terms,
+        ),
+        strict_processed_rules=_load_term_set_section(
+            payload,
+            "strict_processed_rules",
             path=path,
             seen_ids=seen_ids,
             seen_effective_terms=seen_effective_terms,
@@ -988,7 +1015,10 @@ _OVERLAYS = load_runtime_rule_overlays()
 PRODUCT_NAME_BLOCKER_CLI_UPDATES = _OVERLAYS.product_name_blockers
 FALSE_POSITIVE_BLOCKER_CLI_UPDATES = _OVERLAYS.false_positive_blockers
 KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES = _OVERLAYS.keyword_suppressed_by_context
+PROCESSED_PRODUCT_RULE_CLI_UPDATES = _OVERLAYS.processed_product_rules
+PROCESSED_RULE_COMPOUND_EXEMPTION_CLI_UPDATES = _OVERLAYS.processed_rule_compound_exemptions
 GLOBAL_PRODUCT_NAME_BLOCKER_CLI_UPDATES = _OVERLAYS.global_product_name_blockers
+STRICT_PROCESSED_RULE_CLI_UPDATES = _OVERLAYS.strict_processed_rules
 CARRIER_CONTEXT_REQUIRED_CLI_UPDATES = _OVERLAYS.carrier_context_required
 CONTEXT_REQUIRED_WORD_CLI_UPDATES = _OVERLAYS.context_required_words
 INGREDIENT_REQUIRES_IN_PRODUCT_CLI_UPDATES = _OVERLAYS.ingredient_requires_in_product

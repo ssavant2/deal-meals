@@ -148,6 +148,11 @@ from languages.sv.ingredient_matching.match_filters import (
     check_secondary_ingredient_patterns,
 )
 from languages.sv.ingredient_matching.normalization import _apply_space_normalizations
+from languages.sv.ingredient_matching.processed_rules import (
+    PROCESSED_PRODUCT_RULES,
+    PROCESSED_RULES_COMPOUND_EXEMPTIONS,
+    STRICT_PROCESSED_RULES,
+)
 from languages.sv.ingredient_matching.recipe_context import CUISINE_CONTEXT
 from languages.sv.ingredient_matching.compound_text import _COMPOUND_STRICT_PREFIX_KEYWORDS
 from languages.sv.ingredient_matching.specialty_rules import (
@@ -226,9 +231,23 @@ keyword = "Ris"
 context = ["Glas, ris"]
 reason = "Synthetic KSBC test."
 
+[[processed_product_rules]]
+keyword = "Phase Processed"
+blocked_product_words = ["Phase Blocked"]
+reason = "Synthetic processed rule."
+
+[[processed_rule_compound_exemptions]]
+keyword = "Phase Processed"
+compounds = ["Phase Compound"]
+reason = "Synthetic processed exemption."
+
 [[global_product_name_blockers]]
 terms = ["Phase Pet Brand"]
 reason = "Synthetic global blocker test."
+
+[[strict_processed_rules]]
+terms = ["Phase Processed"]
+reason = "Synthetic strict processed rule."
 
 [[carrier_context_required]]
 terms = ["Phase Carrier Context"]
@@ -301,7 +320,13 @@ reason = "Synthetic secondary pattern."
             self.assertEqual(overlays.product_name_blockers["färskost"], {"chips", "snacks"})
             self.assertEqual(overlays.false_positive_blockers["ost"], {"ostron"})
             self.assertEqual(overlays.keyword_suppressed_by_context["ris"], {"glas, ris"})
+            self.assertEqual(overlays.processed_product_rules["phase processed"], {"phase blocked"})
+            self.assertEqual(
+                overlays.processed_rule_compound_exemptions["phase processed"],
+                {"phase compound"},
+            )
             self.assertEqual(overlays.global_product_name_blockers, {"phase pet brand"})
+            self.assertEqual(overlays.strict_processed_rules, {"phase processed"})
             self.assertEqual(overlays.carrier_context_required, {"phase carrier context"})
             self.assertEqual(overlays.context_required_words, {"phase context required"})
             self.assertEqual(overlays.ingredient_requires_in_product, {"phase ingredient context"})
@@ -2250,6 +2275,92 @@ def normalize_probe(text: str) -> str:
             )
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("runtime_qualifier_required_keyword_add_phasequalifier", listed.stdout)
+
+    def test_phase16c_processed_rule_cli_writes_runtime_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            commands = [
+                [
+                    "processed-rule",
+                    "phaseprocessed",
+                    "--blocked-product-words",
+                    "phaseblocked",
+                    "--reason",
+                    "Synthetic processed rule.",
+                ],
+                [
+                    "processed-exemption",
+                    "phaseprocessed",
+                    "--compounds",
+                    "phasecompound",
+                    "--reason",
+                    "Synthetic processed exemption.",
+                ],
+                [
+                    "strict-processed-rule",
+                    "--terms",
+                    "phaseprocessed",
+                    "--reason",
+                    "Synthetic strict processed rule.",
+                ],
+            ]
+            for command in commands:
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "cli.dm",
+                        "matcher",
+                        "add",
+                        *command,
+                        "--tree-root",
+                        str(tree_root),
+                        "--no-run-gates",
+                    ],
+                    cwd=live_app_dir,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "processed_rule": sorted(PROCESSED_PRODUCT_RULES.get("phaseprocessed", set())),
+    "processed_exemption": sorted(PROCESSED_RULES_COMPOUND_EXEMPTIONS.get("phaseprocessed", set())),
+    "strict": "phaseprocessed" in STRICT_PROCESSED_RULES,
+}
+""",
+            )
+            self.assertEqual(runtime["processed_rule"], ["phaseblocked"])
+            self.assertEqual(runtime["processed_exemption"], ["phasecompound"])
+            self.assertEqual(runtime["strict"], True)
+
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "processed-rule",
+                    "--term",
+                    "phaseprocessed",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("runtime_processed_rule_phaseprocessed", listed.stdout)
 
     def test_phase17_compound_protection_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

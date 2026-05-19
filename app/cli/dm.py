@@ -255,6 +255,20 @@ RUNTIME_OVERLAY_SURFACES: dict[str, RuntimeOverlaySurface] = {
         mapping_name="KEYWORD_SUPPRESSED_BY_CONTEXT",
         guide_label="Keyword suppressed by context",
     ),
+    "processed-rule": RuntimeOverlaySurface(
+        command="processed-rule",
+        section="processed_product_rules",
+        value_field="blocked_product_words",
+        mapping_name="PROCESSED_PRODUCT_RULES",
+        guide_label="Processed product rule",
+    ),
+    "processed-exemption": RuntimeOverlaySurface(
+        command="processed-exemption",
+        section="processed_rule_compound_exemptions",
+        value_field="compounds",
+        mapping_name="PROCESSED_RULES_COMPOUND_EXEMPTIONS",
+        guide_label="Processed compound exemption",
+    ),
 }
 RUNTIME_PAIR_SURFACES: dict[str, RuntimePairSurface] = {
     "space-normalization": RuntimePairSurface(
@@ -324,6 +338,13 @@ RUNTIME_TERM_SET_SURFACES: dict[str, RuntimeTermSetSurface] = {
         mapping_name="GLOBAL_PRODUCT_NAME_BLOCKERS",
         guide_label="Global product-name blocker",
         broad_guard_min_chars=4,
+    ),
+    "strict-processed-rule": RuntimeTermSetSurface(
+        command="strict-processed-rule",
+        section="strict_processed_rules",
+        value_field="terms",
+        mapping_name="STRICT_PROCESSED_RULES",
+        guide_label="Strict processed rule keyword",
     ),
     "carrier-context-required": RuntimeTermSetSurface(
         command="carrier-context-required",
@@ -576,6 +597,34 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "Use only for simple set membership; processed/form logic still belongs in code.",
         ),
     ),
+    "processed-rule": MatcherGuide(
+        label="processed-rule",
+        status="supported by dm matcher add",
+        summary="Add product-side processed/form indicators for a matched keyword.",
+        steps=(
+            "Run: ./bin/dm matcher add processed-rule <keyword> --blocked-product-words <w1,w2,...> --reason \"<why>\"",
+            "Use when processed product wording should block a plain/fresh ingredient unless the ingredient asks for that form.",
+            "Add strict-processed-rule separately when the product indicator must match exactly.",
+        ),
+    ),
+    "processed-exemption": MatcherGuide(
+        label="processed-exemption",
+        status="supported by dm matcher add",
+        summary="Exempt compound words from a processed-product rule.",
+        steps=(
+            "Run: ./bin/dm matcher add processed-exemption <keyword> --compounds <c1,c2,...> --reason \"<why>\"",
+            "Use when a compound contains the base keyword but should not inherit its processed/form guard.",
+        ),
+    ),
+    "strict-processed-rule": MatcherGuide(
+        label="strict-processed-rule",
+        status="supported by dm matcher add",
+        summary="Require exact indicator agreement for processed-product rules on selected keywords.",
+        steps=(
+            "Run: ./bin/dm matcher add strict-processed-rule --terms <word1,word2,...> --reason \"<why>\"",
+            "Use after a processed-rule exists when different product forms are not interchangeable.",
+        ),
+    ),
     "qualifier-required-keyword": MatcherGuide(
         label="qualifier-required-keyword",
         status="supported by dm matcher add",
@@ -737,6 +786,11 @@ GUIDE_ALIASES = {
     "carrier_products": "carrier-product",
     "important_short_keyword": "important-short-keyword",
     "processed_food": "processed-food",
+    "processed_product_rule": "processed-rule",
+    "processed-product-rule": "processed-rule",
+    "processed_exemption": "processed-exemption",
+    "processed-compound-exemption": "processed-exemption",
+    "strict_processed_rule": "strict-processed-rule",
     "qualifier_required_keyword": "qualifier-required-keyword",
     "qualifier-required": "qualifier-required-keyword",
     "cuisine_context": "cuisine-context",
@@ -2350,7 +2404,7 @@ def _runtime_overlay_entry_is_active(entry: dict[str, Any]) -> bool:
 
 
 def _runtime_overlay_entry_id(surface: RuntimeOverlaySurface, keyword: str) -> str:
-    return f"runtime_{surface.command}_{_slug(keyword)}"
+    return f"runtime_{surface.command.replace('-', '_')}_{_slug(keyword)}"
 
 
 def _runtime_pair_entry_id(surface: RuntimePairSurface, source: str, target: str) -> str:
@@ -2394,6 +2448,14 @@ def _live_runtime_mapping_values(surface: RuntimeOverlaySurface, keyword: str, p
         from languages.sv.ingredient_matching.carrier_context import KEYWORD_SUPPRESSED_BY_CONTEXT
 
         return set(KEYWORD_SUPPRESSED_BY_CONTEXT.get(normalized_keyword, set()))
+    if surface.command == "processed-rule":
+        from languages.sv.ingredient_matching.processed_rules import PROCESSED_PRODUCT_RULES
+
+        return set(PROCESSED_PRODUCT_RULES.get(normalized_keyword, set()))
+    if surface.command == "processed-exemption":
+        from languages.sv.ingredient_matching.processed_rules import PROCESSED_RULES_COMPOUND_EXEMPTIONS
+
+        return set(PROCESSED_RULES_COMPOUND_EXEMPTIONS.get(normalized_keyword, set()))
     return set()
 
 
@@ -2567,7 +2629,10 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
         "#   [[product_name_blockers]]",
         "#   [[false_positive_blockers]]",
         "#   [[keyword_suppressed_by_context]]",
+        "#   [[processed_product_rules]]",
+        "#   [[processed_rule_compound_exemptions]]",
         "#   [[global_product_name_blockers]]",
+        "#   [[strict_processed_rules]]",
         "#   [[carrier_context_required]]",
         "#   [[context_required_words]]",
         "#   [[ingredient_requires_in_product]]",
@@ -3362,6 +3427,10 @@ def _live_runtime_term_set_values(surface: RuntimeTermSetSurface, paths: Matcher
         from languages.sv.ingredient_matching.blocker_data import GLOBAL_PRODUCT_NAME_BLOCKERS
 
         return set(GLOBAL_PRODUCT_NAME_BLOCKERS)
+    if surface.command == "strict-processed-rule":
+        from languages.sv.ingredient_matching.processed_rules import STRICT_PROCESSED_RULES
+
+        return set(STRICT_PROCESSED_RULES)
     from languages.sv.ingredient_matching.carrier_context import (
         CARRIER_CONTEXT_REQUIRED,
         CONTEXT_REQUIRED_WORDS,
@@ -3426,6 +3495,8 @@ def _append_runtime_term_set_sanity_stub(
     lines = ["", f"# {policy_ref}: generated by dm matcher add {surface.command}"]
     if surface.command == "gpb":
         lines.append("from languages.sv.ingredient_matching.blocker_data import GLOBAL_PRODUCT_NAME_BLOCKERS")
+    elif surface.command == "strict-processed-rule":
+        lines.append("from languages.sv.ingredient_matching.processed_rules import STRICT_PROCESSED_RULES")
     else:
         lines.append(f"from languages.sv.ingredient_matching.carrier_context import {surface.mapping_name}")
     for term in terms:
@@ -4914,6 +4985,116 @@ def add_processed_food_update(
         terms_csv=terms_csv,
         action=action,
         reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("processed-rule")
+def add_processed_rule(
+    keyword: Annotated[str, typer.Argument(help="Keyword whose processed product forms should be guarded.")],
+    blocked_product_words_csv: Annotated[
+        str,
+        typer.Option("--blocked-product-words", help="Comma-separated product words that mark processed/form variants."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why this processed/form guard is needed.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_overlay_rule(
+        surface=RUNTIME_OVERLAY_SURFACES["processed-rule"],
+        keyword=keyword,
+        values_csv=blocked_product_words_csv,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("processed-exemption")
+def add_processed_exemption(
+    keyword: Annotated[str, typer.Argument(help="Processed-rule base keyword to exempt compounds from.")],
+    compounds_csv: Annotated[
+        str,
+        typer.Option("--compounds", help="Comma-separated compound words exempt from the processed rule."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why these compounds should bypass the processed rule.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_overlay_rule(
+        surface=RUNTIME_OVERLAY_SURFACES["processed-exemption"],
+        keyword=keyword,
+        values_csv=compounds_csv,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("strict-processed-rule")
+def add_strict_processed_rule(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated processed-rule keywords to make strict.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these processed rules require exact indicator agreement.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_term_set_rule(
+        surface=RUNTIME_TERM_SET_SURFACES["strict-processed-rule"],
+        terms_csv=terms_csv,
+        reason=reason,
+        allow_broad=False,
         policy_ref=policy_ref,
         tree_root=tree_root,
         run_gates=run_gates,

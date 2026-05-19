@@ -12,6 +12,12 @@ try:
 except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
+from .runtime_rule_overlays import (
+    PROCESSED_PRODUCT_RULE_CLI_UPDATES,
+    PROCESSED_RULE_COMPOUND_EXEMPTION_CLI_UPDATES,
+    STRICT_PROCESSED_RULE_CLI_UPDATES,
+)
+
 _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
     # Note: 'vitlök' removed — now handled by SPICE_VS_FRESH_RULES instead.
     # Burk/rostad products are blocked from matching fresh garlic (klyftor etc.)
@@ -427,12 +433,16 @@ PROCESSED_RULES_COMPOUND_EXEMPTIONS: Dict[str, Set[str]] = {
     # blocked by the generic chili processed-product rule.
     'chili': {'sriracha'},
 }
+for _keyword, _compounds in PROCESSED_RULE_COMPOUND_EXEMPTION_CLI_UPDATES.items():
+    PROCESSED_RULES_COMPOUND_EXEMPTIONS.setdefault(_keyword, set()).update(_compounds)
 
 # Pre-normalized for performance
 PROCESSED_PRODUCT_RULES: Dict[str, Set[str]] = {
     fix_swedish_chars(k).lower(): {fix_swedish_chars(w).lower() for w in v}
     for k, v in _PROCESSED_PRODUCT_RULES_RAW.items()
 }
+for _keyword, _blocked_words in PROCESSED_PRODUCT_RULE_CLI_UPDATES.items():
+    PROCESSED_PRODUCT_RULES.setdefault(_keyword, set()).update(_blocked_words)
 
 # Base words where the product's specific indicator MUST exactly match the ingredient.
 # Regular PROCESSED_PRODUCT_RULES allows any indicator (e.g., "krossade" ≈ "passerade" for tomater).
@@ -450,7 +460,7 @@ STRICT_PROCESSED_RULES: FrozenSet[str] = frozenset({
     'tomater',     # plural form — same strict rules
     'sojabönor',   # canned soybeans ≠ frozen soybeans when recipe explicitly asks for one form
     'sojabonor',
-})
+} | STRICT_PROCESSED_RULE_CLI_UPDATES)
 
 # Equivalence groups for processed indicators in STRICT mode.
 # "malen"/"mald"/"malet"/"malna" are all the same form (ground/milled).
