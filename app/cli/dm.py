@@ -1269,6 +1269,14 @@ def _add_simple_toml_surface(
         canonical_targets=term_values,
         variants=variants,
     )
+    if surface.command == "ingredient-parent":
+        _emit_runtime_authoring_warnings(
+            _ingredient_parent_pnb_mirror_warnings(
+                paths=paths,
+                canonical_targets=term_values,
+                variants=variants,
+            )
+        )
     entry_id, _entry_line, toml_preview = _append_simple_surface_entry(
         paths=paths,
         surface=surface,
@@ -2395,6 +2403,62 @@ def _runtime_space_norm_compound_warnings(
 def _emit_runtime_authoring_warnings(warnings: tuple[str, ...]) -> None:
     for warning in warnings:
         typer.secho(f"Warning: {warning}", fg=typer.colors.YELLOW, err=True)
+
+
+def _runtime_mapping_effective_values(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeOverlaySurface,
+    keyword: str,
+) -> set[str]:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    return (
+        _runtime_overlay_existing_values(sections, surface, keyword)
+        | _live_runtime_mapping_values(surface, keyword, paths)
+    )
+
+
+def _format_warning_values(values: Iterable[str], *, limit: int = 10) -> str:
+    sorted_values = sorted({_runtime_rule_normalize_text(value) for value in values if str(value).strip()})
+    shown = sorted_values[:limit]
+    suffix = f", ... (+{len(sorted_values) - limit})" if len(sorted_values) > limit else ""
+    return ", ".join(shown) + suffix
+
+
+def _ingredient_parent_pnb_mirror_warnings(
+    *,
+    paths: MatcherPaths,
+    canonical_targets: tuple[str, ...],
+    variants: tuple[str, ...],
+) -> tuple[str, ...]:
+    pnb_surface = RUNTIME_OVERLAY_SURFACES["pnb"]
+    warnings: list[str] = []
+    for parent in canonical_targets:
+        parent_blockers = _runtime_mapping_effective_values(
+            paths=paths,
+            surface=pnb_surface,
+            keyword=parent,
+        )
+        if not parent_blockers:
+            continue
+        for variant in variants:
+            variant_blockers = _runtime_mapping_effective_values(
+                paths=paths,
+                surface=pnb_surface,
+                keyword=variant,
+            )
+            missing_blockers = parent_blockers - variant_blockers
+            if not missing_blockers:
+                continue
+            blockers_preview = _format_warning_values(missing_blockers)
+            blockers_csv = ",".join(sorted(missing_blockers))
+            warnings.append(
+                f"ingredient-parent maps {variant!r} -> {parent!r}, but PNB lookup does not "
+                f"inherit parent blockers. Missing child blockers: {blockers_preview}. "
+                f"Consider: ./bin/dm matcher add pnb {variant} --blockers {blockers_csv} "
+                '--reason "<why>"'
+            )
+    return tuple(warnings)
 
 
 def _runtime_overlay_value_field(section: str) -> str:
