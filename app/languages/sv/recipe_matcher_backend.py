@@ -83,6 +83,7 @@ try:
     from languages.sv.ingredient_matching.extraction import is_non_food_product
     from languages.sv.ingredient_matching.extraction import _is_plain_sparkling_water_product_text
     from languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
+    from languages.sv.ingredient_matching.extraction import _is_tonic_mixer_product_text
     from languages.sv.ingredient_matching.matching import (
         matches_ingredient_fast,
         precompute_offer_data,
@@ -209,6 +210,7 @@ except ModuleNotFoundError:
     from app.languages.sv.ingredient_matching.extraction import is_non_food_product
     from app.languages.sv.ingredient_matching.extraction import _is_plain_sparkling_water_product_text
     from app.languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
+    from app.languages.sv.ingredient_matching.extraction import _is_tonic_mixer_product_text
     from app.languages.sv.ingredient_matching.matching import (
         matches_ingredient_fast,
         precompute_offer_data,
@@ -888,6 +890,7 @@ def get_filtered_offers(preferences: Dict) -> List[Offer]:
                 guess_category(offer.name, offer.category) in beverage_food_categories
                 or _is_plain_sparkling_water_product_text(offer_lower, offer.category)
                 or _is_plain_instant_coffee_product_text(offer_lower, offer.category)
+                or _is_tonic_mixer_product_text(offer_lower, offer.category)
             ):
                 all_offers.append(offer)
 

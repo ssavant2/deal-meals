@@ -177,6 +177,17 @@ def _is_plain_sparkling_water_product_text(text: str, category: Optional[str] = 
     ))
 
 
+def _is_tonic_mixer_product_text(text: str, category: Optional[str] = None) -> bool:
+    """Tonic-water / mixer products that should pass the beverage-category
+    food filter. Cocktail and mocktail recipes call for tonic by name and
+    expect to match purchasable tonic products; without this allowlist, the
+    beverages category strips them out before the matcher ever sees them.
+    Flavored tonic variants (Grape, Pink, Fläder, Citrus etc.) are still
+    tonic-water-based and remain useful for the same recipes — the user can
+    pick their preferred variety from the offer."""
+    return bool(re.search(r'\btonic\b', text)) and 'isotonic' not in text
+
+
 def _is_plain_instant_coffee_product_text(text: str, category: Optional[str] = None) -> bool:
     has_instant_form = bool(re.search(r'\b(?:snabbkaffe|pulverkaffe|instant\s+coffee)\b', text))
     has_nescafe = 'nescafé' in text or 'nescafe' in text
