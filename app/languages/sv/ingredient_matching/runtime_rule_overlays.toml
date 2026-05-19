@@ -42,6 +42,13 @@ keyword = "pollock"
 blockers = ["panerad", "panerade", "sprodpanerad", "sprödpanerad"]
 reason = "Panerad Alaska pollock is a fish finger / breaded fillet product — raw pollock recipes need unprocessed fish, not breaded ready-meal products. Same pattern as torsk PNB."
 
+[[product_name_blockers]]
+id = "runtime_pnb_philadelphiaost"
+status = "active"
+keyword = "philadelphiaost"
+blockers = ["tomatsopp", "chips", "dessertost", "salad", "mediterranean", "vegansk", "kajmak", "pineapple", "almond", "chevre", "pepper", "4 peppar", "plant based", "växtbaserad"]
+reason = "Philadelphiaost route inherits all färskost PNB blockers — same product types (flavored/plant cream cheese, soup products) must be excluded via this keyword path too"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -69,3 +76,18 @@ status = "active"
 keyword = "ingefära"
 context = ["kombucha"]
 reason = "Kombucha ingredient 'med ingefära' describes the kombucha flavor — fresh ginger products should not match a kombucha cocktail ingredient"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_fond"
+status = "active"
+keyword = "fond"
+context = ["andfond"]
+reason = "Andfond (duck stock) is instructed as a from-scratch reduction — no commercial andfond product exists; suppress generic fond products from matching"
+
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_hirs"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["hirs"]
+reason = "Hirs (millet) is a 4-char keyword that gets filtered — real offers exist (Hirs 500g Saltå Kvarn) so it must be in IMPORTANT_SHORT_KEYWORDS"
