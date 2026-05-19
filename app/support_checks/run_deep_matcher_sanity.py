@@ -7083,12 +7083,12 @@ test(
     1,
 )
 test(
-    "Q6 batch 134 cached generic djupfryst fisk also matches frozen laxfilé",
+    "generic djupfryst fisk recipe blocks laxfilé (lax recipes specify lax explicitly)",
     recipe_match_num_cached(
         ["400 g tärnad djupfryst fisk"],
         {"name": "Laxfilé Fryst 500g ICA", "category": "frozen"},
     ),
-    1,
+    0,
 )
 test(
     "Q6 batch 134 generic djupfryst fisk matches frozen sejfilé",
@@ -10592,6 +10592,64 @@ test("kikärtor unlabeled 540g still matches plain kikärtor recipe (no dried qu
 test("kikärtor 380g matches kokta-kikärtor recipe",
      recipe_match_num_named("Hummus", ["kokta kikärtor"], _kikartor_offer("Kikärtor 380g ICA", 380)), 1)
 
+# White-fish recipe context: when a recipe asks for firm white fish (cod-family
+# wording or generic "fryst fisk" / "fisk i block"), block oily/colored fish
+# products by product-name signal (lax/tonfisk/makrill/sardin/ansjovis).
+# Laxfilé products can route via the generic 'fisk' keyword, so the check uses
+# product-name substring rather than matched_keyword.
+def _fish_offer(name):
+    return {"name": name, "category": "seafood"}
+test("laxfilé blocked from 'fryst fisk i block t ex alaska polock' recipe",
+     recipe_match_num_named("Fiskbiffar", ["400 g fryst fisk, i block, t ex alaska polock, tinad"], _fish_offer("Laxfilé Fryst 4-p 560g ICA")), 0)
+test("torsk allowed in same alaska polock recipe",
+     recipe_match_num_named("Fiskbiffar", ["400 g fryst fisk, i block, t ex alaska polock, tinad"], _fish_offer("Torsk Fryst 400g ICA")), 1)
+test("laxfilé blocked from generic 'fryst fisk' recipe (lax recipes specify lax)",
+     recipe_match_num_named("Fiskgryta", ["500 g fryst fisk"], _fish_offer("Laxfilé Fryst 4-p 560g ICA")), 0)
+test("laxfilé blocked from 'fisk i block' recipe",
+     recipe_match_num_named("Fiskbiff", ["400 g fisk i block"], _fish_offer("Laxfilé Fryst 4-p 560g ICA")), 0)
+test("laxfilé still matches explicit laxfilé recipe",
+     recipe_match_num_named("Ugnsbakad lax", ["500 g laxfilé"], _fish_offer("Laxfilé Fryst 4-p 560g ICA")), 1)
+test("tonfisk blocked from 'fast vit fisk' recipe",
+     recipe_match_num_named("Vit fiskgryta", ["400 g fast vit fisk"], _fish_offer("Tonfisk Fryst 200g Findus")), 0)
+test("tonfisk still matches explicit tonfisk recipe",
+     recipe_match_num_named("Tonfisksallad", ["1 burk tonfisk"], _fish_offer("Tonfisk i olja 185g ICA")), 1)
+test("mixed torsk&lax product blocked from white-fish recipe (lax substring)",
+     recipe_match_num_named("Fiskbiff", ["400 g fryst fisk, t ex alaska polock"], _fish_offer("Torsk & laxtärningar Fryst 300g ICA")), 0)
+test("makrillfilé blocked from generic vit fisk recipe",
+     recipe_match_num_named("Vit fiskgryta", ["400 g vit fisk"], _fish_offer("Makrillfile i tomatsås 125g Abba")), 0)
+test("makrillfilé still matches explicit makrillfilé recipe",
+     recipe_match_num_named("Stekt makrill", ["300 g makrillfilé"], _fish_offer("Makrillfilé Fryst 200g")), 1)
+
+# Müsli/musli — name-conditional extraction (same pattern as granola): only
+# plain naturell/natural/original variants extract the müsli/musli keyword.
+# Flavored müsli (Frukt, Blåbär, Acai, Hasselnöt, Kokos, etc.) does not
+# extract the keyword so it cannot match a recipe asking for plain müsli.
+test("plain Musli Original matches müsli recipe", kw("Musli Original 700g AXA"), ["musli"])
+test("plain Musli Naturell matches müsli recipe", kw("Musli Naturell Ekologisk 750g ICA"), ["musli"])
+test("Glutenfri Musli Naturell matches müsli recipe", kw("Glutenfri Musli Naturell 400g ICA"), ["musli"])
+test("Musli Gold original matches müsli recipe (lowercase original)", kw("Musli Gold original 750g AXA"), ["musli"])
+test("flavored Musli Frukt does NOT extract musli keyword", kw("Musli Frukt 1kg ICA Basic"), [])
+test("flavored Musli Blåbär does NOT extract musli keyword", kw("Musli Blåbär & Acai 400g Pauluns"), [])
+test("flavored Krispig Musli Kokos does NOT extract musli keyword", kw("Krispig Musli Kokos & Hasselnöt 450g Risenta"), [])
+
+# Flavored balsamico compounds: when a recipe names a specific balsamico flavor
+# (e.g. "Zeta Balsamico Mango"), the product must match that exact flavor or
+# not at all — never fall back to plain crema/aceto balsamico. Implemented via
+# space normalization that joins the flavor into a compound keyword, isolating
+# flavored balsamicos from generic balsamico/balsamvinäger keywords.
+test("Balsamico Mango extracts compound, not balsamvinäger", kw("Zeta Balsamico Mango 250ml"), ["balsamicomango"])
+test("Crema di Balsamico Tryffel extracts compound", kw("Crema Di Balsamico Tryffel 112g Zeta"), ["balsamicotryffel"])
+test("Crema di Balsamico Fikon extracts compound", kw("Crema Di Balsamico Fikon 150ml Werners"), ["balsamicofikon"])
+test("Crema di Balsamico ingefära extracts compound", kw("Crema di Balsamico ingefära 112g Zeta"), ["balsamicoingefära"])
+test("Crema di Balsamico Hallon still extracts compound (preserved)", kw("Crema di Balsamico Hallon 180g ICA"), ["balsamicohallon"])
+test("plain Crema di Balsamico still extracts balsamvinäger", kw("Crema di Balsamico 180g Zeta"), ["balsamvinäger", "vinäger"])
+test("flavored balsamico mango blocked from plain balsamico recipe",
+     match("Zeta Balsamico Mango 250ml", "1 dl balsamico"), None)
+test("flavored balsamico tryffel blocked from plain balsamico recipe",
+     match("Crema Di Balsamico Tryffel 112g Zeta", "1 dl balsamico"), None)
+test("plain balsamico still matches plain recipe",
+     match("Crema di Balsamico 180g Zeta", "1 dl balsamico"), "balsamvinäger")
+
 # Q74: BDPK nötmix — flavored snack mixes only match flavor-matched ingredients
 # (BBQ product ↔ BBQ recipe; plain saltad/rostad ↔ plain products)
 test("nötmix BBQ blocked from plain saltad/rostad recipe",
@@ -10635,3 +10693,7 @@ test("offer-extra-keyword Vetemjöl matches mjöl",
 # offer_extra_keyword_potatis_asparagespotatis: generated by dm matcher add offer-extra-keyword
 test("offer-extra-keyword Asparagespotatis matches potatis",
      match("Asparagespotatis", "potatis", "pantry"), "potatis")
+
+# offer_extra_keyword_milkshake_proteinmilkshake: generated by dm matcher add offer-extra-keyword
+test("offer-extra-keyword Proteinmilkshake matches milkshake",
+     match("Proteinmilkshake", "milkshake", "pantry"), "milkshake")

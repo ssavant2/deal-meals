@@ -1538,6 +1538,40 @@ def _record_validation_event(
         validation_events.append({'type': event_type, **details})
 
 
+# White-fish recipe context — recipe wording that signals the intended product
+# is firm white fish (cod-family). Used to block oily/colored fish offers when
+# the recipe explicitly names a white-fish variety or category. Generic "fryst
+# fisk" and "fisk i block" wording also signals white fish: lax recipes
+# almost always specify "lax" / "laxfilé" / "laxsida" explicitly.
+_WHITE_FISH_RECIPE_CUES = frozenset({
+    'alaska polock', 'polock',
+    'torsk',
+    'sej',
+    'kolja',
+    'kummel',
+    'gädda', 'gadda',
+    'abborre',
+    'gös', 'gos',
+    'fast vit fisk', 'vit fisk', 'fast vit',
+    'fryst fisk', 'fisk i block',
+})
+
+# Oily/colored fish indicators in product names. When a recipe has a
+# white-fish cue, products whose name contains any of these indicators are
+# blocked regardless of which keyword routed them in (e.g. laxfilé products
+# can route via the generic 'fisk' keyword, not just 'lax'/'laxfilé').
+# Forell is borderline (some varieties are leaner) — left out to avoid
+# over-blocking; lax/tonfisk/makrill/sill/sardin/ansjovis are clearly oily
+# and have different cooking behavior than firm white fish.
+_OILY_FISH_PRODUCT_NAME_INDICATORS = frozenset({
+    'lax',  # catches laxfilé, laxsida, laxtärningar — no non-lax fish products contain 'lax'
+    'tonfisk',
+    'makrill',
+    'sardin',
+    'ansjovis',
+})
+
+
 def _flavor_carrier_context_blocked(
     product_lower: str,
     ingredient_lower: str,
@@ -2947,6 +2981,29 @@ def validate_offer_match_candidate(
                     'validation_reject',
                     rule='carrier_flavor_context',
                     detail='dried_kikartor_required',
+                    ing_idx=matched_ing_idx,
+                    keyword=matched_keyword,
+                )
+                matched_keyword = None
+
+        # White-fish recipe context: when the recipe explicitly asks for firm
+        # white fish (alaska polock / torsk / sej / kolja / kummel / gädda /
+        # abborre / gös / "vit fisk" / "fast vit fisk" / "fryst fisk" /
+        # "fisk i block"), block oily/colored fish products by product-name
+        # signal. Laxfilé products can route via the generic 'fisk' keyword,
+        # so checking matched_keyword alone is not enough.
+        if any(cue in ing_norm for cue in _WHITE_FISH_RECIPE_CUES):
+            product_lower = (
+                offer_precomputed.get('name_normalized', '')
+                if offer_precomputed is not None
+                else offer_name_normalized
+            )
+            if any(oily in product_lower for oily in _OILY_FISH_PRODUCT_NAME_INDICATORS):
+                _record_validation_event(
+                    validation_events,
+                    'validation_reject',
+                    rule='carrier_flavor_context',
+                    detail='white_fish_required',
                     ing_idx=matched_ing_idx,
                     keyword=matched_keyword,
                 )

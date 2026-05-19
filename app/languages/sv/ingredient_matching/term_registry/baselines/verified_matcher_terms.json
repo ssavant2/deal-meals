@@ -23,7 +23,7 @@
       "negative_guard_keyword": 15,
       "negative_guard_pattern": 332,
       "negative_regression": 828,
-      "offer_extra_keyword_mapping": 378,
+      "offer_extra_keyword_mapping": 379,
       "parent_match_only_mapping": 17,
       "positive_regression": 662,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1490,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
-      "offer_extra_keyword": 378,
+      "offer_extra_keyword": 379,
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5531,
-    "variants_missing_product_text": 1720,
+    "variant_count": 5532,
+    "variants_missing_product_text": 1721,
     "variants_with_product_text": 3811
   },
   "variants": [
@@ -116197,11 +116197,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"potatis\"}"
+    },
+    {
+      "variant_id": "vterm-f5ec175939b0b194",
+      "row_index": 5162,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:proteinmilkshake",
+      "source_id": "proteinmilkshake",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "proteinmilkshake",
+      "canonical": "milkshake",
+      "expected_family": "milkshake",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"milkshake\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1509,
+      "no_product_text": 1510,
       "static_verified": 2532,
       "synthetic_verified": 1490
     },
@@ -116217,14 +116238,14 @@
       "matcher_regression_case": 1490,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
-      "offer_extra_keyword": 378,
+      "offer_extra_keyword": 379,
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5531
+      "audited": 5532
     },
-    "variant_count": 5531
+    "variant_count": 5532
   }
 }

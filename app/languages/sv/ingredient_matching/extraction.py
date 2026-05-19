@@ -1541,6 +1541,19 @@ def extract_keywords_from_product(
         if 'naturell' not in _name_for_granola and 'natural' not in _name_for_granola:
             keywords = [k for k in keywords if k != 'granola']
 
+    # Name-conditional: müsli/musli — only naturell/natural/original variants extract
+    # the müsli keyword. Flavored müsli (Frukt, Blåbär, Acai, Hasselnöt, Krispig
+    # Kokos, etc.) is too specific — a recipe asking for plain müsli should not
+    # pull in dish-changing flavor variants.
+    if 'müsli' in keywords or 'musli' in keywords:
+        _name_for_musli = original_name_lower
+        if (
+            'naturell' not in _name_for_musli
+            and 'natural' not in _name_for_musli
+            and 'original' not in _name_for_musli
+        ):
+            keywords = [k for k in keywords if k not in ('müsli', 'musli')]
+
     # Offer-side extras keep cached and uncached matching behavior aligned.
     # Example: fresh champinjoner should also satisfy generic recipe wording "svamp".
     extra_keywords = []

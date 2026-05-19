@@ -1307,7 +1307,7 @@ PROCESSED_FOODS: FrozenSet[str] = frozenset({
 
     # BREAKFAST/SNACK CEREALS - not recipe ingredients
     # granola: REMOVED from PROCESSED_FOODS — naturell variants match via name-conditional
-    'müsli', 'musli',  # muesli products
+    # müsli/musli: REMOVED from PROCESSED_FOODS — naturell/original variants match via name-conditional
 
     # FROZEN APPETIZERS / SNACKS - not fresh ingredients
     'spring rolls', 'spring roll', 'vårrullar', 'vårrulle',  # "spring" in product != "springformen" in recipe
@@ -1849,6 +1849,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'lök', 'kål', 'bön', 'majs', 'dill', 'mynta', 'timjan', 'svamp', 'fänkål', 'murkla', 'vitkål', 'squash',  # vegetables & herbs
     'spenat',  # spinach (6 chars) — "Babyspenat", "Spenat Fryst"
     'bulgur',  # grain (6 chars) — "Bulgur Grov", "Bulgur Fin"
+    'müsli', 'musli',  # muesli (5 chars) — naturell/natural/original variants only (see extraction.py name-conditional)
     'kapris',  # capers (6 chars) — "Kapris Burk"
     'ananas',  # pineapple (6 chars) — "Ananas Färsk", "Ananas Ring"
     'quinoa',  # grain (6 chars) — "Quinoa", "Quinoa Röd"
