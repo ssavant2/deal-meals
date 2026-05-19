@@ -101,6 +101,8 @@ RECIPE_COMPILER_HASH_FILES = (
     "app/languages/sv/ingredient_matching/recipe_identity.py",
     "app/languages/sv/ingredient_matching/recipe_matcher_support.py",
     "app/languages/sv/ingredient_matching/recipe_text.py",
+    "app/languages/sv/ingredient_matching/runtime_rule_overlays.py",
+    "app/languages/sv/ingredient_matching/runtime_rule_overlays.toml",
     "app/languages/sv/ingredient_matching/seasonal.py",
     "app/languages/sv/ingredient_matching/specialty_rules.py",
     "app/languages/sv/ingredient_matching/synonyms.py",
