@@ -69,6 +69,8 @@ Known CLI rule shapes:
 ./bin/dm matcher add processed-rule <keyword> --blocked-product-words <w1,w2,...> --reason "<why>"
 ./bin/dm matcher add processed-exemption <keyword> --compounds <c1,c2,...> --reason "<why>"
 ./bin/dm matcher add strict-processed-rule --terms <word1,word2,...> --reason "<why>"
+./bin/dm matcher add spice-fresh-rule <keyword> --blocked-product-words <w1,...> \
+  --spice-indicators <w2,...> --reason "<why>"
 ./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason "<why>"
 ./bin/dm matcher add compound-protection --mode prefix-strict|suffix-strict|suffix-protected|embedded-protected \
   --keywords <word1,word2,...> --reason "<why>"
@@ -574,7 +576,7 @@ can be the correct surface.
 | Ingredient requires product context | `./bin/dm matcher add ingredient-requires-product-context ...` | Ingredient text contains a form/carrier word and should only match products that also name it. | Product-only context rules when the asymmetry is ingredient-side. |
 | Cuisine-specific seasoned product | `./bin/dm matcher add cuisine-context ...` | A product trigger such as `thaikryddad`, `taco`, or `texmex` should remain valid only when the recipe text contains matching cuisine context. This is better than a blanket PNB because the product stays visible for the right cuisine. | Using PNB for cuisine-seasoning products that are legitimate in matching cuisine recipes. |
 | Compound/subword bleed | `./bin/dm matcher add compound-protection ...` | A keyword is matching as an unwanted substring or compound suffix/prefix, e.g. a compound word carries another ingredient name but should require stricter word/prefix proof. | FPB/PNB when the real problem is token/compound shape rather than a semantic product or ingredient context. |
-| Form or processed-state rule | `./bin/dm matcher add processed-rule ...`, `processed-exemption ...`, `strict-processed-rule ...`, or `processed-food ...` for simple set add/remove; otherwise `form_rules.py` or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
+| Form or processed-state rule | `./bin/dm matcher add processed-rule ...`, `spice-fresh-rule ...`, `processed-exemption ...`, `strict-processed-rule ...`, or `processed-food ...` for simple set add/remove; otherwise `form_rules.py` or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
 | Qualifier or bidirectional variant | `./bin/dm matcher add specialty-qualifier ...` or `qualifier-equivalent ...` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. | Raw substring checks without word-boundary handling. |
 | Product qualifier required for a keyword | `./bin/dm matcher add qualifier-required-keyword ...` | A keyword should match product variants only when product qualifier words also appear in the ingredient line. | Specialty qualifier rules when the qualifier belongs to a specific product family rather than every product-side word. |
 | Product keyword substitution | `./bin/dm matcher add product-name-substitution ...` | Product extraction should rewrite one extracted keyword to a more specific canonical only when required product words are also present. | Synonym/parent rules when the terms are always equivalent, regardless of product wording. |
@@ -673,6 +675,7 @@ where the fix is a narrow runtime dictionary/guard.
    ./bin/dm matcher add processed-rule <keyword> --blocked-product-words <w1,w2,...> --reason "<why>"
    ./bin/dm matcher add processed-exemption <keyword> --compounds <c1,c2,...> --reason "<why>"
    ./bin/dm matcher add strict-processed-rule --terms <word1,...> --reason "<why>"
+   ./bin/dm matcher add spice-fresh-rule <keyword> --blocked-product-words <w1,...> --spice-indicators <w2,...> --reason "<why>"
    ./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason "<why>"
    ./bin/dm matcher add compound-protection --mode prefix-strict --keywords <word1,...> --reason "<why>"
    ./bin/dm matcher add qualifier-required-keyword --terms <word1,...> --reason "<why>"

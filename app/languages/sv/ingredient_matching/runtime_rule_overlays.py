@@ -32,6 +32,7 @@ class RuntimeRuleOverlays:
     keyword_suppressed_by_context: Dict[str, Set[str]]
     processed_product_rules: Dict[str, Set[str]]
     processed_rule_compound_exemptions: Dict[str, Set[str]]
+    spice_fresh_rules: Dict[str, Dict[str, Set[str]]]
     global_product_name_blockers: Set[str]
     strict_processed_rules: Set[str]
     carrier_context_required: Set[str]
@@ -122,6 +123,22 @@ _ALLOWED_PRODUCT_NAME_SUBSTITUTION_ENTRY_KEYS = frozenset({
 })
 _ALLOWED_SECONDARY_INGREDIENT_PATTERN_ENTRY_KEYS = frozenset({
     "id", "status", "keyword", "blockers", "exceptions", "reason", "inactive_reason",
+})
+_SPICE_FRESH_RULE_FIELDS = frozenset({
+    "allowed_indicators",
+    "blocked_product_words",
+    "blocked_whole_product_words",
+    "dried_indicators",
+    "fresh_product_words",
+    "ground_indicators",
+    "pickled_indicators",
+    "pickled_product_words",
+    "required_ground_product_words",
+    "required_whole_product_words",
+    "spice_indicators",
+})
+_ALLOWED_SPICE_FRESH_RULE_ENTRY_KEYS = frozenset({
+    "id", "status", "keyword", "reason", "inactive_reason", *_SPICE_FRESH_RULE_FIELDS,
 })
 _VALID_STATUSES = frozenset({"active", "inactive"})
 
@@ -843,6 +860,98 @@ def _load_secondary_ingredient_patterns(
     return updates
 
 
+def _load_spice_fresh_rules(
+    payload: dict[str, Any],
+    *,
+    path: Path,
+    seen_ids: set[str],
+    seen_effective_updates: set[tuple[str, str, str]],
+) -> Dict[str, Dict[str, Set[str]]]:
+    section = "spice_fresh_rules"
+    raw_entries = payload.get(section, [])
+    if not isinstance(raw_entries, list):
+        raise RuntimeRuleOverlayError(f"{path}:{section} must be a list of tables")
+    updates: Dict[str, Dict[str, Set[str]]] = {}
+    for index, entry in enumerate(raw_entries, start=1):
+        if not isinstance(entry, dict):
+            raise RuntimeRuleOverlayError(f"{_path_label(path, section, index)} must be a table")
+        unknown_keys = sorted(set(entry) - _ALLOWED_SPICE_FRESH_RULE_ENTRY_KEYS)
+        if unknown_keys:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} has unknown keys: {', '.join(unknown_keys)}"
+            )
+        missing_keys = sorted({"keyword", "reason"} - set(entry))
+        if missing_keys:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} is missing keys: {', '.join(missing_keys)}"
+            )
+        present_rule_fields = sorted(_SPICE_FRESH_RULE_FIELDS & set(entry))
+        if not present_rule_fields:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} must include at least one spice/fresh rule field"
+            )
+        if "fresh_product_words" in entry and "dried_indicators" not in entry:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} fresh_product_words requires dried_indicators"
+            )
+        if "pickled_indicators" in entry and "pickled_product_words" not in entry:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} pickled_indicators requires pickled_product_words"
+            )
+        if "pickled_product_words" in entry and "pickled_indicators" not in entry:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} pickled_product_words requires pickled_indicators"
+            )
+        if "required_ground_product_words" in entry and "ground_indicators" not in entry:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} required_ground_product_words requires ground_indicators"
+            )
+        if "required_whole_product_words" in entry and "spice_indicators" not in entry:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} required_whole_product_words requires spice_indicators"
+            )
+        if (
+            "blocked_product_words" in entry
+            and "allowed_indicators" not in entry
+            and "spice_indicators" not in entry
+        ):
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} blocked_product_words requires spice_indicators or allowed_indicators"
+            )
+        status = _entry_status(entry, path=path, section=section, index=index)
+        entry_id = entry.get("id")
+        if entry_id is not None:
+            normalized_id = _require_string(entry_id, path=path, section=section, index=index, field="id")
+            if normalized_id in seen_ids:
+                raise RuntimeRuleOverlayError(f"{_path_label(path, section, index)} has duplicate id: {normalized_id}")
+            seen_ids.add(normalized_id)
+        keyword = _normalize_text(_require_string(entry["keyword"], path=path, section=section, index=index, field="keyword"))
+        _require_string(entry["reason"], path=path, section=section, index=index, field="reason")
+        if status == "inactive":
+            continue
+        target = updates.setdefault(keyword, {})
+        for field in present_rule_fields:
+            values = {
+                _normalize_text(item)
+                for item in _require_string_list(
+                    entry[field],
+                    path=path,
+                    section=section,
+                    index=index,
+                    field=field,
+                )
+            }
+            for value in values:
+                effective_update = (keyword, field, value)
+                if effective_update in seen_effective_updates:
+                    raise RuntimeRuleOverlayError(
+                        f"{_path_label(path, section, index)} duplicates active {keyword!r} {field} {value!r}"
+                    )
+                seen_effective_updates.add(effective_update)
+            target.setdefault(field, set()).update(values)
+    return updates
+
+
 def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays:
     payload = _load_toml(path)
     known_sections = (
@@ -854,6 +963,7 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
         | {"compound_protection_updates"}
         | {"specialty_qualifiers", "qualifier_equivalents"}
         | {"product_name_substitutions", "secondary_ingredient_patterns"}
+        | {"spice_fresh_rules"}
     )
     unknown_sections = sorted(set(payload) - known_sections)
     if unknown_sections:
@@ -869,6 +979,7 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
     seen_effective_equivalent_updates: set[tuple[str, str]] = set()
     seen_effective_substitutions: set[tuple[frozenset[str], str, str]] = set()
     seen_effective_secondary_patterns: set[tuple[str, str]] = set()
+    seen_effective_spice_fresh_rules: set[tuple[str, str, str]] = set()
     specialty_updates, specialty_bidirectional_updates = _load_specialty_qualifier_updates(
         payload,
         path=path,
@@ -910,6 +1021,12 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
             path=path,
             seen_ids=seen_ids,
             seen_effective_values=seen_effective_values,
+        ),
+        spice_fresh_rules=_load_spice_fresh_rules(
+            payload,
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_updates=seen_effective_spice_fresh_rules,
         ),
         global_product_name_blockers=_load_term_set_section(
             payload,
@@ -1017,6 +1134,7 @@ FALSE_POSITIVE_BLOCKER_CLI_UPDATES = _OVERLAYS.false_positive_blockers
 KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES = _OVERLAYS.keyword_suppressed_by_context
 PROCESSED_PRODUCT_RULE_CLI_UPDATES = _OVERLAYS.processed_product_rules
 PROCESSED_RULE_COMPOUND_EXEMPTION_CLI_UPDATES = _OVERLAYS.processed_rule_compound_exemptions
+SPICE_FRESH_RULE_CLI_UPDATES = _OVERLAYS.spice_fresh_rules
 GLOBAL_PRODUCT_NAME_BLOCKER_CLI_UPDATES = _OVERLAYS.global_product_name_blockers
 STRICT_PROCESSED_RULE_CLI_UPDATES = _OVERLAYS.strict_processed_rules
 CARRIER_CONTEXT_REQUIRED_CLI_UPDATES = _OVERLAYS.carrier_context_required

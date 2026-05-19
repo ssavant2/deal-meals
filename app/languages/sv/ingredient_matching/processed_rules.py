@@ -15,6 +15,7 @@ except ModuleNotFoundError:
 from .runtime_rule_overlays import (
     PROCESSED_PRODUCT_RULE_CLI_UPDATES,
     PROCESSED_RULE_COMPOUND_EXEMPTION_CLI_UPDATES,
+    SPICE_FRESH_RULE_CLI_UPDATES,
     STRICT_PROCESSED_RULE_CLI_UPDATES,
 )
 
@@ -904,3 +905,9 @@ for k, v in _SPICE_VS_FRESH_RULES_RAW.items():
     if 'required_whole_product_words' in v:
         entry['required_whole_product_words'] = {fix_swedish_chars(w).lower() for w in v['required_whole_product_words']}
     SPICE_VS_FRESH_RULES[key] = entry
+
+for _keyword, _field_updates in SPICE_FRESH_RULE_CLI_UPDATES.items():
+    _entry = SPICE_VS_FRESH_RULES.setdefault(_keyword, {'blocked_product_words': set()})
+    _entry.setdefault('blocked_product_words', set())
+    for _field, _values in _field_updates.items():
+        _entry.setdefault(_field, set()).update(_values)

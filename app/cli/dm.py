@@ -418,8 +418,23 @@ _RUNTIME_OVERLAY_SECTION_ORDER = (
     *(surface.section for surface in RUNTIME_CONTEXT_SURFACES.values()),
     *(surface.section for surface in RUNTIME_COMPOUND_SURFACES.values()),
     *(surface.section for surface in RUNTIME_SPECIALTY_SURFACES.values()),
+    "spice_fresh_rules",
     "product_name_substitutions",
     "secondary_ingredient_patterns",
+)
+
+_SPICE_FRESH_RULE_FIELDS = (
+    "allowed_indicators",
+    "blocked_product_words",
+    "blocked_whole_product_words",
+    "dried_indicators",
+    "fresh_product_words",
+    "ground_indicators",
+    "pickled_indicators",
+    "pickled_product_words",
+    "required_ground_product_words",
+    "required_whole_product_words",
+    "spice_indicators",
 )
 
 
@@ -625,6 +640,16 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "Use after a processed-rule exists when different product forms are not interchangeable.",
         ),
     ),
+    "spice-fresh-rule": MatcherGuide(
+        label="spice-fresh-rule",
+        status="supported by dm matcher add",
+        summary="Add bidirectional spice/fresh form guards for herbs, spices, and vegetables.",
+        steps=(
+            "Run: ./bin/dm matcher add spice-fresh-rule <keyword> --blocked-product-words <w1,...> --spice-indicators <w2,...> --reason \"<why>\"",
+            "Use allowed/fresh/dried/ground options only for the exact runtime check they model.",
+            "Prefer processed-rule when the rule is a simpler product-form blocker.",
+        ),
+    ),
     "qualifier-required-keyword": MatcherGuide(
         label="qualifier-required-keyword",
         status="supported by dm matcher add",
@@ -791,6 +816,8 @@ GUIDE_ALIASES = {
     "processed_exemption": "processed-exemption",
     "processed-compound-exemption": "processed-exemption",
     "strict_processed_rule": "strict-processed-rule",
+    "spice_fresh_rule": "spice-fresh-rule",
+    "spice-vs-fresh-rule": "spice-fresh-rule",
     "qualifier_required_keyword": "qualifier-required-keyword",
     "qualifier-required": "qualifier-required-keyword",
     "cuisine_context": "cuisine-context",
@@ -882,6 +909,10 @@ def _split_csv(value: str, *, label: str, lowercase: bool = True) -> tuple[str, 
     if duplicates:
         raise typer.BadParameter(f"{label} contains duplicates: {', '.join(duplicates)}")
     return items
+
+
+def _split_optional_csv(value: str | None, *, label: str) -> tuple[str, ...]:
+    return _split_csv(value, label=label) if value else ()
 
 
 def _titleish(value: str) -> str:
@@ -2615,6 +2646,23 @@ def _runtime_secondary_pattern_entry_block(entry: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _runtime_spice_fresh_entry_block(entry: dict[str, Any]) -> str:
+    lines = ["[[spice_fresh_rules]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.append(f"keyword = {_toml_string(str(entry['keyword']))}")
+    for field in _SPICE_FRESH_RULE_FIELDS:
+        if entry.get(field):
+            lines.append(f"{field} = {_toml_array(list(entry[field]))}")
+    lines.append(f"reason = {_toml_string(str(entry['reason']))}")
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str:
     lines = [
         "# CLI-managed Track A runtime-rule overlays.",
@@ -2644,6 +2692,7 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
         "#   [[compound_protection_updates]]",
         "#   [[specialty_qualifiers]]",
         "#   [[qualifier_equivalents]]",
+        "#   [[spice_fresh_rules]]",
         "#   [[product_name_substitutions]]",
         "#   [[secondary_ingredient_patterns]]",
         "",
@@ -2670,6 +2719,8 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
                 lines.append(_runtime_compound_entry_block(compound_by_section[section], entry).rstrip())
             elif section in specialty_by_section:
                 lines.append(_runtime_specialty_entry_block(specialty_by_section[section], entry).rstrip())
+            elif section == "spice_fresh_rules":
+                lines.append(_runtime_spice_fresh_entry_block(entry).rstrip())
             elif section == "product_name_substitutions":
                 lines.append(_runtime_product_substitution_entry_block(entry).rstrip())
             elif section == "secondary_ingredient_patterns":
@@ -3036,6 +3087,49 @@ def _runtime_secondary_pattern_matching_entries(
             *(_runtime_rule_normalize_text(value) for value in blockers),
             *(_runtime_rule_normalize_text(value) for value in exceptions),
         }
+        if selector_norm in searchable:
+            matches.append(entry)
+    return matches
+
+
+def _runtime_spice_fresh_entry_id(keyword: str) -> str:
+    return f"runtime_spice_fresh_rule_{_slug(keyword)}"
+
+
+def _runtime_spice_fresh_entry_label(entry: dict[str, Any]) -> str:
+    keyword = str(entry.get("keyword", ""))
+    entry_id = str(entry.get("id") or _runtime_spice_fresh_entry_id(keyword))
+    status = str(entry.get("status", "active"))
+    parts = []
+    for field in _SPICE_FRESH_RULE_FIELDS:
+        values = tuple(str(value) for value in entry.get(field, []))
+        if values:
+            parts.append(f"{field}={','.join(values)}")
+    return f"{entry_id}\t{status}\tspice-fresh-rule\t{keyword}\t{'; '.join(parts)}"
+
+
+def _runtime_spice_fresh_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get("spice_fresh_rules", []):
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        keyword = str(entry.get("keyword", ""))
+        entry_id = str(entry.get("id") or _runtime_spice_fresh_entry_id(keyword))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id:
+            matches.append(entry)
+            continue
+        searchable = {_runtime_rule_normalize_text(keyword)}
+        for field in _SPICE_FRESH_RULE_FIELDS:
+            searchable.update(_runtime_rule_normalize_text(str(value)) for value in entry.get(field, []))
         if selector_norm in searchable:
             matches.append(entry)
     return matches
@@ -3908,6 +4002,119 @@ def _append_secondary_pattern_sanity_stub(
             lines.extend([
                 f"test({_toml_string('secondary pattern allows ' + normalized_keyword + ' via ' + normalized_exception)},",
                 f"     check_secondary_ingredient_patterns({_toml_string(normalized_blocker + ' ' + normalized_exception)}, {_toml_string(normalized_keyword)}, {_toml_string(normalized_keyword)}), True)",
+            ])
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+def _validate_spice_fresh_rule_fields(fields: dict[str, tuple[str, ...]]) -> None:
+    present = {field for field, values in fields.items() if values}
+    if not present:
+        raise typer.BadParameter("spice-fresh-rule must include at least one rule field")
+    if "fresh_product_words" in present and "dried_indicators" not in present:
+        raise typer.BadParameter("--fresh-product-words requires --dried-indicators")
+    if "pickled_indicators" in present and "pickled_product_words" not in present:
+        raise typer.BadParameter("--pickled-indicators requires --pickled-product-words")
+    if "pickled_product_words" in present and "pickled_indicators" not in present:
+        raise typer.BadParameter("--pickled-product-words requires --pickled-indicators")
+    if "required_ground_product_words" in present and "ground_indicators" not in present:
+        raise typer.BadParameter("--required-ground-product-words requires --ground-indicators")
+    if "required_whole_product_words" in present and "spice_indicators" not in present:
+        raise typer.BadParameter("--required-whole-product-words requires --spice-indicators")
+    if (
+        "blocked_product_words" in present
+        and "allowed_indicators" not in present
+        and "spice_indicators" not in present
+    ):
+        raise typer.BadParameter("--blocked-product-words requires --spice-indicators or --allowed-indicators")
+
+
+def _append_spice_fresh_rule_entry(
+    *,
+    paths: MatcherPaths,
+    keyword: str,
+    fields: dict[str, tuple[str, ...]],
+    reason: str,
+    dry_run: bool,
+) -> str:
+    _validate_spice_fresh_rule_fields(fields)
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    normalized_fields = {
+        field: tuple(_runtime_rule_normalize_text(value) for value in values)
+        for field, values in fields.items()
+        if values
+    }
+    entry: dict[str, Any] | None = None
+    existing_by_field: dict[str, set[str]] = {field: set() for field in _SPICE_FRESH_RULE_FIELDS}
+    for candidate in sections.get("spice_fresh_rules", []):
+        if _runtime_rule_normalize_text(str(candidate.get("keyword", ""))) != normalized_keyword:
+            continue
+        if _runtime_overlay_entry_is_active(candidate):
+            for field in _SPICE_FRESH_RULE_FIELDS:
+                existing_by_field[field].update(_runtime_rule_normalize_text(str(value)) for value in candidate.get(field, []))
+        if entry is None:
+            entry = candidate
+    if paths.app_dir == APP_DIR:
+        from languages.sv.ingredient_matching.processed_rules import SPICE_VS_FRESH_RULES
+
+        live_rule = SPICE_VS_FRESH_RULES.get(normalized_keyword, {})
+        for field in _SPICE_FRESH_RULE_FIELDS:
+            existing_by_field[field].update(str(value) for value in live_rule.get(field, set()))
+    duplicate_messages = []
+    for field, values in normalized_fields.items():
+        duplicates = sorted(set(values) & existing_by_field[field])
+        if duplicates:
+            duplicate_messages.append(f"{field}: {', '.join(duplicates)}")
+    if duplicate_messages:
+        raise typer.BadParameter(f"spice-fresh-rule already contains {'; '.join(duplicate_messages)}")
+    if entry is None:
+        entry = {
+            "id": _runtime_spice_fresh_entry_id(normalized_keyword),
+            "status": "active",
+            "keyword": normalized_keyword,
+            "reason": reason.strip(),
+        }
+    else:
+        entry["id"] = str(entry.get("id") or _runtime_spice_fresh_entry_id(normalized_keyword))
+        entry["status"] = "active"
+        entry.pop("inactive_reason", None)
+        entry["keyword"] = normalized_keyword
+        existing_reason = str(entry.get("reason", "")).strip()
+        if reason.strip() and reason.strip() not in existing_reason:
+            entry["reason"] = f"{existing_reason}; {reason.strip()}" if existing_reason else reason.strip()
+    for field, values in normalized_fields.items():
+        entry[field] = list(dict.fromkeys([*entry.get(field, []), *values]))
+    preview = _runtime_spice_fresh_entry_block(entry)
+    if dry_run:
+        return preview
+    if entry not in sections.setdefault("spice_fresh_rules", []):
+        sections["spice_fresh_rules"].append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_spice_fresh_rule_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    keyword: str,
+    fields: dict[str, tuple[str, ...]],
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    lines = [
+        "",
+        f"# {policy_ref}: generated by dm matcher add spice-fresh-rule",
+        "from languages.sv.ingredient_matching.processed_rules import SPICE_VS_FRESH_RULES",
+    ]
+    for field, values in fields.items():
+        for value in values:
+            normalized_value = _runtime_rule_normalize_text(value)
+            lines.extend([
+                f"test({_toml_string('spice-fresh-rule ' + normalized_keyword + ' ' + field + ' ' + normalized_value)},",
+                f"     {_toml_string(normalized_value)} in SPICE_VS_FRESH_RULES.get({_toml_string(normalized_keyword)}, {{}}).get({_toml_string(field)}, set()), True)",
             ])
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
@@ -5102,6 +5309,132 @@ def add_strict_processed_rule(
         dry_run=dry_run,
         write_sanity=write_sanity,
     )
+
+
+@matcher_add_app.command("spice-fresh-rule")
+def add_spice_fresh_rule(
+    keyword: Annotated[str, typer.Argument(help="Keyword whose spice/fresh product forms should be guarded.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why this spice/fresh guard is needed.")],
+    blocked_product_words_csv: Annotated[
+        str | None,
+        typer.Option("--blocked-product-words", help="Product words blocked unless ingredient has matching indicators."),
+    ] = None,
+    spice_indicators_csv: Annotated[
+        str | None,
+        typer.Option("--spice-indicators", help="Ingredient words/units indicating spice/dried/whole form."),
+    ] = None,
+    allowed_indicators_csv: Annotated[
+        str | None,
+        typer.Option("--allowed-indicators", help="Ingredient words that allow blocked product words."),
+    ] = None,
+    fresh_product_words_csv: Annotated[
+        str | None,
+        typer.Option("--fresh-product-words", help="Fresh-product words blocked by dried ingredient indicators."),
+    ] = None,
+    dried_indicators_csv: Annotated[
+        str | None,
+        typer.Option("--dried-indicators", help="Ingredient words/units indicating dried/ground form."),
+    ] = None,
+    ground_indicators_csv: Annotated[
+        str | None,
+        typer.Option("--ground-indicators", help="Ingredient words indicating ground form."),
+    ] = None,
+    blocked_whole_product_words_csv: Annotated[
+        str | None,
+        typer.Option("--blocked-whole-product-words", help="Whole-product words blocked by ground indicators."),
+    ] = None,
+    required_ground_product_words_csv: Annotated[
+        str | None,
+        typer.Option("--required-ground-product-words", help="Product words required when ingredient asks for ground form."),
+    ] = None,
+    required_whole_product_words_csv: Annotated[
+        str | None,
+        typer.Option("--required-whole-product-words", help="Product words required when ingredient asks for whole form."),
+    ] = None,
+    pickled_indicators_csv: Annotated[
+        str | None,
+        typer.Option("--pickled-indicators", help="Ingredient words indicating pickled/preserved form."),
+    ] = None,
+    pickled_product_words_csv: Annotated[
+        str | None,
+        typer.Option("--pickled-product-words", help="Product words that prove pickled/preserved form."),
+    ] = None,
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    keyword = keyword.strip()
+    if not keyword:
+        raise typer.BadParameter("keyword must not be empty")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    fields = {
+        "allowed_indicators": _split_optional_csv(allowed_indicators_csv, label="--allowed-indicators"),
+        "blocked_product_words": _split_optional_csv(blocked_product_words_csv, label="--blocked-product-words"),
+        "blocked_whole_product_words": _split_optional_csv(
+            blocked_whole_product_words_csv,
+            label="--blocked-whole-product-words",
+        ),
+        "dried_indicators": _split_optional_csv(dried_indicators_csv, label="--dried-indicators"),
+        "fresh_product_words": _split_optional_csv(fresh_product_words_csv, label="--fresh-product-words"),
+        "ground_indicators": _split_optional_csv(ground_indicators_csv, label="--ground-indicators"),
+        "pickled_indicators": _split_optional_csv(pickled_indicators_csv, label="--pickled-indicators"),
+        "pickled_product_words": _split_optional_csv(pickled_product_words_csv, label="--pickled-product-words"),
+        "required_ground_product_words": _split_optional_csv(
+            required_ground_product_words_csv,
+            label="--required-ground-product-words",
+        ),
+        "required_whole_product_words": _split_optional_csv(
+            required_whole_product_words_csv,
+            label="--required-whole-product-words",
+        ),
+        "spice_indicators": _split_optional_csv(spice_indicators_csv, label="--spice-indicators"),
+    }
+    _validate_spice_fresh_rule_fields(fields)
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    policy_ref = policy_ref or f"runtime_spice_fresh_rule_{_slug(normalized_keyword)}"
+    overlay_preview = _append_spice_fresh_rule_entry(
+        paths=paths,
+        keyword=keyword,
+        fields=fields,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_spice_fresh_rule_sanity_stub(
+            paths=paths,
+            keyword=keyword,
+            fields=fields,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+    typer.echo(f"Generated spice_fresh_rule: {policy_ref}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
 
 
 @matcher_add_app.command("qualifier-required-keyword")
@@ -6568,6 +6901,33 @@ def matcher_list(
             typer.echo("No entries found.")
         return
 
+    if surface_key == "spice-fresh-rule":
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_spice_fresh_matching_entries(
+            sections,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(entry.get("id") or _runtime_spice_fresh_entry_id(str(entry.get("keyword", "")))),
+                    "status": str(entry.get("status", "active")),
+                    "surface": "spice-fresh-rule",
+                    "keyword": str(entry.get("keyword", "")),
+                    **{field: list(entry.get(field, [])) for field in _SPICE_FRESH_RULE_FIELDS},
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_spice_fresh_entry_label(entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
     if surface_key == "product-name-substitution":
         sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
         matches = _runtime_product_substitution_matching_entries(
@@ -6879,6 +7239,32 @@ def matcher_inactivate(
         entry["status"] = "inactive"
         entry["inactive_reason"] = reason.strip()
         preview = _runtime_specialty_entry_block(surface, entry)
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    if surface_key == "spice-fresh-rule":
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_spice_fresh_matching_entries(
+            sections,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_spice_fresh_entry_label(entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one spice-fresh-rule entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        entry["id"] = str(entry.get("id") or _runtime_spice_fresh_entry_id(str(entry.get("keyword", ""))))
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_spice_fresh_entry_block(entry)
         if dry_run:
             typer.echo(preview)
             return

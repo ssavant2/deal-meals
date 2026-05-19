@@ -151,6 +151,7 @@ from languages.sv.ingredient_matching.normalization import _apply_space_normaliz
 from languages.sv.ingredient_matching.processed_rules import (
     PROCESSED_PRODUCT_RULES,
     PROCESSED_RULES_COMPOUND_EXEMPTIONS,
+    SPICE_VS_FRESH_RULES,
     STRICT_PROCESSED_RULES,
 )
 from languages.sv.ingredient_matching.recipe_context import CUISINE_CONTEXT
@@ -249,6 +250,14 @@ reason = "Synthetic global blocker test."
 terms = ["Phase Processed"]
 reason = "Synthetic strict processed rule."
 
+[[spice_fresh_rules]]
+keyword = "Phase Spice"
+blocked_product_words = ["Phase Fresh"]
+spice_indicators = ["Phase Spice Indicator"]
+fresh_product_words = ["Phase Fresh Product"]
+dried_indicators = ["Phase Dried Indicator"]
+reason = "Synthetic spice/fresh rule."
+
 [[carrier_context_required]]
 terms = ["Phase Carrier Context"]
 reason = "Synthetic carrier-context-required test."
@@ -327,6 +336,22 @@ reason = "Synthetic secondary pattern."
             )
             self.assertEqual(overlays.global_product_name_blockers, {"phase pet brand"})
             self.assertEqual(overlays.strict_processed_rules, {"phase processed"})
+            self.assertEqual(
+                overlays.spice_fresh_rules["phase spice"]["blocked_product_words"],
+                {"phase fresh"},
+            )
+            self.assertEqual(
+                overlays.spice_fresh_rules["phase spice"]["spice_indicators"],
+                {"phase spice indicator"},
+            )
+            self.assertEqual(
+                overlays.spice_fresh_rules["phase spice"]["fresh_product_words"],
+                {"phase fresh product"},
+            )
+            self.assertEqual(
+                overlays.spice_fresh_rules["phase spice"]["dried_indicators"],
+                {"phase dried indicator"},
+            )
             self.assertEqual(overlays.carrier_context_required, {"phase carrier context"})
             self.assertEqual(overlays.context_required_words, {"phase context required"})
             self.assertEqual(overlays.ingredient_requires_in_product, {"phase ingredient context"})
@@ -2361,6 +2386,79 @@ def normalize_probe(text: str) -> str:
             )
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("runtime_processed_rule_phaseprocessed", listed.stdout)
+
+    def test_phase16d_spice_fresh_rule_cli_writes_runtime_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "spice-fresh-rule",
+                    "phasespice",
+                    "--blocked-product-words",
+                    "phasefresh",
+                    "--spice-indicators",
+                    "phaseindicator",
+                    "--fresh-product-words",
+                    "phasefreshproduct",
+                    "--dried-indicators",
+                    "phasedried",
+                    "--reason",
+                    "Synthetic spice/fresh rule.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "blocked": sorted(SPICE_VS_FRESH_RULES["phasespice"]["blocked_product_words"]),
+    "spice": sorted(SPICE_VS_FRESH_RULES["phasespice"]["spice_indicators"]),
+    "fresh": sorted(SPICE_VS_FRESH_RULES["phasespice"]["fresh_product_words"]),
+    "dried": sorted(SPICE_VS_FRESH_RULES["phasespice"]["dried_indicators"]),
+}
+""",
+            )
+            self.assertEqual(runtime["blocked"], ["phasefresh"])
+            self.assertEqual(runtime["spice"], ["phaseindicator"])
+            self.assertEqual(runtime["fresh"], ["phasefreshproduct"])
+            self.assertEqual(runtime["dried"], ["phasedried"])
+
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "spice-fresh-rule",
+                    "--term",
+                    "phasespice",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("runtime_spice_fresh_rule_phasespice", listed.stdout)
 
     def test_phase17_compound_protection_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
