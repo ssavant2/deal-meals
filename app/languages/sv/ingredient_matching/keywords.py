@@ -635,6 +635,8 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'osthyvel',  # "hyvlat med osthyvel" — cheese slicer (kitchen tool), not food
     'potatisskalare',  # "skalad med potatisskalare" — vegetable peeler (kitchen tool), not food
 })
+STOP_WORDS = _apply_keyword_set_updates("stop_words", STOP_WORDS)
+
 NON_FOOD_KEYWORDS: FrozenSet[str] = frozenset({
     # Cleaning products
     'disk', 'diskmedel', 'maskindisk', 'handdisk', 'handdiskmedel', 'diskborste', 'diskduk',
@@ -937,6 +939,7 @@ NON_FOOD_KEYWORDS: FrozenSet[str] = frozenset({
     # Garden/plant products
     'dahlia',  # "Dahlia Creme de Cognac gul/orange ICA Garden" — flower, not food
 })
+NON_FOOD_KEYWORDS = _apply_keyword_set_updates("non_food_keywords", NON_FOOD_KEYWORDS)
 
 PROCESSED_FOODS: FrozenSet[str] = frozenset({
     # ölkorv/olkorv removed from PROCESSED_FOODS — it IS used in Swedish cooking

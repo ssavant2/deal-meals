@@ -56,7 +56,13 @@ _CONTEXT_SECTION_FIELDS = {
     "cuisine_context": ("trigger", "contexts"),
 }
 _SET_UPDATE_SECTIONS = {
-    "keyword_set_updates": frozenset({"flavor_words", "important_short_keywords", "processed_foods"}),
+    "keyword_set_updates": frozenset({
+        "flavor_words",
+        "important_short_keywords",
+        "non_food_keywords",
+        "processed_foods",
+        "stop_words",
+    }),
     "carrier_set_updates": frozenset({"carrier_products"}),
 }
 _SET_ACTIONS = frozenset({"add", "remove"})

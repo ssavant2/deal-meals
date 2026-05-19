@@ -126,7 +126,14 @@ for name, path in (
 
 from languages.sv.ingredient_matching.blocker_data import FALSE_POSITIVE_BLOCKERS, GLOBAL_PRODUCT_NAME_BLOCKERS, PRODUCT_NAME_BLOCKERS
 from languages.sv.ingredient_matching.carrier_context import CARRIER_PRODUCTS, KEYWORD_SUPPRESSED_BY_CONTEXT
-from languages.sv.ingredient_matching.keywords import FLAVOR_WORDS, IMPORTANT_SHORT_KEYWORDS, PROCESSED_FOODS
+from languages.sv.ingredient_matching.extraction import extract_keywords_from_product
+from languages.sv.ingredient_matching.keywords import (
+    FLAVOR_WORDS,
+    IMPORTANT_SHORT_KEYWORDS,
+    NON_FOOD_KEYWORDS,
+    PROCESSED_FOODS,
+    STOP_WORDS,
+)
 from languages.sv.ingredient_matching.normalization import _apply_space_normalizations
 from languages.sv.ingredient_matching.recipe_context import CUISINE_CONTEXT
 from languages.sv.ingredient_matching.compound_text import _COMPOUND_STRICT_PREFIX_KEYWORDS
@@ -221,6 +228,18 @@ action = "add"
 terms = ["Phase Flavor"]
 reason = "Synthetic flavor update."
 
+[[keyword_set_updates]]
+surface = "stop_words"
+action = "add"
+terms = ["Phase Stop"]
+reason = "Synthetic stop-word update."
+
+[[keyword_set_updates]]
+surface = "non_food_keywords"
+action = "add"
+terms = ["Phase Nonfood"]
+reason = "Synthetic non-food update."
+
 [[carrier_set_updates]]
 surface = "carrier_products"
 action = "add"
@@ -237,6 +256,8 @@ reason = "Synthetic carrier update."
             self.assertEqual(overlays.global_product_name_blockers, {"phase pet brand"})
             self.assertEqual(overlays.space_normalizations, (("phase space", "phasespace"),))
             self.assertEqual(overlays.keyword_set_updates["flavor_words"]["add"], {"phase flavor"})
+            self.assertEqual(overlays.keyword_set_updates["stop_words"]["add"], {"phase stop"})
+            self.assertEqual(overlays.keyword_set_updates["non_food_keywords"]["add"], {"phase nonfood"})
             self.assertEqual(overlays.carrier_set_updates["carrier_products"]["add"], {"phase carrier"})
 
             overlay_file.write_text(
@@ -1673,9 +1694,48 @@ def normalize_probe(text: str) -> str:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
+            deep_sanity_file = app_dir / "support_checks" / "run_deep_matcher_sanity.py"
             live_app_dir = Path(__file__).resolve().parents[2]
 
+            broad = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "stop-word",
+                    "--terms",
+                    "abc",
+                    "--reason",
+                    "Synthetic broad stop-word.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--dry-run",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(broad.returncode, 0, broad.stderr + broad.stdout)
+            self.assertIn("--allow-broad", broad.stderr + broad.stdout)
+
             commands = [
+                [
+                    "stop-word",
+                    "--terms",
+                    "phasefilterword",
+                    "--reason",
+                    "Synthetic stop-word.",
+                ],
+                [
+                    "non-food-keyword",
+                    "--terms",
+                    "phasenonfood",
+                    "--reason",
+                    "Synthetic non-food keyword.",
+                ],
                 [
                     "flavor-word",
                     "--terms",
@@ -1731,6 +1791,10 @@ def normalize_probe(text: str) -> str:
                 app_dir,
                 """
 {
+    "stop": "phasefilterword" in STOP_WORDS,
+    "stop_extracted": extract_keywords_from_product("phasefilterword"),
+    "non_food": "phasenonfood" in NON_FOOD_KEYWORDS,
+    "non_food_extracted": extract_keywords_from_product("phasenonfood"),
     "flavor": "phaseflavor" in FLAVOR_WORDS,
     "carrier": "phasecarrier" in CARRIER_PRODUCTS,
     "short": "px" in IMPORTANT_SHORT_KEYWORDS,
@@ -1738,10 +1802,18 @@ def normalize_probe(text: str) -> str:
 }
 """,
             )
+            self.assertEqual(runtime["stop"], True)
+            self.assertEqual(runtime["stop_extracted"], [])
+            self.assertEqual(runtime["non_food"], True)
+            self.assertEqual(runtime["non_food_extracted"], [])
             self.assertEqual(runtime["flavor"], True)
             self.assertEqual(runtime["carrier"], True)
             self.assertEqual(runtime["short"], True)
             self.assertEqual(runtime["processed_removed"], False)
+
+            sanity_text = deep_sanity_file.read_text(encoding="utf-8")
+            self.assertIn("stop-word filters extraction phasefilterword", sanity_text)
+            self.assertIn("non-food-keyword filters product phasenonfood", sanity_text)
 
             listed = subprocess.run(
                 [
@@ -1750,9 +1822,9 @@ def normalize_probe(text: str) -> str:
                     "cli.dm",
                     "matcher",
                     "list",
-                    "flavor-word",
+                    "stop-word",
                     "--term",
-                    "phaseflavor",
+                    "phasefilterword",
                     "--tree-root",
                     str(tree_root),
                 ],
@@ -1762,7 +1834,38 @@ def normalize_probe(text: str) -> str:
                 text=True,
             )
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
-            self.assertIn("runtime_flavor_word_add_phaseflavor", listed.stdout)
+            self.assertIn("runtime_stop_word_add_phasefilterword", listed.stdout)
+
+            inactivate = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "inactivate",
+                    "stop-word",
+                    "phasefilterword",
+                    "--reason",
+                    "Synthetic stop-word inactivation.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(inactivate.returncode, 0, inactivate.stderr + inactivate.stdout)
+            after_inactivate = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "stop": "phasefilterword" in STOP_WORDS,
+}
+""",
+            )
+            self.assertEqual(after_inactivate["stop"], False)
 
     def test_phase16_cuisine_context_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

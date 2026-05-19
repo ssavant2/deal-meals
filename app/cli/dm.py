@@ -265,6 +265,20 @@ RUNTIME_PAIR_SURFACES: dict[str, RuntimePairSurface] = {
     ),
 }
 RUNTIME_SET_UPDATE_SURFACES: dict[str, RuntimeSetUpdateSurface] = {
+    "stop-word": RuntimeSetUpdateSurface(
+        command="stop-word",
+        section="keyword_set_updates",
+        surface="stop_words",
+        default_action="add",
+        guide_label="Stop word",
+    ),
+    "non-food-keyword": RuntimeSetUpdateSurface(
+        command="non-food-keyword",
+        section="keyword_set_updates",
+        surface="non_food_keywords",
+        default_action="add",
+        guide_label="Non-food keyword",
+    ),
     "flavor-word": RuntimeSetUpdateSurface(
         command="flavor-word",
         section="keyword_set_updates",
@@ -464,6 +478,26 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         steps=(
             "Run: ./bin/dm matcher add space-normalization \"<source>\" --target \"<target>\" --reason \"<why>\"",
             "Use when extraction should see a joined or canonicalized token before matching.",
+        ),
+    ),
+    "stop-word": MatcherGuide(
+        label="stop-word",
+        status="supported by dm matcher add",
+        summary="Add or remove STOP_WORDS extraction filters.",
+        steps=(
+            "Run: ./bin/dm matcher add stop-word --terms <word1,word2,...> --reason \"<why>\"",
+            "Use when a product/ingredient descriptor should not become a matcher keyword at all.",
+            "Removal requires --allow-removal because it can reopen broad matching behavior.",
+        ),
+    ),
+    "non-food-keyword": MatcherGuide(
+        label="non-food-keyword",
+        status="supported by dm matcher add",
+        summary="Add or remove NON_FOOD_KEYWORDS filters.",
+        steps=(
+            "Run: ./bin/dm matcher add non-food-keyword --terms <word1,word2,...> --reason \"<why>\"",
+            "Use when a keyword means the product is non-food/tool/household scope, not a recipe ingredient.",
+            "Removal requires --allow-removal because it can reopen broad matching behavior.",
         ),
     ),
     "flavor-word": MatcherGuide(
@@ -2965,6 +2999,8 @@ def _append_runtime_set_update_entry(
         if not _runtime_overlay_entry_is_active(entry):
             continue
         existing_terms.update(_runtime_rule_normalize_text(str(term)) for term in entry.get("terms", []))
+    if action == "add":
+        existing_terms.update(_live_runtime_set_update_values(surface, paths))
     duplicates = sorted(set(normalized_terms) & existing_terms)
     if duplicates:
         raise typer.BadParameter(
@@ -2988,6 +3024,31 @@ def _append_runtime_set_update_entry(
     return preview
 
 
+def _live_runtime_set_update_values(surface: RuntimeSetUpdateSurface, paths: MatcherPaths) -> set[str]:
+    if paths.app_dir != APP_DIR:
+        return set()
+    if surface.surface == "carrier_products":
+        from languages.sv.ingredient_matching.carrier_context import CARRIER_PRODUCTS
+
+        return set(CARRIER_PRODUCTS)
+    from languages.sv.ingredient_matching.keywords import (
+        FLAVOR_WORDS,
+        IMPORTANT_SHORT_KEYWORDS,
+        NON_FOOD_KEYWORDS,
+        PROCESSED_FOODS,
+        STOP_WORDS,
+    )
+
+    live_sets = {
+        "flavor_words": FLAVOR_WORDS,
+        "important_short_keywords": IMPORTANT_SHORT_KEYWORDS,
+        "non_food_keywords": NON_FOOD_KEYWORDS,
+        "processed_foods": PROCESSED_FOODS,
+        "stop_words": STOP_WORDS,
+    }
+    return set(live_sets.get(surface.surface, frozenset()))
+
+
 def _append_runtime_set_update_sanity_stub(
     *,
     paths: MatcherPaths,
@@ -3000,7 +3061,9 @@ def _append_runtime_set_update_sanity_stub(
     mapping_name = {
         "flavor_words": "FLAVOR_WORDS",
         "important_short_keywords": "IMPORTANT_SHORT_KEYWORDS",
+        "non_food_keywords": "NON_FOOD_KEYWORDS",
         "processed_foods": "PROCESSED_FOODS",
+        "stop_words": "STOP_WORDS",
         "carrier_products": "CARRIER_PRODUCTS",
     }[surface.surface]
     import_module = (
@@ -3020,6 +3083,16 @@ def _append_runtime_set_update_sanity_stub(
             f"test({_toml_string(surface.command + ' ' + action + ' ' + normalized_term)},",
             f"     {_toml_string(normalized_term)} in {mapping_name}, {expected})",
         ])
+        if action == "add" and surface.surface == "stop_words":
+            lines.extend([
+                f"test({_toml_string(surface.command + ' filters extraction ' + normalized_term)},",
+                f"     {_toml_string(normalized_term)} in kw({_toml_string(normalized_term)}), False)",
+            ])
+        if action == "add" and surface.surface == "non_food_keywords":
+            lines.extend([
+                f"test({_toml_string(surface.command + ' filters product ' + normalized_term)},",
+                f"     kw({_toml_string(normalized_term)}), [])",
+            ])
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
     return block
@@ -4100,6 +4173,143 @@ def _add_runtime_term_set_rule(
         typer.echo("Skipped gates (--no-run-gates).")
         return
     raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+def _add_keyword_filter_set_rule(
+    *,
+    surface: RuntimeSetUpdateSurface,
+    terms_csv: str,
+    action: Literal["add", "remove"],
+    reason: str,
+    allow_broad: bool,
+    allow_removal: bool,
+    policy_ref: str | None,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    terms = _split_csv(terms_csv, label="--terms")
+    broad_terms = [
+        term for term in terms
+        if len(_runtime_rule_normalize_text(term).replace(" ", "")) < 4
+    ]
+    if broad_terms and not allow_broad:
+        raise typer.BadParameter(
+            f"{surface.command} terms shorter than four characters require --allow-broad: "
+            + ", ".join(broad_terms)
+        )
+    if action == "remove" and not allow_removal:
+        raise typer.BadParameter(f"{surface.command} removals require --allow-removal")
+    _add_runtime_set_update_rule(
+        surface=surface,
+        terms_csv=",".join(terms),
+        action=action,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("stop-word")
+def add_stop_word(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated STOP_WORDS terms to add/remove.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these terms should change stop-word extraction.")],
+    action: Annotated[
+        Literal["add", "remove"],
+        typer.Option("--action", help="Whether to add to or remove from STOP_WORDS."),
+    ] = "add",
+    allow_broad: Annotated[
+        bool,
+        typer.Option("--allow-broad", help="Allow terms shorter than four normalized characters."),
+    ] = False,
+    allow_removal: Annotated[
+        bool,
+        typer.Option("--allow-removal", help="Allow removing terms from this broad extraction filter."),
+    ] = False,
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_keyword_filter_set_rule(
+        surface=RUNTIME_SET_UPDATE_SURFACES["stop-word"],
+        terms_csv=terms_csv,
+        action=action,
+        reason=reason,
+        allow_broad=allow_broad,
+        allow_removal=allow_removal,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("non-food-keyword")
+def add_non_food_keyword(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated NON_FOOD_KEYWORDS terms to add/remove.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these terms should change non-food filtering.")],
+    action: Annotated[
+        Literal["add", "remove"],
+        typer.Option("--action", help="Whether to add to or remove from NON_FOOD_KEYWORDS."),
+    ] = "add",
+    allow_broad: Annotated[
+        bool,
+        typer.Option("--allow-broad", help="Allow terms shorter than four normalized characters."),
+    ] = False,
+    allow_removal: Annotated[
+        bool,
+        typer.Option("--allow-removal", help="Allow removing terms from this broad product filter."),
+    ] = False,
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_keyword_filter_set_rule(
+        surface=RUNTIME_SET_UPDATE_SURFACES["non-food-keyword"],
+        terms_csv=terms_csv,
+        action=action,
+        reason=reason,
+        allow_broad=allow_broad,
+        allow_removal=allow_removal,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
 
 
 @matcher_add_app.command("gpb")
