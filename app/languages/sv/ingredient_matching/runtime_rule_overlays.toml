@@ -28,9 +28,44 @@ keyword = "spannmål"
 blockers = ["entrecote", "uppfödd", "gräs", "oxfilé", "kött", "nötkött", "nötfärs", "fläsk", "kyckling", "lamm", "kalvkött"]
 reason = "Meat products are 'uppfödd på gräs och spannmål' (grass-fed and grain-fed) — spannmål describes the animal feed, not a cooking ingredient. Spannmål as recipe ingredient means a carbohydrate base (rice/oats/wheat), not meat."
 
+[[product_name_blockers]]
+id = "runtime_pnb_cappuccino"
+status = "active"
+keyword = "cappuccino"
+blockers = ["karamell", "kopiko"]
+reason = "Kopiko Cappuccino Karamell is a coffee-flavored candy — it should not match cappuccino-flavor protein drink recipes"
+
+[[product_name_blockers]]
+id = "runtime_pnb_pollock"
+status = "active"
+keyword = "pollock"
+blockers = ["panerad", "panerade", "sprodpanerad", "sprödpanerad"]
+reason = "Panerad Alaska pollock is a fish finger / breaded fillet product — raw pollock recipes need unprocessed fish, not breaded ready-meal products. Same pattern as torsk PNB."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
 keyword = "ingefära"
 blockers = ["balsamico", "balsamicoingefara", "balsamicoingefära"]
 reason = "Crema di Balsamico Ingefära is a condiment — space-norm merges it to balsamicoingefara compound before FPB check, so both plain and compound forms needed as blockers"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_bitter"
+status = "active"
+keyword = "bitter"
+blockers = ["bittermandel"]
+reason = "Tonic Bitter drink extracts 'bitter' which prefix-matches 'bittermandel' recipes — bitterness beverages are not bitter almonds"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_korsbar"
+status = "active"
+keyword = "körsbär"
+blockers = ["körsbärssylt"]
+reason = "Smart-blocker allows körsbär when it appears as a prefix in compound 'körsbärssylt' — compound form needed explicitly so startswith check blocks it"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_ingefara"
+status = "active"
+keyword = "ingefära"
+context = ["kombucha"]
+reason = "Kombucha ingredient 'med ingefära' describes the kombucha flavor — fresh ginger products should not match a kombucha cocktail ingredient"

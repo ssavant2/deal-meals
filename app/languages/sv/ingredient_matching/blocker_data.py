@@ -54,6 +54,9 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'färskost',  # "Färskost" is specific cheese type - should match färskost products only
         'bostongurka',  # "ost" is substring of "bostongurka" - NOT cheese!
         'ostsmak',  # cheese-flavored (e.g. nacho chips) ≠ actual cheese
+        # "ostig smak" / "ostigt resultat" — adjective describing cheesy flavor,
+        # not a cheese ingredient (e.g. nutritional yeast for cheesy taste)
+        'ostig', 'ostigt', 'ostiga',
         'panko',  # "ost" is substring of "pankoströbröd" (pank-ost-röbröd)
         # Non-cheese words containing "ost" as substring
         'rostbiff',  # roast beef - "ost" is substring of "rostbiff"
@@ -1860,6 +1863,7 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'cashew',                  # "Cashew Jalapeno 140g Exotic Snacks" — nut snack, not fresh chili
         'nudlar', 'ramen', 'buldak',  # "Nudlar Buldak Habanero Lime Ramen" — instant noodles, not fresh chili
         'bearnaise', 'chilibearnaise',  # ingredient wants chili-bearnaise sauce, not raw chili pepper
+        'ölkorv', 'olkorv',    # "Ölkorv Chili" — Swedish beer-flavored sausage, not chili pepper
     },
     'chilifrukt': {
         'örtsalt', 'ortsalt',
@@ -2595,6 +2599,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'pizza',  # "Bruschetta pizza 150g Maretti" — snack chip ≠ toasted bread
         'vitlök', 'vitlok',  # garlic-flavored bruschetta ≠ plain bruschetta
         'tunnbrödschips', 'chips',  # "Tunnbrödschips Bruschetta" — cracker/chip ≠ bread topping
+        # Maretti is a snack-chip brand; their "Bruschetta" line is mini bread
+        # chips/crackers, not the tomato-bread topping/spread the recipe wants
+        'maretti',
+        'sourcream',  # "Bruschetta sourcream & onion 150g Maretti" — flavored chip
     },
     # Flavored crostini ≠ plain crostini
     'crostini': {
