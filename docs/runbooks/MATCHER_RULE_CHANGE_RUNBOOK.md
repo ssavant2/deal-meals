@@ -36,59 +36,23 @@ Plain-language rule:
   registry/baseline/export checks, and skip fixture/inventory unless the alias
   changes routing/parity semantics or carries product-policy risk.
 
-Known CLI rule shapes:
-
-```bash
-./bin/dm matcher add keyword-synonym <canonical> --variants <variant1,variant2,...> \
-  --sanity-offer "<offer name>" --offer-category <category>
-./bin/dm matcher add keyword-extra-parent <canonical> --kids <kid1,kid2,...> ...
-./bin/dm matcher add ingredient-parent <canonical> --variants <variant1,variant2,...> ...
-./bin/dm matcher add offer-extra-keyword <canonical> --variants <product-term1,...> ...
-./bin/dm matcher add ingredient-routing-parent <canonical> --variants <variant1,...> ...
-./bin/dm matcher add parent-match-only <canonical> --variants <product-term1,...> ...
-./bin/dm matcher add recipe-routing-helper <canonical> --variants <route-alias1,...> ...
-./bin/dm matcher add no-match-policy <canonical> --ingredient-patterns "<regex>" \
-  --blocked-offer-keywords <keyword> --fixture-refs <fixture_id> ...
-./bin/dm matcher add extraction-helper <canonical> --side product|ingredient|both \
-  --input "<text>" --source-refs <code-ref>
-./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason "<why>"
-./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason "<why>"
-./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason "<why>"
-./bin/dm matcher add gpb --terms <term1,term2,...> --reason "<why>"
-./bin/dm matcher add stop-word --terms <word1,word2,...> --reason "<why>"
-./bin/dm matcher add non-food-keyword --terms <word1,word2,...> --reason "<why>"
-./bin/dm matcher add space-normalization "<source>" --target "<target>" --reason "<why>"
-./bin/dm matcher add flavor-word --terms <word1,word2,...> --reason "<why>"
-./bin/dm matcher add carrier-product --terms <carrier1,carrier2,...> --reason "<why>"
-./bin/dm matcher add carrier-context-required --terms <carrier1,carrier2,...> --reason "<why>"
-./bin/dm matcher add context-required-word --terms <word1,word2,...> --reason "<why>"
-./bin/dm matcher add context-word-exemption <keyword> --context-words <word1,...> --reason "<why>"
-./bin/dm matcher add ingredient-requires-product-context --terms <word1,...> --reason "<why>"
-./bin/dm matcher add important-short-keyword --terms <word1,word2,...> --reason "<why>"
-./bin/dm matcher add processed-food --terms <word1,word2,...> --action remove --reason "<why>"
-./bin/dm matcher add processed-rule <keyword> --blocked-product-words <w1,w2,...> --reason "<why>"
-./bin/dm matcher add processed-exemption <keyword> --compounds <c1,c2,...> --reason "<why>"
-./bin/dm matcher add strict-processed-rule --terms <word1,word2,...> --reason "<why>"
-./bin/dm matcher add spice-fresh-rule <keyword> --blocked-product-words <w1,...> \
-  --spice-indicators <w2,...> --reason "<why>"
-./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason "<why>"
-./bin/dm matcher add compound-protection --mode prefix-strict|suffix-strict|suffix-protected|embedded-protected \
-  --keywords <word1,word2,...> --reason "<why>"
-./bin/dm matcher add specialty-qualifier <keyword> --qualifiers <q1,q2,...> [--bidirectional] --reason "<why>"
-./bin/dm matcher add qualifier-equivalent <qualifier> --equivalents <q1,q2,...> --reason "<why>"
-./bin/dm matcher add qualifier-required-keyword --terms <word1,word2,...> --reason "<why>"
-./bin/dm matcher add product-name-substitution --required-words <w1,w2,...> \
-  --old-keyword <old> --new-keyword <new> --reason "<why>"
-./bin/dm matcher add secondary-ingredient-pattern <keyword> \
-  --blockers <w1,w2,...> [--exceptions <w3,...>] --reason "<why>"
-```
-
-Unsure whether a rule shape has an `add` command:
+Do not memorize every command. Discover support and exact flags with:
 
 ```bash
 ./bin/dm matcher guide <shape>
 ./bin/dm matcher guide --list
 ```
+
+Typical authoring families are:
+
+- aliases/parents/routing: `keyword-synonym`, `keyword-extra-parent`,
+  `ingredient-parent`, `offer-extra-keyword`, `ingredient-routing-parent`,
+  `parent-match-only`, `recipe-routing-helper`
+- declarative policies: `no-match-policy`, `extraction-helper`
+- runtime blockers/filters/context/form data: `pnb`, `fpb`, `ksbc`, `gpb`,
+  `stop-word`, `non-food-keyword`, `space-normalization`, flavor/carrier,
+  context, cuisine, compound, specialty, processed/form, substitution, and
+  secondary-pattern commands
 
 Manual Track A, when no `dm matcher add` command fits:
 
@@ -310,31 +274,10 @@ Use `--dry-run` to preview generated TOML/sanity text, `--no-run-gates` only for
 isolated test trees, and `--inventory-id` only when deliberately adding a
 separate inventory row for a canonical that already has one.
 
-Other TOML registry rule surfaces:
-
-```bash
-./bin/dm matcher add ingredient-parent ris \
-  --variants jasminris \
-  --sanity-offer "Ris"
-
-./bin/dm matcher add offer-extra-keyword potatis \
-  --variants sparrispotatis \
-  --sanity-ingredient "potatis"
-
-./bin/dm matcher add ingredient-routing-parent svamp \
-  --variants skogssvamp \
-  --sanity-offer "Skogssvamp"
-
-./bin/dm matcher add parent-match-only kalkon \
-  --variants kalkonbröst \
-  --sanity-offer "Kalkonbröst Rökt Skivad" \
-  --offer-category meat
-
-./bin/dm matcher add recipe-routing-helper ost \
-  --variants ost \
-  --sanity-ingredient "prästost" \
-  --sanity-offer "Prästost"
-```
+Other TOML registry rule surfaces follow the same pattern:
+`ingredient-parent`, `offer-extra-keyword`, `ingredient-routing-parent`,
+`parent-match-only`, and `recipe-routing-helper`. Use
+`./bin/dm matcher guide <shape>` for the exact flags and proof expectations.
 
 For structured TOML policies, create/choose durable proof first, then let the
 CLI write the registry row and focused sanity stub:
@@ -354,8 +297,7 @@ CLI write the registry row and focused sanity stub:
   --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:402
 ```
 
-Common Python runtime data surfaces now have CLI-backed overlay coverage. Use
-`./bin/dm matcher add pnb|fpb|ksbc|gpb ...` for PNB, FPB, KSBC, and GPB:
+Common Python runtime data surfaces now have CLI-backed overlay coverage:
 
 ```bash
 ./bin/dm matcher add pnb citron --blockers lemonad --reason "Lemonade is a drink product, not lemon."
@@ -399,11 +341,11 @@ The same overlay file also backs stop/non-food filters, space-normalization,
 flavor/carrier, processed-food, cuisine-context, compound-protection,
 specialty-qualifier, qualifier-equivalent, product-name-substitution, and
 secondary-ingredient-pattern commands. Qualifier-required keywords are also
-CLI-backed for the small product-qualifier validation set in `match_filters.py`.
-These commands generate table-level or deterministic sanity canaries; add a
-richer manual behavior case beside the generated one when backend-only proof is
-needed. Form rules and local backend guards still use manual editing plus
-`./bin/dm matcher gates --track A|B`.
+CLI-backed for the small product-qualifier validation set in `match_filters.py`;
+use `dm matcher guide <shape>` for exact flags. These commands generate
+table-level or deterministic sanity canaries. Add a richer manual behavior case
+beside the generated one when backend-only proof is needed. Local backend guards
+still use manual editing plus `./bin/dm matcher gates --track A|B`.
 
 ## Cold-Start Details
 
@@ -629,19 +571,10 @@ the staged migration), dual-write the corresponding `keyword_extra_parent.toml`
 / `ingredient_parent.toml` rows in the same change, otherwise the wiring check
 will fail.
 
-## How To Decide Quickly
+## Layer Decision Tree
 
-Make two decisions: first choose the work track, then choose the matcher layer.
-
-### Choose The Track
-
-Use the TL;DR Track A/Track B rule at the top of this file, then check the
-reference table in Two Work Tracks when the decision is ambiguous. If the case
-is only stale cache, refresh cache before judging semantics.
-
-### Choose The Layer
-
-Use this layer decision tree after choosing Track A or Track B:
+After choosing Track A or Track B, use the failing layer to pick the
+implementation point:
 
 1. Does the ingredient and offer already match in fullscan but not routed cache?
    Start with routing terms, parent/routing registry entries, or term-index
@@ -669,32 +602,8 @@ where the fix is a narrow runtime dictionary/guard.
 1. Reproduce the example enough to identify the keyword/canonical, offer name,
    and ingredient text. A small inline diagnostic is fine.
 2. Patch the narrow existing mechanism. Prefer the CLI-backed runtime overlay
-   whenever the surface has an `add` command:
-
-   ```bash
-   ./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason "<why>"
-   ./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason "<why>"
-   ./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason "<why>"
-   ./bin/dm matcher add gpb --terms <term1,term2,...> --reason "<why>"
-   ./bin/dm matcher add stop-word --terms <word1,word2,...> --reason "<why>"
-   ./bin/dm matcher add non-food-keyword --terms <word1,word2,...> --reason "<why>"
-   ./bin/dm matcher add space-normalization "<source>" --target "<target>" --reason "<why>"
-   ./bin/dm matcher add flavor-word --terms <word1,word2,...> --reason "<why>"
-   ./bin/dm matcher add carrier-product --terms <carrier1,carrier2,...> --reason "<why>"
-   ./bin/dm matcher add carrier-context-required --terms <carrier1,...> --reason "<why>"
-   ./bin/dm matcher add context-required-word --terms <word1,...> --reason "<why>"
-   ./bin/dm matcher add context-word-exemption <keyword> --context-words <word1,...> --reason "<why>"
-   ./bin/dm matcher add ingredient-requires-product-context --terms <word1,...> --reason "<why>"
-   ./bin/dm matcher add processed-rule <keyword> --blocked-product-words <w1,w2,...> --reason "<why>"
-   ./bin/dm matcher add processed-exemption <keyword> --compounds <c1,c2,...> --reason "<why>"
-   ./bin/dm matcher add strict-processed-rule --terms <word1,...> --reason "<why>"
-   ./bin/dm matcher add spice-fresh-rule <keyword> --blocked-product-words <w1,...> --spice-indicators <w2,...> --reason "<why>"
-   ./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason "<why>"
-   ./bin/dm matcher add compound-protection --mode prefix-strict --keywords <word1,...> --reason "<why>"
-   ./bin/dm matcher add qualifier-required-keyword --terms <word1,...> --reason "<why>"
-   ./bin/dm matcher add product-name-substitution --required-words <w1,w2,...> --old-keyword <old> --new-keyword <new> --reason "<why>"
-   ./bin/dm matcher add secondary-ingredient-pattern <keyword> --blockers <w1,w2,...> --reason "<why>"
-   ```
+   whenever `dm matcher guide <shape>` says the surface has an `add` command.
+   The "Pick The Change Surface" table above lists the normal shape names.
 
    The CLI writes `runtime_rule_overlays.toml`; do not append new manual PNB,
    FPB, KSBC, GPB, stop/non-food, cuisine, compound, specialty,
@@ -857,23 +766,10 @@ fallback/debug form.
 ### Registry Entries
 
 If the change uses a live term-registry rule surface, prefer the matching
-authoring command:
-
-```bash
-./bin/dm matcher add keyword-synonym ...
-./bin/dm matcher add keyword-extra-parent ...
-./bin/dm matcher add ingredient-parent ...
-./bin/dm matcher add offer-extra-keyword ...
-./bin/dm matcher add ingredient-routing-parent ...
-./bin/dm matcher add parent-match-only ...
-./bin/dm matcher add recipe-routing-helper ...
-./bin/dm matcher add no-match-policy ...
-./bin/dm matcher add extraction-helper ...
-```
-
-Use `./bin/dm matcher guide <shape>` when unsure. Manual TOML editing is still
-valid for careful fallback/debug work, inactivation/removal, or changes outside
-the supported authoring shapes. Those files live under:
+`dm matcher add` authoring command. Use `./bin/dm matcher guide <shape>` when
+unsure. Manual TOML editing is still valid for careful fallback/debug work,
+inactivation/removal, or changes outside the supported authoring shapes. Those
+files live under:
 
 ```text
 app/languages/sv/ingredient_matching/term_registry/entries/
@@ -1373,68 +1269,49 @@ the new canonical is the desired one.
 
 ## Common Pitfalls
 
-- Track A: forcing every PNB/FPB/KSBC/GPB runtime fix through fixture/inventory before
-  it can land.
-- Track A: calling a tactical fix durable without escalating it to Track B and
-  adding contract proof.
-- Track A: adding a new matcher rule without a corresponding focused
+- Track A: forcing narrow PNB/FPB/KSBC/GPB runtime fixes through
+  fixture/inventory, or calling them durable without escalating to Track B.
+- Track A: adding a matcher rule without a focused
   `run_deep_matcher_sanity.py` regression.
-- Track A: skipping `run_matcher_layer_parity.py --skip-cache-freshness`. Track A
-  fixes can break existing parity fixtures; leave parity clean before committing.
-- Track A: running heavy support-check self-check/model suites
-  (`run_matcher_layer_parity_checks.py`, `run_matcher_rule_model_checks.py`) as
-  routine Track A gates. These are Track B/tooling checks.
-- Track B: adding a runtime rule without a fixture.
-- Track B: adding a fixture without inventory coverage.
-- Track B: hand-editing a TOML registry rule when a `dm matcher add` command
-  exists for that surface. Use the CLI as default. Run
-  `./bin/dm matcher guide <shape>` or `--list` to confirm whether your rule
-  shape has an authoring command; manual TOML editing is the fallback for
-  unsupported shapes only.
-- Track B: hand-editing generated JSON or generated registry coverage TOML
-  instead of editing the authoritative TOML source and regenerating.
-- Track B: updating registry TOML without running `promote_term_baseline.py` and
-  the registry checks.
-- Track B: treating TOML inactivation/removal as pure cleanup when it changes
-  matcher behavior. It needs fixture/inventory proof, and intentional
-  verified-term removals need the explicit removal workflow.
-- Track B: treating a "truly removed" promotion warning as harmless.
-  Content-preserving verified-term ID changes are automatic; true removals need
-  explicit approval.
-- Track B: using raw substring checks for words that need word boundaries.
-- Track B: fixing backend validation but forgetting `matches_ingredient_fast`.
-- Track B: broadening a bridge without a negative sibling.
-- Track B: adding `OFFER_EXTRA_KEYWORDS` or extraction output without making sure
-  routed cache sees the same term family.
-- Track B: adding parent mappings where a scoped `MatchBridge` would be safer.
-- Track B: forgetting nested `blockers` or `backend_allowances` when a bridge is
-  mostly right but has known guarded exceptions.
-- Track B: adding product-name blockers for every flavor when a plain-sensitive
-  family rule is the real model.
-- Track B: skipping parity for route/bridge/release work.
-- General: letting stale cache explain away a semantic fixture failure.
-- General: forgetting `dev_reload.py` before cache-backed validation after
-  matcher runtime changes.
+- Track A: skipping full parity with cache freshness skipped; even tactical
+  fixes must leave existing fixtures clean before commit.
+- Track A: running heavy support-check/model self-checks as routine gates; those
+  are Track B/tooling checks.
+- Track B: adding runtime behavior without a fixture, or a fixture without
+  inventory coverage.
+- Track B: hand-editing TOML when `dm matcher add` supports the surface; use
+  `dm matcher guide <shape>` / `--list` before falling back to manual edits.
+- Track B: editing generated JSON or generated coverage TOML instead of the
+  authoritative TOML source plus `dm matcher regen`.
+- Track B: changing registry TOML without baseline promotion and registry
+  checks.
+- Track B: treating TOML inactivation/removal or a "truly removed" promotion
+  warning as harmless. Behavior-changing removals need fixture/inventory proof,
+  and true verified-term removals need explicit approval.
+- Track B: using raw substring checks where word boundaries are needed.
+- Track B: fixing backend validation but forgetting `matches_ingredient_fast`,
+  or broadening route/bridge/extraction behavior without parity and routed-cache
+  proof.
+- Track B: broadening a bridge without a negative sibling, using a broad parent
+  where a scoped bridge is safer, or forgetting nested `blockers` /
+  `backend_allowances`.
+- Track B: adding one product-name blocker per flavor when a family-level
+  plain-sensitive rule is the actual model.
+- General: letting stale cache explain away a semantic fixture failure; run
+  `dev_reload.py` before cache-backed validation after matcher runtime changes.
 - General: using direct `_SPACE_NORM_PATTERN.sub(...)` or importing
   `_SPACE_NORM_LOOKUP` outside `ingredient_matching/normalization.py`; pre-flight
   flags this because `_apply_space_normalizations()` is the supported entry
   point.
-- General: adding new PNB entries to `_PRODUCT_NAME_BLOCKER_UPDATES` instead of
-  using `./bin/dm matcher add pnb ...`.
-- General: using PNB for cuisine-specific seasoned products that should remain
-  valid in matching recipes; use `CUISINE_CONTEXT` when the product needs recipe
-  cuisine context rather than a blanket block.
-- General: treating `app/tests/` workbench files as permanent regression
-  contracts.
-- General: leaving experimental local registry files under
-  `/app/data/term_registry/` instead of promoting durable entries to tracked
-  TOML.
-- General: promoting regenerated support reports from `/tmp/deal-meals-support-checks/`
-  to Git.
-- General: forgetting to refresh inventory line refs after moving anchors.
-- General: updating hard-coded support-check expectations when the real issue is
-  stale generated/check data, or vice versa. Read the failure before patching
-  counts.
+- General: appending new PNB rows to `_PRODUCT_NAME_BLOCKER_UPDATES` instead of
+  using `dm matcher add pnb`.
+- General: using PNB for cuisine-seasoned products that should remain valid in
+  matching recipes; use `CUISINE_CONTEXT` for recipe-cuisine context.
+- General: treating `app/tests/`, `/app/data/term_registry/`, or regenerated
+  support reports from `/tmp/deal-meals-support-checks/` as permanent artifacts.
+- General: forgetting inventory line-ref refresh after moving anchors.
+- General: patching hard-coded support-check expectations when the real issue is
+  stale generated/check data, or vice versa.
 
 ## Minimal Done Checklist
 
