@@ -15,7 +15,11 @@ except ModuleNotFoundError:
 
 from .blocker_data import FALSE_POSITIVE_BLOCKERS
 from .compound_text import _WORD_PATTERN
-from .runtime_rule_overlays import PRODUCT_NAME_SUBSTITUTION_CLI_UPDATES, SECONDARY_INGREDIENT_PATTERN_CLI_UPDATES
+from .runtime_rule_overlays import (
+    KEYWORD_SET_CLI_UPDATES,
+    PRODUCT_NAME_SUBSTITUTION_CLI_UPDATES,
+    SECONDARY_INGREDIENT_PATTERN_CLI_UPDATES,
+)
 
 
 _SECONDARY_INGREDIENT_PATTERNS_RAW: Dict[str, tuple] = {
@@ -120,12 +124,17 @@ def _is_false_positive_blocked(keyword: str, ingredient_lower: str) -> bool:
     return True
 
 
-_QUALIFIER_REQUIRED_KEYWORDS: FrozenSet[str] = frozenset({
+_QUALIFIER_REQUIRED_KEYWORDS_BASE: FrozenSet[str] = frozenset({
     fix_swedish_chars(w).lower() for w in {
         'dressing',
         'inlagd', 'inlagda',
     }
 })
+_QUALIFIER_REQUIRED_KEYWORD_UPDATES = KEYWORD_SET_CLI_UPDATES.get("qualifier_required_keywords", {})
+_QUALIFIER_REQUIRED_KEYWORDS: FrozenSet[str] = frozenset(
+    (set(_QUALIFIER_REQUIRED_KEYWORDS_BASE) | _QUALIFIER_REQUIRED_KEYWORD_UPDATES.get("add", set()))
+    - _QUALIFIER_REQUIRED_KEYWORD_UPDATES.get("remove", set())
+)
 
 
 PRODUCT_NAME_SUBSTITUTIONS: List[tuple] = [

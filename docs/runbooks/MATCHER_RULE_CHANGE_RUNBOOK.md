@@ -71,6 +71,7 @@ Known CLI rule shapes:
   --keywords <word1,word2,...> --reason "<why>"
 ./bin/dm matcher add specialty-qualifier <keyword> --qualifiers <q1,q2,...> [--bidirectional] --reason "<why>"
 ./bin/dm matcher add qualifier-equivalent <qualifier> --equivalents <q1,q2,...> --reason "<why>"
+./bin/dm matcher add qualifier-required-keyword --terms <word1,word2,...> --reason "<why>"
 ./bin/dm matcher add product-name-substitution --required-words <w1,w2,...> \
   --old-keyword <old> --new-keyword <new> --reason "<why>"
 ./bin/dm matcher add secondary-ingredient-pattern <keyword> \
@@ -379,10 +380,12 @@ blockers, and the current fast/recipe-style result for that pair.
 The same overlay file also backs stop/non-food filters, space-normalization,
 flavor/carrier, processed-food, cuisine-context, compound-protection,
 specialty-qualifier, qualifier-equivalent, product-name-substitution, and
-secondary-ingredient-pattern commands. These commands generate table-level or
-deterministic sanity canaries; add a richer manual behavior case beside the
-generated one when backend-only proof is needed. Form rules and local backend
-guards still use manual editing plus `./bin/dm matcher gates --track A|B`.
+secondary-ingredient-pattern commands. Qualifier-required keywords are also
+CLI-backed for the small product-qualifier validation set in `match_filters.py`.
+These commands generate table-level or deterministic sanity canaries; add a
+richer manual behavior case beside the generated one when backend-only proof is
+needed. Form rules and local backend guards still use manual editing plus
+`./bin/dm matcher gates --track A|B`.
 
 ## Cold-Start Details
 
@@ -570,6 +573,7 @@ can be the correct surface.
 | Compound/subword bleed | `./bin/dm matcher add compound-protection ...` | A keyword is matching as an unwanted substring or compound suffix/prefix, e.g. a compound word carries another ingredient name but should require stricter word/prefix proof. | FPB/PNB when the real problem is token/compound shape rather than a semantic product or ingredient context. |
 | Form or processed-state rule | `./bin/dm matcher add processed-food ...` for simple set add/remove; otherwise `form_rules.py`, `processed_rules.py`, or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
 | Qualifier or bidirectional variant | `./bin/dm matcher add specialty-qualifier ...` or `qualifier-equivalent ...` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. | Raw substring checks without word-boundary handling. |
+| Product qualifier required for a keyword | `./bin/dm matcher add qualifier-required-keyword ...` | A keyword should match product variants only when product qualifier words also appear in the ingredient line. | Specialty qualifier rules when the qualifier belongs to a specific product family rather than every product-side word. |
 | Product keyword substitution | `./bin/dm matcher add product-name-substitution ...` | Product extraction should rewrite one extracted keyword to a more specific canonical only when required product words are also present. | Synonym/parent rules when the terms are always equivalent, regardless of product wording. |
 | Secondary ingredient pattern | `./bin/dm matcher add secondary-ingredient-pattern ...` | A product is mainly another food and only contains the matched keyword as a secondary ingredient, with optional product-side exceptions. | Broad ingredient-family policy that belongs in PNB/FPB/processed/form logic. |
 | Declarative bridge guard | `match_bridge.toml` nested `blockers` / `backend_allowances` | A bridge needs scoped negative guards or backend allowance metadata with fixture refs. | Hiding broad bridge behavior in unrelated backend code. |
@@ -665,15 +669,16 @@ where the fix is a narrow runtime dictionary/guard.
    ./bin/dm matcher add ingredient-requires-product-context --terms <word1,...> --reason "<why>"
    ./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason "<why>"
    ./bin/dm matcher add compound-protection --mode prefix-strict --keywords <word1,...> --reason "<why>"
+   ./bin/dm matcher add qualifier-required-keyword --terms <word1,...> --reason "<why>"
    ./bin/dm matcher add product-name-substitution --required-words <w1,w2,...> --old-keyword <old> --new-keyword <new> --reason "<why>"
    ./bin/dm matcher add secondary-ingredient-pattern <keyword> --blockers <w1,w2,...> --reason "<why>"
    ```
 
    The CLI writes `runtime_rule_overlays.toml`; do not append new manual PNB,
    FPB, KSBC, GPB, stop/non-food, cuisine, compound, specialty,
-   flavor/carrier, processed-food, product substitution, secondary-pattern, or
-   space-normalization data to historical Python tables unless no CLI surface
-   fits.
+   qualifier-required, flavor/carrier, processed-food, product substitution,
+   secondary-pattern, or space-normalization data to historical Python tables
+   unless no CLI surface fits.
 
    If the CLI warns that a blocker/context is hidden by a joined
    space-normalized compound, add the suggested joined form too. This is common

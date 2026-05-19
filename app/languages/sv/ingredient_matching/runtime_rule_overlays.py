@@ -71,6 +71,7 @@ _SET_UPDATE_SECTIONS = {
         "important_short_keywords",
         "non_food_keywords",
         "processed_foods",
+        "qualifier_required_keywords",
         "stop_words",
     }),
     "carrier_set_updates": frozenset({"carrier_products"}),

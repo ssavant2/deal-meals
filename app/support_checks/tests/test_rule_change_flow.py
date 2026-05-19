@@ -143,6 +143,7 @@ from languages.sv.ingredient_matching.keywords import (
 )
 from languages.sv.ingredient_matching.match_filters import (
     PRODUCT_NAME_SUBSTITUTIONS,
+    _QUALIFIER_REQUIRED_KEYWORDS,
     SECONDARY_INGREDIENT_PATTERNS,
     check_secondary_ingredient_patterns,
 )
@@ -264,6 +265,12 @@ action = "add"
 terms = ["Phase Nonfood"]
 reason = "Synthetic non-food update."
 
+[[keyword_set_updates]]
+surface = "qualifier_required_keywords"
+action = "add"
+terms = ["Phase Qualifier Required"]
+reason = "Synthetic qualifier-required update."
+
 [[carrier_set_updates]]
 surface = "carrier_products"
 action = "add"
@@ -302,6 +309,10 @@ reason = "Synthetic secondary pattern."
             self.assertEqual(overlays.keyword_set_updates["flavor_words"]["add"], {"phase flavor"})
             self.assertEqual(overlays.keyword_set_updates["stop_words"]["add"], {"phase stop"})
             self.assertEqual(overlays.keyword_set_updates["non_food_keywords"]["add"], {"phase nonfood"})
+            self.assertEqual(
+                overlays.keyword_set_updates["qualifier_required_keywords"]["add"],
+                {"phase qualifier required"},
+            )
             self.assertEqual(overlays.carrier_set_updates["carrier_products"]["add"], {"phase carrier"})
             self.assertEqual(overlays.context_word_keyword_exemptions["phase keyword"], {"phase context"})
             self.assertEqual(
@@ -2179,6 +2190,66 @@ def normalize_probe(text: str) -> str:
             )
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("runtime_secondary_ingredient_pattern_phasesecondary", listed.stdout)
+
+    def test_phase16b_qualifier_required_keyword_cli_writes_runtime_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "qualifier-required-keyword",
+                    "--terms",
+                    "phasequalifier",
+                    "--reason",
+                    "Synthetic qualifier-required keyword.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "qualifier_required": "phasequalifier" in _QUALIFIER_REQUIRED_KEYWORDS,
+}
+""",
+            )
+            self.assertEqual(runtime["qualifier_required"], True)
+
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "qualifier-required-keyword",
+                    "--term",
+                    "phasequalifier",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("runtime_qualifier_required_keyword_add_phasequalifier", listed.stdout)
 
     def test_phase17_compound_protection_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

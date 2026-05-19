@@ -301,6 +301,13 @@ RUNTIME_SET_UPDATE_SURFACES: dict[str, RuntimeSetUpdateSurface] = {
         default_action="remove",
         guide_label="Processed-food set update",
     ),
+    "qualifier-required-keyword": RuntimeSetUpdateSurface(
+        command="qualifier-required-keyword",
+        section="keyword_set_updates",
+        surface="qualifier_required_keywords",
+        default_action="add",
+        guide_label="Qualifier-required keyword",
+    ),
     "carrier-product": RuntimeSetUpdateSurface(
         command="carrier-product",
         section="carrier_set_updates",
@@ -569,6 +576,16 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "Use only for simple set membership; processed/form logic still belongs in code.",
         ),
     ),
+    "qualifier-required-keyword": MatcherGuide(
+        label="qualifier-required-keyword",
+        status="supported by dm matcher add",
+        summary="Require product qualifier words to also appear in ingredient text for selected keywords.",
+        steps=(
+            "Run: ./bin/dm matcher add qualifier-required-keyword --terms <word1,word2,...> --reason \"<why>\"",
+            "Use for small keyword families where product flavor/type qualifiers must not match plain ingredient wording.",
+            "Removal requires --allow-removal because it relaxes product qualifier validation.",
+        ),
+    ),
     "carrier-context-required": MatcherGuide(
         label="carrier-context-required",
         status="supported by dm matcher add",
@@ -720,6 +737,8 @@ GUIDE_ALIASES = {
     "carrier_products": "carrier-product",
     "important_short_keyword": "important-short-keyword",
     "processed_food": "processed-food",
+    "qualifier_required_keyword": "qualifier-required-keyword",
+    "qualifier-required": "qualifier-required-keyword",
     "cuisine_context": "cuisine-context",
     "carrier_context_required": "carrier-context-required",
     "context_required_word": "context-required-word",
@@ -3265,6 +3284,10 @@ def _live_runtime_set_update_values(surface: RuntimeSetUpdateSurface, paths: Mat
         from languages.sv.ingredient_matching.carrier_context import CARRIER_PRODUCTS
 
         return set(CARRIER_PRODUCTS)
+    if surface.surface == "qualifier_required_keywords":
+        from languages.sv.ingredient_matching.match_filters import _QUALIFIER_REQUIRED_KEYWORDS
+
+        return set(_QUALIFIER_REQUIRED_KEYWORDS)
     from languages.sv.ingredient_matching.keywords import (
         FLAVOR_WORDS,
         IMPORTANT_SHORT_KEYWORDS,
@@ -3297,14 +3320,14 @@ def _append_runtime_set_update_sanity_stub(
         "important_short_keywords": "IMPORTANT_SHORT_KEYWORDS",
         "non_food_keywords": "NON_FOOD_KEYWORDS",
         "processed_foods": "PROCESSED_FOODS",
+        "qualifier_required_keywords": "_QUALIFIER_REQUIRED_KEYWORDS",
         "stop_words": "STOP_WORDS",
         "carrier_products": "CARRIER_PRODUCTS",
     }[surface.surface]
-    import_module = (
-        "languages.sv.ingredient_matching.carrier_context"
-        if surface.surface == "carrier_products"
-        else "languages.sv.ingredient_matching.keywords"
-    )
+    import_module = {
+        "carrier_products": "languages.sv.ingredient_matching.carrier_context",
+        "qualifier_required_keywords": "languages.sv.ingredient_matching.match_filters",
+    }.get(surface.surface, "languages.sv.ingredient_matching.keywords")
     expected = "True" if action == "add" else "False"
     lines = [
         "",
@@ -4888,6 +4911,50 @@ def add_processed_food_update(
 ) -> None:
     _add_runtime_set_update_rule(
         surface=RUNTIME_SET_UPDATE_SURFACES["processed-food"],
+        terms_csv=terms_csv,
+        action=action,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("qualifier-required-keyword")
+def add_qualifier_required_keyword(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated keywords requiring product qualifiers.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these keywords require qualifier agreement.")],
+    action: Annotated[
+        Literal["add", "remove"],
+        typer.Option("--action", help="Whether to add to or remove from qualifier-required keywords."),
+    ] = "add",
+    allow_removal: Annotated[
+        bool,
+        typer.Option("--allow-removal", help="Allow removing terms from this qualifier requirement set."),
+    ] = False,
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    if action == "remove" and not allow_removal:
+        raise typer.BadParameter("qualifier-required-keyword removals require --allow-removal")
+    _add_runtime_set_update_rule(
+        surface=RUNTIME_SET_UPDATE_SURFACES["qualifier-required-keyword"],
         terms_csv=terms_csv,
         action=action,
         reason=reason,
