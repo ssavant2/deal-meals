@@ -60,6 +60,10 @@ Known CLI rule shapes:
 ./bin/dm matcher add space-normalization "<source>" --target "<target>" --reason "<why>"
 ./bin/dm matcher add flavor-word --terms <word1,word2,...> --reason "<why>"
 ./bin/dm matcher add carrier-product --terms <carrier1,carrier2,...> --reason "<why>"
+./bin/dm matcher add carrier-context-required --terms <carrier1,carrier2,...> --reason "<why>"
+./bin/dm matcher add context-required-word --terms <word1,word2,...> --reason "<why>"
+./bin/dm matcher add context-word-exemption <keyword> --context-words <word1,...> --reason "<why>"
+./bin/dm matcher add ingredient-requires-product-context --terms <word1,...> --reason "<why>"
 ./bin/dm matcher add important-short-keyword --terms <word1,word2,...> --reason "<why>"
 ./bin/dm matcher add processed-food --terms <word1,word2,...> --action remove --reason "<why>"
 ./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason "<why>"
@@ -554,6 +558,10 @@ can be the correct surface.
 | Global product-name blocker | `./bin/dm matcher add gpb ...` | The product is globally non-food or globally out of matcher scope regardless of which keyword matched. Common for supplements, pet food, tools, tobacco, cleaning, and similar products. | Food products that can be legitimate for some recipe wording; use scoped PNB/no-match policy instead. |
 | Stop word / extraction noise | `./bin/dm matcher add stop-word ...` | A descriptor, package/form word, diet label, or preparation word should not become a matcher keyword at all. | Terms that are real ingredients in some recipe context; use context/form rules instead. |
 | Non-food keyword | `./bin/dm matcher add non-food-keyword ...` | The keyword means the product is non-food/tool/household scope and should filter out of product extraction. | Food terms that merely need scoped blocking; use GPB/PNB/no-match policy depending on breadth. |
+| Carrier requires ingredient context | `./bin/dm matcher add carrier-context-required ...` | Product carrier/flavor handling should only match when the ingredient line names the same carrier family. | Plain keyword blockers when the issue is reusable carrier semantics. |
+| Product context word requires ingredient context | `./bin/dm matcher add context-required-word ...` | A product subtype/form/context word makes a generic keyword unsafe unless the ingredient repeats that word. | FPB/PNB when the problem is the product's reusable context requirement. |
+| Keyword already implies context word | `./bin/dm matcher add context-word-exemption ...` | A specific keyword should not be blocked by a context-required word because the keyword already implies it. | Broad exemptions without a focused sanity canary. |
+| Ingredient requires product context | `./bin/dm matcher add ingredient-requires-product-context ...` | Ingredient text contains a form/carrier word and should only match products that also name it. | Product-only context rules when the asymmetry is ingredient-side. |
 | Cuisine-specific seasoned product | `./bin/dm matcher add cuisine-context ...` | A product trigger such as `thaikryddad`, `taco`, or `texmex` should remain valid only when the recipe text contains matching cuisine context. This is better than a blanket PNB because the product stays visible for the right cuisine. | Using PNB for cuisine-seasoning products that are legitimate in matching cuisine recipes. |
 | Compound/subword bleed | `./bin/dm matcher add compound-protection ...` | A keyword is matching as an unwanted substring or compound suffix/prefix, e.g. a compound word carries another ingredient name but should require stricter word/prefix proof. | FPB/PNB when the real problem is token/compound shape rather than a semantic product or ingredient context. |
 | Form or processed-state rule | `./bin/dm matcher add processed-food ...` for simple set add/remove; otherwise `form_rules.py`, `processed_rules.py`, or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
@@ -645,6 +653,10 @@ where the fix is a narrow runtime dictionary/guard.
    ./bin/dm matcher add space-normalization "<source>" --target "<target>" --reason "<why>"
    ./bin/dm matcher add flavor-word --terms <word1,word2,...> --reason "<why>"
    ./bin/dm matcher add carrier-product --terms <carrier1,carrier2,...> --reason "<why>"
+   ./bin/dm matcher add carrier-context-required --terms <carrier1,...> --reason "<why>"
+   ./bin/dm matcher add context-required-word --terms <word1,...> --reason "<why>"
+   ./bin/dm matcher add context-word-exemption <keyword> --context-words <word1,...> --reason "<why>"
+   ./bin/dm matcher add ingredient-requires-product-context --terms <word1,...> --reason "<why>"
    ./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason "<why>"
    ./bin/dm matcher add compound-protection --mode prefix-strict --keywords <word1,...> --reason "<why>"
    ```

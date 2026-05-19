@@ -134,6 +134,7 @@ class RuntimeTermSetSurface:
     value_field: str
     mapping_name: str
     guide_label: str
+    broad_guard_min_chars: int | None = None
 
 
 @dataclass(frozen=True)
@@ -315,6 +316,28 @@ RUNTIME_TERM_SET_SURFACES: dict[str, RuntimeTermSetSurface] = {
         value_field="terms",
         mapping_name="GLOBAL_PRODUCT_NAME_BLOCKERS",
         guide_label="Global product-name blocker",
+        broad_guard_min_chars=4,
+    ),
+    "carrier-context-required": RuntimeTermSetSurface(
+        command="carrier-context-required",
+        section="carrier_context_required",
+        value_field="terms",
+        mapping_name="CARRIER_CONTEXT_REQUIRED",
+        guide_label="Carrier context required",
+    ),
+    "context-required-word": RuntimeTermSetSurface(
+        command="context-required-word",
+        section="context_required_words",
+        value_field="terms",
+        mapping_name="CONTEXT_REQUIRED_WORDS",
+        guide_label="Context required word",
+    ),
+    "ingredient-requires-product-context": RuntimeTermSetSurface(
+        command="ingredient-requires-product-context",
+        section="ingredient_requires_in_product",
+        value_field="terms",
+        mapping_name="INGREDIENT_REQUIRES_IN_PRODUCT",
+        guide_label="Ingredient requires product context",
     ),
 }
 RUNTIME_CONTEXT_SURFACES: dict[str, RuntimeContextSurface] = {
@@ -325,6 +348,14 @@ RUNTIME_CONTEXT_SURFACES: dict[str, RuntimeContextSurface] = {
         values_field="contexts",
         mapping_name="CUISINE_CONTEXT",
         guide_label="Cuisine context",
+    ),
+    "context-word-exemption": RuntimeContextSurface(
+        command="context-word-exemption",
+        section="context_word_keyword_exemptions",
+        key_field="keyword",
+        values_field="context_words",
+        mapping_name="CONTEXT_WORD_KEYWORD_EXEMPTIONS",
+        guide_label="Context-word keyword exemption",
     ),
 }
 RUNTIME_COMPOUND_SURFACES: dict[str, RuntimeCompoundSurface] = {
@@ -536,6 +567,42 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "Use only for simple set membership; processed/form logic still belongs in code.",
         ),
     ),
+    "carrier-context-required": MatcherGuide(
+        label="carrier-context-required",
+        status="supported by dm matcher add",
+        summary="Carrier products whose carrier word must also appear in the ingredient.",
+        steps=(
+            "Run: ./bin/dm matcher add carrier-context-required --terms <carrier1,carrier2,...> --reason \"<why>\"",
+            "Use when stripped flavor words should only match within the same carrier family.",
+        ),
+    ),
+    "context-required-word": MatcherGuide(
+        label="context-required-word",
+        status="supported by dm matcher add",
+        summary="Product context words that the ingredient must repeat.",
+        steps=(
+            "Run: ./bin/dm matcher add context-required-word --terms <word1,word2,...> --reason \"<why>\"",
+            "Use when a product subtype/form word makes a generic keyword unsafe without ingredient-side context.",
+        ),
+    ),
+    "context-word-exemption": MatcherGuide(
+        label="context-word-exemption",
+        status="supported by dm matcher add",
+        summary="A keyword that already implies one or more context-required words.",
+        steps=(
+            "Run: ./bin/dm matcher add context-word-exemption <keyword> --context-words <word1,...> --reason \"<why>\"",
+            "Use after confirming the keyword itself is specific enough to satisfy the context word.",
+        ),
+    ),
+    "ingredient-requires-product-context": MatcherGuide(
+        label="ingredient-requires-product-context",
+        status="supported by dm matcher add",
+        summary="Ingredient words that require the product to repeat the same context.",
+        steps=(
+            "Run: ./bin/dm matcher add ingredient-requires-product-context --terms <word1,...> --reason \"<why>\"",
+            "Use when ingredient wording names a form/carrier that should not match a plain product.",
+        ),
+    ),
     "cuisine-context": MatcherGuide(
         label="cuisine-context",
         status="supported by dm matcher add",
@@ -634,6 +701,14 @@ GUIDE_ALIASES = {
     "important_short_keyword": "important-short-keyword",
     "processed_food": "processed-food",
     "cuisine_context": "cuisine-context",
+    "carrier_context_required": "carrier-context-required",
+    "context_required_word": "context-required-word",
+    "context_required_words": "context-required-word",
+    "context_word_exemption": "context-word-exemption",
+    "context_word_keyword_exemptions": "context-word-exemption",
+    "ingredient_requires_product_context": "ingredient-requires-product-context",
+    "keyword_suppressed_by_context": "ksbc",
+    "keyword-suppressed-by-context": "ksbc",
     "compound_strict": "compound-protection",
     "compound_protection": "compound-protection",
     "specialty": "specialty-qualifier",
@@ -2415,10 +2490,14 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
         "#   [[false_positive_blockers]]",
         "#   [[keyword_suppressed_by_context]]",
         "#   [[global_product_name_blockers]]",
+        "#   [[carrier_context_required]]",
+        "#   [[context_required_words]]",
+        "#   [[ingredient_requires_in_product]]",
         "#   [[space_normalizations]]",
         "#   [[keyword_set_updates]]",
         "#   [[carrier_set_updates]]",
         "#   [[cuisine_context]]",
+        "#   [[context_word_keyword_exemptions]]",
         "#   [[compound_protection_updates]]",
         "#   [[specialty_qualifiers]]",
         "#   [[qualifier_equivalents]]",
@@ -3105,7 +3184,18 @@ def _live_runtime_term_set_values(surface: RuntimeTermSetSurface, paths: Matcher
         from languages.sv.ingredient_matching.blocker_data import GLOBAL_PRODUCT_NAME_BLOCKERS
 
         return set(GLOBAL_PRODUCT_NAME_BLOCKERS)
-    return set()
+    from languages.sv.ingredient_matching.carrier_context import (
+        CARRIER_CONTEXT_REQUIRED,
+        CONTEXT_REQUIRED_WORDS,
+        INGREDIENT_REQUIRES_IN_PRODUCT,
+    )
+
+    live_sets = {
+        "carrier-context-required": CARRIER_CONTEXT_REQUIRED,
+        "context-required-word": CONTEXT_REQUIRED_WORDS,
+        "ingredient-requires-product-context": INGREDIENT_REQUIRES_IN_PRODUCT,
+    }
+    return set(live_sets.get(surface.command, frozenset()))
 
 
 def _append_runtime_term_set_entry(
@@ -3155,21 +3245,22 @@ def _append_runtime_term_set_sanity_stub(
     policy_ref: str,
     dry_run: bool,
 ) -> str:
-    if surface.command != "gpb":
-        raise typer.BadParameter(f"no sanity generator for {surface.command}")
-    lines = [
-        "",
-        f"# {policy_ref}: generated by dm matcher add {surface.command}",
-        "from languages.sv.ingredient_matching.blocker_data import GLOBAL_PRODUCT_NAME_BLOCKERS",
-    ]
+    lines = ["", f"# {policy_ref}: generated by dm matcher add {surface.command}"]
+    if surface.command == "gpb":
+        lines.append("from languages.sv.ingredient_matching.blocker_data import GLOBAL_PRODUCT_NAME_BLOCKERS")
+    else:
+        lines.append(f"from languages.sv.ingredient_matching.carrier_context import {surface.mapping_name}")
     for term in terms:
         normalized_term = _runtime_rule_normalize_text(term)
         lines.extend([
             f"test({_toml_string(surface.command + ' overlay contains ' + normalized_term)},",
-            f"     {_toml_string(normalized_term)} in GLOBAL_PRODUCT_NAME_BLOCKERS, True)",
-            f"test({_toml_string(surface.command + ' blocks backend match ' + normalized_term)},",
-            f"     recipe_match_num(['ost'], {_deep_sanity_offer_dict(normalized_term + ' Ost', 'dairy')}), 0)",
+            f"     {_toml_string(normalized_term)} in {surface.mapping_name}, True)",
         ])
+        if surface.command == "gpb":
+            lines.extend([
+                f"test({_toml_string(surface.command + ' blocks backend match ' + normalized_term)},",
+                f"     recipe_match_num(['ost'], {_deep_sanity_offer_dict(normalized_term + ' Ost', 'dairy')}), 0)",
+            ])
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
     return block
@@ -3247,7 +3338,12 @@ def _append_runtime_context_sanity_stub(
     dry_run: bool,
 ) -> str:
     normalized_trigger = _runtime_rule_normalize_text(trigger)
-    mapping_import = f"from languages.sv.ingredient_matching.recipe_context import {surface.mapping_name}"
+    module = (
+        "languages.sv.ingredient_matching.recipe_context"
+        if surface.command == "cuisine-context"
+        else "languages.sv.ingredient_matching.carrier_context"
+    )
+    mapping_import = f"from {module} import {surface.mapping_name}"
     lines = [
         "",
         f"# {policy_ref}: generated by dm matcher add {surface.command}",
@@ -3953,6 +4049,7 @@ def add_fpb(
     )
 
 
+@matcher_add_app.command("keyword-suppressed-by-context")
 @matcher_add_app.command("ksbc")
 def add_ksbc(
     keyword: Annotated[str, typer.Argument(help="Generic keyword to suppress in specific ingredient contexts.")],
@@ -4131,13 +4228,15 @@ def _add_runtime_term_set_rule(
     terms = _split_csv(terms_csv, label="--terms")
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
-    broad_terms = [
-        term for term in terms
-        if len(_runtime_rule_normalize_text(term).replace(" ", "")) < 4
-    ]
+    broad_terms = []
+    if surface.broad_guard_min_chars is not None:
+        broad_terms = [
+            term for term in terms
+            if len(_runtime_rule_normalize_text(term).replace(" ", "")) < surface.broad_guard_min_chars
+        ]
     if broad_terms and not allow_broad:
         raise typer.BadParameter(
-            f"{surface.command} terms shorter than four characters require --allow-broad: "
+            f"{surface.command} terms shorter than {surface.broad_guard_min_chars} characters require --allow-broad: "
             + ", ".join(broad_terms)
         )
     paths = _paths(tree_root)
@@ -4493,6 +4592,131 @@ def add_processed_food_update(
     )
 
 
+def _add_runtime_term_set_command(
+    *,
+    surface: RuntimeTermSetSurface,
+    terms_csv: str,
+    reason: str,
+    policy_ref: str | None,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    _add_runtime_term_set_rule(
+        surface=surface,
+        terms_csv=terms_csv,
+        reason=reason,
+        allow_broad=False,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("carrier-context-required")
+def add_carrier_context_required(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated carriers that require ingredient context.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these carriers require recipe-side context.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_term_set_command(
+        surface=RUNTIME_TERM_SET_SURFACES["carrier-context-required"],
+        terms_csv=terms_csv,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("context-required-word")
+def add_context_required_word(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated product context words required in ingredients.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these product words require ingredient context.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_term_set_command(
+        surface=RUNTIME_TERM_SET_SURFACES["context-required-word"],
+        terms_csv=terms_csv,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("ingredient-requires-product-context")
+def add_ingredient_requires_product_context(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated ingredient words that products must repeat.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these ingredient words must also appear in the product.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_term_set_command(
+        surface=RUNTIME_TERM_SET_SURFACES["ingredient-requires-product-context"],
+        terms_csv=terms_csv,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
 @matcher_add_app.command("cuisine-context")
 def add_cuisine_context(
     trigger: Annotated[str, typer.Argument(help="Product trigger term/phrase, e.g. thaikryddad.")],
@@ -4554,6 +4778,73 @@ def add_cuisine_context(
         typer.echo("Dry run only; no files written.")
         return
     typer.echo(f"Generated cuisine_context rule: {policy_ref}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+@matcher_add_app.command("context-word-exemption")
+def add_context_word_exemption(
+    keyword: Annotated[str, typer.Argument(help="Keyword exempted from one or more context-required words.")],
+    context_words_csv: Annotated[
+        str,
+        typer.Option("--context-words", help="Comma-separated context words this keyword already implies."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why this keyword should ignore these context words.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    keyword = keyword.strip()
+    context_words = _split_csv(context_words_csv, label="--context-words")
+    if not keyword:
+        raise typer.BadParameter("keyword must not be empty")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    policy_ref = policy_ref or f"runtime_context_word_exemption_{_slug(normalized_keyword)}"
+    surface = RUNTIME_CONTEXT_SURFACES["context-word-exemption"]
+    overlay_preview = _append_runtime_context_entry(
+        paths=paths,
+        surface=surface,
+        trigger=keyword,
+        contexts=context_words,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_runtime_context_sanity_stub(
+            paths=paths,
+            surface=surface,
+            trigger=keyword,
+            contexts=context_words,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+    typer.echo(f"Generated {surface.section} rule: {policy_ref}")
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
         return

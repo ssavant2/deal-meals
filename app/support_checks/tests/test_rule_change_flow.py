@@ -125,7 +125,14 @@ for name, path in (
     sys.modules[name] = module
 
 from languages.sv.ingredient_matching.blocker_data import FALSE_POSITIVE_BLOCKERS, GLOBAL_PRODUCT_NAME_BLOCKERS, PRODUCT_NAME_BLOCKERS
-from languages.sv.ingredient_matching.carrier_context import CARRIER_PRODUCTS, KEYWORD_SUPPRESSED_BY_CONTEXT
+from languages.sv.ingredient_matching.carrier_context import (
+    CARRIER_CONTEXT_REQUIRED,
+    CARRIER_PRODUCTS,
+    CONTEXT_REQUIRED_WORDS,
+    CONTEXT_WORD_KEYWORD_EXEMPTIONS,
+    INGREDIENT_REQUIRES_IN_PRODUCT,
+    KEYWORD_SUPPRESSED_BY_CONTEXT,
+)
 from languages.sv.ingredient_matching.extraction import extract_keywords_from_product
 from languages.sv.ingredient_matching.keywords import (
     FLAVOR_WORDS,
@@ -217,6 +224,18 @@ reason = "Synthetic KSBC test."
 terms = ["Phase Pet Brand"]
 reason = "Synthetic global blocker test."
 
+[[carrier_context_required]]
+terms = ["Phase Carrier Context"]
+reason = "Synthetic carrier-context-required test."
+
+[[context_required_words]]
+terms = ["Phase Context Required"]
+reason = "Synthetic context-required test."
+
+[[ingredient_requires_in_product]]
+terms = ["Phase Ingredient Context"]
+reason = "Synthetic ingredient-requires-product test."
+
 [[space_normalizations]]
 source = "Phase Space"
 target = "PhaseSpace"
@@ -245,6 +264,11 @@ surface = "carrier_products"
 action = "add"
 terms = ["Phase Carrier"]
 reason = "Synthetic carrier update."
+
+[[context_word_keyword_exemptions]]
+keyword = "Phase Keyword"
+context_words = ["Phase Context"]
+reason = "Synthetic context-word exemption."
 """,
                 encoding="utf-8",
             )
@@ -254,11 +278,15 @@ reason = "Synthetic carrier update."
             self.assertEqual(overlays.false_positive_blockers["ost"], {"ostron"})
             self.assertEqual(overlays.keyword_suppressed_by_context["ris"], {"glas, ris"})
             self.assertEqual(overlays.global_product_name_blockers, {"phase pet brand"})
+            self.assertEqual(overlays.carrier_context_required, {"phase carrier context"})
+            self.assertEqual(overlays.context_required_words, {"phase context required"})
+            self.assertEqual(overlays.ingredient_requires_in_product, {"phase ingredient context"})
             self.assertEqual(overlays.space_normalizations, (("phase space", "phasespace"),))
             self.assertEqual(overlays.keyword_set_updates["flavor_words"]["add"], {"phase flavor"})
             self.assertEqual(overlays.keyword_set_updates["stop_words"]["add"], {"phase stop"})
             self.assertEqual(overlays.keyword_set_updates["non_food_keywords"]["add"], {"phase nonfood"})
             self.assertEqual(overlays.carrier_set_updates["carrier_products"]["add"], {"phase carrier"})
+            self.assertEqual(overlays.context_word_keyword_exemptions["phase keyword"], {"phase context"})
 
             overlay_file.write_text(
                 """
@@ -1873,6 +1901,49 @@ def normalize_probe(text: str) -> str:
             app_dir = _copy_matcher_tree(tree_root)
             live_app_dir = Path(__file__).resolve().parents[2]
 
+            commands = [
+                [
+                    "carrier-context-required",
+                    "--terms",
+                    "phasecarriercontext",
+                    "--reason",
+                    "Synthetic carrier context requirement.",
+                ],
+                [
+                    "context-required-word",
+                    "--terms",
+                    "phasecontextrequired",
+                    "--reason",
+                    "Synthetic product context requirement.",
+                ],
+                [
+                    "ingredient-requires-product-context",
+                    "--terms",
+                    "phaseingredientcontext",
+                    "--reason",
+                    "Synthetic ingredient context requirement.",
+                ],
+            ]
+            for command in commands:
+                added = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "cli.dm",
+                        "matcher",
+                        "add",
+                        *command,
+                        "--tree-root",
+                        str(tree_root),
+                        "--no-run-gates",
+                    ],
+                    cwd=live_app_dir,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(added.returncode, 0, added.stderr + added.stdout)
+
             result = subprocess.run(
                 [
                     sys.executable,
@@ -1896,14 +1967,47 @@ def normalize_probe(text: str) -> str:
                 text=True,
             )
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            exemption = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "context-word-exemption",
+                    "phasekeyword",
+                    "--context-words",
+                    "phasecontextrequired",
+                    "--reason",
+                    "Synthetic context-word exemption.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(exemption.returncode, 0, exemption.stderr + exemption.stdout)
+
             runtime = _runtime_overlay_probe(
                 app_dir,
                 """
 {
+    "carrier_context_required": sorted(CARRIER_CONTEXT_REQUIRED & {"phasecarriercontext"}),
+    "context_required": sorted(CONTEXT_REQUIRED_WORDS & {"phasecontextrequired"}),
+    "ingredient_requires": sorted(INGREDIENT_REQUIRES_IN_PRODUCT & {"phaseingredientcontext"}),
+    "exemptions": sorted(CONTEXT_WORD_KEYWORD_EXEMPTIONS.get("phasekeyword", [])),
     "contexts": sorted(CUISINE_CONTEXT.get("phasecuisine", [])),
 }
 """,
             )
+            self.assertEqual(runtime["carrier_context_required"], ["phasecarriercontext"])
+            self.assertEqual(runtime["context_required"], ["phasecontextrequired"])
+            self.assertEqual(runtime["ingredient_requires"], ["phaseingredientcontext"])
+            self.assertEqual(runtime["exemptions"], ["phasecontextrequired"])
             self.assertEqual(runtime["contexts"], ["phase dish", "phase recipe"])
 
             listed = subprocess.run(
@@ -1926,6 +2030,27 @@ def normalize_probe(text: str) -> str:
             )
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("runtime_cuisine_context_phasecuisine", listed.stdout)
+
+            context_listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "context-required-word",
+                    "--term",
+                    "phasecontextrequired",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(context_listed.returncode, 0, context_listed.stderr + context_listed.stdout)
+            self.assertIn("runtime_context_required_word_phasecontextrequired", context_listed.stdout)
 
     def test_phase17_compound_protection_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

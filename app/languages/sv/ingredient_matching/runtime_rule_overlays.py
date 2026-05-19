@@ -31,10 +31,14 @@ class RuntimeRuleOverlays:
     false_positive_blockers: Dict[str, Set[str]]
     keyword_suppressed_by_context: Dict[str, Set[str]]
     global_product_name_blockers: Set[str]
+    carrier_context_required: Set[str]
+    context_required_words: Set[str]
+    ingredient_requires_in_product: Set[str]
     space_normalizations: tuple[tuple[str, str], ...]
     keyword_set_updates: Dict[str, Dict[str, Set[str]]]
     carrier_set_updates: Dict[str, Dict[str, Set[str]]]
     cuisine_context: Dict[str, Set[str]]
+    context_word_keyword_exemptions: Dict[str, Set[str]]
     compound_protection_updates: Dict[str, Set[str]]
     specialty_qualifier_updates: Dict[str, Set[str]]
     specialty_bidirectional_updates: Dict[str, Set[str]]
@@ -47,12 +51,16 @@ _SECTION_VALUE_FIELDS = {
     "keyword_suppressed_by_context": "context",
 }
 _TERM_SET_SECTIONS = {
+    "carrier_context_required": "terms",
+    "context_required_words": "terms",
     "global_product_name_blockers": "terms",
+    "ingredient_requires_in_product": "terms",
 }
 _PAIR_SECTION_FIELDS = {
     "space_normalizations": ("source", "target"),
 }
 _CONTEXT_SECTION_FIELDS = {
+    "context_word_keyword_exemptions": ("keyword", "context_words"),
     "cuisine_context": ("trigger", "contexts"),
 }
 _SET_UPDATE_SECTIONS = {
@@ -752,6 +760,27 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
             seen_ids=seen_ids,
             seen_effective_terms=seen_effective_terms,
         ),
+        carrier_context_required=_load_term_set_section(
+            payload,
+            "carrier_context_required",
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_terms=seen_effective_terms,
+        ),
+        context_required_words=_load_term_set_section(
+            payload,
+            "context_required_words",
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_terms=seen_effective_terms,
+        ),
+        ingredient_requires_in_product=_load_term_set_section(
+            payload,
+            "ingredient_requires_in_product",
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_terms=seen_effective_terms,
+        ),
         space_normalizations=_load_pair_section(
             payload,
             "space_normalizations",
@@ -780,6 +809,13 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
             seen_ids=seen_ids,
             seen_effective_values=seen_effective_values,
         ),
+        context_word_keyword_exemptions=_load_context_section(
+            payload,
+            "context_word_keyword_exemptions",
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_values=seen_effective_values,
+        ),
         compound_protection_updates=_load_compound_protection_updates(
             payload,
             path=path,
@@ -803,10 +839,14 @@ PRODUCT_NAME_BLOCKER_CLI_UPDATES = _OVERLAYS.product_name_blockers
 FALSE_POSITIVE_BLOCKER_CLI_UPDATES = _OVERLAYS.false_positive_blockers
 KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES = _OVERLAYS.keyword_suppressed_by_context
 GLOBAL_PRODUCT_NAME_BLOCKER_CLI_UPDATES = _OVERLAYS.global_product_name_blockers
+CARRIER_CONTEXT_REQUIRED_CLI_UPDATES = _OVERLAYS.carrier_context_required
+CONTEXT_REQUIRED_WORD_CLI_UPDATES = _OVERLAYS.context_required_words
+INGREDIENT_REQUIRES_IN_PRODUCT_CLI_UPDATES = _OVERLAYS.ingredient_requires_in_product
 SPACE_NORMALIZATION_CLI_UPDATES = _OVERLAYS.space_normalizations
 KEYWORD_SET_CLI_UPDATES = _OVERLAYS.keyword_set_updates
 CARRIER_SET_CLI_UPDATES = _OVERLAYS.carrier_set_updates
 CUISINE_CONTEXT_CLI_UPDATES = _OVERLAYS.cuisine_context
+CONTEXT_WORD_KEYWORD_EXEMPTION_CLI_UPDATES = _OVERLAYS.context_word_keyword_exemptions
 COMPOUND_PROTECTION_CLI_UPDATES = _OVERLAYS.compound_protection_updates
 SPECIALTY_QUALIFIER_CLI_UPDATES = _OVERLAYS.specialty_qualifier_updates
 SPECIALTY_BIDIRECTIONAL_CLI_UPDATES = _OVERLAYS.specialty_bidirectional_updates

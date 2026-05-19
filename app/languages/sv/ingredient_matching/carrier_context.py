@@ -12,7 +12,14 @@ try:
 except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
-from .runtime_rule_overlays import CARRIER_SET_CLI_UPDATES, KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES
+from .runtime_rule_overlays import (
+    CARRIER_CONTEXT_REQUIRED_CLI_UPDATES,
+    CARRIER_SET_CLI_UPDATES,
+    CONTEXT_REQUIRED_WORD_CLI_UPDATES,
+    CONTEXT_WORD_KEYWORD_EXEMPTION_CLI_UPDATES,
+    INGREDIENT_REQUIRES_IN_PRODUCT_CLI_UPDATES,
+    KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES,
+)
 
 
 def _apply_carrier_set_updates(surface: str, base: FrozenSet[str]) -> FrozenSet[str]:
@@ -493,7 +500,7 @@ CARRIER_CONTEXT_REQUIRED: FrozenSet[str] = frozenset({
     # remains broad. The carrier context also prevents flavor keywords from
     # leaking into non-mjukost ingredients like plain shrimp or jalapeno.
     'mjukost',
-})
+} | CARRIER_CONTEXT_REQUIRED_CLI_UPDATES)
 
 # Carriers where the first word is ALWAYS a flavor, never the actual product.
 # For these, the safety net should NOT re-add stripped flavor words.
@@ -706,7 +713,7 @@ _CONTEXT_REQUIRED_WORDS_RAW: FrozenSet[str] = frozenset({
 # Pre-normalized for performance (avoid fix_swedish_chars in hot loop)
 CONTEXT_REQUIRED_WORDS: FrozenSet[str] = frozenset({
     fix_swedish_chars(w).lower() for w in _CONTEXT_REQUIRED_WORDS_RAW
-})
+} | CONTEXT_REQUIRED_WORD_CLI_UPDATES)
 
 # Context words to IGNORE when a product has a specific keyword.
 # Filled pasta/gnocchi: filling names (mozzarella, ricotta) shouldn't block
@@ -841,6 +848,11 @@ CONTEXT_WORD_KEYWORD_EXEMPTIONS: Dict[str, FrozenSet[str]] = {
     'tårtbottnar': frozenset({'vanilj', 'choklad'}),
     'tårtbotten': frozenset({'vanilj', 'choklad'}),
 }
+for _keyword, _context_words in CONTEXT_WORD_KEYWORD_EXEMPTION_CLI_UPDATES.items():
+    CONTEXT_WORD_KEYWORD_EXEMPTIONS[_keyword] = frozenset(
+        set(CONTEXT_WORD_KEYWORD_EXEMPTIONS.get(_keyword, frozenset()))
+        | set(_context_words)
+    )
 
 
 # ============================================================================
@@ -862,7 +874,7 @@ _INGREDIENT_REQUIRES_IN_PRODUCT_RAW: FrozenSet[str] = frozenset({
 
 INGREDIENT_REQUIRES_IN_PRODUCT: FrozenSet[str] = frozenset({
     fix_swedish_chars(w).lower() for w in _INGREDIENT_REQUIRES_IN_PRODUCT_RAW
-})
+} | INGREDIENT_REQUIRES_IN_PRODUCT_CLI_UPDATES)
 
 # Keyword suppression: when a product matches generic keyword X on an ingredient line
 # that also contains a more specific keyword Y, suppress the generic match.
