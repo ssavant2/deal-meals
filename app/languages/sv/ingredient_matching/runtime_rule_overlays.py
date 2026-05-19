@@ -30,6 +30,7 @@ class RuntimeRuleOverlays:
     product_name_blockers: Dict[str, Set[str]]
     false_positive_blockers: Dict[str, Set[str]]
     keyword_suppressed_by_context: Dict[str, Set[str]]
+    global_product_name_blockers: Set[str]
     space_normalizations: tuple[tuple[str, str], ...]
     keyword_set_updates: Dict[str, Dict[str, Set[str]]]
     carrier_set_updates: Dict[str, Dict[str, Set[str]]]
@@ -44,6 +45,9 @@ _SECTION_VALUE_FIELDS = {
     "product_name_blockers": "blockers",
     "false_positive_blockers": "blockers",
     "keyword_suppressed_by_context": "context",
+}
+_TERM_SET_SECTIONS = {
+    "global_product_name_blockers": "terms",
 }
 _PAIR_SECTION_FIELDS = {
     "space_normalizations": ("source", "target"),
@@ -66,6 +70,10 @@ _METADATA_KEYS = frozenset({"id", "status", "inactive_reason"})
 _ALLOWED_ENTRY_KEYS = {
     section: frozenset({"keyword", value_field, "reason", *_METADATA_KEYS})
     for section, value_field in _SECTION_VALUE_FIELDS.items()
+}
+_ALLOWED_TERM_SET_ENTRY_KEYS = {
+    section: frozenset({terms_field, "reason", *_METADATA_KEYS})
+    for section, terms_field in _TERM_SET_SECTIONS.items()
 }
 _ALLOWED_PAIR_ENTRY_KEYS = {
     section: frozenset({source_field, target_field, "reason", *_METADATA_KEYS})
@@ -225,6 +233,68 @@ def _merge_section(
                 )
             seen_effective_values.add(effective_value)
         merged.setdefault(keyword, set()).update(values)
+    return merged
+
+
+def _load_term_set_section(
+    payload: dict[str, Any],
+    section: str,
+    *,
+    path: Path,
+    seen_ids: set[str],
+    seen_effective_terms: set[tuple[str, str]],
+) -> Set[str]:
+    raw_entries = payload.get(section, [])
+    if not isinstance(raw_entries, list):
+        raise RuntimeRuleOverlayError(f"{path}:{section} must be a list of tables")
+
+    terms_field = _TERM_SET_SECTIONS[section]
+    allowed_keys = _ALLOWED_TERM_SET_ENTRY_KEYS[section]
+    merged: Set[str] = set()
+    for index, entry in enumerate(raw_entries, start=1):
+        if not isinstance(entry, dict):
+            raise RuntimeRuleOverlayError(f"{_path_label(path, section, index)} must be a table")
+        unknown_keys = sorted(set(entry) - allowed_keys)
+        if unknown_keys:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} has unknown keys: {', '.join(unknown_keys)}"
+            )
+        required_keys = {terms_field, "reason"}
+        missing_keys = sorted(required_keys - set(entry))
+        if missing_keys:
+            raise RuntimeRuleOverlayError(
+                f"{_path_label(path, section, index)} is missing keys: {', '.join(missing_keys)}"
+            )
+
+        status = _entry_status(entry, path=path, section=section, index=index)
+        entry_id = entry.get("id")
+        if entry_id is not None:
+            normalized_id = _require_string(entry_id, path=path, section=section, index=index, field="id")
+            if normalized_id in seen_ids:
+                raise RuntimeRuleOverlayError(f"{_path_label(path, section, index)} has duplicate id: {normalized_id}")
+            seen_ids.add(normalized_id)
+
+        _require_string(entry["reason"], path=path, section=section, index=index, field="reason")
+        terms = {
+            _normalize_text(item)
+            for item in _require_string_list(
+                entry[terms_field],
+                path=path,
+                section=section,
+                index=index,
+                field=terms_field,
+            )
+        }
+        if status == "inactive":
+            continue
+        for term in terms:
+            key = (section, term)
+            if key in seen_effective_terms:
+                raise RuntimeRuleOverlayError(
+                    f"{_path_label(path, section, index)} duplicates active term {term!r}"
+                )
+            seen_effective_terms.add(key)
+        merged.update(terms)
     return merged
 
 
@@ -622,6 +692,7 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
     payload = _load_toml(path)
     known_sections = (
         set(_SECTION_VALUE_FIELDS)
+        | set(_TERM_SET_SECTIONS)
         | set(_PAIR_SECTION_FIELDS)
         | set(_SET_UPDATE_SECTIONS)
         | set(_CONTEXT_SECTION_FIELDS)
@@ -634,6 +705,7 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
 
     seen_ids: set[str] = set()
     seen_effective_values: set[tuple[str, str, str]] = set()
+    seen_effective_terms: set[tuple[str, str]] = set()
     seen_effective_pairs: set[tuple[str, str, str]] = set()
     seen_effective_updates: set[tuple[str, str, str, str]] = set()
     seen_effective_compound_updates: set[tuple[str, str]] = set()
@@ -666,6 +738,13 @@ def load_runtime_rule_overlays(path: Path = OVERLAY_PATH) -> RuntimeRuleOverlays
             path=path,
             seen_ids=seen_ids,
             seen_effective_values=seen_effective_values,
+        ),
+        global_product_name_blockers=_load_term_set_section(
+            payload,
+            "global_product_name_blockers",
+            path=path,
+            seen_ids=seen_ids,
+            seen_effective_terms=seen_effective_terms,
         ),
         space_normalizations=_load_pair_section(
             payload,
@@ -717,6 +796,7 @@ _OVERLAYS = load_runtime_rule_overlays()
 PRODUCT_NAME_BLOCKER_CLI_UPDATES = _OVERLAYS.product_name_blockers
 FALSE_POSITIVE_BLOCKER_CLI_UPDATES = _OVERLAYS.false_positive_blockers
 KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES = _OVERLAYS.keyword_suppressed_by_context
+GLOBAL_PRODUCT_NAME_BLOCKER_CLI_UPDATES = _OVERLAYS.global_product_name_blockers
 SPACE_NORMALIZATION_CLI_UPDATES = _OVERLAYS.space_normalizations
 KEYWORD_SET_CLI_UPDATES = _OVERLAYS.keyword_set_updates
 CARRIER_SET_CLI_UPDATES = _OVERLAYS.carrier_set_updates

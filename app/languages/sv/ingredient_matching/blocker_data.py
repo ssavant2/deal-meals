@@ -19,6 +19,7 @@ except ModuleNotFoundError:
 
 from .runtime_rule_overlays import (
     FALSE_POSITIVE_BLOCKER_CLI_UPDATES,
+    GLOBAL_PRODUCT_NAME_BLOCKER_CLI_UPDATES,
     PRODUCT_NAME_BLOCKER_CLI_UPDATES,
 )
 
@@ -4103,4 +4104,4 @@ GLOBAL_PRODUCT_NAME_BLOCKERS: frozenset[str] = frozenset({
     'ahlgrens',        # gummy candy brand (Ahlgrens Bilar)
     'dumle',           # toffee candy brand
     'plopp',           # chocolate candy brand (Plopp mini påse)
-})
+} | GLOBAL_PRODUCT_NAME_BLOCKER_CLI_UPDATES)

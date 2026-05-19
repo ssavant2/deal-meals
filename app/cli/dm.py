@@ -128,6 +128,15 @@ class RuntimeSetUpdateSurface:
 
 
 @dataclass(frozen=True)
+class RuntimeTermSetSurface:
+    command: str
+    section: str
+    value_field: str
+    mapping_name: str
+    guide_label: str
+
+
+@dataclass(frozen=True)
 class RuntimeContextSurface:
     command: str
     section: str
@@ -285,6 +294,15 @@ RUNTIME_SET_UPDATE_SURFACES: dict[str, RuntimeSetUpdateSurface] = {
         guide_label="Carrier product",
     ),
 }
+RUNTIME_TERM_SET_SURFACES: dict[str, RuntimeTermSetSurface] = {
+    "gpb": RuntimeTermSetSurface(
+        command="gpb",
+        section="global_product_name_blockers",
+        value_field="terms",
+        mapping_name="GLOBAL_PRODUCT_NAME_BLOCKERS",
+        guide_label="Global product-name blocker",
+    ),
+}
 RUNTIME_CONTEXT_SURFACES: dict[str, RuntimeContextSurface] = {
     "cuisine-context": RuntimeContextSurface(
         command="cuisine-context",
@@ -320,6 +338,7 @@ RUNTIME_SPECIALTY_SURFACES: dict[str, RuntimeSpecialtySurface] = {
 }
 _RUNTIME_OVERLAY_SECTION_ORDER = (
     *(surface.section for surface in RUNTIME_OVERLAY_SURFACES.values()),
+    *(surface.section for surface in RUNTIME_TERM_SET_SURFACES.values()),
     *(surface.section for surface in RUNTIME_PAIR_SURFACES.values()),
     "keyword_set_updates",
     "carrier_set_updates",
@@ -418,13 +437,13 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
     ),
     "gpb": MatcherGuide(
         label="gpb",
-        status="manual Track A runtime edit",
+        status="supported by dm matcher add",
         summary="GLOBAL_PRODUCT_NAME_BLOCKERS: product text is globally out of matcher scope.",
         steps=(
             "When the mechanism is unclear, run: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
-            "Edit app/languages/sv/ingredient_matching/blocker_data.py / GLOBAL_PRODUCT_NAME_BLOCKERS.",
-            "Add a focused run_deep_matcher_sanity.py regression.",
-            "Run: ./bin/dm matcher gates --track A",
+            "Run: ./bin/dm matcher add gpb --terms <term1,term2,...> --reason \"<why>\"",
+            "Use GPB only when the whole product is out of recipe-matching scope regardless of keyword.",
+            "Terms shorter than four normalized characters require --allow-broad.",
         ),
     ),
     "ksbc": MatcherGuide(
@@ -2280,6 +2299,22 @@ def _runtime_set_update_entry_block(entry: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _runtime_term_set_entry_block(surface: RuntimeTermSetSurface, entry: dict[str, Any]) -> str:
+    lines = [f"[[{surface.section}]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.extend([
+        f"{surface.value_field} = {_toml_array(list(entry[surface.value_field]))}",
+        f"reason = {_toml_string(str(entry['reason']))}",
+    ])
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def _runtime_context_entry_block(surface: RuntimeContextSurface, entry: dict[str, Any]) -> str:
     lines = [f"[[{surface.section}]]"]
     if "id" in entry:
@@ -2345,6 +2380,7 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
         "#   [[product_name_blockers]]",
         "#   [[false_positive_blockers]]",
         "#   [[keyword_suppressed_by_context]]",
+        "#   [[global_product_name_blockers]]",
         "#   [[space_normalizations]]",
         "#   [[keyword_set_updates]]",
         "#   [[carrier_set_updates]]",
@@ -2355,6 +2391,7 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
         "",
     ]
     mapping_by_section = {surface.section: surface for surface in RUNTIME_OVERLAY_SURFACES.values()}
+    term_set_by_section = {surface.section: surface for surface in RUNTIME_TERM_SET_SURFACES.values()}
     pair_by_section = {surface.section: surface for surface in RUNTIME_PAIR_SURFACES.values()}
     context_by_section = {surface.section: surface for surface in RUNTIME_CONTEXT_SURFACES.values()}
     compound_by_section = {surface.section: surface for surface in RUNTIME_COMPOUND_SURFACES.values()}
@@ -2363,6 +2400,8 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
         for entry in sections.get(section, []):
             if section in mapping_by_section:
                 lines.append(_runtime_overlay_entry_block(mapping_by_section[section], entry).rstrip())
+            elif section in term_set_by_section:
+                lines.append(_runtime_term_set_entry_block(term_set_by_section[section], entry).rstrip())
             elif section in pair_by_section:
                 lines.append(_runtime_pair_entry_block(pair_by_section[section], entry).rstrip())
             elif section in {"keyword_set_updates", "carrier_set_updates"}:
@@ -2485,6 +2524,43 @@ def _runtime_set_update_matching_entries(
         action = str(entry.get("action", surface.default_action))
         terms = tuple(str(term) for term in entry.get("terms", []))
         entry_id = str(entry.get("id") or _runtime_set_update_entry_id(surface, action, terms))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id:
+            matches.append(entry)
+            continue
+        if selector_norm in {_runtime_rule_normalize_text(term) for term in terms}:
+            matches.append(entry)
+    return matches
+
+
+def _runtime_term_set_entry_id(surface: RuntimeTermSetSurface, terms: tuple[str, ...]) -> str:
+    term_slug = "_".join(_slug(term) for term in terms[:3])
+    return f"runtime_{surface.command.replace('-', '_')}_{term_slug}"
+
+
+def _runtime_term_set_entry_label(surface: RuntimeTermSetSurface, entry: dict[str, Any]) -> str:
+    terms = tuple(str(term) for term in entry.get(surface.value_field, []))
+    entry_id = str(entry.get("id") or _runtime_term_set_entry_id(surface, terms))
+    status = str(entry.get("status", "active"))
+    return f"{entry_id}\t{status}\t{surface.command}\t{', '.join(terms)}"
+
+
+def _runtime_term_set_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    surface: RuntimeTermSetSurface,
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get(surface.section, []):
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        terms = tuple(str(term) for term in entry.get(surface.value_field, []))
+        entry_id = str(entry.get("id") or _runtime_term_set_entry_id(surface, terms))
         if selector_norm is None:
             matches.append(entry)
             continue
@@ -2943,6 +3019,83 @@ def _append_runtime_set_update_sanity_stub(
         lines.extend([
             f"test({_toml_string(surface.command + ' ' + action + ' ' + normalized_term)},",
             f"     {_toml_string(normalized_term)} in {mapping_name}, {expected})",
+        ])
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+def _live_runtime_term_set_values(surface: RuntimeTermSetSurface, paths: MatcherPaths) -> set[str]:
+    if paths.app_dir != APP_DIR:
+        return set()
+    if surface.command == "gpb":
+        from languages.sv.ingredient_matching.blocker_data import GLOBAL_PRODUCT_NAME_BLOCKERS
+
+        return set(GLOBAL_PRODUCT_NAME_BLOCKERS)
+    return set()
+
+
+def _append_runtime_term_set_entry(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeTermSetSurface,
+    terms: tuple[str, ...],
+    reason: str,
+    dry_run: bool,
+) -> str:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_terms = tuple(_runtime_rule_normalize_text(term) for term in terms)
+    entry_id = _runtime_term_set_entry_id(surface, normalized_terms)
+    existing_terms: set[str] = set()
+    for entry in sections.get(surface.section, []):
+        if not _runtime_overlay_entry_is_active(entry):
+            continue
+        existing_terms.update(
+            _runtime_rule_normalize_text(str(term))
+            for term in entry.get(surface.value_field, [])
+        )
+    existing_terms.update(_live_runtime_term_set_values(surface, paths))
+    duplicates = sorted(set(normalized_terms) & existing_terms)
+    if duplicates:
+        raise typer.BadParameter(f"{surface.command} already contains {', '.join(duplicates)}")
+
+    entry = {
+        "id": entry_id,
+        "status": "active",
+        surface.value_field: list(normalized_terms),
+        "reason": reason.strip(),
+    }
+    preview = _runtime_term_set_entry_block(surface, entry)
+    if dry_run:
+        return preview
+
+    sections.setdefault(surface.section, []).append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_runtime_term_set_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeTermSetSurface,
+    terms: tuple[str, ...],
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    if surface.command != "gpb":
+        raise typer.BadParameter(f"no sanity generator for {surface.command}")
+    lines = [
+        "",
+        f"# {policy_ref}: generated by dm matcher add {surface.command}",
+        "from languages.sv.ingredient_matching.blocker_data import GLOBAL_PRODUCT_NAME_BLOCKERS",
+    ]
+    for term in terms:
+        normalized_term = _runtime_rule_normalize_text(term)
+        lines.extend([
+            f"test({_toml_string(surface.command + ' overlay contains ' + normalized_term)},",
+            f"     {_toml_string(normalized_term)} in GLOBAL_PRODUCT_NAME_BLOCKERS, True)",
+            f"test({_toml_string(surface.command + ' blocks backend match ' + normalized_term)},",
+            f"     recipe_match_num(['ost'], {_deep_sanity_offer_dict(normalized_term + ' Ost', 'dairy')}), 0)",
         ])
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
@@ -3887,6 +4040,107 @@ def _add_runtime_set_update_rule(
         typer.echo("Skipped gates (--no-run-gates).")
         return
     raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+def _add_runtime_term_set_rule(
+    *,
+    surface: RuntimeTermSetSurface,
+    terms_csv: str,
+    reason: str,
+    allow_broad: bool,
+    policy_ref: str | None,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    terms = _split_csv(terms_csv, label="--terms")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    broad_terms = [
+        term for term in terms
+        if len(_runtime_rule_normalize_text(term).replace(" ", "")) < 4
+    ]
+    if broad_terms and not allow_broad:
+        raise typer.BadParameter(
+            f"{surface.command} terms shorter than four characters require --allow-broad: "
+            + ", ".join(broad_terms)
+        )
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+    policy_ref = policy_ref or f"runtime_{surface.command.replace('-', '_')}_{_slug(terms[0])}"
+    overlay_preview = _append_runtime_term_set_entry(
+        paths=paths,
+        surface=surface,
+        terms=terms,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_runtime_term_set_sanity_stub(
+            paths=paths,
+            surface=surface,
+            terms=terms,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+
+    typer.echo(f"Generated {surface.section} rule: {policy_ref}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+@matcher_add_app.command("gpb")
+def add_gpb(
+    terms_csv: Annotated[
+        str,
+        typer.Option("--terms", help="Comma-separated global product-name blocker terms to add."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why these products are globally out of scope.")],
+    allow_broad: Annotated[
+        bool,
+        typer.Option("--allow-broad", help="Allow terms shorter than four normalized characters."),
+    ] = False,
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_term_set_rule(
+        surface=RUNTIME_TERM_SET_SURFACES["gpb"],
+        terms_csv=terms_csv,
+        reason=reason,
+        allow_broad=allow_broad,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
 
 
 @matcher_add_app.command("flavor-word")
@@ -4948,6 +5202,40 @@ def matcher_list(
             typer.echo("No entries found.")
         return
 
+    if surface_key in RUNTIME_TERM_SET_SURFACES:
+        surface = RUNTIME_TERM_SET_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_term_set_matching_entries(
+            sections,
+            surface,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(
+                        entry.get("id")
+                        or _runtime_term_set_entry_id(
+                            surface,
+                            tuple(str(term) for term in entry.get(surface.value_field, [])),
+                        )
+                    ),
+                    "status": str(entry.get("status", "active")),
+                    "surface": surface.command,
+                    surface.value_field: list(entry.get(surface.value_field, [])),
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_term_set_entry_label(surface, entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
     if surface_key in RUNTIME_SET_UPDATE_SURFACES:
         surface = RUNTIME_SET_UPDATE_SURFACES[surface_key]
         sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
@@ -5187,6 +5475,35 @@ def matcher_inactivate(
         entry["status"] = "inactive"
         entry["inactive_reason"] = reason.strip()
         preview = _runtime_pair_entry_block(surface, entry)
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    if surface_key in RUNTIME_TERM_SET_SURFACES:
+        surface = RUNTIME_TERM_SET_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_term_set_matching_entries(
+            sections,
+            surface,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_term_set_entry_label(surface, entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one {surface.command} entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        terms = tuple(str(term) for term in entry.get(surface.value_field, []))
+        entry["id"] = str(entry.get("id") or _runtime_term_set_entry_id(surface, terms))
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_term_set_entry_block(surface, entry)
         if dry_run:
             typer.echo(preview)
             return

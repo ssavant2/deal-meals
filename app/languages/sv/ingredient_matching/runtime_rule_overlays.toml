@@ -10,6 +10,7 @@
 #   [[product_name_blockers]]
 #   [[false_positive_blockers]]
 #   [[keyword_suppressed_by_context]]
+#   [[global_product_name_blockers]]
 #   [[space_normalizations]]
 #   [[keyword_set_updates]]
 #   [[carrier_set_updates]]
