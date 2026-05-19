@@ -99,6 +99,12 @@ For live TOML registry rule authoring, prefer the unified CLI:
 ./bin/dm matcher add extraction-helper ...
 ```
 
+For runtime data-rule authoring, prefer the same CLI entry point:
+`pnb`, `fpb`, `ksbc`, `space-normalization`, `flavor-word`,
+`carrier-product`, `important-short-keyword`, `processed-food`,
+`cuisine-context`, `compound-protection`, `specialty-qualifier`, and
+`qualifier-equivalent` all write `runtime_rule_overlays.toml`.
+
 Use `./bin/dm matcher guide <shape>` to see whether a rule shape has an
 authoring command or remains a manual runtime-table change. `match_bridge.toml`
 is staged/declarative-only today; author live bridge behavior through the

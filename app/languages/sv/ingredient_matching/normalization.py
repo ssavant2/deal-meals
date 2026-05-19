@@ -1,6 +1,8 @@
 import re
 from typing import Dict, List, Tuple
 
+from .runtime_rule_overlays import SPACE_NORMALIZATION_CLI_UPDATES
+
 
 # Space-variant normalizations: "corn flakes" (two words) = "cornflakes" (one word)
 # Applied before compound word checking in keyword extraction and matching
@@ -910,6 +912,7 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('passerade tomater', 'tomatpassata'),
     ('passerad tomat', 'tomatpassata'),
 ]
+_SPACE_NORMALIZATIONS.extend(SPACE_NORMALIZATION_CLI_UPDATES)
 
 # Pre-build combined regex for space normalizations (one pass instead of sequential replacements)
 _SPACE_NORM_LOOKUP: Dict[str, str] = {k: v for k, v in _SPACE_NORMALIZATIONS}

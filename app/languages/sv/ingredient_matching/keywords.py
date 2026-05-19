@@ -2,7 +2,15 @@
 
 from typing import Dict, FrozenSet, List
 
+from .runtime_rule_overlays import KEYWORD_SET_CLI_UPDATES
 from .term_registry.exports import OFFER_EXTRA_KEYWORDS as _REGISTRY_OFFER_EXTRA_KEYWORDS
+
+
+def _apply_keyword_set_updates(surface: str, base: FrozenSet[str]) -> FrozenSet[str]:
+    updates = KEYWORD_SET_CLI_UPDATES.get(surface, {})
+    additions = updates.get("add", set())
+    removals = updates.get("remove", set())
+    return frozenset((set(base) | additions) - removals)
 
 
 STOP_WORDS: FrozenSet[str] = frozenset({
@@ -627,7 +635,6 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'osthyvel',  # "hyvlat med osthyvel" — cheese slicer (kitchen tool), not food
     'potatisskalare',  # "skalad med potatisskalare" — vegetable peeler (kitchen tool), not food
 })
-
 NON_FOOD_KEYWORDS: FrozenSet[str] = frozenset({
     # Cleaning products
     'disk', 'diskmedel', 'maskindisk', 'handdisk', 'handdiskmedel', 'diskborste', 'diskduk',
@@ -1458,6 +1465,8 @@ PROCESSED_FOODS: FrozenSet[str] = frozenset({
     'crunchy fries',    # "Crunchy Fries" — frozen processed fries, not raw potato
 })
 
+PROCESSED_FOODS = _apply_keyword_set_updates("processed_foods", PROCESSED_FOODS)
+
 PROCESSED_FOOD_SUFFIXES: FrozenSet[str] = frozenset({
     'soppa',  # ready-made soups: purjolöksoppa, tomatsoppa, ärtsoppa
     'paj',  # ready-made pies: broccolipaj, kycklingpaj, västerbottenpaj
@@ -2009,5 +2018,8 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'läsk', 'lask',  # explicit soft-drink ingredients
     'tonic',  # tonic water — used in gin & tonic and mixed drinks
 })
+
+FLAVOR_WORDS = _apply_keyword_set_updates("flavor_words", FLAVOR_WORDS)
+IMPORTANT_SHORT_KEYWORDS = _apply_keyword_set_updates("important_short_keywords", IMPORTANT_SHORT_KEYWORDS)
 
 OFFER_EXTRA_KEYWORDS: Dict[str, List[str]] = _REGISTRY_OFFER_EXTRA_KEYWORDS

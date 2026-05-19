@@ -109,6 +109,62 @@ class RuntimeOverlaySurface:
     guide_label: str
 
 
+@dataclass(frozen=True)
+class RuntimePairSurface:
+    command: str
+    section: str
+    source_field: str
+    target_field: str
+    guide_label: str
+
+
+@dataclass(frozen=True)
+class RuntimeSetUpdateSurface:
+    command: str
+    section: str
+    surface: str
+    default_action: Literal["add", "remove"]
+    guide_label: str
+
+
+@dataclass(frozen=True)
+class RuntimeContextSurface:
+    command: str
+    section: str
+    key_field: str
+    values_field: str
+    mapping_name: str
+    guide_label: str
+
+
+@dataclass(frozen=True)
+class RuntimeCompoundSurface:
+    command: str
+    section: str
+    guide_label: str
+
+
+@dataclass(frozen=True)
+class RuntimeSpecialtySurface:
+    command: str
+    section: str
+    key_field: str
+    values_field: str
+    guide_label: str
+
+
+@dataclass(frozen=True)
+class RegistryEntryRecord:
+    surface: str
+    entry_id: str
+    status: str
+    canonical: str
+    terms: tuple[str, ...]
+    start: int
+    end: int
+    block: str
+
+
 SIMPLE_TOML_SURFACES: dict[str, SimpleTomlSurface] = {
     "ingredient-parent": SimpleTomlSurface(
         command="ingredient-parent",
@@ -190,7 +246,87 @@ RUNTIME_OVERLAY_SURFACES: dict[str, RuntimeOverlaySurface] = {
         guide_label="Keyword suppressed by context",
     ),
 }
-_RUNTIME_OVERLAY_SECTION_ORDER = tuple(surface.section for surface in RUNTIME_OVERLAY_SURFACES.values())
+RUNTIME_PAIR_SURFACES: dict[str, RuntimePairSurface] = {
+    "space-normalization": RuntimePairSurface(
+        command="space-normalization",
+        section="space_normalizations",
+        source_field="source",
+        target_field="target",
+        guide_label="Space normalization",
+    ),
+}
+RUNTIME_SET_UPDATE_SURFACES: dict[str, RuntimeSetUpdateSurface] = {
+    "flavor-word": RuntimeSetUpdateSurface(
+        command="flavor-word",
+        section="keyword_set_updates",
+        surface="flavor_words",
+        default_action="add",
+        guide_label="Flavor word",
+    ),
+    "important-short-keyword": RuntimeSetUpdateSurface(
+        command="important-short-keyword",
+        section="keyword_set_updates",
+        surface="important_short_keywords",
+        default_action="add",
+        guide_label="Important short keyword",
+    ),
+    "processed-food": RuntimeSetUpdateSurface(
+        command="processed-food",
+        section="keyword_set_updates",
+        surface="processed_foods",
+        default_action="remove",
+        guide_label="Processed-food set update",
+    ),
+    "carrier-product": RuntimeSetUpdateSurface(
+        command="carrier-product",
+        section="carrier_set_updates",
+        surface="carrier_products",
+        default_action="add",
+        guide_label="Carrier product",
+    ),
+}
+RUNTIME_CONTEXT_SURFACES: dict[str, RuntimeContextSurface] = {
+    "cuisine-context": RuntimeContextSurface(
+        command="cuisine-context",
+        section="cuisine_context",
+        key_field="trigger",
+        values_field="contexts",
+        mapping_name="CUISINE_CONTEXT",
+        guide_label="Cuisine context",
+    ),
+}
+RUNTIME_COMPOUND_SURFACES: dict[str, RuntimeCompoundSurface] = {
+    "compound-protection": RuntimeCompoundSurface(
+        command="compound-protection",
+        section="compound_protection_updates",
+        guide_label="Compound protection",
+    ),
+}
+RUNTIME_SPECIALTY_SURFACES: dict[str, RuntimeSpecialtySurface] = {
+    "specialty-qualifier": RuntimeSpecialtySurface(
+        command="specialty-qualifier",
+        section="specialty_qualifiers",
+        key_field="keyword",
+        values_field="qualifiers",
+        guide_label="Specialty qualifier",
+    ),
+    "qualifier-equivalent": RuntimeSpecialtySurface(
+        command="qualifier-equivalent",
+        section="qualifier_equivalents",
+        key_field="qualifier",
+        values_field="equivalents",
+        guide_label="Qualifier equivalent",
+    ),
+}
+_RUNTIME_OVERLAY_SECTION_ORDER = (
+    *(surface.section for surface in RUNTIME_OVERLAY_SURFACES.values()),
+    *(surface.section for surface in RUNTIME_PAIR_SURFACES.values()),
+    "keyword_set_updates",
+    "carrier_set_updates",
+    *(surface.section for surface in RUNTIME_CONTEXT_SURFACES.values()),
+    *(surface.section for surface in RUNTIME_COMPOUND_SURFACES.values()),
+    *(surface.section for surface in RUNTIME_SPECIALTY_SURFACES.values()),
+)
 
 
 GUIDE_SHAPES: dict[str, MatcherGuide] = {
@@ -294,6 +430,87 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "Use this carefully: KSBC is semantic and can suppress useful generic fallbacks.",
         ),
     ),
+    "space-normalization": MatcherGuide(
+        label="space-normalization",
+        status="supported by dm matcher add",
+        summary="Normalize a spaced/accent/plural surface form before extraction.",
+        steps=(
+            "Run: ./bin/dm matcher add space-normalization \"<source>\" --target \"<target>\" --reason \"<why>\"",
+            "Use when extraction should see a joined or canonicalized token before matching.",
+        ),
+    ),
+    "flavor-word": MatcherGuide(
+        label="flavor-word",
+        status="supported by dm matcher add",
+        summary="Add product flavor words stripped from carrier products.",
+        steps=(
+            "Run: ./bin/dm matcher add flavor-word --terms <word1,word2,...> --reason \"<why>\"",
+            "Pair with carrier-product when the product family is also new.",
+        ),
+    ),
+    "carrier-product": MatcherGuide(
+        label="carrier-product",
+        status="supported by dm matcher add",
+        summary="Add carrier products whose flavor words should not become ingredient keywords.",
+        steps=(
+            "Run: ./bin/dm matcher add carrier-product --terms <carrier1,carrier2,...> --reason \"<why>\"",
+            "Use for product families where flavor/filling words are variants, toppings, or mix-ins.",
+        ),
+    ),
+    "important-short-keyword": MatcherGuide(
+        label="important-short-keyword",
+        status="supported by dm matcher add",
+        summary="Force a short but meaningful food word through extraction.",
+        steps=(
+            "Run: ./bin/dm matcher add important-short-keyword --terms <word1,word2,...> --reason \"<why>\"",
+            "Use narrowly; short words are high collision risk.",
+        ),
+    ),
+    "processed-food": MatcherGuide(
+        label="processed-food",
+        status="supported by dm matcher add",
+        summary="Add or remove simple PROCESSED_FOODS set entries.",
+        steps=(
+            "Run: ./bin/dm matcher add processed-food --terms <word1,word2,...> --action add|remove --reason \"<why>\"",
+            "Use only for simple set membership; processed/form logic still belongs in code.",
+        ),
+    ),
+    "cuisine-context": MatcherGuide(
+        label="cuisine-context",
+        status="supported by dm matcher add",
+        summary="Keep cuisine-seasoned products valid only in matching recipe contexts.",
+        steps=(
+            "Run: ./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason \"<why>\"",
+            "Prefer this over PNB when the product is legitimate in the right cuisine.",
+        ),
+    ),
+    "compound-protection": MatcherGuide(
+        label="compound-protection",
+        status="supported by dm matcher add",
+        summary="Protect keywords from compound/prefix/suffix substring bleed.",
+        steps=(
+            "Run: ./bin/dm matcher add compound-protection --mode prefix-strict|suffix-strict|suffix-protected|embedded-protected --keywords <word1,...> --reason \"<why>\"",
+            "Use before PNB/FPB when the real issue is token shape rather than semantic context.",
+        ),
+    ),
+    "specialty-qualifier": MatcherGuide(
+        label="specialty-qualifier",
+        status="supported by dm matcher add",
+        summary="Require product/ingredient qualifier agreement for a keyword family.",
+        steps=(
+            "Run: ./bin/dm matcher add specialty-qualifier <keyword> --qualifiers <q1,q2,...> [--bidirectional] --reason \"<why>\"",
+            "Use --bidirectional when product qualifiers should also constrain plain ingredient recipes.",
+        ),
+    ),
+    "qualifier-equivalent": MatcherGuide(
+        label="qualifier-equivalent",
+        status="supported by dm matcher add",
+        summary="Declare qualifier spellings/forms as equivalent for specialty checks.",
+        steps=(
+            "Run: ./bin/dm matcher add qualifier-equivalent <qualifier> --equivalents <q1,q2,...> --reason \"<why>\"",
+            "Use for adjective forms and known cross-language/product-label equivalents.",
+        ),
+    ),
     "no-match-policy": MatcherGuide(
         label="no-match-policy",
         status="supported by dm matcher add",
@@ -348,6 +565,19 @@ GUIDE_ALIASES = {
     "false_positive_blocker": "fpb",
     "global-product-name-blocker": "gpb",
     "global_product_name_blocker": "gpb",
+    "space_norm": "space-normalization",
+    "space-normalisation": "space-normalization",
+    "flavor_words": "flavor-word",
+    "flavour-word": "flavor-word",
+    "carrier_products": "carrier-product",
+    "important_short_keyword": "important-short-keyword",
+    "processed_food": "processed-food",
+    "cuisine_context": "cuisine-context",
+    "compound_strict": "compound-protection",
+    "compound_protection": "compound-protection",
+    "specialty": "specialty-qualifier",
+    "specialty_qualifier": "specialty-qualifier",
+    "qualifier_equivalent": "qualifier-equivalent",
 }
 
 
@@ -433,6 +663,37 @@ def _toml_string(value: str) -> str:
 
 def _toml_array(values: tuple[str, ...] | list[str]) -> str:
     return "[" + ", ".join(_toml_string(value) for value in values) + "]"
+
+
+def _deep_sanity_offer_dict(name: str, category: str) -> str:
+    fields = [f'"name": {_toml_string(name)}']
+    if category:
+        fields.append(f'"category": {_toml_string(category)}')
+    return "{" + ", ".join(fields) + "}"
+
+
+def _deep_sanity_match_assertion(
+    *,
+    description: str,
+    offer_name: str,
+    ingredient: str,
+    offer_category: str,
+    expected_canonical: str | None,
+    mode: Literal["fast-match", "backend-match"],
+    recipe_name: str = "Sanity Recipe",
+) -> list[str]:
+    if mode == "fast-match":
+        expected = "None" if expected_canonical is None else _toml_string(expected_canonical)
+        return [
+            f"test({_toml_string(description)},",
+            f"     match({_toml_string(offer_name)}, {_toml_string(ingredient)}, {_toml_string(offer_category)}), {expected})",
+        ]
+    expected_count = 0 if expected_canonical is None else 1
+    return [
+        f"test({_toml_string(description + ' (backend)')},",
+        f"     recipe_match_num_named({_toml_string(recipe_name)}, [{_toml_string(ingredient)}], "
+        f"{_deep_sanity_offer_dict(offer_name, offer_category)}), {expected_count})",
+    ]
 
 
 def _source_spec(paths: MatcherPaths, contract: str):
@@ -660,13 +921,20 @@ def _append_simple_surface_deep_sanity_stub(
     sanity_offer: str,
     offer_category: str,
     policy_ref: str,
+    sanity_mode: Literal["fast-match", "backend-match"],
     dry_run: bool,
 ) -> str:
     lines = [
         "",
         f"# {policy_ref}: generated by dm matcher add {surface.command}",
-        f"test({_toml_string(surface.command + ' ' + sanity_offer + ' matches ' + canonical)},",
-        f"     match({_toml_string(sanity_offer)}, {_toml_string(sanity_ingredient)}, {_toml_string(offer_category)}), {_toml_string(canonical)})",
+        *_deep_sanity_match_assertion(
+            description=surface.command + " " + sanity_offer + " matches " + canonical,
+            offer_name=sanity_offer,
+            ingredient=sanity_ingredient,
+            offer_category=offer_category,
+            expected_canonical=canonical,
+            mode=sanity_mode,
+        ),
     ]
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
@@ -692,6 +960,7 @@ def _add_simple_toml_surface(
     sanity_ingredient: str | None,
     sanity_offer: str | None,
     offer_category: str,
+    sanity_mode: Literal["fast-match", "backend-match"],
     policy_ref: str | None,
     source_ref: str | None,
     tree_root: Path | None,
@@ -758,6 +1027,7 @@ def _add_simple_toml_surface(
         sanity_offer=sanity_offer,
         offer_category=offer_category,
         policy_ref=policy_ref,
+        sanity_mode=sanity_mode,
         dry_run=dry_run,
     )
     change = MatcherChangePlan(
@@ -936,13 +1206,20 @@ def _append_no_match_deep_sanity_stub(
     negative_ingredient: str,
     negative_offer: str,
     offer_category: str,
+    sanity_mode: Literal["fast-match", "backend-match"],
     dry_run: bool,
 ) -> str:
     lines = [
         "",
         f"# {policy_ref}: generated by dm matcher add no-match-policy",
-        f"test({_toml_string('no-match-policy blocks ' + negative_offer)},",
-        f"     match({_toml_string(negative_offer)}, {_toml_string(negative_ingredient)}, {_toml_string(offer_category)}), None)",
+        *_deep_sanity_match_assertion(
+            description="no-match-policy blocks " + negative_offer,
+            offer_name=negative_offer,
+            ingredient=negative_ingredient,
+            offer_category=offer_category,
+            expected_canonical=None,
+            mode=sanity_mode,
+        ),
     ]
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
@@ -1481,6 +1758,7 @@ def _append_deep_sanity_stub(
     ingredient: str,
     offer_category: str,
     policy_ref: str,
+    sanity_mode: Literal["fast-match", "backend-match"],
     dry_run: bool,
 ) -> str:
     lines = [
@@ -1488,10 +1766,15 @@ def _append_deep_sanity_stub(
         f"# {policy_ref}: generated by dm matcher add keyword-extra-parent",
     ]
     for kid, offer_name in zip(kids, offer_names, strict=True):
-        lines.extend([
-            f"test({_toml_string(_titleish(canonical) + ' recipe matches ' + kid)},",
-            f"     match({_toml_string(offer_name)}, {_toml_string(ingredient)}, {_toml_string(offer_category)}), {_toml_string(canonical)})",
-        ])
+        lines.extend(_deep_sanity_match_assertion(
+            description=_titleish(canonical) + " recipe matches " + kid,
+            offer_name=offer_name,
+            ingredient=ingredient,
+            offer_category=offer_category,
+            expected_canonical=canonical,
+            mode=sanity_mode,
+            recipe_name=_titleish(canonical) + " recipe",
+        ))
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
     return block
@@ -1506,6 +1789,7 @@ def _append_keyword_synonym_deep_sanity_stub(
     offer_category: str,
     ingredient_override: str | None,
     policy_ref: str,
+    sanity_mode: Literal["fast-match", "backend-match"],
     dry_run: bool,
 ) -> str:
     lines = [
@@ -1514,10 +1798,14 @@ def _append_keyword_synonym_deep_sanity_stub(
     ]
     for variant in variants:
         ingredient = ingredient_override or variant
-        lines.extend([
-            f"test({_toml_string('Keyword synonym ' + variant + ' matches ' + canonical)},",
-            f"     match({_toml_string(sanity_offer)}, {_toml_string(ingredient)}, {_toml_string(offer_category)}), {_toml_string(canonical)})",
-        ])
+        lines.extend(_deep_sanity_match_assertion(
+            description="Keyword synonym " + variant + " matches " + canonical,
+            offer_name=sanity_offer,
+            ingredient=ingredient,
+            offer_category=offer_category,
+            expected_canonical=canonical,
+            mode=sanity_mode,
+        ))
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
     return block
@@ -1793,6 +2081,19 @@ def _runtime_overlay_entry_values(entry: dict[str, Any], value_field: str) -> tu
     return tuple(_runtime_rule_normalize_text(str(value)) for value in raw_values)
 
 
+def _runtime_overlay_entry_is_active(entry: dict[str, Any]) -> bool:
+    return str(entry.get("status", "active")).strip().lower() != "inactive"
+
+
+def _runtime_overlay_entry_id(surface: RuntimeOverlaySurface, keyword: str) -> str:
+    return f"runtime_{surface.command}_{_slug(keyword)}"
+
+
+def _runtime_pair_entry_id(surface: RuntimePairSurface, source: str, target: str) -> str:
+    command_slug = surface.command.replace("-", "_")
+    return f"runtime_{command_slug}_{_slug(source)}_{_slug(target)}"
+
+
 def _runtime_overlay_existing_values(
     sections: dict[str, list[dict[str, Any]]],
     surface: RuntimeOverlaySurface,
@@ -1801,6 +2102,8 @@ def _runtime_overlay_existing_values(
     normalized_keyword = _runtime_rule_normalize_text(keyword)
     values: set[str] = set()
     for entry in sections.get(surface.section, []):
+        if not _runtime_overlay_entry_is_active(entry):
+            continue
         entry_keyword = str(entry.get("keyword", "")).strip()
         if _runtime_rule_normalize_text(entry_keyword) != normalized_keyword:
             continue
@@ -1831,13 +2134,106 @@ def _live_runtime_mapping_values(surface: RuntimeOverlaySurface, keyword: str, p
 
 
 def _runtime_overlay_entry_block(surface: RuntimeOverlaySurface, entry: dict[str, Any]) -> str:
-    return "\n".join([
-        f"[[{surface.section}]]",
+    lines = [f"[[{surface.section}]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.extend([
         f"keyword = {_toml_string(str(entry['keyword']))}",
         f"{surface.value_field} = {_toml_array(list(entry[surface.value_field]))}",
         f"reason = {_toml_string(str(entry['reason']))}",
-        "",
     ])
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _runtime_pair_entry_block(surface: RuntimePairSurface, entry: dict[str, Any]) -> str:
+    lines = [f"[[{surface.section}]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.extend([
+        f"{surface.source_field} = {_toml_string(str(entry[surface.source_field]))}",
+        f"{surface.target_field} = {_toml_string(str(entry[surface.target_field]))}",
+        f"reason = {_toml_string(str(entry['reason']))}",
+    ])
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _runtime_set_update_entry_block(entry: dict[str, Any]) -> str:
+    lines = [f"[[{entry['section']}]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.extend([
+        f"surface = {_toml_string(str(entry['surface']))}",
+        f"action = {_toml_string(str(entry['action']))}",
+        f"terms = {_toml_array(list(entry['terms']))}",
+        f"reason = {_toml_string(str(entry['reason']))}",
+    ])
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _runtime_context_entry_block(surface: RuntimeContextSurface, entry: dict[str, Any]) -> str:
+    lines = [f"[[{surface.section}]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.extend([
+        f"{surface.key_field} = {_toml_string(str(entry[surface.key_field]))}",
+        f"{surface.values_field} = {_toml_array(list(entry[surface.values_field]))}",
+        f"reason = {_toml_string(str(entry['reason']))}",
+    ])
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _runtime_compound_entry_block(surface: RuntimeCompoundSurface, entry: dict[str, Any]) -> str:
+    lines = [f"[[{surface.section}]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.extend([
+        f"mode = {_toml_string(str(entry['mode']))}",
+        f"keywords = {_toml_array(list(entry['keywords']))}",
+        f"reason = {_toml_string(str(entry['reason']))}",
+    ])
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _runtime_specialty_entry_block(surface: RuntimeSpecialtySurface, entry: dict[str, Any]) -> str:
+    lines = [f"[[{surface.section}]]"]
+    if "id" in entry:
+        lines.append(f"id = {_toml_string(str(entry['id']))}")
+    if "status" in entry:
+        lines.append(f"status = {_toml_string(str(entry['status']))}")
+    lines.append(f"{surface.key_field} = {_toml_string(str(entry[surface.key_field]))}")
+    lines.append(f"{surface.values_field} = {_toml_array(list(entry[surface.values_field]))}")
+    if surface.section == "specialty_qualifiers":
+        lines.append(f"bidirectional = {'true' if bool(entry.get('bidirectional', False)) else 'false'}")
+    lines.append(f"reason = {_toml_string(str(entry['reason']))}")
+    if "inactive_reason" in entry:
+        lines.append(f"inactive_reason = {_toml_string(str(entry['inactive_reason']))}")
+    lines.append("")
+    return "\n".join(lines)
 
 
 def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str:
@@ -1847,18 +2243,410 @@ def _runtime_overlay_file_text(sections: dict[str, list[dict[str, Any]]]) -> str
         "# This file is tracked production source. Add entries through:",
         "#   ./bin/dm matcher add pnb|fpb|ksbc ...",
         "#",
+        "# New CLI entries use id/status metadata. Statusless entries are treated as active",
+        "# only for backwards compatibility; do not append statusless rows manually.",
+        "#",
         "# Supported sections:",
         "#   [[product_name_blockers]]",
         "#   [[false_positive_blockers]]",
         "#   [[keyword_suppressed_by_context]]",
+        "#   [[space_normalizations]]",
+        "#   [[keyword_set_updates]]",
+        "#   [[carrier_set_updates]]",
+        "#   [[cuisine_context]]",
+        "#   [[compound_protection_updates]]",
+        "#   [[specialty_qualifiers]]",
+        "#   [[qualifier_equivalents]]",
         "",
     ]
+    mapping_by_section = {surface.section: surface for surface in RUNTIME_OVERLAY_SURFACES.values()}
+    pair_by_section = {surface.section: surface for surface in RUNTIME_PAIR_SURFACES.values()}
+    context_by_section = {surface.section: surface for surface in RUNTIME_CONTEXT_SURFACES.values()}
+    compound_by_section = {surface.section: surface for surface in RUNTIME_COMPOUND_SURFACES.values()}
+    specialty_by_section = {surface.section: surface for surface in RUNTIME_SPECIALTY_SURFACES.values()}
     for section in _RUNTIME_OVERLAY_SECTION_ORDER:
-        surface = next(item for item in RUNTIME_OVERLAY_SURFACES.values() if item.section == section)
         for entry in sections.get(section, []):
-            lines.append(_runtime_overlay_entry_block(surface, entry).rstrip())
+            if section in mapping_by_section:
+                lines.append(_runtime_overlay_entry_block(mapping_by_section[section], entry).rstrip())
+            elif section in pair_by_section:
+                lines.append(_runtime_pair_entry_block(pair_by_section[section], entry).rstrip())
+            elif section in {"keyword_set_updates", "carrier_set_updates"}:
+                lines.append(_runtime_set_update_entry_block({"section": section, **entry}).rstrip())
+            elif section in context_by_section:
+                lines.append(_runtime_context_entry_block(context_by_section[section], entry).rstrip())
+            elif section in compound_by_section:
+                lines.append(_runtime_compound_entry_block(compound_by_section[section], entry).rstrip())
+            elif section in specialty_by_section:
+                lines.append(_runtime_specialty_entry_block(specialty_by_section[section], entry).rstrip())
             lines.append("")
     return "\n".join(lines).rstrip() + "\n"
+
+
+def _runtime_overlay_surface_from_arg(surface_name: str) -> RuntimeOverlaySurface:
+    key = surface_name.strip().lower().replace("_", "-")
+    if key not in RUNTIME_OVERLAY_SURFACES:
+        known = ", ".join(sorted(RUNTIME_OVERLAY_SURFACES))
+        raise typer.BadParameter(f"unknown runtime overlay surface {surface_name!r}; known: {known}")
+    return RUNTIME_OVERLAY_SURFACES[key]
+
+
+def _runtime_overlay_entry_label(surface: RuntimeOverlaySurface, entry: dict[str, Any]) -> str:
+    entry_id = str(entry.get("id") or _runtime_overlay_entry_id(surface, str(entry.get("keyword", ""))))
+    status = str(entry.get("status", "active"))
+    values = ", ".join(str(value) for value in entry.get(surface.value_field, []))
+    return f"{entry_id}\t{status}\t{surface.command}\t{entry.get('keyword', '')} -> {values}"
+
+
+def _runtime_overlay_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    surface: RuntimeOverlaySurface,
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get(surface.section, []):
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        entry_id = str(entry.get("id") or _runtime_overlay_entry_id(surface, str(entry.get("keyword", ""))))
+        keyword = str(entry.get("keyword", ""))
+        values = tuple(str(value) for value in entry.get(surface.value_field, []))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id or selector_norm == _runtime_rule_normalize_text(keyword):
+            matches.append(entry)
+            continue
+        if selector_norm in {_runtime_rule_normalize_text(value) for value in values}:
+            matches.append(entry)
+    return matches
+
+
+def _runtime_pair_entry_label(surface: RuntimePairSurface, entry: dict[str, Any]) -> str:
+    source = str(entry.get(surface.source_field, ""))
+    target = str(entry.get(surface.target_field, ""))
+    entry_id = str(entry.get("id") or _runtime_pair_entry_id(surface, source, target))
+    status = str(entry.get("status", "active"))
+    return f"{entry_id}\t{status}\t{surface.command}\t{source} -> {target}"
+
+
+def _runtime_pair_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    surface: RuntimePairSurface,
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get(surface.section, []):
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        source = str(entry.get(surface.source_field, ""))
+        target = str(entry.get(surface.target_field, ""))
+        entry_id = str(entry.get("id") or _runtime_pair_entry_id(surface, source, target))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id:
+            matches.append(entry)
+            continue
+        if selector_norm in {
+            _runtime_rule_normalize_text(source),
+            _runtime_rule_normalize_text(target),
+        }:
+            matches.append(entry)
+    return matches
+
+
+def _runtime_set_update_entry_id(surface: RuntimeSetUpdateSurface, action: str, terms: tuple[str, ...]) -> str:
+    term_slug = "_".join(_slug(term) for term in terms[:3])
+    return f"runtime_{surface.command.replace('-', '_')}_{action}_{term_slug}"
+
+
+def _runtime_set_update_entry_label(surface: RuntimeSetUpdateSurface, entry: dict[str, Any]) -> str:
+    action = str(entry.get("action", surface.default_action))
+    terms = tuple(str(term) for term in entry.get("terms", []))
+    entry_id = str(entry.get("id") or _runtime_set_update_entry_id(surface, action, terms))
+    status = str(entry.get("status", "active"))
+    return f"{entry_id}\t{status}\t{surface.command}\t{action}\t{', '.join(terms)}"
+
+
+def _runtime_set_update_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    surface: RuntimeSetUpdateSurface,
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get(surface.section, []):
+        if str(entry.get("surface", "")).replace("-", "_") != surface.surface:
+            continue
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        action = str(entry.get("action", surface.default_action))
+        terms = tuple(str(term) for term in entry.get("terms", []))
+        entry_id = str(entry.get("id") or _runtime_set_update_entry_id(surface, action, terms))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id:
+            matches.append(entry)
+            continue
+        if selector_norm in {_runtime_rule_normalize_text(term) for term in terms}:
+            matches.append(entry)
+    return matches
+
+
+def _runtime_context_entry_id(surface: RuntimeContextSurface, key: str) -> str:
+    return f"runtime_{surface.command.replace('-', '_')}_{_slug(key)}"
+
+
+def _runtime_context_entry_label(surface: RuntimeContextSurface, entry: dict[str, Any]) -> str:
+    key = str(entry.get(surface.key_field, ""))
+    entry_id = str(entry.get("id") or _runtime_context_entry_id(surface, key))
+    status = str(entry.get("status", "active"))
+    values = ", ".join(str(value) for value in entry.get(surface.values_field, []))
+    return f"{entry_id}\t{status}\t{surface.command}\t{key} -> {values}"
+
+
+def _runtime_context_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    surface: RuntimeContextSurface,
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get(surface.section, []):
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        key = str(entry.get(surface.key_field, ""))
+        values = tuple(str(value) for value in entry.get(surface.values_field, []))
+        entry_id = str(entry.get("id") or _runtime_context_entry_id(surface, key))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id or selector_norm == _runtime_rule_normalize_text(key):
+            matches.append(entry)
+            continue
+        if selector_norm in {_runtime_rule_normalize_text(value) for value in values}:
+            matches.append(entry)
+    return matches
+
+
+def _runtime_compound_entry_id(surface: RuntimeCompoundSurface, mode: str, keywords: tuple[str, ...]) -> str:
+    keyword_slug = "_".join(_slug(keyword) for keyword in keywords[:3])
+    return f"runtime_{surface.command.replace('-', '_')}_{mode}_{keyword_slug}"
+
+
+def _runtime_compound_entry_label(surface: RuntimeCompoundSurface, entry: dict[str, Any]) -> str:
+    mode = str(entry.get("mode", ""))
+    keywords = tuple(str(keyword) for keyword in entry.get("keywords", []))
+    entry_id = str(entry.get("id") or _runtime_compound_entry_id(surface, mode, keywords))
+    status = str(entry.get("status", "active"))
+    return f"{entry_id}\t{status}\t{surface.command}\t{mode}\t{', '.join(keywords)}"
+
+
+def _runtime_compound_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    surface: RuntimeCompoundSurface,
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get(surface.section, []):
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        mode = str(entry.get("mode", ""))
+        keywords = tuple(str(keyword) for keyword in entry.get("keywords", []))
+        entry_id = str(entry.get("id") or _runtime_compound_entry_id(surface, mode, keywords))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id or selector_norm == mode:
+            matches.append(entry)
+            continue
+        if selector_norm in {_runtime_rule_normalize_text(keyword) for keyword in keywords}:
+            matches.append(entry)
+    return matches
+
+
+def _runtime_specialty_entry_id(surface: RuntimeSpecialtySurface, key: str, values: tuple[str, ...]) -> str:
+    value_slug = "_".join(_slug(value) for value in values[:2])
+    return f"runtime_{surface.command.replace('-', '_')}_{_slug(key)}_{value_slug}"
+
+
+def _runtime_specialty_entry_label(surface: RuntimeSpecialtySurface, entry: dict[str, Any]) -> str:
+    key = str(entry.get(surface.key_field, ""))
+    values = tuple(str(value) for value in entry.get(surface.values_field, []))
+    entry_id = str(entry.get("id") or _runtime_specialty_entry_id(surface, key, values))
+    status = str(entry.get("status", "active"))
+    suffix = "\tbidirectional" if entry.get("bidirectional") else ""
+    return f"{entry_id}\t{status}\t{surface.command}\t{key} -> {', '.join(values)}{suffix}"
+
+
+def _runtime_specialty_matching_entries(
+    sections: dict[str, list[dict[str, Any]]],
+    surface: RuntimeSpecialtySurface,
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[dict[str, Any]]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get(surface.section, []):
+        if not include_inactive and not _runtime_overlay_entry_is_active(entry):
+            continue
+        key = str(entry.get(surface.key_field, ""))
+        values = tuple(str(value) for value in entry.get(surface.values_field, []))
+        entry_id = str(entry.get("id") or _runtime_specialty_entry_id(surface, key, values))
+        if selector_norm is None:
+            matches.append(entry)
+            continue
+        if selector == entry_id or selector_norm == _runtime_rule_normalize_text(key):
+            matches.append(entry)
+            continue
+        if selector_norm in {_runtime_rule_normalize_text(value) for value in values}:
+            matches.append(entry)
+    return matches
+
+
+def _registry_surface_file(paths: MatcherPaths, surface_name: str) -> tuple[str, Path]:
+    file_stem = surface_name.strip().lower().replace("-", "_")
+    target = paths.registry_entries_dir / f"{file_stem}.toml"
+    if not target.exists():
+        known = ", ".join(sorted(path.stem.replace("_", "-") for path in paths.registry_entries_dir.glob("*.toml")))
+        raise typer.BadParameter(f"unknown registry surface {surface_name!r}; known: {known}")
+    return file_stem.replace("_", "-"), target
+
+
+def _registry_entry_terms(entry: dict[str, Any]) -> tuple[str, ...]:
+    terms: list[str] = []
+    for field in (
+        "canonical",
+        "variants",
+        "ingredient_terms",
+        "offer_terms",
+        "route_terms",
+        "blocked_offer_keywords",
+        "allowed_specifics",
+    ):
+        raw = entry.get(field)
+        if isinstance(raw, str):
+            terms.append(raw)
+        elif isinstance(raw, list):
+            terms.extend(str(item) for item in raw if isinstance(item, str))
+    return tuple(dict.fromkeys(term for term in terms if term.strip()))
+
+
+def _registry_entry_records(surface: str, path: Path) -> list[RegistryEntryRecord]:
+    text = path.read_text(encoding="utf-8")
+    starts = [match.start() for match in re.finditer(r"(?m)^\[\[entries\]\]\s*$", text)]
+    records: list[RegistryEntryRecord] = []
+    for index, start in enumerate(starts):
+        end = starts[index + 1] if index + 1 < len(starts) else len(text)
+        block = text[start:end]
+        try:
+            payload = tomllib.loads(block)
+            entries = payload.get("entries", [])
+            entry = entries[0] if isinstance(entries, list) and entries else {}
+        except tomllib.TOMLDecodeError as exc:
+            raise typer.BadParameter(f"{path}: invalid TOML near entry block {index + 1}: {exc}") from exc
+        if not isinstance(entry, dict):
+            continue
+        entry_id = str(entry.get("entry_id") or "").strip()
+        if not entry_id:
+            continue
+        terms = _registry_entry_terms(entry)
+        records.append(RegistryEntryRecord(
+            surface=surface,
+            entry_id=entry_id,
+            status=str(entry.get("status") or "active").strip() or "active",
+            canonical=str(entry.get("canonical") or "").strip(),
+            terms=terms,
+            start=start,
+            end=end,
+            block=block,
+        ))
+    return records
+
+
+def _registry_matching_records(
+    records: list[RegistryEntryRecord],
+    selector: str | None,
+    *,
+    include_inactive: bool,
+) -> list[RegistryEntryRecord]:
+    selector_norm = _runtime_rule_normalize_text(selector) if selector is not None else None
+    matches: list[RegistryEntryRecord] = []
+    for record in records:
+        if not include_inactive and record.status == "inactive":
+            continue
+        if selector_norm is None:
+            matches.append(record)
+            continue
+        if selector == record.entry_id:
+            matches.append(record)
+            continue
+        if selector_norm in {_runtime_rule_normalize_text(term) for term in record.terms}:
+            matches.append(record)
+    return matches
+
+
+def _registry_entry_label(record: RegistryEntryRecord) -> str:
+    term_text = ", ".join(record.terms[:6])
+    if len(record.terms) > 6:
+        term_text += f", ... (+{len(record.terms) - 6})"
+    return f"{record.entry_id}\t{record.status}\t{record.surface}\t{record.canonical}\t{term_text}"
+
+
+def _inactive_reason_comment(reason: str) -> str:
+    return "# inactive_reason: " + re.sub(r"\s+", " ", reason.strip())
+
+
+def _registry_entry_block_with_status(block: str, *, status: str, reason: str) -> str:
+    cleaned = re.sub(r"(?m)^# inactive_reason: .*\n(?=status\s*=)", "", block)
+    status_line = f'status = "{status}"'
+    if status == "inactive":
+        status_line = f"{_inactive_reason_comment(reason)}\n{status_line}"
+    if re.search(r'(?m)^status\s*=\s*"[^"]+"\s*$', cleaned):
+        return re.sub(r'(?m)^status\s*=\s*"[^"]+"\s*$', status_line, cleaned, count=1)
+    return re.sub(r'(?m)^(canonical\s*=\s*".*"\s*)$', r"\1\n" + status_line, cleaned, count=1)
+
+
+def _write_registry_entry_block(path: Path, record: RegistryEntryRecord, new_block: str, *, dry_run: bool) -> None:
+    if dry_run:
+        typer.echo(new_block)
+        return
+    text = path.read_text(encoding="utf-8")
+    path.write_text(text[:record.start] + new_block + text[record.end:], encoding="utf-8")
+
+
+def _run_track_b_inactivation_gates(paths: MatcherPaths, report_root: Path | None) -> int:
+    if paths.app_dir != APP_DIR:
+        raise typer.BadParameter("tree-root inactivation gates are not available; use --no-run-gates")
+    return _run_support_check(
+        "run_matcher_change_gates.py",
+        [
+            "--track",
+            "B",
+            "--registry-changed",
+            "--no-runtime-changed",
+            "--no-fixtures-changed",
+            "--no-inventory-changed",
+            "--no-support-checks-changed",
+            "--allow-removals",
+        ],
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
 
 
 def _append_runtime_overlay_entry(
@@ -1873,6 +2661,7 @@ def _append_runtime_overlay_entry(
     sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
     normalized_keyword = _runtime_rule_normalize_text(keyword)
     normalized_values = tuple(_runtime_rule_normalize_text(value) for value in values)
+    entry_id = _runtime_overlay_entry_id(surface, normalized_keyword)
     duplicate_values = sorted(
         set(normalized_values)
         & (
@@ -1892,11 +2681,16 @@ def _append_runtime_overlay_entry(
             break
     if entry is None:
         entry = {
+            "id": entry_id,
+            "status": "active",
             "keyword": normalized_keyword,
             surface.value_field: list(normalized_values),
             "reason": reason.strip(),
         }
     else:
+        entry["id"] = str(entry.get("id") or entry_id)
+        entry["status"] = "active"
+        entry.pop("inactive_reason", None)
         existing_values = list(_runtime_overlay_entry_values(entry, surface.value_field))
         existing_value_set = set(existing_values)
         for value in normalized_values:
@@ -1917,6 +2711,388 @@ def _append_runtime_overlay_entry(
         sections[surface.section].append(entry)
     paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
     return preview
+
+
+def _append_runtime_pair_entry(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimePairSurface,
+    source: str,
+    target: str,
+    reason: str,
+    dry_run: bool,
+) -> str:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_source = _runtime_rule_normalize_text(source)
+    normalized_target = _runtime_rule_normalize_text(target)
+    entry_id = _runtime_pair_entry_id(surface, normalized_source, normalized_target)
+    for entry in sections.get(surface.section, []):
+        if not _runtime_overlay_entry_is_active(entry):
+            continue
+        entry_source = _runtime_rule_normalize_text(str(entry.get(surface.source_field, "")))
+        entry_target = _runtime_rule_normalize_text(str(entry.get(surface.target_field, "")))
+        if entry_source == normalized_source:
+            raise typer.BadParameter(
+                f"{surface.command} already contains {normalized_source} -> {entry_target}"
+            )
+
+    entry = {
+        "id": entry_id,
+        "status": "active",
+        surface.source_field: normalized_source,
+        surface.target_field: normalized_target,
+        "reason": reason.strip(),
+    }
+    preview = _runtime_pair_entry_block(surface, entry)
+    if dry_run:
+        return preview
+
+    sections.setdefault(surface.section, []).append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_space_normalization_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    source: str,
+    target: str,
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    normalized_source = _runtime_rule_normalize_text(source)
+    normalized_target = _runtime_rule_normalize_text(target)
+    lines = [
+        "",
+        f"# {policy_ref}: generated by dm matcher add space-normalization",
+        f"test({_toml_string('space-normalization ' + normalized_source + ' -> ' + normalized_target)},",
+        f"     _apply_space_normalizations({_toml_string(normalized_source)}), {_toml_string(normalized_target)})",
+    ]
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+def _append_runtime_set_update_entry(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeSetUpdateSurface,
+    terms: tuple[str, ...],
+    action: Literal["add", "remove"],
+    reason: str,
+    dry_run: bool,
+) -> str:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_terms = tuple(_runtime_rule_normalize_text(term) for term in terms)
+    entry_id = _runtime_set_update_entry_id(surface, action, normalized_terms)
+    existing_terms: set[str] = set()
+    for entry in sections.get(surface.section, []):
+        if str(entry.get("surface", "")).replace("-", "_") != surface.surface:
+            continue
+        if str(entry.get("action", surface.default_action)) != action:
+            continue
+        if not _runtime_overlay_entry_is_active(entry):
+            continue
+        existing_terms.update(_runtime_rule_normalize_text(str(term)) for term in entry.get("terms", []))
+    duplicates = sorted(set(normalized_terms) & existing_terms)
+    if duplicates:
+        raise typer.BadParameter(
+            f"{surface.command} already contains {', '.join(duplicates)} for action {action}"
+        )
+
+    entry = {
+        "id": entry_id,
+        "status": "active",
+        "surface": surface.surface,
+        "action": action,
+        "terms": list(normalized_terms),
+        "reason": reason.strip(),
+    }
+    preview = _runtime_set_update_entry_block({"section": surface.section, **entry})
+    if dry_run:
+        return preview
+
+    sections.setdefault(surface.section, []).append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_runtime_set_update_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeSetUpdateSurface,
+    terms: tuple[str, ...],
+    action: Literal["add", "remove"],
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    mapping_name = {
+        "flavor_words": "FLAVOR_WORDS",
+        "important_short_keywords": "IMPORTANT_SHORT_KEYWORDS",
+        "processed_foods": "PROCESSED_FOODS",
+        "carrier_products": "CARRIER_PRODUCTS",
+    }[surface.surface]
+    import_module = (
+        "languages.sv.ingredient_matching.carrier_context"
+        if surface.surface == "carrier_products"
+        else "languages.sv.ingredient_matching.keywords"
+    )
+    expected = "True" if action == "add" else "False"
+    lines = [
+        "",
+        f"# {policy_ref}: generated by dm matcher add {surface.command}",
+        f"from {import_module} import {mapping_name}",
+    ]
+    for term in terms:
+        normalized_term = _runtime_rule_normalize_text(term)
+        lines.extend([
+            f"test({_toml_string(surface.command + ' ' + action + ' ' + normalized_term)},",
+            f"     {_toml_string(normalized_term)} in {mapping_name}, {expected})",
+        ])
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+def _append_runtime_context_entry(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeContextSurface,
+    trigger: str,
+    contexts: tuple[str, ...],
+    reason: str,
+    dry_run: bool,
+) -> str:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_trigger = _runtime_rule_normalize_text(trigger)
+    normalized_contexts = tuple(_runtime_rule_normalize_text(context) for context in contexts)
+    entry_id = _runtime_context_entry_id(surface, normalized_trigger)
+    duplicate_contexts: set[str] = set()
+    entry: dict[str, Any] | None = None
+    for candidate in sections.get(surface.section, []):
+        if _runtime_rule_normalize_text(str(candidate.get(surface.key_field, ""))) != normalized_trigger:
+            continue
+        if _runtime_overlay_entry_is_active(candidate):
+            duplicate_contexts.update(
+                _runtime_rule_normalize_text(str(context))
+                for context in candidate.get(surface.values_field, [])
+            )
+        if entry is None:
+            entry = candidate
+    duplicates = sorted(set(normalized_contexts) & duplicate_contexts)
+    if duplicates:
+        raise typer.BadParameter(f"{surface.command} already contains contexts for {trigger}: {', '.join(duplicates)}")
+
+    if entry is None:
+        entry = {
+            "id": entry_id,
+            "status": "active",
+            surface.key_field: normalized_trigger,
+            surface.values_field: list(normalized_contexts),
+            "reason": reason.strip(),
+        }
+    else:
+        existing_values = list(_runtime_overlay_entry_values(entry, surface.values_field))
+        existing_value_set = set(existing_values)
+        for value in normalized_contexts:
+            if value not in existing_value_set:
+                existing_values.append(value)
+                existing_value_set.add(value)
+        entry["id"] = str(entry.get("id") or entry_id)
+        entry["status"] = "active"
+        entry.pop("inactive_reason", None)
+        entry[surface.key_field] = normalized_trigger
+        entry[surface.values_field] = existing_values
+        existing_reason = str(entry.get("reason", "")).strip()
+        if reason.strip() and reason.strip() not in existing_reason:
+            entry["reason"] = f"{existing_reason}; {reason.strip()}" if existing_reason else reason.strip()
+
+    preview = _runtime_context_entry_block(surface, entry)
+    if dry_run:
+        return preview
+    if entry not in sections.setdefault(surface.section, []):
+        sections[surface.section].append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_runtime_context_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeContextSurface,
+    trigger: str,
+    contexts: tuple[str, ...],
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    normalized_trigger = _runtime_rule_normalize_text(trigger)
+    mapping_import = f"from languages.sv.ingredient_matching.recipe_context import {surface.mapping_name}"
+    lines = [
+        "",
+        f"# {policy_ref}: generated by dm matcher add {surface.command}",
+        mapping_import,
+    ]
+    for context in contexts:
+        normalized_context = _runtime_rule_normalize_text(context)
+        lines.extend([
+            f"test({_toml_string(surface.command + ' ' + normalized_trigger + ' has ' + normalized_context)},",
+            f"     {_toml_string(normalized_context)} in {surface.mapping_name}.get({_toml_string(normalized_trigger)}, set()), True)",
+        ])
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+_COMPOUND_MODE_EXPORTS = {
+    "suffix_strict": "_COMPOUND_STRICT_KEYWORDS",
+    "prefix_strict": "_COMPOUND_STRICT_PREFIX_KEYWORDS",
+    "suffix_protected": "_SUFFIX_PROTECTED_KEYWORDS",
+    "embedded_protected": "_EMBEDDED_PROTECTED_KEYWORDS",
+}
+
+
+def _append_runtime_compound_entry(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeCompoundSurface,
+    mode: Literal["suffix-strict", "prefix-strict", "suffix-protected", "embedded-protected"],
+    keywords: tuple[str, ...],
+    reason: str,
+    dry_run: bool,
+) -> str:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_mode = mode.replace("-", "_")
+    normalized_keywords = tuple(_runtime_rule_normalize_text(keyword) for keyword in keywords)
+    entry_id = _runtime_compound_entry_id(surface, normalized_mode, normalized_keywords)
+    existing_keywords: set[str] = set()
+    for entry in sections.get(surface.section, []):
+        if str(entry.get("mode", "")).replace("-", "_") != normalized_mode:
+            continue
+        if not _runtime_overlay_entry_is_active(entry):
+            continue
+        existing_keywords.update(_runtime_rule_normalize_text(str(keyword)) for keyword in entry.get("keywords", []))
+    duplicates = sorted(set(normalized_keywords) & existing_keywords)
+    if duplicates:
+        raise typer.BadParameter(f"{surface.command} already contains {normalized_mode}: {', '.join(duplicates)}")
+
+    entry = {
+        "id": entry_id,
+        "status": "active",
+        "mode": normalized_mode,
+        "keywords": list(normalized_keywords),
+        "reason": reason.strip(),
+    }
+    preview = _runtime_compound_entry_block(surface, entry)
+    if dry_run:
+        return preview
+    sections.setdefault(surface.section, []).append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_runtime_compound_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    mode: str,
+    keywords: tuple[str, ...],
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    normalized_mode = mode.replace("-", "_")
+    export_name = _COMPOUND_MODE_EXPORTS[normalized_mode]
+    lines = [
+        "",
+        f"# {policy_ref}: generated by dm matcher add compound-protection",
+        f"from languages.sv.ingredient_matching.compound_text import {export_name}",
+    ]
+    for keyword in keywords:
+        normalized_keyword = _runtime_rule_normalize_text(keyword)
+        lines.extend([
+            f"test({_toml_string('compound-protection ' + normalized_mode + ' ' + normalized_keyword)},",
+            f"     {_toml_string(normalized_keyword)} in {export_name}, True)",
+        ])
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+def _append_runtime_specialty_entry(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeSpecialtySurface,
+    key: str,
+    values: tuple[str, ...],
+    reason: str,
+    bidirectional: bool,
+    dry_run: bool,
+) -> str:
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    normalized_key = _runtime_rule_normalize_text(key)
+    normalized_values = tuple(_runtime_rule_normalize_text(value) for value in values)
+    entry_id = _runtime_specialty_entry_id(surface, normalized_key, normalized_values)
+    existing_values: set[str] = set()
+    for entry in sections.get(surface.section, []):
+        if _runtime_rule_normalize_text(str(entry.get(surface.key_field, ""))) != normalized_key:
+            continue
+        if not _runtime_overlay_entry_is_active(entry):
+            continue
+        existing_values.update(_runtime_rule_normalize_text(str(value)) for value in entry.get(surface.values_field, []))
+    duplicates = sorted(set(normalized_values) & existing_values)
+    if duplicates:
+        raise typer.BadParameter(f"{surface.command} already contains {normalized_key}: {', '.join(duplicates)}")
+
+    entry = {
+        "id": entry_id,
+        "status": "active",
+        surface.key_field: normalized_key,
+        surface.values_field: list(normalized_values),
+        "reason": reason.strip(),
+    }
+    if surface.section == "specialty_qualifiers":
+        entry["bidirectional"] = bidirectional
+    preview = _runtime_specialty_entry_block(surface, entry)
+    if dry_run:
+        return preview
+    sections.setdefault(surface.section, []).append(entry)
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    return preview
+
+
+def _append_runtime_specialty_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeSpecialtySurface,
+    key: str,
+    values: tuple[str, ...],
+    policy_ref: str,
+    bidirectional: bool,
+    dry_run: bool,
+) -> str:
+    normalized_key = _runtime_rule_normalize_text(key)
+    mapping_name = "QUALIFIER_EQUIVALENTS" if surface.section == "qualifier_equivalents" else "SPECIALTY_QUALIFIERS"
+    import_line = f"from languages.sv.ingredient_matching.specialty_rules import {mapping_name}"
+    lines = ["", f"# {policy_ref}: generated by dm matcher add {surface.command}", import_line]
+    for value in values:
+        normalized_value = _runtime_rule_normalize_text(value)
+        if surface.section == "qualifier_equivalents":
+            expression = f"{_toml_string(normalized_value)} in {mapping_name}.get({_toml_string(normalized_key)}, set())"
+        else:
+            expression = f"{_toml_string(normalized_value)} in {mapping_name}.get({_toml_string(normalized_key)}, [])"
+        lines.extend([
+            f"test({_toml_string(surface.command + ' ' + normalized_key + ' has ' + normalized_value)},",
+            f"     {expression}, True)",
+        ])
+    if bidirectional:
+        lines.append("from languages.sv.ingredient_matching.specialty_rules import BIDIRECTIONAL_PER_KEYWORD")
+        for value in values:
+            normalized_value = _runtime_rule_normalize_text(value)
+            lines.extend([
+                f"test({_toml_string('specialty bidirectional ' + normalized_key + ' has ' + normalized_value)},",
+                f"     {_toml_string(normalized_value)} in BIDIRECTIONAL_PER_KEYWORD.get({_toml_string(normalized_key)}, set()), True)",
+            ])
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
 
 
 def _append_runtime_overlay_deep_sanity_stub(
@@ -2094,6 +3270,7 @@ def add_keyword_extra_parent(
         ingredient=ingredient,
         offer_category=offer_category,
         policy_ref=policy_ref,
+        sanity_mode="fast-match",
         dry_run=dry_run,
     )
 
@@ -2262,6 +3439,7 @@ def add_keyword_synonym(
         offer_category=offer_category,
         ingredient_override=ingredient_override,
         policy_ref=policy_ref,
+        sanity_mode="fast-match",
         dry_run=dry_run,
     )
 
@@ -2483,6 +3661,534 @@ def add_ksbc(
     )
 
 
+@matcher_add_app.command("space-normalization")
+def add_space_normalization(
+    source: Annotated[str, typer.Argument(help="Source phrase/token to normalize before extraction.")],
+    target: Annotated[str, typer.Option("--target", help="Replacement text after normalization.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why this normalization is needed.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    source = source.strip()
+    target = target.strip()
+    if not source:
+        raise typer.BadParameter("source must not be empty")
+    if not target:
+        raise typer.BadParameter("--target must not be empty")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+
+    normalized_source = _runtime_rule_normalize_text(source)
+    normalized_target = _runtime_rule_normalize_text(target)
+    policy_ref = policy_ref or f"runtime_space_normalization_{_slug(normalized_source)}_{_slug(normalized_target)}"
+    surface = RUNTIME_PAIR_SURFACES["space-normalization"]
+    overlay_preview = _append_runtime_pair_entry(
+        paths=paths,
+        surface=surface,
+        source=source,
+        target=target,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_space_normalization_sanity_stub(
+            paths=paths,
+            source=source,
+            target=target,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+
+    typer.echo(f"Generated space_normalization rule: {policy_ref}")
+    typer.echo(f"  entry: {_runtime_pair_entry_id(surface, normalized_source, normalized_target)}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+def _add_runtime_set_update_rule(
+    *,
+    surface: RuntimeSetUpdateSurface,
+    terms_csv: str,
+    action: Literal["add", "remove"],
+    reason: str,
+    policy_ref: str | None,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    terms = _split_csv(terms_csv, label="--terms")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+    first_slug = _slug(terms[0])
+    policy_ref = policy_ref or f"runtime_{surface.command.replace('-', '_')}_{action}_{first_slug}"
+    overlay_preview = _append_runtime_set_update_entry(
+        paths=paths,
+        surface=surface,
+        terms=terms,
+        action=action,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_runtime_set_update_sanity_stub(
+            paths=paths,
+            surface=surface,
+            terms=terms,
+            action=action,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+
+    typer.echo(f"Generated {surface.surface} {action} rule: {policy_ref}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+@matcher_add_app.command("flavor-word")
+def add_flavor_word(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated flavor words to add.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these words are product flavors, not ingredients.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_set_update_rule(
+        surface=RUNTIME_SET_UPDATE_SURFACES["flavor-word"],
+        terms_csv=terms_csv,
+        action="add",
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("carrier-product")
+def add_carrier_product(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated carrier product terms to add.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these carriers should strip flavor words.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_set_update_rule(
+        surface=RUNTIME_SET_UPDATE_SURFACES["carrier-product"],
+        terms_csv=terms_csv,
+        action="add",
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("important-short-keyword")
+def add_important_short_keyword(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated short keywords to force-keep.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these short words are meaningful food keywords.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_set_update_rule(
+        surface=RUNTIME_SET_UPDATE_SURFACES["important-short-keyword"],
+        terms_csv=terms_csv,
+        action="add",
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("processed-food")
+def add_processed_food_update(
+    terms_csv: Annotated[str, typer.Option("--terms", help="Comma-separated processed-food terms to add/remove.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these terms should change processed-food handling.")],
+    action: Annotated[
+        Literal["add", "remove"],
+        typer.Option("--action", help="Whether to add to or remove from PROCESSED_FOODS."),
+    ] = "remove",
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_set_update_rule(
+        surface=RUNTIME_SET_UPDATE_SURFACES["processed-food"],
+        terms_csv=terms_csv,
+        action=action,
+        reason=reason,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("cuisine-context")
+def add_cuisine_context(
+    trigger: Annotated[str, typer.Argument(help="Product trigger term/phrase, e.g. thaikryddad.")],
+    contexts_csv: Annotated[
+        str,
+        typer.Option("--contexts", help="Comma-separated recipe context terms that allow this trigger."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why this trigger needs cuisine context.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    trigger = trigger.strip()
+    contexts = _split_csv(contexts_csv, label="--contexts")
+    if not trigger:
+        raise typer.BadParameter("trigger must not be empty")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+    normalized_trigger = _runtime_rule_normalize_text(trigger)
+    policy_ref = policy_ref or f"runtime_cuisine_context_{_slug(normalized_trigger)}"
+    surface = RUNTIME_CONTEXT_SURFACES["cuisine-context"]
+    overlay_preview = _append_runtime_context_entry(
+        paths=paths,
+        surface=surface,
+        trigger=trigger,
+        contexts=contexts,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_runtime_context_sanity_stub(
+            paths=paths,
+            surface=surface,
+            trigger=trigger,
+            contexts=contexts,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+    typer.echo(f"Generated cuisine_context rule: {policy_ref}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+@matcher_add_app.command("compound-protection")
+def add_compound_protection(
+    keywords_csv: Annotated[str, typer.Option("--keywords", help="Comma-separated keywords to protect.")],
+    mode: Annotated[
+        Literal["suffix-strict", "prefix-strict", "suffix-protected", "embedded-protected"],
+        typer.Option("--mode", help="Compound protection mode."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why this compound protection is needed.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    keywords = _split_csv(keywords_csv, label="--keywords")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+    normalized_mode = mode.replace("-", "_")
+    policy_ref = policy_ref or f"runtime_compound_protection_{normalized_mode}_{_slug(keywords[0])}"
+    surface = RUNTIME_COMPOUND_SURFACES["compound-protection"]
+    overlay_preview = _append_runtime_compound_entry(
+        paths=paths,
+        surface=surface,
+        mode=mode,
+        keywords=keywords,
+        reason=reason,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_runtime_compound_sanity_stub(
+            paths=paths,
+            mode=mode,
+            keywords=keywords,
+            policy_ref=policy_ref,
+            dry_run=dry_run,
+        )
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+    typer.echo(f"Generated compound_protection rule: {policy_ref}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+def _add_runtime_specialty_rule(
+    *,
+    surface: RuntimeSpecialtySurface,
+    key: str,
+    values_csv: str,
+    reason: str,
+    bidirectional: bool,
+    policy_ref: str | None,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    key = key.strip()
+    values = _split_csv(values_csv, label=f"--{surface.values_field.replace('_', '-')}")
+    if not key:
+        raise typer.BadParameter(f"{surface.key_field} must not be empty")
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
+    normalized_key = _runtime_rule_normalize_text(key)
+    policy_ref = policy_ref or f"runtime_{surface.command.replace('-', '_')}_{_slug(normalized_key)}"
+    overlay_preview = _append_runtime_specialty_entry(
+        paths=paths,
+        surface=surface,
+        key=key,
+        values=values,
+        reason=reason,
+        bidirectional=bidirectional,
+        dry_run=dry_run,
+    )
+    sanity_preview = ""
+    if write_sanity:
+        sanity_preview = _append_runtime_specialty_sanity_stub(
+            paths=paths,
+            surface=surface,
+            key=key,
+            values=values,
+            policy_ref=policy_ref,
+            bidirectional=bidirectional,
+            dry_run=dry_run,
+        )
+    if dry_run:
+        typer.echo(overlay_preview)
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+    typer.echo(f"Generated {surface.section} rule: {policy_ref}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+@matcher_add_app.command("specialty-qualifier")
+def add_specialty_qualifier(
+    keyword: Annotated[str, typer.Argument(help="Base keyword whose variants need qualifiers.")],
+    qualifiers_csv: Annotated[str, typer.Option("--qualifiers", help="Comma-separated qualifiers.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these qualifiers are required.")],
+    bidirectional: Annotated[
+        bool,
+        typer.Option("--bidirectional", help="Also require the qualifier from product to ingredient."),
+    ] = False,
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_specialty_rule(
+        surface=RUNTIME_SPECIALTY_SURFACES["specialty-qualifier"],
+        key=keyword,
+        values_csv=qualifiers_csv,
+        reason=reason,
+        bidirectional=bidirectional,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_add_app.command("qualifier-equivalent")
+def add_qualifier_equivalent(
+    qualifier: Annotated[str, typer.Argument(help="Qualifier key.")],
+    equivalents_csv: Annotated[str, typer.Option("--equivalents", help="Comma-separated equivalent terms.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why these qualifiers are equivalent.")],
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
+    ] = True,
+) -> None:
+    _add_runtime_specialty_rule(
+        surface=RUNTIME_SPECIALTY_SURFACES["qualifier-equivalent"],
+        key=qualifier,
+        values_csv=equivalents_csv,
+        reason=reason,
+        bidirectional=False,
+        policy_ref=policy_ref,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
 @matcher_add_app.command("ingredient-parent")
 def add_ingredient_parent(
     canonical: Annotated[str, typer.Argument(help="Existing parent canonical, e.g. ris.")],
@@ -2517,6 +4223,7 @@ def add_ingredient_parent(
         sanity_ingredient=sanity_ingredient,
         sanity_offer=sanity_offer,
         offer_category=offer_category,
+        sanity_mode="fast-match",
         policy_ref=policy_ref,
         source_ref=source_ref,
         tree_root=tree_root,
@@ -2564,6 +4271,7 @@ def add_offer_extra_keyword(
         sanity_ingredient=sanity_ingredient,
         sanity_offer=sanity_offer,
         offer_category=offer_category,
+        sanity_mode="fast-match",
         policy_ref=policy_ref,
         source_ref=source_ref,
         tree_root=tree_root,
@@ -2607,6 +4315,7 @@ def add_ingredient_routing_parent(
         sanity_ingredient=sanity_ingredient,
         sanity_offer=sanity_offer,
         offer_category=offer_category,
+        sanity_mode="fast-match",
         policy_ref=policy_ref,
         source_ref=source_ref,
         tree_root=tree_root,
@@ -2650,6 +4359,7 @@ def add_parent_match_only(
         sanity_ingredient=sanity_ingredient,
         sanity_offer=sanity_offer,
         offer_category=offer_category,
+        sanity_mode="fast-match",
         policy_ref=policy_ref,
         source_ref=source_ref,
         tree_root=tree_root,
@@ -2693,6 +4403,7 @@ def add_recipe_routing_helper(
         sanity_ingredient=sanity_ingredient,
         sanity_offer=sanity_offer,
         offer_category=offer_category,
+        sanity_mode="fast-match",
         policy_ref=policy_ref,
         source_ref=source_ref,
         tree_root=tree_root,
@@ -2819,6 +4530,7 @@ def add_no_match_policy(
         negative_ingredient=negative_ingredient.strip(),
         negative_offer=negative_offer.strip(),
         offer_category=offer_category,
+        sanity_mode="fast-match",
         dry_run=dry_run,
     )
     change = MatcherChangePlan(
@@ -2985,6 +4697,476 @@ def matcher_guide(
         typer.echo("Fallback: edit according to the runbook, then run ./bin/dm matcher preflight and gates.", err=True)
         raise typer.Exit(2)
     _print_guide(guide)
+
+
+@matcher_app.command("list", help="List matcher entries on a registry or runtime-overlay surface.")
+def matcher_list(
+    surface_name: Annotated[
+        str,
+        typer.Argument(help="Surface to list, e.g. keyword-synonym, ingredient-parent, pnb, fpb, ksbc."),
+    ],
+    term: Annotated[str | None, typer.Option("--term", help="Filter by entry id, canonical, variant, keyword, or value.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to read instead of /app.")] = None,
+    include_inactive: Annotated[
+        bool,
+        typer.Option("--include-inactive", help="Include entries with status = inactive."),
+    ] = False,
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Output format."),
+    ] = "text",
+) -> None:
+    paths = _paths(tree_root)
+    surface_key = surface_name.strip().lower().replace("_", "-")
+    if surface_key in RUNTIME_OVERLAY_SURFACES:
+        surface = RUNTIME_OVERLAY_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_overlay_matching_entries(
+            sections,
+            surface,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(entry.get("id") or _runtime_overlay_entry_id(surface, str(entry.get("keyword", "")))),
+                    "status": str(entry.get("status", "active")),
+                    "surface": surface.command,
+                    "keyword": str(entry.get("keyword", "")),
+                    surface.value_field: list(entry.get(surface.value_field, [])),
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_overlay_entry_label(surface, entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
+    if surface_key in RUNTIME_PAIR_SURFACES:
+        surface = RUNTIME_PAIR_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_pair_matching_entries(
+            sections,
+            surface,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(
+                        entry.get("id")
+                        or _runtime_pair_entry_id(
+                            surface,
+                            str(entry.get(surface.source_field, "")),
+                            str(entry.get(surface.target_field, "")),
+                        )
+                    ),
+                    "status": str(entry.get("status", "active")),
+                    "surface": surface.command,
+                    surface.source_field: str(entry.get(surface.source_field, "")),
+                    surface.target_field: str(entry.get(surface.target_field, "")),
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_pair_entry_label(surface, entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
+    if surface_key in RUNTIME_SET_UPDATE_SURFACES:
+        surface = RUNTIME_SET_UPDATE_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_set_update_matching_entries(
+            sections,
+            surface,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(
+                        entry.get("id")
+                        or _runtime_set_update_entry_id(
+                            surface,
+                            str(entry.get("action", surface.default_action)),
+                            tuple(str(term) for term in entry.get("terms", [])),
+                        )
+                    ),
+                    "status": str(entry.get("status", "active")),
+                    "surface": surface.command,
+                    "action": str(entry.get("action", surface.default_action)),
+                    "terms": list(entry.get("terms", [])),
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_set_update_entry_label(surface, entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
+    if surface_key in RUNTIME_CONTEXT_SURFACES:
+        surface = RUNTIME_CONTEXT_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_context_matching_entries(
+            sections,
+            surface,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(entry.get("id") or _runtime_context_entry_id(surface, str(entry.get(surface.key_field, "")))),
+                    "status": str(entry.get("status", "active")),
+                    "surface": surface.command,
+                    surface.key_field: str(entry.get(surface.key_field, "")),
+                    surface.values_field: list(entry.get(surface.values_field, [])),
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_context_entry_label(surface, entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
+    if surface_key in RUNTIME_COMPOUND_SURFACES:
+        surface = RUNTIME_COMPOUND_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_compound_matching_entries(
+            sections,
+            surface,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(
+                        entry.get("id")
+                        or _runtime_compound_entry_id(
+                            surface,
+                            str(entry.get("mode", "")),
+                            tuple(str(keyword) for keyword in entry.get("keywords", [])),
+                        )
+                    ),
+                    "status": str(entry.get("status", "active")),
+                    "surface": surface.command,
+                    "mode": str(entry.get("mode", "")),
+                    "keywords": list(entry.get("keywords", [])),
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_compound_entry_label(surface, entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
+    if surface_key in RUNTIME_SPECIALTY_SURFACES:
+        surface = RUNTIME_SPECIALTY_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_specialty_matching_entries(
+            sections,
+            surface,
+            term,
+            include_inactive=include_inactive,
+        )
+        if output_format == "json":
+            payload = [
+                {
+                    "id": str(
+                        entry.get("id")
+                        or _runtime_specialty_entry_id(
+                            surface,
+                            str(entry.get(surface.key_field, "")),
+                            tuple(str(value) for value in entry.get(surface.values_field, [])),
+                        )
+                    ),
+                    "status": str(entry.get("status", "active")),
+                    "surface": surface.command,
+                    surface.key_field: str(entry.get(surface.key_field, "")),
+                    surface.values_field: list(entry.get(surface.values_field, [])),
+                    "bidirectional": bool(entry.get("bidirectional", False)),
+                    "reason": str(entry.get("reason", "")),
+                }
+                for entry in matches
+            ]
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        for entry in matches:
+            typer.echo(_runtime_specialty_entry_label(surface, entry))
+        if not matches:
+            typer.echo("No entries found.")
+        return
+
+    surface, path = _registry_surface_file(paths, surface_name)
+    matches = _registry_matching_records(
+        _registry_entry_records(surface, path),
+        term,
+        include_inactive=include_inactive,
+    )
+    if output_format == "json":
+        payload = [
+            {
+                "entry_id": record.entry_id,
+                "status": record.status,
+                "surface": record.surface,
+                "canonical": record.canonical,
+                "terms": list(record.terms),
+            }
+            for record in matches
+        ]
+        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+        return
+    for record in matches:
+        typer.echo(_registry_entry_label(record))
+    if not matches:
+        typer.echo("No entries found.")
+
+
+@matcher_app.command("inactivate", help="Set a matcher registry or runtime-overlay entry to inactive.")
+def matcher_inactivate(
+    surface_name: Annotated[
+        str,
+        typer.Argument(help="Surface, e.g. keyword-synonym, ingredient-parent, pnb, fpb, ksbc."),
+    ],
+    selector: Annotated[str, typer.Argument(help="Entry id or unique term/keyword to inactivate.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why this entry is being inactivated.")],
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run the relevant gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print the change without writing files.")] = False,
+) -> None:
+    if not reason.strip():
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    surface_key = surface_name.strip().lower().replace("_", "-")
+    if surface_key in RUNTIME_OVERLAY_SURFACES:
+        surface = _runtime_overlay_surface_from_arg(surface_key)
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_overlay_matching_entries(
+            sections,
+            surface,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_overlay_entry_label(surface, entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one {surface.command} entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        entry["id"] = str(entry.get("id") or _runtime_overlay_entry_id(surface, str(entry.get("keyword", ""))))
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_overlay_entry_block(surface, entry)
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    if surface_key in RUNTIME_PAIR_SURFACES:
+        surface = RUNTIME_PAIR_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_pair_matching_entries(
+            sections,
+            surface,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_pair_entry_label(surface, entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one {surface.command} entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        entry["id"] = str(
+            entry.get("id")
+            or _runtime_pair_entry_id(
+                surface,
+                str(entry.get(surface.source_field, "")),
+                str(entry.get(surface.target_field, "")),
+            )
+        )
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_pair_entry_block(surface, entry)
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    if surface_key in RUNTIME_SET_UPDATE_SURFACES:
+        surface = RUNTIME_SET_UPDATE_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_set_update_matching_entries(
+            sections,
+            surface,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_set_update_entry_label(surface, entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one {surface.command} entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        action = str(entry.get("action", surface.default_action))
+        terms = tuple(str(term) for term in entry.get("terms", []))
+        entry["id"] = str(entry.get("id") or _runtime_set_update_entry_id(surface, action, terms))
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_set_update_entry_block({"section": surface.section, **entry})
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    if surface_key in RUNTIME_CONTEXT_SURFACES:
+        surface = RUNTIME_CONTEXT_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_context_matching_entries(
+            sections,
+            surface,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_context_entry_label(surface, entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one {surface.command} entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        entry["id"] = str(entry.get("id") or _runtime_context_entry_id(surface, str(entry.get(surface.key_field, ""))))
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_context_entry_block(surface, entry)
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    if surface_key in RUNTIME_COMPOUND_SURFACES:
+        surface = RUNTIME_COMPOUND_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_compound_matching_entries(
+            sections,
+            surface,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_compound_entry_label(surface, entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one {surface.command} entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        mode = str(entry.get("mode", ""))
+        keywords = tuple(str(keyword) for keyword in entry.get("keywords", []))
+        entry["id"] = str(entry.get("id") or _runtime_compound_entry_id(surface, mode, keywords))
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_compound_entry_block(surface, entry)
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    if surface_key in RUNTIME_SPECIALTY_SURFACES:
+        surface = RUNTIME_SPECIALTY_SURFACES[surface_key]
+        sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+        matches = _runtime_specialty_matching_entries(
+            sections,
+            surface,
+            selector,
+            include_inactive=True,
+        )
+        if len(matches) != 1:
+            labels = "\n".join(_runtime_specialty_entry_label(surface, entry) for entry in matches[:20])
+            detail = f"\n{labels}" if labels else ""
+            raise typer.BadParameter(f"selector must match exactly one {surface.command} entry; got {len(matches)}{detail}")
+        entry = matches[0]
+        key = str(entry.get(surface.key_field, ""))
+        values = tuple(str(value) for value in entry.get(surface.values_field, []))
+        entry["id"] = str(entry.get("id") or _runtime_specialty_entry_id(surface, key, values))
+        entry["status"] = "inactive"
+        entry["inactive_reason"] = reason.strip()
+        preview = _runtime_specialty_entry_block(surface, entry)
+        if dry_run:
+            typer.echo(preview)
+            return
+        paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+        typer.echo(f"Inactivated runtime overlay entry: {entry['id']}")
+        if not run_gates:
+            typer.echo("Skipped gates (--no-run-gates).")
+            return
+        raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+    surface, path = _registry_surface_file(paths, surface_name)
+    records = _registry_entry_records(surface, path)
+    matches = _registry_matching_records(records, selector, include_inactive=True)
+    if len(matches) != 1:
+        labels = "\n".join(_registry_entry_label(record) for record in matches[:20])
+        detail = f"\n{labels}" if labels else ""
+        raise typer.BadParameter(f"selector must match exactly one {surface} entry; got {len(matches)}{detail}")
+    record = matches[0]
+    new_block = _registry_entry_block_with_status(record.block, status="inactive", reason=reason)
+    _write_registry_entry_block(path, record, new_block, dry_run=dry_run)
+    if dry_run:
+        return
+    typer.echo(f"Inactivated registry entry: {record.entry_id}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_b_inactivation_gates(paths, report_root))
 
 
 @matcher_app.command(

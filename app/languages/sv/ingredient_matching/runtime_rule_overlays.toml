@@ -3,10 +3,20 @@
 # This file is tracked production source. Add entries through:
 #   ./bin/dm matcher add pnb|fpb|ksbc ...
 #
+# New CLI entries use id/status metadata. Statusless entries are treated as active
+# only for backwards compatibility; do not append statusless rows manually.
+#
 # Supported sections:
 #   [[product_name_blockers]]
 #   [[false_positive_blockers]]
 #   [[keyword_suppressed_by_context]]
+#   [[space_normalizations]]
+#   [[keyword_set_updates]]
+#   [[carrier_set_updates]]
+#   [[cuisine_context]]
+#   [[compound_protection_updates]]
+#   [[specialty_qualifiers]]
+#   [[qualifier_equivalents]]
 
 [[product_name_blockers]]
 keyword = "rom"

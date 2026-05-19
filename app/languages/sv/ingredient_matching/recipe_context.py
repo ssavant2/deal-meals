@@ -8,6 +8,8 @@ try:
 except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
+from .runtime_rule_overlays import CUISINE_CONTEXT_CLI_UPDATES
+
 
 _DESCRIPTOR_PHRASE_MARKERS = re.compile(
     r'(?:'
@@ -101,3 +103,16 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
         # 'lime' removed — too generic, also used in Mexican/Caribbean/Mediterranean cuisines
     },
 }
+
+
+def _merge_normalized_context_updates(
+    target: Dict[str, Set[str]],
+    updates: Dict[str, Set[str]],
+) -> None:
+    for trigger, contexts in updates.items():
+        target.setdefault(fix_swedish_chars(trigger).lower(), set()).update(
+            {fix_swedish_chars(context).lower() for context in contexts}
+        )
+
+
+_merge_normalized_context_updates(CUISINE_CONTEXT, CUISINE_CONTEXT_CLI_UPDATES)

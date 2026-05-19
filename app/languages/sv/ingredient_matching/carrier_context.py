@@ -12,7 +12,14 @@ try:
 except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
-from .runtime_rule_overlays import KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES
+from .runtime_rule_overlays import CARRIER_SET_CLI_UPDATES, KEYWORD_SUPPRESSED_BY_CONTEXT_CLI_UPDATES
+
+
+def _apply_carrier_set_updates(surface: str, base: FrozenSet[str]) -> FrozenSet[str]:
+    updates = CARRIER_SET_CLI_UPDATES.get(surface, {})
+    additions = updates.get("add", set())
+    removals = updates.get("remove", set())
+    return frozenset((set(base) | additions) - removals)
 
 
 # ============================================================================
@@ -447,6 +454,8 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     # Kaviar — "Kaviar Dill" has dill as flavoring, not herb ingredient
     'kaviar',
 })
+
+CARRIER_PRODUCTS = _apply_carrier_set_updates("carrier_products", CARRIER_PRODUCTS)
 
 # Pre-split carrier products for fast lookup:
 # Single-word carriers can be checked via set intersection with name_words (O(n) vs O(173))

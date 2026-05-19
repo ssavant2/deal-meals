@@ -12,6 +12,12 @@ try:
 except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
+from .runtime_rule_overlays import (
+    QUALIFIER_EQUIVALENT_CLI_UPDATES,
+    SPECIALTY_BIDIRECTIONAL_CLI_UPDATES,
+    SPECIALTY_QUALIFIER_CLI_UPDATES,
+)
+
 _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # Premium hams - "skinka" should not match "Serrano" unless recipe says "serrano"
     # Also handles: "kokt skinka" should NOT match "rökt skinka"
@@ -980,6 +986,10 @@ SPECIALTY_QUALIFIERS: Dict[str, List[str]] = {
     fix_swedish_chars(k).lower(): sorted(fix_swedish_chars(q).lower() for q in qualifiers)
     for k, qualifiers in _SPECIALTY_QUALIFIERS_RAW.items()
 }
+for _keyword, _qualifiers in SPECIALTY_QUALIFIER_CLI_UPDATES.items():
+    _merged_qualifiers = set(SPECIALTY_QUALIFIERS.get(_keyword, []))
+    _merged_qualifiers.update(_qualifiers)
+    SPECIALTY_QUALIFIERS[_keyword] = sorted(_merged_qualifiers)
 
 # Qualifiers enforced in BOTH directions (product→ingredient AND ingredient→product).
 # Used when the qualifier indicates a fundamental transformation of the base ingredient
@@ -1263,6 +1273,10 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
         'vildris', 'vild',       # wild rice (different species entirely)
     }),
 }
+for _keyword, _qualifiers in SPECIALTY_BIDIRECTIONAL_CLI_UPDATES.items():
+    _merged_bidirectional = set(BIDIRECTIONAL_PER_KEYWORD.get(_keyword, frozenset()))
+    _merged_bidirectional.update(_qualifiers)
+    BIDIRECTIONAL_PER_KEYWORD[_keyword] = frozenset(_merged_bidirectional)
 
 # Qualifier equivalents: if ingredient says "grekisk", product can have "turkisk" (and vice versa)
 # Used in specialty qualifier check — these types are interchangeable in cooking
@@ -1451,3 +1465,5 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'malet': {'malen', 'mald', 'malet', 'malda'},
     'malda': {'malen', 'mald', 'malet', 'malda'},
 }
+for _qualifier, _equivalents in QUALIFIER_EQUIVALENT_CLI_UPDATES.items():
+    QUALIFIER_EQUIVALENTS.setdefault(_qualifier, set()).update(_equivalents)

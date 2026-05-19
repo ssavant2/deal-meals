@@ -87,6 +87,12 @@ def _copy_matcher_tree(tree_root: Path) -> Path:
         app_dir / "languages" / "sv",
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
+    live_languages_dir = Path(__file__).resolve().parents[2] / "languages"
+    shutil.copytree(
+        live_languages_dir / "term_registry",
+        app_dir / "languages" / "term_registry",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
     support_checks_dir = Path(__file__).resolve().parents[1]
     shutil.copytree(
         support_checks_dir,
@@ -119,7 +125,16 @@ for name, path in (
     sys.modules[name] = module
 
 from languages.sv.ingredient_matching.blocker_data import FALSE_POSITIVE_BLOCKERS, PRODUCT_NAME_BLOCKERS
-from languages.sv.ingredient_matching.carrier_context import KEYWORD_SUPPRESSED_BY_CONTEXT
+from languages.sv.ingredient_matching.carrier_context import CARRIER_PRODUCTS, KEYWORD_SUPPRESSED_BY_CONTEXT
+from languages.sv.ingredient_matching.keywords import FLAVOR_WORDS, IMPORTANT_SHORT_KEYWORDS, PROCESSED_FOODS
+from languages.sv.ingredient_matching.normalization import _apply_space_normalizations
+from languages.sv.ingredient_matching.recipe_context import CUISINE_CONTEXT
+from languages.sv.ingredient_matching.compound_text import _COMPOUND_STRICT_PREFIX_KEYWORDS
+from languages.sv.ingredient_matching.specialty_rules import (
+    BIDIRECTIONAL_PER_KEYWORD,
+    QUALIFIER_EQUIVALENTS,
+    SPECIALTY_QUALIFIERS,
+)
 print(json.dumps({expression}, ensure_ascii=False, sort_keys=True))
 """
     result = subprocess.run(
@@ -190,6 +205,23 @@ reason = "Synthetic FPB test."
 keyword = "Ris"
 context = ["Glas, ris"]
 reason = "Synthetic KSBC test."
+
+[[space_normalizations]]
+source = "Phase Space"
+target = "PhaseSpace"
+reason = "Synthetic legacy space-normalization entry."
+
+[[keyword_set_updates]]
+surface = "flavor_words"
+action = "add"
+terms = ["Phase Flavor"]
+reason = "Synthetic flavor update."
+
+[[carrier_set_updates]]
+surface = "carrier_products"
+action = "add"
+terms = ["Phase Carrier"]
+reason = "Synthetic carrier update."
 """,
                 encoding="utf-8",
             )
@@ -198,6 +230,89 @@ reason = "Synthetic KSBC test."
             self.assertEqual(overlays.product_name_blockers["färskost"], {"chips", "snacks"})
             self.assertEqual(overlays.false_positive_blockers["ost"], {"ostron"})
             self.assertEqual(overlays.keyword_suppressed_by_context["ris"], {"glas, ris"})
+            self.assertEqual(overlays.space_normalizations, (("phase space", "phasespace"),))
+            self.assertEqual(overlays.keyword_set_updates["flavor_words"]["add"], {"phase flavor"})
+            self.assertEqual(overlays.carrier_set_updates["carrier_products"]["add"], {"phase carrier"})
+
+            overlay_file.write_text(
+                """
+[[product_name_blockers]]
+id = "runtime_pnb_phasev2"
+status = "active"
+keyword = "phasev2"
+blockers = ["Phase Active"]
+reason = "Synthetic active v2 entry."
+
+[[product_name_blockers]]
+id = "runtime_pnb_phasev2_inactive"
+status = "inactive"
+keyword = "phasev2"
+blockers = ["Phase Inactive"]
+reason = "Synthetic inactive v2 entry."
+inactive_reason = "Synthetic inactivation."
+
+[[space_normalizations]]
+id = "runtime_space_normalization_phase_v2_phasev2"
+status = "active"
+source = "phase v2"
+target = "phasev2"
+reason = "Synthetic active pair entry."
+
+[[space_normalizations]]
+id = "runtime_space_normalization_phase_v2_ignored"
+status = "inactive"
+source = "phase v2 ignored"
+target = "ignored"
+reason = "Synthetic inactive pair entry."
+inactive_reason = "Synthetic inactivation."
+""",
+                encoding="utf-8",
+            )
+            overlays = load_runtime_rule_overlays(overlay_file)
+            self.assertEqual(overlays.product_name_blockers["phasev2"], {"phase active"})
+            self.assertEqual(overlays.space_normalizations, (("phase v2", "phasev2"),))
+
+            overlay_file.write_text(
+                """
+[[product_name_blockers]]
+id = "runtime_pnb_duplicate"
+status = "active"
+keyword = "phaseone"
+blockers = ["x"]
+reason = "Synthetic duplicate id one."
+
+[[false_positive_blockers]]
+id = "runtime_pnb_duplicate"
+status = "active"
+keyword = "phasetwo"
+blockers = ["y"]
+reason = "Synthetic duplicate id two."
+""",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(RuntimeRuleOverlayError, "duplicate id"):
+                load_runtime_rule_overlays(overlay_file)
+
+            overlay_file.write_text(
+                """
+[[product_name_blockers]]
+id = "runtime_pnb_phasebad_a"
+status = "active"
+keyword = "phasebad"
+blockers = ["x"]
+reason = "Synthetic duplicate value one."
+
+[[product_name_blockers]]
+id = "runtime_pnb_phasebad_b"
+status = "active"
+keyword = "phasebad"
+blockers = ["x"]
+reason = "Synthetic duplicate value two."
+""",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(RuntimeRuleOverlayError, "duplicates active"):
+                load_runtime_rule_overlays(overlay_file)
 
             overlay_file.write_text(
                 """
@@ -1126,6 +1241,8 @@ def normalize_probe(text: str) -> str:
 
             overlay_text = overlay_file.read_text(encoding="utf-8")
             self.assertEqual(overlay_text.count('keyword = "phasepnb"'), 1)
+            self.assertIn('id = "runtime_pnb_phasepnb"', overlay_text)
+            self.assertIn('status = "active"', overlay_text)
             self.assertIn('blockers = ["phaseproductblocker", "phaseproductblocker2"]', overlay_text)
 
             sanity_text = deep_sanity_file.read_text(encoding="utf-8")
@@ -1159,6 +1276,525 @@ def normalize_probe(text: str) -> str:
             self.assertNotEqual(duplicate.returncode, 0, duplicate.stderr + duplicate.stdout)
             self.assertIn("pnb already contains phaseproductblocker", duplicate.stderr + duplicate.stdout)
 
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "pnb",
+                    "--term",
+                    "phasepnb",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("runtime_pnb_phasepnb", listed.stdout)
+
+            inactivate = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "inactivate",
+                    "pnb",
+                    "runtime_pnb_phasepnb",
+                    "--reason",
+                    "Synthetic inactivation.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(inactivate.returncode, 0, inactivate.stderr + inactivate.stdout)
+            after_inactivate = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "pnb": sorted(PRODUCT_NAME_BLOCKERS.get("phasepnb", [])),
+}
+""",
+            )
+            self.assertEqual(after_inactivate["pnb"], [])
+            overlay_text = overlay_file.read_text(encoding="utf-8")
+            self.assertIn('status = "inactive"', overlay_text)
+            self.assertIn('inactive_reason = "Synthetic inactivation."', overlay_text)
+
+    def test_phase14_space_normalization_cli_writes_runtime_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            overlay_file = app_dir / "languages" / "sv" / "ingredient_matching" / "runtime_rule_overlays.toml"
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "space-normalization",
+                    "phase space",
+                    "--target",
+                    "phasespace",
+                    "--reason",
+                    "Synthetic space normalization.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            overlay_text = overlay_file.read_text(encoding="utf-8")
+            self.assertIn("[[space_normalizations]]", overlay_text)
+            self.assertIn('id = "runtime_space_normalization_phase_space_phasespace"', overlay_text)
+            self.assertIn('source = "phase space"', overlay_text)
+            self.assertIn('target = "phasespace"', overlay_text)
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "normalized": _apply_space_normalizations("phase space"),
+}
+""",
+            )
+            self.assertEqual(runtime["normalized"], "phasespace")
+
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "space-normalization",
+                    "--term",
+                    "phase space",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("runtime_space_normalization_phase_space_phasespace", listed.stdout)
+
+            duplicate = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "space-normalization",
+                    "phase space",
+                    "--target",
+                    "phaseother",
+                    "--reason",
+                    "Synthetic duplicate source.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(duplicate.returncode, 0, duplicate.stderr + duplicate.stdout)
+            self.assertIn("space-normalization already contains phase space", duplicate.stderr + duplicate.stdout)
+
+            inactivate = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "inactivate",
+                    "space-normalization",
+                    "runtime_space_normalization_phase_space_phasespace",
+                    "--reason",
+                    "Synthetic space-normalization inactivation.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(inactivate.returncode, 0, inactivate.stderr + inactivate.stdout)
+            after_inactivate = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "normalized": _apply_space_normalizations("phase space"),
+}
+""",
+            )
+            self.assertEqual(after_inactivate["normalized"], "phase space")
+
+    def test_phase15_runtime_set_update_cli_writes_keyword_and_carrier_overlays(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            commands = [
+                [
+                    "flavor-word",
+                    "--terms",
+                    "phaseflavor",
+                    "--reason",
+                    "Synthetic flavor word.",
+                ],
+                [
+                    "carrier-product",
+                    "--terms",
+                    "phasecarrier",
+                    "--reason",
+                    "Synthetic carrier product.",
+                ],
+                [
+                    "important-short-keyword",
+                    "--terms",
+                    "px",
+                    "--reason",
+                    "Synthetic important short keyword.",
+                ],
+                [
+                    "processed-food",
+                    "--terms",
+                    "snabbnudlar",
+                    "--action",
+                    "remove",
+                    "--reason",
+                    "Synthetic processed-food removal.",
+                ],
+            ]
+            for command in commands:
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "cli.dm",
+                        "matcher",
+                        "add",
+                        *command,
+                        "--tree-root",
+                        str(tree_root),
+                        "--no-run-gates",
+                    ],
+                    cwd=live_app_dir,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "flavor": "phaseflavor" in FLAVOR_WORDS,
+    "carrier": "phasecarrier" in CARRIER_PRODUCTS,
+    "short": "px" in IMPORTANT_SHORT_KEYWORDS,
+    "processed_removed": "snabbnudlar" in PROCESSED_FOODS,
+}
+""",
+            )
+            self.assertEqual(runtime["flavor"], True)
+            self.assertEqual(runtime["carrier"], True)
+            self.assertEqual(runtime["short"], True)
+            self.assertEqual(runtime["processed_removed"], False)
+
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "flavor-word",
+                    "--term",
+                    "phaseflavor",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("runtime_flavor_word_add_phaseflavor", listed.stdout)
+
+    def test_phase16_cuisine_context_cli_writes_runtime_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "cuisine-context",
+                    "phasecuisine",
+                    "--contexts",
+                    "phase recipe, phase dish",
+                    "--reason",
+                    "Synthetic cuisine context.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "contexts": sorted(CUISINE_CONTEXT.get("phasecuisine", [])),
+}
+""",
+            )
+            self.assertEqual(runtime["contexts"], ["phase dish", "phase recipe"])
+
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "cuisine-context",
+                    "--term",
+                    "phasecuisine",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("runtime_cuisine_context_phasecuisine", listed.stdout)
+
+    def test_phase17_compound_protection_cli_writes_runtime_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "compound-protection",
+                    "--mode",
+                    "prefix-strict",
+                    "--keywords",
+                    "phasecompound",
+                    "--reason",
+                    "Synthetic compound protection.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "prefix": "phasecompound" in _COMPOUND_STRICT_PREFIX_KEYWORDS,
+}
+""",
+            )
+            self.assertEqual(runtime["prefix"], True)
+
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "compound-protection",
+                    "--term",
+                    "phasecompound",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("runtime_compound_protection_prefix_strict_phasecompound", listed.stdout)
+
+    def test_phase18_specialty_cli_writes_runtime_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            commands = [
+                [
+                    "specialty-qualifier",
+                    "phasebase",
+                    "--qualifiers",
+                    "phasequal",
+                    "--bidirectional",
+                    "--reason",
+                    "Synthetic specialty qualifier.",
+                ],
+                [
+                    "qualifier-equivalent",
+                    "phasequal",
+                    "--equivalents",
+                    "phaseequiv",
+                    "--reason",
+                    "Synthetic qualifier equivalent.",
+                ],
+            ]
+            for command in commands:
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "cli.dm",
+                        "matcher",
+                        "add",
+                        *command,
+                        "--tree-root",
+                        str(tree_root),
+                        "--no-run-gates",
+                    ],
+                    cwd=live_app_dir,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "specialty": "phasequal" in SPECIALTY_QUALIFIERS.get("phasebase", []),
+    "bidirectional": "phasequal" in BIDIRECTIONAL_PER_KEYWORD.get("phasebase", set()),
+    "equivalent": "phaseequiv" in QUALIFIER_EQUIVALENTS.get("phasequal", set()),
+}
+""",
+            )
+            self.assertEqual(runtime["specialty"], True)
+            self.assertEqual(runtime["bidirectional"], True)
+            self.assertEqual(runtime["equivalent"], True)
+
+    def test_phase13_registry_inactivation_cli_marks_entries_inactive(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            ingredient_parent_file = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "ingredient_parent.toml"
+            )
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "inactivate",
+                    "ingredient-parent",
+                    "sv-se.alias.jasminris_001",
+                    "--reason",
+                    "Synthetic registry inactivation.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            text = ingredient_parent_file.read_text(encoding="utf-8")
+            block_start = text.index('entry_id = "sv-se.alias.jasminris_001"')
+            block_end = text.index("[[entries]]", block_start + 1)
+            block = text[block_start:block_end]
+            self.assertIn("# inactive_reason: Synthetic registry inactivation.", block)
+            self.assertIn('status = "inactive"', block)
+
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "list",
+                    "ingredient-parent",
+                    "--term",
+                    "sv-se.alias.jasminris_001",
+                    "--include-inactive",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("sv-se.alias.jasminris_001\tinactive\tingredient-parent", listed.stdout)
+
     def test_phase7_support_check_runner_preserves_exit_code_and_env(self) -> None:
         calls = []
         original_run = dm_cli._run
@@ -1186,6 +1822,31 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(calls[0]["cwd"], Path("/tmp/dm-matcher-cwd"))
         self.assertEqual(calls[0]["env"]["DEAL_MEALS_SUPPORT_REPORT_ROOT"], "/tmp/dm-matcher-reports")
 
+    def test_phase14_deep_sanity_generator_has_fast_and_backend_modes(self) -> None:
+        fast_lines = dm_cli._deep_sanity_match_assertion(
+            description="Synthetic fast sanity",
+            offer_name="Phase Offer",
+            ingredient="phase ingredient",
+            offer_category="pantry",
+            expected_canonical="phase",
+            mode="fast-match",
+        )
+        backend_lines = dm_cli._deep_sanity_match_assertion(
+            description="Synthetic backend sanity",
+            offer_name="Phase Offer",
+            ingredient="phase ingredient",
+            offer_category="pantry",
+            expected_canonical=None,
+            mode="backend-match",
+            recipe_name="Phase Recipe",
+        )
+
+        self.assertIn("match(", "\n".join(fast_lines))
+        self.assertIn('"phase"', "\n".join(fast_lines))
+        self.assertIn("recipe_match_num_named", "\n".join(backend_lines))
+        self.assertIn('"Phase Recipe"', "\n".join(backend_lines))
+        self.assertTrue("\n".join(backend_lines).rstrip().endswith(", 0)"))
+
     def test_phase7_dm_matcher_help_lists_unified_entry_points(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         result = subprocess.run(
@@ -1207,6 +1868,8 @@ def normalize_probe(text: str) -> str:
             "promote",
             "regen",
             "refresh-line-refs",
+            "list",
+            "inactivate",
         ):
             self.assertIn(command, result.stdout)
 

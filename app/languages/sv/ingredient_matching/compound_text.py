@@ -6,6 +6,7 @@ try:
 except ModuleNotFoundError:
     from app.languages.sv.normalization import fix_swedish_chars
 
+from .runtime_rule_overlays import COMPOUND_PROTECTION_CLI_UPDATES
 from .keywords import NON_FOOD_KEYWORDS, PROCESSED_FOODS
 
 
@@ -137,6 +138,9 @@ _SUFFIX_PROTECTED_KEYWORDS: FrozenSet[str] = frozenset({
                       # (allows KSC-free qualifier matching for "senap skånsk" ingredients)
     }
 })
+_SUFFIX_PROTECTED_KEYWORDS = frozenset(
+    set(_SUFFIX_PROTECTED_KEYWORDS) | COMPOUND_PROTECTION_CLI_UPDATES.get("suffix_protected", set())
+)
 
 # Keywords that must NOT be embedded in the MIDDLE of a word.
 # Allowed at start of word ("risotto", "rispapper") or end of word ("basmatiris", "sushiris")
@@ -151,6 +155,9 @@ _EMBEDDED_PROTECTED_KEYWORDS: FrozenSet[str] = frozenset({
                   # while still allowing standalone "dryck" in explicit drink ingredients
     }
 })
+_EMBEDDED_PROTECTED_KEYWORDS = frozenset(
+    set(_EMBEDDED_PROTECTED_KEYWORDS) | COMPOUND_PROTECTION_CLI_UPDATES.get("embedded_protected", set())
+)
 
 # Keywords where compound forms in recipe text require strict matching.
 # When keyword appears as SUFFIX of a compound word in the recipe
@@ -226,6 +233,9 @@ _COMPOUND_STRICT_KEYWORDS: FrozenSet[str] = frozenset({
                      # standalone "ärtor"/"ärter" matches all (no compound restriction)
     }
 })
+_COMPOUND_STRICT_KEYWORDS = frozenset(
+    set(_COMPOUND_STRICT_KEYWORDS) | COMPOUND_PROTECTION_CLI_UPDATES.get("suffix_strict", set())
+)
 
 # Keywords where PREFIX compound forms in recipe text require strict matching.
 # When keyword appears at the START of a compound word in the recipe
@@ -249,6 +259,9 @@ _COMPOUND_STRICT_PREFIX_KEYWORDS: FrozenSet[str] = frozenset({
                        # blocks "Fläskfilé" from matching 'fläsklägg' recipes
     }
 })
+_COMPOUND_STRICT_PREFIX_KEYWORDS = frozenset(
+    set(_COMPOUND_STRICT_PREFIX_KEYWORDS) | COMPOUND_PROTECTION_CLI_UPDATES.get("prefix_strict", set())
+)
 
 # Alias mappings for compound qualifiers where the Swedish name differs.
 # e.g., "torrmjölk" has prefix "torr" but the product is called "mjölkpulver"

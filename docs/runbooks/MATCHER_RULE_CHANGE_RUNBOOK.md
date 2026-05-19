@@ -54,6 +54,16 @@ Known CLI rule shapes:
 ./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason "<why>"
 ./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason "<why>"
 ./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason "<why>"
+./bin/dm matcher add space-normalization "<source>" --target "<target>" --reason "<why>"
+./bin/dm matcher add flavor-word --terms <word1,word2,...> --reason "<why>"
+./bin/dm matcher add carrier-product --terms <carrier1,carrier2,...> --reason "<why>"
+./bin/dm matcher add important-short-keyword --terms <word1,word2,...> --reason "<why>"
+./bin/dm matcher add processed-food --terms <word1,word2,...> --action remove --reason "<why>"
+./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason "<why>"
+./bin/dm matcher add compound-protection --mode prefix-strict|suffix-strict|suffix-protected|embedded-protected \
+  --keywords <word1,word2,...> --reason "<why>"
+./bin/dm matcher add specialty-qualifier <keyword> --qualifiers <q1,q2,...> [--bidirectional] --reason "<why>"
+./bin/dm matcher add qualifier-equivalent <qualifier> --equivalents <q1,q2,...> --reason "<why>"
 ```
 
 Unsure whether a rule shape has an `add` command:
@@ -321,7 +331,7 @@ CLI write the registry row and focused sanity stub:
   --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:402
 ```
 
-Common Python runtime blockers now have CLI coverage: use
+Common Python runtime data surfaces now have CLI-backed overlay coverage. Use
 `./bin/dm matcher add pnb|fpb|ksbc ...` for PNB, FPB, and KSBC:
 
 ```bash
@@ -330,13 +340,13 @@ Common Python runtime blockers now have CLI coverage: use
 ./bin/dm matcher add ksbc ris --context risotto --reason "Risotto context should not fall back to plain rice."
 ```
 
-These runtime commands currently generate a table-level sanity canary that
-proves the normalized mapping contains the new value. They do not yet accept
-`--sanity-offer` / `--sanity-ingredient`; add a richer manual sanity case beside
-the generated one when behavior-level proof is needed. GPB, `STOP_WORDS`,
-`CUISINE_CONTEXT`, compound/subword protection, specialty/form/processed rules,
-and backend-only guards still use manual editing plus
-`./bin/dm matcher gates --track A|B`.
+The same overlay file also backs space-normalization, flavor/carrier,
+processed-food, cuisine-context, compound-protection, specialty-qualifier, and
+qualifier-equivalent commands. These commands generate table-level or
+deterministic sanity canaries; add a richer manual behavior case beside the
+generated one when backend-only proof is needed. GPB, `STOP_WORDS`, form rules,
+and local backend guards still use manual editing plus `./bin/dm matcher gates
+--track A|B`.
 
 ## Cold-Start Details
 
@@ -514,10 +524,10 @@ can be the correct surface.
 | Product-name blocker | `./bin/dm matcher add pnb ...` | Offer/product wording contains a per-keyword variant, carrier, product type, or flavor that should block the matched keyword. Common Track A tactical fix. | Large flavor/form families that should be modeled declaratively. |
 | Generic keyword suppressed by specific context | `./bin/dm matcher add ksbc ...` | Ingredient text names a more specific context and the generic keyword should not fall back. Use narrowly; this is semantic. | Broad high-traffic suppressions without a focused sanity canary. |
 | Global product-name blocker | `blocker_data.py` / `GLOBAL_PRODUCT_NAME_BLOCKERS` | The product is globally non-food or globally out of matcher scope regardless of which keyword matched. Common for supplements, pet food, tools, tobacco, cleaning, and similar products. | Food products that can be legitimate for some recipe wording; use scoped PNB/no-match policy instead. |
-| Cuisine-specific seasoned product | `recipe_context.py` / `CUISINE_CONTEXT` | A product trigger such as `thaikryddad`, `taco`, or `texmex` should remain valid only when the recipe text contains matching cuisine context. This is better than a blanket PNB because the product stays visible for the right cuisine. | Using PNB for cuisine-seasoning products that are legitimate in matching cuisine recipes. |
-| Compound/subword bleed | `compound_text.py` / `_SUFFIX_PROTECTED_KEYWORDS`, `_EMBEDDED_PROTECTED_KEYWORDS`, or `_COMPOUND_STRICT_KEYWORDS` | A keyword is matching as an unwanted substring or compound suffix/prefix, e.g. a compound word carries another ingredient name but should require stricter word/prefix proof. | FPB/PNB when the real problem is token/compound shape rather than a semantic product or ingredient context. |
-| Form or processed-state rule | `form_rules.py`, `processed_rules.py`, or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
-| Qualifier or bidirectional variant | `specialty_rules.py` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. | Raw substring checks without word-boundary handling. |
+| Cuisine-specific seasoned product | `./bin/dm matcher add cuisine-context ...` | A product trigger such as `thaikryddad`, `taco`, or `texmex` should remain valid only when the recipe text contains matching cuisine context. This is better than a blanket PNB because the product stays visible for the right cuisine. | Using PNB for cuisine-seasoning products that are legitimate in matching cuisine recipes. |
+| Compound/subword bleed | `./bin/dm matcher add compound-protection ...` | A keyword is matching as an unwanted substring or compound suffix/prefix, e.g. a compound word carries another ingredient name but should require stricter word/prefix proof. | FPB/PNB when the real problem is token/compound shape rather than a semantic product or ingredient context. |
+| Form or processed-state rule | `./bin/dm matcher add processed-food ...` for simple set add/remove; otherwise `form_rules.py`, `processed_rules.py`, or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
+| Qualifier or bidirectional variant | `./bin/dm matcher add specialty-qualifier ...` or `qualifier-equivalent ...` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. | Raw substring checks without word-boundary handling. |
 | Declarative bridge guard | `match_bridge.toml` nested `blockers` / `backend_allowances` | A bridge needs scoped negative guards or backend allowance metadata with fixture refs. | Hiding broad bridge behavior in unrelated backend code. |
 | Backend-only validation | `recipe_matcher_backend.py` | The rule needs recipe context, retry behavior, or materialization-time validation. | Fixing only backend when fast/fullscan/routing also need the rule. |
 | Routing-only gap | `./bin/dm matcher add ingredient-routing-parent ...`, `recipe-routing-helper ...`, or `term_indexes.py` helper | Fullscan matches but routed cache never sees the pair. | Backend allowances that hide missing route terms. |
@@ -592,22 +602,27 @@ where the fix is a narrow runtime dictionary/guard.
 
 1. Reproduce the example enough to identify the keyword/canonical, offer name,
    and ingredient text. A small inline diagnostic is fine.
-2. Patch the narrow existing mechanism. For the common PNB/FPB/KSBC cases,
-   prefer the CLI so the runtime overlay and focused sanity canary are generated:
+2. Patch the narrow existing mechanism. Prefer the CLI-backed runtime overlay
+   whenever the surface has an `add` command:
 
    ```bash
    ./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason "<why>"
    ./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason "<why>"
    ./bin/dm matcher add ksbc <keyword> --context <word1,word2,...> --reason "<why>"
+   ./bin/dm matcher add space-normalization "<source>" --target "<target>" --reason "<why>"
+   ./bin/dm matcher add flavor-word --terms <word1,word2,...> --reason "<why>"
+   ./bin/dm matcher add carrier-product --terms <carrier1,carrier2,...> --reason "<why>"
+   ./bin/dm matcher add cuisine-context <trigger> --contexts <term1,term2,...> --reason "<why>"
+   ./bin/dm matcher add compound-protection --mode prefix-strict --keywords <word1,...> --reason "<why>"
    ```
 
-   The CLI writes `runtime_rule_overlays.toml`; do not append new manual PNB
-   entries to the historical `_PRODUCT_NAME_BLOCKER_UPDATES` overlay in
-   `blocker_data.py`.
+   The CLI writes `runtime_rule_overlays.toml`; do not append new manual PNB,
+   FPB, KSBC, cuisine, compound, specialty, flavor/carrier, processed-food, or
+   space-normalization data to historical Python tables unless no CLI surface
+   fits.
 
-   For GPB, `CUISINE_CONTEXT`, compound/subword protection,
-   specialty/form/processed rules, STOP_WORDS, or local backend guards, edit the
-   owning Python surface beside the existing local pattern.
+   For GPB, `STOP_WORDS`, form rules, or local backend guards, edit the owning
+   Python surface beside the existing local pattern.
 3. Add or adjust a focused regression inside `run_deep_matcher_sanity.py` for
    every new rule. If a nearby case already asserts the exact same behavior,
    keep or extend that case rather than duplicating it. This script is the
