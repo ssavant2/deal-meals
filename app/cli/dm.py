@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -2540,6 +2541,30 @@ def _runtime_pair_entry_id(surface: RuntimePairSurface, source: str, target: str
     return f"runtime_{command_slug}_{_slug(source)}_{_slug(target)}"
 
 
+def _runtime_pair_entry_id_with_collision_suffix(
+    surface: RuntimePairSurface,
+    source: str,
+    target: str,
+    sections: dict[str, list[dict[str, Any]]],
+) -> str:
+    entry_id = _runtime_pair_entry_id(surface, source, target)
+    existing_ids = {
+        str(entry.get("id") or "").strip()
+        for entry in sections.get(surface.section, [])
+        if str(entry.get("id") or "").strip()
+    }
+    if entry_id not in existing_ids:
+        return entry_id
+    digest = hashlib.sha256(f"{surface.command}\0{source}\0{target}".encode("utf-8")).hexdigest()[:10]
+    disambiguated = f"{entry_id}_{digest}"
+    if disambiguated not in existing_ids:
+        return disambiguated
+    suffix = 2
+    while f"{disambiguated}_{suffix}" in existing_ids:
+        suffix += 1
+    return f"{disambiguated}_{suffix}"
+
+
 def _runtime_overlay_existing_values(
     sections: dict[str, list[dict[str, Any]]],
     surface: RuntimeOverlaySurface,
@@ -3531,11 +3556,16 @@ def _append_runtime_pair_entry(
     target: str,
     reason: str,
     dry_run: bool,
-) -> str:
+) -> tuple[str, str]:
     sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
     normalized_source = _runtime_rule_normalize_text(source)
     normalized_target = _runtime_rule_normalize_text(target)
-    entry_id = _runtime_pair_entry_id(surface, normalized_source, normalized_target)
+    entry_id = _runtime_pair_entry_id_with_collision_suffix(
+        surface,
+        normalized_source,
+        normalized_target,
+        sections,
+    )
     for entry in sections.get(surface.section, []):
         if not _runtime_overlay_entry_is_active(entry):
             continue
@@ -3555,11 +3585,11 @@ def _append_runtime_pair_entry(
     }
     preview = _runtime_pair_entry_block(surface, entry)
     if dry_run:
-        return preview
+        return preview, entry_id
 
     sections.setdefault(surface.section, []).append(entry)
     paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
-    return preview
+    return preview, entry_id
 
 
 def _append_space_normalization_sanity_stub(
@@ -4933,7 +4963,7 @@ def add_space_normalization(
     normalized_target = _runtime_rule_normalize_text(target)
     policy_ref = policy_ref or f"runtime_space_normalization_{_slug(normalized_source)}_{_slug(normalized_target)}"
     surface = RUNTIME_PAIR_SURFACES["space-normalization"]
-    overlay_preview = _append_runtime_pair_entry(
+    overlay_preview, entry_id = _append_runtime_pair_entry(
         paths=paths,
         surface=surface,
         source=source,
@@ -4959,7 +4989,7 @@ def add_space_normalization(
         return
 
     typer.echo(f"Generated space_normalization rule: {policy_ref}")
-    typer.echo(f"  entry: {_runtime_pair_entry_id(surface, normalized_source, normalized_target)}")
+    typer.echo(f"  entry: {entry_id}")
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
         return

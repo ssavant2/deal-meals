@@ -8,6 +8,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -1814,6 +1815,73 @@ def normalize_probe(text: str) -> str:
 """,
             )
             self.assertEqual(runtime["normalized"], "phasespace")
+
+            collision_source_one = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "space-normalization",
+                    "phase14-dash term",
+                    "--target",
+                    "phase14dashterm",
+                    "--reason",
+                    "Synthetic punctuation collision setup.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                    "--no-sanity",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(
+                collision_source_one.returncode,
+                0,
+                collision_source_one.stderr + collision_source_one.stdout,
+            )
+
+            collision_source_two = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "space-normalization",
+                    "phase14 dash-term",
+                    "--target",
+                    "phase14dashterm",
+                    "--reason",
+                    "Synthetic punctuation collision variant.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                    "--no-sanity",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(
+                collision_source_two.returncode,
+                0,
+                collision_source_two.stderr + collision_source_two.stdout,
+            )
+
+            base_id = "runtime_space_normalization_phase14_dash_term_phase14dashterm"
+            overlay_text = overlay_file.read_text(encoding="utf-8")
+            ids = re.findall(r'id = "([^"]+)"', overlay_text)
+            collision_ids = [entry_id for entry_id in ids if entry_id.startswith(base_id)]
+            self.assertEqual(len(collision_ids), 2)
+            self.assertEqual(len(set(collision_ids)), 2)
+            self.assertIn(base_id, collision_ids)
+            self.assertTrue(any(entry_id.startswith(f"{base_id}_") for entry_id in collision_ids))
 
             listed = subprocess.run(
                 [
