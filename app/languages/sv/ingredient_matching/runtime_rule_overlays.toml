@@ -95,6 +95,13 @@ keyword = "fiskfilé"
 blockers = ["tonfiskfilé", "tonfiskfilé"]
 reason = "tonfiskfilé recipe should not match generic white fish filé products — tonfisk (tuna) is a specific saltwater fish with distinct texture; compound substring 'fiskfilé' in 'tonfiskfilé' causes bleed from torsk/kolja/lax/etc"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_oliver"
+status = "active"
+keyword = "oliver"
+blockers = ["snackoliver", "snacksoliver"]
+reason = "snackoliver ingredient should not match generic oliver-jar products — 'oliver' is a substring of 'snackoliver' causing bleed; snackoliver recipes should match only snacksoliver-format products"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
