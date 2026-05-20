@@ -7382,12 +7382,12 @@ category = "dairy"
 name = "BreOliv Mild 91% 200g Zeta"
 
 [[fixtures.expected_matches]]
-canonical = "margarin"
+canonical = "breoliv"
 ingredient_index = 0
-must_match_keyword = "margarin"
+must_match_keyword = "breoliv"
 
 [[fixtures]]
-expected = 1
+expected = 0
 id = "matcher_regression_breoliv_bregott_positive"
 ingredients = ["Zeta BreOliv"]
 policy_ref = "legacy_import_curated_regression"
@@ -7398,10 +7398,22 @@ source_ref = "legacy_review:branded_breoliv_wording_still_has_no_usable_keyword_
 category = "dairy"
 name = "Bregott Normalsaltat 600g"
 
+[[fixtures]]
+expected = 1
+id = "matcher_regression_breoliv_bordsmargarin_positive"
+ingredients = ["bordsmargarin"]
+policy_ref = "current_review_matcher_regression"
+recipe_name = "Sanity Recipe"
+source_ref = "current_review:breoliv_product_matches_bordsmargarin_recipe_wording"
+
+[fixtures.offer]
+category = "dairy"
+name = "BreOliv Mild 91% 200g Zeta"
+
 [[fixtures.expected_matches]]
-canonical = "margarin"
+canonical = "bordsmargarin"
 ingredient_index = 0
-must_match_keyword = "margarin"
+must_match_keyword = "bordsmargarin"
 
 [[fixtures]]
 expected = 1
@@ -28746,4 +28758,3 @@ category = "vegetables"
 canonical = "småtomat"
 ingredient_index = 0
 must_match_keyword = "småtomat"
-

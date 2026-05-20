@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 from copy import deepcopy
 from dataclasses import replace
+import io
 import json
 import os
 from pathlib import Path
@@ -58,7 +60,14 @@ from support_checks.run_verified_term_audit import (
     IDENTITY_HASH_VERSION_V2,
     build_variants,
 )
-from support_checks.promote_term_baseline import PromotionConfig, _content_key
+from support_checks.promote_term_baseline import (
+    PromotionConfig,
+    _content_key,
+    _coverage_key,
+    _expected_count_constants_are_stale,
+    _update_expected_count_constants,
+    _write_variant_id_migration_map,
+)
 from languages.sv.ingredient_matching.rule_models import MatchBridge
 from languages.sv.ingredient_matching.runtime_rule_overlays import (
     RuntimeRuleOverlayError,
@@ -799,6 +808,168 @@ def normalize_probe(text: str) -> str:
         self.assertNotEqual(_content_key(fixture_variant, config), _content_key(source_rewrite, config))
         self.assertNotEqual(_content_key(registry_variant, config), _content_key(registry_canonical_revision, config))
 
+    def test_promote_coverage_key_uses_expected_family_for_negative_fixtures(self) -> None:
+        config = PromotionConfig(
+            language="sv",
+            market="SE",
+            baseline_path=Path("verified_matcher_terms.json"),
+            audit_module="support_checks.run_verified_term_audit",
+            registry_module="languages.sv.ingredient_matching.term_registry.registry",
+        )
+        variant = {
+            "language": "sv",
+            "market": "SE",
+            "source_type": "matcher_regression_case",
+            "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+            "source_id": "matcher_regression_negative_policy_family",
+            "variant_role": "negative_regression",
+            "variant_text": "matcher_regression_negative_policy_family: Blocked Offer",
+            "canonical": "",
+            "expected_family": "current_review_matcher_regression",
+            "expected": 0,
+        }
+
+        self.assertEqual(
+            _coverage_key(variant, config),
+            (
+                "sv",
+                "SE",
+                "matcher_regression_case",
+                "current_review_matcher_regression",
+                "matcher_regression_negative_policy_family: Blocked Offer",
+                "negative_regression",
+            ),
+        )
+
+    def test_promote_variant_id_migration_map_preserves_existing_records(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "verified_term_variant_id_migrations.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "from_hash_version": "v1_source_ref",
+                        "to_hash_version": "v2_stable_without_source_ref",
+                        "variant_count": 1,
+                        "migrations": [
+                            {
+                                "old_variant_id": "vterm-old-existing",
+                                "new_variant_id": "vterm-new-existing",
+                                "language": "sv",
+                                "market": "SE",
+                                "source_family": "keyword_synonym",
+                                "canonical": "existing",
+                                "variant": "existing",
+                                "layer_role": "keyword_synonym_mapping",
+                                "source_file": "existing.toml",
+                                "source_id": "existing",
+                                "source_ref": "manual:existing",
+                            }
+                        ],
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            _write_variant_id_migration_map(
+                path=path,
+                output_dir=None,
+                records=[
+                    {
+                        "old_variant_id": "vterm-old-new",
+                        "new_variant_id": "vterm-new-new",
+                        "language": "sv",
+                        "market": "SE",
+                        "source_family": "matcher_regression_case",
+                        "canonical": "new",
+                        "variant": "new fixture",
+                        "layer_role": "positive_regression",
+                        "source_file": "new.json",
+                        "source_id": "new",
+                        "source_ref": "manual:new",
+                    }
+                ],
+            )
+
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["variant_count"], 2)
+            self.assertEqual(
+                {(record["old_variant_id"], record["new_variant_id"]) for record in payload["migrations"]},
+                {
+                    ("vterm-old-existing", "vterm-new-existing"),
+                    ("vterm-old-new", "vterm-new-new"),
+                },
+            )
+
+    def test_promote_can_refresh_stale_expected_constants_without_variant_diff(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            add_term_checks = tmp_path / "run_term_registry_add_term_checks.py"
+            contract_checks = tmp_path / "run_term_registry_contract_checks.py"
+            sanity_checks = tmp_path / "run_sanity_checks.py"
+            add_term_checks.write_text("EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS = 1\n", encoding="utf-8")
+            contract_checks.write_text("EXPECTED_VERIFIED_TERM_VARIANT_COUNT = 2\n", encoding="utf-8")
+            sanity_checks.write_text(
+                'self.assertEqual(summary.get("unique_coverage_key_count"), 1)\n',
+                encoding="utf-8",
+            )
+            config = PromotionConfig(
+                language="sv",
+                market="SE",
+                baseline_path=tmp_path / "verified_matcher_terms.json",
+                audit_module="support_checks.run_verified_term_audit",
+                registry_module="languages.sv.ingredient_matching.term_registry.registry",
+                add_term_checks_path=add_term_checks,
+                contract_checks_path=contract_checks,
+                sanity_checks_path=sanity_checks,
+            )
+
+            self.assertTrue(
+                _expected_count_constants_are_stale(
+                    config,
+                    variant_count=5,
+                    unique_coverage_key_count=8,
+                )
+            )
+            with contextlib.redirect_stdout(io.StringIO()):
+                changed = _update_expected_count_constants(
+                    config,
+                    variant_count=5,
+                    unique_coverage_key_count=8,
+                    output_dir=None,
+                )
+
+            self.assertEqual({source.name for source, _target in changed}, {
+                "run_term_registry_add_term_checks.py",
+                "run_term_registry_contract_checks.py",
+                "run_sanity_checks.py",
+            })
+            self.assertIn("EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS = 8", add_term_checks.read_text(encoding="utf-8"))
+            self.assertIn("EXPECTED_VERIFIED_TERM_VARIANT_COUNT = 5", contract_checks.read_text(encoding="utf-8"))
+            self.assertIn(
+                'summary.get("unique_coverage_key_count"), 8',
+                sanity_checks.read_text(encoding="utf-8"),
+            )
+            self.assertFalse(
+                _expected_count_constants_are_stale(
+                    config,
+                    variant_count=5,
+                    unique_coverage_key_count=8,
+                )
+            )
+            with contextlib.redirect_stdout(io.StringIO()):
+                unchanged = _update_expected_count_constants(
+                    config,
+                    variant_count=5,
+                    unique_coverage_key_count=8,
+                    output_dir=None,
+                )
+            self.assertEqual(unchanged, [])
+
     def test_phase6_preflight_flags_match_bridge_positive_fixture_miss(self) -> None:
         fixture_id = "matcher_regression_positive_phase6_bridge_miss"
         fixtures = [
@@ -878,6 +1049,7 @@ def normalize_probe(text: str) -> str:
                     str(tree_root),
                     "--report-root",
                     str(tree_root / "support-reports"),
+                    "--no-run-gates",
                 ],
                 cwd=live_app_dir,
                 check=False,
@@ -914,8 +1086,9 @@ def normalize_probe(text: str) -> str:
             self.assertIn(fixture_id, fixture_source_file.read_text(encoding="utf-8"))
             self.assertIn(inventory_id, inventory_source_file.read_text(encoding="utf-8"))
 
-            generated = generate_coverage_files(tree_root=tree_root)
-            self.assertFalse(any(item.changed for item in generated))
+            check_generated_contract_json(tree_root=tree_root, write=True)
+            write_coverage_files(generate_coverage_files(tree_root=tree_root))
+            self.assertFalse(any(item.changed for item in generate_coverage_files(tree_root=tree_root)))
             report = run_preflight(tree_root=tree_root)
             codes = {issue["code"] for issue in report["new_issues"]}
             self.assertNotIn("fixture_missing_registry_coverage", codes, report)
@@ -3022,7 +3195,7 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(report["blocker_count"], 0)
         self.assertEqual(report["blocker_baseline_count"], 0)
         self.assertEqual(report["summary"]["contract_access_api"], 2)
-        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4129)
+        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4131)
 
     def test_phase5_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -3365,6 +3538,44 @@ reason = "Synthetic parent PNB mirror warning canary."
                     "hardcoded_keyword_output:extract_keywords_from_ingredient",
                     "hardcoded_keyword_output:extract_keywords_from_product",
                 },
+            )
+            replacement = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "extraction-helper",
+                    "phase9extract",
+                    "--side",
+                    "product",
+                    "--input",
+                    "Phase9extract",
+                    "--source-refs",
+                    "code:extraction:synthetic:2",
+                    "--tree-root",
+                    str(tree_root),
+                    "--replace-existing",
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(replacement.returncode, 0, replacement.stderr + replacement.stdout)
+
+            entries = load_registry_entries(entries_dir=entries_dir, include_local=False)
+            extraction_entry = next(entry for entry in entries if entry.entry_id == "sv-se.family.phase9extract")
+            helper_text = (entries_dir / "extraction_helper.toml").read_text(encoding="utf-8")
+            helper_block = helper_text[helper_text.find('entry_id = "sv-se.family.phase9extract"') :]
+            helper_block = helper_block[: helper_block.find("[[entries]]", 1)]
+            self.assertNotIn("ingredient_terms", helper_block)
+            self.assertIn('offer_terms = ["phase9extract"]', helper_block)
+            self.assertEqual(
+                {row["layer_role"] for row in extraction_entry.language_payload["coverage"]},
+                {"hardcoded_keyword_output:extract_keywords_from_product"},
             )
 
     def test_phase9_dm_matcher_guide_lists_all_toml_add_surfaces(self) -> None:

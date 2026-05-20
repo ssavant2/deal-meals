@@ -8879,9 +8879,9 @@
     "expected": 1,
     "expected_matches": [
       {
-        "canonical": "margarin",
+        "canonical": "breoliv",
         "ingredient_index": 0,
-        "must_match_keyword": "margarin"
+        "must_match_keyword": "breoliv"
       }
     ],
     "id": "matcher_regression_breoliv_exact_positive",
@@ -8897,14 +8897,7 @@
     "source_ref": "legacy_review:branded_breoliv_wording_still_has_no_usable_keyword_path_to_the_exact_spread_family"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "margarin",
-        "ingredient_index": 0,
-        "must_match_keyword": "margarin"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_breoliv_bregott_positive",
     "ingredients": [
       "Zeta BreOliv"
@@ -8916,6 +8909,27 @@
     "policy_ref": "legacy_import_curated_regression",
     "recipe_name": "Knäckebröd med tomater och italiensk hårdost",
     "source_ref": "legacy_review:branded_breoliv_wording_still_has_no_usable_keyword_path_to_the_exact_spread_family"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "bordsmargarin",
+        "ingredient_index": 0,
+        "must_match_keyword": "bordsmargarin"
+      }
+    ],
+    "id": "matcher_regression_breoliv_bordsmargarin_positive",
+    "ingredients": [
+      "bordsmargarin"
+    ],
+    "offer": {
+      "category": "dairy",
+      "name": "BreOliv Mild 91% 200g Zeta"
+    },
+    "policy_ref": "current_review_matcher_regression",
+    "recipe_name": "Sanity Recipe",
+    "source_ref": "current_review:breoliv_product_matches_bordsmargarin_recipe_wording"
   },
   {
     "expected": 1,

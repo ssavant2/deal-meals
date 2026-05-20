@@ -5888,12 +5888,12 @@ variant = "mandelspån"
 layer_role = "legacy_normalization"
 
 [[entries]]
-entry_id = "sv-se.policy.margarin.legacy_extraction_breoliv_spread_family"
+entry_id = "sv-se.policy.breoliv.legacy_extraction_breoliv_spread_family"
 language = "sv"
 market = "SE"
-canonical = "margarin"
+canonical = "breoliv"
 status = "active"
-variants = ["margarin"]
+variants = ["breoliv"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
@@ -5903,8 +5903,8 @@ notes = "Registry coverage for matcher rule inventory row legacy_extraction_breo
 
 [[entries.coverage]]
 source_family = "matcher_rule_inventory"
-canonical = "margarin"
-variant = "margarin"
+canonical = "breoliv"
+variant = "breoliv"
 layer_role = "legacy_extraction"
 
 [[entries]]

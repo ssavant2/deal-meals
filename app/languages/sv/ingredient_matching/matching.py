@@ -2950,8 +2950,6 @@ def matches_ingredient(
     if _ingredient_requests_generic_frozen_fish_fillet(ingredient_lower):
         ingredient_lower += ' fiskfilé'
     ingredient_lower = _append_canonical_keyword_synonyms(ingredient_lower)
-    if 'breoliv' in ingredient_lower:
-        ingredient_lower += ' margarin'
     if _ingredient_is_non_buyable_root_veg_pasta(ingredient_lower):
         return None
 
@@ -4221,8 +4219,6 @@ def _prepare_fast_ingredient_text(
     # vego-only yoghurt matching still applies, but also expose "yoghurt" for
     # the normal keyword path.
     ingredient_lower = re.sub(r'\bgurt\b', 'gurt yoghurt', ingredient_lower)
-    if 'breoliv' in ingredient_lower:
-        ingredient_lower += ' margarin'
     ingredient_lower = re.sub(
         r'\b([a-zåäöé]+?)(sylt|marmelad)\s+eller\s+-(sylt|marmelad)\b',
         r'\1\2 eller \1\3',

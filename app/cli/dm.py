@@ -765,6 +765,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         summary="Registry coverage and sanity proof for a hardcoded extraction.py keyword output.",
         steps=(
             "Run: ./bin/dm matcher add extraction-helper <canonical> --side product|ingredient|both --input \"<text>\" --source-refs <code-ref>",
+            "When an existing simple extraction helper loses or changes a side, rerun with --replace-existing and the remaining --side.",
             "This covers an extraction.py code change; it does not replace the code change itself.",
         ),
     ),
@@ -1552,13 +1553,45 @@ def _append_extraction_helper_entry(
     canonical: str,
     side: Literal["product", "ingredient", "both"],
     source_refs: tuple[str, ...],
+    replace_existing: bool,
     dry_run: bool,
-) -> tuple[str, int, str]:
+) -> tuple[str, int, str, bool]:
     target_file = _registry_entry_file(paths, "extraction_helper")
     existing_ids = _existing_entry_ids(target_file)
     entry_id = f"sv-se.family.{_slug(canonical)}"
     if entry_id in existing_ids:
-        raise typer.BadParameter(f"extraction_helper entry already exists: {entry_id}")
+        if not replace_existing:
+            raise typer.BadParameter(
+                f"extraction_helper entry already exists: {entry_id}. "
+                "Use --replace-existing to rewrite its covered side/source refs."
+            )
+        records = _registry_entry_records("extraction-helper", target_file)
+        matches = [record for record in records if record.entry_id == entry_id]
+        if len(matches) != 1:
+            raise typer.BadParameter(f"expected exactly one extraction_helper entry for {entry_id}; got {len(matches)}")
+        record = matches[0]
+        payload = tomllib.loads(record.block)
+        entry = payload.get("entries", [{}])[0]
+        terms = set(_registry_entry_terms(entry))
+        if terms - {canonical}:
+            raise typer.BadParameter(
+                f"{entry_id} has extra terms ({', '.join(sorted(terms - {canonical}))}); "
+                "manual edit required so extra product/ingredient terms are not lost."
+            )
+        for coverage in entry.get("coverage", []):
+            if coverage.get("canonical") != canonical or coverage.get("variant") != canonical:
+                raise typer.BadParameter(
+                    f"{entry_id} has non-canonical coverage rows; manual edit required."
+                )
+        block = _extraction_helper_block(
+            entry_id=entry_id,
+            canonical=canonical,
+            side=side,
+            source_refs=source_refs,
+        )
+        if not dry_run:
+            _write_registry_entry_block(target_file, record, block, dry_run=False)
+        return entry_id, record.start, block, True
     existing_keys = _existing_coverage_keys(paths)
     duplicate_roles = [
         role
@@ -1578,7 +1611,7 @@ def _append_extraction_helper_entry(
     existing_text = target_file.read_text(encoding="utf-8")
     start_line = len(existing_text.splitlines()) + 1
     _append_text_block(target_file, block, dry_run=dry_run)
-    return entry_id, start_line, block
+    return entry_id, start_line, block, False
 
 
 def _append_extraction_helper_deep_sanity_stub(
@@ -6621,6 +6654,13 @@ def add_extraction_helper(
     ],
     offer_category: Annotated[str, typer.Option("--offer-category", help="Product category for product-side sanity.")] = "",
     policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable policy ref override for comments.")] = None,
+    replace_existing: Annotated[
+        bool,
+        typer.Option(
+            "--replace-existing",
+            help="Rewrite an existing simple extraction_helper entry, useful when a hardcoded extraction side was removed.",
+        ),
+    ] = False,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
     run_gates: Annotated[
         bool,
@@ -6642,11 +6682,12 @@ def add_extraction_helper(
     if paths.app_dir != APP_DIR and run_gates and not dry_run:
         raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
     policy_ref = policy_ref or f"extraction_helper_{_slug(canonical)}"
-    entry_id, _entry_line, toml_preview = _append_extraction_helper_entry(
+    entry_id, _entry_line, toml_preview, replaced = _append_extraction_helper_entry(
         paths=paths,
         canonical=canonical,
         side=side,
         source_refs=source_refs,
+        replace_existing=replace_existing,
         dry_run=dry_run,
     )
     sanity_preview = _append_extraction_helper_deep_sanity_stub(
@@ -6672,8 +6713,15 @@ def add_extraction_helper(
         _print_dry_run_preview(change)
         return
 
-    typer.echo(f"Generated extraction_helper coverage: {change.policy_ref}")
+    action = "Updated" if replaced else "Generated"
+    typer.echo(f"{action} extraction_helper coverage: {change.policy_ref}")
     typer.echo(f"  entry: {entry_id}")
+    typer.echo(
+        "NOTE: extraction-helper covers hardcoded extraction.py output. "
+        "If the code change alters existing matcher behavior, update fixtures/inventory/bridges "
+        "and finish with Track B gates.",
+        err=True,
+    )
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
         return

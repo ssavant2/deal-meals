@@ -815,11 +815,16 @@ def extract_keywords_from_product(
     ):
         return ['matbrödsjäst', 'jäst']
 
-    # BreOliv/Bregott/Lätta/Flora are table margarine/spread products for
+    # BreOliv is a specific premium olive-oil spread. Keep the brand keyword
+    # narrow, but let the product answer generic "bordsmargarin" recipe wording.
+    if re.search(r'\bbreoliv\b', original_name_lower):
+        return ['breoliv', 'bordsmargarin']
+
+    # Bregott/Lätta/Flora are table margarine/spread products for
     # recipe-matching purposes, not olive oil or free-standing brand tokens.
     if (
         (category or '').lower() in {'dairy', 'pantry'}
-        and re.search(r'\b(?:breoliv|bregott|lätta|latta|flora)\b', original_name_lower)
+        and re.search(r'\b(?:bregott|lätta|latta|flora)\b', original_name_lower)
     ):
         return ['margarin']
 
@@ -1887,7 +1892,7 @@ def extract_keywords_from_ingredient(
         return ['torkadsvamp']
 
     if 'breoliv' in name:
-        return ['margarin']
+        return ['breoliv']
 
     if any(cue in name for cue in ('morotsspaghetti', 'kålrotsspaghetti', 'kalrotsspaghetti')):
         return []

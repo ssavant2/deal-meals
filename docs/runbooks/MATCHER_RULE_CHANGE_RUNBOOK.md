@@ -300,6 +300,23 @@ CLI write the registry row and focused sanity stub:
   --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:402
 ```
 
+If a hardcoded extraction helper is narrowed after an `extraction.py` edit, do
+not hand-delete coverage rows. For a simple one-canonical entry, rewrite the
+covered side/source refs instead:
+
+```bash
+./bin/dm matcher add extraction-helper margarin \
+  --side product \
+  --input "Lätta 39%" \
+  --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:829 \
+  --replace-existing
+```
+
+If the entry has extra offer/ingredient terms or non-canonical coverage rows,
+`--replace-existing` refuses the rewrite; edit manually and run Track B gates.
+Extraction helper changes are Track B registry work even when the behavior
+change itself is a small Python branch.
+
 Common Python runtime data surfaces now have CLI-backed overlay coverage:
 
 ```bash
@@ -935,7 +952,10 @@ The accepted intentional-removal flow is:
 `promote_term_baseline.py` (with or without `--allow-removals`) auto-updates the
 relevant baseline JSON fields (`variant_count`, `source_counts`, `role_counts`,
 `status_counts`, `classification_counts`) and the `EXPECTED_VERIFIED_TERM_VARIANT_COUNT`
-constant in `run_term_registry_contract_checks.py`. Do not patch these by hand.
+constant in `run_term_registry_contract_checks.py`, plus the frozen unique
+coverage-key constants used by add-term/sanity checks. It also refreshes stale
+constants when the baseline variant list itself is already up to date. Do not
+patch these by hand.
 
 Manual baseline JSON edits are a last resort. Use them only if the promotion
 script cannot write/stage the intended files, and record that clearly in the

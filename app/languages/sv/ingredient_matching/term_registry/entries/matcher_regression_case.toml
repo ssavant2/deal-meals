@@ -708,30 +708,30 @@ variant = "matcher_regression_bostongurka_positive: Bostongurka Felix"
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.margarin.matcher_regression_breoliv_bregott_positive"
+entry_id = "sv-se.policy.legacy_import_curated_regression.matcher_regression_breoliv_bregott_positive"
 language = "sv"
 market = "SE"
-canonical = "margarin"
+canonical = "legacy_import_curated_regression"
 status = "active"
 variants = ["matcher_regression_breoliv_bregott_positive: Bregott Normalsaltat 600g"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_breoliv_bregott_positive"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_breoliv_bregott_positive."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "margarin"
+canonical = "legacy_import_curated_regression"
 variant = "matcher_regression_breoliv_bregott_positive: Bregott Normalsaltat 600g"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.margarin.matcher_regression_breoliv_exact_positive"
+entry_id = "sv-se.policy.breoliv.matcher_regression_breoliv_exact_positive"
 language = "sv"
 market = "SE"
-canonical = "margarin"
+canonical = "breoliv"
 status = "active"
 variants = ["matcher_regression_breoliv_exact_positive: BreOliv Mild 91% 200g Zeta"]
 ingredient_terms = []
@@ -743,7 +743,7 @@ notes = "Registry coverage for matcher regression fixture matcher_regression_bre
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "margarin"
+canonical = "breoliv"
 variant = "matcher_regression_breoliv_exact_positive: BreOliv Mild 91% 200g Zeta"
 layer_role = "positive_regression"
 
@@ -29805,4 +29805,24 @@ notes = "Registry coverage for matcher regression fixture keyword_extra_parent_s
 source_family = "matcher_regression_case"
 canonical = "småtomat"
 variant = "keyword_extra_parent_smatomat_snacktomater_positive: Snacktomater 250g"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.bordsmargarin.matcher_regression_breoliv_bordsmargarin_positive"
+language = "sv"
+market = "SE"
+canonical = "bordsmargarin"
+status = "active"
+variants = ["matcher_regression_breoliv_bordsmargarin_positive: BreOliv Mild 91% 200g Zeta"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:matcher_regression_breoliv_bordsmargarin_positive"]
+layer_policy = ["normal"]
+notes = "Registry coverage for matcher regression fixture matcher_regression_breoliv_bordsmargarin_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "bordsmargarin"
+variant = "matcher_regression_breoliv_bordsmargarin_positive: BreOliv Mild 91% 200g Zeta"
 layer_role = "positive_regression"

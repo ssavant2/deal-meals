@@ -2,8 +2,8 @@
   "schema_version": 1,
   "from_hash_version": "v1_source_ref",
   "to_hash_version": "v2_stable_without_source_ref",
-  "description": "One-shot verified-term baseline migration. v2 variant_id hashes exclude source_ref provenance text so source_ref edits do not force future baseline hash migrations.",
-  "variant_count": 5517,
+  "description": "Permanent verified-term variant_id migration map. Current records come from the v1 source_ref-based hash to v2 stable hash migration; v2 hashes exclude source_ref provenance text so source_ref edits do not force future baseline hash migrations.",
+  "variant_count": 5518,
   "migrations": [
     {
       "old_variant_id": "vterm-001176a79541d816",
@@ -7349,6 +7349,19 @@
       "source_file": "app/languages/sv/ingredient_matching/match_bridges.py",
       "source_id": "bridge_baguette_typo_route_alias",
       "source_ref": "match_bridges:bridge_baguette_typo_route_alias"
+    },
+    {
+      "old_variant_id": "vterm-1acc271446a4bd1e",
+      "new_variant_id": "vterm-6d8c769059f670d6",
+      "language": "sv",
+      "market": "SE",
+      "source_family": "matcher_regression_case",
+      "canonical": "breoliv",
+      "variant": "matcher_regression_breoliv_exact_positive: BreOliv Mild 91% 200g Zeta",
+      "layer_role": "positive_regression",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_id": "matcher_regression_breoliv_exact_positive",
+      "source_ref": "legacy_review:branded_breoliv_wording_still_has_no_usable_keyword_path_to_the_exact_spread_family"
     },
     {
       "old_variant_id": "vterm-1ace79e4672fbb7a",

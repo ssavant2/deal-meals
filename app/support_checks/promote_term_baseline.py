@@ -291,7 +291,120 @@ def _update_py_constant(
     new_text, count = re.subn(pattern, rf"\g<1>{new_value}\g<3>", text, flags=re.MULTILINE)
     if count == 0:
         return None
+    if new_text == text:
+        return None
     return _write_text(path, new_text, output_dir=output_dir)
+
+
+def _py_constant_value(path: Path | None, name: str) -> int | None:
+    if path is None or not path.exists():
+        return None
+    text = path.read_text(encoding="utf-8")
+    import re
+    pattern = rf"^{re.escape(name)}\s*=\s*(\d+)\s*(?:#.*)?$"
+    match = re.search(pattern, text, flags=re.MULTILINE)
+    return int(match.group(1)) if match else None
+
+
+def _sanity_unique_coverage_key_count_value(path: Path | None) -> int | None:
+    value = _py_constant_value(path, "_EXPECTED_UNIQUE_COVERAGE_KEYS")
+    if value is not None:
+        return value
+    if path is None or not path.exists():
+        return None
+    text = path.read_text(encoding="utf-8")
+    import re
+    match = re.search(r'summary\.get\("unique_coverage_key_count"\),\s*(\d+)', text)
+    return int(match.group(1)) if match else None
+
+
+def _expected_count_constants_are_stale(
+    config: PromotionConfig,
+    *,
+    variant_count: int,
+    unique_coverage_key_count: int,
+) -> bool:
+    checks = [
+        (
+            config.contract_checks_path,
+            "EXPECTED_VERIFIED_TERM_VARIANT_COUNT",
+            variant_count,
+        ),
+        (
+            config.add_term_checks_path,
+            "EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS",
+            unique_coverage_key_count,
+        ),
+    ]
+    for path, name, expected in checks:
+        value = _py_constant_value(path, name)
+        if value is not None and value != expected:
+            return True
+    sanity_value = _sanity_unique_coverage_key_count_value(config.sanity_checks_path)
+    return sanity_value is not None and sanity_value != unique_coverage_key_count
+
+
+def _update_expected_count_constants(
+    config: PromotionConfig,
+    *,
+    variant_count: int,
+    unique_coverage_key_count: int,
+    output_dir: Path | None,
+) -> list[tuple[Path, Path]]:
+    changed_files: list[tuple[Path, Path]] = []
+
+    if config.contract_checks_path:
+        target = _update_py_constant(
+            config.contract_checks_path,
+            "EXPECTED_VERIFIED_TERM_VARIANT_COUNT",
+            variant_count,
+            output_dir=output_dir,
+        )
+        if target:
+            changed_files.append((config.contract_checks_path, target))
+            print(f"Updated EXPECTED_VERIFIED_TERM_VARIANT_COUNT → {variant_count}")
+    else:
+        print("Skipped contract-check constant update; no language-specific check path configured.")
+
+    if config.add_term_checks_path:
+        target = _update_py_constant(
+            config.add_term_checks_path,
+            "EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS",
+            unique_coverage_key_count,
+            output_dir=output_dir,
+        )
+        if target:
+            changed_files.append((config.add_term_checks_path, target))
+            print(f"Updated EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS → {unique_coverage_key_count}")
+    else:
+        print("Skipped add-term-check constant update; no language-specific check path configured.")
+
+    target = None
+    if config.sanity_checks_path:
+        target = _update_py_constant(
+            config.sanity_checks_path,
+            "_EXPECTED_UNIQUE_COVERAGE_KEYS",
+            unique_coverage_key_count,
+            output_dir=output_dir,
+        )
+    if target:
+        changed_files.append((config.sanity_checks_path, target))
+        print(f"Updated _EXPECTED_UNIQUE_COVERAGE_KEYS in sanity checks → {unique_coverage_key_count}")
+    elif config.sanity_checks_path and config.sanity_checks_path.exists():
+        text = config.sanity_checks_path.read_text(encoding="utf-8")
+        import re
+        pattern = r'(summary\.get\("unique_coverage_key_count"\),\s*)(\d+)'
+        new_text, n = re.subn(pattern, rf"\g<1>{unique_coverage_key_count}", text)
+        if n and new_text != text:
+            target = _write_text(config.sanity_checks_path, new_text, output_dir=output_dir)
+            changed_files.append((config.sanity_checks_path, target))
+            print(f"Updated unique_coverage_key_count in sanity checks → {unique_coverage_key_count}")
+        elif not n:
+            print(f"WARNING: could not patch unique_coverage_key_count in {config.sanity_checks_path.name}")
+    else:
+        print("Skipped sanity-check constant update; no language-specific check path configured.")
+
+    return changed_files
 
 
 def _write_output_manifest(
@@ -356,6 +469,23 @@ def _write_variant_id_migration_map(
     records: list[dict[str, Any]],
     output_dir: Path | None,
 ) -> Path:
+    existing_records: list[dict[str, Any]] = []
+    if path.exists():
+        existing_payload = _load_json(path)
+        raw_existing = existing_payload.get("migrations") or []
+        if not isinstance(raw_existing, list):
+            raise ValueError(f"variant-id migration map migrations must be a list: {path}")
+        existing_records = [record for record in raw_existing if isinstance(record, dict)]
+
+    merged_records = {
+        (str(record.get("old_variant_id") or ""), str(record.get("new_variant_id") or "")): record
+        for record in [*existing_records, *records]
+        if record.get("old_variant_id") and record.get("new_variant_id")
+    }
+    ordered_records = sorted(
+        merged_records.values(),
+        key=lambda item: (str(item["old_variant_id"]), str(item["new_variant_id"])),
+    )
     payload = {
         "schema_version": VARIANT_ID_MIGRATION_SCHEMA_VERSION,
         "from_hash_version": "v1_source_ref",
@@ -367,8 +497,8 @@ def _write_variant_id_migration_map(
             "so source_ref edits do not force future baseline hash "
             "migrations."
         ),
-        "variant_count": len(records),
-        "migrations": sorted(records, key=lambda item: item["old_variant_id"]),
+        "variant_count": len(ordered_records),
+        "migrations": ordered_records,
     }
     return _write_json(path, payload, output_dir=output_dir)
 
@@ -400,7 +530,7 @@ def _coverage_key(v: dict, config: PromotionConfig) -> tuple[str, str, str, str,
         str(v.get("language") or config.language),
         str(v.get("market") or config.market),
         str(v.get("source_family") or v.get("source_type") or ""),
-        str(v.get("canonical") or ""),
+        str(v.get("canonical") or v.get("expected_family") or ""),
         str(v.get("variant") or v.get("variant_text") or ""),
         str(v.get("layer_role") or v.get("variant_role") or ""),
     )
@@ -686,26 +816,46 @@ def promote(
 
     if not new_variants and not hash_migrations and not allowed_removed_ids:
         summary_changed = _refresh_summary_from_variants(baseline)
-        if not summary_changed and not baseline_normalized:
+        print("Counting registry TOML coverage keys …")
+        new_unique_key_count = _get_unique_coverage_key_count(config)
+        constants_stale = _expected_count_constants_are_stale(
+            config,
+            variant_count=current_count,
+            unique_coverage_key_count=new_unique_key_count,
+        )
+        if not summary_changed and not baseline_normalized and not constants_stale:
             print(f"\nNothing to promote — baseline is up to date ({current_count} variants).")
             return 0
         if dry_run:
-            print(f"\n[dry-run] Would refresh stale baseline metadata ({current_count} variants).")
+            print(
+                f"\n[dry-run] Would refresh stale baseline metadata/check constants "
+                f"({current_count} variants)."
+            )
             print("[dry-run] No files written.")
             return 0
-        _apply_verification_updates(baseline, promoted_variants=[])
-        print(f"\nRefreshing baseline metadata ({current_count} variants) …")
-        target = _write_json(config.baseline_path, baseline, output_dir=output_dir)
+        changed_files: list[tuple[Path, Path]] = []
+        if summary_changed or baseline_normalized:
+            _apply_verification_updates(baseline, promoted_variants=[])
+            print(f"\nRefreshing baseline metadata ({current_count} variants) …")
+            target = _write_json(config.baseline_path, baseline, output_dir=output_dir)
+            changed_files.append((config.baseline_path, target))
+        changed_files.extend(_update_expected_count_constants(
+            config,
+            variant_count=current_count,
+            unique_coverage_key_count=new_unique_key_count,
+            output_dir=output_dir,
+        ))
         _write_output_manifest(
             output_dir=output_dir,
-            changed_files=[(config.baseline_path, target)],
+            changed_files=changed_files,
             current_count=current_count,
             new_count=current_count,
+            new_unique_key_count=new_unique_key_count,
         )
         if output_dir is None:
-            print("\n✓ Baseline summary refresh complete.")
+            print("\n✓ Baseline metadata/check constant refresh complete.")
         else:
-            print(f"\n✓ Baseline summary refresh staged under {output_dir}.")
+            print(f"\n✓ Baseline metadata/check constant refresh staged under {output_dir}.")
         return 0
 
     if dry_run:
@@ -749,73 +899,14 @@ def promote(
         changed_files.append((config.variant_id_migration_path, target))
         print(f"Wrote variant-id migration map → {config.variant_id_migration_path.name}")
 
-    # --- Update the frozen verified-term variant count in contract checks ---
-    if config.contract_checks_path:
-        target = _update_py_constant(
-            config.contract_checks_path,
-            "EXPECTED_VERIFIED_TERM_VARIANT_COUNT",
-            new_count,
-            output_dir=output_dir,
-        )
-        if target:
-            changed_files.append((config.contract_checks_path, target))
-            print(f"Updated EXPECTED_VERIFIED_TERM_VARIANT_COUNT → {new_count}")
-        else:
-            print(
-                "WARNING: could not update EXPECTED_VERIFIED_TERM_VARIANT_COUNT in "
-                f"{config.contract_checks_path.name}"
-            )
-    else:
-        print("Skipped contract-check constant update; no language-specific check path configured.")
-
-    # --- Update the frozen unique coverage-key count in add-term checks ---
     print("Counting registry TOML coverage keys …")
     new_unique_key_count = _get_unique_coverage_key_count(config)
-
-    if config.add_term_checks_path:
-        target = _update_py_constant(
-            config.add_term_checks_path,
-            "EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS",
-            new_unique_key_count,
-            output_dir=output_dir,
-        )
-        if target:
-            changed_files.append((config.add_term_checks_path, target))
-            print(f"Updated EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS → {new_unique_key_count}")
-        else:
-            print(
-                "WARNING: could not update EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS in "
-                f"{config.add_term_checks_path.name}"
-            )
-    else:
-        print("Skipped add-term-check constant update; no language-specific check path configured.")
-
-    # --- Update unique_coverage_key_count in sanity checks ---
-    target = None
-    if config.sanity_checks_path:
-        target = _update_py_constant(
-            config.sanity_checks_path,
-            "_EXPECTED_UNIQUE_COVERAGE_KEYS",
-            new_unique_key_count,
-            output_dir=output_dir,
-        )
-    if target:
-        changed_files.append((config.sanity_checks_path, target))
-        print(f"Updated _EXPECTED_UNIQUE_COVERAGE_KEYS in sanity checks → {new_unique_key_count}")
-    elif config.sanity_checks_path and config.sanity_checks_path.exists():
-        # The sanity check uses a literal int inline, not a named constant - patch it directly
-        text = config.sanity_checks_path.read_text(encoding="utf-8")
-        import re
-        pattern = r'(summary\.get\("unique_coverage_key_count"\),\s*)(\d+)'
-        new_text, n = re.subn(pattern, rf"\g<1>{new_unique_key_count}", text)
-        if n:
-            target = _write_text(config.sanity_checks_path, new_text, output_dir=output_dir)
-            changed_files.append((config.sanity_checks_path, target))
-            print(f"Updated unique_coverage_key_count in sanity checks → {new_unique_key_count}")
-        else:
-            print(f"WARNING: could not patch unique_coverage_key_count in {config.sanity_checks_path.name}")
-    else:
-        print("Skipped sanity-check constant update; no language-specific check path configured.")
+    changed_files.extend(_update_expected_count_constants(
+        config,
+        variant_count=new_count,
+        unique_coverage_key_count=new_unique_key_count,
+        output_dir=output_dir,
+    ))
 
     _write_output_manifest(
         output_dir=output_dir,

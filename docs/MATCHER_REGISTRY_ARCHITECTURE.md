@@ -162,6 +162,11 @@ For live TOML registry rule authoring, prefer the unified CLI:
 ./bin/dm matcher add extraction-helper ...
 ```
 
+For `extraction_helper.toml`, the same command can rewrite a simple existing
+entry with `--replace-existing` when an `extraction.py` branch is narrowed from
+`both` to `product`/`ingredient` or otherwise loses a side. Complex helper
+entries with extra terms still need a deliberate manual edit.
+
 For runtime data-rule authoring, prefer the same CLI entry point. Supported
 runtime shapes include `pnb`, `fpb`, `ksbc`, `gpb`, stop/non-food filters,
 space-normalization, flavor/carrier, context, cuisine, compound, specialty,

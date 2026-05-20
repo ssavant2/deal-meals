@@ -56,6 +56,54 @@ def _command(name: str, *args: str) -> tuple[str, ...]:
     return (sys.executable, _script(name), *args)
 
 
+def _cgroup_cpu_quota_count() -> int | None:
+    cpu_max = Path("/sys/fs/cgroup/cpu.max")
+    try:
+        quota_text = cpu_max.read_text(encoding="utf-8").strip().split()
+    except OSError:
+        quota_text = []
+    if len(quota_text) == 2 and quota_text[0] != "max":
+        try:
+            quota = int(quota_text[0])
+            period = int(quota_text[1])
+        except ValueError:
+            quota = period = 0
+        if quota > 0 and period > 0:
+            return max(1, (quota + period - 1) // period)
+
+    cpu_quota = Path("/sys/fs/cgroup/cpu/cpu.cfs_quota_us")
+    cpu_period = Path("/sys/fs/cgroup/cpu/cpu.cfs_period_us")
+    try:
+        quota = int(cpu_quota.read_text(encoding="utf-8").strip())
+        period = int(cpu_period.read_text(encoding="utf-8").strip())
+    except (OSError, ValueError):
+        return None
+    if quota > 0 and period > 0:
+        return max(1, (quota + period - 1) // period)
+    return None
+
+
+def _available_cpu_count() -> int:
+    counts = [os.cpu_count() or 1]
+    if hasattr(os, "sched_getaffinity"):
+        try:
+            counts.append(len(os.sched_getaffinity(0)))
+        except OSError:
+            pass
+    cgroup_count = _cgroup_cpu_quota_count()
+    if cgroup_count is not None:
+        counts.append(cgroup_count)
+    return max(1, min(counts))
+
+
+def _default_support_self_test_jobs() -> int:
+    return max(1, _available_cpu_count() - 1)
+
+
+def _support_self_test_jobs(args: argparse.Namespace) -> int:
+    return args.support_self_test_jobs or _default_support_self_test_jobs()
+
+
 def _fixture_file_for_args(args: argparse.Namespace) -> Path:
     return contract_paths(args.tree_root).fixture_file
 
@@ -471,11 +519,29 @@ def _build_track_b_steps(args: argparse.Namespace, changes: ChangeFlags) -> list
     ))
 
     if args.include_support_self_checks:
+        support_self_test_jobs = _support_self_test_jobs(args)
         steps.extend([
             Step(
                 "matcher rule-change flow tests",
-                (sys.executable, "-m", "unittest", "support_checks.tests.test_rule_change_flow"),
-                "support-check self-test for the pre-flight rule-change flow",
+                (
+                    sys.executable,
+                    "-m",
+                    "unittest_parallel",
+                    "-s",
+                    "support_checks/tests",
+                    "-p",
+                    "test_rule_change_flow.py",
+                    "-t",
+                    ".",
+                    "--level",
+                    "test",
+                    "-j",
+                    str(support_self_test_jobs),
+                ),
+                (
+                    "support-check self-test for the pre-flight rule-change flow "
+                    f"({support_self_test_jobs} worker process(es))"
+                ),
             ),
             Step(
                 "matcher fixture schema checks",
@@ -687,6 +753,15 @@ def parse_args() -> argparse.Namespace:
         help="Run support-check self-tests for fixture schema, diagnostics, and parity tooling.",
     )
     parser.add_argument(
+        "--support-self-test-jobs",
+        type=int,
+        default=None,
+        help=(
+            "Worker process count for the rule-change-flow unittest-parallel self-test. "
+            "Defaults to CPU cores minus one."
+        ),
+    )
+    parser.add_argument(
         "--generate-coverage",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -695,7 +770,10 @@ def parse_args() -> argparse.Namespace:
             "and registry coverage TOML before pre-flight."
         ),
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.support_self_test_jobs is not None and args.support_self_test_jobs < 1:
+        parser.error("--support-self-test-jobs must be at least 1")
+    return args
 
 
 def main() -> int:

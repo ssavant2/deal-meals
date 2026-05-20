@@ -8525,14 +8525,15 @@ entry_id = "sv-se.bridge.bridge_breoliv_spread_family"
 language = "sv"
 market = "SE"
 canonical = "margarin"
-status = "active"
+status = "inactive"
+inactive_reason = "BreOliv is isolated to its own keyword via extraction.py and should not bridge to bregott/margarin."
 variants = ["\\bbreoliv\\b -> \\bbreoliv\\b", "\\bbreoliv\\b -> \\bbregott\\b", "\\bbreoliv\\b -> \\bmargarin\\b"]
 ingredient_terms = ["\\bbreoliv\\b"]
 offer_terms = ["\\bbreoliv\\b", "\\bbregott\\b", "\\bmargarin\\b"]
 negative_guards = []
-source_refs = ["bridge:match_bridges:bridge_breoliv_spread_family"]
+source_refs = ["legacy_review:breoliv_match_bridge_inactivated_after_keyword_isolation"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge: bridge_breoliv_spread_family."
+notes = "Registry-owned match bridge: bridge_breoliv_spread_family. Inactivated: BreOliv now isolates to its own keyword."
 
 [entries.language_payload.match_bridge]
 id = "bridge_breoliv_spread_family"
