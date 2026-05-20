@@ -10962,8 +10962,14 @@ test("nötmix plain still matches plain recipe",
 # "bordsmargarin" recipe wording.
 test("KW BreOliv product extracts breoliv and bordsmargarin not margarin",
      extract_keywords_from_product('Breoliv Mild 91% 200g Zeta', category='dairy'), ['breoliv', 'bordsmargarin'])
-test("KW Lätta product still extracts margarin",
-     extract_keywords_from_product('Lätta Margarin 39% 600g', category='dairy'), ['margarin'])
+test("KW Lätta product extracts bordsmargarin (table margarine for sandwiches)",
+     extract_keywords_from_product('Lätta Margarin 39% 600g', category='dairy'), ['bordsmargarin'])
+test("KW Flora product extracts bordsmargarin",
+     extract_keywords_from_product('Flora Normalsaltat 70% 600g', category='dairy'), ['bordsmargarin'])
+test("KW Bregott product extracts bordsmargarin",
+     extract_keywords_from_product('Smör & Raps Normalsaltat 75% 500g Bregott®', category='dairy'), ['bordsmargarin'])
+test("KW plain margarin still extracts margarin (not bordsmargarin)",
+     extract_keywords_from_product('Margarin Lätt 35% 250g ProActiv', category='dairy'), ['margarin'])
 test("KW breoliv ingredient extracts breoliv",
      extract_keywords_from_ingredient('1/2 frp Zeta BreOliv'), ['breoliv'])
 test("BreOliv product matches bordsmargarin recipe wording",

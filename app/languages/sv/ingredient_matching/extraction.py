@@ -820,13 +820,15 @@ def extract_keywords_from_product(
     if re.search(r'\bbreoliv\b', original_name_lower):
         return ['breoliv', 'bordsmargarin']
 
-    # Bregott/Lätta/Flora are table margarine/spread products for
-    # recipe-matching purposes, not olive oil or free-standing brand tokens.
+    # Bregott/Lätta/Flora are bordsmargarin (table margarine for spreading on
+    # bread/sandwiches), not cooking margarine or butter. They should match
+    # recipes that explicitly want bordsmargarin, not generic 'smör'/'margarin'
+    # cooking ingredients.
     if (
         (category or '').lower() in {'dairy', 'pantry'}
         and re.search(r'\b(?:bregott|lätta|latta|flora)\b', original_name_lower)
     ):
-        return ['margarin']
+        return ['bordsmargarin']
 
     # Bao / steam buns are a buyable bread family of their own and should not
     # disappear into generic bread matching.
