@@ -102,6 +102,13 @@ keyword = "oliver"
 blockers = ["snackoliver", "snacksoliver"]
 reason = "snackoliver ingredient should not match generic oliver-jar products — 'oliver' is a substring of 'snackoliver' causing bleed; snackoliver recipes should match only snacksoliver-format products"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_svamp"
+status = "active"
+keyword = "svamp"
+blockers = ["karl-johan", "karljohan", "karl-johansvamp", "karljohansvamp"]
+reason = "Karl-Johan (stensopp/Boletus edulis) is a specific named species with distinct flavor — should not match generic svamp products (champinjon, ostronskivling). Mirrors Q79 potato variety isolation policy."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -115,6 +122,27 @@ status = "active"
 keyword = "fond"
 context = ["andfond"]
 reason = "Andfond (duck stock) is instructed as a from-scratch reduction — no commercial andfond product exists; suppress generic fond products from matching"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_karl_johan_svamp_karl_johansvamp"
+status = "active"
+source = "karl-johan svamp"
+target = "karl-johansvamp"
+reason = "Karl-Johan named-species mushroom — normalize two-word form to compound so generic 'svamp' keyword doesn't leak from ingredient text"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_karl_johan_dash_svamp_karl_johansvamp"
+status = "active"
+source = "karl johan-svamp"
+target = "karl-johansvamp"
+reason = "Karl-Johan product name variant — hyphen between Johan and svamp instead of Karl and Johan"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_karl_johan_three_word_karl_johansvamp"
+status = "active"
+source = "karl johan svamp"
+target = "karl-johansvamp"
+reason = "Karl-Johan three-word form — normalize to compound"
 
 [[keyword_set_updates]]
 id = "runtime_important_short_keyword_add_hirs"
