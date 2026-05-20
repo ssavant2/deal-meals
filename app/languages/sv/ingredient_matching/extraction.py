@@ -1769,6 +1769,18 @@ def extract_keywords_from_ingredient(
         name,
     )
 
+    # Strip descriptive sub-clauses introduced by preference markers
+    # ("förslagsvis", "gärna", "om möjligt", "exempelvis"). These are
+    # recipe-author suggestions that often reference OTHER ingredients
+    # (e.g. "Mandelmassa förslagsvis från samma semlor som grädden kommer
+    # ifrån" leaks 'grädde' into the mandelmassa line). Strip from the
+    # marker to end-of-string.
+    name = re.sub(
+        r'\b(?:förslagsvis|gärna|om möjligt|exempelvis)\b.*$',
+        '',
+        name,
+    )
+
     # Normalize space variants (e.g., "corn flakes" -> "cornflakes")
     name = _apply_space_normalizations(name)
     name = rewrite_truncated_chocolate_color_lists(name)
