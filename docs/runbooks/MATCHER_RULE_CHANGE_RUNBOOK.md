@@ -1236,6 +1236,11 @@ Useful wrapper options:
   intentional TOML inactivation/removal.
 - `--confirm-large-removals` is required for non-interactive baseline promotion
   when more than five verified-term variants are truly removed.
+- `--parallel-readonly` is enabled by default and runs independent read-only
+  gate steps in parallel using available CPU cores minus one. Use
+  `--no-parallel-readonly` when debugging interleaved gate behavior.
+- `--parallel-readonly-jobs N` overrides the read-only worker count when the
+  default CPU-core-minus-one budget is not appropriate.
 - `--refresh-line-refs` runs the host-only inventory line-ref refresher.
 - `--no-generate-coverage` disables the automatic derived coverage refresh
   when you intentionally want pre-flight to report stale coverage.
