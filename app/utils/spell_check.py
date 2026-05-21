@@ -85,7 +85,7 @@ def _levenshtein(s1: str, s2: str) -> int:
     return prev_row[-1]
 
 
-def _max_distance(word_length: int) -> int:
+def _max_distance() -> int:
     """Maximum allowed edit distance based on word length.
 
     Always 1 because distance 2 produces too many false positives with
@@ -155,7 +155,7 @@ def _find_correction(word: str) -> Optional[str]:
     if _is_language_inflection(word):
         return None
 
-    max_dist = _max_distance(len(word))
+    max_dist = _max_distance()
     candidates = []
 
     for target in _CORRECTION_TARGETS:

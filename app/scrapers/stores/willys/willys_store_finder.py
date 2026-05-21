@@ -5,7 +5,7 @@ Fetches store list directly from Willys backend API.
 """
 
 import httpx
-from typing import List, Dict, Optional
+from typing import List, Dict
 from loguru import logger
 from utils.security import ssrf_safe_event_hook
 

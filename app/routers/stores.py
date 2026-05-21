@@ -28,7 +28,7 @@ from state import (
 
 # Import plugin system
 try:
-    from scrapers.stores import get_enabled_stores, get_all_stores, get_store
+    from scrapers.stores import get_enabled_stores, get_store
     PLUGIN_SYSTEM_AVAILABLE = True
 except ImportError:
     PLUGIN_SYSTEM_AVAILABLE = False

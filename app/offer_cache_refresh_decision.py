@@ -518,13 +518,11 @@ def _estimate_offer_impact_with_full_planner(
         from cache_delta import (
             _build_current_offer_term_postings,
             _load_or_build_delta_term_postings,
-            _plan_delta_patch_recipe_ids,
         )
     except ModuleNotFoundError:
         from app.cache_delta import (
             _build_current_offer_term_postings,
             _load_or_build_delta_term_postings,
-            _plan_delta_patch_recipe_ids,
         )
 
     current_offer_term_postings = _build_current_offer_term_postings(offers)

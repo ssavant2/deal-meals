@@ -13,8 +13,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from loguru import logger
 
-from languages.i18n import get_language_info
-from utils.request_helpers import get_theme, get_language, get_i18n_context
+from utils.request_helpers import get_i18n_context
 
 # Import plugin system
 try:
@@ -35,8 +34,6 @@ def init_templates(app_templates: Jinja2Templates):
     global templates
     templates = app_templates
 
-
-# NOTE: get_theme, get_language, get_i18n_context imported from utils/request_helpers.py
 
 # ==================== PAGE ROUTES ====================
 

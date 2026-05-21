@@ -7,7 +7,6 @@ Each store inherits from this and defines its config + scraper.
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, List, Any, Callable, Awaitable, Union
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 import copy
 import re
 import time

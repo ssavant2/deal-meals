@@ -110,9 +110,6 @@ VERSION_TITLE = f"Build {BUILD_VERSION}"
 # Import i18n framework
 from languages.i18n import get_language_info
 
-# Import shared request helpers
-from utils.request_helpers import get_theme, get_language, get_i18n_context
-
 # Import routers
 from routers import pages as pages_router
 from routers import stores as stores_router

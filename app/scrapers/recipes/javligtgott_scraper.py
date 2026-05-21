@@ -27,7 +27,6 @@ import re
 import os
 import sys
 from datetime import datetime, timezone
-from html.parser import HTMLParser
 from xml.etree import ElementTree as ET
 
 # Add app directory to path
@@ -37,7 +36,7 @@ sys.path.insert(0, app_dir)
 from database import get_db_session
 from scrapers.recipes._common import (
     RecipeScrapeResult, incremental_attempt_limit, make_recipe_scrape_result,
-    recipe_target_reached, split_serving_lists, validate_image_url,
+    recipe_target_reached, split_serving_lists,
     StreamingRecipeSaver, finish_streaming_recipe_scrape
 )
 from scrapers.recipes.url_discovery_cache import (

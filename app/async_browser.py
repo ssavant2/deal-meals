@@ -31,7 +31,7 @@ USAGE:
     asyncio.run(main())
 """
 
-from playwright.async_api import async_playwright, Browser, BrowserContext
+from playwright.async_api import async_playwright, Browser
 from loguru import logger
 from typing import Optional, List
 import asyncio
@@ -311,7 +311,7 @@ class AsyncBrowserManager:
         return await self.start()
     
     
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, *_exc_info):
         """Async context manager exit - stop browser."""
         await self.stop()
         return False

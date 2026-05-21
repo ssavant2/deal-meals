@@ -9,8 +9,7 @@ which handle locking automatically.
 """
 
 import asyncio
-from typing import Optional, Any
-from datetime import datetime
+from typing import Optional
 
 
 # ==================== LOCKS ====================

@@ -16,10 +16,8 @@ from languages.sv.category_utils import guess_category as shared_guess_category
 from languages.sv.category_utils import normalize_api_category as shared_normalize_category
 from loguru import logger
 from scrapers.stores.weight_utils import parse_weight
-from languages.sv.normalization import fix_swedish_chars
 from constants_timeouts import HTTP_TIMEOUT
 import httpx
-import re
 import asyncio
 from utils.security import ssrf_safe_event_hook
 from datetime import datetime, timezone
@@ -381,7 +379,7 @@ class HemkopStore(StorePlugin):
 
             for item in results:
                 try:
-                    product = self._parse_campaign_product(item, is_online=False)
+                    product = self._parse_campaign_product(item)
                     if product:
                         products.append(product)
                 except Exception as e:
@@ -531,7 +529,7 @@ class HemkopStore(StorePlugin):
 
             for item in results:
                 try:
-                    product = self._parse_campaign_product(item, is_online=True)
+                    product = self._parse_campaign_product(item)
                     if product:
                         products.append(product)
                 except Exception as e:
@@ -546,7 +544,7 @@ class HemkopStore(StorePlugin):
 
     # ==================== PRODUCT PARSING ====================
 
-    def _parse_campaign_product(self, item: dict, is_online: bool = False) -> Optional[Dict]:
+    def _parse_campaign_product(self, item: dict) -> Optional[Dict]:
         """
         Parse a product from campaign API.
 

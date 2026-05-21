@@ -469,12 +469,11 @@ class WillysStore(StorePlugin):
         return await self._get_active_ehandel_store_code(session_cookies=session_cookies)
     
     
-    def _parse_campaign_product(self, item: dict, url_prefix: str = "offline") -> Optional[Dict]:
+    def _parse_campaign_product(self, item: dict) -> Optional[Dict]:
         """Parse a product from campaign API with improved name extraction V4.
 
         Args:
             item: Product dict from Willys campaign API.
-            url_prefix: URL prefix for product links ('offline' for butik, 'online' for ehandel).
         """
 
         try:
@@ -1207,8 +1206,6 @@ class WillysStore(StorePlugin):
                         continue
                     break
 
-                await asyncio.sleep(0.5)
-
             logger.warning("Time selection ('Välj tid') dialog did not appear as expected")
 
         except Exception as e:
@@ -1385,7 +1382,7 @@ class WillysStore(StorePlugin):
                     item_code = item.get('code', '')
                     seen_codes.add(item_code)
 
-                    product = self._parse_campaign_product(item, url_prefix="online")
+                    product = self._parse_campaign_product(item)
                     if product:
                         products.append(product)
 
@@ -1472,7 +1469,7 @@ class WillysStore(StorePlugin):
                         continue
                     seen_codes.add(item_code)
 
-                    product = self._parse_campaign_product(item, url_prefix="online")
+                    product = self._parse_campaign_product(item)
                     if product:
                         variant_products.append(product)
                         new_count += 1

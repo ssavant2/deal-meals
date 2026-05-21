@@ -1095,7 +1095,7 @@ async def update_scraper_config(scraper_id: str, request: Request):
     max_incr = body.get("max_recipes_incremental")
 
     # Validate: must be None or int 1-9999
-    for val, label in [(max_full, "full"), (max_incr, "incremental")]:
+    for val, _label in [(max_full, "full"), (max_incr, "incremental")]:
         if val is not None:
             try:
                 val_int = int(val)
@@ -1358,7 +1358,7 @@ def clear_scraper_recipes(scraper_id: str):
 async def get_running_recipe_scraper():
     """Check if any recipe scraper is currently running."""
     # Snapshot the dict to avoid iteration issues
-    for scraper_id, status in list(running_scrapers.items()):
+    for scraper_id, _status in list(running_scrapers.items()):
         state = await get_running_scraper(scraper_id)
         if state and state.get("running"):
             return JSONResponse({

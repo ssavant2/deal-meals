@@ -479,7 +479,6 @@ class ScraperScheduler:
             # Session is closed — safe to open new sessions inside _add_job_from_schedule
             for row in rows:
                 self._add_job_from_schedule(
-                    schedule_id=str(row.id),
                     scraper_id=row.scraper_id,
                     frequency=row.frequency,
                     day_of_week=row.day_of_week,
@@ -493,7 +492,6 @@ class ScraperScheduler:
 
     def _add_job_from_schedule(
         self,
-        schedule_id: str,
         scraper_id: str,
         frequency: str,
         day_of_week: Optional[int],
@@ -1154,7 +1152,6 @@ class ScraperScheduler:
             # Update scheduler
             if enabled:
                 self._add_job_from_schedule(
-                    schedule_id="",
                     scraper_id=scraper_id,
                     frequency=frequency,
                     day_of_week=day_of_week,

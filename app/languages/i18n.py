@@ -27,7 +27,7 @@ Language folders must contain:
 
 import os
 import importlib
-from typing import Dict, List, Optional, Callable
+from typing import Dict, List, Callable
 from functools import lru_cache
 from loguru import logger
 

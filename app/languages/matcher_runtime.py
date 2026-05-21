@@ -13,7 +13,6 @@ import os
 from types import ModuleType
 
 from .i18n import DEFAULT_LANGUAGE, normalize_language_code
-from .market_runtime import normalize_market_text
 
 
 MATCHER_LANGUAGE_ENV = "MATCHER_LANGUAGE"

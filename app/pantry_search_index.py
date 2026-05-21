@@ -8,7 +8,6 @@ covering a query.
 
 from __future__ import annotations
 
-from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -34,11 +33,6 @@ except ModuleNotFoundError:
         CompiledRecipeSearchTermIndex,
         FoundRecipe,
     )
-
-try:
-    from config import settings
-except ModuleNotFoundError:
-    from app.config import settings
 
 try:
     from languages.matcher_runtime import (

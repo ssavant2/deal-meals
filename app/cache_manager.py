@@ -3169,7 +3169,7 @@ class CacheManager:
         for cat, w in active_cats:
             weight_groups.setdefault(w, []).append(cat)
 
-        for w, group in weight_groups.items():
+        for group in weight_groups.values():
             if len(group) < 3:
                 continue
             min_count = min(fetch_plan.get(c, 0) for c in group)

@@ -41,7 +41,6 @@ SOURCE_URL = ""
 
 import httpx
 import re
-import json
 from loguru import logger
 from utils.security import ssrf_safe_event_hook, is_safe_url
 from typing import List, Dict, Optional
