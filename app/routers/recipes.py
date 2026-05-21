@@ -42,6 +42,10 @@ from utils.recipe_image_cleanup import (
     delete_unreferenced_recipe_image_files,
 )
 from utils.scraper_history import save_run_history, scrape_result_history_kwargs
+from utils.scraper_health import (
+    annotate_recipe_quality_gate_decision,
+    get_recipe_scraper_health,
+)
 from state import (
     running_scrapers, scraper_tasks, event_bus,
     update_running_scraper, get_running_scraper, get_scraper_lock,
@@ -929,6 +933,8 @@ def get_recipe_scrapers():
     # Fetch per-scraper config (fetch limits)
     scraper_configs = _get_scraper_configs()
 
+    scraper_health = get_recipe_scraper_health([s.id for s in scrapers])
+
     scraper_list = []
     for s in scrapers:
         # Use db_source_name for database lookup (may differ from display name)
@@ -954,6 +960,7 @@ def get_recipe_scrapers():
             "warning": s.warning if hasattr(s, 'warning') else "",
             "max_recipes_full": max_full,
             "max_recipes_incremental": max_incr,
+            "health": scraper_health.get(s.id, {}),
             "time_estimates": {}
         }
 
@@ -2176,6 +2183,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
     recipes_found = 0
     attempted_count = 0
     save_result_for_cache = {}
+    scrape_result = None
 
     try:
         scraper_class = scraper_manager.get_scraper_class(scraper_id)
@@ -2494,6 +2502,13 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 state["spell_corrections"] = spell_count
             await update_running_scraper(scraper_id, state, replace=True)
 
+        if scrape_result is not None:
+            annotate_recipe_quality_gate_decision(
+                scraper_id,
+                scrape_result,
+                expected_min_urls=scraper_info.expected_recipe_count if scraper_info else None,
+            )
+
         duration = int(time.time() - start_time)
         save_run_history(
             scraper_id,
@@ -2618,7 +2633,8 @@ async def get_recipe_scraper_status(scraper_id: str):
         "status": "idle",
         "message_key": "recipes.ready_to_run",
         "last_run_at": scraper_info.last_run_at.isoformat() if scraper_info.last_run_at else None,
-        "recipe_count": scraper_info.recipe_count
+        "recipe_count": scraper_info.recipe_count,
+        "health": get_recipe_scraper_health([scraper_id]).get(scraper_id, {}),
     })
 
 

@@ -27,6 +27,7 @@ from recipe_cache_refresh_decision import (
 from recipe_scraper_limits import get_effective_config, get_scraper_configs
 from scrapers.recipes._common import normalize_recipe_scrape_result
 from state import event_bus
+from utils.scraper_health import annotate_recipe_quality_gate_decision
 from utils.scraper_history import save_run_history, scrape_result_history_kwargs
 
 
@@ -777,6 +778,7 @@ class ScraperScheduler:
         recipes_found = 0
         attempted_count = 0
         save_result_for_cache: dict = {}
+        scrape_result = None
 
         if scraper_id in self._batch_executed_scraper_ids:
             logger.info(f"Skipping scheduled scraper {scraper_id}; already ran in this batch")
@@ -871,6 +873,17 @@ class ScraperScheduler:
                         self._batch_has_new_recipes = bool(save_result_for_cache.get("created", 0))
                     return 0
                 recipes_found = save_result_for_cache.get("created", 0)
+                scrape_result = normalize_recipe_scrape_result(
+                    {
+                        "status": scrape_status or ("success" if recipes_found else "success_empty"),
+                        "recipes": [],
+                        "reason": save_result_for_cache.get("scrape_reason"),
+                        "message_key": save_result_for_cache.get("message_key"),
+                        "message_params": save_result_for_cache.get("message_params") or {},
+                    },
+                    mode="incremental",
+                    source_name=db_source_name,
+                )
                 logger.info(f"Scheduled scrape complete for {scraper_id}: {recipes_found} new recipes")
             elif max_incremental and hasattr(scraper, 'scrape_all_recipes'):
                 scrape_result = normalize_recipe_scrape_result(
@@ -935,6 +948,12 @@ class ScraperScheduler:
 
             # Save to run history for time estimates
             duration = int(time.time() - start_time)
+            if scrape_result is not None:
+                annotate_recipe_quality_gate_decision(
+                    scraper_id,
+                    scrape_result,
+                    expected_min_urls=scraper_info.expected_recipe_count if scraper_info else None,
+                )
             save_run_history(
                 scraper_id,
                 "incremental",

@@ -326,6 +326,11 @@ UI = {
     'recipes.clear_database': 'Töm databas',
     'recipes.database_size': 'Databasstorlek',
     'recipes.last_run': 'Senast körd',
+    'recipes.health_no_history': 'Ingen körhistorik ännu',
+    'recipes.health_burn_in': 'Observerar kvalitet ({count}/{needed})',
+    'recipes.health_ready': 'Historiken ser stabil ut',
+    'recipes.health_latest_failed': 'Senaste körningen misslyckades',
+    'recipes.health_gate_mode': 'Kvalitetsläge: {mode}',
     'recipes.remove_favorite': 'Ta bort favorit',
     'recipes.mark_favorite': 'Markera som favorit',
 

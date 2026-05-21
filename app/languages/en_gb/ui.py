@@ -326,6 +326,11 @@ UI = {
     'recipes.clear_database': 'Clear database',
     'recipes.database_size': 'Database size',
     'recipes.last_run': 'Last run',
+    'recipes.health_no_history': 'No run history yet',
+    'recipes.health_burn_in': 'Observing quality ({count}/{needed})',
+    'recipes.health_ready': 'History looks stable',
+    'recipes.health_latest_failed': 'Latest run failed',
+    'recipes.health_gate_mode': 'Quality mode: {mode}',
     'recipes.remove_favorite': 'Remove favorite',
     'recipes.mark_favorite': 'Mark as favorite',
 

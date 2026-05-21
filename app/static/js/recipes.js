@@ -712,6 +712,31 @@ function buildDescription(scraper) {
     return `${base} (${fullText} / ${incrText})`;
 }
 
+function renderScraperHealthBadge(scraper) {
+    const health = scraper.health || {};
+    if (!health.label_key) return '';
+
+    const label = t(health.label_key, health.message_params || {}) || health.label_key;
+    let icon = 'bi-hourglass-split';
+    let cls = 'text-muted';
+    if (health.status === 'ready') {
+        icon = 'bi-shield-check';
+        cls = 'text-success';
+    } else if (health.status === 'latest_failed') {
+        icon = 'bi-exclamation-triangle';
+        cls = 'text-warning';
+    }
+
+    const modeText = health.effective_gate_mode
+        ? t('recipes.health_gate_mode', { mode: health.effective_gate_mode })
+        : '';
+    const title = modeText ? `${label} · ${modeText}` : label;
+    return `
+        <span class="ms-3 ${cls}" title="${escapeAttr(title)}">
+            <i class="bi ${icon}"></i> ${escapeHtml(label)}
+        </span>`;
+}
+
 function createScraperCard(scraper) {
     const card = document.createElement('div');
     card.className = `card scraper-card mb-3 ${scraper.enabled ? '' : 'disabled-scraper'}`;
@@ -732,6 +757,7 @@ function createScraperCard(scraper) {
     const scraperNameText = escapeHtml(scraper.name || '');
     const scraperNameAttr = escapeAttr(scraper.name || '');
     const descriptionText = escapeHtml(buildDescription(scraper));
+    const healthBadgeHtml = renderScraperHealthBadge(scraper);
 
     // Format last run date
     let lastRunText = i18n.never_run;
@@ -824,6 +850,7 @@ function createScraperCard(scraper) {
                         <span title="${i18n.last_run}">
                             <i class="bi bi-clock"></i> ${lastRunText}
                         </span>
+                        ${healthBadgeHtml}
                     </div>
                 </div>
                 <div class="ms-3">
