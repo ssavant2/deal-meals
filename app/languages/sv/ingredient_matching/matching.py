@@ -990,6 +990,22 @@ def _append_canonical_keyword_synonyms(text: str) -> str:
         extras.append('chipotlepulver')
     if 'kycklingsteak' in text and 'kyckling' not in extras:
         extras.append('kyckling')
+    # "mjukost med Xsmak" — expose the corresponding flavored compound keyword
+    # so dedicated Räkost/Skinkost/Baconost/Champinjonost products match via
+    # the compound keyword on the fast path. KSBC suppresses plain mjukost
+    # for these flavor-specific recipes; the compound keyword takes over.
+    if 'mjukost' in text:
+        for _flavor_prefix, _compound_kw in (
+            ('räk', 'räkost'),
+            ('rak', 'räkost'),
+            ('skink', 'skinkost'),
+            ('bacon', 'baconost'),
+            ('champinjon', 'champinjonost'),
+        ):
+            if re.search(rf'\bmed\s+{_flavor_prefix}smak\b', text):
+                if _compound_kw not in text and _compound_kw not in extras:
+                    extras.append(_compound_kw)
+                break
     # "neutral olja" = rapsolja or solrosolja; both words must be present since
     # 'olja' and 'neutral' are individually stop-words and extract nothing alone.
     if 'neutral' in text and 'olja' in text:

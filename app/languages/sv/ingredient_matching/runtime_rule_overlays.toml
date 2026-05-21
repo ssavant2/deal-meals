@@ -130,6 +130,13 @@ keyword = "chili"
 blockers = ["bärta"]
 reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Bärta products with 'chili' in flavor name should not match generic chili-pepper recipes — protein products are functionally distinct from chili spice/vegetable."
 
+[[product_name_blockers]]
+id = "runtime_pnb_sockerkaka"
+status = "active"
+keyword = "sockerkaka"
+blockers = ["basic"]
+reason = "ICA Basic Sockerkaka 350g (bread category) is finished/baked sponge cake — recipes wanting sockerkaka usually mean a bakmix to make a cake batter (Kungsörnen Sockerkaka 420g is bakmix despite no 'mix' in the name; future Kalle Anka Bakmix etc. all match via sockerkaka keyword). Only block the Basic-named finished form."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -242,6 +249,13 @@ keyword = "bittermandel"
 blockers = ["bittermandelarom"]
 reason = "Bittermandelarom (liquid almond extract) is functionally distinct from whole/raw bittermandel (bitter almonds). Recipes calling for 'arom' expect a few drops of bottled extract, not solid almonds to grind themselves."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_sirap"
+status = "active"
+keyword = "sirap"
+blockers = ["jordgubbssirap", "hallonsirap", "mintsirap", "fläderblomssirap", "vaniljsirap", "karamellsirap", "citronsirap"]
+reason = "Flavored cocktail/dessert syrups (jordgubbs, hallon, mint, fläderblom, vanilj, karamell, citron — Monin/Torani-type) are functionally distinct from plain ljus/mörk baking syrup. Smart-blocker prevents the sirap parent keyword when ingredient text contains a compound flavored-syrup form."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -283,6 +297,13 @@ status = "active"
 keyword = "chili"
 context = ["bärta"]
 reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Recipes specifying 'Bärta Chili Lime' want the Bärta product, not fresh chili peppers. Suppress chili keyword when ingredient text contains 'bärta'."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_mjukost"
+status = "active"
+keyword = "mjukost"
+context = ["räksmak", "raksmak", "skinksmak", "baconsmak", "champinjonsmak"]
+reason = "When ingredient explicitly specifies a flavor ('mjukost med Xsmak'), generic mjukost keyword would match all 34 mjukost variants including wrong flavors (Päron, Sriracha, Brie etc.). Suppress mjukost-keyword for flavor-specific recipes — they should match via the compound Xost keyword (räkost/skinkost/baconost/champinjonost) only."
 
 [[space_normalizations]]
 id = "runtime_space_normalization_karl_johan_svamp_karl_johansvamp"
@@ -326,6 +347,14 @@ surface = "important_short_keywords"
 action = "add"
 terms = ["hirs"]
 reason = "Hirs (millet) is a 4-char keyword that gets filtered — real offers exist (Hirs 500g Saltå Kvarn) so it must be in IMPORTANT_SHORT_KEYWORDS"
+
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_rakost"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["räkost"]
+reason = "Räkost (6 chars) is a specific flavored cream cheese variety with dedicated products (Kavli/Fjällbrynt). Recipes saying '200g räkost' need it as a real keyword instead of being filtered as too-short."
 
 [[keyword_set_updates]]
 id = "runtime_stop_word_add_kommer"

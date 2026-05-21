@@ -1735,6 +1735,38 @@ def extract_keywords_from_product(
     if len(unique_keywords) == 1 and unique_keywords[0] in SOLO_KEYWORD_BLOCK:
         return []
 
+    # Flavored mjukost bridge: "Mjukost Räkor/Skinka/Bacon/Champinjon" products
+    # also expose the corresponding compound keyword (räkost/skinkost/...).
+    # Dedicated Räkost/Skinkost/Baconost/Champinjonost products already extract
+    # the compound directly via standard tokenization; this rule only adds the
+    # compound for the "Mjukost <flavor>" naming variant.
+    # Compound is prepended (before plain 'mjukost') so that flavor-specific
+    # recipes match it first and KSBC mjukost-suppression doesn't short-circuit
+    # the whole match attempt.
+    if 'mjukost' in unique_keywords:
+        _MJUKOST_FLAVOR_TO_COMPOUND = {
+            'räkor': 'räkost',
+            'rakor': 'räkost',
+            'skinka': 'skinkost',
+            'bacon': 'baconost',
+            'champinjon': 'champinjonost',
+            'champinjoner': 'champinjonost',
+        }
+        for flavor_word, compound_kw in _MJUKOST_FLAVOR_TO_COMPOUND.items():
+            if re.search(rf'\bmjukost\s+{re.escape(flavor_word)}\b', original_name_lower):
+                if compound_kw not in unique_keywords:
+                    unique_keywords.insert(0, compound_kw)
+                break
+
+    # Reverse bridge: dedicated Xost products should also expose generic
+    # 'mjukost' so plain "200 g mjukost" recipes match Räkost/Skinkost/Bacon-
+    # ost/Champinjonost variants (broad-mjukost-family policy when no flavor
+    # is specified). KSBC mjukost suppresses this path on flavor-specific
+    # recipes, so cross-flavor leakage stays blocked.
+    _XOST_TO_MJUKOST = {'räkost', 'skinkost', 'baconost', 'champinjonost'}
+    if any(kw in _XOST_TO_MJUKOST for kw in unique_keywords) and 'mjukost' not in unique_keywords:
+        unique_keywords.append('mjukost')
+
     return unique_keywords
 
 
@@ -2335,6 +2367,25 @@ def extract_keywords_from_ingredient(
             # specific type (kyckling/kött/fisk) should name it explicitly.
             unique_keywords = ['grönsaksbuljong' if kw == 'buljong' else kw
                                for kw in unique_keywords]
+
+    # Flavored mjukost bridge: "mjukost med X-smak" maps to the corresponding
+    # compound keyword (räkost/skinkost/baconost/champinjonost). Mirrors the
+    # offer-side bridge so a recipe specifying the flavor matches dedicated
+    # Xost-products (Räkost Kavli, Skinkost Fjällbrynt) and "Mjukost Räkor"
+    # variants alike.
+    if 'mjukost' in unique_keywords:
+        _MJUKOST_FLAVOR_INGREDIENT = (
+            ('räk', 'räkost'),
+            ('rak', 'räkost'),
+            ('skink', 'skinkost'),
+            ('bacon', 'baconost'),
+            ('champinjon', 'champinjonost'),
+        )
+        for flavor_prefix, compound_kw in _MJUKOST_FLAVOR_INGREDIENT:
+            if re.search(rf'\bmed\s+{flavor_prefix}smak\b', name):
+                if compound_kw not in unique_keywords:
+                    unique_keywords.append(compound_kw)
+                break
 
     # Safety net: if a single ingredient line produces too many keywords,
     # it's likely a product description or badly formatted text — drop all.
