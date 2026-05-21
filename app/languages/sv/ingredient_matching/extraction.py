@@ -1767,6 +1767,16 @@ def extract_keywords_from_product(
     if any(kw in _XOST_TO_MJUKOST for kw in unique_keywords) and 'mjukost' not in unique_keywords:
         unique_keywords.append('mjukost')
 
+    # Vegan-cheese brand bridge: products whose name signals plant-based
+    # cheese (Violife, Greenvie, "Vegansk Ost", "Växtbaserad ost") expose
+    # `veganost` so dairy-free/vegan recipes match them via the dedicated
+    # vegan keyword (paired with KSBC ost which suppresses dairy on the
+    # same recipes).
+    _VEGAN_CHEESE_BRAND_CUES = ('violife', 'greenvie', 'green vie', 'vegansk', 'växtbaserad', 'vaxtbaserad', 'plant based', 'plantbaserad')
+    if 'ost' in unique_keywords and 'veganost' not in unique_keywords:
+        if any(cue in original_name_lower for cue in _VEGAN_CHEESE_BRAND_CUES):
+            unique_keywords.insert(0, 'veganost')
+
     # Flavored woksås bridge: "Woksås Pad Thai / Satay / Teriyaki / Korean BBQ"
     # products expose the corresponding compound keyword. Same pattern as
     # mjukost — KSBC woksås suppresses plain matching for flavor-specific
@@ -2412,6 +2422,20 @@ def extract_keywords_from_ingredient(
                 if compound_kw not in unique_keywords:
                     unique_keywords.append(compound_kw)
                 break
+
+    # Dietary modifier bridge: "ost, mjölkfri" / "ost laktosfri" / "vegansk ost"
+    # also extracts `veganost` so plant-based cheese products match. KSBC ost
+    # suppresses dairy products on the same recipes via dietary context.
+    if 'ost' in unique_keywords:
+        _DIETARY_MODIFIERS = (
+            'mjölkfri', 'mjölkfritt', 'mjolkfri', 'mjolkfritt',
+            'laktosfri', 'laktosfritt',
+            'vegan', 'vegansk',
+            'växtbaserad', 'vaxtbaserad',
+        )
+        if any(mod in name for mod in _DIETARY_MODIFIERS):
+            if 'veganost' not in unique_keywords:
+                unique_keywords.append('veganost')
 
     # Flavored woksås bridge: "Woksås Pad Thai" / "Pad Thai woksås" maps to
     # the corresponding compound keyword. Mirrors offer-side bridge.

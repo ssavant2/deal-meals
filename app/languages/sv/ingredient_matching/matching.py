@@ -1006,6 +1006,19 @@ def _append_canonical_keyword_synonyms(text: str) -> str:
                 if _compound_kw not in text and _compound_kw not in extras:
                     extras.append(_compound_kw)
                 break
+    # "ost, mjölkfri" / "ost laktosfri" / "vegansk ost" — expose veganost
+    # so plant-based cheese products match. KSBC ost suppresses dairy on
+    # the same recipes.
+    if 'ost' in text:
+        _DIETARY_MODIFIERS = (
+            'mjölkfri', 'mjölkfritt', 'mjolkfri', 'mjolkfritt',
+            'laktosfri', 'laktosfritt',
+            'vegan', 'vegansk',
+            'växtbaserad', 'vaxtbaserad',
+        )
+        if any(mod in text for mod in _DIETARY_MODIFIERS):
+            if 'veganost' not in text and 'veganost' not in extras:
+                extras.append('veganost')
     # "Woksås Pad Thai" / "Pad Thai woksås" etc. — expose Xwoksås compound.
     if 'woksås' in text or 'woksas' in text:
         for _pattern, _compound_kw in (

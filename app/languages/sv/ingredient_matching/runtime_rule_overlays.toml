@@ -312,6 +312,13 @@ keyword = "woksås"
 context = ["pad thai", "padthai", "teriyaki", "satay", "korean bbq", "koreanbbq", "sweet sour", "sweet & sour", "sweet&sour", "sweetsour"]
 reason = "When recipe specifies woksås with a flavor (Pad Thai, Satay, Teriyaki, Korean BBQ, Sweet & Sour), suppress plain woksås-keyword. Match goes via the compound Xwoksås keyword (padthaiwoksas/sataywoksas/teriyakiwoksas/koreanbbqwoksas/sweetsourwoksas). Plain woksås-recipes (no flavor specified) still match all variants via the reverse offer bridge."
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_ost"
+status = "active"
+keyword = "ost"
+context = ["mjölkfri", "mjölkfritt", "mjolkfri", "mjolkfritt", "laktosfri", "laktosfritt", "vegan", "vegansk", "växtbaserad", "vaxtbaserad"]
+reason = "When ingredient explicitly specifies dietary restriction (mjölkfri/laktosfri/vegan/växtbaserad), generic 'ost' keyword would match dairy-cheese products. Vegan/dairy-free recipes need plant-based alternatives only — Violife/Greenvie etc. match via dedicated 'veganost' keyword which is unaffected by this KSBC."
+
 [[space_normalizations]]
 id = "runtime_space_normalization_karl_johan_svamp_karl_johansvamp"
 status = "active"
