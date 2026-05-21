@@ -63,10 +63,10 @@ _PAREN_ALT_RE = re.compile(r'^(.*?)\(([^)]*?\beller\b[^)]*)\)\s*$', re.IGNORECAS
 _LEAF_ALT_SPLIT_RE = re.compile(r'\s*,\s*|\s+eller\s+', re.IGNORECASE)
 _PLUS_SPLIT_RE = re.compile(r'\s+\+\s+')
 _HERB_LIST_SPLIT_RE = re.compile(r'\s*,\s*|\s+och\s+', re.IGNORECASE)
-_EXAMPLE_SIGNAL_RE = re.compile(r'(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s+(.+)', re.IGNORECASE)
-_EXAMPLE_BASE_RE = re.compile(r'(.+?)\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s', re.IGNORECASE)
+_EXAMPLE_SIGNAL_RE = re.compile(r'(?:t\.?\s*ex\.?|exempelvis|till\s+exempel|alternativt)\s+(.+)', re.IGNORECASE)
+_EXAMPLE_BASE_RE = re.compile(r'(.+?)\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel|alternativt)\s', re.IGNORECASE)
 _PAREN_EXAMPLE_RE = re.compile(
-    r'^(.*?)\(\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s+([^)]*)\)\s*$',
+    r'^(.*?)\(\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel|alternativt)\s+([^)]*)\)\s*$',
     re.IGNORECASE,
 )
 _SINGLE_PRODUCT_EXAMPLE_PAREN_RE = re.compile(
@@ -169,10 +169,14 @@ def _single_example_item_is_purchasable_alternative(base: str, item: str) -> boo
 
     base_lower = base.lower()
     item_lower = item.lower()
-    return (
-        'gurka' in base_lower
-        and item_lower in {'bostongurka', 'bostongurkor'}
-    )
+    if 'gurka' in base_lower and item_lower in {'bostongurka', 'bostongurkor'}:
+        return True
+    # Tomat-family: "tomater (alternativt körsbärstomater)" → keep both as
+    # alternatives. Item may include leading qualifiers like 'en burk' —
+    # accept as long as it contains a tomat-family word.
+    if 'tomat' in base_lower and 'tomat' in item_lower:
+        return True
+    return False
 
 def rewrite_buljong_eller_fond(text: str) -> str:
     """Rewrite generic stock alternatives to specific ones in both directions.

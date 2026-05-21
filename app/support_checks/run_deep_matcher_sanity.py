@@ -11836,3 +11836,14 @@ test("ost-dietary: laktosfri-recipe matches Violife",
      match("Vegansk Ost Violife 200g", "200 g ost laktosfri", "dairy"), "veganost")
 test("ost-dietary: plain ost-recipe matches vegan ost via plain keyword",
      match("Vegansk Ost Violife 200g", "200 g ost", "dairy"), "ost")
+
+# Q68-6: parenthetical 'alternativt' expansion + tomat-family purchasable alt
+from languages.sv.ingredient_matching.extraction import extract_keywords_from_ingredient as _ext_q686
+test("alternativt-expansion: tomater + körsbärstomater paren both extract",
+     sorted(_ext_q686("6 tomater, hackade (alternativt en burk körsbärstomater)")),
+     sorted(['tomat', 'småtomat']))
+test("alternativt-expansion: tomater (alternativt körsbärstomater)",
+     sorted(_ext_q686("6 tomater (alternativt körsbärstomater)")),
+     sorted(['tomat', 'småtomat']))
+test("alternativt-expansion: non-tomat paren unchanged",
+     _ext_q686("6 tomater (ca 500g)"), ['tomat'])

@@ -1771,11 +1771,26 @@ def extract_keywords_from_product(
     # cheese (Violife, Greenvie, "Vegansk Ost", "Växtbaserad ost") expose
     # `veganost` so dairy-free/vegan recipes match them via the dedicated
     # vegan keyword (paired with KSBC ost which suppresses dairy on the
-    # same recipes).
+    # same recipes). For these vegan products, also strip dairy-isolated
+    # cheese-type keywords (mozzarella/cheddar/feta/etc.) — they describe
+    # the vegan product's style, not a dairy cheese, and would otherwise
+    # trigger dairy-cheese isolation rules that block the vegan match.
     _VEGAN_CHEESE_BRAND_CUES = ('violife', 'greenvie', 'green vie', 'vegansk', 'växtbaserad', 'vaxtbaserad', 'plant based', 'plantbaserad')
-    if 'ost' in unique_keywords and 'veganost' not in unique_keywords:
-        if any(cue in original_name_lower for cue in _VEGAN_CHEESE_BRAND_CUES):
+    _DAIRY_ISOLATED_CHEESE_KEYWORDS = {
+        'mozzarella', 'cheddar', 'feta', 'fetaost', 'parmesan', 'parmigiano',
+        'gorgonzola', 'gouda', 'brie', 'camembert', 'manchego', 'ricotta',
+        'halloumi', 'chevre', 'gruyere',
+    }
+    _is_vegan_cheese_product = (
+        'ost' in unique_keywords
+        and any(cue in original_name_lower for cue in _VEGAN_CHEESE_BRAND_CUES)
+    )
+    if _is_vegan_cheese_product:
+        if 'veganost' not in unique_keywords:
             unique_keywords.insert(0, 'veganost')
+        # Strip dairy-isolated cheese-type style descriptors so they don't
+        # trigger compound-strict / isolation rules meant for dairy products.
+        unique_keywords = [kw for kw in unique_keywords if kw not in _DAIRY_ISOLATED_CHEESE_KEYWORDS]
 
     # Flavored woksås bridge: "Woksås Pad Thai / Satay / Teriyaki / Korean BBQ"
     # products expose the corresponding compound keyword. Same pattern as
@@ -1848,7 +1863,11 @@ def extract_keywords_from_ingredient(
     """
     if not _skip_eller_split:
         _eller_lower = ingredient.lower()
-        if ' eller ' in _eller_lower or '(eller' in _eller_lower:
+        if (
+            ' eller ' in _eller_lower
+            or '(eller' in _eller_lower
+            or 'alternativt' in _eller_lower
+        ):
             alternatives = parse_eller_alternatives(ingredient)
             if len(alternatives) > 1:
                 merged: List[str] = []
