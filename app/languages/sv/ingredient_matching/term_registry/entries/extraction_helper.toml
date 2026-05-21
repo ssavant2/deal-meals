@@ -1817,26 +1817,6 @@ variant = "majskolv"
 layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
 
 [[entries]]
-entry_id = "sv-se.family.margarin"
-language = "sv"
-market = "SE"
-canonical = "margarin"
-status = "active"
-variants = ["margarin"]
-ingredient_terms = ["margarin"]
-offer_terms = ["margarin"]
-negative_guards = []
-source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:829"]
-layer_policy = ["normal"]
-notes = "Registry coverage for hardcoded extraction helper output (product side only — Bregott/Lätta/Flora map to margarin keyword)."
-
-[[entries.coverage]]
-source_family = "extraction_helper"
-canonical = "margarin"
-variant = "margarin"
-layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
-
-[[entries]]
 entry_id = "sv-se.family.marinad"
 language = "sv"
 market = "SE"

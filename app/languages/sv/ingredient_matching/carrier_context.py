@@ -661,7 +661,9 @@ _CONTEXT_REQUIRED_WORDS_RAW: FrozenSet[str] = frozenset({
     # plommon/plommontomater KEPT — regular-sized plum tomatoes, NOT interchangeable with small.
     'plommon', 'plommontomater',
     'körsbär', 'körsbärstomater', 'cherry',  # keep: körsbärstomater default = canned
-    'datterini', 'datterino',  # Italian variety (often canned) - not "vanliga tomater"
+    # 'datterini', 'datterino' REMOVED — now treated as specialty qualifier
+    # for tomat (in runtime overlay), so they match canned-tomato recipes
+    # (krossade/burk) via qualifier match, blocked from fresh-tomato via form rules
     # 'marzano' removed: San Marzano är premium konserverad tomat — lämplig som substitut
     # för alla konserverade tomat-ingredienser. "(gärna San Marzano)"-parenteser strimlas av parsern
     # så CONTEXT_REQUIRED_WORD omöjliggjorde matchning i praktiken.

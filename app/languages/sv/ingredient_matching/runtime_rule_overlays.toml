@@ -158,6 +158,13 @@ source = "karl johan svamp"
 target = "karl-johansvamp"
 reason = "Karl-Johan three-word form — normalize to compound"
 
+[[space_normalizations]]
+id = "runtime_space_normalization_polpa_di_pomodoro_krossade_tomater"
+status = "active"
+source = "polpa di pomodoro"
+target = "krossade tomater"
+reason = "Polpa di Pomodoro = Italian for crushed canned tomatoes. Without normalization the term ends extraction with empty keywords. Map to existing 'krossade tomater' wording so tomato recipes can match."
+
 [[keyword_set_updates]]
 id = "runtime_important_short_keyword_add_hirs"
 status = "active"
@@ -173,3 +180,133 @@ surface = "stop_words"
 action = "add"
 terms = ["kommer"]
 reason = "Verb 'kommer' (comes) leaks as keyword from children's book/toy product names like 'Halvan Här kommer flygplanet', 'Vems rumpa kommer här?' — non-food items that match ingredient text containing 'kommer'."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_brodrost"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["brödrost"]
+reason = "Brödrost (toaster) is a kitchen appliance, not food. Mistakenly scraped into dairy category with name ending in -ost."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_kaffebryggare"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["kaffebryggare"]
+reason = "Kaffebryggare (coffee maker) is a kitchen appliance, not food. Mistakenly classified as beverages category."
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_tomat_datterini_datterino"
+status = "active"
+keyword = "tomat"
+qualifiers = ["datterini", "datterino"]
+bidirectional = true
+reason = "Datterini are canned Italian cherry tomatoes — treat as specialty variety so they match canned-tomat recipes via qualifier, but not plain/fresh tomat recipes"
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_tomater_datterini_datterino"
+status = "active"
+keyword = "tomater"
+qualifiers = ["datterini", "datterino"]
+bidirectional = true
+reason = "Datterini canned Italian tomatoes — plural tomat keyword path"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_datterini_burk_konserverad"
+status = "active"
+qualifier = "datterini"
+equivalents = ["burk", "konserverad", "konserverade", "krossad", "krossade", "finkrossad", "finkrossade", "passerad", "passerade", "skalad", "skalade", "polpa"]
+reason = "Datterini are canned/jarred tomatoes — equivalent to other canned-tomato qualifier forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_datterino_burk_konserverad"
+status = "active"
+qualifier = "datterino"
+equivalents = ["burk", "konserverad", "konserverade", "krossad", "krossade", "finkrossad", "finkrossade", "passerad", "passerade", "skalad", "skalade", "polpa"]
+reason = "Datterino singular form"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_burk_datterini_datterino"
+status = "active"
+qualifier = "burk"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_konserverad_datterini_datterino"
+status = "active"
+qualifier = "konserverad"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_konserverade_datterini_datterino"
+status = "active"
+qualifier = "konserverade"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_krossad_datterini_datterino"
+status = "active"
+qualifier = "krossad"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_krossade_datterini_datterino"
+status = "active"
+qualifier = "krossade"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_finkrossad_datterini_datterino"
+status = "active"
+qualifier = "finkrossad"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_finkrossade_datterini_datterino"
+status = "active"
+qualifier = "finkrossade"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_passerad_datterini_datterino"
+status = "active"
+qualifier = "passerad"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_passerade_datterini_datterino"
+status = "active"
+qualifier = "passerade"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_skalad_datterini_datterino"
+status = "active"
+qualifier = "skalad"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_skalade_datterini_datterino"
+status = "active"
+qualifier = "skalade"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_polpa_datterini_datterino"
+status = "active"
+qualifier = "polpa"
+equivalents = ["datterini", "datterino"]
+reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
