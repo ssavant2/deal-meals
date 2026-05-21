@@ -1006,6 +1006,19 @@ def _append_canonical_keyword_synonyms(text: str) -> str:
                 if _compound_kw not in text and _compound_kw not in extras:
                     extras.append(_compound_kw)
                 break
+    # "Woksås Pad Thai" / "Pad Thai woksås" etc. — expose Xwoksås compound.
+    if 'woksås' in text or 'woksas' in text:
+        for _pattern, _compound_kw in (
+            (r'\bpad\s*thai\b', 'padthaiwoksas'),
+            (r'\bteriyaki\b', 'teriyakiwoksas'),
+            (r'\bsatay\b', 'sataywoksas'),
+            (r'\bkorean\s*bbq\b', 'koreanbbqwoksas'),
+            (r'\bsweet\s*(?:&|och|and)?\s*sour\b', 'sweetsourwoksas'),
+        ):
+            if re.search(_pattern, text):
+                if _compound_kw not in text and _compound_kw not in extras:
+                    extras.append(_compound_kw)
+                break
     # "neutral olja" = rapsolja or solrosolja; both words must be present since
     # 'olja' and 'neutral' are individually stop-words and extract nothing alone.
     if 'neutral' in text and 'olja' in text:

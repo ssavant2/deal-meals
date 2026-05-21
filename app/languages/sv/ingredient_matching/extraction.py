@@ -1767,6 +1767,32 @@ def extract_keywords_from_product(
     if any(kw in _XOST_TO_MJUKOST for kw in unique_keywords) and 'mjukost' not in unique_keywords:
         unique_keywords.append('mjukost')
 
+    # Flavored woksås bridge: "Woksås Pad Thai / Satay / Teriyaki / Korean BBQ"
+    # products expose the corresponding compound keyword. Same pattern as
+    # mjukost — KSBC woksås suppresses plain matching for flavor-specific
+    # recipes; the compound keyword takes over. Compound prepended so it's
+    # tried before plain 'woksås'.
+    _WOKSAS_FLAVOR_PATTERNS = (
+        (r'\bpad\s*thai\b', 'padthaiwoksas'),
+        (r'\bteriyaki\b', 'teriyakiwoksas'),
+        (r'\bsatay\b', 'sataywoksas'),
+        (r'\bkorean\s*bbq\b', 'koreanbbqwoksas'),
+        (r'\bsweet\s*(?:&|och|and)?\s*sour\b', 'sweetsourwoksas'),
+    )
+    if 'woksås' in unique_keywords or 'woksas' in unique_keywords:
+        for _pattern, _compound_kw in _WOKSAS_FLAVOR_PATTERNS:
+            if re.search(_pattern, original_name_lower):
+                if _compound_kw not in unique_keywords:
+                    unique_keywords.insert(0, _compound_kw)
+                break
+
+    # Reverse bridge: dedicated Xwoksås products also expose generic 'woksås'
+    # so plain 'woksås' recipes match all variants (broad-family policy).
+    _XWOKSAS_TO_WOKSAS = {'padthaiwoksas', 'teriyakiwoksas', 'sataywoksas',
+                          'koreanbbqwoksas', 'sweetsourwoksas'}
+    if any(kw in _XWOKSAS_TO_WOKSAS for kw in unique_keywords) and 'woksås' not in unique_keywords:
+        unique_keywords.append('woksås')
+
     return unique_keywords
 
 
@@ -2383,6 +2409,22 @@ def extract_keywords_from_ingredient(
         )
         for flavor_prefix, compound_kw in _MJUKOST_FLAVOR_INGREDIENT:
             if re.search(rf'\bmed\s+{flavor_prefix}smak\b', name):
+                if compound_kw not in unique_keywords:
+                    unique_keywords.append(compound_kw)
+                break
+
+    # Flavored woksås bridge: "Woksås Pad Thai" / "Pad Thai woksås" maps to
+    # the corresponding compound keyword. Mirrors offer-side bridge.
+    if 'woksås' in unique_keywords or 'woksas' in unique_keywords:
+        _WOKSAS_FLAVOR_INGREDIENT = (
+            (r'\bpad\s*thai\b', 'padthaiwoksas'),
+            (r'\bteriyaki\b', 'teriyakiwoksas'),
+            (r'\bsatay\b', 'sataywoksas'),
+            (r'\bkorean\s*bbq\b', 'koreanbbqwoksas'),
+            (r'\bsweet\s*(?:&|och|and)?\s*sour\b', 'sweetsourwoksas'),
+        )
+        for _pattern, compound_kw in _WOKSAS_FLAVOR_INGREDIENT:
+            if re.search(_pattern, name):
                 if compound_kw not in unique_keywords:
                     unique_keywords.append(compound_kw)
                 break
