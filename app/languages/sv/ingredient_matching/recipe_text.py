@@ -102,6 +102,17 @@ _TRUNCATED_ELLER_COMPOUND_RE = re.compile(
     rf'\b([a-zåäöé]+)-\s+eller\s+([a-zåäöé]+?)({"|".join(re.escape(s) for s in _TRUNCATED_ELLER_SUFFIXES)})\b',
     re.IGNORECASE,
 )
+# Color-adjective eller-groups where the first arm omits the shared noun.
+# Example: "gula eller röda lökar" / "1 gul eller röd lök".
+# Without this rewrite, parse_eller_alternatives splits to ["2 gula", "röda lökar"]
+# and the first arm loses the noun. Restrict to a known list of color adjectives
+# (singular + plural forms) and a known list of nouns where this pattern is safe.
+_COLOR_ADJECTIVE_WORD = r'(?:gul|gula|röd|röda|vit|vita|grön|gröna|brun|bruna|svart|svarta)'
+_COLOR_ADJ_ELLER_NOUN_RE = re.compile(
+    rf'\b({_COLOR_ADJECTIVE_WORD})\s+eller\s+({_COLOR_ADJECTIVE_WORD})\s+(lök|lökar|löken|paprika|paprikor|paprikan|kål|kålen)\b',
+    re.IGNORECASE,
+)
+
 _CHOCOLATE_COLOR_WORD = r'(?:vit|mörk|mork|ljus)'
 _TRUNCATED_CHOCOLATE_COLOR_OCH_RE = re.compile(
     rf'\b({_CHOCOLATE_COLOR_WORD})-\s+(?:och|&)\s+({_CHOCOLATE_COLOR_WORD})\s+choklad\b',
@@ -407,11 +418,20 @@ def rewrite_truncated_eller_compounds(text: str) -> str:
     - "sill- eller strömmingsfiléer" -> "sillfiléer eller strömmingsfiléer"
     - "sej- eller torskfilé" -> "sejfilé eller torskfilé"
     - "röd- eller vitkål" -> "rödkål eller vitkål"
+    - "gula eller röda lökar" -> "gula lökar eller röda lökar"
     """
-    return _TRUNCATED_ELLER_COMPOUND_RE.sub(
+    text = _TRUNCATED_ELLER_COMPOUND_RE.sub(
         lambda m: f"{m.group(1)}{m.group(3)} eller {m.group(2)}{m.group(3)}",
         text,
     )
+    # Color-adjective eller-group: copy the shared noun back to the first arm
+    # so each alternative carries the noun ("gula" -> "gula lökar"). Each arm
+    # then extracts to its own keyword set.
+    text = _COLOR_ADJ_ELLER_NOUN_RE.sub(
+        lambda m: f"{m.group(1)} {m.group(3)} eller {m.group(2)} {m.group(3)}",
+        text,
+    )
+    return text
 
 
 def rewrite_truncated_chocolate_color_lists(text: str) -> str:

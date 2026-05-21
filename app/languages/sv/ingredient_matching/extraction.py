@@ -27,6 +27,7 @@ from .keywords import (
 from .synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS
 from .recipe_text import (
     is_subrecipe_reference_text,
+    parse_eller_alternatives,
     preserve_cheese_preference_parentheticals,
     preserve_fresh_pasta_parenthetical,
     preserve_parenthetical_chili_alias,
@@ -1754,6 +1755,36 @@ def extract_keywords_from_ingredient(
     """
     Extract searchable keywords from a recipe ingredient.
 
+    When the ingredient contains an "eller" (or) group, each alternative arm
+    is extracted independently and the keyword sets are merged. This preserves
+    parent + child compounds in eller-groups (e.g. "lök eller rödlök" yields
+    both ['lök', 'rödlök']) instead of compound detection collapsing the
+    parent. Non-eller ingredients go straight to single-pass extraction.
+    """
+    lowered = ingredient.lower()
+    if ' eller ' in lowered or '(eller' in lowered:
+        alternatives = parse_eller_alternatives(ingredient)
+        if len(alternatives) > 1:
+            merged: List[str] = []
+            for alt in alternatives:
+                for kw in _extract_keywords_from_ingredient_single(alt, min_length):
+                    if kw not in merged:
+                        merged.append(kw)
+            # Mirror single-pass safety net for runaway keyword counts.
+            if len(merged) > 5:
+                return []
+            return merged
+    return _extract_keywords_from_ingredient_single(ingredient, min_length)
+
+
+def _extract_keywords_from_ingredient_single(
+    ingredient: str,
+    min_length: int = MIN_KEYWORD_LENGTH_STRICT
+) -> List[str]:
+    """
+    Single-pass extraction: produces keywords for one ingredient text without
+    splitting on eller-groups. The public wrapper handles eller-merging.
+
     More strict than product extraction (requires longer words).
 
     Args:
@@ -1764,9 +1795,9 @@ def extract_keywords_from_ingredient(
         List of keywords suitable for matching
 
     Example:
-        >>> extract_keywords_from_ingredient("2-3 msk grovt salt")
+        >>> _extract_keywords_from_ingredient_single("2-3 msk grovt salt")
         []  # "grovt" and "salt" filtered by stop_words
-        >>> extract_keywords_from_ingredient("ca 1 kg laxfilé")
+        >>> _extract_keywords_from_ingredient_single("ca 1 kg laxfilé")
         ['laxfilé']
     """
     # Skip sub-recipe references — these are not purchasable ingredients

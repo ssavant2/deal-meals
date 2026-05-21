@@ -116,6 +116,20 @@ keyword = "vitchoklad"
 blockers = ["havregrynsgröt", "proteinpudding", "dessertsås", "dessertsås"]
 reason = "Havregrynsgröt/proteinpudding/dessertsås with vit choklad as flavor are not actual white chocolate baking products — recipes wanting vit choklad need solid chocolate bar/chips for cooking or baking"
 
+[[product_name_blockers]]
+id = "runtime_pnb_lask"
+status = "active"
+keyword = "läsk"
+blockers = ["tonic", "tonicvatten"]
+reason = "Tonic is quinine-based bitter water with minimal sugar — recipes calling for 'läsk' use sweet carbonated soda for sweetness/fluffiness (pannkakor, bakning). Tonic-products should not substitute."
+
+[[product_name_blockers]]
+id = "runtime_pnb_chili"
+status = "active"
+keyword = "chili"
+blockers = ["bärta"]
+reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Bärta products with 'chili' in flavor name should not match generic chili-pepper recipes — protein products are functionally distinct from chili spice/vegetable."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -214,6 +228,13 @@ keyword = "vinäger"
 blockers = ["balsamvinäger", "äppelcidervinäger", "vitvinsvinäger", "rödvinsvinäger", "risvinäger", "sherryvinäger", "champagnevinäger", "merlotvinäger", "cavavinäger", "portvinsvinäger"]
 reason = "Specific vinegar varieties (balsamic/apple cider/wine/rice/sherry/champagne) have distinct flavors and uses — generic 'vinäger' parent should not match a recipe that specifies a compound vinegar. Smart-blocker prevents standalone 'vinäger'-recipes from being blocked."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_kex"
+status = "inactive"
+keyword = "kex"
+blockers = ["rawfood", "rawfoods"]
+reason = "Replaced by runtime_ksbc_kex_rawfood — FPB smart-blocker is bypassed because 'kex' appears as a standalone word in ingredient text 'Rawfood Kex' (smart-blocker sees w == keyword → has_valid=True). KSBC operates at matched_keyword level and works correctly."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -234,6 +255,27 @@ status = "active"
 keyword = "formbröd"
 context = ["grov", "grova"]
 reason = "\"Grova brödskivor\" (coarse bread slices, e.g. rågbröd) requests dense coarse bread — soft white formbröd/formfranska should not match. Routes via brödskivor→formbröd canonical synonym. FPB cannot be used here due to smart-blocker/synonym-append interaction."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_kex"
+status = "active"
+keyword = "kex"
+context = ["rawfood", "rawfoods"]
+reason = "Rawfood-kex are dehydrated raw seed/vegetable crackers, distinct from baked wheat crackers. Recipes with 'rawfood' should not get conventional kex products. FPB doesn't work here because 'kex' appears standalone in ingredient text 'Rawfood Kex'; KSBC suppresses at matched_keyword level."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_persilja"
+status = "active"
+keyword = "persilja"
+context = ["krutonger"]
+reason = "'Krutonger Vitlök & Persilja' is a flavored crouton product name where 'persilja' is the flavor descriptor, not a fresh parsley ingredient. Suppress persilja keyword when ingredient text contains 'krutonger'."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_chili"
+status = "active"
+keyword = "chili"
+context = ["bärta"]
+reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Recipes specifying 'Bärta Chili Lime' want the Bärta product, not fresh chili peppers. Suppress chili keyword when ingredient text contains 'bärta'."
 
 [[space_normalizations]]
 id = "runtime_space_normalization_karl_johan_svamp_karl_johansvamp"
