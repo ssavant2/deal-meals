@@ -18,6 +18,7 @@ Usage:
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --dry-run
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --allow-removals
+    docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --allow-removals --confirm-large-removals
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --migrate-hashes
     docker compose exec -T -w /app web python support_checks/promote_term_baseline.py --language sv --market SE
 
@@ -93,6 +94,7 @@ BASELINE_VERIFICATION_OMIT_KEYS = {
     "first_batch_id",
     "last_batch_id",
 }
+LARGE_REMOVAL_CONFIRMATION_THRESHOLD = 5
 
 
 @dataclass(frozen=True)
@@ -673,6 +675,7 @@ def promote(
     dry_run: bool = False,
     migrate_hashes: bool = False,
     allow_removals: bool = False,
+    confirm_large_removals: bool = False,
     output_dir: Path | None = None,
 ) -> int:
     if output_dir is not None:
@@ -738,6 +741,25 @@ def promote(
                 print("Re-run with --allow-removals only after confirming the removals are intentional.")
                 print("Aborting.")
                 return 1
+            if (
+                len(truly_removed) > LARGE_REMOVAL_CONFIRMATION_THRESHOLD
+                and not dry_run
+                and not confirm_large_removals
+            ):
+                print(
+                    "Large removal set detected. Type 'yes' to confirm dropping "
+                    f"{len(truly_removed)} verified-term variants from the baseline."
+                )
+                if not sys.stdin.isatty():
+                    print(
+                        "Non-interactive run: re-run with --confirm-large-removals "
+                        "after checking that every removal is intentional."
+                    )
+                    print("Aborting.")
+                    return 1
+                if input("> ").strip().lower() != "yes":
+                    print("Aborting.")
+                    return 1
             allowed_removed_ids.update(truly_removed)
             print("Removal approval enabled: these truly removed variants will be dropped from the baseline.")
         print(
@@ -973,6 +995,14 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--confirm-large-removals",
+        action="store_true",
+        help=(
+            "Non-interactive confirmation for dropping more than "
+            f"{LARGE_REMOVAL_CONFIRMATION_THRESHOLD} truly removed variants after review."
+        ),
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=None,
@@ -1012,6 +1042,7 @@ def main() -> int:
             dry_run=args.dry_run,
             migrate_hashes=args.migrate_hashes,
             allow_removals=args.allow_removals,
+            confirm_large_removals=args.confirm_large_removals,
             output_dir=args.output_dir,
         )
     except PermissionError as exc:
@@ -1028,6 +1059,7 @@ def main() -> int:
             dry_run=args.dry_run,
             migrate_hashes=args.migrate_hashes,
             allow_removals=args.allow_removals,
+            confirm_large_removals=args.confirm_large_removals,
             output_dir=fallback_dir,
         )
 

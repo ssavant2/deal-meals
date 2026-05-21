@@ -194,6 +194,8 @@ Add only the flags that match the change:
 - `--inventory-changed` when the rule-inventory TOML source or generated JSON changed.
 - `--allow-removals` only after confirming intentional TOML inactivation or
   removal.
+- `--confirm-large-removals` only after reviewing a non-interactive promotion
+  with more than five true verified-term removals.
 - `--refresh-line-refs` when inventory anchors moved; run from a writable host
   checkout or write-enabled dev container.
 - `--baseline-output-dir /tmp/term-baseline-promotion` only when the checkout is
@@ -343,6 +345,13 @@ FPB/PNB/KSBC blocker such as `balsamico` may not fire on the joined runtime
 token. `dm matcher add pnb|fpb|ksbc` warns when it sees this shape; include the
 suggested joined blocker as well when the rule is meant to block that compound.
 
+Watch for FPB smart-blocker bypass. FPB is best when the keyword appears only
+inside the blocker context. If the recipe-side ingredient also contains the
+keyword as a standalone word, smart-blocker can allow the match and the FPB will
+look present-but-ineffective. In that shape, verify the pair with
+`dm matcher probe --expect no-match ...` and prefer KSBC when the specific
+recipe-side context should suppress the generic keyword fallback.
+
 PNB and GPB are product/backend proof surfaces. Do not treat a passing or
 failing `matches_ingredient()` check alone as enough evidence for a product-name
 blocker; use backend/product diagnostics or a focused behavior sanity when the
@@ -365,6 +374,20 @@ comes from:
 The output distinguishes historical base tables, historical update tables, and
 `runtime_rule_overlays.toml`, which avoids the "nearby dict section" trap in
 large Python files.
+
+Use the same list command for registry and specialty surfaces before hand
+editing TOML or Python:
+
+```bash
+./bin/dm matcher list keyword-synonym --term <term>
+./bin/dm matcher list ingredient-parent --term <term>
+./bin/dm matcher list specialty-qualifier --term <term>
+./bin/dm matcher list specialty-qualifiers --term <term>  # accepted alias
+./bin/dm matcher list match-bridge --term <term>
+```
+
+Remember that `match-bridge` entries are diagnostics/migration metadata unless
+the corresponding runtime-wired parent/synonym/offer-keyword row exists too.
 
 The same overlay file also backs stop/non-food filters, space-normalization,
 flavor/carrier, processed-food, cuisine-context, compound-protection,
@@ -415,6 +438,23 @@ product and ingredient keywords, relevant blocker context, and the current
 fast/backend-style result. It is an audit helper, not a second matcher
 implementation.
 
+### Behavior Probe
+
+Use `dm matcher probe` when the question is "does this new rule actually bite?"
+rather than "does the dict contain my new value?"
+
+```bash
+./bin/dm matcher probe \
+  --offer "Kex med choklad" \
+  --ingredient "kex" \
+  --expect no-match
+```
+
+The probe is read-only. It prints the fast matcher result and the full
+`RecipeMatcher` backend result side by side, and exits non-zero when
+`--expect` or `--expect-fast` is not met. If fast and backend diverge, run
+`dm matcher explain` next to see which rule family is involved.
+
 ## Cold-Start Details
 
 Read this section first if you have never seen this runbook before. Also return
@@ -443,6 +483,16 @@ The important layers are:
 7. backend validation in `validate_offer_match_candidate`
 8. cache materialization and grouping
 
+Short pipeline sketch for rule placement:
+
+```text
+ingredient text -> extraction/parents/synonyms -> routing terms
+offer text -> extraction/precompute/context/specialty/form data
+routing candidate -> matches_ingredient_fast
+fast keyword -> FPB/KSBC/PNB/specialty/form/backend validators
+validated pair -> cache materialization -> UI/API result
+```
+
 When a change affects semantics, think in terms of all eight layers. If you fix
 only the layer where you first noticed the bug, you may create a live/cache
 split.
@@ -458,6 +508,17 @@ The main repo map:
 | `app/support_checks/` | Deterministic support checks and matcher diagnostics. |
 | `app/tests/` | Ignored local workbench/review material. Useful for investigation, not permanent proof. |
 | `docs/TESTING.md` | High-level testing policy and current durable matcher/cache gates. |
+
+Dietary/vegan context is intentionally spread by responsibility:
+
+| Module | Owns |
+| --- | --- |
+| `specialty_rules.py` | Specialty qualifiers and bidirectional qualifier families. |
+| `validators.py` | Runtime specialty/form validators called after a candidate exists. |
+| `blocker_data.py` | FPB/PNB/KSBC blocker dictionaries and overlay merges. |
+| `matching.py` / `engine.py` | Fast ingredient-offer candidate generation. |
+| `recipe_matcher_backend.py` | Backend-only validation and recipe-context decisions. |
+| `extraction.py` / `keywords.py` | Which words become ingredient/product keywords at all. |
 
 The production-style compose service mounts `/app` read-only. The dev overlay is
 writable in the current setup, but baseline writes belong to the file-owning
@@ -594,7 +655,7 @@ table.
 | Offer keyword extraction | `./bin/dm matcher add offer-extra-keyword ...` or `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Product wording should expose an additional canonical offer keyword. | Adding recipe synonyms when only offer extraction is missing. |
 | Recipe extraction helper | `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures. |
 | Parent/canonical fallback | `./bin/dm matcher add ingredient-parent ...`, `parent-match-only ...`, or `keyword-extra-parent ...` | A child term should expose a broader canonical, sometimes only for matching. | Parent mappings that erase meaningful product-form differences. |
-| Ingredient-context blocker | `./bin/dm matcher add fpb ...` | Ingredient wording contains a keyword only inside a context that should suppress it. Common Track A tactical fix. | Offer/product variant blocking; use a product-side blocker or form/specialty rule after confirming the issue is product-side. |
+| Ingredient-context blocker | `./bin/dm matcher add fpb ...` | Ingredient wording contains a keyword only inside a context that should suppress it. Common Track A tactical fix. | Offer/product variant blocking; use a product-side blocker or form/specialty rule after confirming the issue is product-side. If the keyword is standalone in the recipe ingredient, verify with `dm matcher probe`; KSBC is usually the right suppressor for that shape. |
 | Product-name blocker | `./bin/dm matcher add pnb ...` | Offer/product wording contains a per-keyword variant, carrier, product type, or flavor that should block the matched keyword. Common Track A tactical fix. | Large flavor/form families that should be modeled declaratively. |
 | Generic keyword suppressed by specific context | `./bin/dm matcher add ksbc ...` | Ingredient text names a more specific context and the generic keyword should not fall back. Use narrowly; this is semantic. | Broad high-traffic suppressions without a focused sanity canary. |
 | Global product-name blocker | `./bin/dm matcher add gpb ...` | The product is globally non-food or globally out of matcher scope regardless of which keyword matched. Common for supplements, pet food, tools, tobacco, cleaning, and similar products. | Food products that can be legitimate for some recipe wording; use scoped PNB/no-match policy instead. |
@@ -645,6 +706,27 @@ If you really need to add a `match_bridge.toml` entry (e.g. you are continuing
 the staged migration), dual-write the corresponding `keyword_extra_parent.toml`
 / `ingredient_parent.toml` rows in the same change, otherwise the wiring check
 will fail.
+
+### Flavor-Family Isolation Pattern
+
+When a flavored/specialty product family keeps matching a plain ingredient,
+check this repeatable shape before adding one-off blockers:
+
+1. Protect compound or substring bleed first when the plain keyword is only a
+   token-shape accident.
+2. Add the ingredient-side bridge/parent/synonym only if recipes genuinely use
+   another wording for the same family.
+3. Add the canonical synonym/parent row needed for routing and extraction.
+4. Add the offer-side bridge/extra keyword only if product wording is missing
+   the canonical family.
+5. Add the reverse bridge/parent only when the broader family should also find
+   the specific product.
+6. Add KSBC, specialty qualifier, no-match policy, or a backend guard for the
+   negative/plain case, then prove it with `dm matcher probe --expect no-match`.
+
+Typical examples are flavored cheese, sauces, vinegar, syrup, and vegan variants
+where one word is a real ingredient in some recipes but a product flavor/type in
+others.
 
 ## Layer Decision Tree
 
@@ -698,6 +780,11 @@ where the fix is a narrow runtime dictionary/guard.
 
    For form rules or local backend guards, edit the owning Python surface beside
    the existing local pattern.
+
+   For PNB/FPB/KSBC/GPB-style fixes, remember that the generated sanity canary
+   may prove table membership before it proves behavior. Run
+   `dm matcher probe --offer "<offer>" --ingredient "<ingredient>" --expect no-match`
+   (or `--expect match`) on the concrete pair before calling the rule done.
 3. Add or adjust a focused regression inside `run_deep_matcher_sanity.py` for
    every new rule. If a nearby case already asserts the exact same behavior,
    keep or extend that case rather than duplicating it. This script is the
@@ -947,6 +1034,10 @@ The accepted intentional-removal flow is:
    ./bin/dm matcher promote --allow-removals
    ```
 
+   When more than five variants are truly removed, the promote script asks for
+   `yes` interactively before writing. In non-interactive gates, pass
+   `--confirm-large-removals` only after reviewing the listed removals.
+
 3. Run the registry contract checks and full Track B gates.
 
 `promote_term_baseline.py` (with or without `--allow-removals`) auto-updates the
@@ -1143,6 +1234,8 @@ Useful wrapper options:
   unrelated edits.
 - `--allow-removals` is passed to `promote_term_baseline.py` after confirmed
   intentional TOML inactivation/removal.
+- `--confirm-large-removals` is required for non-interactive baseline promotion
+  when more than five verified-term variants are truly removed.
 - `--refresh-line-refs` runs the host-only inventory line-ref refresher.
 - `--no-generate-coverage` disables the automatic derived coverage refresh
   when you intentionally want pre-flight to report stale coverage.
@@ -1204,6 +1297,10 @@ intentional TOML inactivation/removal requires removal approval:
 # OR, when TOML inactivation/removal intentionally removed verified variants:
 ./bin/dm matcher promote --allow-removals
 ```
+
+If more than five verified variants are truly removed, the command asks for
+`yes` before writing. For reviewed non-interactive runs, add
+`--confirm-large-removals`.
 
 If the checkout is read-only, stage the generated files under a writable
 directory, again choosing either the plain or removal-approved variant as
@@ -1392,6 +1489,9 @@ the new canonical is the desired one.
 - General: assuming FPB should fire just because the visible blocker word is in
   the product/ingredient text. Space-normalization may have joined the words
   into a post-normalized compound before the blocker check.
+- General: using FPB when the recipe ingredient contains the keyword as a
+  standalone word and the context should suppress a generic fallback. The
+  smart-blocker may allow that match; use `dm matcher probe` and consider KSBC.
 - General: adding a new PNB key without first checking
   `dm matcher list pnb --effective --term <term>`; an effective rule may already
   exist in the historical base, historical updates, or overlay TOML.

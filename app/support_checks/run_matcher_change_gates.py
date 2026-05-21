@@ -309,6 +309,8 @@ def _promotion_args(args: argparse.Namespace) -> list[str]:
         promotion_args.append("--migrate-hashes")
     if args.allow_removals:
         promotion_args.append("--allow-removals")
+    if args.confirm_large_removals:
+        promotion_args.append("--confirm-large-removals")
     if args.baseline_output_dir is not None:
         promotion_args.extend(["--output-dir", str(args.baseline_output_dir)])
     return promotion_args
@@ -722,6 +724,11 @@ def parse_args() -> argparse.Namespace:
         "--allow-removals",
         action="store_true",
         help="Pass --allow-removals to promote_term_baseline.py after confirming intentional removals.",
+    )
+    parser.add_argument(
+        "--confirm-large-removals",
+        action="store_true",
+        help="Pass --confirm-large-removals to promote_term_baseline.py after reviewing large removals.",
     )
     parser.add_argument(
         "--baseline-output-dir",

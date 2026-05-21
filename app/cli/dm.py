@@ -523,6 +523,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "When the mechanism is unclear, run: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Run: ./bin/dm matcher add fpb <keyword> --blockers <word1,word2,...> --reason \"<why>\"",
             "If active space-normalization joins the ingredient phrase into a compound, also cover the joined blocker form when warned.",
+            "If the recipe ingredient contains the keyword as a standalone word, verify with dm matcher probe; KSBC may be the right surface.",
             "The command writes runtime_rule_overlays.toml, appends a focused sanity canary, and runs Track A gates by default.",
         ),
     ),
@@ -785,20 +786,34 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
 
 GUIDE_ALIASES = {
     "keyword_synonym": "keyword-synonym",
+    "keyword-synonyms": "keyword-synonym",
+    "keyword_synonyms": "keyword-synonym",
     "synonym": "keyword-synonym",
     "keyword_extra_parent": "keyword-extra-parent",
+    "keyword-extra-parents": "keyword-extra-parent",
+    "keyword_extra_parents": "keyword-extra-parent",
     "extra-parent": "keyword-extra-parent",
     "ingredient_parent": "ingredient-parent",
+    "ingredient-parents": "ingredient-parent",
+    "ingredient_parents": "ingredient-parent",
     "offer_extra_keyword": "offer-extra-keyword",
+    "offer-extra-keywords": "offer-extra-keyword",
+    "offer_extra_keywords": "offer-extra-keyword",
     "ingredient_routing_parent": "ingredient-routing-parent",
     "routing-parent": "ingredient-routing-parent",
     "parent_match_only": "parent-match-only",
     "recipe_routing_helper": "recipe-routing-helper",
     "recipe-routing": "recipe-routing-helper",
     "no_match_policy": "no-match-policy",
+    "no-match-policies": "no-match-policy",
+    "no_match_policies": "no-match-policy",
     "no-match": "no-match-policy",
     "extraction_helper": "extraction-helper",
+    "extraction-helpers": "extraction-helper",
+    "extraction_helpers": "extraction-helper",
     "match_bridge": "match-bridge",
+    "match-bridges": "match-bridge",
+    "match_bridges": "match-bridge",
     "bridge": "match-bridge",
     "product-name-blocker": "pnb",
     "product_name_blocker": "pnb",
@@ -837,7 +852,11 @@ GUIDE_ALIASES = {
     "compound_protection": "compound-protection",
     "specialty": "specialty-qualifier",
     "specialty_qualifier": "specialty-qualifier",
+    "specialty-qualifiers": "specialty-qualifier",
+    "specialty_qualifiers": "specialty-qualifier",
     "qualifier_equivalent": "qualifier-equivalent",
+    "qualifier-equivalents": "qualifier-equivalent",
+    "qualifier_equivalents": "qualifier-equivalent",
 }
 
 
@@ -2432,6 +2451,20 @@ def _runtime_space_norm_compound_warnings(
             f"Add {target!r} too if this rule must block that compound."
         )
     return tuple(warnings)
+
+
+def _runtime_fpb_smart_blocker_warning(surface: RuntimeOverlaySurface, keyword: str) -> tuple[str, ...]:
+    if surface.command != "fpb":
+        return ()
+    normalized_keyword = _runtime_rule_normalize_text(keyword)
+    if not normalized_keyword:
+        return ()
+    return (
+        "FPB can be bypassed when the recipe ingredient contains "
+        f"{normalized_keyword!r} as its own word; use "
+        f"`dm matcher probe --expect no-match ...` after authoring, and prefer KSBC "
+        "when recipe-side context should suppress a generic standalone keyword.",
+    )
 
 
 def _emit_runtime_authoring_warnings(warnings: tuple[str, ...]) -> None:
@@ -4402,6 +4435,10 @@ def _guide_key(shape: str) -> str:
     return GUIDE_ALIASES.get(shape.strip().lower(), GUIDE_ALIASES.get(normalized, normalized))
 
 
+def _matcher_surface_key(surface_name: str) -> str:
+    return _guide_key(surface_name)
+
+
 def _print_guide(guide: MatcherGuide) -> None:
     typer.echo(f"{guide.label}: {guide.status}")
     typer.echo(guide.summary)
@@ -4760,11 +4797,14 @@ def _add_runtime_overlay_rule(
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
 
     _emit_runtime_authoring_warnings(
-        _runtime_space_norm_compound_warnings(
-            paths=paths,
-            surface=surface,
-            keyword=keyword,
-            values=values,
+        (
+            *_runtime_space_norm_compound_warnings(
+                paths=paths,
+                surface=surface,
+                keyword=keyword,
+                values=values,
+            ),
+            *_runtime_fpb_smart_blocker_warning(surface, keyword),
         )
     )
 
@@ -6864,6 +6904,182 @@ def matcher_explain(
     typer.echo(trace)
 
 
+def _normalize_probe_expectation(value: str | None, *, option_name: str) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip().lower().replace("_", "-")
+    if normalized not in {"match", "no-match"}:
+        raise typer.BadParameter(f"{option_name} must be 'match' or 'no-match'")
+    return normalized
+
+
+def _probe_matcher_pair(
+    *,
+    offer: str,
+    ingredient: str,
+    offer_category: str,
+    brand: str,
+    weight_grams: float | None,
+    recipe_name: str,
+) -> dict[str, Any]:
+    from types import SimpleNamespace
+
+    try:
+        from languages.sv.ingredient_matching import (
+            build_ingredient_match_data,
+            build_offer_match_data,
+            match_offer_to_ingredient,
+        )
+        from recipe_matcher import RecipeMatcher
+    except ModuleNotFoundError:
+        from app.languages.sv.ingredient_matching import (
+            build_ingredient_match_data,
+            build_offer_match_data,
+            match_offer_to_ingredient,
+        )
+        from app.recipe_matcher import RecipeMatcher
+
+    ingredient_data = build_ingredient_match_data(ingredient)
+    offer_data = build_offer_match_data(
+        offer,
+        offer_category,
+        brand=brand,
+        weight_grams=weight_grams,
+    )
+    fast_result = match_offer_to_ingredient(ingredient_data, offer_data)
+
+    matcher = RecipeMatcher()
+    recipe = SimpleNamespace(
+        id="dm-probe-recipe",
+        name=recipe_name or "DM Matcher Probe",
+        ingredients=[ingredient],
+    )
+    offer_obj = SimpleNamespace(
+        id="dm-probe-offer",
+        name=offer,
+        category=offer_category,
+        brand=brand,
+        price=0,
+        original_price=None,
+        savings=0,
+        store=None,
+        product_url=None,
+        is_multi_buy=False,
+        multi_buy_quantity=None,
+        weight_grams=weight_grams,
+    )
+    backend_result = matcher._match_recipe_to_offers(recipe, [offer_obj], preferences={})
+    backend_num_matches = int(backend_result.get("num_matches") or 0)
+    return {
+        "offer": offer,
+        "ingredient": ingredient,
+        "offer_category": offer_category,
+        "brand": brand,
+        "weight_grams": weight_grams,
+        "recipe_name": recipe_name,
+        "fast_matched": bool(fast_result.matched),
+        "fast_keyword": fast_result.matched_keyword or "",
+        "fast_reason": fast_result.reason or "",
+        "backend_matched": backend_num_matches > 0,
+        "backend_num_matches": backend_num_matches,
+    }
+
+
+@matcher_app.command("probe", help="Probe one offer/ingredient pair across fast and backend matcher paths.")
+def matcher_probe(
+    offer: Annotated[
+        str,
+        typer.Option("--offer", "--product", help="Offer/product name to inspect."),
+    ],
+    ingredient: Annotated[str, typer.Option("--ingredient", help="Recipe ingredient text to inspect.")],
+    offer_category: Annotated[
+        str,
+        typer.Option("--offer-category", "--category", help="Optional offer category."),
+    ] = "",
+    brand: Annotated[str, typer.Option("--brand", help="Optional offer/product brand.")] = "",
+    weight_grams: Annotated[
+        float | None,
+        typer.Option("--weight-grams", help="Optional offer/product weight in grams."),
+    ] = None,
+    recipe_name: Annotated[
+        str,
+        typer.Option("--recipe-name", help="Optional recipe name for backend context."),
+    ] = "DM Matcher Probe",
+    expect: Annotated[
+        str | None,
+        typer.Option("--expect", help="Expected backend result: match or no-match."),
+    ] = None,
+    expect_fast: Annotated[
+        str | None,
+        typer.Option("--expect-fast", help="Expected fast matcher result: match or no-match."),
+    ] = None,
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Output format."),
+    ] = "text",
+) -> None:
+    if not offer.strip():
+        raise typer.BadParameter("--offer must not be empty")
+    if not ingredient.strip():
+        raise typer.BadParameter("--ingredient must not be empty")
+
+    expected_backend = _normalize_probe_expectation(expect, option_name="--expect")
+    expected_fast = _normalize_probe_expectation(expect_fast, option_name="--expect-fast")
+    probe = _probe_matcher_pair(
+        offer=offer.strip(),
+        ingredient=ingredient.strip(),
+        offer_category=offer_category.strip(),
+        brand=brand.strip(),
+        weight_grams=weight_grams,
+        recipe_name=recipe_name.strip(),
+    )
+
+    failures: list[str] = []
+    if expected_backend is not None:
+        actual_backend = "match" if probe["backend_matched"] else "no-match"
+        if actual_backend != expected_backend:
+            failures.append(f"backend expected {expected_backend}, got {actual_backend}")
+    if expected_fast is not None:
+        actual_fast = "match" if probe["fast_matched"] else "no-match"
+        if actual_fast != expected_fast:
+            failures.append(f"fast expected {expected_fast}, got {actual_fast}")
+
+    diverged = probe["fast_matched"] != probe["backend_matched"]
+    payload = {
+        **probe,
+        "fast_backend_diverged": diverged,
+        "passed": not failures,
+        "failures": failures,
+    }
+    if output_format == "json":
+        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        if failures:
+            raise typer.Exit(1)
+        return
+
+    fast_status = (
+        f"MATCH ({probe['fast_keyword']})"
+        if probe["fast_matched"]
+        else f"NO MATCH ({probe['fast_reason'] or 'no reason'})"
+    )
+    backend_status = (
+        f"MATCH (num_matches={probe['backend_num_matches']})"
+        if probe["backend_matched"]
+        else "NO MATCH (num_matches=0)"
+    )
+    typer.echo(f"Offer: {probe['offer']}")
+    typer.echo(f"Ingredient: {probe['ingredient']}")
+    typer.echo(f"Fast matcher: {fast_status}")
+    typer.echo(f"Backend matcher: {backend_status}")
+    if diverged:
+        typer.secho("Warning: fast/backend results diverge; run `dm matcher explain` for rule-family trace.", fg=typer.colors.YELLOW, err=True)
+    if failures:
+        typer.secho("FAIL: " + "; ".join(failures), fg=typer.colors.RED, err=True)
+        raise typer.Exit(1)
+    if expected_backend is not None or expected_fast is not None:
+        typer.secho("PASS", fg=typer.colors.GREEN)
+
+
 @matcher_app.command("guide", help="Show the recommended matcher workflow for a rule shape.")
 def matcher_guide(
     shape: Annotated[str | None, typer.Argument(help="Rule shape, e.g. pnb, keyword-synonym, no-match-policy.")] = None,
@@ -6893,7 +7109,7 @@ def matcher_guide(
 def matcher_list(
     surface_name: Annotated[
         str,
-        typer.Argument(help="Surface to list, e.g. keyword-synonym, ingredient-parent, pnb, fpb, ksbc."),
+        typer.Argument(help="Surface to list, e.g. keyword-synonym, ingredient-parent, specialty-qualifier, match-bridge, pnb, fpb, ksbc."),
     ],
     term: Annotated[str | None, typer.Option("--term", help="Filter by entry id, canonical, variant, keyword, or value.")] = None,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to read instead of /app.")] = None,
@@ -6911,7 +7127,7 @@ def matcher_list(
     ] = "text",
 ) -> None:
     paths = _paths(tree_root)
-    surface_key = surface_name.strip().lower().replace("_", "-")
+    surface_key = _matcher_surface_key(surface_name)
     if effective:
         rows = _runtime_effective_origin_rows(surface_key, term)
         if rows is None:
@@ -7251,7 +7467,7 @@ def matcher_list(
             typer.echo("No entries found.")
         return
 
-    surface, path = _registry_surface_file(paths, surface_name)
+    surface, path = _registry_surface_file(paths, surface_key)
     matches = _registry_matching_records(
         _registry_entry_records(surface, path),
         term,
@@ -7298,7 +7514,7 @@ def matcher_inactivate(
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
     paths = _paths(tree_root)
-    surface_key = surface_name.strip().lower().replace("_", "-")
+    surface_key = _matcher_surface_key(surface_name)
     if surface_key in RUNTIME_OVERLAY_SURFACES:
         surface = _runtime_overlay_surface_from_arg(surface_key)
         sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
@@ -7595,7 +7811,7 @@ def matcher_inactivate(
             return
         raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
 
-    surface, path = _registry_surface_file(paths, surface_name)
+    surface, path = _registry_surface_file(paths, surface_key)
     records = _registry_entry_records(surface, path)
     matches = _registry_matching_records(records, selector, include_inactive=True)
     if len(matches) != 1:
@@ -7687,6 +7903,10 @@ def matcher_promote(
         bool,
         typer.Option("--allow-removals", help="Allow confirmed intentional baseline removals."),
     ] = False,
+    confirm_large_removals: Annotated[
+        bool,
+        typer.Option("--confirm-large-removals", help="Confirm more than five truly removed baseline variants."),
+    ] = False,
     output_dir: Annotated[
         Path | None,
         typer.Option("--output-dir", help="Stage changed files under this writable directory."),
@@ -7703,6 +7923,8 @@ def matcher_promote(
         args.append("--migrate-hashes")
     if allow_removals:
         args.append("--allow-removals")
+    if confirm_large_removals:
+        args.append("--confirm-large-removals")
     if output_dir is not None:
         args.extend(["--output-dir", str(output_dir)])
     args.extend(_raw_args(ctx))
