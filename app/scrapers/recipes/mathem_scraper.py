@@ -46,6 +46,7 @@ from typing import List, Dict, Optional, Tuple
 import asyncio
 import re
 import json
+from email.utils import parsedate_to_datetime
 from datetime import datetime, timezone
 from xml.etree import ElementTree as ET
 from urllib.parse import urlsplit
@@ -78,6 +79,18 @@ SOURCE_URL = "https://www.mathem.se"
 
 # Scraper config
 MIN_INGREDIENTS = 3  # Skip recipes with fewer ingredients
+MATHEM_BOT_USER_AGENT = os.getenv(
+    "MATHEM_RECIPE_USER_AGENT",
+    "DealMealsBot/1.0 (recipe scraper; contact: local)",
+)
+MATHEM_RETRY_STATUSES = {429, 500, 502, 503, 504}
+MATHEM_MAX_RETRIES = 3
+MATHEM_RETRY_BACKOFF_SECONDS = 2.0
+
+MATHEM_RECIPE_SITEMAP_RE = re.compile(
+    r"^https://www\.mathem\.se/sitemap/sv/recipes/\d+\.xml$",
+    re.IGNORECASE,
+)
 
 # Non-food ingredient keywords that indicate product bundles, not recipes.
 # Mathem has "recipes" that are actually product packages (office supplies,
@@ -127,8 +140,57 @@ NON_RECIPE_PACKAGE_SLUG_PATTERNS = (
     r'(?:^|-)mathems-(?:lilla|stora)-frukostpaket(?:-|$)',
     r'(?:^|-)clean-eating-(?:lilla|stora)-frukostpaket(?:-|$)',
     r'(?:^|-)mathems-kaffepaket(?:-|$)',
-    r'(?:^|-)mathem-(?:delipaketet|dryckespaketet|dukningspaketet|hamburgerpaketet|korvpaketet|lilla-stadpaketet|stora-stadpaketet)(?:-|$)',
+    (
+        r'(?:^|-)mathem-(?:delipaketet|dryckespaketet|dukningspaketet|'
+        r'hamburgerpaketet|korvpaketet|lilla-stadpaketet|stora-stadpaketet)(?:-|$)'
+    ),
+    r'(?:^|-)mathems-(?:lilla|stora)-aw-paket(?:-|$)',
+    r'(?:^|-)mari-bergman-asiatiskt-bas-kit(?:-|$)',
 )
+
+PACKAGE_CONTEXT_TERMS = (
+    "mathems",
+    "snackspaket",
+    "frukostpaket",
+    "fikapaket",
+    "kaffepaket",
+    "aw-paket",
+    "bas-kit",
+    "delipaketet",
+    "dryckespaketet",
+    "dukningspaketet",
+    "hamburgerpaketet",
+    "korvpaketet",
+    "städpaketet",
+    "stadpaketet",
+)
+
+SHOPPING_ONLY_INSTRUCTION_PATTERNS = (
+    r"\bköp(?:er)?\s+(?:hela\s+)?paketet\b",
+    r"\bbeställ\s+(?:hela\s+)?paketet\b",
+    r"\bhämta\s+(?:ut\s+)?(?:i\s+butik|paketet)\b",
+    r"\blägg(?:s)?\s+i\s+(?:din\s+)?varukorg\b",
+    r"\bservera\s+(?:direkt\s+)?ur\s+paketet\b",
+)
+
+
+def is_mathem_recipe_sitemap_url(url: str) -> bool:
+    """Return True only for real Mathem recipe-detail sitemap pages."""
+    return bool(MATHEM_RECIPE_SITEMAP_RE.match(str(url or "").strip()))
+
+
+def _mathem_sitemap_sort_key(url: str) -> int:
+    match = re.search(r"/recipes/(\d+)\.xml$", str(url or ""))
+    return int(match.group(1)) if match else 10_000
+
+
+def _unique_sorted_recipe_sitemaps(urls: List[str]) -> List[str]:
+    seen = {
+        str(url or "").strip()
+        for url in urls
+        if is_mathem_recipe_sitemap_url(str(url or "").strip())
+    }
+    return sorted(seen, key=_mathem_sitemap_sort_key)
 
 
 def is_blocked_non_recipe_package_url(url: str) -> bool:
@@ -144,13 +206,82 @@ def is_blocked_non_recipe_package_url(url: str) -> bool:
     return any(re.search(pattern, slug) for pattern in NON_RECIPE_PACKAGE_SLUG_PATTERNS)
 
 
+def _plain_text(value: object) -> str:
+    text = html.unescape(str(value or ""))
+    text = re.sub(r"<[^>]+>", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _extract_instruction_texts(value: object) -> List[str]:
+    if not value:
+        return []
+    if isinstance(value, str):
+        text = _plain_text(value)
+        return [text] if text else []
+    if isinstance(value, list):
+        texts: List[str] = []
+        for item in value:
+            texts.extend(_extract_instruction_texts(item))
+        return texts
+    if isinstance(value, dict):
+        texts = []
+        for key in ("text", "name"):
+            text = _plain_text(value.get(key))
+            if text:
+                texts.append(text)
+        texts.extend(_extract_instruction_texts(value.get("itemListElement")))
+        return texts
+    return []
+
+
+def _has_package_context(recipe: Dict, url: str) -> bool:
+    haystack = " ".join([
+        str(recipe.get("name") or ""),
+        urlsplit(url or "").path,
+        " ".join(str(item or "") for item in recipe.get("ingredients") or []),
+    ]).lower()
+    return any(term in haystack for term in PACKAGE_CONTEXT_TERMS)
+
+
+def _shopping_only_instruction_text(instruction_texts: List[str]) -> str:
+    return " ".join(instruction_texts).lower()
+
+
+def non_recipe_package_reason(recipe: Dict, instruction_texts: List[str], url: str) -> Optional[str]:
+    """Return a deterministic reason if a Mathem Recipe is really a shopping bundle."""
+    ingredients = [str(item or "") for item in recipe.get("ingredients") or []]
+    all_ingredients_lower = " ".join(ingredients).lower()
+    non_food_hits = [
+        keyword
+        for keyword in NON_FOOD_INGREDIENTS
+        if keyword in all_ingredients_lower
+    ]
+    if non_food_hits:
+        return f"non_food_ingredient:{non_food_hits[0]}"
+
+    if not _has_package_context(recipe, url):
+        return None
+
+    instruction_blob = _shopping_only_instruction_text(instruction_texts)
+    if not instruction_blob:
+        return "package_without_instructions"
+    if len(instruction_blob) < 40:
+        return "package_with_too_short_instructions"
+    if any(re.search(pattern, instruction_blob) for pattern in SHOPPING_ONLY_INSTRUCTION_PATTERNS):
+        return "package_shopping_instruction"
+    if len(ingredients) < MIN_INGREDIENTS:
+        return "package_with_too_few_ingredients"
+
+    return None
+
+
 class MathemScraper:
     """Fast scraper for Mathem.se using sitemap + httpx."""
 
     def __init__(self):
         self.base_url = "https://www.mathem.se"
         self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "User-Agent": MATHEM_BOT_USER_AGENT,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "sv-SE,sv;q=0.9,en;q=0.8",
         }
@@ -183,6 +314,41 @@ class MathemScraper:
             except Exception:
                 pass
 
+    def _retry_after_delay(self, response: httpx.Response, attempt: int) -> float:
+        retry_after = response.headers.get("Retry-After")
+        if retry_after:
+            try:
+                return max(0.0, float(retry_after))
+            except ValueError:
+                try:
+                    retry_at = parsedate_to_datetime(retry_after)
+                    if retry_at.tzinfo is None:
+                        retry_at = retry_at.replace(tzinfo=timezone.utc)
+                    return max(0.0, (retry_at - datetime.now(timezone.utc)).total_seconds())
+                except (TypeError, ValueError):
+                    pass
+        return MATHEM_RETRY_BACKOFF_SECONDS * attempt
+
+    async def _get_with_backoff(self, client: httpx.AsyncClient, url: str, **kwargs) -> httpx.Response:
+        """GET with polite retry/backoff for Mathem throttling and transient errors."""
+        last_response: Optional[httpx.Response] = None
+        for attempt in range(1, MATHEM_MAX_RETRIES + 1):
+            response = await client.get(url, **kwargs)
+            last_response = response
+            if response.status_code not in MATHEM_RETRY_STATUSES:
+                return response
+            if attempt >= MATHEM_MAX_RETRIES:
+                return response
+
+            delay = self._retry_after_delay(response, attempt)
+            logger.debug(
+                "Mathem retry "
+                f"(status={response.status_code}, attempt={attempt}/{MATHEM_MAX_RETRIES}, "
+                f"sleep={delay:.2f}s): {url}"
+            )
+            await asyncio.sleep(delay)
+        return last_response
+
     async def discover_sitemap_urls(self, client: httpx.AsyncClient) -> List[str]:
         """
         Dynamically discover recipe sitemap URLs from robots.txt.
@@ -199,48 +365,48 @@ class MathemScraper:
 
         # Step 1: Get sitemap URL from robots.txt
         try:
-            response = await client.get(f"{self.base_url}/robots.txt")
+            response = await self._get_with_backoff(client, f"{self.base_url}/robots.txt")
             response.raise_for_status()
 
-            # Find Sitemap: line
-            sitemap_match = re.search(r'Sitemap:\s*(\S+)', response.text, re.IGNORECASE)
-            if not sitemap_match:
+            sitemap_urls = re.findall(r'Sitemap:\s*(\S+)', response.text, re.IGNORECASE)
+            if not sitemap_urls:
                 logger.warning("No Sitemap found in robots.txt, using fallback")
                 return self._get_fallback_sitemaps()
 
-            main_sitemap = sitemap_match.group(1)
-            logger.info(f"   Found main sitemap: {main_sitemap}")
+            logger.info(f"   Found {len(sitemap_urls)} sitemap line(s) in robots.txt")
 
         except Exception as e:
             logger.warning(f"Error fetching robots.txt: {e}")
             return self._get_fallback_sitemaps()
 
-        # Step 2: Fetch sitemap index
-        try:
-            response = await client.get(main_sitemap)
-            response.raise_for_status()
+        discovered_sitemaps: List[str] = []
+        for sitemap_url in sitemap_urls:
+            if is_mathem_recipe_sitemap_url(sitemap_url):
+                discovered_sitemaps.append(sitemap_url)
+                continue
+            try:
+                response = await self._get_with_backoff(client, sitemap_url)
+                response.raise_for_status()
+                root = ET.fromstring(response.content)
+                ns = {"ns": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
-            root = ET.fromstring(response.content)
-            ns = {"ns": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+                for sitemap_elem in root.findall("ns:sitemap", ns):
+                    loc = sitemap_elem.find("ns:loc", ns)
+                    if loc is not None and loc.text and is_mathem_recipe_sitemap_url(loc.text):
+                        discovered_sitemaps.append(loc.text.strip())
+            except Exception as e:
+                logger.warning(f"Error parsing sitemap index {sitemap_url}: {e}")
 
-            # Find all sitemap entries containing 'recipe'
-            recipe_sitemaps = []
-            for sitemap_elem in root.findall("ns:sitemap", ns):
-                loc = sitemap_elem.find("ns:loc", ns)
-                if loc is not None and 'recipe' in loc.text.lower():
-                    recipe_sitemaps.append(loc.text)
-
-            if recipe_sitemaps:
-                logger.info(f"   Found {len(recipe_sitemaps)} recipe sitemaps")
-                return recipe_sitemaps
-
-            # No recipe-specific sitemaps found
-            logger.info("   No recipe sitemaps in index, checking main sitemap")
-            return [main_sitemap]
-
-        except Exception as e:
-            logger.warning(f"Error parsing sitemap index: {e}")
-            return self._get_fallback_sitemaps()
+        fallback_sitemaps = self._get_fallback_sitemaps()
+        recipe_sitemaps = _unique_sorted_recipe_sitemaps(
+            [*discovered_sitemaps, *fallback_sitemaps]
+        )
+        logger.info(
+            f"   Using {len(recipe_sitemaps)} recipe sitemaps "
+            f"({len(_unique_sorted_recipe_sitemaps(discovered_sitemaps))} discovered, "
+            f"{len(fallback_sitemaps)} fallback candidates)"
+        )
+        return recipe_sitemaps
 
     def _get_fallback_sitemaps(self) -> List[str]:
         """Fallback to known sitemap pattern if dynamic discovery fails."""
@@ -262,13 +428,17 @@ class MathemScraper:
         all_recipes = []
         blocked_package_count = 0
 
-        async with httpx.AsyncClient(headers=self.headers, timeout=30, event_hooks={"request": [ssrf_safe_event_hook]}) as client:
+        async with httpx.AsyncClient(
+            headers=self.headers,
+            timeout=30,
+            event_hooks={"request": [ssrf_safe_event_hook]},
+        ) as client:
             # Dynamically discover sitemaps
             sitemap_urls = await self.discover_sitemap_urls(client)
 
             for sitemap_url in sitemap_urls:
                 try:
-                    response = await client.get(sitemap_url)
+                    response = await self._get_with_backoff(client, sitemap_url)
                     response.raise_for_status()
 
                     # Parse XML
@@ -330,7 +500,7 @@ class MathemScraper:
             return None
 
         try:
-            response = await client.get(url, follow_redirects=True)
+            response = await self._get_with_backoff(client, url, follow_redirects=True)
             response.raise_for_status()
             page_html = response.text
 
@@ -385,6 +555,7 @@ class MathemScraper:
             ingredients = data.get("recipeIngredient", [])
             if ingredients:
                 recipe["ingredients"] = ingredients
+            instruction_texts = _extract_instruction_texts(data.get("recipeInstructions"))
 
             # Servings
             servings = data.get("recipeYield")
@@ -406,15 +577,20 @@ class MathemScraper:
 
             ingredients = recipe.get("ingredients", [])
             if not ingredients or len(ingredients) < MIN_INGREDIENTS:
-                logger.debug(f"   Skipping {url}: only {len(ingredients) if ingredients else 0} ingredients (min {MIN_INGREDIENTS})")
+                ingredient_count = len(ingredients) if ingredients else 0
+                logger.debug(
+                    f"   Skipping {url}: only {ingredient_count} ingredients "
+                    f"(min {MIN_INGREDIENTS})"
+                )
                 return None
 
-            # Filter out product bundles (office supplies, cleaning kits, etc.)
-            all_ingredients_lower = ' '.join(ingredients).lower()
-            for keyword in NON_FOOD_INGREDIENTS:
-                if keyword in all_ingredients_lower:
-                    logger.info(f"   Skipping non-recipe bundle: {recipe['name']} (ingredient: {keyword})")
-                    return None
+            package_reason = non_recipe_package_reason(recipe, instruction_texts, url)
+            if package_reason:
+                logger.info(
+                    f"   Skipping non-recipe bundle: {recipe['name']} "
+                    f"({package_reason})"
+                )
+                return None
 
             return recipe
 
