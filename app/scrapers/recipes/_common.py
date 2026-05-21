@@ -650,7 +650,15 @@ class StreamingRecipeSaver:
         self.pending.clear()
         release_recipe_batch_memory()
 
-    async def finish(self, *, cancelled: bool = False) -> Dict[str, Any]:
+    async def finish(
+        self,
+        *,
+        cancelled: bool = False,
+        diagnostics: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        if diagnostics:
+            self.stats["diagnostics"] = diagnostics
+
         if cancelled:
             self.pending.clear()
             self.stats["scrape_status"] = "cancelled"
@@ -747,6 +755,8 @@ def save_recipes_to_database(
                 touch_source_scraped_at(source_name)
         stats["scrape_status"] = scrape_result.status
         stats["scrape_reason"] = scrape_result.reason
+        if scrape_result.diagnostics:
+            stats["diagnostics"] = scrape_result.diagnostics
         return stats
 
     # Deduplicate by URL (keep first occurrence)
@@ -924,6 +934,8 @@ def save_recipes_to_database(
     )
     stats["scrape_status"] = scrape_result.status
     stats["scrape_reason"] = scrape_result.reason
+    if scrape_result.diagnostics:
+        stats["diagnostics"] = scrape_result.diagnostics
 
     if touch_source:
         # Touch all recipes for this source so 'synced last month' stays accurate

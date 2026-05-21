@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import asyncio
 import sys
 
 
@@ -15,6 +16,7 @@ from utils.scraper_history import (  # noqa: E402
     _cleanup_run_history_for_scraper_mode,
     scrape_result_history_kwargs,
 )
+from scrapers.recipes._common import StreamingRecipeSaver  # noqa: E402
 
 
 class _FakeResult:
@@ -89,6 +91,17 @@ def main() -> int:
     check("history kwargs filtered count", kwargs["filtered_count"], 3)
     check("history kwargs parse rate", kwargs["parse_rate"], 0.6)
     check("history kwargs data path", kwargs["data_path"], "recipe_api")
+
+    async def finish_cancelled_saver_with_diagnostics():
+        saver = StreamingRecipeSaver("History Test", overwrite=False)
+        return await saver.finish(
+            cancelled=True,
+            diagnostics={"candidate_url_count": 10, "parser_method": "fixture"},
+        )
+
+    stats = asyncio.run(finish_cancelled_saver_with_diagnostics())
+    check("streaming saver keeps diagnostics", stats["diagnostics"]["candidate_url_count"], 10)
+    check("streaming saver cancelled status", stats["scrape_status"], "cancelled")
 
     print("ALL SCRAPER HISTORY CHECKS PASSED")
     return 0

@@ -14,6 +14,7 @@ from sqlalchemy import text
 from loguru import logger
 
 from database import get_db_session
+from scrapers.recipes.profiles import RecipeSourceProfile, build_recipe_source_profile
 
 # Scrapers enabled by default for new installations
 DEFAULT_ENABLED_SCRAPERS = {'koket', 'myrecipes'}
@@ -43,6 +44,7 @@ class ScraperInfo:
     db_source_name: str = ""  # Name used in database (may differ from display name)
     enabled: bool = True
     warning: str = ""  # Optional warning message for large scrapers
+    source_profile: RecipeSourceProfile | None = None
 
     # Runtime stats (populated from database)
     last_run_at: Optional[datetime] = None
@@ -151,6 +153,12 @@ class RecipeScraperManager:
             if not db_source_name:
                 db_source_name = self._infer_db_source_name(name)
 
+            source_profile = build_recipe_source_profile(
+                scraper_id,
+                module,
+                db_source_name=db_source_name,
+            )
+
             # Find the scraper class (e.g., ReceptenScraper, ZetaScraper)
             scraper_class = None
             for attr_name in dir(module):
@@ -168,7 +176,8 @@ class RecipeScraperManager:
                 module_path=module_path,
                 db_source_name=db_source_name,
                 enabled=True,
-                warning=warning
+                warning=warning,
+                source_profile=source_profile,
             )
 
             self._modules[scraper_id] = module

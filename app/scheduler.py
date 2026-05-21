@@ -880,6 +880,7 @@ class ScraperScheduler:
                         "reason": save_result_for_cache.get("scrape_reason"),
                         "message_key": save_result_for_cache.get("message_key"),
                         "message_params": save_result_for_cache.get("message_params") or {},
+                        "diagnostics": save_result_for_cache.get("diagnostics") or {},
                     },
                     mode="incremental",
                     source_name=db_source_name,
@@ -949,10 +950,20 @@ class ScraperScheduler:
             # Save to run history for time estimates
             duration = int(time.time() - start_time)
             if scrape_result is not None:
+                source_profile = getattr(scraper_info, "source_profile", None) if scraper_info else None
                 annotate_recipe_quality_gate_decision(
                     scraper_id,
                     scrape_result,
-                    expected_min_urls=scraper_info.expected_recipe_count if scraper_info else None,
+                    expected_min_urls=(
+                        getattr(source_profile, "expected_min_urls", None)
+                        if source_profile
+                        else (scraper_info.expected_recipe_count if scraper_info else None)
+                    ),
+                    expected_min_parse_rate=(
+                        getattr(source_profile, "expected_min_parse_rate", None)
+                        if source_profile
+                        else None
+                    ),
                 )
             save_run_history(
                 scraper_id,

@@ -940,8 +940,10 @@ def get_recipe_scrapers():
         # Use db_source_name for database lookup (may differ from display name)
         db_name = s.db_source_name or s.name
         max_full, max_incr = _get_effective_config(s.id, scraper_configs)
+        source_profile = getattr(s, "source_profile", None)
+        test_limit = getattr(source_profile, "test_limit", 20) or 20
         estimate_targets = {
-            "test": 20,
+            "test": test_limit,
             "incremental": max_incr,
             "full": max_full or s.expected_recipe_count,
         }
@@ -2205,6 +2207,8 @@ async def _run_scraper_task(scraper_id: str, mode: str):
         expected_total = scraper_info.expected_recipe_count if scraper_info else 1000
         scraper_configs = _get_scraper_configs()
         max_full, max_incr = _get_effective_config(scraper_id, scraper_configs)
+        source_profile = getattr(scraper_info, "source_profile", None) if scraper_info else None
+        test_limit = getattr(source_profile, "test_limit", 20) or 20
 
         # Mode labels are now i18n keys
         mode_label_keys = {"test": "recipes.mode_test", "incremental": "recipes.mode_incremental", "full": "recipes.mode_full"}
@@ -2315,6 +2319,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 "reason": save_result.get("scrape_reason"),
                 "message_key": save_result.get("message_key"),
                 "message_params": save_result.get("message_params") or {},
+                "diagnostics": save_result.get("diagnostics") or {},
             }, run_mode)
 
         async def handle_terminal_scrape_result(scrape_result) -> bool:
@@ -2349,7 +2354,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
         if mode == "test":
             scrape_result = normalize_result(
                 await await_with_inactivity_timeout(
-                    scraper.scrape_all_recipes(max_recipes=20),
+                    scraper.scrape_all_recipes(max_recipes=test_limit),
                     "test scrape",
                 ),
                 "test",
@@ -2506,7 +2511,16 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             annotate_recipe_quality_gate_decision(
                 scraper_id,
                 scrape_result,
-                expected_min_urls=scraper_info.expected_recipe_count if scraper_info else None,
+                expected_min_urls=(
+                    getattr(source_profile, "expected_min_urls", None)
+                    if source_profile
+                    else (scraper_info.expected_recipe_count if scraper_info else None)
+                ),
+                expected_min_parse_rate=(
+                    getattr(source_profile, "expected_min_parse_rate", None)
+                    if source_profile
+                    else None
+                ),
             )
 
         duration = int(time.time() - start_time)

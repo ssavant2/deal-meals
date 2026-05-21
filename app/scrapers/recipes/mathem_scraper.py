@@ -857,8 +857,12 @@ class MathemScraper:
             stats = saver.stats.copy()
             stats["scrape_status"] = "failed"
             stats["scrape_reason"] = result.reason
+            stats["diagnostics"] = result.diagnostics
             return stats
-        stats = await saver.finish(cancelled=result.status == "cancelled")
+        stats = await saver.finish(
+            cancelled=result.status == "cancelled",
+            diagnostics=result.diagnostics,
+        )
         if result.status == "no_new_recipes":
             stats["scrape_status"] = "no_new_recipes"
             stats["scrape_reason"] = result.reason

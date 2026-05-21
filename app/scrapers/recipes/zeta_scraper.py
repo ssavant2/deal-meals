@@ -601,6 +601,7 @@ class ZetaScraper:
         all_urls = [url for url, _ in all_urls_with_dates]
 
         logger.info(f"Found {len(all_urls)} total recipe URLs from sitemap")
+        self._last_candidate_url_count = len(all_urls)
         if not all_urls:
             return []
 
@@ -648,13 +649,22 @@ class ZetaScraper:
 
         if not urls_to_scrape:
             reason = "no_recipe_urls" if overwrite else "no_new_recipes"
+            diagnostics = {
+                "candidate_url_count": getattr(self, "_last_candidate_url_count", 0),
+                "selected_url_count": 0,
+                "parsed_recipe_count": 0,
+                "filtered_non_recipe_count": 0,
+                "parse_rate": 0.0,
+                "discovery_method": "robots_sitemap_plus_fallback",
+                "parser_method": "json_ld_httpx",
+            }
             saver = StreamingRecipeSaver(
                 DB_SOURCE_NAME,
                 batch_size=SAVE_BATCH_SIZE,
                 overwrite=overwrite,
                 max_recipes=max_recipes,
             )
-            stats = await saver.finish()
+            stats = await saver.finish(diagnostics=diagnostics)
             stats["scrape_status"] = "success_empty" if overwrite else "no_new_recipes"
             stats["scrape_reason"] = reason
             return stats
@@ -724,7 +734,19 @@ class ZetaScraper:
                 if i + SCRAPE_BATCH_SIZE < total:
                     await asyncio.sleep(1.0)
 
-        stats = await saver.finish(cancelled=self._cancel_flag)
+        diagnostics = {
+            "candidate_url_count": getattr(self, "_last_candidate_url_count", None),
+            "selected_url_count": len(urls_to_scrape),
+            "parsed_recipe_count": saver.seen_count,
+            "filtered_non_recipe_count": self._discovery_recorded_non_recipe,
+            "parse_rate": round(saver.seen_count / len(urls_to_scrape), 4) if urls_to_scrape else 0.0,
+            "discovery_method": "robots_sitemap_plus_fallback",
+            "parser_method": "json_ld_httpx",
+        }
+        stats = await saver.finish(
+            cancelled=self._cancel_flag,
+            diagnostics=diagnostics,
+        )
         logger.success(f"\nScraped and saved {saver.seen_count} Zeta recipes")
         if not overwrite:
             logger.info(f"   URL discovery: recorded_non_recipe={self._discovery_recorded_non_recipe}")
