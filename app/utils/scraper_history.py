@@ -13,6 +13,56 @@ from loguru import logger
 RUN_HISTORY_RETENTION_PER_SCRAPER_MODE = 30
 
 
+def _first_present(mapping: dict, *keys):
+    for key in keys:
+        value = mapping.get(key)
+        if value is not None:
+            return value
+    return None
+
+
+def scrape_result_history_kwargs(scrape_result, *, source_kind: str = None) -> dict:
+    """Build optional save_run_history kwargs from a scraper result object."""
+    diagnostics = dict(getattr(scrape_result, "diagnostics", None) or {})
+    return {
+        "source_kind": source_kind,
+        "status": getattr(scrape_result, "status", None),
+        "reason_code": getattr(scrape_result, "reason", None),
+        "candidate_count": _first_present(
+            diagnostics,
+            "candidate_count",
+            "candidate_urls",
+            "candidate_url_count",
+        ),
+        "selected_count": _first_present(
+            diagnostics,
+            "selected_count",
+            "selected_urls",
+            "selected_url_count",
+        ),
+        "parsed_count": _first_present(
+            diagnostics,
+            "parsed_count",
+            "parsed_recipes",
+            "parsed_recipe_count",
+        ),
+        "filtered_count": _first_present(
+            diagnostics,
+            "filtered_count",
+            "filtered_urls",
+            "filtered_non_recipe_count",
+        ),
+        "parse_rate": diagnostics.get("parse_rate"),
+        "data_path": _first_present(
+            diagnostics,
+            "data_path",
+            "parser_method",
+            "discovery_method",
+        ),
+        "diagnostics": diagnostics,
+    }
+
+
 def _scraper_run_history_columns(db) -> set[str]:
     """Return available scraper_run_history columns for additive deployments."""
     rows = db.execute(text("""

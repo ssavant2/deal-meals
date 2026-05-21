@@ -590,6 +590,11 @@ class CoopScraper:
 
         # Get URLs from sitemap
         all_urls = await self.get_recipe_urls_from_sitemap()
+        diagnostics = {
+            "candidate_url_count": len(all_urls),
+            "discovery_method": "coop_recipe_sitemap",
+            "parser_method": "recipe_api_with_playwright_fallback",
+        }
         if not all_urls:
             logger.error("No URLs found in sitemap")
             return make_recipe_scrape_result(
@@ -598,6 +603,7 @@ class CoopScraper:
                 max_recipes=max_recipes,
                 failed=True,
                 reason="no_recipe_urls",
+                diagnostics=diagnostics,
             )
 
         # Shuffle URLs with fixed seed for deterministic but varied selection
@@ -660,14 +666,17 @@ class CoopScraper:
 
         if not urls_to_scrape:
             logger.info("No new recipes to scrape")
+            diagnostics["selected_url_count"] = 0
             return make_recipe_scrape_result(
                 [],
                 force_all=force_all,
                 max_recipes=max_recipes,
                 reason="no_new_recipes",
+                diagnostics=diagnostics,
             )
 
         self._progress["total"] = len(urls_to_scrape)
+        diagnostics["selected_url_count"] = len(urls_to_scrape)
         recipes = []
         recipes_lock = asyncio.Lock()
 
@@ -687,6 +696,13 @@ class CoopScraper:
 
         if self._target_reached or not api_failed_urls:
             found_count = stream_saver.seen_count if stream_saver else len(recipes)
+            attempted_count = int(self._progress.get("current", 0) or 0)
+            diagnostics.update({
+                "attempted_url_count": attempted_count,
+                "parsed_recipe_count": found_count,
+                "filtered_non_recipe_count": self._discovery_recorded_non_recipe,
+                "parse_rate": round(found_count / attempted_count, 4) if attempted_count else 0.0,
+            })
             logger.info(f"Coop API-first finished without Playwright fallback: {found_count} recipes")
             return make_recipe_scrape_result(
                 recipes,
@@ -694,6 +710,7 @@ class CoopScraper:
                 max_recipes=max_recipes,
                 reason="target_reached" if self._target_reached else None,
                 cancelled=self._cancel_flag and not self._target_reached,
+                diagnostics=diagnostics,
             )
 
         urls_to_scrape = api_failed_urls
@@ -851,6 +868,12 @@ class CoopScraper:
         logger.info(f"Fail reasons: {self._fail_reasons}")
         if record_discovery:
             logger.info(f"URL discovery: recorded_non_recipe={self._discovery_recorded_non_recipe}")
+        diagnostics.update({
+            "attempted_url_count": attempted_count,
+            "parsed_recipe_count": found_count,
+            "filtered_non_recipe_count": self._discovery_recorded_non_recipe,
+            "parse_rate": round(found_count / attempted_count, 4) if attempted_count else 0.0,
+        })
 
         return make_recipe_scrape_result(
             recipes,
@@ -862,6 +885,7 @@ class CoopScraper:
                 else ("cancelled" if self._cancel_flag else None)
             ),
             cancelled=self._cancel_flag and not self._target_reached,
+            diagnostics=diagnostics,
         )
 
     async def scrape_incremental(self) -> RecipeScrapeResult:

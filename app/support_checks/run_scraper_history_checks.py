@@ -13,6 +13,7 @@ sys.path.insert(0, str(APP_DIR))
 from utils.scraper_history import (  # noqa: E402
     RUN_HISTORY_RETENTION_PER_SCRAPER_MODE,
     _cleanup_run_history_for_scraper_mode,
+    scrape_result_history_kwargs,
 )
 
 
@@ -65,6 +66,29 @@ def main() -> int:
         keep_latest=0,
     )
     check("cleanup clamps retention", fake_db.calls[0][1]["keep_latest"], 1)
+
+    class FakeScrapeResult:
+        status = "success"
+        reason = "target_reached"
+        diagnostics = {
+            "candidate_url_count": 100,
+            "selected_url_count": 20,
+            "parsed_recipe_count": 12,
+            "filtered_non_recipe_count": 3,
+            "parse_rate": 0.6,
+            "parser_method": "recipe_api",
+        }
+
+    kwargs = scrape_result_history_kwargs(FakeScrapeResult(), source_kind="recipe")
+    check("history kwargs source kind", kwargs["source_kind"], "recipe")
+    check("history kwargs status", kwargs["status"], "success")
+    check("history kwargs reason", kwargs["reason_code"], "target_reached")
+    check("history kwargs candidate count", kwargs["candidate_count"], 100)
+    check("history kwargs selected count", kwargs["selected_count"], 20)
+    check("history kwargs parsed count", kwargs["parsed_count"], 12)
+    check("history kwargs filtered count", kwargs["filtered_count"], 3)
+    check("history kwargs parse rate", kwargs["parse_rate"], 0.6)
+    check("history kwargs data path", kwargs["data_path"], "recipe_api")
 
     print("ALL SCRAPER HISTORY CHECKS PASSED")
     return 0

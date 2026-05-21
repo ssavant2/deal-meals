@@ -738,6 +738,11 @@ class MathemScraper:
         # Sort by lastmod descending (newest first) for incremental priority
         all_urls_with_dates.sort(key=lambda x: x[1] or "1970-01-01", reverse=True)
         all_urls = [url for url, _ in all_urls_with_dates]
+        diagnostics = {
+            "candidate_url_count": len(all_urls),
+            "discovery_method": "robots_sitemap_plus_fallback",
+            "parser_method": "json_ld_httpx",
+        }
 
         if not all_urls:
             logger.warning("No recipe URLs found in sitemap!")
@@ -747,6 +752,7 @@ class MathemScraper:
                 max_recipes=max_recipes,
                 failed=True,
                 reason="no_recipe_urls",
+                diagnostics=diagnostics,
             )
 
         if force_all:
@@ -781,11 +787,13 @@ class MathemScraper:
 
             if not urls_to_scrape:
                 logger.info("   No new recipes found!")
+                diagnostics["selected_url_count"] = 0
                 return make_recipe_scrape_result(
                     [],
                     force_all=force_all,
                     max_recipes=max_recipes,
                     reason="no_new_recipes",
+                    diagnostics=diagnostics,
                 )
 
         recipes = await self.scrape_recipes_concurrent(
@@ -795,6 +803,13 @@ class MathemScraper:
             record_discovery=bool(stream_saver is not None and not force_all),
         )
         found_count = stream_saver.seen_count if stream_saver else len(recipes)
+        selected_count = len(urls_to_scrape)
+        diagnostics.update({
+            "selected_url_count": selected_count,
+            "parsed_recipe_count": found_count,
+            "filtered_non_recipe_count": self._discovery_recorded_non_recipe,
+            "parse_rate": round(found_count / selected_count, 4) if selected_count else 0.0,
+        })
         logger.info(f"\nScraped {found_count} recipes successfully")
         if self._cancel_flag:
             return make_recipe_scrape_result(
@@ -803,12 +818,14 @@ class MathemScraper:
                 max_recipes=max_recipes,
                 cancelled=True,
                 reason="cancelled",
+                diagnostics=diagnostics,
             )
 
         return make_recipe_scrape_result(
             recipes,
             force_all=force_all,
             max_recipes=max_recipes,
+            diagnostics=diagnostics,
         )
 
     async def scrape_incremental(self) -> RecipeScrapeResult:

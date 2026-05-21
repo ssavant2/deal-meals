@@ -27,7 +27,7 @@ from recipe_cache_refresh_decision import (
 from recipe_scraper_limits import get_effective_config, get_scraper_configs
 from scrapers.recipes._common import normalize_recipe_scrape_result
 from state import event_bus
-from utils.scraper_history import save_run_history
+from utils.scraper_history import save_run_history, scrape_result_history_kwargs
 
 
 ALL_ACTIVE_RECIPE_SCRAPERS_ID = "__all_active__"
@@ -942,6 +942,7 @@ class ScraperScheduler:
                 recipes_found,
                 attempted_count=get_final_attempted_count(),
                 success=True,
+                **scrape_result_history_kwargs(scrape_result, source_kind="recipe"),
             )
 
             # Flag for batch download (checked after lock release grace period)

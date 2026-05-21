@@ -41,7 +41,7 @@ from utils.recipe_image_cleanup import (
     delete_unreferenced_recipe_image_file,
     delete_unreferenced_recipe_image_files,
 )
-from utils.scraper_history import save_run_history
+from utils.scraper_history import save_run_history, scrape_result_history_kwargs
 from state import (
     running_scrapers, scraper_tasks, event_bus,
     update_running_scraper, get_running_scraper, get_scraper_lock,
@@ -2503,6 +2503,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             attempted_count=get_final_attempted_count(),
             success=True,
             update_schedule=True,
+            **scrape_result_history_kwargs(scrape_result, source_kind="recipe"),
         )
 
         # Trigger cache refresh + image auto-download (only for non-test modes with DB changes).
