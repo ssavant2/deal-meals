@@ -235,6 +235,13 @@ keyword = "kex"
 blockers = ["rawfood", "rawfoods"]
 reason = "Replaced by runtime_ksbc_kex_rawfood — FPB smart-blocker is bypassed because 'kex' appears as a standalone word in ingredient text 'Rawfood Kex' (smart-blocker sees w == keyword → has_valid=True). KSBC operates at matched_keyword level and works correctly."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_bittermandel"
+status = "active"
+keyword = "bittermandel"
+blockers = ["bittermandelarom"]
+reason = "Bittermandelarom (liquid almond extract) is functionally distinct from whole/raw bittermandel (bitter almonds). Recipes calling for 'arom' expect a few drops of bottled extract, not solid almonds to grind themselves."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"

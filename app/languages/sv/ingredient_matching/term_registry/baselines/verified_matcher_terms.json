@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 398,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 103,
-      "keyword_synonym_mapping": 117,
+      "keyword_synonym_mapping": 118,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
-      "keyword_synonym": 117,
+      "keyword_synonym": 118,
       "match_bridge": 1971,
       "matcher_regression_case": 1491,
       "matcher_rule_inventory": 459,
@@ -42,8 +42,8 @@
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5552,
-    "variants_missing_product_text": 1743,
+    "variant_count": 5553,
+    "variants_missing_product_text": 1744,
     "variants_with_product_text": 3809
   },
   "variants": [
@@ -116638,11 +116638,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"pangasiusmalfilé\"}"
+    },
+    {
+      "variant_id": "vterm-c3e90d0adadc4b39",
+      "row_index": 4673,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:bittermandlar",
+      "source_id": "bittermandlar",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "bittermandlar",
+      "canonical": "bittermandel",
+      "expected_family": "bittermandel",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"bittermandel\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1529,
+      "no_product_text": 1530,
       "static_verified": 2532,
       "synthetic_verified": 1491
     },
@@ -116653,7 +116674,7 @@
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
-      "keyword_synonym": 117,
+      "keyword_synonym": 118,
       "match_bridge": 1971,
       "matcher_regression_case": 1491,
       "matcher_rule_inventory": 459,
@@ -116664,8 +116685,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5552
+      "audited": 5553
     },
-    "variant_count": 5552
+    "variant_count": 5553
   }
 }
