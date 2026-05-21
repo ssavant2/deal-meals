@@ -292,6 +292,32 @@ _BRAND_NAME_COMPLETIONS: Dict[str, str] = {
     'philadelphia': 'färskost',
 }
 
+_POMODORO_PASTA_CONTEXT_RE = re.compile(
+    r'\b(?:pasta|tortelloni|tortellini|ravioli|gnocchi|lasagne|spaghetti|'
+    r'tagliatelle|penne|rigatoni|fusilli|fettuccine|linguine|farfalle|'
+    r'carbonara|sugo|pastasås|pastasas|sauce|sås|sas|pesto)\b'
+)
+
+
+def _is_plain_pomodoro_tomato_product_text(
+    name_lower: str,
+    category: Optional[str],
+) -> bool:
+    if 'pomodoro' not in name_lower:
+        return False
+    if _POMODORO_PASTA_CONTEXT_RE.search(name_lower):
+        return False
+
+    category_lower = (category or '').lower()
+    tomato_cues = (
+        'tomat', 'tomater', 'polpa', 'pomodoro',
+        'krossad', 'krossade', 'passerad', 'passerade',
+        'skalad', 'skalade',
+    )
+    if category_lower in {'', 'vegetables', 'pantry', 'fruit'}:
+        return True
+    return any(cue in name_lower for cue in tomato_cues)
+
 
 def extract_keywords_from_product(
     product_name: str,
@@ -449,6 +475,11 @@ def extract_keywords_from_product(
 
     if 'dadelsirap' in original_name_lower:
         return ['dadelsirap']
+
+    # "Pomodoro" is tomato in Italian. Keep plain tomato/canned-tomato products
+    # out of the ready-meal "Pasta Pomodoro" blocker path below.
+    if _is_plain_pomodoro_tomato_product_text(original_name_lower, category):
+        return ['tomat']
 
     if re.search(r'\b5\s*-?\s*minuters\s+sill\b|\b5minuters\s+sill\b|\b5\s*-?\s*minuterssill\b', original_name_lower):
         return ['inläggningssill', 'sill']

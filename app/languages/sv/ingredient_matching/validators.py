@@ -132,6 +132,27 @@ _POTATO_FRESH_PRODUCT_CUES = frozenset({
 })
 
 
+def processed_indicator_occurs_in_product_text(
+    base_word: str,
+    indicator: str,
+    product_lower: str,
+) -> bool:
+    """Return whether a processed-form indicator is really present in product text."""
+
+    if indicator != 'mix':
+        return indicator in product_lower
+
+    if _is_whole_word(indicator, product_lower):
+        return True
+
+    compact_product = re.sub(r'\s+', '', product_lower)
+    compact_base = re.sub(r'\s+', '', base_word)
+    compound_bases = {compact_base}
+    if compact_base.endswith('er') and len(compact_base) > 2:
+        compound_bases.add(compact_base[:-2])
+    return any(f"{base}mix" in compact_product for base in compound_bases)
+
+
 def _qualifier_present_in_text(qualifier: str, text: str) -> bool:
     # Generic "rökt" should only count as its own word. Otherwise "varmrökt"
     # and "kallrökt" accidentally satisfy smoked-equivalence checks via the
@@ -308,7 +329,10 @@ def check_processed_product_rules(product_lower: str, ingredient_lower: str) -> 
                 # indicator) even though the ingredient has nothing to do with kryddmix.
                 if base_word not in ingredient_lower:
                     return False
-                product_indicators = [ind for ind in processed_indicators if ind in product_lower]
+                product_indicators = [
+                    ind for ind in processed_indicators
+                    if processed_indicator_occurs_in_product_text(base_word, ind, product_lower)
+                ]
                 # Expand with equivalents: "malen" also matches "mald"/"malet"/"malna"
                 expanded_indicators = set(product_indicators)
                 for ind in product_indicators:
@@ -353,7 +377,7 @@ def check_processed_product_rules(product_lower: str, ingredient_lower: str) -> 
                         return False
             else:
                 for indicator in processed_indicators:
-                    if indicator in product_lower:
+                    if processed_indicator_occurs_in_product_text(base_word, indicator, product_lower):
                         if indicator not in ingredient_lower:
                             has_any_indicator = any(ind in ingredient_lower for ind in processed_indicators)
                             if not has_any_indicator:

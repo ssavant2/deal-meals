@@ -107,6 +107,7 @@ from .validators import (
     check_specialty_qualifiers,
     frozen_fresh_herb_form_overrides_spice_indicator,
     ingredient_has_spice_indicator,
+    processed_indicator_occurs_in_product_text,
 )
 from .synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS
 
@@ -3992,7 +3993,10 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
     needs_processed_check = False
     for base_word, indicators in PROCESSED_PRODUCT_RULES.items():
         if base_word in name_normalized:
-            if any(ind in name_normalized for ind in indicators):
+            if any(
+                processed_indicator_occurs_in_product_text(base_word, ind, name_normalized)
+                for ind in indicators
+            ):
                 needs_processed_check = True
                 break
 
@@ -4042,7 +4046,10 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
             if exemptions and any(ex in name_normalized for ex in exemptions):
                 continue
             if base_word in STRICT_PROCESSED_RULES:
-                product_indicators = tuple(ind for ind in indicators if ind in name_normalized)
+                product_indicators = tuple(
+                    ind for ind in indicators
+                    if processed_indicator_occurs_in_product_text(base_word, ind, name_normalized)
+                )
                 if product_indicators:
                     # Expand with equivalents for matching: "malen" ↔ "mald"/"malet"
                     expanded = set(product_indicators)
@@ -4051,7 +4058,7 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
                     processed_checks.append((base_word, 'strict', tuple(expanded)))
             else:
                 for indicator in indicators:
-                    if indicator in name_normalized:
+                    if processed_indicator_occurs_in_product_text(base_word, indicator, name_normalized):
                         processed_checks.append((base_word, 'relaxed', indicator, indicators))
                         break
 

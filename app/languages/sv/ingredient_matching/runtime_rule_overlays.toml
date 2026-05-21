@@ -165,6 +165,13 @@ source = "polpa di pomodoro"
 target = "krossade tomater"
 reason = "Polpa di Pomodoro = Italian for crushed canned tomatoes. Without normalization the term ends extraction with empty keywords. Map to existing 'krossade tomater' wording so tomato recipes can match."
 
+[[space_normalizations]]
+id = "runtime_space_normalization_choklad_mork_morkchoklad"
+status = "active"
+source = "choklad mörk"
+target = "mörkchoklad"
+reason = "ICA-product naming 'Choklad Mörk 74%' has Choklad first — extracts empty keyword list without this norm. Does NOT touch 'mörk choklad' (mörk first) to preserve alternative-recipe handling like 'vit- och mörk choklad'"
+
 [[keyword_set_updates]]
 id = "runtime_important_short_keyword_add_hirs"
 status = "active"
