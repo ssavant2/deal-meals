@@ -4,20 +4,216 @@ Mathem Store Plugin - E-commerce grocery scraper.
 Mathem is Sweden's largest online grocery store with home delivery only.
 No physical stores - offers are the same nationwide.
 
-Uses Playwright for scraping since direct HTTP requests are blocked (403).
-Includes polite delays and JSON-LD fallback for missing data.
+Uses Mathem's server-rendered Next.js data first, with Playwright kept as a
+fallback. Includes polite delays and JSON-LD fallback for browser scraping.
 """
 
-from typing import List, Dict, Optional
+from typing import Any, List, Dict, Optional, Tuple
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+from html.parser import HTMLParser
 import re
 import asyncio
 import json
+import os
+import httpx
 from loguru import logger
 
 from scrapers.stores.base import StorePlugin, StoreConfig, StoreConfigField, StoreScrapeResult
 from scrapers.stores.weight_utils import parse_weight
 from languages.sv.category_utils import guess_category as shared_guess_category
+from utils.security import ssrf_safe_event_hook
+
+
+MATHEM_BASE_URL = "https://www.mathem.se"
+MATHEM_STORE_USER_AGENT = os.getenv(
+    "MATHEM_STORE_USER_AGENT",
+    "DealMealsBot/1.0 (store scraper; contact: local)",
+)
+MATHEM_HTTP_HEADERS = {
+    "User-Agent": MATHEM_STORE_USER_AGENT,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "sv-SE,sv;q=0.9,en;q=0.6",
+}
+MATHEM_RETRY_STATUSES = {429, 500, 502, 503, 504}
+MATHEM_MAX_RETRIES = 3
+MATHEM_RETRY_BACKOFF_SECONDS = 2.0
+
+
+class _NextDataHTMLParser(HTMLParser):
+    """Extract the JSON payload from Next.js' __NEXT_DATA__ script."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=False)
+        self._capturing = False
+        self._chunks: List[str] = []
+
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+        if tag.lower() != "script":
+            return
+        attr_map = {key.lower(): value for key, value in attrs}
+        if attr_map.get("id") == "__NEXT_DATA__":
+            self._capturing = True
+
+    def handle_data(self, data: str) -> None:
+        if self._capturing:
+            self._chunks.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() == "script" and self._capturing:
+            self._capturing = False
+
+    @property
+    def data(self) -> str:
+        return "".join(self._chunks).strip()
+
+
+def extract_mathem_next_data(html_text: str) -> Optional[Dict[str, Any]]:
+    """Return the parsed __NEXT_DATA__ payload from a Mathem page."""
+    parser = _NextDataHTMLParser()
+    parser.feed(html_text or "")
+    if not parser.data:
+        return None
+    try:
+        parsed = json.loads(parser.data)
+    except json.JSONDecodeError:
+        logger.debug("Mathem __NEXT_DATA__ payload was not valid JSON")
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def _iter_dicts(value: Any):
+    if isinstance(value, dict):
+        yield value
+        for child in value.values():
+            yield from _iter_dicts(child)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _iter_dicts(item)
+
+
+def find_mathem_discount_page_data(next_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Find the dehydrated page data that owns the discount product grids."""
+    for candidate in _iter_dicts(next_data):
+        blocks = candidate.get("blocks")
+        if not isinstance(blocks, list):
+            continue
+        if any(block.get("component") == "product-grid" for block in blocks if isinstance(block, dict)):
+            return candidate
+    return None
+
+
+def _parse_decimal(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    text = str(value).strip()
+    if not text:
+        return None
+    text = text.replace("\xa0", " ").replace("kr", "").replace("SEK", "")
+    text = re.sub(r"\s+", "", text).replace(",", ".")
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def _absolute_mathem_url(url: Optional[str]) -> Optional[str]:
+    if not url:
+        return None
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+    if url.startswith("/"):
+        return f"{MATHEM_BASE_URL}{url}"
+    return f"{MATHEM_BASE_URL}/{url.lstrip('/')}"
+
+
+def _mathem_product_image(product: Dict[str, Any]) -> Optional[str]:
+    for image in product.get("images") or []:
+        if not isinstance(image, dict):
+            continue
+        for key in ("large", "thumbnail"):
+            candidate = image.get(key)
+            if isinstance(candidate, dict) and candidate.get("url"):
+                return candidate["url"]
+    return None
+
+
+def _multi_buy_from_description(description: Optional[str]) -> Tuple[Optional[int], Optional[float]]:
+    if not description:
+        return None, None
+    match = re.search(r"(\d+)\s+f[öo]r\s+([\d\s\xa0,.]+)\s*kr", description, re.IGNORECASE)
+    if not match:
+        return None, None
+    total_price = _parse_decimal(match.group(2))
+    if total_price is None:
+        return None, None
+    return int(match.group(1)), total_price
+
+
+def iter_mathem_discount_products(page_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Return unique product records from Mathem product-grid blocks."""
+    products: List[Dict[str, Any]] = []
+    seen: set[str] = set()
+
+    for block in page_data.get("blocks") or []:
+        if not isinstance(block, dict) or block.get("component") != "product-grid":
+            continue
+
+        block_products = block.get("products")
+        if not isinstance(block_products, list):
+            block_products = []
+            for item in block.get("items") or []:
+                if isinstance(item, dict) and item.get("itemType") == "product":
+                    product = item.get("item")
+                    if isinstance(product, dict):
+                        block_products.append(product)
+
+        for product in block_products:
+            if not isinstance(product, dict):
+                continue
+            key = str(product.get("id") or product.get("frontUrl") or product.get("absoluteUrl") or "")
+            if key and key in seen:
+                continue
+            if key:
+                seen.add(key)
+            products.append(product)
+
+    return products
+
+
+def mathem_ssr_product_to_raw(product: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Map a Mathem Next.js product record to the raw format used by _parse_product."""
+    price = _parse_decimal(product.get("grossPrice"))
+    if price is None:
+        return None
+
+    discount = product.get("discount") if isinstance(product.get("discount"), dict) else {}
+    promotion = product.get("promotion") if isinstance(product.get("promotion"), dict) else {}
+    description = discount.get("descriptionShort") or promotion.get("descriptionShort")
+    multi_buy_quantity, multi_buy_price = _multi_buy_from_description(description)
+
+    original_price = _parse_decimal(discount.get("undiscountedGrossPrice"))
+    if original_price is None:
+        original_price = price
+
+    raw: Dict[str, Any] = {
+        "name": product.get("fullName") or product.get("name"),
+        "price": price,
+        "original_price": original_price,
+        "unit": product.get("unitPriceQuantityAbbreviation") or "st",
+        "size": product.get("nameExtra"),
+        "brand": product.get("brand"),
+        "image": _mathem_product_image(product),
+        "url": _absolute_mathem_url(product.get("frontUrl") or product.get("absoluteUrl")),
+    }
+
+    if multi_buy_quantity and multi_buy_price:
+        raw["multi_buy_quantity"] = multi_buy_quantity
+        raw["multi_buy_price"] = multi_buy_price
+
+    return raw
 
 
 class MathemStore(StorePlugin):
@@ -35,7 +231,7 @@ class MathemStore(StorePlugin):
     MAX_ENRICH_PRODUCTS = None  # None = enrich every eligible product page
 
     def __init__(self):
-        self.base_url = "https://www.mathem.se"
+        self.base_url = MATHEM_BASE_URL
         self.discounts_url = f"{self.base_url}/se/products/discounts/"
 
     @property
@@ -85,9 +281,18 @@ class MathemStore(StorePlugin):
         Returns:
             StoreScrapeResult with products in standard format
         """
-        logger.info("Starting Mathem scraping (with polite delays)...")
+        logger.info("Starting Mathem scraping...")
 
-        products = await self._scrape_discounts_playwright()
+        products, diagnostics = await self._scrape_discounts_http()
+        if not products:
+            logger.info("Mathem SSR scrape did not yield products, falling back to Playwright")
+            playwright_products = await self._scrape_discounts_playwright()
+            products = playwright_products
+            diagnostics = {
+                **diagnostics,
+                "data_path": "playwright_dom",
+                "playwright_product_count": len(playwright_products),
+            }
 
         await self._report_progress(
             progress=65,
@@ -98,7 +303,101 @@ class MathemStore(StorePlugin):
         return self._scrape_result_from_products(
             products,
             location_type="ehandel",
+            diagnostics=diagnostics,
         )
+
+    def _retry_after_delay(self, response: httpx.Response, attempt: int) -> float:
+        retry_after = response.headers.get("Retry-After")
+        if retry_after:
+            try:
+                return max(0.0, float(retry_after))
+            except ValueError:
+                try:
+                    retry_at = parsedate_to_datetime(retry_after)
+                    if retry_at.tzinfo is None:
+                        retry_at = retry_at.replace(tzinfo=timezone.utc)
+                    return max(0.0, (retry_at - datetime.now(timezone.utc)).total_seconds())
+                except (TypeError, ValueError):
+                    pass
+        return MATHEM_RETRY_BACKOFF_SECONDS * attempt
+
+    async def _get_with_backoff(self, client: httpx.AsyncClient, url: str) -> httpx.Response:
+        """GET with polite retry/backoff for Mathem throttling and transient errors."""
+        last_response: Optional[httpx.Response] = None
+        for attempt in range(1, MATHEM_MAX_RETRIES + 1):
+            response = await client.get(url)
+            last_response = response
+            if response.status_code not in MATHEM_RETRY_STATUSES:
+                return response
+            if attempt >= MATHEM_MAX_RETRIES:
+                return response
+
+            delay = self._retry_after_delay(response, attempt)
+            logger.debug(
+                "Mathem store retry "
+                f"(status={response.status_code}, attempt={attempt}/{MATHEM_MAX_RETRIES}, "
+                f"sleep={delay:.2f}s): {url}"
+            )
+            await asyncio.sleep(delay)
+        return last_response
+
+    async def _scrape_discounts_http(self) -> Tuple[List[Dict], Dict[str, Any]]:
+        """Scrape discount products from Mathem's server-rendered Next.js data."""
+        diagnostics: Dict[str, Any] = {"data_path": "next_data_product_grid"}
+
+        try:
+            async with httpx.AsyncClient(
+                headers=MATHEM_HTTP_HEADERS,
+                timeout=30,
+                follow_redirects=True,
+                event_hooks={"request": [ssrf_safe_event_hook]},
+            ) as client:
+                response = await self._get_with_backoff(client, self.discounts_url)
+                diagnostics["http_status"] = response.status_code
+                response.raise_for_status()
+        except httpx.HTTPError as exc:
+            diagnostics["http_error"] = type(exc).__name__
+            logger.warning(f"Mathem SSR scrape failed before parsing: {exc}")
+            return [], diagnostics
+
+        next_data = extract_mathem_next_data(response.text)
+        if not next_data:
+            diagnostics["reason"] = "missing_next_data"
+            return [], diagnostics
+
+        page_data = find_mathem_discount_page_data(next_data)
+        if not page_data:
+            diagnostics["reason"] = "missing_product_grid"
+            return [], diagnostics
+
+        products, parse_diagnostics = self._parse_ssr_discount_products(page_data)
+        diagnostics.update(parse_diagnostics)
+        return products, diagnostics
+
+    def _parse_ssr_discount_products(self, page_data: Dict[str, Any]) -> Tuple[List[Dict], Dict[str, Any]]:
+        """Parse Mathem discount products from dehydrated Next.js page data."""
+        products: List[Dict] = []
+        raw_records = iter_mathem_discount_products(page_data)
+        skipped = 0
+
+        for raw_record in raw_records:
+            try:
+                raw_product = mathem_ssr_product_to_raw(raw_record)
+                product = self._parse_product(raw_product) if raw_product else None
+                if product:
+                    products.append(product)
+                else:
+                    skipped += 1
+            except Exception as exc:
+                skipped += 1
+                logger.debug(f"Failed to parse Mathem SSR product: {exc}")
+
+        diagnostics = {
+            "raw_product_count": len(raw_records),
+            "parsed_product_count": len(products),
+            "skipped_product_count": skipped,
+        }
+        return products, diagnostics
 
     async def _scrape_discounts_playwright(self) -> List[Dict]:
         """Scrape discount products using Playwright with polite delays."""
@@ -488,6 +787,14 @@ class MathemStore(StorePlugin):
             is_multi_buy = True
             unit_price = round(multi_buy_price / multi_buy_quantity, 2)
 
+        original_price = raw.get('original_price')
+        try:
+            original_price = float(original_price) if original_price is not None else None
+        except (TypeError, ValueError):
+            original_price = None
+        if not original_price or original_price < unit_price:
+            original_price = price
+
         # Determine unit
         unit = raw.get('unit', 'st')
         if unit == 'liter':
@@ -508,8 +815,8 @@ class MathemStore(StorePlugin):
         product = {
             "name": name,
             "price": round(unit_price, 2),
-            "original_price": round(price, 2),  # Regular price
-            "savings": round(price - unit_price, 2) if is_multi_buy else 0.0,
+            "original_price": round(original_price, 2),  # Regular price
+            "savings": round(max(original_price - unit_price, 0), 2),
             "unit": unit,
             "category": category,
             "image_url": raw.get('image'),

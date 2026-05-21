@@ -33,6 +33,7 @@ CHECKS = [
     "run_recipe_url_discovery_checks.py",
     "run_scraper_p0_checks.py",
     "run_scraper_history_checks.py",
+    "run_mathem_store_ssr_checks.py",
     "run_ingredient_routing_mode_checks.py",
     "run_delta_ingredient_routing_policy_checks.py",
 ]
