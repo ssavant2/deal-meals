@@ -852,6 +852,32 @@ class ScraperScheduler:
 
             scraper_info = scraper_manager.get_scraper(scraper_id)
             db_source_name = (scraper_info.db_source_name or scraper_info.name) if scraper_info else None
+            source_profile = getattr(scraper_info, "source_profile", None) if scraper_info else None
+
+            def apply_quality_gate_decision(scrape_result):
+                diagnostics = dict(getattr(scrape_result, "diagnostics", None) or {})
+                if "quality_gate" in diagnostics:
+                    return diagnostics["quality_gate"]
+                return annotate_recipe_quality_gate_decision(
+                    scraper_id,
+                    scrape_result,
+                    expected_min_urls=(
+                        getattr(source_profile, "expected_min_urls", None)
+                        if source_profile
+                        else (scraper_info.expected_recipe_count if scraper_info else None)
+                    ),
+                    expected_min_parse_rate=(
+                        getattr(source_profile, "expected_min_parse_rate", None)
+                        if source_profile
+                        else None
+                    ),
+                )
+
+            def raise_if_quality_gate_blocks(scrape_result) -> None:
+                decision = apply_quality_gate_decision(scrape_result)
+                if isinstance(decision, dict) and decision.get("should_block"):
+                    raise RuntimeError(decision.get("reason_code") or "recipe_quality_gate_blocked")
+
             self._set_recipe_schedule_status(
                 current_scraper_name=scraper_info.name if scraper_info else scraper_id,
             )
@@ -859,9 +885,24 @@ class ScraperScheduler:
                 result = await scraper.scrape_and_save(
                     overwrite=False,
                     max_recipes=max_incremental,
+                    quality_gate_callback=apply_quality_gate_decision,
                 )
                 save_result_for_cache = result if isinstance(result, dict) else {}
                 scrape_status = save_result_for_cache.get("scrape_status")
+                scrape_result = normalize_recipe_scrape_result(
+                    {
+                        "status": scrape_status or (
+                            "success" if save_result_for_cache.get("created", 0) else "success_empty"
+                        ),
+                        "recipes": [],
+                        "reason": save_result_for_cache.get("scrape_reason"),
+                        "message_key": save_result_for_cache.get("message_key"),
+                        "message_params": save_result_for_cache.get("message_params") or {},
+                        "diagnostics": save_result_for_cache.get("diagnostics") or {},
+                    },
+                    mode="incremental",
+                    source_name=db_source_name,
+                )
                 if scrape_status == "failed":
                     raise RuntimeError(
                         save_result_for_cache.get("scrape_reason") or "recipe_scrape_failed"
@@ -873,18 +914,6 @@ class ScraperScheduler:
                         self._batch_has_new_recipes = bool(save_result_for_cache.get("created", 0))
                     return 0
                 recipes_found = save_result_for_cache.get("created", 0)
-                scrape_result = normalize_recipe_scrape_result(
-                    {
-                        "status": scrape_status or ("success" if recipes_found else "success_empty"),
-                        "recipes": [],
-                        "reason": save_result_for_cache.get("scrape_reason"),
-                        "message_key": save_result_for_cache.get("message_key"),
-                        "message_params": save_result_for_cache.get("message_params") or {},
-                        "diagnostics": save_result_for_cache.get("diagnostics") or {},
-                    },
-                    mode="incremental",
-                    source_name=db_source_name,
-                )
                 logger.info(f"Scheduled scrape complete for {scraper_id}: {recipes_found} new recipes")
             elif max_incremental and hasattr(scraper, 'scrape_all_recipes'):
                 scrape_result = normalize_recipe_scrape_result(
@@ -897,6 +926,7 @@ class ScraperScheduler:
                 if scrape_result.status == "cancelled":
                     logger.info(f"Scheduled scrape cancelled for {scraper_id}")
                     return 0
+                raise_if_quality_gate_blocks(scrape_result)
                 scraper_module = importlib.import_module(f"scrapers.recipes.{scraper_id}_scraper")
                 save_to_database = getattr(scraper_module, 'save_to_database')
                 if scrape_result.should_save:
@@ -915,6 +945,7 @@ class ScraperScheduler:
                 if scrape_result.status == "cancelled":
                     logger.info(f"Scheduled scrape cancelled for {scraper_id}")
                     return 0
+                raise_if_quality_gate_blocks(scrape_result)
                 scraper_module = importlib.import_module(f"scrapers.recipes.{scraper_id}_scraper")
                 save_to_database = getattr(scraper_module, 'save_to_database')
                 if scrape_result.should_save:
@@ -933,6 +964,7 @@ class ScraperScheduler:
                 if scrape_result.status == "cancelled":
                     logger.info(f"Scheduled scrape cancelled for {scraper_id}")
                     return 0
+                raise_if_quality_gate_blocks(scrape_result)
                 scraper_module = importlib.import_module(f"scrapers.recipes.{scraper_id}_scraper")
                 save_to_database = getattr(scraper_module, 'save_to_database')
                 result = save_to_database(scrape_result, clear_old=False) if scrape_result.should_save else {}
@@ -950,21 +982,7 @@ class ScraperScheduler:
             # Save to run history for time estimates
             duration = int(time.time() - start_time)
             if scrape_result is not None:
-                source_profile = getattr(scraper_info, "source_profile", None) if scraper_info else None
-                annotate_recipe_quality_gate_decision(
-                    scraper_id,
-                    scrape_result,
-                    expected_min_urls=(
-                        getattr(source_profile, "expected_min_urls", None)
-                        if source_profile
-                        else (scraper_info.expected_recipe_count if scraper_info else None)
-                    ),
-                    expected_min_parse_rate=(
-                        getattr(source_profile, "expected_min_parse_rate", None)
-                        if source_profile
-                        else None
-                    ),
-                )
+                apply_quality_gate_decision(scrape_result)
             save_run_history(
                 scraper_id,
                 "incremental",
@@ -992,6 +1010,7 @@ class ScraperScheduler:
                 attempted_count=attempted_count if attempted_count > 0 else None,
                 success=False,
                 error_message=str(e),
+                **scrape_result_history_kwargs(scrape_result, source_kind="recipe"),
             )
             return 0
         finally:

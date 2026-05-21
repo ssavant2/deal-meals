@@ -16,7 +16,11 @@ from utils.scraper_history import (  # noqa: E402
     _cleanup_run_history_for_scraper_mode,
     scrape_result_history_kwargs,
 )
-from scrapers.recipes._common import StreamingRecipeSaver  # noqa: E402
+from scrapers.recipes._common import (  # noqa: E402
+    RecipeScrapeResult,
+    StreamingRecipeSaver,
+    finish_streaming_recipe_scrape,
+)
 
 
 class _FakeResult:
@@ -119,6 +123,31 @@ def main() -> int:
     stats = asyncio.run(finish_cancelled_saver_with_diagnostics())
     check("streaming saver keeps diagnostics", stats["diagnostics"]["candidate_url_count"], 10)
     check("streaming saver cancelled status", stats["scrape_status"], "cancelled")
+
+    async def finish_blocked_saver():
+        saver = StreamingRecipeSaver("History Test", overwrite=True)
+        result = RecipeScrapeResult.success(
+            [],
+            diagnostics={"candidate_url_count": 4},
+        )
+
+        def quality_gate_callback(scrape_result):
+            scrape_result.diagnostics["quality_gate"] = {
+                "should_block": True,
+                "reason_code": "recipe_discovery_count_too_low",
+            }
+            return scrape_result.diagnostics["quality_gate"]
+
+        return await finish_streaming_recipe_scrape(
+            saver,
+            result,
+            quality_gate_callback=quality_gate_callback,
+        )
+
+    stats = asyncio.run(finish_blocked_saver())
+    check("streaming quality gate blocks finish", stats["scrape_status"], "failed")
+    check("streaming quality gate reason", stats["scrape_reason"], "recipe_discovery_count_too_low")
+    check("streaming quality gate diagnostics", stats["diagnostics"]["quality_gate"]["should_block"], True)
 
     print("ALL SCRAPER HISTORY CHECKS PASSED")
     return 0

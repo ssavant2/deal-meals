@@ -58,7 +58,7 @@ from database import get_db_session
 from scrapers.recipes._common import (
     _is_type, RecipeScrapeResult, incremental_attempt_limit,
     make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
-    split_serving_lists, StreamingRecipeSaver
+    split_serving_lists, StreamingRecipeSaver, finish_streaming_recipe_scrape
 )
 from scrapers.recipes.url_discovery_cache import (
     record_non_recipe_url,
@@ -693,6 +693,7 @@ class ArlaScraper:
         self,
         overwrite: bool = False,
         max_recipes: Optional[int] = None,
+        quality_gate_callback=None,
     ) -> Dict:
         """Scrape and save in small batches."""
         saver = StreamingRecipeSaver(
@@ -705,20 +706,11 @@ class ArlaScraper:
             force_all=overwrite,
             stream_saver=saver,
         )
-        if result.status == "failed":
-            stats = saver.stats.copy()
-            stats["scrape_status"] = "failed"
-            stats["scrape_reason"] = result.reason
-            stats["diagnostics"] = result.diagnostics
-            return stats
-        stats = await saver.finish(
-            cancelled=result.status == "cancelled",
-            diagnostics=result.diagnostics,
+        return await finish_streaming_recipe_scrape(
+            saver,
+            result,
+            quality_gate_callback=quality_gate_callback,
         )
-        if result.status == "no_new_recipes":
-            stats["scrape_status"] = "no_new_recipes"
-            stats["scrape_reason"] = result.reason
-        return stats
 
     # ========== DATABASE OPERATIONS ==========
 

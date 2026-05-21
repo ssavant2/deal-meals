@@ -701,6 +701,73 @@ class StreamingRecipeSaver:
         return self.stats
 
 
+def quality_gate_blocked_streaming_stats(
+    saver: StreamingRecipeSaver,
+    scrape_result: RecipeScrapeResult,
+    quality_gate_callback=None,
+) -> Optional[Dict[str, Any]]:
+    """Return failed scrape stats when a caller-provided quality gate blocks finish().
+
+    Streaming scrapers may have already saved batches by the time discovery
+    diagnostics are known, but full-sync stale deletion happens in finish().
+    Blocking here protects that destructive final step when enforcing is active.
+    """
+    if quality_gate_callback is None or scrape_result.status == "cancelled":
+        return None
+
+    decision = quality_gate_callback(scrape_result)
+    if not isinstance(decision, dict) or not decision.get("should_block"):
+        return None
+
+    reason = decision.get("reason_code") or "recipe_quality_gate_blocked"
+    logger.warning(
+        "Recipe scraper quality gate blocked streaming finish for {}: {}",
+        saver.source_name,
+        decision,
+    )
+    saver.pending.clear()
+    stats = saver.stats.copy()
+    stats["scrape_status"] = "failed"
+    stats["scrape_reason"] = reason
+    stats["message_key"] = "recipes.quality_gate_blocked"
+    stats["message_params"] = {"reason": reason}
+    stats["diagnostics"] = scrape_result.diagnostics
+    release_recipe_batch_memory()
+    return stats
+
+
+async def finish_streaming_recipe_scrape(
+    saver: StreamingRecipeSaver,
+    scrape_result: RecipeScrapeResult,
+    *,
+    quality_gate_callback=None,
+) -> Dict[str, Any]:
+    """Finish a streaming scrape with shared failure/cancel/gate handling."""
+    if scrape_result.status == "failed":
+        stats = saver.stats.copy()
+        stats["scrape_status"] = "failed"
+        stats["scrape_reason"] = scrape_result.reason
+        stats["diagnostics"] = scrape_result.diagnostics
+        return stats
+
+    blocked_stats = quality_gate_blocked_streaming_stats(
+        saver,
+        scrape_result,
+        quality_gate_callback,
+    )
+    if blocked_stats is not None:
+        return blocked_stats
+
+    stats = await saver.finish(
+        cancelled=scrape_result.status == "cancelled",
+        diagnostics=scrape_result.diagnostics,
+    )
+    if scrape_result.status == "no_new_recipes":
+        stats["scrape_status"] = "no_new_recipes"
+        stats["scrape_reason"] = scrape_result.reason
+    return stats
+
+
 def save_recipes_to_database(
     recipes: Union[RecipeScrapeResult, List[Dict]],
     source_name: str,

@@ -2322,6 +2322,30 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 "diagnostics": save_result.get("diagnostics") or {},
             }, run_mode)
 
+        def apply_quality_gate_decision(scrape_result):
+            diagnostics = dict(getattr(scrape_result, "diagnostics", None) or {})
+            if "quality_gate" in diagnostics:
+                return diagnostics["quality_gate"]
+            return annotate_recipe_quality_gate_decision(
+                scraper_id,
+                scrape_result,
+                expected_min_urls=(
+                    getattr(source_profile, "expected_min_urls", None)
+                    if source_profile
+                    else (scraper_info.expected_recipe_count if scraper_info else None)
+                ),
+                expected_min_parse_rate=(
+                    getattr(source_profile, "expected_min_parse_rate", None)
+                    if source_profile
+                    else None
+                ),
+            )
+
+        def raise_if_quality_gate_blocks(scrape_result) -> None:
+            decision = apply_quality_gate_decision(scrape_result)
+            if isinstance(decision, dict) and decision.get("should_block"):
+                raise RuntimeError(decision.get("reason_code") or "recipe_quality_gate_blocked")
+
         async def handle_terminal_scrape_result(scrape_result) -> bool:
             if scrape_result.status == "cancelled":
                 await update_running_scraper(scraper_id, {
@@ -2380,7 +2404,11 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             scrape_result = None
             if hasattr(scraper, 'scrape_and_save'):
                 result = await await_with_inactivity_timeout(
-                    scraper.scrape_and_save(overwrite=True, max_recipes=max_full),
+                    scraper.scrape_and_save(
+                        overwrite=True,
+                        max_recipes=max_full,
+                        quality_gate_callback=apply_quality_gate_decision,
+                    ),
                     "full scrape",
                 )
                 scrape_result = normalize_saved_result(result, "full")
@@ -2396,6 +2424,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 )
                 if await handle_terminal_scrape_result(scrape_result):
                     return
+                raise_if_quality_gate_blocks(scrape_result)
                 scraper_module = scraper_manager.get_module(scraper_id)
                 save_to_database = getattr(scraper_module, 'save_to_database')
                 if scrape_result.should_save or scrape_result.is_empty:
@@ -2429,7 +2458,11 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             result = {}
             if hasattr(scraper, 'scrape_and_save'):
                 result = await await_with_inactivity_timeout(
-                    scraper.scrape_and_save(overwrite=False, max_recipes=max_incr),
+                    scraper.scrape_and_save(
+                        overwrite=False,
+                        max_recipes=max_incr,
+                        quality_gate_callback=apply_quality_gate_decision,
+                    ),
                     "incremental scrape",
                 )
                 scrape_result = normalize_saved_result(result, "incremental")
@@ -2449,6 +2482,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 save_to_database = getattr(scraper_module, 'save_to_database')
                 if await handle_terminal_scrape_result(scrape_result):
                     return
+                raise_if_quality_gate_blocks(scrape_result)
                 if scrape_result.should_save:
                     result = save_to_database(scrape_result, clear_old=False)
                     new_count = result.get("created", 0) if isinstance(result, dict) else 0
@@ -2466,6 +2500,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 save_to_database = getattr(scraper_module, 'save_to_database')
                 if await handle_terminal_scrape_result(scrape_result):
                     return
+                raise_if_quality_gate_blocks(scrape_result)
                 if scrape_result.should_save:
                     result = save_to_database(scrape_result, clear_old=False)
                     new_count = result.get("created", 0) if isinstance(result, dict) else 0
@@ -2483,6 +2518,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
                 save_to_database = getattr(scraper_module, 'save_to_database')
                 if await handle_terminal_scrape_result(scrape_result):
                     return
+                raise_if_quality_gate_blocks(scrape_result)
                 result = save_to_database(scrape_result, clear_old=False) if scrape_result.should_save else {}
                 new_count = result.get("created", 0) if isinstance(result, dict) else 0
 
@@ -2508,20 +2544,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             await update_running_scraper(scraper_id, state, replace=True)
 
         if scrape_result is not None:
-            annotate_recipe_quality_gate_decision(
-                scraper_id,
-                scrape_result,
-                expected_min_urls=(
-                    getattr(source_profile, "expected_min_urls", None)
-                    if source_profile
-                    else (scraper_info.expected_recipe_count if scraper_info else None)
-                ),
-                expected_min_parse_rate=(
-                    getattr(source_profile, "expected_min_parse_rate", None)
-                    if source_profile
-                    else None
-                ),
-            )
+            apply_quality_gate_decision(scrape_result)
 
         duration = int(time.time() - start_time)
         save_run_history(
@@ -2616,6 +2639,7 @@ async def _run_scraper_task(scraper_id: str, mode: str):
             attempted_count=attempted_count if attempted_count > 0 else None,
             success=False,
             error_message=str(e),
+            **scrape_result_history_kwargs(scrape_result, source_kind="recipe"),
         )
 
         if mode == "incremental":

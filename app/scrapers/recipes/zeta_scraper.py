@@ -60,7 +60,8 @@ from models import FoundRecipe
 from scrapers.recipes._common import (
     _is_type, RecipeScrapeResult, incremental_attempt_limit,
     make_recipe_scrape_result, parse_iso8601_duration, recipe_target_reached,
-    save_recipes_to_database, StreamingRecipeSaver, unescape_html
+    save_recipes_to_database, StreamingRecipeSaver, unescape_html,
+    quality_gate_blocked_streaming_stats
 )
 from scrapers.recipes.url_discovery_cache import (
     record_non_recipe_url,
@@ -635,6 +636,7 @@ class ZetaScraper:
         self,
         overwrite: bool = False,
         max_recipes: Optional[int] = None,
+        quality_gate_callback=None,
     ) -> Dict[str, int]:
         """Scrape and save in small chunks to keep full Zeta sync memory flat."""
         logger.info(f"\n{'='*60}")
@@ -664,6 +666,22 @@ class ZetaScraper:
                 overwrite=overwrite,
                 max_recipes=max_recipes,
             )
+            scrape_result = RecipeScrapeResult.success_empty(
+                reason=reason,
+                diagnostics=diagnostics,
+            )
+            if reason == "no_new_recipes":
+                scrape_result = RecipeScrapeResult.no_new_recipes(
+                    reason=reason,
+                    diagnostics=diagnostics,
+                )
+            blocked_stats = quality_gate_blocked_streaming_stats(
+                saver,
+                scrape_result,
+                quality_gate_callback,
+            )
+            if blocked_stats is not None:
+                return blocked_stats
             stats = await saver.finish(diagnostics=diagnostics)
             stats["scrape_status"] = "success_empty" if overwrite else "no_new_recipes"
             stats["scrape_reason"] = reason
@@ -743,6 +761,21 @@ class ZetaScraper:
             "discovery_method": "robots_sitemap_plus_fallback",
             "parser_method": "json_ld_httpx",
         }
+        scrape_result = RecipeScrapeResult.cancelled(
+            reason="cancelled",
+            diagnostics=diagnostics,
+        ) if self._cancel_flag else RecipeScrapeResult.success(
+            [],
+            diagnostics=diagnostics,
+        )
+        blocked_stats = quality_gate_blocked_streaming_stats(
+            saver,
+            scrape_result,
+            quality_gate_callback,
+        )
+        if blocked_stats is not None:
+            return blocked_stats
+
         stats = await saver.finish(
             cancelled=self._cancel_flag,
             diagnostics=diagnostics,

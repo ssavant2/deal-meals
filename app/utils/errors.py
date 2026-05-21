@@ -60,6 +60,15 @@ def friendly_error(e: Exception) -> str:
     if any(x in error_str for x in ['rate limit', '429', 'too many']):
         return 'error.rate_limited'
 
+    # Scraper quality gates
+    if any(x in error_str for x in [
+        'recipe_discovery_expected_min_canary',
+        'recipe_discovery_count_too_low',
+        'recipe_parse_rate_too_low',
+        'recipe_quality_gate_blocked',
+    ]):
+        return 'error.scraper_quality_gate'
+
     # Auth errors
     if any(x in error_str for x in ['unauthorized', '401', '403', 'forbidden', 'permission']):
         return 'error.unauthorized'
