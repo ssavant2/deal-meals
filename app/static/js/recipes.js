@@ -714,26 +714,16 @@ function buildDescription(scraper) {
 
 function renderScraperHealthBadge(scraper) {
     const health = scraper.health || {};
-    if (!health.label_key) return '';
+    if (health.status !== 'latest_failed') return '';
 
-    const label = t(health.label_key, health.message_params || {}) || health.label_key;
-    let icon = 'bi-hourglass-split';
-    let cls = 'text-muted';
-    if (health.status === 'ready') {
-        icon = 'bi-shield-check';
-        cls = 'text-success';
-    } else if (health.status === 'latest_failed') {
-        icon = 'bi-exclamation-triangle';
-        cls = 'text-warning';
-    }
+    const label = t(health.label_key || 'recipes.health_latest_failed', health.message_params || {})
+        || i18n['recipes.health_latest_failed']
+        || '';
+    if (!label) return '';
 
-    const modeText = health.effective_gate_mode
-        ? t('recipes.health_gate_mode', { mode: health.effective_gate_mode })
-        : '';
-    const title = modeText ? `${label} · ${modeText}` : label;
     return `
-        <span class="ms-3 ${cls}" title="${escapeAttr(title)}">
-            <i class="bi ${icon}"></i> ${escapeHtml(label)}
+        <span class="ms-3 text-warning" title="${escapeAttr(label)}">
+            <i class="bi bi-exclamation-triangle"></i> ${escapeHtml(label)}
         </span>`;
 }
 
