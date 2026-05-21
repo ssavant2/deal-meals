@@ -193,6 +193,20 @@ keyword = "mango"
 blockers = ["mangopure", "mangopure"]
 reason = "Mangopure (mango puré) is a processed product, not fresh mango fruit. Ingredient 'mangopuré' (also written as 'mangopure') should match only true puré products, not whole fresh/frozen mango."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_ris"
+status = "active"
+keyword = "ris"
+blockers = ["riskakor", "riskaka"]
+reason = "rice cakes are snacks not rice grain — riskakor ingredient should not pull all rice products"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_lax"
+status = "active"
+keyword = "lax"
+blockers = ["gravlaxsås", "gravlaxsås"]
+reason = "gravlaxsås is the gravlax sauce condiment, not raw salmon — recipe asking for the sauce should not pull all lax products"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
