@@ -37,7 +37,7 @@ How scraper code changes are deployed depends on the install style:
    - [1.8 Login Stores](#18-stores-that-require-login) · [1.9 Strategy Decision Tree](#19-choosing-a-scraping-strategy) · [1.10 Multi-Buy Offers](#110-multi-buy-offers) · [1.11 Error Handling](#111-error-handling-in-scrape_offers)
 2. [Adding a Recipe Scraper](#2-adding-a-recipe-scraper)
    - [2.1 File Structure](#21-file-structure) · [2.2 Discovery](#22-discovery) · [2.3 Constants](#23-required-module-constants) · [2.4 Interface](#24-required-class-interface) · [2.5 Recipe Format](#25-required-recipe-format) · [2.6 Saving](#26-saving-streaming-and-legacy)
-   - [2.7 Result Contract](#27-recipe-scrape-result-contract) · [2.8 scrape_and_save()](#28-recommended-scrape_and_save-method) · [2.9 Progress Callbacks](#29-progress-callbacks-recommended) · [2.10 Examples](#210-real-examples) · [2.11 Strategies](#211-common-scraping-strategies)
+   - [2.7 Result Contract](#27-recipe-scrape-result-contract) · [2.8 scrape_and_save()](#28-recommended-scrape_and_save-method) · [2.9 Quality Profiles](#29-quality-profiles-run-history-and-gates) · [2.10 Progress Callbacks](#210-progress-callbacks-recommended) · [2.11 Examples](#211-real-examples) · [2.12 Strategies](#212-common-scraping-strategies)
 3. [Shared Utilities](#3-shared-utilities)
 4. [Testing](#4-testing)
 5. [Troubleshooting](#5-troubleshooting)
@@ -538,7 +538,22 @@ MIN_INGREDIENTS = 3                       # Skip recipes with fewer ingredients
 Optional:
 ```python
 SCRAPER_WARNING = "Large scraper — full mode takes ~30 minutes"
+EXPECTED_MIN_URLS = 450                    # Optional explicit discovery floor
+EXPECTED_MIN_PARSE_RATE = 0.25             # Optional parser health floor
+TEST_RECIPE_LIMIT = 20                     # Optional test-mode limit
+ALLOW_PLAYWRIGHT_FALLBACK = False          # Optional profile hint
+PREFLIGHT_URLS = ("https://...",)          # Optional known-good recipe pages
+NEGATIVE_PREFLIGHT_URLS = ("https://...",) # Optional known non-recipe pages
+BLOCKED_URL_FRAGMENTS = ("/tags/",)        # Optional source-owned URL filters
+BLOCKED_NON_RECIPE_PACKAGE_IDS = ("123",)  # Optional source-specific non-recipes
 ```
+
+The manager builds a `RecipeSourceProfile` from these constants at startup.
+`EXPECTED_RECIPE_COUNT` is still used for UI estimates and as the default
+bootstrap discovery floor. Use `EXPECTED_MIN_URLS` when the health floor should
+be lower or higher than the UI's rough total. `expected_min_urls` is used both
+during early burn-in as a canary floor and later as a safety floor alongside run
+history.
 
 ### 2.4 Required Class Interface
 
@@ -546,6 +561,7 @@ SCRAPER_WARNING = "Large scraper — full mode takes ~30 minutes"
 from scrapers.recipes._common import (
     RecipeScrapeResult,
     StreamingRecipeSaver,
+    finish_streaming_recipe_scrape,
     incremental_attempt_limit,
     make_recipe_scrape_result,
     recipe_target_reached,
@@ -735,10 +751,30 @@ return make_recipe_scrape_result(
     recipes,
     force_all=force_all,
     max_recipes=max_recipes,
+    diagnostics={
+        "candidate_url_count": len(all_candidate_urls),
+        "selected_url_count": len(urls_to_scrape),
+        "parsed_recipe_count": len(recipes),
+        "filtered_non_recipe_count": filtered_count,
+        "parse_rate": round(len(recipes) / len(urls_to_scrape), 4) if urls_to_scrape else 0.0,
+        "discovery_method": "robots_sitemap_plus_fallback",
+        "parser_method": "json_ld_httpx",
+    },
 )
 ```
 
 The app still accepts legacy `list[dict]` returns, but the result object lets the central router distinguish "no new recipes", "verified empty", "failed", "partial", and "cancelled" without each plugin duplicating UI policy.
+
+Add diagnostics whenever the scraper has discovery/parser counts. They are
+written to bounded `scraper_run_history`, used for future time estimates, and
+feed the recipe quality gate. Preferred keys are:
+
+- `candidate_url_count`: all candidate recipe URLs discovered before filters
+- `selected_url_count`: URLs selected for this run
+- `parsed_recipe_count`: successfully parsed recipes
+- `filtered_non_recipe_count`: package/tag/article/non-recipe URLs filtered out
+- `parse_rate`: parsed / selected, rounded to a small float
+- `discovery_method` or `parser_method`: short diagnostic labels
 
 When the result is passed to `save_recipes_to_database()`, the shared save
 helper also:
@@ -764,6 +800,7 @@ async def scrape_and_save(
     self,
     overwrite: bool = False,
     max_recipes: int = None,
+    quality_gate_callback=None,
 ) -> Dict[str, int]:
     """Scrape and save in small batches."""
     saver = StreamingRecipeSaver(
@@ -776,17 +813,11 @@ async def scrape_and_save(
         force_all=overwrite,
         stream_saver=saver,
     )
-    if result.status == "failed":
-        stats = saver.stats.copy()
-        stats["scrape_status"] = "failed"
-        stats["scrape_reason"] = result.reason
-        return stats
-
-    stats = await saver.finish(cancelled=result.status == "cancelled")
-    if result.status == "no_new_recipes":
-        stats["scrape_status"] = "no_new_recipes"
-        stats["scrape_reason"] = result.reason
-    return stats
+    return await finish_streaming_recipe_scrape(
+        saver,
+        result,
+        quality_gate_callback=quality_gate_callback,
+    )
 ```
 
 Your `scrape_all_recipes()` should accept `stream_saver=None`. When a recipe is
@@ -800,13 +831,45 @@ only after `finish()` succeeds. If a full scrape fails or is cancelled, old
 recipes are kept. `finish(cancelled=True)` drops unsaved pending recipes instead
 of flushing them.
 
+`quality_gate_callback` is supplied by the router/scheduler. Always pass it to
+`finish_streaming_recipe_scrape()`. In enforce mode it can block the final
+streaming `finish()` step when discovery/parser diagnostics look unsafe, which
+protects full-mode stale deletion. The helper also preserves diagnostics in the
+returned stats dict.
+
 Cache refreshes and automatic image downloads are triggered by the router after
 the whole scraper (or run-all queue) completes, not after each streaming batch.
 Small incremental recipe changes usually use recipe-delta to patch
 `recipe_offer_cache`; run-all queues, large full imports, missing change IDs, or
 failed safety verification fall back to a full rebuild.
 
-### 2.9 Progress Callbacks (Recommended)
+### 2.9 Quality Profiles, Run History, and Gates
+
+Each recipe scraper gets a source profile from its module constants. The profile
+is intentionally small: it describes expected discovery size, parser floors,
+known sitemap/preflight URLs, and source-owned URL blocks. Keep source-specific
+rules in the scraper module; shared scraper helpers should own fetching/parsing
+plumbing, not each site's filtering policy.
+
+Every manual and scheduled scraper run writes a bounded history row
+(`scraper_run_history`, latest 30 per scraper/mode). History rows keep status,
+reason code, duration, recipe count, attempted count, and diagnostics such as
+candidate/selected/parsed counts.
+
+Quality gates read that history plus the current run's diagnostics:
+
+- With no or unstable history, `auto` mode observes only.
+- After 5 successful metric runs, or 3 stable candidate counts within 10%,
+  `auto` can enforce.
+- `SCRAPER_QUALITY_GATES=off|observe|auto|enforce` sets the default.
+- `SCRAPER_QUALITY_GATE_OVERRIDES=mathem=off,recipe:arla=enforce,*=observe`
+  overrides individual sources or all sources.
+
+If a gate blocks, the UI gets a plain user-facing error and the detailed reason
+is stored in logs/history. Do not surface internal reason codes as support-style
+messages.
+
+### 2.10 Progress Callbacks (Recommended)
 
 Progress callbacks let the UI show real-time scraping status. The app calls `set_progress_callback()` on your scraper before scraping starts.
 
@@ -852,13 +915,13 @@ For configured incremental recipe runs, the router displays progress using
 buffers are not exposed in the UI. Still send `current`/`total` for logs,
 timeouts, and developer diagnostics.
 
-### 2.10 Real Examples
+### 2.11 Real Examples
 
 **Simplest: Zeta** (`app/scrapers/recipes/zeta_scraper.py`) — sitemap + httpx, no browser needed. Best starting point for new scrapers.
 
 **With Playwright: Coop** (`app/scrapers/recipes/coop_scraper.py`) — sitemap + Playwright for JS-rendered pages. Use this pattern when the site requires a browser.
 
-### 2.11 Common Scraping Strategies
+### 2.12 Common Scraping Strategies
 
 | Strategy | When to use | Example |
 |---|---|---|
@@ -985,9 +1048,17 @@ Store scrapers don't save offers directly. The app handles it via two functions 
 
 1. **`ensure_store_exists(store_id, store_name, store_url)`** — called before saving. Auto-registers new stores in the database on first use (matches on `store_type`, the ASCII lowercase ID).
 
-2. **`save_offers(store_name, products)`** — saves scraped products to the `offers` table. **Clears ALL existing offers from ALL stores first**, then inserts the new products. This means only one store's offers are active at a time (by design — recipes are based on one store's deals).
+2. **`save_offers(store_name, products)`** — validates the new product rows, then clears ALL existing offers from ALL stores and inserts the new products in one transaction. This means only one store's offers are active at a time (by design — recipes are based on one store's deals).
 
 Your `scrape_offers()` method only needs to return `StoreScrapeResult.success(products)` for trustworthy data. The app calls `save_offers()` for you.
+
+Failed, blocked, partial, empty, or invalid results keep existing offers/cache.
+Only return `StoreScrapeResult.success_empty(...)` when the source has clearly
+verified that there are currently no offers; that status intentionally clears
+offers/cache to an empty state. Manual and scheduled store runs also write
+bounded run-history rows with status/reason/diagnostics, so include simple
+diagnostics such as `data_path`, raw product count, parsed product count, and
+skipped product count when possible.
 
 ### Database Tables (Reference)
 

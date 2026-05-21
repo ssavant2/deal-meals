@@ -191,11 +191,33 @@ Use these standard categories for the `category` field:
 Your `scrape_offers()` method only needs to return `StoreScrapeResult.success(products)` for trustworthy results. The app handles saving:
 
 1. **`ensure_store_exists()`** — auto-registers your store in the database on first use (matched by `config.id`)
-2. **`save_offers()`** — clears ALL existing offers (from ALL stores), then inserts your products
+2. **`save_offers()`** — validates your products, then clears ALL existing offers (from ALL stores) and inserts the new rows in one transaction
 
 This means only one store's offers are active at a time. This is by design — recipe matching works against one store's current deals.
 
 Your store is registered automatically when discovered. You do not need to insert it into the database manually.
+
+Failed, blocked, partial, empty, or invalid scrapes keep the existing offers and
+cache. Only return `StoreScrapeResult.success_empty(...)` when the source has
+clearly verified that there are currently no offers; that status intentionally
+clears offers/cache to an empty state.
+
+Include small diagnostics when possible:
+
+```python
+return StoreScrapeResult.success(
+    products,
+    diagnostics={
+        "data_path": "public_json_api",
+        "raw_product_count": len(raw_items),
+        "parsed_product_count": len(products),
+        "skipped_product_count": skipped,
+    },
+)
+```
+
+Manual and scheduled store runs store these diagnostics in bounded run history.
+They are not shown as status text unless a scrape fails.
 
 ## Timeout Constants
 

@@ -30,6 +30,7 @@ from typing import Dict, Optional
 
 from scrapers.recipes._common import (
     RecipeScrapeResult,
+    finish_streaming_recipe_scrape,
     incremental_attempt_limit,
     make_recipe_scrape_result,
     recipe_target_reached,
@@ -43,6 +44,14 @@ SCRAPER_DESCRIPTION = "Recept från [site]"
 EXPECTED_RECIPE_COUNT = 0
 SOURCE_URL = "https://..."
 MIN_INGREDIENTS = 3
+
+# Optional health/profile hints
+EXPECTED_MIN_URLS = None
+EXPECTED_MIN_PARSE_RATE = None
+TEST_RECIPE_LIMIT = 20
+PREFLIGHT_URLS = ()
+NEGATIVE_PREFLIGHT_URLS = ()
+BLOCKED_URL_FRAGMENTS = ()
 
 
 class [SiteName]Scraper:
@@ -77,6 +86,7 @@ class [SiteName]Scraper:
         self,
         overwrite: bool = False,
         max_recipes: Optional[int] = None,
+        quality_gate_callback=None,
     ) -> Dict[str, int]:
         """Scrape and save in small batches for GUI/scheduled production runs."""
         saver = StreamingRecipeSaver(
@@ -89,17 +99,11 @@ class [SiteName]Scraper:
             force_all=overwrite,
             stream_saver=saver,
         )
-        if result.status == "failed":
-            stats = saver.stats.copy()
-            stats["scrape_status"] = "failed"
-            stats["scrape_reason"] = result.reason
-            return stats
-
-        stats = await saver.finish(cancelled=result.status == "cancelled")
-        if result.status == "no_new_recipes":
-            stats["scrape_status"] = "no_new_recipes"
-            stats["scrape_reason"] = result.reason
-        return stats
+        return await finish_streaming_recipe_scrape(
+            saver,
+            result,
+            quality_gate_callback=quality_gate_callback,
+        )
 
 
 def save_to_database(recipes, clear_old: bool = False) -> Dict[str, int]:
@@ -159,6 +163,7 @@ from loguru import logger
 from playwright.async_api import TimeoutError as PlaywrightTimeout, async_playwright
 from scrapers.recipes._common import (
     RecipeScrapeResult,
+    finish_streaming_recipe_scrape,
     make_recipe_scrape_result,
     save_recipes_to_database,
     StreamingRecipeSaver,
@@ -299,6 +304,7 @@ async def scrape_and_save(
     self,
     overwrite: bool = False,
     max_recipes: Optional[int] = None,
+    quality_gate_callback=None,
 ) -> Dict[str, int]:
     """Scrape and save in small batches."""
     saver = StreamingRecipeSaver(
@@ -311,23 +317,22 @@ async def scrape_and_save(
         force_all=overwrite,
         stream_saver=saver,
     )
-    if result.status == "failed":
-        stats = saver.stats.copy()
-        stats["scrape_status"] = "failed"
-        stats["scrape_reason"] = result.reason
-        return stats
-
-    stats = await saver.finish(cancelled=result.status == "cancelled")
-    if result.status == "no_new_recipes":
-        stats["scrape_status"] = "no_new_recipes"
-        stats["scrape_reason"] = result.reason
-    return stats
+    return await finish_streaming_recipe_scrape(
+        saver,
+        result,
+        quality_gate_callback=quality_gate_callback,
+    )
 ```
 
 `StreamingRecipeSaver` saves batches of 50 recipes by default. In full mode it
 upserts batches during the run and deletes stale source recipes only after the
 scrape finishes successfully. Cancelled runs do not flush pending unsaved
 recipes.
+
+Always accept `quality_gate_callback` and pass it to
+`finish_streaming_recipe_scrape()`. The router/scheduler uses it to block unsafe
+full-sync finishes when run-history and current discovery diagnostics indicate a
+broken source.
 
 ### 3. Three Run Modes
 
@@ -418,13 +423,21 @@ result = await scraper.scrape_all_recipes(max_recipes=20)
 
 # Incremental mode:
 if hasattr(scraper, "scrape_and_save"):
-    result = await scraper.scrape_and_save(overwrite=False, max_recipes=max_incr)
+    result = await scraper.scrape_and_save(
+        overwrite=False,
+        max_recipes=max_incr,
+        quality_gate_callback=quality_gate_callback,
+    )
 else:
     result = await scraper.scrape_all_recipes(max_recipes=max_incr)
 
 # Full overwrite mode:
 if hasattr(scraper, "scrape_and_save"):
-    result = await scraper.scrape_and_save(overwrite=True, max_recipes=max_full)
+    result = await scraper.scrape_and_save(
+        overwrite=True,
+        max_recipes=max_full,
+        quality_gate_callback=quality_gate_callback,
+    )
 else:
     result = await scraper.scrape_all_recipes(force_all=True, max_recipes=max_full)
 ```
@@ -437,7 +450,8 @@ but there was nothing new to fetch.
 
 For scrapers that implement `scrape_and_save()`, the router expects a stats dict
 with `created`, `updated`, `saved`, `errors`, `scrape_status`, and
-`scrape_reason` keys. `StreamingRecipeSaver.finish()` fills these fields.
+`scrape_reason` keys. `finish_streaming_recipe_scrape()` fills these fields and
+preserves diagnostics for run history and quality gates.
 
 The `if __name__ == "__main__"` block in your scraper is for **developer CLI testing only** — the GUI never calls it.
 
@@ -484,6 +498,7 @@ from constants_timeouts import HTTP_TIMEOUT
 from loguru import logger
 from scrapers.recipes._common import (
     RecipeScrapeResult,
+    finish_streaming_recipe_scrape,
     make_recipe_scrape_result,
     save_recipes_to_database,
     StreamingRecipeSaver,
@@ -497,6 +512,14 @@ SCRAPER_DESCRIPTION = "[Brief description for GUI]"
 EXPECTED_RECIPE_COUNT = 0  # Approximate number of recipes
 SOURCE_URL = "https://..."
 MIN_INGREDIENTS = 3       # Skip recipes with fewer ingredients
+
+# Optional health/profile hints
+EXPECTED_MIN_URLS = None
+EXPECTED_MIN_PARSE_RATE = None
+TEST_RECIPE_LIMIT = 20
+PREFLIGHT_URLS = ()
+NEGATIVE_PREFLIGHT_URLS = ()
+BLOCKED_URL_FRAGMENTS = ()
 ```
 
 ### Option B Skeleton
@@ -626,6 +649,7 @@ class [SiteName]Scraper:
         self,
         overwrite: bool = False,
         max_recipes: Optional[int] = None,
+        quality_gate_callback=None,
     ) -> Dict[str, int]:
         """Scrape and save in small batches."""
         saver = StreamingRecipeSaver(
@@ -638,17 +662,11 @@ class [SiteName]Scraper:
             force_all=overwrite,
             stream_saver=saver,
         )
-        if result.status == "failed":
-            stats = saver.stats.copy()
-            stats["scrape_status"] = "failed"
-            stats["scrape_reason"] = result.reason
-            return stats
-
-        stats = await saver.finish(cancelled=result.status == "cancelled")
-        if result.status == "no_new_recipes":
-            stats["scrape_status"] = "no_new_recipes"
-            stats["scrape_reason"] = result.reason
-        return stats
+        return await finish_streaming_recipe_scrape(
+            saver,
+            result,
+            quality_gate_callback=quality_gate_callback,
+        )
 
 
 def save_to_database(recipes, clear_old: bool = False) -> Dict:
@@ -988,14 +1006,20 @@ Saves parsed recipes in small batches during a production scrape:
 ```python
 saver = StreamingRecipeSaver(DB_SOURCE_NAME, overwrite=overwrite, max_recipes=max_recipes)
 await saver.add(recipe)      # Flushes automatically every 50 recipes by default
-stats = await saver.finish() # Flushes remaining recipes and returns save stats
+stats = await finish_streaming_recipe_scrape(
+    saver,
+    result,
+    quality_gate_callback=quality_gate_callback,
+)
 ```
 
 Use it from `scrape_and_save()` rather than calling `save_recipes_to_database()`
-inside your scrape loop. In full/overwrite mode it upserts batches as they are
-found, then deletes stale source recipes only after the full scrape succeeds.
-Cancelled runs call `finish(cancelled=True)`, which drops pending unsaved
-recipes and returns cancelled status metadata.
+inside your scrape loop. Finish through `finish_streaming_recipe_scrape()`, not
+`saver.finish()` directly, so failed/cancelled/no-new statuses and quality-gate
+blocks are handled consistently. In full/overwrite mode it upserts batches as
+they are found, then deletes stale source recipes only after the full scrape
+succeeds. Cancelled runs drop pending unsaved recipes and return cancelled
+status metadata.
 
 ### `parse_iso8601_duration(duration: str) -> Optional[int]`
 
