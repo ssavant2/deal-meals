@@ -3,6 +3,8 @@
 Used by both routers/recipes.py (manual runs) and scheduler.py (scheduled runs).
 """
 
+import json
+
 from sqlalchemy import text
 from database import get_db_session
 from loguru import logger
@@ -11,16 +13,14 @@ from loguru import logger
 RUN_HISTORY_RETENTION_PER_SCRAPER_MODE = 30
 
 
-def _has_attempted_count_column(db) -> bool:
-    """Return True when this database has the newer scalable estimate column."""
-    return bool(db.execute(text("""
-        SELECT EXISTS (
-            SELECT 1
-            FROM information_schema.columns
-            WHERE table_name = 'scraper_run_history'
-              AND column_name = 'attempted_count'
-        )
-    """)).scalar())
+def _scraper_run_history_columns(db) -> set[str]:
+    """Return available scraper_run_history columns for additive deployments."""
+    rows = db.execute(text("""
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'scraper_run_history'
+    """)).fetchall()
+    return {str(row[0]) for row in rows}
 
 
 def _cleanup_run_history_for_scraper_mode(
@@ -63,6 +63,16 @@ def save_run_history(
     error_message: str = None,
     update_schedule: bool = False,
     keep_latest_per_mode: int = RUN_HISTORY_RETENTION_PER_SCRAPER_MODE,
+    source_kind: str = None,
+    status: str = None,
+    reason_code: str = None,
+    candidate_count: int = None,
+    selected_count: int = None,
+    parsed_count: int = None,
+    filtered_count: int = None,
+    parse_rate: float = None,
+    data_path: str = None,
+    diagnostics: dict = None,
 ):
     """Save a scraper run to history for time estimates.
 
@@ -76,6 +86,7 @@ def save_run_history(
     """
     try:
         with get_db_session() as db:
+            available_columns = _scraper_run_history_columns(db)
             params = {
                 "scraper_id": scraper_id,
                 "mode": mode,
@@ -84,35 +95,54 @@ def save_run_history(
                 "success": success,
                 "error_message": error_message
             }
-            if _has_attempted_count_column(db):
-                params["attempted_count"] = attempted_count
-                db.execute(
-                    text("""
-                        INSERT INTO scraper_run_history (
-                            scraper_id, mode, duration_seconds, recipes_found,
-                            attempted_count, success, error_message
-                        )
-                        VALUES (
-                            :scraper_id, :mode, :duration_seconds, :recipes_found,
-                            :attempted_count, :success, :error_message
-                        )
-                    """),
-                    params,
+            insert_columns = [
+                "scraper_id",
+                "mode",
+                "duration_seconds",
+                "recipes_found",
+                "success",
+                "error_message",
+            ]
+            value_expressions = {
+                column: f":{column}"
+                for column in insert_columns
+            }
+
+            optional_values = {
+                "attempted_count": attempted_count,
+                "source_kind": source_kind,
+                "status": status or ("success" if success else "failed"),
+                "reason_code": reason_code or (error_message if not success else None),
+                "candidate_count": candidate_count,
+                "selected_count": selected_count,
+                "parsed_count": parsed_count,
+                "filtered_count": filtered_count,
+                "parse_rate": parse_rate,
+                "data_path": data_path,
+                "diagnostics": json.dumps(diagnostics or {}, ensure_ascii=False, sort_keys=True),
+            }
+            for column, value in optional_values.items():
+                if column not in available_columns:
+                    continue
+                insert_columns.append(column)
+                params[column] = value
+                value_expressions[column] = (
+                    f"CAST(:{column} AS jsonb)"
+                    if column == "diagnostics"
+                    else f":{column}"
                 )
-            else:
-                db.execute(
-                    text("""
-                        INSERT INTO scraper_run_history (
-                            scraper_id, mode, duration_seconds, recipes_found,
-                            success, error_message
-                        )
-                        VALUES (
-                            :scraper_id, :mode, :duration_seconds, :recipes_found,
-                            :success, :error_message
-                        )
-                    """),
-                    params,
-                )
+
+            db.execute(
+                text(f"""
+                    INSERT INTO scraper_run_history (
+                        {", ".join(insert_columns)}
+                    )
+                    VALUES (
+                        {", ".join(value_expressions[column] for column in insert_columns)}
+                    )
+                """),
+                params,
+            )
             removed_rows = _cleanup_run_history_for_scraper_mode(
                 db,
                 scraper_id=scraper_id,

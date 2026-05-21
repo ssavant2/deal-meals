@@ -33,6 +33,7 @@ CREATE_RECIPE_SEARCH_TERM_INDEX_ID = "20260430_create_recipe_search_term_index"
 CREATE_RECIPE_OFFER_CANDIDATES_ID = "20260507_create_recipe_offer_candidates"
 ADD_CANDIDATE_JOIN_TERM_INDEXES_ID = "20260507_add_candidate_join_term_indexes"
 ADD_SCRAPER_RUN_HISTORY_SCHEDULED_MODE_ID = "20260514_add_scraper_run_history_scheduled_mode"
+ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_ID = "20260521_add_scraper_run_history_health_columns"
 MIGRATION_TABLE = "deal_meals_schema_migrations"
 
 DROP_MEMORY_CACHE_PREFS_SQL = """
@@ -272,6 +273,40 @@ ADD CONSTRAINT scraper_run_history_mode_check
 CHECK (mode IN ('test', 'incremental', 'full', 'scheduled'));
 """.strip()
 
+ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_SQL = """
+ALTER TABLE scraper_run_history
+ADD COLUMN IF NOT EXISTS source_kind VARCHAR(20),
+ADD COLUMN IF NOT EXISTS status VARCHAR(32),
+ADD COLUMN IF NOT EXISTS reason_code VARCHAR(80),
+ADD COLUMN IF NOT EXISTS candidate_count INTEGER,
+ADD COLUMN IF NOT EXISTS selected_count INTEGER,
+ADD COLUMN IF NOT EXISTS parsed_count INTEGER,
+ADD COLUMN IF NOT EXISTS filtered_count INTEGER,
+ADD COLUMN IF NOT EXISTS parse_rate NUMERIC(6,4),
+ADD COLUMN IF NOT EXISTS data_path VARCHAR(80),
+ADD COLUMN IF NOT EXISTS diagnostics JSONB DEFAULT '{}'::jsonb;
+
+ALTER TABLE scraper_run_history
+DROP CONSTRAINT IF EXISTS scraper_run_history_mode_check;
+
+ALTER TABLE scraper_run_history
+DROP CONSTRAINT IF EXISTS chk_run_history_mode;
+
+ALTER TABLE scraper_run_history
+ADD CONSTRAINT scraper_run_history_mode_check
+CHECK (mode IN ('test', 'preflight', 'incremental', 'full', 'scheduled', 'diagnostic'));
+
+CREATE INDEX IF NOT EXISTS idx_scraper_run_history_status
+    ON scraper_run_history(scraper_id, mode, status, run_at);
+
+COMMENT ON COLUMN scraper_run_history.status
+    IS 'Stable machine-readable scrape status for diagnostics';
+COMMENT ON COLUMN scraper_run_history.reason_code
+    IS 'Stable machine-readable reason code for diagnostics/UI mapping';
+COMMENT ON COLUMN scraper_run_history.diagnostics
+    IS 'Compact JSON counters and scraper diagnostics; never raw HTML payloads';
+""".strip()
+
 
 @dataclass(frozen=True)
 class _MigrationEngine:
@@ -502,6 +537,18 @@ def _scraper_run_history_allows_scheduled_mode(conn) -> bool:
     """)).scalar())
 
 
+def _scraper_run_history_health_columns_exist(conn) -> bool:
+    return bool(conn.execute(text("""
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'scraper_run_history'
+              AND column_name = 'diagnostics'
+        )
+    """)).scalar())
+
+
 def _warn_manual_cache_last_operation_add() -> None:
     logger.warning(
         "cache_metadata.last_operation is missing, but the app DB user cannot "
@@ -570,6 +617,15 @@ def _warn_manual_scraper_run_history_scheduled_mode_add() -> None:
         "user cannot run DDL. Run the startup migration with DB admin "
         "credentials or alter the scraper_run_history mode check constraint "
         "before relying on scheduled store run history."
+    )
+
+
+def _warn_manual_scraper_run_history_health_columns_add() -> None:
+    logger.warning(
+        "scraper_run_history health columns are missing, but the app DB user "
+        "cannot run DDL. Run the startup migration with DB admin credentials "
+        "or add the columns from database/init.sql before relying on scraper "
+        "quality diagnostics."
     )
 
 
@@ -891,6 +947,35 @@ def _run_add_scraper_run_history_scheduled_mode(
         )
 
 
+def _run_add_scraper_run_history_health_columns(
+    engine_info: _MigrationEngine,
+    release_version: str,
+) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _scraper_run_history_health_columns_exist(conn):
+                _warn_manual_scraper_run_history_health_columns_add()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_ID):
+            return
+
+        already_has_columns = _scraper_run_history_health_columns_exist(conn)
+        conn.execute(text(ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_SQL))
+        logger.info(
+            "Startup migration {} ensured scraper run-health columns exist",
+            ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_ID,
+        )
+        _record_migration(
+            conn,
+            ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_ID,
+            release_version,
+            {"already_had_columns": already_has_columns},
+        )
+
+
 def run_startup_migrations(release_version: str) -> None:
     """Run one-off migrations that are safe during app startup."""
     if not _version_can_run_startup_migrations(release_version):
@@ -913,6 +998,7 @@ def run_startup_migrations(release_version: str) -> None:
         _run_create_recipe_offer_candidates(engine_info, release_version)
         _run_add_candidate_join_term_indexes(engine_info, release_version)
         _run_add_scraper_run_history_scheduled_mode(engine_info, release_version)
+        _run_add_scraper_run_history_health_columns(engine_info, release_version)
     except SQLAlchemyError as e:
         logger.warning(f"Startup migrations skipped after database error: {e}")
     finally:

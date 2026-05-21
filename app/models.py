@@ -601,18 +601,32 @@ class ScraperRunHistory(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuidv7()"))
     scraper_id = Column(String(50), nullable=False)
-    mode = Column(String(20), nullable=False)  # 'test', 'incremental', 'full', 'scheduled'
+    mode = Column(String(20), nullable=False)
     duration_seconds = Column(Integer, nullable=False)
     recipes_found = Column(Integer, default=0)
     attempted_count = Column(Integer)
     success = Column(Boolean, default=True)
     error_message = Column(Text)
     run_at = Column(DateTime(timezone=True), default=_utcnow)
+    source_kind = Column(String(20))
+    status = Column(String(32))
+    reason_code = Column(String(80))
+    candidate_count = Column(Integer)
+    selected_count = Column(Integer)
+    parsed_count = Column(Integer)
+    filtered_count = Column(Integer)
+    parse_rate = Column(Numeric(6, 4))
+    data_path = Column(String(80))
+    diagnostics = Column(JSONB, default=dict)
 
     __table_args__ = (
-        CheckConstraint("mode IN ('test', 'incremental', 'full', 'scheduled')", name='chk_run_history_mode'),
+        CheckConstraint(
+            "mode IN ('test', 'preflight', 'incremental', 'full', 'scheduled', 'diagnostic')",
+            name='chk_run_history_mode',
+        ),
         Index('idx_scraper_run_history_scraper_mode', 'scraper_id', 'mode'),
         Index('idx_scraper_run_history_run_at', 'run_at'),
+        Index('idx_scraper_run_history_status', 'scraper_id', 'mode', 'status', 'run_at'),
     )
 
     def __repr__(self):

@@ -644,20 +644,36 @@ COMMENT ON TABLE scraper_schedules IS 'Scheduled runs for recipe scrapers';
 CREATE TABLE scraper_run_history (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     scraper_id VARCHAR(50) NOT NULL,
-    mode VARCHAR(20) NOT NULL CHECK (mode IN ('test', 'incremental', 'full', 'scheduled')),
+    mode VARCHAR(20) NOT NULL CHECK (mode IN ('test', 'preflight', 'incremental', 'full', 'scheduled', 'diagnostic')),
     duration_seconds INTEGER NOT NULL,
     recipes_found INTEGER DEFAULT 0,
     attempted_count INTEGER,
     success BOOLEAN DEFAULT true,
     error_message TEXT,
-    run_at TIMESTAMPTZ DEFAULT NOW()
+    run_at TIMESTAMPTZ DEFAULT NOW(),
+    source_kind VARCHAR(20),
+    status VARCHAR(32),
+    reason_code VARCHAR(80),
+    candidate_count INTEGER,
+    selected_count INTEGER,
+    parsed_count INTEGER,
+    filtered_count INTEGER,
+    parse_rate NUMERIC(6, 4),
+    data_path VARCHAR(80),
+    diagnostics JSONB DEFAULT '{}'::jsonb
 );
 
 CREATE INDEX idx_scraper_run_history_scraper_mode ON scraper_run_history(scraper_id, mode);
 CREATE INDEX idx_scraper_run_history_run_at ON scraper_run_history(run_at);
+CREATE INDEX idx_scraper_run_history_status ON scraper_run_history(scraper_id, mode, status, run_at);
 
 COMMENT ON TABLE scraper_run_history IS 'Run time history for estimating future scraper durations';
-COMMENT ON COLUMN scraper_run_history.attempted_count IS 'Number of recipe URLs/items attempted during the run; used for scalable time estimates';
+COMMENT ON COLUMN scraper_run_history.attempted_count
+    IS 'Number of recipe URLs/items attempted during the run; used for scalable time estimates';
+COMMENT ON COLUMN scraper_run_history.status IS 'Stable machine-readable scrape status for diagnostics';
+COMMENT ON COLUMN scraper_run_history.reason_code IS 'Stable machine-readable reason code for diagnostics/UI mapping';
+COMMENT ON COLUMN scraper_run_history.diagnostics
+    IS 'Compact JSON counters and scraper diagnostics; never raw HTML payloads';
 
 -- ============================================================================
 -- SCRAPER_CONFIG - Per-scraper recipe fetch limits (configurable via UI)
