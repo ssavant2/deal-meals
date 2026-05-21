@@ -31,6 +31,8 @@ CHECKS = [
     "run_candidate_refresh_guard_checks.py",
     "run_recipe_ingredient_term_map_checks.py",
     "run_recipe_url_discovery_checks.py",
+    "run_scraper_p0_checks.py",
+    "run_scraper_history_checks.py",
     "run_ingredient_routing_mode_checks.py",
     "run_delta_ingredient_routing_policy_checks.py",
 ]
