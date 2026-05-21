@@ -81,6 +81,41 @@ keyword = "macadamianötter"
 blockers = ["häagen-dazs", "haagen-dazs", "brittle", "glass", "gelato"]
 reason = "Macadamia ice cream / brittle candy (Cracking macadamia nut brittle Häagen-Dazs) contains macadamia as an ingredient but is not a raw nut product — macadamianötter recipes need unprepared whole/chopped nuts, not desserts"
 
+[[product_name_blockers]]
+id = "runtime_pnb_nutella"
+status = "active"
+keyword = "nutella"
+blockers = ["kex", "croissanter", "hasselnötsglass", "mellanmål"]
+reason = "Nutella Kex / Croissanter nutella / Nutella hasselnötsglass / Mellanmål Nutella & go are derivative snack/ice cream products, not Nutella hazelnut spread that a recipe asking for nutella wants"
+
+[[product_name_blockers]]
+id = "runtime_pnb_cajun"
+status = "active"
+keyword = "cajun"
+blockers = ["sås", "bbq"]
+reason = "Cajun BBQ sauce (Sås Cajun BBQ 200g ICA) is a condiment, not cajun seasoning powder — cajunkrydda recipes need dry spice blend, not bottled sauce. Same pattern as paprikakrydda/grillkrydda blockers."
+
+[[product_name_blockers]]
+id = "runtime_pnb_paprikor"
+status = "active"
+keyword = "paprikor"
+blockers = ["crackers", "mild", "malen"]
+reason = "Sync with 'paprika' PNB. Crackers (snack with paprika flavor), mild (small spice jar with 'mild'-label like 'Paprika Mild 43g ICA'), and malen (ground spice form) are not fresh bell pepper / paprikor."
+
+[[product_name_blockers]]
+id = "runtime_pnb_pannkakor"
+status = "active"
+keyword = "pannkakor"
+blockers = ["bakmix"]
+reason = "Bakmix Pannkakor (baking mix to make pancakes from scratch) is not a ready/frozen pancake product — recipes wanting frysta pannkakor need the finished product, not a mix requiring preparation. Same pattern as blomkål/broccoli mix blockers."
+
+[[product_name_blockers]]
+id = "runtime_pnb_vitchoklad"
+status = "active"
+keyword = "vitchoklad"
+blockers = ["havregrynsgröt", "proteinpudding", "dessertsås", "dessertsås"]
+reason = "Havregrynsgröt/proteinpudding/dessertsås with vit choklad as flavor are not actual white chocolate baking products — recipes wanting vit choklad need solid chocolate bar/chips for cooking or baking"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -136,6 +171,27 @@ status = "inactive"
 keyword = "formbröd"
 blockers = ["grov", "grova"]
 reason = "Replaced by runtime_ksbc_formbrod_grov — FPB smart-blocker fires on the canonical synonym appended by _append_canonical_keyword_synonyms (formbröd is added standalone to ingredient text), so the blocker always sees 'has_valid=True' and never fires. KSBC operates at matched_keyword level and works correctly."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_socker"
+status = "active"
+keyword = "socker"
+blockers = ["sockermassa"]
+reason = "Sockermassa (fondant/rolled sugar paste for cake decoration) is not plain socker — Strösocker products should not match svart sockermassa ingredients"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_marsipan"
+status = "active"
+keyword = "marsipan"
+blockers = ["marsipanlock"]
+reason = "Marsipanlock (pre-rolled colored marzipan sheets for cake covering) is a specific product form — plain marsipan blocks should not match marsipanlock recipes via substring (marsipan in marsipanlock). Extends existing PNB marsipanlock policy to cover plain marsipan products without sötmandel-marker."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_mango"
+status = "active"
+keyword = "mango"
+blockers = ["mangopure", "mangopure"]
+reason = "Mangopure (mango puré) is a processed product, not fresh mango fruit. Ingredient 'mangopuré' (also written as 'mangopure') should match only true puré products, not whole fresh/frozen mango."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
