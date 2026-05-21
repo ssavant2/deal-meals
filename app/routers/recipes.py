@@ -909,6 +909,13 @@ async def reset_recipe_cache(request: Request):
 
 # ==================== RECIPE SCRAPERS ====================
 
+def _visible_recipe_scraper_health(health: dict | None) -> dict:
+    """Expose only actionable scraper health messages to the UI/API."""
+    if not isinstance(health, dict):
+        return {}
+    return health if health.get("status") == "latest_failed" else {}
+
+
 @router.get("/recipe-scrapers")
 def get_recipe_scrapers():
     """Get all available recipe scrapers with their status."""
@@ -962,7 +969,7 @@ def get_recipe_scrapers():
             "warning": s.warning if hasattr(s, 'warning') else "",
             "max_recipes_full": max_full,
             "max_recipes_incremental": max_incr,
-            "health": scraper_health.get(s.id, {}),
+            "health": _visible_recipe_scraper_health(scraper_health.get(s.id)),
             "time_estimates": {}
         }
 
@@ -2672,7 +2679,9 @@ async def get_recipe_scraper_status(scraper_id: str):
         "message_key": "recipes.ready_to_run",
         "last_run_at": scraper_info.last_run_at.isoformat() if scraper_info.last_run_at else None,
         "recipe_count": scraper_info.recipe_count,
-        "health": get_recipe_scraper_health([scraper_id]).get(scraper_id, {}),
+        "health": _visible_recipe_scraper_health(
+            get_recipe_scraper_health([scraper_id]).get(scraper_id)
+        ),
     })
 
 
