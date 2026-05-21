@@ -74,6 +74,13 @@ keyword = "prosciutto"
 blockers = ["salami"]
 reason = "Combo charcuterie pack like 'Prosciutto Crudo Salami Milano 85g Negroni' is primarily a salami product — should not match plain prosciutto recipes"
 
+[[product_name_blockers]]
+id = "runtime_pnb_macadamianotter"
+status = "active"
+keyword = "macadamianötter"
+blockers = ["häagen-dazs", "haagen-dazs", "brittle", "glass", "gelato"]
+reason = "Macadamia ice cream / brittle candy (Cracking macadamia nut brittle Häagen-Dazs) contains macadamia as an ingredient but is not a raw nut product — macadamianötter recipes need unprepared whole/chopped nuts, not desserts"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -123,6 +130,13 @@ keyword = "spenat"
 blockers = ["babyspenat"]
 reason = "Babyspenat (young tender leaves used raw in salads) is functionally different from generic bladspenat/hackad spenat (mature, often frozen, for cooking). Babyspenat products have their own 'babyspenat' keyword and match directly; this blocks generic spenat products from babyspenat recipes via substring 'spenat' in 'babyspenat'."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_formbrod"
+status = "inactive"
+keyword = "formbröd"
+blockers = ["grov", "grova"]
+reason = "Replaced by runtime_ksbc_formbrod_grov — FPB smart-blocker fires on the canonical synonym appended by _append_canonical_keyword_synonyms (formbröd is added standalone to ingredient text), so the blocker always sees 'has_valid=True' and never fires. KSBC operates at matched_keyword level and works correctly."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -136,6 +150,13 @@ status = "active"
 keyword = "fond"
 context = ["andfond"]
 reason = "Andfond (duck stock) is instructed as a from-scratch reduction — no commercial andfond product exists; suppress generic fond products from matching"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_formbrod"
+status = "active"
+keyword = "formbröd"
+context = ["grov", "grova"]
+reason = "\"Grova brödskivor\" (coarse bread slices, e.g. rågbröd) requests dense coarse bread — soft white formbröd/formfranska should not match. Routes via brödskivor→formbröd canonical synonym. FPB cannot be used here due to smart-blocker/synonym-append interaction."
 
 [[space_normalizations]]
 id = "runtime_space_normalization_karl_johan_svamp_karl_johansvamp"
@@ -203,6 +224,14 @@ surface = "stop_words"
 action = "add"
 terms = ["kaffebryggare"]
 reason = "Kaffebryggare (coffee maker) is a kitchen appliance, not food. Mistakenly classified as beverages category."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_mosad_mosade_mosat"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["mosad", "mosade", "mosat"]
+reason = "Mashed adjective leaks from baby-food product 'Mosade katrinplommon/prunes' into recipes with 'mosade blåbär'/'mosade vinbär'; descriptive form (like hackad/skivad/riven) not an ingredient."
 
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"

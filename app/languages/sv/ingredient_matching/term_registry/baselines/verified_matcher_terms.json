@@ -5,7 +5,7 @@
       "bridge_negative_guard": 197,
       "bridge_positive": 1774,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 98,
-      "hardcoded_keyword_output:extract_keywords_from_product": 111,
+      "hardcoded_keyword_output:extract_keywords_from_product": 112,
       "ingredient_parent_mapping": 398,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 103,
@@ -23,13 +23,13 @@
       "negative_guard_keyword": 15,
       "negative_guard_pattern": 332,
       "negative_regression": 829,
-      "offer_extra_keyword_mapping": 395,
+      "offer_extra_keyword_mapping": 396,
       "parent_match_only_mapping": 17,
       "positive_regression": 662,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
-      "extraction_helper": 209,
+      "extraction_helper": 210,
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1491,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
-      "offer_extra_keyword": 395,
+      "offer_extra_keyword": 396,
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5550,
-    "variants_missing_product_text": 1741,
+    "variant_count": 5552,
+    "variants_missing_product_text": 1743,
     "variants_with_product_text": 3809
   },
   "variants": [
@@ -116596,18 +116596,60 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"dessertost\"}"
+    },
+    {
+      "variant_id": "vterm-02a4c74adf7b2010",
+      "row_index": 5528,
+      "source_order": 90,
+      "source_type": "extraction_helper",
+      "source_file": "app/languages/sv/ingredient_matching/extraction.py",
+      "source_ref": "app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:482",
+      "source_id": "extract_keywords_from_product:tomat",
+      "variant_role": "hardcoded_keyword_output:extract_keywords_from_product",
+      "variant_text": "tomat",
+      "canonical": "tomat",
+      "expected_family": "tomat",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": null,
+      "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [482], \"output\": \"tomat\"}"
+    },
+    {
+      "variant_id": "vterm-b2b887f460d61cd7",
+      "row_index": 5146,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:pangasiusfilé",
+      "source_id": "pangasiusfilé",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "pangasiusfilé",
+      "canonical": "pangasiusmalfilé",
+      "expected_family": "pangasiusmalfilé",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"pangasiusmalfilé\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1528,
-      "static_verified": 2531,
+      "no_product_text": 1529,
+      "static_verified": 2532,
       "synthetic_verified": 1491
     },
     "method": "static_contract_audit",
     "problem_counts": {},
     "source_counts": {
-      "extraction_helper": 209,
+      "extraction_helper": 210,
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
@@ -116616,14 +116658,14 @@
       "matcher_regression_case": 1491,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
-      "offer_extra_keyword": 395,
+      "offer_extra_keyword": 396,
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5550
+      "audited": 5552
     },
-    "variant_count": 5550
+    "variant_count": 5552
   }
 }

@@ -3499,11 +3499,13 @@ def matches_ingredient(
                             'torkad', 'torkade',
                         })
                         _FRESH_INDICATORS = frozenset({'färsk', 'farsk', 'riven', 'hackad', 'pressad'})
+                        _EXPLICIT_DRY_MARKERS = frozenset({'torkad', 'torkade', 'torkat'})
                         if (base_word in _SPICE_AMOUNT_IMPLICIT_GROUND
                                 and any(ind in _GROUND_PRODUCT_INDICATORS for ind in expanded_indicators)
                                 and not any(fi in ingredient_lower for fi in _FRESH_INDICATORS)
-                                and re.search(r'\b(?:tsk|krm)\b', ingredient_lower)):
-                            pass  # Allow: spice amount implies ground/dried
+                                and (re.search(r'\b(?:tsk|krm|msk)\b', ingredient_lower)
+                                     or any(dm in ingredient_lower for dm in _EXPLICIT_DRY_MARKERS))):
+                            pass  # Allow: spice amount or explicit dry marker implies ground/dried
                         else:
                             return None
                 else:

@@ -2661,3 +2661,15 @@ ingredient = "isbergssallad"
 offer_name = "Isbergssallat ca 440g Klass 1 ICA"
 offer_category = "vegetables"
 expected = 1
+
+[[entries]]
+entry_id = "sv-se.alias.pangasiusfile.pangasiusmalfile_114"
+language = "sv"
+market = "SE"
+canonical = "pangasiusfilé"
+status = "inactive"
+variants = ["pangasiusmalfilé"]
+offer_terms = ["pangasiusfilé"]
+source_refs = ["manual:keyword_synonym_pangasiusfile_pangasiusmalfile"]
+layer_policy = ["offer_alias"]
+notes = "REVERTED — keyword_synonym changes product extraction from pangasiusmalfilé to pangasiusfilé, breaking the existing vit-fiskfilé bridge. Replaced by offer_extra_keyword which adds pangasiusfilé as additional keyword without removing pangasiusmalfilé."
