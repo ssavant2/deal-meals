@@ -207,6 +207,13 @@ keyword = "lax"
 blockers = ["gravlaxsås", "gravlaxsås"]
 reason = "gravlaxsås is the gravlax sauce condiment, not raw salmon — recipe asking for the sauce should not pull all lax products"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_vinager"
+status = "active"
+keyword = "vinäger"
+blockers = ["balsamvinäger", "äppelcidervinäger", "vitvinsvinäger", "rödvinsvinäger", "risvinäger", "sherryvinäger", "champagnevinäger", "merlotvinäger", "cavavinäger", "portvinsvinäger"]
+reason = "Specific vinegar varieties (balsamic/apple cider/wine/rice/sherry/champagne) have distinct flavors and uses — generic 'vinäger' parent should not match a recipe that specifies a compound vinegar. Smart-blocker prevents standalone 'vinäger'-recipes from being blocked."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
