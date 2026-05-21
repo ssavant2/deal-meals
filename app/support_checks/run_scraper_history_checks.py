@@ -92,6 +92,23 @@ def main() -> int:
     check("history kwargs parse rate", kwargs["parse_rate"], 0.6)
     check("history kwargs data path", kwargs["data_path"], "recipe_api")
 
+    class FakeStoreScrapeResult:
+        status = "success"
+        reason = "ssr_ok"
+        diagnostics = {
+            "raw_product_count": 402,
+            "parsed_product_count": 400,
+            "skipped_product_count": 2,
+            "data_path": "next_data_product_grid",
+        }
+
+    kwargs = scrape_result_history_kwargs(FakeStoreScrapeResult(), source_kind="store")
+    check("store history kwargs source kind", kwargs["source_kind"], "store")
+    check("store history kwargs raw product count", kwargs["candidate_count"], 402)
+    check("store history kwargs parsed products", kwargs["parsed_count"], 400)
+    check("store history kwargs skipped products", kwargs["filtered_count"], 2)
+    check("store history kwargs data path", kwargs["data_path"], "next_data_product_grid")
+
     async def finish_cancelled_saver_with_diagnostics():
         saver = StreamingRecipeSaver("History Test", overwrite=False)
         return await saver.finish(

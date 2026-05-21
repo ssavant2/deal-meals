@@ -14,6 +14,7 @@ from loguru import logger
 from database import get_db_session
 from utils.errors import friendly_error
 from utils.security import ALLOWED_ORIGINS
+from utils.scraper_history import save_run_history, scrape_result_history_kwargs
 from utils.store_scrape_config import build_store_scrape_config_context
 
 # Import shared state helpers (async-safe, with locking)
@@ -84,6 +85,35 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
     scrape_start_time = datetime.now(timezone.utc)
     db_store_id = None  # Will be set when we query the DB
 
+    def save_manual_run_history(
+        *,
+        success: bool,
+        count: int = 0,
+        error_message: str | None = None,
+        scrape_result=None,
+        status: str | None = None,
+        reason_code: str | None = None,
+    ) -> None:
+        duration = max(1, int((datetime.now(timezone.utc) - scrape_start_time).total_seconds()))
+        history_kwargs = (
+            scrape_result_history_kwargs(scrape_result, source_kind="store")
+            if scrape_result is not None
+            else {
+                "source_kind": "store",
+                "status": status or ("success" if success else "failed"),
+                "reason_code": reason_code,
+            }
+        )
+        save_run_history(
+            f"store_{store_id}",
+            "manual",
+            duration,
+            count,
+            success=success,
+            error_message=error_message,
+            **history_kwargs,
+        )
+
     try:
         # NEW: Try using plugin first
         if PLUGIN_SYSTEM_AVAILABLE:
@@ -111,6 +141,12 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                             "message_key": config_context.message_key,
                             "message_params": config_context.message_params,
                         })
+                        save_manual_run_history(
+                            success=False,
+                            error_message=config_context.message_key,
+                            status="failed",
+                            reason_code=config_context.message_key,
+                        )
                         await delete_active_scrape(store_id)
                         return False
 
@@ -196,6 +232,12 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                         })
                     except Exception:
                         pass
+                    save_manual_run_history(
+                        success=False,
+                        error_message="manual store scrape cancelled",
+                        status="cancelled",
+                        reason_code="cancelled",
+                    )
                     return False
                 finally:
                     if hasattr(store_plugin, "set_progress_callback"):
@@ -209,11 +251,12 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                 products = scrape_result.products
 
                 if not scrape_result.should_replace_offers:
-                    logger.warning(
+                    error_message = (
                         f"Store scrape for {store_name} did not produce replaceable data "
                         f"(status={scrape_result.status}, reason={scrape_result.reason}); "
                         "keeping existing offers and cache"
                     )
+                    logger.warning(error_message)
                     await delete_active_scrape(store_id)
                     try:
                         message_params = {"store": store_name}
@@ -226,6 +269,11 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                         })
                     except Exception:
                         logger.debug(f"WebSocket closed before empty-result notice for {store_id}")
+                    save_manual_run_history(
+                        success=False,
+                        error_message=error_message,
+                        scrape_result=scrape_result,
+                    )
                     return False
 
                 scrape_meta = getattr(store_plugin, '_scrape_meta', None)
@@ -267,6 +315,7 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                     )
                 else:
                     stats = await asyncio.to_thread(save_offers, store_id, products)
+                scrape_result.diagnostics["save_result"] = stats
 
                 created_count = int(stats.get('created') or 0)
                 unchanged_count = int(stats.get('unchanged_count') or 0)
@@ -277,10 +326,11 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                     if scrape_result.is_empty_success and stats.get('verified_empty'):
                         pass
                     else:
-                        logger.warning(
+                        error_message = (
                             f"No valid products were saved for {store_name}; "
                             "keeping existing offers and cache"
                         )
+                        logger.warning(error_message)
                         await delete_active_scrape(store_id)
                         try:
                             await websocket.send_json({
@@ -291,6 +341,12 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                             })
                         except Exception:
                             logger.debug(f"WebSocket closed before stale-result notice for {store_id}")
+                        save_manual_run_history(
+                            success=False,
+                            count=result_count,
+                            error_message=error_message,
+                            scrape_result=scrape_result,
+                        )
                         return False
 
                 # Calculate and save actual scrape duration for future progress estimation
@@ -384,6 +440,11 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                     completed = await get_active_scrape(store_id)
                     logger.debug(f"Saved completed state: {completed}")
 
+                save_manual_run_history(
+                    success=True,
+                    count=result_count,
+                    scrape_result=scrape_result,
+                )
                 return True
 
             except KeyError:
@@ -394,6 +455,12 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
                     "message_key": "ws.plugin_not_found",
                     "message_params": {"name": store_name}
                 })
+                save_manual_run_history(
+                    success=False,
+                    error_message="store plugin not found",
+                    status="failed",
+                    reason_code="plugin_not_found",
+                )
                 return False
 
         # Plugin system not available - clear tracking
@@ -402,6 +469,12 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
             "status": "error",
             "message_key": "ws.plugin_not_available"
         })
+        save_manual_run_history(
+            success=False,
+            error_message="store plugin system not available",
+            status="failed",
+            reason_code="plugin_system_not_available",
+        )
         return False
 
     except Exception as e:
@@ -412,6 +485,12 @@ async def scrape_store_offers(websocket: WebSocket, store_name: str, owner_id: s
             "message_key": friendly_error(e)
         })
         logger.error(f"Fetch error: {e}")
+        save_manual_run_history(
+            success=False,
+            error_message=str(e),
+            status="failed",
+            reason_code=type(e).__name__,
+        )
         return False
 
 

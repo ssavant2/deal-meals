@@ -1477,6 +1477,9 @@ class ScraperScheduler:
                     0,
                     success=False,
                     error_message=error_message,
+                    source_kind="store",
+                    status="skipped",
+                    reason_code="already_running",
                 )
                 job = self.scheduler.get_job(f"store_{store_id}")
                 if job and job.next_run_time:
@@ -1536,6 +1539,9 @@ class ScraperScheduler:
                     0,
                     success=False,
                     error_message=error_message,
+                    source_kind="store",
+                    status="failed",
+                    reason_code=config_context.message_key,
                 )
                 return
 
@@ -1591,6 +1597,9 @@ class ScraperScheduler:
                     0,
                     success=False,
                     error_message=error_message,
+                    source_kind="store",
+                    status="cancelled",
+                    reason_code="cancelled",
                 )
                 return
             finally:
@@ -1651,6 +1660,8 @@ class ScraperScheduler:
                         self._schedule_store_retry(store_id)
                 else:
                     logger.info(f"{run_label.capitalize()} store scrape complete for {store_id}: {result}")
+
+                scrape_result.diagnostics["save_result"] = result
             else:
                 error_message = (
                     f"Store scrape did not produce replaceable data for {store_id} "
@@ -1677,12 +1688,23 @@ class ScraperScheduler:
                 product_count,
                 success=error_message is None and (product_count > 0 or verified_empty_success),
                 error_message=error_message,
+                **scrape_result_history_kwargs(scrape_result, source_kind="store"),
             )
 
         except Exception as e:
             logger.exception(f"{run_label.capitalize()} store scraper {store_id} failed")
             duration = int(time.time() - start_time)
-            save_run_history(f"store_{store_id}", "scheduled", duration, 0, success=False, error_message=str(e))
+            save_run_history(
+                f"store_{store_id}",
+                "scheduled",
+                duration,
+                0,
+                success=False,
+                error_message=str(e),
+                source_kind="store",
+                status="failed",
+                reason_code=type(e).__name__,
+            )
             job = self.scheduler.get_job(f"store_{store_id}")
             if job and job.next_run_time:
                 self._update_store_next_run(store_id, job.next_run_time)
