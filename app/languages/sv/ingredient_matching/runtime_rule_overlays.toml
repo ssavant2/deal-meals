@@ -172,6 +172,13 @@ keyword = "olivolja"
 blockers = ["basilika", "vitlök", "vitlök", "rosmarin"]
 reason = "Smaksatta olivoljor (basilika/vitlök/rosmarin) är distinkta produkter från ren olivolja. Utökar befintliga olivolja-PNB-blockers (chili/citron/tryffel/limone) med fler flavor-varianter. Bred familj enligt batch-review-beslut."
 
+[[product_name_blockers]]
+id = "runtime_pnb_chokladsmak"
+status = "active"
+keyword = "chokladsmak"
+blockers = ["mjölk", "mjölk", "dryck"]
+reason = "Smaksatt mjölkdryck (Mjölk UHT med chokladsmak / chokladmjölk-drycker) är en färdig dryck, inte en bakingrediens. Recept som vill ha chokladsmak i något (tårtbottnar/kakor/glass/godis) ska inte matcha mjölk- eller dryck-baserade chokladsmak-produkter."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
