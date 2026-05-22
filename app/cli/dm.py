@@ -37,6 +37,7 @@ DEFAULT_KEYWORD_EXTRA_PARENT_FILE = (
     SV_DIR / "ingredient_matching" / "term_registry" / "entries" / "keyword_extra_parent.toml"
 )
 DEFAULT_DEEP_SANITY_FILE = SUPPORT_CHECKS_DIR / "run_deep_matcher_sanity.py"
+DEEP_SANITY_FINAL_SUMMARY_MARKER = "# FINAL SUMMARY - keep at EOF"
 
 
 app = typer.Typer(help="Deal Meals developer tools.")
@@ -1002,6 +1003,13 @@ def _append_text_block(path: Path, block: str, *, dry_run: bool, trim_existing: 
     if dry_run:
         return
     existing_text = path.read_text(encoding="utf-8")
+    if path.name == DEFAULT_DEEP_SANITY_FILE.name and DEEP_SANITY_FINAL_SUMMARY_MARKER in existing_text:
+        marker_index = existing_text.index(DEEP_SANITY_FINAL_SUMMARY_MARKER)
+        summary_start = existing_text.rfind("\n", 0, marker_index) + 1
+        prefix = existing_text[:summary_start].rstrip()
+        suffix = existing_text[summary_start:].lstrip("\n")
+        path.write_text(f"{prefix}\n{block.strip()}\n\n{suffix}", encoding="utf-8")
+        return
     if trim_existing:
         path.write_text(existing_text.rstrip() + "\n" + block, encoding="utf-8")
         return

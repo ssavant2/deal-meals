@@ -3245,6 +3245,26 @@ variant = "vaniljsås"
 layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
 
 [[entries]]
+entry_id = "sv-se.family.vegomargarin"
+language = "sv"
+market = "SE"
+canonical = "vegomargarin"
+status = "active"
+variants = ["vegomargarin"]
+ingredient_terms = []
+offer_terms = ["vegomargarin"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:859", "code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:1834"]
+layer_policy = ["normal"]
+notes = "Registry coverage for hardcoded plant-based margarine extraction helper output."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "vegomargarin"
+variant = "vegomargarin"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
 entry_id = "sv-se.family.veganskmajonnas"
 language = "sv"
 market = "SE"
