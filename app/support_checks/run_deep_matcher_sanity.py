@@ -11956,3 +11956,17 @@ test("FPB svamp has svampburgare",
 from languages.sv.ingredient_matching import PRODUCT_NAME_BLOCKERS
 test("PNB frön has musli",
      "musli" in PRODUCT_NAME_BLOCKERS.get("frön", set()), True)
+
+# tomat-family isolation (Q69-3 fix): småtomat products do NOT expose plain 'tomat' keyword;
+# "4 tomater" only matches round tomatoes, not cherry/baby/cocktail varieties
+from languages.sv.ingredient_matching import extract_keywords_from_product
+test("tomat-isolation: Cocktailtomater extracts only småtomat (not tomat)",
+     extract_keywords_from_product("Cocktailtomater 250g"), ["småtomat"])
+test("tomat-isolation: Babyplommontomater extracts only småtomat",
+     extract_keywords_from_product("Babyplommontomater 500g Klass 1 ICA"), ["småtomat"])
+test("tomat-isolation: round Tomat still extracts tomat",
+     extract_keywords_from_product("Tomat rund ca 90g Klass 1"), ["tomat"])
+test("tomat-isolation: 'small tomater' normalizes to småtomat in ingredient",
+     extract_keywords_from_ingredient("400 g små tomater"), ["småtomat"])
+test("tomat-isolation: '4 tomater' stays as tomat (no normalization)",
+     extract_keywords_from_ingredient("4 tomater"), ["tomat"])

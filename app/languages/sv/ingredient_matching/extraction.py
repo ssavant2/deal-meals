@@ -1818,6 +1818,14 @@ def extract_keywords_from_product(
     if any(kw in _XWOKSAS_TO_WOKSAS for kw in unique_keywords) and 'woksås' not in unique_keywords:
         unique_keywords.append('woksås')
 
+    # Small tomato isolation: products that carry the 'småtomat' compound keyword
+    # (cherry, baby plum, cocktail, on-the-vine) should NOT also expose the generic
+    # 'tomat' keyword. A recipe asking for plain "tomater" wants standard round/medium
+    # tomatoes — small varieties are a distinct group. Mirrors the potatis variety
+    # isolation (färskpotatis, mandelpotatis do not expose plain 'potatis').
+    if 'småtomat' in unique_keywords:
+        unique_keywords = [kw for kw in unique_keywords if kw not in ('tomat', 'tomater')]
+
     return unique_keywords
 
 

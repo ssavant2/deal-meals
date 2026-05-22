@@ -29771,7 +29771,7 @@ layer_role = "positive_regression"
 entry_id = "sv-se.policy.keyword_extra_parent_tomat_family.smatomat_positive"
 language = "sv"
 market = "SE"
-canonical = "tomat"
+canonical = "småtomat"
 status = "active"
 variants = ["keyword_extra_parent_tomat_smatomat_positive: Cocktailtomater 250g"]
 ingredient_terms = []
@@ -29783,7 +29783,7 @@ notes = "Registry coverage for matcher regression fixture keyword_extra_parent_t
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "tomat"
+canonical = "småtomat"
 variant = "keyword_extra_parent_tomat_smatomat_positive: Cocktailtomater 250g"
 layer_role = "positive_regression"
 

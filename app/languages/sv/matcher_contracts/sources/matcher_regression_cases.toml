@@ -28738,9 +28738,9 @@ name = "Cocktailtomater 250g"
 category = "vegetables"
 
 [[fixtures.expected_matches]]
-canonical = "tomat"
+canonical = "småtomat"
 ingredient_index = 0
-must_match_keyword = "tomat"
+must_match_keyword = "småtomat"
 
 [[fixtures]]
 id = "keyword_extra_parent_smatomat_snacktomater_positive"

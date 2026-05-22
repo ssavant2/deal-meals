@@ -33026,9 +33026,9 @@
     "expected": 1,
     "expected_matches": [
       {
-        "canonical": "tomat",
+        "canonical": "småtomat",
         "ingredient_index": 0,
-        "must_match_keyword": "tomat"
+        "must_match_keyword": "småtomat"
       }
     ],
     "id": "keyword_extra_parent_tomat_smatomat_positive",

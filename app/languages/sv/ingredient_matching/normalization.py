@@ -818,7 +818,13 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('chilipeppar grön', 'grön chilipeppar'),
     ('chilipeppar gron', 'gron chilipeppar'),
     ('chilipeppar gul', 'gul chilipeppar'),
-    # Fresh small tomato variants
+    # Fresh small tomato variants — space-separated adjective forms
+    ('små tomater', 'småtomater'),
+    ('lilla tomater', 'småtomater'),
+    ('liten tomat', 'småtomat'),
+    ('litet tomat', 'småtomat'),
+    ('snacktomater', 'småtomater'),
+    ('snacktomat', 'småtomat'),
     ('körsbärskvisttomater', 'småtomater'),
     ('körsbärskvisttomat', 'småtomat'),
     ('korsbarskvisttomat', 'småtomat'),
