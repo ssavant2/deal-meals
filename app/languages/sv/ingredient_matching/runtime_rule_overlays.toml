@@ -179,6 +179,13 @@ keyword = "chokladsmak"
 blockers = ["mjölk", "mjölk", "dryck"]
 reason = "Smaksatt mjölkdryck (Mjölk UHT med chokladsmak / chokladmjölk-drycker) är en färdig dryck, inte en bakingrediens. Recept som vill ha chokladsmak i något (tårtbottnar/kakor/glass/godis) ska inte matcha mjölk- eller dryck-baserade chokladsmak-produkter."
 
+[[product_name_blockers]]
+id = "runtime_pnb_coconut"
+status = "active"
+keyword = "coconut"
+blockers = ["pineapple", "nick", "skumtoppar", "chokladbar", "aminos"]
+reason = "Mirror of kokos PNB blockers — coconut is the English form extracted alongside kokos; PNB-lookup uses matched_keyword directly so the same blockers must be registered for both kokos and coconut to keep recipes like '400 ml kokosmjölk' from matching Nick Coconut-bar / Coconut Aminos / coconut chokladbar."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
