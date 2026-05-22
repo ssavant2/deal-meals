@@ -186,6 +186,13 @@ keyword = "coconut"
 blockers = ["pineapple", "nick", "skumtoppar", "chokladbar", "aminos"]
 reason = "Mirror of kokos PNB blockers — coconut is the English form extracted alongside kokos; PNB-lookup uses matched_keyword directly so the same blockers must be registered for both kokos and coconut to keep recipes like '400 ml kokosmjölk' from matching Nick Coconut-bar / Coconut Aminos / coconut chokladbar."
 
+[[product_name_blockers]]
+id = "runtime_pnb_apelsinsmak"
+status = "active"
+keyword = "apelsinsmak"
+blockers = ["kondisrullar"]
+reason = "Kondisrullar Apelsinsmak är sponge cake rolls (bakelse-produkt), inte en bakchoklad-ingrediens. Recept som ber om 'mörk choklad apelsinsmak' avser bakchoklad med apelsinsmak, inte färdiga apelsinsmaks-bakelser."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
