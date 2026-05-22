@@ -151,6 +151,13 @@ keyword = "vallmofrön"
 blockers = ["vitt", "vit"]
 reason = "Vita vallmofrön (white poppy seeds) are a different ingredient from svarta/blå vallmofrön — milder flavor used in Indian cooking, not Swedish baking. Recipes explicitly asking for black poppy seeds should not match white poppy products."
 
+[[product_name_blockers]]
+id = "runtime_pnb_fron"
+status = "active"
+keyword = "frön"
+blockers = ["musli"]
+reason = "Musli/Müsli (breakfast cereal) containing seeds is a carrier product — recipe wants loose seeds for bread topping, not granola/muesli; substring 'musli' covers both spellings in product names"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -190,8 +197,8 @@ reason = "snackoliver ingredient should not match generic oliver-jar products �
 id = "runtime_fpb_svamp"
 status = "active"
 keyword = "svamp"
-blockers = ["karl-johan", "karljohan", "karl-johansvamp", "karljohansvamp"]
-reason = "Karl-Johan (stensopp/Boletus edulis) is a specific named species with distinct flavor — should not match generic svamp products (champinjon, ostronskivling). Mirrors Q79 potato variety isolation policy."
+blockers = ["karl-johan", "karljohan", "karl-johansvamp", "karljohansvamp", "svampburgare"]
+reason = "Karl-Johan (stensopp/Boletus edulis) is a specific named species with distinct flavor — should not match generic svamp products (champinjon, ostronskivling). Mirrors Q79 potato variety isolation policy.; Svampburgare = formade veganburgare (Anamma/Oumph etc.), inte färska svampprodukter; ingrediens '220 g svampburgare' matchade Champinjoner via 'svamp'-substring."
 
 [[false_positive_blockers]]
 id = "runtime_fpb_spenat"
@@ -344,8 +351,8 @@ reason = "When ingredient explicitly specifies a flavor ('mjukost med Xsmak'), g
 id = "runtime_ksbc_woksas"
 status = "active"
 keyword = "woksås"
-context = ["pad thai", "padthai", "teriyaki", "satay", "korean bbq", "koreanbbq", "sweet sour", "sweet & sour", "sweet&sour", "sweetsour"]
-reason = "When recipe specifies woksås with a flavor (Pad Thai, Satay, Teriyaki, Korean BBQ, Sweet & Sour), suppress plain woksås-keyword. Match goes via the compound Xwoksås keyword (padthaiwoksas/sataywoksas/teriyakiwoksas/koreanbbqwoksas/sweetsourwoksas). Plain woksås-recipes (no flavor specified) still match all variants via the reverse offer bridge."
+context = ["pad thai", "padthai", "teriyaki", "satay", "korean bbq", "koreanbbq", "sweet sour", "sweet & sour", "sweet&sour", "sweetsour", "sweet chili", "sweetchili", "sweet&chili", "sweetchilisås", "sweet chilisås"]
+reason = "When recipe specifies woksås with a flavor (Pad Thai, Satay, Teriyaki, Korean BBQ, Sweet & Sour), suppress plain woksås-keyword. Match goes via the compound Xwoksås keyword (padthaiwoksas/sataywoksas/teriyakiwoksas/koreanbbqwoksas/sweetsourwoksas). Plain woksås-recipes (no flavor specified) still match all variants via the reverse offer bridge.; Sweet-chili-flavored woksås — Q68-4 flavor isolation: when ingredient specifies sweet chili variant, plain woksås keyword should be suppressed so satay/padthai/teriyaki/korean BBQ woksås products don't leak in. Sweet-chili matches still come via chilisås keyword. No 'Woksås Sweet Chili' branded products exist; sweet-chili variants are sold as chilisås."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ost"
