@@ -843,6 +843,12 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('romanticatomat', 'småtomat'),
     ('tomater babyplommon', 'småtomater'),
     ('tomat babyplommon', 'småtomat'),
+    # English "cherry tomatoes" maps to the Swedish small-tomato family so
+    # English-labeled fresh products and Swedish recipes can match each other.
+    ('cherrytomater', 'småtomater'),
+    ('cherrytomat', 'småtomat'),
+    ('cherry tomater', 'småtomater'),
+    ('cherry tomat', 'småtomat'),
     ('cider äpple', 'äppelcider'),
     ('toastbröd', 'formbröd'),
     ('toastbrod', 'formbröd'),
