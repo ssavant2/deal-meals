@@ -165,6 +165,13 @@ keyword = "chips"
 blockers = ["tortilla", "tortillachips", "nacho", "nachochips", "nachos", "corn", "bananchips", "bananachips"]
 reason = "Tortilla/nacho chips (corn-based) and banana chips are distinct categories from potato chips. A recipe asking for 'lättsaltade chips' wants potato chips — not corn tortilla chips, nacho chips, or banana chips."
 
+[[product_name_blockers]]
+id = "runtime_pnb_olivolja"
+status = "active"
+keyword = "olivolja"
+blockers = ["basilika", "vitlök", "vitlök", "rosmarin"]
+reason = "Smaksatta olivoljor (basilika/vitlök/rosmarin) är distinkta produkter från ren olivolja. Utökar befintliga olivolja-PNB-blockers (chili/citron/tryffel/limone) med fler flavor-varianter. Bred familj enligt batch-review-beslut."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -381,6 +388,34 @@ status = "active"
 keyword = "margarin"
 context = ["mjölkfritt", "mjolkfritt", "mjölkfri", "mjolkfri", "växtbaserat", "vaxtbaserat", "växtbaserad", "vaxtbaserad", "vegan", "vegansk"]
 reason = "Dairy-free recipes ('mjölkfritt/mjölkfri margarin') must not match regular dairy-based margarin. Follows Q68-5 pattern: dietary modifier in ingredient suppresses generic keyword. Plant-based margarin products would need dedicated keyword to match — currently 0 such products in DB.; Plant-based recipes ('växtbaserat margarin' / 'vegansk margarin') must not match regular dairy-based margarin. Mirrors mjölkfri/laktosfri context already present (Q68-5/Q69 pattern: dietary modifier in ingredient suppresses generic keyword). Plant-based margarin products would need dedicated keyword to match."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_kaka"
+status = "active"
+keyword = "kaka"
+context = ["mjuk"]
+reason = "Mjuk kaka (sockerkaka) är specifik vara för fyllning/bakning, distinkt från hårda småkakor (Finska Pinnar, Drömmar, Havreflarn, Kolasnitt). När recept säger 'mjuk kaka' avses sockerkaka-textur."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_gradde"
+status = "active"
+keyword = "grädde"
+context = ["syrad"]
+reason = "Syrad grädde = sour cream, en specifik vara med distinkt smak/konsistens. Skiljer sig från vispgrädde och matlagningsgrädde — receptet vill ha den syrade varianten specifikt."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_lime"
+status = "active"
+keyword = "lime"
+context = ["dressing"]
+reason = "Parser-leakage: dressing-produkter med 'Lime' i namnet (Curry/Lime Dressing) leakar lime-keyword till ingredienser som inte vill ha färska limer. När ingredienstexten innehåller 'dressing' avses inte färsk lime utan flytande färdigblandad dressing."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_bonor"
+status = "active"
+keyword = "bönor"
+context = ["matvete"]
+reason = "Zeta Bönor Matvete Durum är en pastaprodukt (food wheat pasta tillverkad av bönmjöl), inte hela bönor för matlagning. När ingredienstexten innehåller 'matvete' avses specialty-pastan, inte generiska bönor (svarta bönor/edamame/kidney)."
 
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
