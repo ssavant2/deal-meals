@@ -78,8 +78,8 @@ reason = "Combo charcuterie pack like 'Prosciutto Crudo Salami Milano 85g Negron
 id = "runtime_pnb_macadamianotter"
 status = "active"
 keyword = "macadamianötter"
-blockers = ["häagen-dazs", "haagen-dazs", "brittle", "glass", "gelato"]
-reason = "Macadamia ice cream / brittle candy (Cracking macadamia nut brittle Häagen-Dazs) contains macadamia as an ingredient but is not a raw nut product — macadamianötter recipes need unprepared whole/chopped nuts, not desserts"
+blockers = ["häagen-dazs", "haagen-dazs", "brittle", "glass", "gelato", "nötmix", "notmix"]
+reason = "Macadamia ice cream / brittle candy (Cracking macadamia nut brittle Häagen-Dazs) contains macadamia as an ingredient but is not a raw nut product — macadamianötter recipes need unprepared whole/chopped nuts, not desserts; Nötmix products (mixed nut snacks containing macadamia + cashew + pistage) are not pure macadamia and should not match macadamia-specific recipes."
 
 [[product_name_blockers]]
 id = "runtime_pnb_nutella"
@@ -269,6 +269,13 @@ status = "active"
 keyword = "choklad"
 blockers = ["chokladmjölk", "chokladmjolk", "pralin"]
 reason = "Chokladmjölk is a chocolate beverage (Pucko/Cocio), not solid chocolate for baking. Recipe asking for chokladmjölk should not match bakchoklad/chokladknappar via substring 'choklad' in 'chokladmjölk'.; Ingredient text containing 'pralin/praliner' indicates ready-to-eat chocolate confectionery, not baking chocolate. Bakchoklad/chokladknappar should not match recipes asking for praliner via the choklad parent keyword."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_hallon"
+status = "active"
+keyword = "hallon"
+blockers = ["hallonpulver"]
+reason = "Hallonpulver is freeze-dried raspberry powder used in confectionery/popcorn (small amount as flavoring). Fresh/frozen hallon products are not a substitute — recipe wants the dry powder form. Analogous to hallonsaft/hallonmarmelad pattern."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"

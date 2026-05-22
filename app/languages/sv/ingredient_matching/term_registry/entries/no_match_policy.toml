@@ -5254,8 +5254,8 @@ language = "sv"
 market = "SE"
 canonical = "storkornskaviar"
 status = "active"
-variants = ["storkornskaviar ! \\bkalles\\b", "storkornskaviar ! \\bsvennes\\b", "storkornskaviar ! \\bkaviar\\b.*\\b(?:original|mild|dill|guld|randig)\\b"]
-negative_guards = ["storkornskaviar ! \\bkalles\\b", "storkornskaviar ! \\bsvennes\\b", "storkornskaviar ! \\bkaviar\\b.*\\b(?:original|mild|dill|guld|randig)\\b"]
+variants = ["storkornskaviar ! \\bkalles\\b", "storkornskaviar ! \\bsvennes\\b", "storkornskaviar ! \\bkaviar\\b.*\\b(?:original|mild|mildrökt|mildrOkt|orökt|orOkt|dill|guld|randig|klädesholmen|kladesholmen|ejderns|pacific)\\b"]
+negative_guards = ["storkornskaviar ! \\bkalles\\b", "storkornskaviar ! \\bsvennes\\b", "storkornskaviar ! \\bkaviar\\b.*\\b(?:original|mild|mildrökt|mildrOkt|orökt|orOkt|dill|guld|randig|klädesholmen|kladesholmen|ejderns|pacific)\\b"]
 source_refs = ["policy:no_match_policies:policy_storkornskaviar_not_tube_kaviar"]
 layer_policy = ["negative_guard_only"]
 notes = "Large-grain red roe must not match Kalles/Svennes tube-style kaviar spreads."
@@ -5267,9 +5267,9 @@ rule_version = 1
 canonical = "storkornskaviar"
 ingredient_patterns = ["\\bstorkornskaviar\\b"]
 blocked_offer_keywords = []
-blocked_offer_patterns = ["\\bkalles\\b", "\\bsvennes\\b", "\\bkaviar\\b.*\\b(?:original|mild|dill|guld|randig)\\b"]
+blocked_offer_patterns = ["\\bkalles\\b", "\\bsvennes\\b", "\\bkaviar\\b.*\\b(?:original|mild|mildrökt|mildrOkt|orökt|orOkt|dill|guld|randig|klädesholmen|kladesholmen|ejderns|pacific)\\b"]
 allowed_specifics = []
-reason = "Large-grain red roe must not match Kalles/Svennes tube-style kaviar spreads."
+reason = "Large-grain roe must not match tube/spread kaviar (Kalles/Svennes/Ejderns/Klädesholmen). Extended to cover mildrökt, orökt, and brand-only plain kaviar products where original regex missed word-boundary after 'mild' in 'mildrökt'."
 policy_ref = "current_review_no_match_policy_contracts"
 fixture_refs = ["track_a_storkornskaviar_tube_kaviar_negative"]
 supersedes = ["legacy_no_match_storkornskaviar_tube_kaviar"]
@@ -5289,7 +5289,7 @@ layer_role = "negative_guard_pattern"
 [[entries.coverage]]
 source_family = "no_match_policy"
 canonical = "storkornskaviar"
-variant = "storkornskaviar ! \\bkaviar\\b.*\\b(?:original|mild|dill|guld|randig)\\b"
+variant = "storkornskaviar ! \\bkaviar\\b.*\\b(?:original|mild|mildrökt|mildrOkt|orökt|orOkt|dill|guld|randig|klädesholmen|kladesholmen|ejderns|pacific)\\b"
 layer_role = "negative_guard_pattern"
 
 [[entries.negative_examples]]
