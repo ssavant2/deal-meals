@@ -1059,10 +1059,38 @@ def _append_canonical_keyword_synonyms(text: str) -> str:
     return text + ' ' + ' '.join(extras)
 
 
-def _blocked_by_exact_compound_only(ingredient_lower: str, matched_keyword: str) -> bool:
-    """Keep exact ingredient compounds from degrading into broad fallback families."""
+_FLEXIBLE_ALTERNATIVE_MARKERS = (
+    'valfri', 'vilken som helst', 'vilken sort som helst',
+    't.ex', 't ex', 'tex ', 'exempelvis', 'till exempel',
+)
+
+
+def _blocked_by_exact_compound_only(
+    ingredient_lower: str,
+    matched_keyword: str,
+    _eller_arms: tuple = (),
+) -> bool:
+    """Keep exact ingredient compounds from degrading into broad fallback families.
+
+    Relaxation: when the ingredient explicitly signals flexibility (the arm
+    containing the matched keyword has a "valfri sort" / "t.ex" / similar
+    marker), broader keywords are allowed even though a specific compound
+    appears in a different arm. Without such a marker, "X eller Y" is treated
+    strictly — the broader fallback remains blocked.
+    """
     for compound, blocked_keywords in _EXACT_COMPOUND_ONLY_INGREDIENTS.items():
         if compound in ingredient_lower and matched_keyword in blocked_keywords:
+            if _eller_arms:
+                # Find the arm where the matched keyword lives. If that arm
+                # explicitly accepts any variety (valfri sort / t.ex / etc.),
+                # allow the broader fallback.
+                matched_arms = [arm for arm in _eller_arms if matched_keyword in arm]
+                for arm in matched_arms:
+                    if compound in arm:
+                        # Compound is in the SAME arm — strict block applies.
+                        continue
+                    if any(marker in arm for marker in _FLEXIBLE_ALTERNATIVE_MARKERS):
+                        return False  # flexible arm — allow broader match
             return True
     return False
 
@@ -4576,7 +4604,7 @@ def matches_ingredient_fast(
                         if _check_compound_strict(keyword, ingredient_lower, pname,
                                                   _ingredient_words, check_prefix=True):
                             continue
-            if _blocked_by_exact_compound_only(ingredient_lower, keyword):
+            if _blocked_by_exact_compound_only(ingredient_lower, keyword, _eller_arms_prepared):
                 continue
             # KSBC inside the loop: if this keyword is suppressed by a context
             # word in the ingredient, skip it and try the next product keyword.
@@ -4693,7 +4721,7 @@ def matches_ingredient_fast(
                     if _check_compound_strict(keyword, ingredient_lower, pname,
                                               check_prefix=True):
                         continue
-                if _blocked_by_exact_compound_only(ingredient_lower, parent):
+                if _blocked_by_exact_compound_only(ingredient_lower, parent, _eller_arms_prepared):
                     continue
                 # NOTE: PRODUCT_NAME_BLOCKERS for parent path also in recipe_matcher.py
                 matched_keyword = parent

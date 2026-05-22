@@ -56,13 +56,20 @@ def _build_eller_arms_prepared(raw_text: str, full_normalized_text: str) -> tupl
     The fallback path in match_offer_to_ingredient uses these when the
     full-text match returns None — typically because a carrier-context check
     on the full text (e.g. fraiche-requires-fraiche-in-product) blocked an
-    alternative arm that the user explicitly accepted.
+    alternative arm that the user explicitly accepted. Also triggers on
+    "t.ex Y" / "exempelvis Y" example markers so the base-vs-example split
+    can be honored.
     """
     lowered = raw_text.lower()
     if (
         ' eller ' not in lowered
         and '(eller' not in lowered
         and 'alternativt' not in lowered
+        and 't.ex' not in lowered
+        and 't ex' not in lowered
+        and 'tex ' not in lowered
+        and 'exempelvis' not in lowered
+        and 'till exempel' not in lowered
     ):
         return ()
     alternatives = parse_eller_alternatives(raw_text)
