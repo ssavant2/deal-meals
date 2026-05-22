@@ -185,6 +185,17 @@ def _single_example_item_is_purchasable_alternative(base: str, item: str) -> boo
     # accept as long as it contains a tomat-family word.
     if 'tomat' in base_lower and 'tomat' in item_lower:
         return True
+    # Svamp-family: "400 g svamp valfri sort t.ex trattkantareller" — the recipe
+    # asks for generic mushrooms and gives an example variety. Keep both so
+    # svamp matches all mushroom products and the named variety also gets a
+    # chance to match its own specific product.
+    if 'svamp' in base_lower and any(
+        cue in item_lower for cue in (
+            'svamp', 'kantarell', 'champinjon', 'ostronsk', 'ostronskivling',
+            'shiitake', 'enoki', 'portobello', 'karljohan', 'karl-johan',
+        )
+    ):
+        return True
     return False
 
 def rewrite_buljong_eller_fond(text: str) -> str:
