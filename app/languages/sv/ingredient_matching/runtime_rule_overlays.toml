@@ -144,6 +144,13 @@ keyword = "rörsocker"
 blockers = ["panela"]
 reason = "Panela is unrefined pressed brown cane sugar with different texture and moisture content — not a substitute for refined rörsocker in baking doughs/dressings."
 
+[[product_name_blockers]]
+id = "runtime_pnb_vallmofron"
+status = "active"
+keyword = "vallmofrön"
+blockers = ["vitt", "vit"]
+reason = "Vita vallmofrön (white poppy seeds) are a different ingredient from svarta/blå vallmofrön — milder flavor used in Indian cooking, not Swedish baking. Recipes explicitly asking for black poppy seeds should not match white poppy products."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -277,6 +284,13 @@ keyword = "hallon"
 blockers = ["hallonpulver"]
 reason = "Hallonpulver is freeze-dried raspberry powder used in confectionery/popcorn (small amount as flavoring). Fresh/frozen hallon products are not a substitute — recipe wants the dry powder form. Analogous to hallonsaft/hallonmarmelad pattern."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_tonfisk"
+status = "active"
+keyword = "tonfisk"
+blockers = ["tonfiskpastej", "tonfiskpastejer"]
+reason = "Tonfiskpastej (spreadable tuna pâté for sandwiches) is a prepared product — recipes asking for tonfiskpastej do not want plain canned tuna chunks. Substring 'tonfisk' in 'tonfiskpastej' causes false matching to flaked/canned tonfisk products."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -351,8 +365,8 @@ reason = "rispuffar med choklad (Kinapuffar) injicerar choklad-keyword via paren
 id = "runtime_ksbc_margarin"
 status = "active"
 keyword = "margarin"
-context = ["mjölkfritt", "mjolkfritt", "mjölkfri", "mjolkfri"]
-reason = "Dairy-free recipes ('mjölkfritt/mjölkfri margarin') must not match regular dairy-based margarin. Follows Q68-5 pattern: dietary modifier in ingredient suppresses generic keyword. Plant-based margarin products would need dedicated keyword to match — currently 0 such products in DB."
+context = ["mjölkfritt", "mjolkfritt", "mjölkfri", "mjolkfri", "växtbaserat", "vaxtbaserat", "växtbaserad", "vaxtbaserad", "vegan", "vegansk"]
+reason = "Dairy-free recipes ('mjölkfritt/mjölkfri margarin') must not match regular dairy-based margarin. Follows Q68-5 pattern: dietary modifier in ingredient suppresses generic keyword. Plant-based margarin products would need dedicated keyword to match — currently 0 such products in DB.; Plant-based recipes ('växtbaserat margarin' / 'vegansk margarin') must not match regular dairy-based margarin. Mirrors mjölkfri/laktosfri context already present (Q68-5/Q69 pattern: dietary modifier in ingredient suppresses generic keyword). Plant-based margarin products would need dedicated keyword to match."
 
 [[space_normalizations]]
 id = "runtime_space_normalization_karl_johan_svamp_karl_johansvamp"
