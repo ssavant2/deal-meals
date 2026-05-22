@@ -137,6 +137,13 @@ keyword = "sockerkaka"
 blockers = ["basic"]
 reason = "ICA Basic Sockerkaka 350g (bread category) is finished/baked sponge cake — recipes wanting sockerkaka usually mean a bakmix to make a cake batter (Kungsörnen Sockerkaka 420g is bakmix despite no 'mix' in the name; future Kalle Anka Bakmix etc. all match via sockerkaka keyword). Only block the Basic-named finished form."
 
+[[product_name_blockers]]
+id = "runtime_pnb_rorsocker"
+status = "active"
+keyword = "rörsocker"
+blockers = ["panela"]
+reason = "Panela is unrefined pressed brown cane sugar with different texture and moisture content — not a substitute for refined rörsocker in baking doughs/dressings."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -256,6 +263,13 @@ keyword = "sirap"
 blockers = ["jordgubbssirap", "hallonsirap", "mintsirap", "fläderblomssirap", "vaniljsirap", "karamellsirap", "citronsirap"]
 reason = "Flavored cocktail/dessert syrups (jordgubbs, hallon, mint, fläderblom, vanilj, karamell, citron — Monin/Torani-type) are functionally distinct from plain ljus/mörk baking syrup. Smart-blocker prevents the sirap parent keyword when ingredient text contains a compound flavored-syrup form."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_choklad"
+status = "active"
+keyword = "choklad"
+blockers = ["chokladmjölk", "chokladmjolk", "pralin"]
+reason = "Chokladmjölk is a chocolate beverage (Pucko/Cocio), not solid chocolate for baking. Recipe asking for chokladmjölk should not match bakchoklad/chokladknappar via substring 'choklad' in 'chokladmjölk'.; Ingredient text containing 'pralin/praliner' indicates ready-to-eat chocolate confectionery, not baking chocolate. Bakchoklad/chokladknappar should not match recipes asking for praliner via the choklad parent keyword."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -318,6 +332,20 @@ status = "active"
 keyword = "ost"
 context = ["mjölkfri", "mjölkfritt", "mjolkfri", "mjolkfritt", "laktosfri", "laktosfritt", "vegan", "vegansk", "växtbaserad", "vaxtbaserad"]
 reason = "When ingredient explicitly specifies dietary restriction (mjölkfri/laktosfri/vegan/växtbaserad), generic 'ost' keyword would match dairy-cheese products. Vegan/dairy-free recipes need plant-based alternatives only — Violife/Greenvie etc. match via dedicated 'veganost' keyword which is unaffected by this KSBC."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_choklad"
+status = "active"
+keyword = "choklad"
+context = ["rispuffar"]
+reason = "rispuffar med choklad (Kinapuffar) injicerar choklad-keyword via parent-text; plain bakchoklad/chokladknappar är inte chokladpuffar"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_margarin"
+status = "active"
+keyword = "margarin"
+context = ["mjölkfritt", "mjolkfritt", "mjölkfri", "mjolkfri"]
+reason = "Dairy-free recipes ('mjölkfritt/mjölkfri margarin') must not match regular dairy-based margarin. Follows Q68-5 pattern: dietary modifier in ingredient suppresses generic keyword. Plant-based margarin products would need dedicated keyword to match — currently 0 such products in DB."
 
 [[space_normalizations]]
 id = "runtime_space_normalization_karl_johan_svamp_karl_johansvamp"
@@ -401,6 +429,14 @@ surface = "stop_words"
 action = "add"
 terms = ["mosad", "mosade", "mosat"]
 reason = "Mashed adjective leaks from baby-food product 'Mosade katrinplommon/prunes' into recipes with 'mosade blåbär'/'mosade vinbär'; descriptive form (like hackad/skivad/riven) not an ingredient."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_liknande"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["liknande"]
+reason = "Swedish 'liknande' (similar/like) is a natural-language approximation word that should never be extracted as a food keyword"
 
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"
