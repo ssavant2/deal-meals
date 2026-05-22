@@ -1418,6 +1418,7 @@ def _match_offer_to_ingredient_keyword(ingredient_data, offer_match_data) -> Opt
         _prenormalized=True,
         _prepared_fast_text=ingredient_data.prepared_fast_text,
         _ingredient_words=ingredient_data.words,
+        _eller_arms_prepared=getattr(ingredient_data, 'eller_arms_prepared', ()),
     )
 
 
@@ -1987,8 +1988,29 @@ def validate_offer_match_candidate(
         if icm:
             ing_norm = ingredients_normalized[matched_ing_idx]
             matched_kw_lower = matched_keyword.lower()
+            # When the ingredient is an "X eller Y" alternative, the carrier
+            # context (e.g. fraiche) may live in one arm while the matched
+            # keyword lives in the other. Only reject if the arm containing
+            # the matched keyword also has the required carrier-context word.
+            eller_arms = ()
+            if 0 <= matched_ing_idx < len(ingredient_match_data_per_ing):
+                eller_arms = getattr(
+                    ingredient_match_data_per_ing[matched_ing_idx],
+                    'eller_arms_prepared',
+                    (),
+                )
             for req_word in icm:
                 if req_word in ing_norm and matched_kw_lower != req_word:
+                    if eller_arms:
+                        matched_arm_has_req = any(
+                            matched_kw_lower in arm and req_word in arm
+                            for arm in eller_arms
+                        )
+                        matched_kw_in_any_arm = any(
+                            matched_kw_lower in arm for arm in eller_arms
+                        )
+                        if matched_kw_in_any_arm and not matched_arm_has_req:
+                            continue  # carrier lives in a different eller-arm
                     _record_validation_event(
                         validation_events,
                         'validation_reject',

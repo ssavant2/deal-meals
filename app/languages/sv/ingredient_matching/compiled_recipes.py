@@ -142,6 +142,7 @@ def serialize_ingredient_match_data(item: IngredientMatchData) -> dict[str, Any]
         "prepared_fast_text": bool(item.prepared_fast_text),
         "source_index": int(item.source_index),
         "expanded_index": int(item.expanded_index),
+        "eller_arms_prepared": list(item.eller_arms_prepared),
     }
 
 
@@ -154,6 +155,7 @@ def deserialize_ingredient_match_data(payload: dict[str, Any]) -> IngredientMatc
         prepared_fast_text=bool(payload.get("prepared_fast_text", False)),
         source_index=int(payload.get("source_index", 0)),
         expanded_index=int(payload.get("expanded_index", 0)),
+        eller_arms_prepared=tuple(payload.get("eller_arms_prepared", ())),
     )
 
 

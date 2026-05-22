@@ -14,6 +14,7 @@ from .ingredient_data import IngredientMatchData
 from .match_result import MatchResult
 from .matching import _prepare_fast_ingredient_text, matches_ingredient_fast, precompute_offer_data
 from .offer_data import OfferMatchData
+from .recipe_text import parse_eller_alternatives
 from .versioning import (
     MATCHER_VERSION,
     OFFER_COMPILER_VERSION,
@@ -36,6 +37,7 @@ def build_ingredient_match_data(
     normalized_text = _prepare_fast_ingredient_text(ingredient_text, _prenormalized=False)
     words = tuple(_WORD_PATTERN.findall(normalized_text))
     extracted_keywords = frozenset(extract_keywords_from_ingredient(ingredient_text))
+    eller_arms_prepared = _build_eller_arms_prepared(ingredient_text, normalized_text)
     return IngredientMatchData(
         raw_text=ingredient_text,
         normalized_text=normalized_text,
@@ -44,7 +46,34 @@ def build_ingredient_match_data(
         prepared_fast_text=True,
         source_index=source_index,
         expanded_index=expanded_index,
+        eller_arms_prepared=eller_arms_prepared,
     )
+
+
+def _build_eller_arms_prepared(raw_text: str, full_normalized_text: str) -> tuple[str, ...]:
+    """Return per-arm prepared texts for "X eller Y" ingredients, else empty tuple.
+
+    The fallback path in match_offer_to_ingredient uses these when the
+    full-text match returns None — typically because a carrier-context check
+    on the full text (e.g. fraiche-requires-fraiche-in-product) blocked an
+    alternative arm that the user explicitly accepted.
+    """
+    lowered = raw_text.lower()
+    if (
+        ' eller ' not in lowered
+        and '(eller' not in lowered
+        and 'alternativt' not in lowered
+    ):
+        return ()
+    alternatives = parse_eller_alternatives(raw_text)
+    if len(alternatives) <= 1:
+        return ()
+    prepared_arms: list[str] = []
+    for arm in alternatives:
+        arm_prepared = _prepare_fast_ingredient_text(arm, _prenormalized=False)
+        if arm_prepared and arm_prepared != full_normalized_text:
+            prepared_arms.append(arm_prepared)
+    return tuple(prepared_arms)
 
 
 def build_prepared_ingredient_match_data(
@@ -56,6 +85,7 @@ def build_prepared_ingredient_match_data(
     prepared_fast_text: bool = False,
     source_index: int = 0,
     expanded_index: int = 0,
+    eller_arms_prepared: tuple[str, ...] | None = None,
 ) -> IngredientMatchData:
     """Wrap already-prepared recipe-matcher ingredient text as canonical data.
 
@@ -67,6 +97,12 @@ def build_prepared_ingredient_match_data(
         words = tuple(_WORD_PATTERN.findall(normalized_text))
     if extracted_keywords is None:
         extracted_keywords = frozenset()
+    if eller_arms_prepared is None:
+        # Derive eller-arms from raw_text (preferred) or normalized_text so the
+        # per-arm fallback in match_offer_to_ingredient/_match_offer_to_ingredient_keyword
+        # works for recipes flowing through the compiled-recipes path.
+        source_for_arms = raw_text if raw_text else normalized_text
+        eller_arms_prepared = _build_eller_arms_prepared(source_for_arms, normalized_text)
     return IngredientMatchData(
         raw_text=raw_text or normalized_text,
         normalized_text=normalized_text,
@@ -75,6 +111,7 @@ def build_prepared_ingredient_match_data(
         prepared_fast_text=prepared_fast_text,
         source_index=source_index,
         expanded_index=expanded_index,
+        eller_arms_prepared=eller_arms_prepared,
     )
 
 
@@ -140,6 +177,7 @@ def match_offer_to_ingredient(
         _prenormalized=True,
         _prepared_fast_text=ingredient.prepared_fast_text,
         _ingredient_words=ingredient.words,
+        _eller_arms_prepared=ingredient.eller_arms_prepared,
     )
     if not matched_keyword:
         return MatchResult(matched=False, reason="fast_match_no_match")

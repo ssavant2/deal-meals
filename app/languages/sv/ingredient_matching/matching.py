@@ -4466,7 +4466,8 @@ def matches_ingredient_fast(
     ingredient_text: str,
     _prenormalized: bool = False,
     _prepared_fast_text: bool = False,
-    _ingredient_words: list = None
+    _ingredient_words: list = None,
+    _eller_arms_prepared: tuple = (),
 ) -> Optional[str]:
     """
     Fast version of matches_ingredient using pre-computed offer data.
@@ -4479,6 +4480,11 @@ def matches_ingredient_fast(
             output of _prepare_fast_ingredient_text() and can be used as-is.
         _ingredient_words: Pre-computed word list from ingredient text (avoids
             re-parsing with regex on every FP blocker check)
+        _eller_arms_prepared: Per-arm prepared texts for "X eller Y" ingredients.
+            When provided, the ingredient_context_missing carrier check (icm) is
+            relaxed for arms that don't contain the required carrier word. This
+            prevents a 'fraiche' carrier in one arm from blocking a yoghurt match
+            in the other arm of 'crème fraîche eller tjock yoghurt'.
 
     Returns:
         The matched keyword, or None if no match
@@ -5593,9 +5599,25 @@ def matches_ingredient_fast(
         ):
             return None
         ingredient_context_missing = offer_data.get('ingredient_context_missing', _EMPTY_FROZENSET)
+        matched_kw_lower = matched_keyword.lower()
         for req_word in INGREDIENT_REQUIRES_IN_PRODUCT:
             if req_word in ingredient_lower and matched_keyword != req_word:
                 if req_word in ingredient_context_missing:
+                    # When the ingredient is an "X eller Y" alternative, only reject
+                    # if the eller-arm containing the matched keyword also contains
+                    # the required carrier word. Otherwise the carrier lives in a
+                    # different arm and shouldn't block this arm's match.
+                    if _eller_arms_prepared:
+                        matched_kw_in_any_arm = any(
+                            matched_kw_lower in arm for arm in _eller_arms_prepared
+                        )
+                        if matched_kw_in_any_arm:
+                            matched_arm_has_req = any(
+                                matched_kw_lower in arm and req_word in arm
+                                for arm in _eller_arms_prepared
+                            )
+                            if not matched_arm_has_req:
+                                continue  # carrier lives in a different eller-arm
                     return None
 
     # STEP 2d: Inverse context check — MOVED to per-ingredient validation
