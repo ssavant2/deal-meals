@@ -914,6 +914,14 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
         'mandelpotatis', 'mandelpotatisar',
         'färskpotatis', 'farskpotatis',
     },
+    # Plural form mirrors the singular's suppressors — products extract both
+    # 'potatis' and 'potatisar' as keywords, so the loop-level KSBC must cover both.
+    'potatisar': {
+        'potatisskalare', 'sötpotatis', 'sotpotatis',
+        'bakpotatis', 'bakpotatisar',
+        'mandelpotatis', 'mandelpotatisar',
+        'färskpotatis', 'farskpotatis',
+    },
     # "Hushållsaromer" = liquid flavoring, not hushållsost (cheese)
     'hushålls': {'hushållsaromer'},
     # "chokladägg" = hollow chocolate eggs (candy), not real eggs

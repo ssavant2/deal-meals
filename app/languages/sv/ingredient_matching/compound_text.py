@@ -431,7 +431,7 @@ _PROCESSED_FOODS_PATTERN = _build_combined_word_pattern(PROCESSED_FOODS)
 # Pre-compiled pattern for extracting words from text (used in FP blocker check)
 _WORD_PATTERN = re.compile(r'[a-zåäöé]+')
 _WORD_PATTERN_4PLUS = re.compile(r'[a-zåäö]{4,}')
-_RE_SPICE_AMOUNT = re.compile(r'\b(?:tsk|krm)\b')
+_RE_SPICE_AMOUNT = re.compile(r'\b(?:tsk|krm|msk)\b')
 
 def _is_whole_word(word: str, text: str) -> bool:
     """Check if word appears as a standalone word in text (not as suffix of compound word).

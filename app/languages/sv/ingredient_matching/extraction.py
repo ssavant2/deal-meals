@@ -2210,14 +2210,6 @@ def extract_keywords_from_ingredient(
     name = rewrite_truncated_eller_compounds(name)
     name = rewrite_mince_of_alternatives(name)
 
-    # Expand shorthand alternatives where the second option omits the shared prefix.
-    # "körsbärssylt eller -marmelad" → "körsbärssylt eller körsbärsmarmelad"
-    name = re.sub(
-        r'\b([a-zåäöé]+?)(sylt|marmelad)\s+eller\s+-(sylt|marmelad)\b',
-        r'\1\2 eller \1\3',
-        name,
-    )
-
     # Keep named cheese preferences from parentheticals such as
     # "lagrad ost (helst gruyère)" before stripping the remaining paren text.
     name = preserve_cheese_preference_parentheticals(name)

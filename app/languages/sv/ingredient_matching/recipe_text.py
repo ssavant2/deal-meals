@@ -102,6 +102,15 @@ _TRUNCATED_ELLER_COMPOUND_RE = re.compile(
     rf'\b([a-zåäöé]+)-\s+eller\s+([a-zåäöé]+?)({"|".join(re.escape(s) for s in _TRUNCATED_ELLER_SUFFIXES)})\b',
     re.IGNORECASE,
 )
+# Shared-prefix shorthand where the SECOND option is truncated:
+# "körsbärssylt eller -marmelad" → "körsbärssylt eller körsbärsmarmelad"
+# "äppelmust eller -juice" → "äppelmust eller äppeljuice"
+# Constrained to a known suffix set so we don't expand arbitrary words.
+_TRUNCATED_ELLER_SECOND_OPT_SUFFIX = r'(?:sylt|marmelad|mos|must|juice|saft|dryck)'
+_TRUNCATED_ELLER_SECOND_OPT_RE = re.compile(
+    rf'\b([a-zåäöé]+?)({_TRUNCATED_ELLER_SECOND_OPT_SUFFIX})\s+eller\s+-({_TRUNCATED_ELLER_SECOND_OPT_SUFFIX})\b',
+    re.IGNORECASE,
+)
 # Color-adjective eller-groups where the first arm omits the shared noun.
 # Example: "gula eller röda lökar" / "1 gul eller röd lök".
 # Without this rewrite, parse_eller_alternatives splits to ["2 gula", "röda lökar"]
@@ -426,6 +435,12 @@ def rewrite_truncated_eller_compounds(text: str) -> str:
     """
     text = _TRUNCATED_ELLER_COMPOUND_RE.sub(
         lambda m: f"{m.group(1)}{m.group(3)} eller {m.group(2)}{m.group(3)}",
+        text,
+    )
+    # Mirror form: second option truncated (shares prefix with first option).
+    # "körsbärssylt eller -marmelad" -> "körsbärssylt eller körsbärsmarmelad"
+    text = _TRUNCATED_ELLER_SECOND_OPT_RE.sub(
+        lambda m: f"{m.group(1)}{m.group(2)} eller {m.group(1)}{m.group(3)}",
         text,
     )
     # Color-adjective eller-group: copy the shared noun back to the first arm

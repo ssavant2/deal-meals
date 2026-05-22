@@ -351,6 +351,20 @@ _COOKED_KYCKLINGKLUBBA_INGREDIENT_CUES = frozenset({
     'rökt', 'rokt',
 })
 _PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'kalkon', 'salami', 'salame', 'rostbiff'})
+# Mjukost carrier exemption: flavored "Xost" variant keywords (räkost, skinkost,
+# baconost, etc.) ARE mjukost products by definition — dedicated products like
+# "Räkost 330g Kavli" or "Skinkost 330g Kavli" don't repeat "mjukost" in the
+# product name. Without this exemption, those products would fail the mjukost
+# carrier-context check on recipes like "mjukost med räksmak" / "mjukost med
+# skinksmak".
+_MJUKOST_FLAVORED_VARIANT_KEYWORDS = frozenset({
+    'räkost', 'rakost',
+    'skinkost',
+    'baconost',
+    'champinjonost',
+    'kräftost', 'kraftost',
+    'salamiost',
+})
 _COOKED_KYCKLING_PRODUCT_CUES = frozenset({
     'färdigkyckling',
     'färdiggrillad', 'fardiggrillad',
@@ -4558,6 +4572,15 @@ def matches_ingredient_fast(
                             continue
             if _blocked_by_exact_compound_only(ingredient_lower, keyword):
                 continue
+            # KSBC inside the loop: if this keyword is suppressed by a context
+            # word in the ingredient, skip it and try the next product keyword.
+            # (Without this, a flavored mjukost product whose first keyword
+            # `mjukost` gets suppressed by `räksmak` would return None instead
+            # of falling through to `räkost`.)
+            if keyword in KEYWORD_SUPPRESSED_BY_CONTEXT:
+                suppressors = KEYWORD_SUPPRESSED_BY_CONTEXT[keyword]
+                if any(s in ingredient_lower for s in suppressors):
+                    continue
             # Product-name blockers are validated later per ingredient in
             # recipe_matcher.py, which avoids cross-ingredient leakage such as
             # "röd" from one ingredient unblocking "Red Curry Thai" for another.
@@ -5417,6 +5440,10 @@ def matches_ingredient_fast(
             if _cc in ingredient_lower and _cc not in name_norm:
                 if _cc in {'pålägg', 'palagg'} and matched_keyword in _PALAGG_DELI_KEYWORD_EXEMPTIONS:
                     continue
+                # Flavored Xost products (Räkost/Skinkost/Baconost/etc.) ARE mjukost
+                # — they just don't repeat "mjukost" in the product name.
+                if _cc == 'mjukost' and matched_keyword in _MJUKOST_FLAVORED_VARIANT_KEYWORDS:
+                    continue
                 # 'eller' alternative: "tomatsås eller pinsasås" — the carrier is in
                 # a different alternative segment than the matched keyword → not a
                 # compound requirement, skip restriction.
@@ -5673,12 +5700,15 @@ def matches_ingredient_fast(
                         processed_indicators = PROCESSED_PRODUCT_RULES.get(check[0], ())
                         if not any(ind in ingredient_lower for ind in processed_indicators):
                             continue
-                    # Spice-amount heuristic: "1 tsk ingefära" = ground/dried
+                    # Spice-amount heuristic: "1 tsk/msk/krm ingefära" = ground/dried,
+                    # also explicit dry markers like "torkad gurkmeja" imply ground.
+                    _EXPLICIT_DRY_MARKERS_SVF = ('torkad', 'torkade', 'torkat')
                     if (check[0] in _SPICE_AMOUNT_IMPLICIT_GROUND
                             and any(ind in _GROUND_PRODUCT_INDICATORS for ind in check[2])
                             and not any(fi in ingredient_lower for fi in _FRESH_INDICATORS_SVF)
-                            and _RE_SPICE_AMOUNT.search(ingredient_lower)):
-                        continue  # Allow: spice amount implies ground/dried
+                            and (_RE_SPICE_AMOUNT.search(ingredient_lower)
+                                 or any(dm in ingredient_lower for dm in _EXPLICIT_DRY_MARKERS_SVF))):
+                        continue  # Allow: spice amount or dry marker implies ground/dried
                     return None
             else:
                 if check[2] not in ingredient_lower:
