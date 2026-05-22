@@ -2261,9 +2261,9 @@ category = "dairy"
 name = "Bakning Växtbaserat Margarin Carlshamn"
 
 [[fixtures.expected_matches]]
-canonical = "margarin"
+canonical = "vegomargarin"
 ingredient_index = 0
-must_match_keyword = "margarin"
+must_match_keyword = "vegomargarin"
 
 [[fixtures]]
 expected = 0

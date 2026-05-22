@@ -2716,16 +2716,16 @@
     "kind": "legacy_no_match_policy",
     "line_refs": [
       {
-        "anchor": "# Plant-based \"butter\" recipe wording is represented as margarine/spread",
+        "anchor": "# Plant-based \"butter\" recipe wording routes to vegomargarin compound so that",
         "end": 237,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
         "start": 237
       },
       {
         "anchor": "'plant based', 'plant-based',",
-        "end": 276,
+        "end": 277,
         "path": "app/languages/sv/ingredient_matching/matching.py",
-        "start": 276
+        "start": 277
       },
       {
         "anchor": "\"\"\"Explicit vegan/plant-based base foods should not fall back to meat/dairy.\"\"\"",

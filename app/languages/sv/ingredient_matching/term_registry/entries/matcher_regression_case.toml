@@ -28328,10 +28328,10 @@ variant = "matcher_regression_vegobacon_baconost_negative: Baconost Mjukost Kavl
 layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.margarin.matcher_regression_vegosmor_plant_margarine_positive"
+entry_id = "sv-se.policy.vegomargarin.matcher_regression_vegosmor_plant_margarine_positive"
 language = "sv"
 market = "SE"
-canonical = "margarin"
+canonical = "vegomargarin"
 status = "active"
 variants = ["matcher_regression_vegosmor_plant_margarine_positive: Bakning Växtbaserat Margarin Carlshamn"]
 ingredient_terms = []
@@ -28343,7 +28343,7 @@ notes = "Registry coverage for matcher regression fixture matcher_regression_veg
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "margarin"
+canonical = "vegomargarin"
 variant = "matcher_regression_vegosmor_plant_margarine_positive: Bakning Växtbaserat Margarin Carlshamn"
 layer_role = "positive_regression"
 

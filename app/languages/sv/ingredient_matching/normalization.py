@@ -234,17 +234,18 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('vegetariska hamburgare', 'vegetariskhamburgare'),
     ('beyond burgers', 'beyondburgare'),
     ('beyond burger', 'beyondburgare'),
-    # Plant-based "butter" recipe wording is represented as margarine/spread
-    # families in current store offers.
-    ('växtbaserat smör', 'margarin'),
-    ('vaxtbaserat smor', 'margarin'),
-    ('veganskt smör', 'margarin'),
-    ('veganskt smor', 'margarin'),
-    ('vegosmör', 'margarin'),
-    ('vegosmor', 'margarin'),
-    ('vegasmör', 'margarin'),
-    ('vegansmör', 'margarin'),
-    ('vegansmor', 'margarin'),
+    # Plant-based "butter" recipe wording routes to vegomargarin compound so that
+    # KSBC can distinguish it from dairy margarin (Q71-1). The compound keyword
+    # vegomargarin is exposed by plant-based margarin offers (Växtbaserat/Lätta/Flora/Milda).
+    ('växtbaserat smör', 'vegomargarin'),
+    ('vaxtbaserat smor', 'vegomargarin'),
+    ('veganskt smör', 'vegomargarin'),
+    ('veganskt smor', 'vegomargarin'),
+    ('vegosmör', 'vegomargarin'),
+    ('vegosmor', 'vegomargarin'),
+    ('vegasmör', 'vegomargarin'),
+    ('vegansmör', 'vegomargarin'),
+    ('vegansmor', 'vegomargarin'),
     # Plural → singular for vego-compounds so COMPOUND_STRICT can match suffix
     ('vegokorvar', 'vegokorv'),
     # Mathem generic category "Biffar/Bullar" — too generic, remove "biff" substring

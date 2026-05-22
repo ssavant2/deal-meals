@@ -273,6 +273,7 @@ _EXPLICIT_VEGAN_PRODUCT_CUES = frozenset({
     'vegansk', 'veganska', 'veganskt',
     'vegan',
     'växtbaserad', 'vaxtbaserad',
+    'växtbaserat', 'vaxtbaserat',  # neuter gender form (smör/margarin/alternativ är växtbaserat)
     'plant based', 'plant-based',
     'vegetabilisk',
     'violife', 'greenvie',

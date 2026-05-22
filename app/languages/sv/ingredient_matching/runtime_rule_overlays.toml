@@ -158,6 +158,13 @@ keyword = "frön"
 blockers = ["musli"]
 reason = "Musli/Müsli (breakfast cereal) containing seeds is a carrier product — recipe wants loose seeds for bread topping, not granola/muesli; substring 'musli' covers both spellings in product names"
 
+[[product_name_blockers]]
+id = "runtime_pnb_chips"
+status = "active"
+keyword = "chips"
+blockers = ["tortilla", "tortillachips", "nacho", "nachochips", "nachos", "corn", "bananchips", "bananachips"]
+reason = "Tortilla/nacho chips (corn-based) and banana chips are distinct categories from potato chips. A recipe asking for 'lättsaltade chips' wants potato chips — not corn tortilla chips, nacho chips, or banana chips."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -358,8 +365,8 @@ reason = "When recipe specifies woksås with a flavor (Pad Thai, Satay, Teriyaki
 id = "runtime_ksbc_ost"
 status = "active"
 keyword = "ost"
-context = ["mjölkfri", "mjölkfritt", "mjolkfri", "mjolkfritt", "laktosfri", "laktosfritt", "vegan", "vegansk", "växtbaserad", "vaxtbaserad"]
-reason = "When ingredient explicitly specifies dietary restriction (mjölkfri/laktosfri/vegan/växtbaserad), generic 'ost' keyword would match dairy-cheese products. Vegan/dairy-free recipes need plant-based alternatives only — Violife/Greenvie etc. match via dedicated 'veganost' keyword which is unaffected by this KSBC."
+context = ["mjölkfri", "mjölkfritt", "mjolkfri", "mjolkfritt", "laktosfri", "laktosfritt", "vegan", "vegansk", "växtbaserad", "vaxtbaserad", "fårost", "farost"]
+reason = "When ingredient explicitly specifies dietary restriction (mjölkfri/laktosfri/vegan/växtbaserad), generic 'ost' keyword would match dairy-cheese products. Vegan/dairy-free recipes need plant-based alternatives only — Violife/Greenvie etc. match via dedicated 'veganost' keyword which is unaffected by this KSBC.; When ingredient explicitly specifies 'fårost' (sheep's milk cheese), generic 'ost' keyword would match dairy cow-milk cheeses. Suppress ost keyword so only dedicated sheep-milk cheese keywords (manchego, pecorino, roquefort, fårost) can match."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_choklad"
@@ -374,6 +381,12 @@ status = "active"
 keyword = "margarin"
 context = ["mjölkfritt", "mjolkfritt", "mjölkfri", "mjolkfri", "växtbaserat", "vaxtbaserat", "växtbaserad", "vaxtbaserad", "vegan", "vegansk"]
 reason = "Dairy-free recipes ('mjölkfritt/mjölkfri margarin') must not match regular dairy-based margarin. Follows Q68-5 pattern: dietary modifier in ingredient suppresses generic keyword. Plant-based margarin products would need dedicated keyword to match — currently 0 such products in DB.; Plant-based recipes ('växtbaserat margarin' / 'vegansk margarin') must not match regular dairy-based margarin. Mirrors mjölkfri/laktosfri context already present (Q68-5/Q69 pattern: dietary modifier in ingredient suppresses generic keyword). Plant-based margarin products would need dedicated keyword to match."
+
+[[global_product_name_blockers]]
+id = "runtime_gpb_toffifee"
+status = "active"
+terms = ["toffifee"]
+reason = "Toffifee is a specific branded hazelnut-caramel-chocolate candy — not a cooking/baking ingredient and not a substitute for any generic recipe ingredient."
 
 [[space_normalizations]]
 id = "runtime_space_normalization_karl_johan_svamp_karl_johansvamp"

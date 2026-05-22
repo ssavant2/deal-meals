@@ -855,11 +855,17 @@ def extract_keywords_from_product(
     # Bregott/Lätta/Flora are bordsmargarin (table margarine for spreading on
     # bread/sandwiches), not cooking margarine or butter. They should match
     # recipes that explicitly want bordsmargarin, not generic 'smör'/'margarin'
-    # cooking ingredients.
+    # cooking ingredients. Plant-based variants (växtbaserat/växtbaserad) also
+    # expose vegomargarin so that vegosmör/växtbaserat smör recipe wording can
+    # find them while dairy bordsmargarin is excluded (Q71-1).
     if (
         (category or '').lower() in {'dairy', 'pantry'}
-        and re.search(r'\b(?:bregott|lätta|latta|flora)\b', original_name_lower)
+        and re.search(r'\b(?:bregott|lätta|latta|flora|milda)\b', original_name_lower)
     ):
+        _is_plant = any(cue in original_name_lower for cue in
+                        ('växtbaserat', 'vaxtbaserat', 'växtbaserad', 'vaxtbaserad'))
+        if _is_plant:
+            return ['vegomargarin', 'bordsmargarin']
         return ['bordsmargarin']
 
     # Bao / steam buns are a buyable bread family of their own and should not
@@ -1817,6 +1823,16 @@ def extract_keywords_from_product(
                           'koreanbbqwoksas', 'sweetsourwoksas'}
     if any(kw in _XWOKSAS_TO_WOKSAS for kw in unique_keywords) and 'woksås' not in unique_keywords:
         unique_keywords.append('woksås')
+
+    # Plant-based margarin bridge: products that have 'margarin' keyword AND contain
+    # plant-based markers in their name also get 'vegomargarin' compound keyword.
+    # This mirrors the veganost system (Q68-5): recipe wording like "växtbaserat smör"
+    # normalizes to "vegomargarin", which then routes to these offers via shared keyword.
+    _VEGO_MARGARIN_CUES = ('växtbaserat', 'vaxtbaserat', 'växtbaserad', 'vaxtbaserad')
+    if 'margarin' in unique_keywords:
+        if any(cue in original_name_lower for cue in _VEGO_MARGARIN_CUES):
+            if 'vegomargarin' not in unique_keywords:
+                unique_keywords.insert(0, 'vegomargarin')
 
     # Small tomato isolation: products that carry the 'småtomat' compound keyword
     # (cherry, baby plum, cocktail, on-the-vine) should NOT also expose the generic
