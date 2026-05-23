@@ -199,9 +199,11 @@ Add only the flags that match the change:
 - `--refresh-line-refs` when inventory anchors moved; run from a writable host
   checkout or write-enabled dev container.
 - `--baseline-output-dir /tmp/term-baseline-promotion` only when the checkout is
-  read-only; the wrapper stages generated files and stops so you can apply them
-  before rerunning gates. If promote is accidentally run as a user that cannot
-  write the checkout, it falls back to this staged-output mode automatically.
+  genuinely read-only; the wrapper stages generated files and stops so you can
+  apply them before rerunning gates. If promote is accidentally run as a user
+  that cannot write the checkout (e.g. root in the dev container instead of
+  appuser), the wrapper now fails fast with a message pointing at the right
+  invocation; there is no silent staging fallback.
 - `--reload-cache --fresh-cache-gates` when cache/UI/cache-backed validation is
   part of the handoff.
 - `--include-support-self-checks` when support-check code or schemas changed.
