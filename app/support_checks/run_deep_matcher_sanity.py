@@ -9890,8 +9890,8 @@ test("Batch 14 sötmandel spån blocks whole almonds", recipe_match_num(["2 msk 
 test("Batch 14 plain citronmeliss accepts fresh citronmeliss", recipe_match_num_cached(["citronmeliss"], {"name": "Citronmeliss Klass 1 Garant", "category": "fruit"}), 1)
 test("Batch 14 ketchuptyp chilisås blocks garlic Asian chili sauce", recipe_match_num(["1/2 dl chilisås av ketchuptyp"], {"name": "Chilisås Vitlök Ayam", "category": "pantry"}), 0)
 test("Batch 14 ketchuptyp chilisås accepts classic chilisås", recipe_match_num_cached(["1/2 dl chilisås av ketchuptyp"], {"name": "Chilisås Klassisk Garant", "category": "pantry"}), 1)
-test("Batch 14 red onion bunch exposes knipplök", "knipplök" in precompute_offer_data("Lök Röd i Knippe Klass 1", "fruit")["keywords"], True)
-test("Batch 14 knipplök accepts red onion bunch", recipe_match_num_cached(["1 röd knipplök, strimlad"], {"name": "Lök Röd i Knippe Klass 1", "category": "fruit"}), 1)
+test("Batch 14 red onion bunch does NOT expose knipplök (narrowed to salladslök-only)", "knipplök" in precompute_offer_data("Lök Röd i Knippe Klass 1", "fruit")["keywords"], False)
+test("Batch 14 knipplök blocks red onion bunch (only salladslök-knippe substitutes)", recipe_match_num_cached(["1 röd knipplök, strimlad"], {"name": "Lök Röd i Knippe Klass 1", "category": "fruit"}), 0)
 test("Batch 14 knipplök accepts salladslök bunch", recipe_match_num(["1 röd knipplök, strimlad"], {"name": "Salladslök Knippe", "category": "vegetables"}), 1)
 test("Batch 14 canned cherry tomatoes beverage category reclassifies to pantry", guess_category("Körsbärs- Tomater i Tomatjuice Eldorado", "beverages"), "pantry")
 test("Batch 14 canned cherry tomatoes accept in-juice product", recipe_match_num_cached(["1 förp konserverade körsbärstomater"], {"name": "Körsbärs- Tomater i Tomatjuice Eldorado", "category": "beverages"}), 1)
@@ -9921,7 +9921,7 @@ test("kolsyrat vatten blocks vattenmelon-flavored", recipe_match_num_cached(["1 
 test("kolsyrat vatten blocks ananas-drakfrukt-flavored", recipe_match_num_cached(["1 1/2 dl kolsyrat vatten"], {"name": "Kolsyrat vatten Ananas Drakfrukt 50cl Loka", "category": "beverages"}), 0)
 test("Batch 14 pitted kalamata accepts pitted kalamata olives", recipe_match_num(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Oliver Kalamata Urkärnade 350g Fontana", "category": "spices"}), 1)
 test("Batch 14 pitted kalamata accepts pitted black olive fallback", recipe_match_num_cached(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Svarta Oliver Utan Kärnor Eldorado", "category": "spices"}), 1)
-test("Batch 14 pitted kalamata pragmatically accepts kalamata with pits", recipe_match_num(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Kalamata Oliver med Kärnor Fontana", "category": "spices"}), 1)
+test("Batch 14 pitted kalamata blocks kalamata with pits (Q74-1 policy generalization)", recipe_match_num(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Kalamata Oliver med Kärnor Fontana", "category": "spices"}), 0)
 test("Batch 14 pitted kalamata pragmatically accepts unqualified Gemlik fallback", recipe_match_num_cached(["1 dl Zeta Kalamataoliver urkärnade"], {"name": "Gemlik Oliver Ceren", "category": "spices"}), 1)
 test("Batch 14 pitted black olives accept pitted black olive product", recipe_match_num(["100 g Svarta oliver utan kärnor"], {"name": "Svarta Oliver Utan Kärnor Figaro", "category": "spices"}), 1)
 test("Batch 14 pitted black olives now block kalamata with pits (oliver PNB med kärnor)", recipe_match_num_cached(["100 g Svarta oliver utan kärnor"], {"name": "Kalamata Oliver med Kärnor Fontana", "category": "spices"}), 0)
@@ -12186,6 +12186,111 @@ test("Keyword synonym chiabatta matches ciabatta",
      match("Ciabatta 4-pack 320g ICA", "chiabatta", "pantry"), "ciabatta")
 test("Keyword synonym chiabattabröd matches ciabatta",
      match("Ciabatta 4-pack 320g ICA", "chiabattabröd", "pantry"), "ciabatta")
+
+# Beet precooked logic (kokt/kokta ingredient requires förkokt-labeled product)
+test("Förkokt rödbeta matches kokta rödbetor ingredient",
+     match("Rödbeta förkokt 500g ICA", "2 kokta rödbetor", "vegetables"), "rödbeta")
+test("Aptitrödbetor blocked from kokta rödbetor (vinegar-pickled, not förkokt)",
+     match("Aptitrödbetor 710g Felix", "2 kokta rödbetor", "vegetables"), None)
+test("Rödbetor Skivade blocked from kokta rödbetor (sliced pickled)",
+     match("Rödbetor Skivade 370g Felix", "2 kokta rödbetor", "vegetables"), None)
+test("Fresh rödbeta still matches färska rödbetor",
+     match("Rödbeta ca 500g Klass 1 ICA", "2 färska rödbetor", "vegetables"), "rödbeta")
+
+# Apple cider modern spelling cue (äpple — previously only äppel/appel)
+test("Herrgårdscider Äpple matches Cider Äpple ingredient",
+     match("Herrgårdscider Äpple Kiviks Musteri", "750 ml Cider Äpple", "pantry"), "cider")
+
+# Anjoviskryddad sill smart blocker (requires anjov-flavored product)
+test("Plain Inlagd sill blocked from anjoviskryddad sill eller-arm",
+     match("Inlagd sill 275g ICA", "1 förp ansjovis eller 7 bitar finhackad anjoviskryddad sill", "fish"), None)
+
+# Raw sill smart blocker (5-minuterssill/inläggningssill require non-finished product)
+test("Plain Inlagd Sill blocked from 5-minuterssill ingredient",
+     match("Inlagd Sill Klassisk 250g Abba", "3 bitar 5-minuterssill", "fish"), None)
+test("5-minuters sillfilé still matches 5-minuterssill (dedicated keyword)",
+     match("5-minuters sillfilé 430g Abba", "3 bitar 5-minuterssill", "fish"), "5-minuterssill")
+
+# CUISINE_CONTEXT narrowed: grekisk no longer triggers gyros; kokosmjölk no longer triggers thaikryddad
+from languages.sv.ingredient_matching.recipe_context import CUISINE_CONTEXT
+test("Gyros 'grekisk' removed from triggers",
+     'grekisk' in CUISINE_CONTEXT.get('gyros', set()), False)
+test("Thaikryddad 'kokosmjölk' removed from triggers",
+     'kokosmjölk' in CUISINE_CONTEXT.get('thaikryddad', set()), False)
+
+# Knipplök bridge narrowing: knippe-bundled yellow onion blocked from knipplök
+test("Lök gul knippe blocked from knipplök ingredient (knippe arm removed)",
+     match("Lök gul knippe ca 250g Klass 1 ICA", "3 knipplökar", "vegetables"), None)
+test("Salladslök knippe still matches knipplök ingredient",
+     match("Salladslök knippe 100g Klass 1", "3 knipplökar", "vegetables"), "knipplök")
+
+# Energibar global blocker: Corny brand "Bar Energi/Protein/..." format
+test("Bar Energi Havre Banana globally blocked (PROCESSED_FOODS 'bar energi')",
+     match("Bar Energi Havre Banana 50g Corny", "1 banan", "fruit"), None)
+# runtime_fpb_lokar_knipplok: generated by dm matcher add fpb
+from languages.sv.ingredient_matching import FALSE_POSITIVE_BLOCKERS
+test("FPB lökar has knipplök",
+     "knipplök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has knipplok",
+     "knipplok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has knipplökar",
+     "knipplökar" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has knipplokar",
+     "knipplokar" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has salladslök",
+     "salladslök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has salladslök",
+     "salladslök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has gullök",
+     "gullök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has gullok",
+     "gullok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has rödlök",
+     "rödlök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has rödlök",
+     "rödlök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has purjolök",
+     "purjolök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has purjolok",
+     "purjolok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has vitlök",
+     "vitlök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has vitlök",
+     "vitlök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has gräslök",
+     "gräslök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has graslok",
+     "graslok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has silverlök",
+     "silverlök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has silverlok",
+     "silverlok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has pärllök",
+     "pärllök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has parllok",
+     "parllok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has ramslök",
+     "ramslök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has ramslok",
+     "ramslok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has schalottenlök",
+     "schalottenlök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has schalottenlok",
+     "schalottenlok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has steklök",
+     "steklök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has steklok",
+     "steklok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has syltlök",
+     "syltlök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has syltlok",
+     "syltlok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has vårlök",
+     "vårlök" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has varlok",
+     "varlok" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
+test("FPB lökar has schalotten",
+     "schalotten" in FALSE_POSITIVE_BLOCKERS.get("lökar", set()), True)
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")

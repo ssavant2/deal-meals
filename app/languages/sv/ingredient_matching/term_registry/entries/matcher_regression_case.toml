@@ -4648,26 +4648,6 @@ variant = "matcher_regression_knackebrod_vallmofro_positive: Vallmofrö Falu Kn�
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.knipplok.matcher_regression_knipplok_red_onion_bunch_positive"
-language = "sv"
-market = "SE"
-canonical = "knipplök"
-status = "active"
-variants = ["matcher_regression_knipplok_red_onion_bunch_positive: Lök Röd i Knippe Klass 1"]
-ingredient_terms = []
-offer_terms = []
-negative_guards = []
-source_refs = ["fixture:matcher_regression_cases:matcher_regression_knipplok_red_onion_bunch_positive"]
-layer_policy = ["normal"]
-notes = "Registry coverage for matcher regression fixture matcher_regression_knipplok_red_onion_bunch_positive."
-
-[[entries.coverage]]
-source_family = "matcher_regression_case"
-canonical = "knipplök"
-variant = "matcher_regression_knipplok_red_onion_bunch_positive: Lök Röd i Knippe Klass 1"
-layer_role = "positive_regression"
-
-[[entries]]
 entry_id = "sv-se.policy.knipplok.matcher_regression_knipplok_salladslok_positive"
 language = "sv"
 market = "SE"
@@ -17685,26 +17665,6 @@ notes = "Registry coverage for matcher regression fixture matcher_regression_pit
 source_family = "matcher_regression_case"
 canonical = "oliver"
 variant = "matcher_regression_pitted_kalamata_gemlik_fallback_positive: Gemlik Oliver Ceren"
-layer_role = "positive_regression"
-
-[[entries]]
-entry_id = "sv-se.policy.kalamataoliver.matcher_regression_pitted_kalamata_with_pits_positive"
-language = "sv"
-market = "SE"
-canonical = "kalamataoliver"
-status = "active"
-variants = ["matcher_regression_pitted_kalamata_with_pits_positive: Kalamata Oliver med Kärnor Fontana"]
-ingredient_terms = []
-offer_terms = []
-negative_guards = []
-source_refs = ["fixture:matcher_regression_cases:matcher_regression_pitted_kalamata_with_pits_positive"]
-layer_policy = ["normal"]
-notes = "Registry coverage for matcher regression fixture matcher_regression_pitted_kalamata_with_pits_positive."
-
-[[entries.coverage]]
-source_family = "matcher_regression_case"
-canonical = "kalamataoliver"
-variant = "matcher_regression_pitted_kalamata_with_pits_positive: Kalamata Oliver med Kärnor Fontana"
 layer_role = "positive_regression"
 
 [[entries]]

@@ -2020,7 +2020,7 @@ _APPLE_CIDER_PRODUCT_BLOCKERS = frozenset({
     'bär', 'bar', 'berry', 'berries',
     'hallon', 'jordgubb', 'skogsbär', 'skogsbar',
 })
-_APPLE_CIDER_PRODUCT_CUES = frozenset({'äppel', 'appel', 'apple'})
+_APPLE_CIDER_PRODUCT_CUES = frozenset({'äppel', 'appel', 'apple', 'äpple', 'apples'})
 _BLACK_PEPPER_KEYWORDS = frozenset({'svartpeppar'})
 _WHOLE_BLACK_PEPPER_CUES = frozenset({'pepparkorn', 'hel', 'hela'})
 _GROUND_BLACK_PEPPER_CUES = frozenset({'malen', 'mald', 'malet', 'malna'})
@@ -2224,6 +2224,69 @@ def _salted_potato_chips_allows_product(
     return True
 
 
+# Recipe ingredients that ask for "anjoviskryddad sill" / "ansjoviskryddad sill"
+# are specifically the anjovis-spiced herring variant (similar to ansjovis in flavor
+# profile). Plain "Inlagd sill" products do not satisfy this — the spicing is different.
+# Often appears as an "ansjovis eller anjoviskryddad sill" eller-construction in
+# Janssons frestelse-style recipes, where the user wants the spicy-cured variant.
+_ANJOVISKRYDDAD_SILL_INGREDIENT_CUES = ('anjoviskrydd', 'ansjoviskrydd')
+_ANJOVISKRYDDAD_SILL_PRODUCT_CUES = ('anjov', 'ansjov')
+_ANJOVISKRYDDAD_SILL_KEYWORDS = frozenset({
+    'sill', 'sillfilé', 'sillfileer', 'sillfile',
+    'inläggningssill', 'inlaggningssill',
+    'strömmingsfileer', 'strommingsfileer',
+})
+
+
+def _anjoviskryddad_sill_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Require anjov-flavored product when ingredient asks for anjoviskryddad sill."""
+
+    if matched_keyword not in _ANJOVISKRYDDAD_SILL_KEYWORDS:
+        return True
+    if not any(cue in ingredient_lower for cue in _ANJOVISKRYDDAD_SILL_INGREDIENT_CUES):
+        return True
+    return any(cue in product_lower for cue in _ANJOVISKRYDDAD_SILL_PRODUCT_CUES)
+
+
+# "5-minuterssill" / "inläggningssill" recipes request raw or semi-prepared herring
+# fillets that the home cook will pickle themselves (5-minute cure or longer brine).
+# Already-pickled "Inlagd sill" products are finished ready-to-eat herring — they
+# don't satisfy a recipe that begins from raw fillets. Products with the specific
+# label (5-minuter, inläggning, anjov-spiced) extract dedicated keywords and match
+# normally; the FP we want to block is plain "Inlagd sill" matching via shared
+# `sill` keyword.
+_RAW_SILL_INGREDIENT_CUES = (
+    '5-minuters', '5 minuters', '5minuters',
+    'inläggningssill', 'inlaggningssill',
+)
+_FINISHED_INLAGD_SILL_PRODUCT_CUES = ('inlagd', 'inlagda')
+_RAW_SILL_PRODUCT_EXCEPTION_CUES = (
+    '5-minuters', '5 minuters', '5minuters',
+    'inläggning', 'inlaggning',
+    'anjov', 'ansjov',
+)
+
+
+def _raw_sill_requirement_allows_product(
+    product_lower: str,
+    ingredient_lower: str,
+    matched_keyword: Optional[str],
+) -> bool:
+    """Block finished 'Inlagd sill' products when recipe wants raw/semi-prepared sill."""
+
+    if matched_keyword not in {'sill'}:
+        return True
+    if not any(cue in ingredient_lower for cue in _RAW_SILL_INGREDIENT_CUES):
+        return True
+    if any(cue in product_lower for cue in _RAW_SILL_PRODUCT_EXCEPTION_CUES):
+        return True  # product explicitly labeled as raw/semi-prepared or anjov-spiced
+    return not any(cue in product_lower for cue in _FINISHED_INLAGD_SILL_PRODUCT_CUES)
+
+
 def _batch15_requirement_allows_product(
     product_lower: str,
     ingredient_lower: str,
@@ -2240,6 +2303,8 @@ def _batch15_requirement_allows_product(
         and _fennel_seed_form_allows_product(product_lower, ingredient_lower, matched_keyword)
         and _coarse_mustard_allows_product(product_lower, ingredient_lower, matched_keyword)
         and _salted_potato_chips_allows_product(product_lower, ingredient_lower, matched_keyword)
+        and _anjoviskryddad_sill_requirement_allows_product(product_lower, ingredient_lower, matched_keyword)
+        and _raw_sill_requirement_allows_product(product_lower, ingredient_lower, matched_keyword)
     )
 
 
@@ -3880,8 +3945,13 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
         and not any(cue in _offer_lower_pre for cue in ('burger toast', 'cheddar'))
     ):
         _append_extra_keyword('formbröd')
+    # Knipplök bridge: only salladslök-knippe products substitute for knipplök
+    # (pearl/spring onion). Bundled yellow/red onion in "knippe" is the same
+    # generic onion type sold bundled — NOT a knipplök substitute. Previously
+    # this fired on plain `lök` / `rödlök` too, which let "Lök gul knippe"
+    # match knipplök recipes incorrectly.
     if 'knippe' in _offer_words_pre and any(
-        kw in keywords for kw in ('lök', 'rödlök', 'rodlok', 'salladslök', 'salladslok')
+        kw in keywords for kw in ('salladslök', 'salladslok')
     ):
         _append_extra_keyword('knipplök')
         _append_extra_keyword('knipplok')

@@ -4389,27 +4389,6 @@
         "must_match_keyword": "knipplök"
       }
     ],
-    "id": "matcher_regression_knipplok_red_onion_bunch_positive",
-    "ingredients": [
-      "1 röd knipplök, strimlad"
-    ],
-    "offer": {
-      "category": "fruit",
-      "name": "Lök Röd i Knippe Klass 1"
-    },
-    "policy_ref": "current_review_matcher_regression",
-    "recipe_name": "Sanity Recipe",
-    "source_ref": "current_review:positive_sibling:knipplok_red_onion_bunch"
-  },
-  {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "knipplök",
-        "ingredient_index": 0,
-        "must_match_keyword": "knipplök"
-      }
-    ],
     "id": "matcher_regression_knipplok_salladslok_positive",
     "ingredients": [
       "1 röd knipplök, strimlad"
@@ -4708,27 +4687,6 @@
     "policy_ref": "current_review_matcher_regression",
     "recipe_name": "Sanity Recipe",
     "source_ref": "current_review:positive_sibling:pitted_kalamata_black_fallback"
-  },
-  {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "kalamataoliver",
-        "ingredient_index": 0,
-        "must_match_keyword": "kalamataoliver"
-      }
-    ],
-    "id": "matcher_regression_pitted_kalamata_with_pits_positive",
-    "ingredients": [
-      "1 dl Zeta Kalamataoliver urkärnade"
-    ],
-    "offer": {
-      "category": "spices",
-      "name": "Kalamata Oliver med Kärnor Fontana"
-    },
-    "policy_ref": "current_review_matcher_regression",
-    "recipe_name": "Sanity Recipe",
-    "source_ref": "current_review:positive_sibling:pitted_kalamata_with_pits"
   },
   {
     "allowed_additional_matches": {

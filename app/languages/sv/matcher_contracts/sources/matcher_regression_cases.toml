@@ -3642,23 +3642,6 @@ must_match_keyword = "chilisås"
 
 [[fixtures]]
 expected = 1
-id = "matcher_regression_knipplok_red_onion_bunch_positive"
-ingredients = ["1 röd knipplök, strimlad"]
-policy_ref = "current_review_matcher_regression"
-recipe_name = "Sanity Recipe"
-source_ref = "current_review:positive_sibling:knipplok_red_onion_bunch"
-
-[fixtures.offer]
-category = "fruit"
-name = "Lök Röd i Knippe Klass 1"
-
-[[fixtures.expected_matches]]
-canonical = "knipplök"
-ingredient_index = 0
-must_match_keyword = "knipplök"
-
-[[fixtures]]
-expected = 1
 id = "matcher_regression_knipplok_salladslok_positive"
 ingredients = ["1 röd knipplök, strimlad"]
 policy_ref = "current_review_matcher_regression"
@@ -3910,23 +3893,6 @@ name = "Svarta Oliver Utan Kärnor Eldorado"
 canonical = "oliver"
 ingredient_index = 0
 must_match_keyword = "oliver"
-
-[[fixtures]]
-expected = 1
-id = "matcher_regression_pitted_kalamata_with_pits_positive"
-ingredients = ["1 dl Zeta Kalamataoliver urkärnade"]
-policy_ref = "current_review_matcher_regression"
-recipe_name = "Sanity Recipe"
-source_ref = "current_review:positive_sibling:pitted_kalamata_with_pits"
-
-[fixtures.offer]
-category = "spices"
-name = "Kalamata Oliver med Kärnor Fontana"
-
-[[fixtures.expected_matches]]
-canonical = "kalamataoliver"
-ingredient_index = 0
-must_match_keyword = "kalamataoliver"
 
 [[fixtures]]
 expected = 0

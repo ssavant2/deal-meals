@@ -4742,13 +4742,13 @@ language = "sv"
 market = "SE"
 canonical = "knipplök"
 status = "active"
-variants = ["\\bknipplök\\b -> \\bknippe\\b", "\\bknipplök\\b -> \\bsalladslök\\b", "\\bknipplök\\b -> \\bsalladslok\\b", "\\bknipplok\\b -> \\bknippe\\b", "\\bknipplok\\b -> \\bsalladslök\\b", "\\bknipplok\\b -> \\bsalladslok\\b"]
+variants = ["\\bknipplök\\b -> \\bsalladslök\\b", "\\bknipplök\\b -> \\bsalladslok\\b", "\\bknipplok\\b -> \\bsalladslök\\b", "\\bknipplok\\b -> \\bsalladslok\\b"]
 ingredient_terms = ["\\bknipplök\\b", "\\bknipplok\\b"]
-offer_terms = ["\\bknippe\\b", "\\bsalladslök\\b", "\\bsalladslok\\b"]
+offer_terms = ["\\bsalladslök\\b", "\\bsalladslok\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_knipplok_bunch"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge: bridge_knipplok_bunch."
+notes = "Registry-owned match bridge: bridge_knipplok_bunch. Narrowed to only salladslök; the previous '\\bknippe\\b' arm matched any product with 'knippe' (bundled yellow onion, dill, basilika, purjolök) which are not pearl/spring-onion substitutes."
 
 [entries.language_payload.match_bridge]
 id = "bridge_knipplok_bunch"
@@ -4756,21 +4756,15 @@ rule_schema_version = 1
 rule_version = 1
 canonical = "knipplök"
 ingredient_patterns = ["\\bknipplök\\b", "\\bknipplok\\b"]
-offer_patterns = ["\\bknippe\\b", "\\bsalladslök\\b", "\\bsalladslok\\b"]
+offer_patterns = ["\\bsalladslök\\b", "\\bsalladslok\\b"]
 negative_offer_patterns = []
 aliases = ["lök i knippe", "salladslök knippe"]
-fixture_refs = ["matcher_regression_knipplok_red_onion_bunch_positive", "matcher_regression_knipplok_salladslok_positive"]
+fixture_refs = ["matcher_regression_knipplok_salladslok_positive"]
 supersedes = ["legacy_extraction_knipplok_bunch"]
 ingredient_form_signals = []
 offer_form_signals = []
 required_offer_form_signals = []
 forbidden_offer_form_signals = []
-
-[[entries.coverage]]
-source_family = "match_bridge"
-canonical = "knipplök"
-variant = "\\bknipplök\\b -> \\bknippe\\b"
-layer_role = "bridge_positive"
 
 [[entries.coverage]]
 source_family = "match_bridge"
@@ -4787,12 +4781,6 @@ layer_role = "bridge_positive"
 [[entries.coverage]]
 source_family = "match_bridge"
 canonical = "knipplök"
-variant = "\\bknipplok\\b -> \\bknippe\\b"
-layer_role = "bridge_positive"
-
-[[entries.coverage]]
-source_family = "match_bridge"
-canonical = "knipplök"
 variant = "\\bknipplok\\b -> \\bsalladslök\\b"
 layer_role = "bridge_positive"
 
@@ -4804,7 +4792,7 @@ layer_role = "bridge_positive"
 
 [[entries.positive_examples]]
 ingredient = "\\bknipplök\\b"
-offer_name = "\\bknippe\\b"
+offer_name = "\\bsalladslök\\b"
 expected = 1
 
 [[entries]]
@@ -20932,7 +20920,7 @@ ingredient_patterns = ["\\bkalamataoliver\\b", "\\bkalamata\\s*oliver\\b"]
 offer_patterns = ["\\bkalamata\\b.*\\boliver\\b", "\\bolivmix\\b.*\\bkalamata\\b", "\\bsvarta\\s+oliver\\b", "\\bgemlik\\s+oliver\\b"]
 negative_offer_patterns = ["\\bolivolja\\b", "\\bhummus\\b", "\\btapenade\\b"]
 aliases = ["gemlik oliver", "oliver", "svarta oliver"]
-fixture_refs = ["matcher_regression_kalamata_black_positive", "matcher_regression_kalamata_gemlik_positive", "matcher_regression_kalamata_mix_positive", "matcher_regression_kalamata_positive", "matcher_regression_pitted_kalamata_black_fallback_positive", "matcher_regression_pitted_kalamata_exact_positive", "matcher_regression_pitted_kalamata_gemlik_fallback_positive", "matcher_regression_pitted_kalamata_with_pits_positive"]
+fixture_refs = ["matcher_regression_kalamata_black_positive", "matcher_regression_kalamata_gemlik_positive", "matcher_regression_kalamata_mix_positive", "matcher_regression_kalamata_positive", "matcher_regression_pitted_kalamata_black_fallback_positive", "matcher_regression_pitted_kalamata_exact_positive", "matcher_regression_pitted_kalamata_gemlik_fallback_positive"]
 supersedes = ["legacy_route_parent_kalamata_oliver"]
 ingredient_form_signals = []
 offer_form_signals = []

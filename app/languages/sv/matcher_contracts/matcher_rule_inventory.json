@@ -2224,7 +2224,6 @@
       "matcher_regression_kalamata_oliveoil_negative",
       "matcher_regression_pitted_kalamata_exact_positive",
       "matcher_regression_pitted_kalamata_black_fallback_positive",
-      "matcher_regression_pitted_kalamata_with_pits_positive",
       "matcher_regression_pitted_kalamata_gemlik_fallback_positive"
     ],
     "id": "legacy_route_parent_kalamata_oliver",
@@ -3711,14 +3710,13 @@
     "adapter_ref": "match_bridges:bridge_knipplok_bunch",
     "canonical": "knipplök",
     "fixture_refs": [
-      "matcher_regression_knipplok_red_onion_bunch_positive",
       "matcher_regression_knipplok_salladslok_positive"
     ],
     "id": "legacy_extraction_knipplok_bunch",
     "kind": "legacy_extraction",
     "line_refs": [
       {
-        "anchor": "kw in keywords for kw in ('lök', 'rödlök', 'rodlok', 'salladslök', 'salladslok')",
+        "anchor": "kw in keywords for kw in ('salladslök', 'salladslok')",
         "end": 3787,
         "path": "app/languages/sv/ingredient_matching/matching.py",
         "start": 3787
@@ -3730,12 +3728,11 @@
         "start": 152
       }
     ],
-    "notes": "Knippe/bunch onion products expose knipplök for both red onion bunches and scallion bunches.",
+    "notes": "Knippe-bundled salladslök products expose knipplök as a substitute for pearl/spring onion. Generic bundled yellow/red onion does not qualify.",
     "owner": "matcher",
     "policy_ref": "current_review_matcher_regression",
     "risk": "processed_allowance",
     "source_refs": [
-      "current_review:positive_sibling:knipplok_red_onion_bunch",
       "current_review:positive_sibling:knipplok_salladslok"
     ],
     "status": "wrapped_adapter"

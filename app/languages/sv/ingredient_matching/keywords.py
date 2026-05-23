@@ -1245,6 +1245,7 @@ PROCESSED_FOODS: FrozenSet[str] = frozenset({
     's-märke', 's-marke',  # "S-märke Supersur Ananas" — candy, not ananas
     'mellanmål', 'mellanmal',  # snack products
     'nötbar', 'notbar', 'proteinbar', 'energibar',  # snack bars - NOT recipe ingredients
+    'bar energi', 'bar protein', 'bar havre', 'bar kärn',  # Corny brand naming: "Bar Energi/Protein/Havre/Kärn ..."
     'fruktbar',  # fruit bars ("Hallon Äpple Fruktbar" — snack, not fresh fruit)
     'havrebar',  # oat bars
     'müslibar', 'muslibar',  # muesli bars

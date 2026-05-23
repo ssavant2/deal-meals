@@ -67,11 +67,13 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
     },
     # Gyros / Greek-marinated chicken products require a Greek recipe context.
     # 'pita' removed — pita is shared across Greek/Middle-Eastern/Turkish
-    # cuisines (shawarma, kebab, dürüm all use it). Genuine Greek recipes
-    # should still trigger via gyros/souvlaki/tzatziki/grekisk/kalamata or
+    # cuisines (shawarma, kebab, dürüm all use it). 'grekisk' removed because
+    # it leaks into Indian/Mediterranean recipes via "grekisk yoghurt" (a
+    # generic dairy term used worldwide, not a Greek-cuisine marker). Genuine
+    # Greek recipes still trigger via gyros/souvlaki/tzatziki/kalamata or
     # named dish words (moussaka, pastitsio, spanakopita, dolmades).
     'gyros': {
-        'gyros', 'souvlaki', 'grekisk', 'medelhav',
+        'gyros', 'souvlaki', 'medelhav',
         'tzatziki', 'kalamata',
         'moussaka', 'pastitsio',
         'dolma', 'dolmades',
@@ -79,14 +81,14 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
         'taramosalata',
     },
     # Thaikryddad products require a Thai/Asian recipe context.
-    # Without thai context (wok, pad thai, curry, kokosmjölk, etc.) a
-    # thaikryddad kycklingfilé would appear in French or Italian recipes
-    # where the seasoning profile is completely wrong.
+    # Without thai context (wok, pad thai, curry markers, etc.) a thaikryddad
+    # kycklingfilé would appear in French or Italian recipes where the
+    # seasoning profile is completely wrong.
     'thaikryddad': {
         # General cuisine/cooking-style cues
         'thai', 'thaikryddad', 'wok', 'pad', 'asiatisk', 'asian',
         # Thai pantry ingredients that are distinctive to thai/southeast-asian cooking
-        'kokosmjölk', 'lemongrass', 'citrongräs', 'fisksås',
+        'lemongrass', 'citrongräs', 'fisksås',
         'kaffirlime', 'kaffirlimeblad', 'palmsocker',
         'thaibasilika', 'thai basilika',
         # Thai curry names — recipe wording rather than just ingredient
@@ -98,6 +100,8 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
         'som tam', 'krapow',
         # Thai chili sauce
         'sriracha',
+        # 'kokosmjölk' removed — too generic (Indian/Caribbean/African recipes
+        #   also use coconut milk extensively, e.g. tikka masala, korma).
         # 'koriander' removed — too generic (Mexican/Indian/Middle-Eastern/American also use it)
         # 'ingefära' removed — too generic, also used in Persian/Moroccan/Mediterranean
         # 'lime' removed — too generic, also used in Mexican/Caribbean/Mediterranean cuisines

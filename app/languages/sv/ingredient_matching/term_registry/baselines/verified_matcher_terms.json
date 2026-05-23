@@ -3,7 +3,7 @@
     "generated_at": "2026-05-12T18:40:45.019548+00:00",
     "role_counts": {
       "bridge_negative_guard": 197,
-      "bridge_positive": 1774,
+      "bridge_positive": 1772,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 98,
       "hardcoded_keyword_output:extract_keywords_from_product": 113,
       "ingredient_parent_mapping": 398,
@@ -25,7 +25,7 @@
       "negative_regression": 829,
       "offer_extra_keyword_mapping": 401,
       "parent_match_only_mapping": 17,
-      "positive_regression": 662,
+      "positive_regression": 660,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
@@ -34,17 +34,17 @@
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
       "keyword_synonym": 123,
-      "match_bridge": 1971,
-      "matcher_regression_case": 1491,
+      "match_bridge": 1969,
+      "matcher_regression_case": 1489,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
       "offer_extra_keyword": 401,
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5564,
+    "variant_count": 5560,
     "variants_missing_product_text": 1755,
-    "variants_with_product_text": 3809
+    "variants_with_product_text": 3805
   },
   "variants": [
     {
@@ -13633,27 +13633,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"aliases\": [], \"fixture_refs\": [\"matcher_regression_vaxtbaserad_mjolk_oat_positive\", \"matcher_regression_vaxtbaserad_mjolkryck_positive\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_normalization_vaxtbaserad_mjolk_vaxtdryck\", \"legacy_normalization_vaxtbaserad_mjolkryck\"]}"
-    },
-    {
-      "variant_id": "vterm-e4d073a15a42eb17",
-      "row_index": 698,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "current_review:positive_sibling:knipplok_red_onion_bunch",
-      "source_id": "matcher_regression_knipplok_red_onion_bunch_positive",
-      "variant_role": "positive_regression",
-      "variant_text": "matcher_regression_knipplok_red_onion_bunch_positive: Lök Röd i Knippe Klass 1",
-      "canonical": "knipplök",
-      "expected_family": "knipplök",
-      "ingredient_text": "1 röd knipplök, strimlad",
-      "product_text": "Lök Röd i Knippe Klass 1",
-      "product_category": "fruit",
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": false,
-      "notes": "current_review_matcher_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"knipplök\", \"ingredient_index\": 0, \"must_match_keyword\": \"knipplök\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
       "variant_id": "vterm-223109da3a5378a3",
@@ -66744,27 +66723,6 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Mozzarellasticks med tomatsas\"}"
     },
     {
-      "variant_id": "vterm-a2d528b3f933a048",
-      "row_index": 2758,
-      "source_order": 30,
-      "source_type": "match_bridge",
-      "source_file": "app/languages/sv/ingredient_matching/match_bridges.py",
-      "source_ref": "match_bridges:bridge_knipplok_bunch",
-      "source_id": "bridge_knipplok_bunch",
-      "variant_role": "bridge_positive",
-      "variant_text": "\\bknipplok\\b -> \\bknippe\\b",
-      "canonical": "knipplök",
-      "expected_family": "knipplök",
-      "ingredient_text": "\\bknipplok\\b",
-      "product_text": "\\bknippe\\b",
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"aliases\": [\"lök i knippe\", \"salladslök knippe\"], \"fixture_refs\": [\"matcher_regression_knipplok_red_onion_bunch_positive\", \"matcher_regression_knipplok_salladslok_positive\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_extraction_knipplok_bunch\"]}"
-    },
-    {
       "variant_id": "vterm-b55b2a4795399396",
       "row_index": 2402,
       "source_order": 30,
@@ -90789,27 +90747,6 @@
       "metadata": "{\"target\": \"havskräftor\"}"
     },
     {
-      "variant_id": "vterm-a8a6d04744dde3bf",
-      "row_index": 1350,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "current_review:positive_sibling:pitted_kalamata_with_pits",
-      "source_id": "matcher_regression_pitted_kalamata_with_pits_positive",
-      "variant_role": "positive_regression",
-      "variant_text": "matcher_regression_pitted_kalamata_with_pits_positive: Kalamata Oliver med Kärnor Fontana",
-      "canonical": "kalamataoliver",
-      "expected_family": "kalamataoliver",
-      "ingredient_text": "1 dl Zeta Kalamataoliver urkärnade",
-      "product_text": "Kalamata Oliver med Kärnor Fontana",
-      "product_category": "spices",
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": false,
-      "notes": "current_review_matcher_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"kalamataoliver\", \"ingredient_index\": 0, \"must_match_keyword\": \"kalamataoliver\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
-    },
-    {
       "variant_id": "vterm-b536ad2e1148e49f",
       "row_index": 4735,
       "source_order": 51,
@@ -96016,27 +95953,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"aliases\": [\"marinerad kronärtskocka\"], \"fixture_refs\": [\"matcher_regression_positive_kronartskockor_marinerade_200g_zeta\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_review_explicit_marinerad_kronartskocka_is_blocked_even_by_exact_marinated_artichoke_offers\"]}"
-    },
-    {
-      "variant_id": "vterm-2f1a29ef8f2758b5",
-      "row_index": 2761,
-      "source_order": 30,
-      "source_type": "match_bridge",
-      "source_file": "app/languages/sv/ingredient_matching/match_bridges.py",
-      "source_ref": "match_bridges:bridge_knipplok_bunch",
-      "source_id": "bridge_knipplok_bunch",
-      "variant_role": "bridge_positive",
-      "variant_text": "\\bknipplök\\b -> \\bknippe\\b",
-      "canonical": "knipplök",
-      "expected_family": "knipplök",
-      "ingredient_text": "\\bknipplök\\b",
-      "product_text": "\\bknippe\\b",
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"aliases\": [\"lök i knippe\", \"salladslök knippe\"], \"fixture_refs\": [\"matcher_regression_knipplok_red_onion_bunch_positive\", \"matcher_regression_knipplok_salladslok_positive\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_extraction_knipplok_bunch\"]}"
     },
     {
       "variant_id": "vterm-86df293e46023dc5",
@@ -116871,19 +116787,19 @@
       "metadata": "{\"target\": \"ciabatta\"}"
     },
     {
-      "variant_id": "vterm-0628934047a36e23",
-      "row_index": 4247,
+      "variant_id": "vterm-d76ed0df57ed1dd3",
+      "row_index": 4243,
       "source_order": 41,
       "source_type": "no_match_policy",
       "source_file": "app/languages/sv/ingredient_matching/no_match_policies.py",
       "source_ref": "no_match_policies:policy_urkärnade_oliver_not_with_pits",
       "source_id": "policy_urkärnade_oliver_not_with_pits",
       "variant_role": "negative_guard_pattern",
-      "variant_text": "urkärnade oliver ! \\bkärn(a|or)\\b",
+      "variant_text": "urkärnade oliver ! \\bmed\\s+kärn(a|or)\\b",
       "canonical": "urkärnade oliver",
-      "expected_family": "\\bkärn(a|or)\\b",
+      "expected_family": "\\bmed\\s+kärn(a|or)\\b",
       "ingredient_text": null,
-      "product_text": "\\bkärn(a|or)\\b",
+      "product_text": "\\bmed\\s+kärn(a|or)\\b",
       "product_category": null,
       "product_brand": null,
       "expected": 0,
@@ -116895,8 +116811,8 @@
   "verification": {
     "classification_counts": {
       "no_product_text": 1540,
-      "static_verified": 2533,
-      "synthetic_verified": 1491
+      "static_verified": 2531,
+      "synthetic_verified": 1489
     },
     "method": "static_contract_audit",
     "problem_counts": {},
@@ -116906,8 +116822,8 @@
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
       "keyword_synonym": 123,
-      "match_bridge": 1971,
-      "matcher_regression_case": 1491,
+      "match_bridge": 1969,
+      "matcher_regression_case": 1489,
       "matcher_rule_inventory": 459,
       "no_match_policy": 347,
       "offer_extra_keyword": 401,
@@ -116916,8 +116832,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5564
+      "audited": 5560
     },
-    "variant_count": 5564
+    "variant_count": 5560
   }
 }

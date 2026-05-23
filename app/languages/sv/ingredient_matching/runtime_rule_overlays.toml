@@ -396,6 +396,13 @@ keyword = "ost"
 blockers = ["balsamicostekt"]
 reason = "Word 'ost' (cheese) substring-matches inside 'balsamicostekT' (balsamic-fried red onion); not a cheese ingredient"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_lokar"
+status = "active"
+keyword = "lökar"
+blockers = ["knipplök", "knipplok", "knipplökar", "knipplokar", "salladslök", "salladslök", "gullök", "gullok", "rödlök", "rödlök", "purjolök", "purjolok", "vitlök", "vitlök", "gräslök", "graslok", "silverlök", "silverlok", "pärllök", "parllok", "ramslök", "ramslok", "schalottenlök", "schalottenlok", "steklök", "steklok", "syltlök", "syltlok", "vårlök", "varlok", "schalotten"]
+reason = "Plural 'lökar' keyword needs same FPB blockers as singular 'lök' to prevent generic onion matches when ingredient names a specific onion variant (knipplök/salladslök/etc.)"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
