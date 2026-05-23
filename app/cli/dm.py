@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -43,7 +44,11 @@ DEEP_SANITY_FINAL_SUMMARY_MARKER = "# FINAL SUMMARY - keep at EOF"
 app = typer.Typer(help="Deal Meals developer tools.")
 matcher_app = typer.Typer(help="Matcher rule-change workflows.")
 matcher_add_app = typer.Typer(help="Generate matcher rule-change artifacts.")
+matcher_fixture_app = typer.Typer(help="Maintain matcher regression fixtures.")
+matcher_modify_app = typer.Typer(help="Modify existing matcher rule artifacts.")
 matcher_app.add_typer(matcher_add_app, name="add")
+matcher_app.add_typer(matcher_fixture_app, name="fixture")
+matcher_app.add_typer(matcher_modify_app, name="modify")
 app.add_typer(matcher_app, name="matcher")
 
 
@@ -79,6 +84,14 @@ class MatcherChangePlan:
         if not self.fixture_ids:
             raise typer.BadParameter(f"{self.command} generated no fixture ids")
         return self.fixture_ids[0]
+
+
+@dataclass(frozen=True)
+class RegistryFixtureRefRemovalPlan:
+    path: Path
+    new_text: str
+    changed_entries: tuple[str, ...]
+    dropped_entries: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -755,10 +768,11 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
     ),
     "no-match-policy": MatcherGuide(
         label="no-match-policy",
-        status="supported by dm matcher add",
+        status="supported by dm matcher add/modify",
         summary="Declarative ingredient pattern plus blocked offer keyword/pattern should never match.",
         steps=(
             "Run: ./bin/dm matcher add no-match-policy <canonical> --ingredient-patterns \"<regex>\" --blocked-offer-keywords <keyword> --fixture-refs <fixture_id> --reason \"<why>\" --negative-ingredient \"<ingredient>\" --negative-offer \"<offer>\"",
+            "For an existing simple policy, run: ./bin/dm matcher modify no-match-policy <policy_ref> --set-ingredient-patterns \"<regex>\" --set-blocked-offer-patterns \"<regex>\"",
             "Create or choose the durable negative fixture before adding the policy ref.",
         ),
     ),
@@ -774,13 +788,24 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
     ),
     "match-bridge": MatcherGuide(
         label="match-bridge",
-        status="manual staged Track B edit",
+        status="modify supported; new rows remain staged Track B",
         summary="Declarative bridge diagnostics/guards; new bridge rows are not runtime-wired by themselves.",
         steps=(
             "Read the match_bridge callout in the matcher runbook before editing.",
+            "For an existing simple bridge, run: ./bin/dm matcher modify match-bridge <policy_ref> --remove-offer-patterns \"<regex>\" or --set-offer-patterns \"<regex>\"",
             "Dual-write the runtime-wired keyword_extra_parent/ingredient_parent/keyword_synonym/offer_extra_keyword row when needed.",
             "Add fixture/inventory proof for durable behavior.",
             "Run: ./bin/dm matcher gates --track B --policy-ref <policy_ref>",
+        ),
+    ),
+    "smart-blocker": MatcherGuide(
+        label="smart-blocker",
+        status="scaffold supported by dm matcher add",
+        summary="Create and chain a matching.py smart-blocker stub; the rule logic remains a manual Python edit.",
+        steps=(
+            "Run: ./bin/dm matcher add smart-blocker <name> --description \"<why>\" [--sanity-ingredient \"<ingredient>\" --sanity-offer \"<offer>\" --expect no-match]",
+            "Fill in the generated helper body in matching.py, then run Track A or Track B gates for the behavioral change.",
+            "Use this only when existing declarative/runtime overlay surfaces cannot express the rule.",
         ),
     ),
 }
@@ -816,6 +841,9 @@ GUIDE_ALIASES = {
     "match-bridges": "match-bridge",
     "match_bridges": "match-bridge",
     "bridge": "match-bridge",
+    "smart_blocker": "smart-blocker",
+    "smart-blockers": "smart-blocker",
+    "smart_blockers": "smart-blocker",
     "product-name-blocker": "pnb",
     "product_name_blocker": "pnb",
     "false-positive-blocker": "fpb",
@@ -1115,6 +1143,199 @@ def _ensure_fixture_refs_exist(paths: MatcherPaths, fixture_refs: tuple[str, ...
         raise typer.BadParameter(f"fixture_ref does not exist: {', '.join(missing)}")
 
 
+def _split_fixture_ids(value: str) -> tuple[str, ...]:
+    return _split_csv(value, label="fixture id", lowercase=False)
+
+
+def _remove_fixture_rows(
+    *,
+    paths: MatcherPaths,
+    fixture_ids: tuple[str, ...],
+) -> tuple[list[dict], tuple[str, ...]]:
+    fixture_id_set = set(fixture_ids)
+    fixtures = load_contract_source(_source_spec(paths, "matcher_regression_cases"))
+    kept: list[dict] = []
+    removed: list[str] = []
+    for row in fixtures:
+        row_id = str(row.get("id") or "")
+        if row_id in fixture_id_set:
+            removed.append(row_id)
+            continue
+        kept.append(row)
+    missing = tuple(fixture_id for fixture_id in fixture_ids if fixture_id not in set(removed))
+    if missing:
+        raise typer.BadParameter(f"fixture id not found: {', '.join(missing)}")
+    return kept, tuple(removed)
+
+
+def _remove_fixture_refs_from_contract_rows(
+    rows: list[dict],
+    *,
+    fixture_ids: tuple[str, ...],
+    id_field: str,
+    drop_empty_rows: bool,
+    row_label: str,
+) -> tuple[list[dict], tuple[str, ...], tuple[str, ...]]:
+    fixture_id_set = set(fixture_ids)
+    changed: list[str] = []
+    dropped: list[str] = []
+    blocked_empty: list[str] = []
+    updated_rows: list[dict] = []
+
+    for row in rows:
+        refs = row.get("fixture_refs")
+        if not isinstance(refs, list) or not any(ref in fixture_id_set for ref in refs):
+            updated_rows.append(row)
+            continue
+
+        row_id = str(row.get(id_field) or row.get("id") or "<unknown>")
+        new_refs = [ref for ref in refs if ref not in fixture_id_set]
+        if not new_refs:
+            if drop_empty_rows:
+                dropped.append(row_id)
+                continue
+            blocked_empty.append(row_id)
+            updated_rows.append(row)
+            continue
+
+        row = dict(row)
+        row["fixture_refs"] = new_refs
+        changed.append(row_id)
+        updated_rows.append(row)
+
+    if blocked_empty:
+        raise typer.BadParameter(
+            f"removing fixture refs would leave {row_label} rows without fixture_refs: "
+            f"{', '.join(blocked_empty)}. Re-run with --drop-empty-{row_label} if those rows "
+            "should be removed too."
+        )
+    return updated_rows, tuple(changed), tuple(dropped)
+
+
+def _fixture_ref_line_update(
+    line: str,
+    *,
+    fixture_ids: set[str],
+) -> tuple[str, bool, bool]:
+    match = re.match(r"^(\s*)fixture_refs\s*=\s*(\[.*\])\s*$", line)
+    if not match:
+        return line, False, False
+    try:
+        payload = tomllib.loads(f"fixture_refs = {match.group(2)}")
+    except tomllib.TOMLDecodeError as exc:
+        raise typer.BadParameter(f"invalid fixture_refs line in registry entry: {line!r}: {exc}") from exc
+    refs = payload.get("fixture_refs")
+    if not isinstance(refs, list) or not any(ref in fixture_ids for ref in refs):
+        return line, False, False
+    new_refs = [str(ref) for ref in refs if ref not in fixture_ids]
+    if not new_refs:
+        return line, True, True
+    return f"{match.group(1)}fixture_refs = {_toml_array(new_refs)}", True, False
+
+
+def _registry_block_without_fixture_refs(
+    record: RegistryEntryRecord,
+    *,
+    fixture_ids: set[str],
+) -> tuple[str, bool, bool]:
+    changed = False
+    emptied = False
+    lines: list[str] = []
+    for line in record.block.splitlines():
+        new_line, line_changed, line_emptied = _fixture_ref_line_update(line, fixture_ids=fixture_ids)
+        changed = changed or line_changed
+        emptied = emptied or line_emptied
+        lines.append(new_line)
+    if not changed:
+        return record.block, False, False
+    suffix = "\n" if record.block.endswith("\n") else ""
+    return "\n".join(lines) + suffix, True, emptied
+
+
+def _plan_registry_fixture_ref_removal(
+    *,
+    paths: MatcherPaths,
+    fixture_ids: tuple[str, ...],
+    drop_empty_registry_entries: bool,
+) -> tuple[RegistryFixtureRefRemovalPlan, ...]:
+    fixture_id_set = set(fixture_ids)
+    plans: list[RegistryFixtureRefRemovalPlan] = []
+    blocked_empty: list[str] = []
+
+    for path in sorted(paths.registry_entries_dir.glob("*.toml")):
+        text = path.read_text(encoding="utf-8")
+        records = _registry_entry_records(path.stem.replace("_", "-"), path)
+        replacements: list[tuple[int, int, str, str, bool]] = []
+        for record in records:
+            new_block, changed, emptied = _registry_block_without_fixture_refs(
+                record,
+                fixture_ids=fixture_id_set,
+            )
+            if not changed:
+                continue
+            if emptied and not drop_empty_registry_entries:
+                blocked_empty.append(record.entry_id)
+                continue
+            replacements.append((
+                record.start,
+                record.end,
+                "" if emptied else new_block,
+                record.entry_id,
+                emptied,
+            ))
+
+        if not replacements:
+            continue
+
+        new_text = text
+        changed_entries: list[str] = []
+        dropped_entries: list[str] = []
+        for start, end, replacement, entry_id, dropped in sorted(replacements, reverse=True):
+            new_text = new_text[:start] + replacement + new_text[end:]
+            (dropped_entries if dropped else changed_entries).append(entry_id)
+        plans.append(RegistryFixtureRefRemovalPlan(
+            path=path,
+            new_text=new_text,
+            changed_entries=tuple(reversed(changed_entries)),
+            dropped_entries=tuple(reversed(dropped_entries)),
+        ))
+
+    if blocked_empty:
+        raise typer.BadParameter(
+            "removing fixture refs would leave registry entries without fixture_refs: "
+            f"{', '.join(blocked_empty)}. Re-run with --drop-empty-registry-entries if those "
+            "entries should be removed too."
+        )
+    return tuple(plans)
+
+
+def _write_registry_fixture_ref_removal_plans(plans: tuple[RegistryFixtureRefRemovalPlan, ...]) -> None:
+    for plan in plans:
+        plan.path.write_text(plan.new_text, encoding="utf-8")
+
+
+def _print_fixture_remove_summary(
+    *,
+    fixture_ids: tuple[str, ...],
+    inventory_changed: tuple[str, ...],
+    inventory_dropped: tuple[str, ...],
+    registry_plans: tuple[RegistryFixtureRefRemovalPlan, ...],
+    dry_run: bool,
+) -> None:
+    prefix = "Would remove" if dry_run else "Removed"
+    typer.echo(f"{prefix} fixture(s): {', '.join(fixture_ids)}")
+    if inventory_changed:
+        typer.echo(f"  inventory refs updated: {', '.join(inventory_changed)}")
+    if inventory_dropped:
+        typer.echo(f"  inventory rows dropped: {', '.join(inventory_dropped)}")
+    for plan in registry_plans:
+        rel_path = plan.path
+        if plan.changed_entries:
+            typer.echo(f"  registry refs updated in {rel_path}: {', '.join(plan.changed_entries)}")
+        if plan.dropped_entries:
+            typer.echo(f"  registry entries dropped from {rel_path}: {', '.join(plan.dropped_entries)}")
+
+
 def _simple_surface_block(
     *,
     surface: SimpleTomlSurface,
@@ -1356,6 +1577,8 @@ def _no_match_policy_block(
     *,
     entry_id: str,
     policy_id: str,
+    rule_schema_version: int = 1,
+    rule_version: int = 1,
     canonical: str,
     ingredient_patterns: tuple[str, ...],
     blocked_offer_keywords: tuple[str, ...],
@@ -1388,8 +1611,8 @@ def _no_match_policy_block(
         "",
         "[entries.language_payload.no_match_policy]",
         f"id = {_toml_string(policy_id)}",
-        "rule_schema_version = 1",
-        "rule_version = 1",
+        f"rule_schema_version = {rule_schema_version}",
+        f"rule_version = {rule_version}",
         f"canonical = {_toml_string(canonical)}",
         f"ingredient_patterns = {_toml_array(ingredient_patterns)}",
         f"blocked_offer_keywords = {_toml_array(blocked_offer_keywords)}",
@@ -1523,6 +1746,250 @@ def _append_no_match_deep_sanity_stub(
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
     return block
+
+
+def _split_set_csv(value: str | None, *, label: str, lowercase: bool = True) -> tuple[str, ...] | None:
+    if value is None:
+        return None
+    if not value.strip():
+        return ()
+    return _split_csv(value, label=label, lowercase=lowercase)
+
+
+def _no_match_policy_payload_from_record(record: RegistryEntryRecord) -> tuple[dict[str, Any], dict[str, Any]]:
+    payload = tomllib.loads(record.block)
+    entries = payload.get("entries", [])
+    entry = entries[0] if isinstance(entries, list) and entries else {}
+    if not isinstance(entry, dict):
+        raise typer.BadParameter(f"{record.entry_id}: invalid no_match_policy entry block")
+    language_payload = entry.get("language_payload", {})
+    policy = language_payload.get("no_match_policy") if isinstance(language_payload, dict) else None
+    if not isinstance(policy, dict):
+        raise typer.BadParameter(f"{record.entry_id}: missing entries.language_payload.no_match_policy")
+    return entry, policy
+
+
+def _find_no_match_policy_record(paths: MatcherPaths, selector: str) -> tuple[Path, RegistryEntryRecord, dict[str, Any], dict[str, Any]]:
+    target_file = _registry_entry_file(paths, "no_match_policy")
+    matches: list[tuple[RegistryEntryRecord, dict[str, Any], dict[str, Any]]] = []
+    selector_norm = _runtime_rule_normalize_text(selector)
+    for record in _registry_entry_records("no-match-policy", target_file):
+        entry, policy = _no_match_policy_payload_from_record(record)
+        searchable = {
+            record.entry_id,
+            str(policy.get("id") or ""),
+            str(policy.get("policy_ref") or ""),
+            str(policy.get("canonical") or record.canonical),
+        }
+        normalized_searchable = {_runtime_rule_normalize_text(value) for value in searchable if value}
+        if selector in searchable or selector_norm in normalized_searchable:
+            matches.append((record, entry, policy))
+    if len(matches) != 1:
+        labels = "\n".join(_registry_entry_label(match[0]) for match in matches[:20])
+        detail = f"\n{labels}" if labels else ""
+        raise typer.BadParameter(f"selector must match exactly one no-match-policy entry; got {len(matches)}{detail}")
+    record, entry, policy = matches[0]
+    return target_file, record, entry, policy
+
+
+def _string_tuple(value: Any) -> tuple[str, ...]:
+    if not isinstance(value, list):
+        return ()
+    return tuple(str(item) for item in value if str(item).strip())
+
+
+def _int_value(value: Any, *, default: int) -> int:
+    return value if isinstance(value, int) else default
+
+
+def _first_no_match_negative_example(entry: dict[str, Any]) -> dict[str, Any]:
+    examples = entry.get("negative_examples")
+    if isinstance(examples, list) and examples and isinstance(examples[0], dict):
+        return examples[0]
+    return {}
+
+
+def _guard_variants(
+    canonical: str,
+    blocked_offer_keywords: tuple[str, ...],
+    blocked_offer_patterns: tuple[str, ...],
+) -> tuple[str, ...]:
+    return tuple(f"{canonical} ! {guard}" for guard in (*blocked_offer_keywords, *blocked_offer_patterns))
+
+
+def _match_bridge_positive_variants(
+    ingredient_patterns: tuple[str, ...],
+    offer_patterns: tuple[str, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        f"{ingredient_pattern} -> {offer_pattern}"
+        for ingredient_pattern in ingredient_patterns
+        for offer_pattern in offer_patterns
+    )
+
+
+def _match_bridge_negative_variants(canonical: str, negative_offer_patterns: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(f"{canonical} ! {pattern}" for pattern in negative_offer_patterns)
+
+
+def _match_bridge_block(
+    *,
+    entry_id: str,
+    language: str,
+    market: str,
+    status: str,
+    canonical: str,
+    source_refs: tuple[str, ...],
+    layer_policy: tuple[str, ...],
+    notes: str,
+    bridge_id: str,
+    rule_schema_version: int,
+    rule_version: int,
+    ingredient_patterns: tuple[str, ...],
+    offer_patterns: tuple[str, ...],
+    negative_offer_patterns: tuple[str, ...],
+    aliases: tuple[str, ...],
+    fixture_refs: tuple[str, ...],
+    supersedes: tuple[str, ...],
+    ingredient_form_signals: tuple[str, ...],
+    offer_form_signals: tuple[str, ...],
+    required_offer_form_signals: tuple[str, ...],
+    forbidden_offer_form_signals: tuple[str, ...],
+    precedence: int | None,
+    positive_ingredient: str,
+    positive_offer: str,
+    negative_ingredient: str,
+    negative_offer: str | None,
+) -> str:
+    positive_variants = _match_bridge_positive_variants(ingredient_patterns, offer_patterns)
+    negative_variants = _match_bridge_negative_variants(canonical, negative_offer_patterns)
+    lines = [
+        "[[entries]]",
+        f"entry_id = {_toml_string(entry_id)}",
+        f"language = {_toml_string(language)}",
+        f"market = {_toml_string(market)}",
+        f"canonical = {_toml_string(canonical)}",
+        f"status = {_toml_string(status)}",
+        f"variants = {_toml_array([*positive_variants, *negative_variants])}",
+        f"ingredient_terms = {_toml_array(ingredient_patterns)}",
+        f"offer_terms = {_toml_array(offer_patterns)}",
+        f"negative_guards = {_toml_array(negative_variants)}",
+        f"source_refs = {_toml_array(source_refs)}",
+        f"layer_policy = {_toml_array(layer_policy)}",
+        f"notes = {_toml_string(notes)}",
+        "",
+        "[entries.language_payload.match_bridge]",
+        f"id = {_toml_string(bridge_id)}",
+        f"rule_schema_version = {rule_schema_version}",
+        f"rule_version = {rule_version}",
+        f"canonical = {_toml_string(canonical)}",
+        f"ingredient_patterns = {_toml_array(ingredient_patterns)}",
+        f"offer_patterns = {_toml_array(offer_patterns)}",
+        f"negative_offer_patterns = {_toml_array(negative_offer_patterns)}",
+        f"aliases = {_toml_array(aliases)}",
+        f"fixture_refs = {_toml_array(fixture_refs)}",
+        f"supersedes = {_toml_array(supersedes)}",
+        f"ingredient_form_signals = {_toml_array(ingredient_form_signals)}",
+        f"offer_form_signals = {_toml_array(offer_form_signals)}",
+        f"required_offer_form_signals = {_toml_array(required_offer_form_signals)}",
+        f"forbidden_offer_form_signals = {_toml_array(forbidden_offer_form_signals)}",
+    ]
+    if precedence is not None:
+        lines.append(f"precedence = {precedence}")
+    lines.append("")
+
+    for variant in positive_variants:
+        lines.extend([
+            "[[entries.coverage]]",
+            'source_family = "match_bridge"',
+            f"canonical = {_toml_string(canonical)}",
+            f"variant = {_toml_string(variant)}",
+            'layer_role = "bridge_positive"',
+            "",
+        ])
+    for variant in negative_variants:
+        lines.extend([
+            "[[entries.coverage]]",
+            'source_family = "match_bridge"',
+            f"canonical = {_toml_string(canonical)}",
+            f"variant = {_toml_string(variant)}",
+            'layer_role = "bridge_negative_guard"',
+            "",
+        ])
+
+    lines.extend([
+        "[[entries.positive_examples]]",
+        f"ingredient = {_toml_string(positive_ingredient)}",
+        f"offer_name = {_toml_string(positive_offer)}",
+        "expected = 1",
+        "",
+    ])
+    if negative_offer is not None:
+        lines.extend([
+            "[[entries.negative_examples]]",
+            f"ingredient = {_toml_string(negative_ingredient)}",
+            f"offer_name = {_toml_string(negative_offer)}",
+            "expected = 0",
+            "",
+        ])
+    return "\n".join(lines)
+
+
+def _match_bridge_payload_from_record(record: RegistryEntryRecord) -> tuple[dict[str, Any], dict[str, Any]]:
+    payload = tomllib.loads(record.block)
+    entries = payload.get("entries", [])
+    entry = entries[0] if isinstance(entries, list) and entries else {}
+    if not isinstance(entry, dict):
+        raise typer.BadParameter(f"{record.entry_id}: invalid match_bridge entry block")
+    language_payload = entry.get("language_payload", {})
+    bridge = language_payload.get("match_bridge") if isinstance(language_payload, dict) else None
+    if not isinstance(bridge, dict):
+        raise typer.BadParameter(f"{record.entry_id}: missing entries.language_payload.match_bridge")
+    if bridge.get("blockers") or bridge.get("backend_allowances"):
+        raise typer.BadParameter(
+            f"{record.entry_id}: match_bridge contains nested blockers/backend_allowances; manual edit required"
+        )
+    return entry, bridge
+
+
+def _find_match_bridge_record(paths: MatcherPaths, selector: str) -> tuple[Path, RegistryEntryRecord, dict[str, Any], dict[str, Any]]:
+    target_file = _registry_entry_file(paths, "match_bridge")
+    matches: list[tuple[RegistryEntryRecord, dict[str, Any], dict[str, Any]]] = []
+    selector_norm = _runtime_rule_normalize_text(selector)
+    for record in _registry_entry_records("match-bridge", target_file):
+        entry, bridge = _match_bridge_payload_from_record(record)
+        searchable = {
+            record.entry_id,
+            str(bridge.get("id") or ""),
+            str(bridge.get("canonical") or record.canonical),
+            *[str(alias) for alias in bridge.get("aliases") or []],
+        }
+        normalized_searchable = {_runtime_rule_normalize_text(value) for value in searchable if value}
+        if selector in searchable or selector_norm in normalized_searchable:
+            matches.append((record, entry, bridge))
+    if len(matches) != 1:
+        labels = "\n".join(_registry_entry_label(match[0]) for match in matches[:20])
+        detail = f"\n{labels}" if labels else ""
+        raise typer.BadParameter(f"selector must match exactly one match-bridge entry; got {len(matches)}{detail}")
+    record, entry, bridge = matches[0]
+    return target_file, record, entry, bridge
+
+
+def _remove_values(values: tuple[str, ...], removals: tuple[str, ...], *, label: str) -> tuple[str, ...]:
+    if not removals:
+        return values
+    missing = tuple(value for value in removals if value not in values)
+    if missing:
+        raise typer.BadParameter(f"{label} not present: {', '.join(missing)}")
+    removal_set = set(removals)
+    return tuple(value for value in values if value not in removal_set)
+
+
+def _first_example(entry: dict[str, Any], field: str) -> dict[str, Any]:
+    examples = entry.get(field)
+    if isinstance(examples, list) and examples and isinstance(examples[0], dict):
+        return examples[0]
+    return {}
 
 
 def _extraction_layer_roles(side: Literal["product", "ingredient", "both"]) -> tuple[str, ...]:
@@ -2309,6 +2776,50 @@ def _run_preflight(paths: MatcherPaths, report_root: Path | None) -> int:
     )
 
 
+def _resolve_staged_source_path(paths: MatcherPaths, source_path: str) -> Path:
+    raw = Path(source_path)
+    if raw.is_absolute():
+        return raw
+    if raw.parts and raw.parts[0] == "app":
+        return paths.repo_root / raw
+    return paths.app_dir / raw
+
+
+def _apply_promote_staged_output(
+    *,
+    paths: MatcherPaths,
+    output_dir: Path,
+    dry_run: bool,
+) -> None:
+    manifest_path = output_dir / "promotion_manifest.json"
+    if not manifest_path.exists():
+        raise typer.BadParameter(f"promotion manifest not found: {manifest_path}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    changed_files = manifest.get("changed_files")
+    if not isinstance(changed_files, list) or not changed_files:
+        raise typer.BadParameter(f"promotion manifest has no changed_files: {manifest_path}")
+
+    applied = 0
+    for item in changed_files:
+        if not isinstance(item, dict):
+            continue
+        source_path = str(item.get("source_path") or "")
+        staged_path = Path(str(item.get("staged_path") or ""))
+        if not source_path or not staged_path:
+            raise typer.BadParameter(f"invalid changed_files entry in {manifest_path}: {item!r}")
+        if not staged_path.is_absolute():
+            staged_path = output_dir / staged_path
+        target_path = _resolve_staged_source_path(paths, source_path)
+        if not staged_path.exists():
+            raise typer.BadParameter(f"staged file missing: {staged_path}")
+        typer.echo(f"{'Would apply' if dry_run else 'Applying'} {staged_path} -> {target_path}")
+        if not dry_run:
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(staged_path, target_path)
+        applied += 1
+    typer.echo(f"{'Would apply' if dry_run else 'Applied'} {applied} staged promotion file(s).")
+
+
 def _watch_files(paths: MatcherPaths) -> tuple[Path, ...]:
     entries_dir = paths.app_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
     contract_sources_dir = paths.app_dir / "languages" / "sv" / "matcher_contracts" / "sources"
@@ -2336,6 +2847,92 @@ def _validate_keyword_extra_parent_args(canonical: str, kids: tuple[str, ...]) -
         raise typer.BadParameter("kids must differ from canonical")
     if any(re.search(r"\s", kid) for kid in kids):
         raise typer.BadParameter("keyword-extra-parent currently supports single-token kids only")
+
+
+def _matching_py_path(paths: MatcherPaths) -> Path:
+    return paths.app_dir / "languages" / "sv" / "ingredient_matching" / "matching.py"
+
+
+def _python_identifier_slug(value: str) -> str:
+    slug = _slug(value, fallback="smart_blocker")
+    if slug[0].isdigit():
+        slug = f"rule_{slug}"
+    return slug
+
+
+def _smart_blocker_function_name(name: str) -> str:
+    return f"_{_python_identifier_slug(name)}_requirement_allows_product"
+
+
+def _smart_blocker_stub(
+    *,
+    function_name: str,
+    description: str,
+    uses_product_keywords: bool,
+) -> str:
+    signature = [
+        f"def {function_name}(",
+        "    product_lower: str,",
+        "    ingredient_lower: str,",
+        "    matched_keyword: Optional[str],",
+    ]
+    if uses_product_keywords:
+        signature.append("    product_keywords: Iterable[str],")
+    signature.extend([
+        ") -> bool:",
+        f"    \"\"\"{description.strip()}\"\"\"",
+        "",
+        "    # TODO: replace this no-op scaffold with the actual product/ingredient guard.",
+        "    # Return False only for the specific false-positive shape this blocker owns.",
+        "    return True",
+        "",
+        "",
+    ])
+    return "\n".join(signature)
+
+
+def _smart_blocker_call(function_name: str, *, uses_product_keywords: bool) -> str:
+    if uses_product_keywords:
+        return f"{function_name}(product_lower, ingredient_lower, matched_keyword, product_keywords)"
+    return f"{function_name}(product_lower, ingredient_lower, matched_keyword)"
+
+
+def _insert_smart_blocker_scaffold(
+    *,
+    paths: MatcherPaths,
+    name: str,
+    description: str,
+    uses_product_keywords: bool,
+    dry_run: bool,
+) -> tuple[str, str]:
+    target = _matching_py_path(paths)
+    text = target.read_text(encoding="utf-8")
+    function_name = _smart_blocker_function_name(name)
+    if re.search(rf"(?m)^def {re.escape(function_name)}\(", text):
+        raise typer.BadParameter(f"smart-blocker function already exists: {function_name}")
+
+    guard_marker = "\ndef _product_requirement_guards_allow_product("
+    guard_index = text.find(guard_marker)
+    if guard_index < 0:
+        raise typer.BadParameter("could not find _product_requirement_guards_allow_product insertion point")
+
+    stub = _smart_blocker_stub(
+        function_name=function_name,
+        description=description,
+        uses_product_keywords=uses_product_keywords,
+    )
+    call = _smart_blocker_call(function_name, uses_product_keywords=uses_product_keywords)
+    if call in text:
+        raise typer.BadParameter(f"smart-blocker call already exists: {call}")
+    chain_marker = "        and _raw_sill_requirement_allows_product(product_lower, ingredient_lower, matched_keyword)\n"
+    if chain_marker not in text:
+        raise typer.BadParameter("could not find product requirement guard chain insertion point")
+
+    new_text = text[:guard_index + 1] + stub + text[guard_index + 1:]
+    new_text = new_text.replace(chain_marker, chain_marker + f"        and {call}\n", 1)
+    if not dry_run:
+        target.write_text(new_text, encoding="utf-8")
+    return function_name, call
 
 
 def _runtime_rule_normalize_text(value: str) -> str:
@@ -6575,6 +7172,96 @@ def add_recipe_routing_helper(
     )
 
 
+@matcher_add_app.command("smart-blocker")
+def add_smart_blocker(
+    name: Annotated[str, typer.Argument(help="Stable blocker name, used for the generated function name.")],
+    description: Annotated[str, typer.Option("--description", help="Docstring/TODO description for the blocker.")],
+    uses_product_keywords: Annotated[
+        bool,
+        typer.Option("--uses-product-keywords", help="Pass product_keywords into the generated blocker call."),
+    ] = False,
+    sanity_ingredient: Annotated[
+        str | None,
+        typer.Option("--sanity-ingredient", help="Optional sanity ingredient for a focused canary."),
+    ] = None,
+    sanity_offer: Annotated[
+        str | None,
+        typer.Option("--sanity-offer", help="Optional sanity offer for a focused canary."),
+    ] = None,
+    expect: Annotated[
+        Literal["match", "no-match"],
+        typer.Option("--expect", help="Expected result for optional sanity canary."),
+    ] = "no-match",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for optional sanity.")] = "pantry",
+    policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run light sanity/preflight gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print the scaffold without writing files.")] = False,
+) -> None:
+    if not name.strip():
+        raise typer.BadParameter("name must not be empty")
+    if not description.strip():
+        raise typer.BadParameter("--description must not be empty")
+    if (sanity_ingredient is None) != (sanity_offer is None):
+        raise typer.BadParameter("--sanity-ingredient and --sanity-offer must be provided together")
+
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root smart-blocker gates are not available; use --no-run-gates")
+
+    function_name, call = _insert_smart_blocker_scaffold(
+        paths=paths,
+        name=name,
+        description=description,
+        uses_product_keywords=uses_product_keywords,
+        dry_run=dry_run,
+    )
+    policy_ref = policy_ref or f"smart_blocker_{_python_identifier_slug(name)}"
+    sanity_preview = ""
+    if sanity_ingredient is not None and sanity_offer is not None:
+        sanity_preview = "\n".join([
+            "",
+            f"# {policy_ref}: generated by dm matcher add smart-blocker",
+            *_deep_sanity_match_assertion(
+                description=f"smart-blocker {name}",
+                offer_name=sanity_offer.strip(),
+                ingredient=sanity_ingredient.strip(),
+                offer_category=offer_category,
+                expected_canonical=None if expect == "no-match" else name.strip().lower(),
+                mode="fast-match",
+            ),
+        ]) + "\n"
+        _append_text_block(paths.deep_sanity_file, sanity_preview, dry_run=dry_run, trim_existing=True)
+
+    if dry_run:
+        typer.echo(_smart_blocker_stub(
+            function_name=function_name,
+            description=description,
+            uses_product_keywords=uses_product_keywords,
+        ))
+        typer.echo(f"Product requirement guard chain call: and {call}")
+        if sanity_preview:
+            typer.echo(sanity_preview)
+        typer.echo("Dry run only; no files written.")
+        return
+
+    typer.echo(f"Generated smart-blocker scaffold: {function_name}")
+    typer.echo(f"  chained call: {call}")
+    typer.echo("  TODO: implement the function body; scaffold returns True until filled in.")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
+    raise typer.Exit(gate_status)
+
+
 @matcher_add_app.command("no-match-policy")
 def add_no_match_policy(
     canonical: Annotated[str, typer.Argument(help="Canonical/policy family to guard, e.g. cheddarost.")],
@@ -6718,6 +7405,383 @@ def add_no_match_policy(
     raise typer.Exit(gate_status)
 
 
+@matcher_modify_app.command("no-match-policy")
+def modify_no_match_policy(
+    selector: Annotated[str, typer.Argument(help="Policy id, policy ref, entry id, or unique canonical.")],
+    set_ingredient_patterns_csv: Annotated[
+        str | None,
+        typer.Option("--set-ingredient-patterns", help="Comma-separated replacement ingredient regex patterns."),
+    ] = None,
+    set_blocked_offer_keywords_csv: Annotated[
+        str | None,
+        typer.Option("--set-blocked-offer-keywords", help="Comma-separated replacement blocked offer keywords."),
+    ] = None,
+    set_blocked_offer_patterns_csv: Annotated[
+        str | None,
+        typer.Option("--set-blocked-offer-patterns", help="Comma-separated replacement blocked offer regex patterns."),
+    ] = None,
+    set_allowed_specifics_csv: Annotated[
+        str | None,
+        typer.Option("--set-allowed-specifics", help="Comma-separated replacement allowed specific keywords."),
+    ] = None,
+    reason: Annotated[str | None, typer.Option("--reason", help="Replacement human policy reason.")] = None,
+    negative_ingredient: Annotated[
+        str | None,
+        typer.Option("--negative-ingredient", help="Replacement negative example ingredient."),
+    ] = None,
+    negative_offer: Annotated[
+        str | None,
+        typer.Option("--negative-offer", help="Replacement negative example offer name."),
+    ] = None,
+    offer_category: Annotated[
+        str | None,
+        typer.Option("--offer-category", help="Replacement negative example offer category."),
+    ] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run light registry/sanity gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print the rewritten entry without writing files.")] = False,
+) -> None:
+    if not any(
+        value is not None
+        for value in (
+            set_ingredient_patterns_csv,
+            set_blocked_offer_keywords_csv,
+            set_blocked_offer_patterns_csv,
+            set_allowed_specifics_csv,
+            reason,
+            negative_ingredient,
+            negative_offer,
+            offer_category,
+        )
+    ):
+        raise typer.BadParameter("provide at least one --set-* or replacement option")
+
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
+
+    target_file, record, entry, policy = _find_no_match_policy_record(paths, selector)
+    canonical = str(policy.get("canonical") or entry.get("canonical") or record.canonical).strip()
+    if not canonical:
+        raise typer.BadParameter(f"{record.entry_id}: no_match_policy canonical must not be empty")
+
+    old_keywords = _string_tuple(policy.get("blocked_offer_keywords"))
+    old_patterns = _string_tuple(policy.get("blocked_offer_patterns"))
+    ingredient_patterns = (
+        _split_set_csv(set_ingredient_patterns_csv, label="--set-ingredient-patterns", lowercase=False)
+        if set_ingredient_patterns_csv is not None
+        else _string_tuple(policy.get("ingredient_patterns"))
+    )
+    blocked_offer_keywords = (
+        _split_set_csv(set_blocked_offer_keywords_csv, label="--set-blocked-offer-keywords")
+        if set_blocked_offer_keywords_csv is not None
+        else old_keywords
+    )
+    blocked_offer_patterns = (
+        _split_set_csv(set_blocked_offer_patterns_csv, label="--set-blocked-offer-patterns", lowercase=False)
+        if set_blocked_offer_patterns_csv is not None
+        else old_patterns
+    )
+    allowed_specifics = (
+        _split_set_csv(set_allowed_specifics_csv, label="--set-allowed-specifics")
+        if set_allowed_specifics_csv is not None
+        else _string_tuple(policy.get("allowed_specifics"))
+    )
+    if (
+        ingredient_patterns is None
+        or blocked_offer_keywords is None
+        or blocked_offer_patterns is None
+        or allowed_specifics is None
+    ):
+        raise typer.BadParameter("internal no-match-policy option parsing error")
+
+    if not ingredient_patterns:
+        raise typer.BadParameter("no-match-policy requires at least one ingredient pattern")
+    if not blocked_offer_keywords and not blocked_offer_patterns:
+        raise typer.BadParameter("no-match-policy requires blocked offer keywords, patterns, or both")
+
+    negative_example = _first_no_match_negative_example(entry)
+    old_guard_variants = set(_guard_variants(canonical, old_keywords, old_patterns))
+    new_guard_variants = _guard_variants(canonical, blocked_offer_keywords, blocked_offer_patterns)
+    existing_negative_offer = str(negative_example.get("offer_name") or "")
+    if negative_offer is not None:
+        next_negative_offer = negative_offer.strip()
+    elif existing_negative_offer in old_guard_variants or existing_negative_offer.startswith(f"{canonical} ! "):
+        next_negative_offer = new_guard_variants[0]
+    else:
+        next_negative_offer = existing_negative_offer or new_guard_variants[0]
+    if not next_negative_offer:
+        raise typer.BadParameter("--negative-offer must not be empty")
+
+    next_negative_ingredient = (
+        negative_ingredient.strip()
+        if negative_ingredient is not None
+        else str(negative_example.get("ingredient") or canonical)
+    )
+    if not next_negative_ingredient:
+        raise typer.BadParameter("--negative-ingredient must not be empty")
+
+    next_offer_category = (
+        offer_category.strip()
+        if offer_category is not None
+        else str(negative_example.get("offer_category") or "")
+    )
+    next_reason = reason.strip() if reason is not None else str(policy.get("reason") or entry.get("notes") or "")
+    if not next_reason:
+        raise typer.BadParameter("--reason must not be empty")
+
+    block = _no_match_policy_block(
+        entry_id=record.entry_id,
+        policy_id=str(policy.get("id") or selector),
+        rule_schema_version=_int_value(policy.get("rule_schema_version"), default=1),
+        rule_version=_int_value(policy.get("rule_version"), default=1) + 1,
+        canonical=canonical,
+        ingredient_patterns=ingredient_patterns,
+        blocked_offer_keywords=blocked_offer_keywords,
+        blocked_offer_patterns=blocked_offer_patterns,
+        allowed_specifics=allowed_specifics,
+        reason=next_reason,
+        policy_ref=str(policy.get("policy_ref") or selector),
+        fixture_refs=_string_tuple(policy.get("fixture_refs")),
+        supersedes=_string_tuple(policy.get("supersedes")),
+        negative_ingredient=next_negative_ingredient,
+        negative_offer=next_negative_offer,
+        offer_category=next_offer_category,
+    )
+    if dry_run:
+        typer.echo(block)
+        typer.echo("Dry run only; no files written.")
+        return
+
+    _write_registry_entry_block(target_file, record, block, dry_run=False)
+    typer.echo(f"Updated no_match_policy: {policy.get('id') or selector}")
+    typer.echo(f"  entry: {record.entry_id}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
+    raise typer.Exit(gate_status)
+
+
+@matcher_modify_app.command("match-bridge")
+def modify_match_bridge(
+    selector: Annotated[str, typer.Argument(help="Bridge id, entry id, unique canonical, or alias.")],
+    set_ingredient_patterns_csv: Annotated[
+        str | None,
+        typer.Option("--set-ingredient-patterns", help="Comma-separated replacement ingredient regex patterns."),
+    ] = None,
+    set_offer_patterns_csv: Annotated[
+        str | None,
+        typer.Option("--set-offer-patterns", help="Comma-separated replacement offer regex patterns."),
+    ] = None,
+    remove_offer_patterns_csv: Annotated[
+        str | None,
+        typer.Option("--remove-offer-patterns", help="Comma-separated offer regex patterns to remove."),
+    ] = None,
+    set_negative_offer_patterns_csv: Annotated[
+        str | None,
+        typer.Option("--set-negative-offer-patterns", help="Comma-separated replacement negative offer regex patterns."),
+    ] = None,
+    remove_negative_offer_patterns_csv: Annotated[
+        str | None,
+        typer.Option("--remove-negative-offer-patterns", help="Comma-separated negative offer regex patterns to remove."),
+    ] = None,
+    set_aliases_csv: Annotated[
+        str | None,
+        typer.Option("--set-aliases", help="Comma-separated replacement aliases."),
+    ] = None,
+    reason: Annotated[str | None, typer.Option("--reason", help="Replacement notes text.")] = None,
+    positive_ingredient: Annotated[
+        str | None,
+        typer.Option("--positive-ingredient", help="Replacement positive example ingredient."),
+    ] = None,
+    positive_offer: Annotated[
+        str | None,
+        typer.Option("--positive-offer", help="Replacement positive example offer name."),
+    ] = None,
+    negative_ingredient: Annotated[
+        str | None,
+        typer.Option("--negative-ingredient", help="Replacement negative example ingredient."),
+    ] = None,
+    negative_offer: Annotated[
+        str | None,
+        typer.Option("--negative-offer", help="Replacement negative example offer name."),
+    ] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run light registry/sanity gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print the rewritten entry without writing files.")] = False,
+) -> None:
+    if set_offer_patterns_csv is not None and remove_offer_patterns_csv is not None:
+        raise typer.BadParameter("--set-offer-patterns conflicts with --remove-offer-patterns")
+    if set_negative_offer_patterns_csv is not None and remove_negative_offer_patterns_csv is not None:
+        raise typer.BadParameter("--set-negative-offer-patterns conflicts with --remove-negative-offer-patterns")
+    if not any(
+        value is not None
+        for value in (
+            set_ingredient_patterns_csv,
+            set_offer_patterns_csv,
+            remove_offer_patterns_csv,
+            set_negative_offer_patterns_csv,
+            remove_negative_offer_patterns_csv,
+            set_aliases_csv,
+            reason,
+            positive_ingredient,
+            positive_offer,
+            negative_ingredient,
+            negative_offer,
+        )
+    ):
+        raise typer.BadParameter("provide at least one pattern/example replacement option")
+
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
+
+    target_file, record, entry, bridge = _find_match_bridge_record(paths, selector)
+    canonical = str(bridge.get("canonical") or entry.get("canonical") or record.canonical).strip()
+    if not canonical:
+        raise typer.BadParameter(f"{record.entry_id}: match_bridge canonical must not be empty")
+
+    ingredient_patterns = (
+        _split_set_csv(set_ingredient_patterns_csv, label="--set-ingredient-patterns", lowercase=False)
+        if set_ingredient_patterns_csv is not None
+        else _string_tuple(bridge.get("ingredient_patterns"))
+    )
+    offer_patterns = (
+        _split_set_csv(set_offer_patterns_csv, label="--set-offer-patterns", lowercase=False)
+        if set_offer_patterns_csv is not None
+        else _string_tuple(bridge.get("offer_patterns"))
+    )
+    negative_offer_patterns = (
+        _split_set_csv(set_negative_offer_patterns_csv, label="--set-negative-offer-patterns", lowercase=False)
+        if set_negative_offer_patterns_csv is not None
+        else _string_tuple(bridge.get("negative_offer_patterns"))
+    )
+    aliases = (
+        _split_set_csv(set_aliases_csv, label="--set-aliases")
+        if set_aliases_csv is not None
+        else _string_tuple(bridge.get("aliases"))
+    )
+    if (
+        ingredient_patterns is None
+        or offer_patterns is None
+        or negative_offer_patterns is None
+        or aliases is None
+    ):
+        raise typer.BadParameter("internal match-bridge option parsing error")
+    offer_patterns = _remove_values(
+        offer_patterns,
+        _split_set_csv(remove_offer_patterns_csv, label="--remove-offer-patterns", lowercase=False) or (),
+        label="offer pattern",
+    )
+    negative_offer_patterns = _remove_values(
+        negative_offer_patterns,
+        _split_set_csv(remove_negative_offer_patterns_csv, label="--remove-negative-offer-patterns", lowercase=False) or (),
+        label="negative offer pattern",
+    )
+    if not ingredient_patterns:
+        raise typer.BadParameter("match-bridge requires at least one ingredient pattern")
+    if not offer_patterns:
+        raise typer.BadParameter("match-bridge requires at least one offer pattern")
+
+    positive_example = _first_example(entry, "positive_examples")
+    existing_positive_ingredient = str(positive_example.get("ingredient") or "")
+    existing_positive_offer = str(positive_example.get("offer_name") or "")
+    next_positive_ingredient = (
+        positive_ingredient.strip()
+        if positive_ingredient is not None
+        else (existing_positive_ingredient if existing_positive_ingredient in ingredient_patterns else ingredient_patterns[0])
+    )
+    next_positive_offer = (
+        positive_offer.strip()
+        if positive_offer is not None
+        else (existing_positive_offer if existing_positive_offer in offer_patterns else offer_patterns[0])
+    )
+    if not next_positive_ingredient:
+        raise typer.BadParameter("--positive-ingredient must not be empty")
+    if not next_positive_offer:
+        raise typer.BadParameter("--positive-offer must not be empty")
+
+    negative_example = _first_example(entry, "negative_examples")
+    next_negative_ingredient = (
+        negative_ingredient.strip()
+        if negative_ingredient is not None
+        else str(negative_example.get("ingredient") or canonical)
+    )
+    next_negative_offer: str | None
+    if negative_offer is not None:
+        next_negative_offer = negative_offer.strip()
+    elif negative_offer_patterns:
+        existing_negative_offer = str(negative_example.get("offer_name") or "")
+        next_negative_offer = (
+            existing_negative_offer
+            if existing_negative_offer in negative_offer_patterns
+            else negative_offer_patterns[0]
+        )
+    else:
+        next_negative_offer = None
+    if next_negative_offer is not None and not next_negative_offer:
+        raise typer.BadParameter("--negative-offer must not be empty")
+    if negative_offer_patterns and not next_negative_ingredient:
+        raise typer.BadParameter("--negative-ingredient must not be empty")
+
+    block = _match_bridge_block(
+        entry_id=record.entry_id,
+        language=str(entry.get("language") or "sv"),
+        market=str(entry.get("market") or "SE"),
+        status=str(entry.get("status") or "active"),
+        canonical=canonical,
+        source_refs=_string_tuple(entry.get("source_refs")),
+        layer_policy=_string_tuple(entry.get("layer_policy")) or ("bridge_only",),
+        notes=reason.strip() if reason is not None else str(entry.get("notes") or f"Registry-owned match bridge: {bridge.get('id') or selector}."),
+        bridge_id=str(bridge.get("id") or selector),
+        rule_schema_version=_int_value(bridge.get("rule_schema_version"), default=1),
+        rule_version=_int_value(bridge.get("rule_version"), default=1) + 1,
+        ingredient_patterns=ingredient_patterns,
+        offer_patterns=offer_patterns,
+        negative_offer_patterns=negative_offer_patterns,
+        aliases=aliases,
+        fixture_refs=_string_tuple(bridge.get("fixture_refs")),
+        supersedes=_string_tuple(bridge.get("supersedes")),
+        ingredient_form_signals=_string_tuple(bridge.get("ingredient_form_signals")),
+        offer_form_signals=_string_tuple(bridge.get("offer_form_signals")),
+        required_offer_form_signals=_string_tuple(bridge.get("required_offer_form_signals")),
+        forbidden_offer_form_signals=_string_tuple(bridge.get("forbidden_offer_form_signals")),
+        precedence=bridge.get("precedence") if isinstance(bridge.get("precedence"), int) else None,
+        positive_ingredient=next_positive_ingredient,
+        positive_offer=next_positive_offer,
+        negative_ingredient=next_negative_ingredient,
+        negative_offer=next_negative_offer,
+    )
+    if dry_run:
+        typer.echo(block)
+        typer.echo("Dry run only; no files written.")
+        return
+
+    _write_registry_entry_block(target_file, record, block, dry_run=False)
+    typer.echo(f"Updated match_bridge: {bridge.get('id') or selector}")
+    typer.echo(f"  entry: {record.entry_id}")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
+    raise typer.Exit(gate_status)
+
+
 @matcher_add_app.command("extraction-helper")
 def add_extraction_helper(
     canonical: Annotated[str, typer.Argument(help="Canonical keyword produced by extraction.py.")],
@@ -6805,6 +7869,92 @@ def add_extraction_helper(
         return
     gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
     raise typer.Exit(gate_status)
+
+
+@matcher_fixture_app.command("remove")
+def matcher_fixture_remove(
+    fixture_ids_csv: Annotated[str, typer.Argument(help="Fixture id, or comma-separated fixture ids, to remove.")],
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    drop_empty_inventory: Annotated[
+        bool,
+        typer.Option(
+            "--drop-empty-inventory/--keep-empty-inventory",
+            help="Drop inventory rows that would otherwise be left with no fixture_refs.",
+        ),
+    ] = False,
+    drop_empty_registry_entries: Annotated[
+        bool,
+        typer.Option(
+            "--drop-empty-registry-entries/--keep-empty-registry-entries",
+            help="Drop registry entries that would otherwise be left with no fixture_refs.",
+        ),
+    ] = False,
+    regen: Annotated[
+        bool,
+        typer.Option("--regen/--no-regen", help="Regenerate matcher contract JSON and registry coverage after writing."),
+    ] = True,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run matcher preflight after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Show the cascade without writing files.")] = False,
+) -> None:
+    fixture_ids = _split_fixture_ids(fixture_ids_csv)
+    paths = _paths(tree_root)
+
+    fixture_rows, removed_fixture_ids = _remove_fixture_rows(paths=paths, fixture_ids=fixture_ids)
+    inventory_rows = load_contract_source(_source_spec(paths, "matcher_rule_inventory"))
+    inventory_rows, inventory_changed, inventory_dropped = _remove_fixture_refs_from_contract_rows(
+        inventory_rows,
+        fixture_ids=fixture_ids,
+        id_field="id",
+        drop_empty_rows=drop_empty_inventory,
+        row_label="inventory",
+    )
+    registry_plans = _plan_registry_fixture_ref_removal(
+        paths=paths,
+        fixture_ids=fixture_ids,
+        drop_empty_registry_entries=drop_empty_registry_entries,
+    )
+
+    if dry_run:
+        _print_fixture_remove_summary(
+            fixture_ids=removed_fixture_ids,
+            inventory_changed=inventory_changed,
+            inventory_dropped=inventory_dropped,
+            registry_plans=registry_plans,
+            dry_run=True,
+        )
+        typer.echo("Dry run only; no files written.")
+        return
+
+    write_contract_source(_source_spec(paths, "matcher_regression_cases"), fixture_rows)
+    write_contract_source(_source_spec(paths, "matcher_rule_inventory"), inventory_rows)
+    _write_registry_fixture_ref_removal_plans(registry_plans)
+    _print_fixture_remove_summary(
+        fixture_ids=removed_fixture_ids,
+        inventory_changed=inventory_changed,
+        inventory_dropped=inventory_dropped,
+        registry_plans=registry_plans,
+        dry_run=False,
+    )
+
+    if regen:
+        _regenerate_contract_json(paths)
+        coverage_status = _run_coverage_generator(paths)
+        if coverage_status != 0:
+            raise typer.Exit(coverage_status)
+    else:
+        typer.echo("Skipped regen (--no-regen).")
+
+    if not run_gates:
+        typer.echo("Skipped preflight (--no-run-gates).")
+        return
+    raise typer.Exit(_run_preflight(paths, report_root))
 
 
 @matcher_app.command("dev-watch")
@@ -7903,6 +9053,10 @@ def matcher_promote(
     language: Annotated[str, typer.Option("--language", help="Language package code.")] = "sv",
     market: Annotated[str, typer.Option("--market", help="Market code.")] = "SE",
     dry_run: Annotated[bool, typer.Option("--dry-run", help="Show what would change without writing files.")] = False,
+    apply_staged: Annotated[
+        Path | None,
+        typer.Option("--apply-staged", help="Apply files from a promote --output-dir promotion_manifest.json."),
+    ] = None,
     migrate_hashes: Annotated[
         bool,
         typer.Option("--migrate-hashes", help="Backward-compatible no-op alias for promote."),
@@ -7924,6 +9078,13 @@ def matcher_promote(
         typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
     ] = None,
 ) -> None:
+    if apply_staged is not None:
+        if _raw_args(ctx):
+            raise typer.BadParameter("--apply-staged cannot be combined with raw pass-through args")
+        paths = _paths(None)
+        _apply_promote_staged_output(paths=paths, output_dir=apply_staged, dry_run=dry_run)
+        return
+
     args = ["--language", language, "--market", market]
     if dry_run:
         args.append("--dry-run")
@@ -8008,6 +9169,10 @@ def matcher_regen(
 def matcher_refresh_line_refs(
     ctx: typer.Context,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to update instead of /app.")] = None,
+    fix: Annotated[
+        bool,
+        typer.Option("--fix", help="Explicit alias for the default write mode; conflicts with --dry-run."),
+    ] = False,
     dry_run: Annotated[bool, typer.Option("--dry-run", help="Show refreshed line refs without writing.")] = False,
     output_format: Annotated[
         Literal["text", "json"],
@@ -8018,6 +9183,8 @@ def matcher_refresh_line_refs(
         typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
     ] = None,
 ) -> None:
+    if fix and dry_run:
+        raise typer.BadParameter("--fix conflicts with --dry-run")
     paths = _paths(tree_root)
     args = [
         *_tree_root_args(tree_root),

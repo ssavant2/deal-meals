@@ -614,7 +614,7 @@ def run_meat_component_policy(audit: MatcherAudit) -> None:
     )
 
 
-def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
+def run_direct_matcher_fix_policy(audit: MatcherAudit) -> None:
     fresh_carrots = [
         offer for offer in select_name_family(
             audit.offers,
@@ -628,7 +628,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         ))
     ]
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="morätter typo accepts ordinary carrots",
         ingredient="2 morätter",
         candidates=fresh_carrots,
@@ -639,7 +639,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         if contains_any(norm(offer.name), ("chokladdryck", "o'boy", "oboy"))
     ]
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="chokladdryck accepts chocolate drink powders",
         ingredient="0.75 dl Chokladdryck",
         candidates=chocolate_drinks,
@@ -652,7 +652,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         exclude=["chokladdryck", "o'boy", "oboy"],
     )
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="chokladdryck rejects solid chocolate fallback",
         ingredient="0.75 dl Chokladdryck",
         candidates=solid_chocolate,
@@ -672,7 +672,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         ))
     ]
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="kycklingfile accepts raw chicken fillet family",
         ingredient="200 g Kycklingfile",
         candidates=raw_chicken_fillets,
@@ -687,7 +687,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         if contains_any(norm(offer.name), ("pastrami", "grillad skivad", "grillkryddad skivad"))
     ]
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="kycklingfile rejects cooked/deli sliced chicken",
         ingredient="200 g Kycklingfile",
         candidates=cooked_or_deli_chicken,
@@ -704,7 +704,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         and "stark" not in norm(offer.name)
     ]
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="optional smoked paprikapulver accepts plain and smoked paprika spice jars",
         ingredient="2 tsk paprikapulver, ev rökt",
         candidates=paprika_spice_products,
@@ -715,7 +715,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         if re.search(r"\b(?:rökt|rokt)\s+paprika\b", norm(offer.name)) is not None
     ]
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="explicit rökt paprikapulver accepts smoked paprika spice jars",
         ingredient="1 tsk Rökt paprikapulver",
         candidates=smoked_paprika_spices,
@@ -726,7 +726,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         if re.search(r"\b(?:rökt|rokt)\s+paprika\b", norm(offer.name)) is None
     ]
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="explicit rökt paprikapulver rejects plain paprika spice jars",
         ingredient="1 tsk Rökt paprikapulver",
         candidates=plain_paprika_spices,
@@ -738,7 +738,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         and "paprika" in norm(offer.name)
     ]
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="paprikapulver rejects fresh or preserved bell-pepper products",
         ingredient="2 tsk paprikapulver, ev rökt",
         candidates=fresh_paprika_products,
@@ -753,7 +753,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         )
     ]
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="riven västerbottensost accepts västerbottensost cheese products",
         ingredient="2 dl riven Västerbottensost",
         candidates=vasterbotten_cheeses,
@@ -768,7 +768,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         if contains_any(norm(offer.name), ("philadelphia", "färskost", "farskost", "cream cheese"))
     ]
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="riven västerbottensost rejects västerbotten-flavored fresh cheese",
         ingredient="2 dl riven Västerbottensost",
         candidates=vasterbotten_fresh_cheese,
@@ -786,7 +786,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         ))
     ]
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="varmrökt laxfilé accepts hot-smoked salmon products",
         ingredient="350 g varmrökt laxfilé",
         candidates=hot_smoked_salmon,
@@ -802,14 +802,14 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         and contains_any(norm(offer.name), ("laxfil", "kallrökt", "kallrokt", "kallr"))
     ]
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="varmrökt laxfilé rejects raw and cold-smoked salmon products",
         ingredient="350 g varmrökt laxfilé",
         candidates=raw_or_cold_salmon,
     )
 
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="plain laxfilé rejects hot-smoked salmon products",
         ingredient="300 g laxfilé",
         candidates=hot_smoked_salmon,
@@ -824,7 +824,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         )
     ]
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="salladsmix accepts mixed leaf salad products",
         ingredient="salladsmix",
         candidates=mixed_leaf_salads,
@@ -844,7 +844,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         )
     ]
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="salladsmix rejects prepared salad/carrier products",
         ingredient="salladsmix",
         candidates=prepared_salads,
@@ -860,7 +860,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         ))
     ]
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="chipotlepasta eller pulver accepts dry chipotle seasoning",
         ingredient="1 tsk chipotlepasta eller pulver",
         candidates=chipotle_spices,
@@ -872,7 +872,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         and offer.id not in {candidate.id for candidate in chipotle_spices}
     ]
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="chipotlepasta eller pulver rejects chipotle-flavored carriers",
         ingredient="1 tsk chipotlepasta eller pulver",
         candidates=chipotle_carriers,
@@ -884,7 +884,7 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         include=["pancetta"],
     )
     audit.expect_all_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="pancetta accepts pancetta products",
         ingredient="200 g Pancetta",
         candidates=pancetta_products,
@@ -896,14 +896,14 @@ def run_batch2_direct_fix_policy(audit: MatcherAudit) -> None:
         or (offer.category != "meat" and "pancetta" in norm(offer.name))
     ]
     audit.expect_none_match(
-        section="batch2 direct fixes",
+        section="direct matcher fixes",
         check="pancetta rejects bacon fallback and prepared pancetta carriers",
         ingredient="200 g Pancetta",
         candidates=pancetta_fallback_blocks,
     )
 
 
-def run_batch3_direct_fix_policy(audit: MatcherAudit) -> None:
+def run_extended_direct_matcher_fix_policy(audit: MatcherAudit) -> None:
     chicken_steak_or_raw_fillet = [
         offer for offer in audit.offers
         if offer.category == "meat"
@@ -914,7 +914,7 @@ def run_batch3_direct_fix_policy(audit: MatcherAudit) -> None:
         )
     ]
     audit.expect_all_match(
-        section="batch3 direct fixes",
+        section="extended direct matcher fixes",
         check="kyckling steak accepts chicken steak and raw fillet fallback",
         ingredient="800 g Kyckling Steak",
         candidates=chicken_steak_or_raw_fillet,
@@ -934,7 +934,7 @@ def run_batch3_direct_fix_policy(audit: MatcherAudit) -> None:
         ))
     ]
     audit.expect_none_match(
-        section="batch3 direct fixes",
+        section="extended direct matcher fixes",
         check="kyckling steak rejects cooked/deli sliced chicken",
         ingredient="800 g Kyckling Steak",
         candidates=cooked_or_deli_chicken,
@@ -948,7 +948,7 @@ def run_batch3_direct_fix_policy(audit: MatcherAudit) -> None:
         ))
     ]
     audit.expect_none_match(
-        section="batch3 direct fixes",
+        section="extended direct matcher fixes",
         check="brewed strong coffee ingredient has no purchasable coffee-product match",
         ingredient="1 dl starkt kaffe, gärna espresso",
         candidates=coffee_products,
@@ -959,7 +959,7 @@ def run_batch3_direct_fix_policy(audit: MatcherAudit) -> None:
         if contains_any(norm(offer.name), ("savoiardi", "savoiarde", "savoiardikex", "ladyfinger"))
     ]
     audit.expect_all_match(
-        section="batch3 direct fixes",
+        section="extended direct matcher fixes",
         check="savoiardo kex accepts savoiardi/ladyfinger biscuits",
         ingredient="10-12 st Vicenzi Savoiardo kex",
         candidates=savoiardi_biscuits,
@@ -971,7 +971,7 @@ def run_batch3_direct_fix_policy(audit: MatcherAudit) -> None:
         and offer.id not in {candidate.id for candidate in savoiardi_biscuits}
     ]
     audit.expect_none_match(
-        section="batch3 direct fixes",
+        section="extended direct matcher fixes",
         check="savoiardo kex rejects generic crackers and salty kex",
         ingredient="10-12 st Vicenzi Savoiardo kex",
         candidates=generic_crackers,
@@ -1078,8 +1078,8 @@ def run_staple_form_policy(audit: MatcherAudit) -> None:
     )
 
 
-def run_batch3_user_decision_policy(audit: MatcherAudit) -> None:
-    section = "batch3 user decisions"
+def run_documented_decision_policy(audit: MatcherAudit) -> None:
+    section = "documented user decisions"
 
     audit.expect_none_match(
         section=section,
@@ -1374,10 +1374,10 @@ def main() -> int:
     run_rice_policy(audit)
     run_exact_specific_policy(audit)
     run_meat_component_policy(audit)
-    run_batch2_direct_fix_policy(audit)
-    run_batch3_direct_fix_policy(audit)
+    run_direct_matcher_fix_policy(audit)
+    run_extended_direct_matcher_fix_policy(audit)
     run_staple_form_policy(audit)
-    run_batch3_user_decision_policy(audit)
+    run_documented_decision_policy(audit)
     run_recurring_root_cause_policy(audit)
     return print_summary(audit)
 

@@ -296,7 +296,8 @@ def _build_matching_preview_payload(max_results: int, parsed_exclude: list[str])
 def recipe_search(request: Request, q: str = "", limit: int = 50, offset: int = 0, source: str = ""):
     """Search recipes by name or ingredient using PostgreSQL Full-Text Search."""
     try:
-        from languages.matcher_runtime import get_recipe_fts_config_backend, normalize_market_text
+        from languages.matcher_runtime import get_recipe_fts_config_backend
+        from languages.market_runtime import normalize_market_text
         from recipe_matcher import get_enabled_recipe_sources
 
         raw_query = normalize_market_text(q.strip().lower())

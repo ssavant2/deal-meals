@@ -298,7 +298,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'hållare',  # holder — generic non-food word ("Gatukritor med hållare")
     'sorterade',  # sorted/assorted — generic adjective ("Tallrik sorterade färger")
     'riserva',  # Italian quality grade (maturation/reserve) — "Vitvinsvinäger Riserva Zeta" matched 'rispapper' ingredient
-    'fungerar',  # Swedish verb "works/functions" — "lär dig om hur kroppen fungerar" (book title) matched ingredient note "Rödvinsvinäger - Vitvinsvinäger fungerar också!" (batch 49)
+    'fungerar',  # Swedish verb "works/functions" in non-food book titles and ingredient notes
     'flikar',   # recipe format word (= slices/tabs of butter etc.) — leaks into children's books with "flikar" (= book flaps) in title
     'putsad',   # prep descriptor (= trimmed/cleaned) — "Ryggbiff Putsad" matched "putsad fläskfilé" via substring
 
@@ -1715,7 +1715,7 @@ FLAVOR_WORDS: FrozenSet[str] = frozenset({
     # Toppings as flavors (in bakery products)
     'strössel', 'strossel',  # "Munk Rosa Strössel" - strössel is the topping
 
-    # === BATCH 2: MORE FLAVOR_WORDS FROM WILLYS CATALOG ===
+    # Additional flavor words from the Willys catalog.
 
     # Spices/herbs as flavors (in färskost, korv, granola, knäcke)
     'kanel',  # cinnamon (14x: "Äpple Kanel Yoghurt", "Äpple Kanel Granola")
@@ -1982,7 +1982,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'limpa',  # bread loaf
     'frisé',  # frisée lettuce
     'bbqsås',  # BBQ sauce (6 chars, from _SPACE_NORMALIZATIONS: barbequesås/bbq-sås → bbqsås)
-    # Batch 10 additions
+    # Short keywords for pantry, protein, produce, and cooking-liquid terms.
     'paneer',  # Indian cheese (6 chars)
     'röding',  # Arctic char fish (6 chars)
     'löjrom',  # bleak roe (6 chars)
@@ -1994,7 +1994,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'enbär', 'enbar',  # juniper berries (5 chars)
     'tajin',  # Moroccan spice blend (5 chars)
     'mynta',  # mint herb (5 chars) — "Mynta Burk"
-    # Batch 11 additions
+    # Additional short keywords for grains, cheese, fruit, and cooking spirits.
     'högrev', 'hogrev',  # beef chuck (6 chars)
     'kombu',  # seaweed for dashi (5 chars)
     'pomelo',  # citrus fruit (6 chars)
@@ -2006,7 +2006,7 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'dinkel',  # spelt grain (6 chars)
     'rom',  # rum for cooking (3 chars)
     # Note: 'örter' NOT added — too generic, matches flavored färskost/sås FPs
-    # Batch 12 additions
+    # Additional short keywords and bread-variety terms.
     'kolja',  # haddock fish (5 chars)
     # Bread brand names (needed for OFFER_EXTRA_KEYWORDS mapping)
     # NOTE: 'rosta' NOT here — collides with cooking method "rostad/rostade" causing FPs in 12+ recipes

@@ -148,7 +148,8 @@ migrations. True removals still require explicit `--allow-removals`.
 
 ## Standard Maintenance
 
-For live TOML registry rule authoring, prefer the unified CLI:
+For live TOML registry rule authoring and mechanical maintenance, prefer the
+unified CLI:
 
 ```bash
 ./bin/dm matcher add keyword-synonym ...
@@ -160,6 +161,9 @@ For live TOML registry rule authoring, prefer the unified CLI:
 ./bin/dm matcher add recipe-routing-helper ...
 ./bin/dm matcher add no-match-policy ...
 ./bin/dm matcher add extraction-helper ...
+./bin/dm matcher modify no-match-policy ...
+./bin/dm matcher modify match-bridge ...
+./bin/dm matcher fixture remove <fixture_id>
 ```
 
 For `extraction_helper.toml`, the same command can rewrite a simple existing
@@ -173,11 +177,18 @@ space-normalization, flavor/carrier, context, cuisine, compound, specialty,
 processed/form, substitution, and secondary-pattern commands; all write
 `runtime_rule_overlays.toml`.
 
+`dm matcher add smart-blocker` is different: it scaffolds and chains a
+`matching.py` helper for repeated guard logic, but the helper body is still a
+manual Python edit. Use it to remove the mechanical "forgot to wire the helper"
+step, not to replace the semantic implementation.
+
 Use `./bin/dm matcher guide <shape>` to see whether a rule shape has an
 authoring command or remains a manual runtime-table change. `match_bridge.toml`
 is staged/declarative-only today; author live bridge behavior through the
 runtime-wired TOML surfaces unless bridge runtime-wiring is explicitly being
-worked on.
+worked on. Existing simple `match_bridge.toml` rows can be narrowed with
+`dm matcher modify match-bridge`; new rows remain staged metadata unless paired
+with a runtime-wired surface.
 
 For Track B matcher-rule work, prefer the wrapper:
 

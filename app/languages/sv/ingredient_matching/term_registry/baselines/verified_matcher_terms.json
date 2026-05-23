@@ -9264,7 +9264,7 @@
       "expected": null,
       "needs_product_text": true,
       "notes": "Manual policy treats svartpeppar, including typo and coarse-ground wording, as a staple no-match term; whole/ground form wording must not create offers. The user manuals carry the user-facing wording.",
-      "metadata": "{\"adapter_ref\": \"no_match_policies:policy_black_pepper_staple\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_hela_svartpepparkorn_hel_no_match\", \"plan_initial_hela_svartpepparkorn_malen_no_match\", \"plan_initial_svartpeppar_malen_no_match\", \"plan_initial_svartpeppar_malen_hel_no_match\", \"matcher_regression_svarpeppar_typo_no_match\", \"matcher_regression_grovmalen_svartpeppar_malen_no_match\", \"matcher_regression_grovmalen_svartpeppar_hel_no_match\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"no_match_policy\", \"source_refs\": [\"plan_initial:svartpeppar_no_match\", \"manual:ingredients_never_matched\", \"current_review:stefan_correction:svartpeppar\", \"sanity:svartpeppar\"], \"status\": \"wrapped_adapter\"}"
+      "metadata": "{\"adapter_ref\": \"no_match_policies:policy_black_pepper_staple\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_hela_svartpepparkorn_hel_no_match\", \"plan_initial_hela_svartpepparkorn_malen_no_match\", \"plan_initial_svartpeppar_malen_no_match\", \"plan_initial_svartpeppar_malen_hel_no_match\", \"matcher_regression_svarpeppar_typo_no_match\", \"matcher_regression_grovmalen_svartpeppar_malen_no_match\", \"matcher_regression_grovmalen_svartpeppar_hel_no_match\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"no_match_policy\", \"source_refs\": [\"plan_initial:svartpeppar_no_match\", \"manual:ingredients_never_matched\", \"current_review:documented_correction:svartpeppar\", \"sanity:svartpeppar\"], \"status\": \"wrapped_adapter\"}"
     },
     {
       "variant_id": "vterm-352cace0cbcb30ca",
@@ -9453,7 +9453,7 @@
       "expected": null,
       "needs_product_text": true,
       "notes": "Offer extraction keeps apple and pear cider in distinct flavor canonicals while retaining the cider parent.",
-      "metadata": "{\"adapter_ref\": \"match_bridges:bridge_apple_cider_exact\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_cider_apple_positive\", \"plan_initial_cider_pear_negative\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"flavor_guard\", \"source_refs\": [\"plan_initial:cider_apple_positive\", \"current_review:stefan_correction:cider_apple\", \"sanity:appelcider\"], \"status\": \"wrapped_adapter\"}"
+      "metadata": "{\"adapter_ref\": \"match_bridges:bridge_apple_cider_exact\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_cider_apple_positive\", \"plan_initial_cider_pear_negative\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"flavor_guard\", \"source_refs\": [\"plan_initial:cider_apple_positive\", \"current_review:documented_correction:cider_apple\", \"sanity:appelcider\"], \"status\": \"wrapped_adapter\"}"
     },
     {
       "variant_id": "vterm-d1486da2374485e6",
@@ -44102,7 +44102,7 @@
       "product_brand": null,
       "expected": null,
       "needs_product_text": true,
-      "notes": "Recovered Batch 67 fixes cover the fiskgrytbitar sushi blocker/raw fish fallback, kaka inside skaka, yeast-type matbröd wording, and osthyvel as a non-food tool cue.",
+      "notes": "Recovered matcher fixes cover the fiskgrytbitar sushi blocker/raw fish fallback, kaka inside skaka, yeast-type matbröd wording, and osthyvel as a non-food tool cue.",
       "metadata": "{\"adapter_ref\": null, \"adapter_refs\": [\"match_bridges:bridge_fiskgrytbitar_laxfile\", \"match_bridges:bridge_matbrodsjast_generic_route_sibling\"], \"fixture_refs\": [\"matcher_regression_fiskgrytbitar_sushi_negative\", \"matcher_regression_fiskgrytbitar_lax_positive\", \"matcher_regression_skaka_kaka_negative\", \"matcher_regression_jast_matbrod_bread_negative\", \"matcher_regression_jast_matbrod_yeast_positive\", \"matcher_regression_osthyvel_tool_negative\"], \"policy_ref\": \"legacy_import_curated_regression\", \"risk\": \"backend_guard\", \"source_refs\": [\"legacy_review:fiskgrytbitar_lax_mapping_matching_sushi_products\"], \"status\": \"wrapped_adapter\"}"
     },
     {
@@ -65292,7 +65292,7 @@
       "expected": null,
       "needs_product_text": true,
       "notes": "Parent mapping lets apple cider route through cider while validators keep flavor-specific asks narrow.",
-      "metadata": "{\"adapter_ref\": \"match_bridges:bridge_apple_cider_flavor_parent\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_cider_apple_positive\", \"plan_initial_cider_pear_negative\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"flavor_guard\", \"source_refs\": [\"plan_initial:cider_apple_positive\", \"current_review:stefan_correction:cider_apple\", \"sanity:appelcider\"], \"status\": \"wrapped_adapter\"}"
+      "metadata": "{\"adapter_ref\": \"match_bridges:bridge_apple_cider_flavor_parent\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_cider_apple_positive\", \"plan_initial_cider_pear_negative\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"flavor_guard\", \"source_refs\": [\"plan_initial:cider_apple_positive\", \"current_review:documented_correction:cider_apple\", \"sanity:appelcider\"], \"status\": \"wrapped_adapter\"}"
     },
     {
       "variant_id": "vterm-f05180959faec3c9",
@@ -70941,7 +70941,7 @@
       "expected": null,
       "needs_product_text": true,
       "notes": "Generic olja/till stekning wording intentionally produces no recipe route term for plain rapsolja offers.",
-      "metadata": "{\"adapter_ref\": \"no_match_policies:policy_generic_oil\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_generic_oil_negative\", \"plan_initial_generic_oil_plain_negative\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"no_match_policy\", \"source_refs\": [\"plan_initial:generic_oil_negative\", \"plan_initial:generic_oil_plain_negative\", \"manual:ingredients_never_matched\", \"current_review:stefan_correction:generic_olja\", \"sanity:generic_olja\", \"sanity:olja_till_stekning\"], \"status\": \"wrapped_adapter\"}"
+      "metadata": "{\"adapter_ref\": \"no_match_policies:policy_generic_oil\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_generic_oil_negative\", \"plan_initial_generic_oil_plain_negative\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"no_match_policy\", \"source_refs\": [\"plan_initial:generic_oil_negative\", \"plan_initial:generic_oil_plain_negative\", \"manual:ingredients_never_matched\", \"current_review:documented_correction:generic_olja\", \"sanity:generic_olja\", \"sanity:olja_till_stekning\"], \"status\": \"wrapped_adapter\"}"
     },
     {
       "variant_id": "vterm-880a111f9de5926b",
@@ -99773,7 +99773,7 @@
       "product_brand": null,
       "expected": null,
       "needs_product_text": true,
-      "notes": "Kalamata olive wording routes through the olive family for whole-olive products. Batch 14 pitted wording keeps with/without pits pragmatic while preserving exact Kalamata before black/Gemlik fallback; olive oil, hummus and tapenade remain blocked.",
+      "notes": "Kalamata olive wording routes through the olive family for whole-olive products. Pitted-olive wording keeps with/without pits pragmatic while preserving exact Kalamata before black/Gemlik fallback; olive oil, hummus and tapenade remain blocked.",
       "metadata": "{\"adapter_ref\": \"match_bridges:bridge_kalamata_oliver_parent\", \"adapter_refs\": [], \"fixture_refs\": [\"matcher_regression_kalamata_positive\", \"matcher_regression_kalamata_mix_positive\", \"matcher_regression_kalamata_black_positive\", \"matcher_regression_kalamata_gemlik_positive\", \"matcher_regression_kalamata_oliveoil_negative\", \"matcher_regression_pitted_kalamata_exact_positive\", \"matcher_regression_pitted_kalamata_black_fallback_positive\", \"matcher_regression_pitted_kalamata_with_pits_positive\", \"matcher_regression_pitted_kalamata_gemlik_fallback_positive\"], \"policy_ref\": \"current_review_matcher_regression\", \"risk\": \"route_gap_guard\", \"source_refs\": [\"current_review:accepted_direct_fix:kalamataoliver\", \"current_review:positive_sibling:pitted_kalamata_exact\", \"current_review:positive_sibling:pitted_kalamata_black_fallback\", \"current_review:positive_sibling:pitted_kalamata_with_pits\", \"current_review:positive_sibling:pitted_kalamata_gemlik_fallback\"], \"status\": \"wrapped_adapter\"}"
     },
     {
@@ -100194,7 +100194,7 @@
       "expected": null,
       "needs_product_text": true,
       "notes": "Ingredient-side apple cider requests reject pear or other cider flavors after broad cider routing.",
-      "metadata": "{\"adapter_ref\": \"matcher_layer_diagnostics:fastmatch_reject\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_cider_apple_positive\", \"plan_initial_cider_pear_negative\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"flavor_guard\", \"source_refs\": [\"plan_initial:cider_apple_positive\", \"current_review:stefan_correction:cider_apple\", \"sanity:appelcider\"], \"status\": \"wrapped_adapter\"}"
+      "metadata": "{\"adapter_ref\": \"matcher_layer_diagnostics:fastmatch_reject\", \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_cider_apple_positive\", \"plan_initial_cider_pear_negative\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"flavor_guard\", \"source_refs\": [\"plan_initial:cider_apple_positive\", \"current_review:documented_correction:cider_apple\", \"sanity:appelcider\"], \"status\": \"wrapped_adapter\"}"
     },
     {
       "variant_id": "vterm-7156c3459b106f28",
@@ -109518,7 +109518,7 @@
       "expected": null,
       "needs_product_text": true,
       "notes": "Superseded for ordinary recipe matching by the manual black-pepper no-match policy; kept inventoried until the legacy validator can be retired safely.",
-      "metadata": "{\"adapter_ref\": null, \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_hela_svartpepparkorn_hel_no_match\", \"plan_initial_hela_svartpepparkorn_malen_no_match\", \"plan_initial_svartpeppar_malen_no_match\", \"plan_initial_svartpeppar_malen_hel_no_match\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"form_guard\", \"source_refs\": [\"plan_initial:svartpeppar_no_match\", \"current_review:stefan_correction:svartpeppar\", \"sanity:svartpeppar\"], \"status\": \"deprecated\"}"
+      "metadata": "{\"adapter_ref\": null, \"adapter_refs\": [], \"fixture_refs\": [\"plan_initial_hela_svartpepparkorn_hel_no_match\", \"plan_initial_hela_svartpepparkorn_malen_no_match\", \"plan_initial_svartpeppar_malen_no_match\", \"plan_initial_svartpeppar_malen_hel_no_match\"], \"policy_ref\": \"matcher_layer_plan_initial\", \"risk\": \"form_guard\", \"source_refs\": [\"plan_initial:svartpeppar_no_match\", \"current_review:documented_correction:svartpeppar\", \"sanity:svartpeppar\"], \"status\": \"deprecated\"}"
     },
     {
       "variant_id": "vterm-629856f180f6f2f6",

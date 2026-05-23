@@ -84,8 +84,7 @@ def home(request: Request):
     except Exception as e:
         logger.debug(f"Could not load recipe sources: {e}")
 
-    return templates.TemplateResponse("home.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "home.html", {
         "stores": stores_list,
         "plugin_system": PLUGIN_SYSTEM_AVAILABLE,
         "ranking_mode": ranking_mode,
@@ -102,8 +101,7 @@ def stores_page(request: Request):
     if PLUGIN_SYSTEM_AVAILABLE:
         stores_list = get_enabled_stores()
 
-    return templates.TemplateResponse("stores.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "stores.html", {
         "stores": stores_list,
         "plugin_system": PLUGIN_SYSTEM_AVAILABLE,
         **get_i18n_context(request)
@@ -121,8 +119,7 @@ async def recipes_page(request: Request):
     except Exception as e:
         logger.debug(f"Could not load image download state for recipes page: {e}")
 
-    return templates.TemplateResponse("recipes.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "recipes.html", {
         "image_download_running": image_download_running,
         **get_i18n_context(request)
     })
@@ -135,8 +132,7 @@ def config_page(request: Request):
     if PLUGIN_SYSTEM_AVAILABLE:
         stores_list = get_all_stores()
 
-    return templates.TemplateResponse("config.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "config.html", {
         "stores": stores_list,
         "plugin_system": PLUGIN_SYSTEM_AVAILABLE,
         **get_i18n_context(request)

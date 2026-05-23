@@ -1204,7 +1204,7 @@ variants = ["mandelpotatis"]
 ingredient_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Inactivated 2026-05-16: mandelpotatis is a specific variety, not generic potatis (Stefan policy)."
+notes = "Inactivated 2026-05-16: mandelpotatis is a specific variety, not generic potatis."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -9122,7 +9122,7 @@ variants = ["scotchbonnet", "scotch bonnet"]
 ingredient_terms = ["habanero"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Scotch bonnet is a habanero variety — map to habanero so habanero products match scotch bonnet ingredient (batch 49)."
+notes = "Scotch bonnet is a habanero variety — map to habanero so habanero products match scotch bonnet ingredient."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"

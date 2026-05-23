@@ -53,6 +53,11 @@ Typical authoring families are:
   `stop-word`, `non-food-keyword`, `space-normalization`, flavor/carrier,
   context, cuisine, compound, specialty, processed/form, substitution, and
   secondary-pattern commands
+- mechanical maintenance: `dm matcher fixture remove`, `dm matcher modify
+  no-match-policy`, `dm matcher modify match-bridge`, `dm matcher promote
+  --apply-staged`, and `dm matcher refresh-line-refs --fix`
+- smart-blocker scaffolding: `dm matcher add smart-blocker` creates and chains a
+  Python stub; the actual matcher logic is still a manual code edit
 
 Manual Track A, when no `dm matcher add` command fits:
 
@@ -68,12 +73,19 @@ Manual Track B:
 ./bin/dm matcher gates --track B --policy-ref <policy_ref>
 ```
 
-Inactivate/remove a registry rule:
+Inactivate or remove a registry rule/fixture:
 
 ```text
 status = "inactive"
 ./bin/dm matcher gates --track B --registry-changed --allow-removals
+
+./bin/dm matcher fixture remove <fixture_id>
 ```
+
+`fixture remove` cascades the fixture deletion through the authoritative fixture
+TOML source, inventory fixture refs, registry fixture refs, regenerated JSON, and
+pre-flight. It refuses to leave empty inventory or registry rows unless you pass
+the explicit `--drop-empty-inventory` or `--drop-empty-registry-entries` flags.
 
 Iterate with live pre-flight feedback:
 
@@ -93,8 +105,10 @@ Single maintenance/check operations:
 ./bin/dm matcher preflight
 ./bin/dm matcher sanity
 ./bin/dm matcher promote
+./bin/dm matcher promote --apply-staged /tmp/term-baseline-promotion
 ./bin/dm matcher regen --check
 ./bin/dm matcher refresh-line-refs --dry-run
+./bin/dm matcher refresh-line-refs --fix
 ```
 
 Generated-file rule: edit the authoritative TOML sources, not generated JSON or
@@ -200,10 +214,11 @@ Add only the flags that match the change:
   checkout or write-enabled dev container.
 - `--baseline-output-dir /tmp/term-baseline-promotion` only when the checkout is
   genuinely read-only; the wrapper stages generated files and stops so you can
-  apply them before rerunning gates. If promote is accidentally run as a user
-  that cannot write the checkout (e.g. root in the dev container instead of
-  appuser), the wrapper now fails fast with a message pointing at the right
-  invocation; there is no silent staging fallback.
+  apply them with `./bin/dm matcher promote --apply-staged <dir>` before
+  rerunning gates. If promote is accidentally run as a user that cannot write
+  the checkout (e.g. root in the dev container instead of appuser), the wrapper
+  now fails fast with a message pointing at the right invocation; there is no
+  silent staging fallback.
 - `--reload-cache --fresh-cache-gates` when cache/UI/cache-backed validation is
   part of the handoff.
 - `--include-support-self-checks` when support-check code or schemas changed.
@@ -219,9 +234,11 @@ Common single-operation wrappers:
 ./bin/dm matcher preflight              # pre-flight only
 ./bin/dm matcher sanity                 # deep matcher sanity only
 ./bin/dm matcher promote                # verified-term baseline promotion
+./bin/dm matcher promote --apply-staged /tmp/term-baseline-promotion
 ./bin/dm matcher regen                  # generated JSON then coverage
 ./bin/dm matcher regen --check          # read-only generated-artifact drift check
 ./bin/dm matcher refresh-line-refs      # refresh inventory anchors + generated JSON
+./bin/dm matcher refresh-line-refs --fix  # explicit write-mode alias
 ./bin/dm matcher guide <shape>          # show the recommended path for a rule type
 ```
 
@@ -304,6 +321,21 @@ CLI write the registry row and focused sanity stub:
   --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:402
 ```
 
+For an existing simple `no-match-policy`, use the modifier instead of hand
+keeping `variants`, guards, coverage, and negative-example payloads in sync:
+
+```bash
+./bin/dm matcher modify no-match-policy policy_generic_oil \
+  --set-ingredient-patterns "\bolja\b" \
+  --set-blocked-offer-patterns "\bolja\b" \
+  --negative-ingredient "1 dl neutral olja" \
+  --negative-offer "Olivolja Extra Virgin"
+```
+
+The modifier rewrites the synchronized fields in one pass, bumps the
+`rule_version`, and runs pre-flight by default. Use `--dry-run` first when the
+existing policy has broad fixture coverage.
+
 If a hardcoded extraction helper is narrowed after an `extraction.py` edit, do
 not hand-delete coverage rows. For a simple one-canonical entry, rewrite the
 covered side/source refs instead:
@@ -359,6 +391,22 @@ failing `matches_ingredient()` check alone as enough evidence for a product-name
 blocker; use backend/product diagnostics or a focused behavior sanity when the
 generated table canary is not enough.
 
+For repeated backend-only product/ingredient guard patterns that cannot be
+expressed as existing overlays, scaffold the function and chain with:
+
+```bash
+./bin/dm matcher add smart-blocker raw_sill \
+  --description "Block raw sill products unless the ingredient asks for raw sill." \
+  --sanity-ingredient "sill" \
+  --sanity-offer "Rå sillfilé" \
+  --expect no-match
+```
+
+This only creates the `matching.py` helper stub, inserts the call into
+`_product_requirement_guards_allow_product`, and optionally adds a sanity
+placeholder. The rule body remains a manual Python edit because the semantic
+logic is the important part.
+
 When the failure mode is unclear, run `dm matcher explain` before digging
 through large Python tables. The first version is read-only and intentionally
 narrow: it shows extraction, precomputed product keywords, likely PNB/FPB/KSBC
@@ -390,6 +438,18 @@ editing TOML or Python:
 
 Remember that `match-bridge` entries are diagnostics/migration metadata unless
 the corresponding runtime-wired parent/synonym/offer-keyword row exists too.
+For narrowing a simple existing bridge, prefer the modifier over editing the
+same offer-pattern fields in several TOML payloads:
+
+```bash
+./bin/dm matcher modify match-bridge bridge_alger_nori \
+  --remove-offer-patterns "\bseaweed\b" \
+  --reason "Narrow bridge to nori-specific products."
+```
+
+The modifier rewrites the bridge variants, offer terms, coverage, and example
+payloads together. It refuses nested bridge blockers/backend allowances so those
+still get an explicit manual review.
 
 The same overlay file also backs stop/non-food filters, space-normalization,
 flavor/carrier, processed-food, cuisine-context, compound-protection,
@@ -535,8 +595,8 @@ decision in the runbook.
 
 | Track | Use for | Typical files | Required proof |
 | --- | --- | --- | --- |
-| Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/KSBC/GPB additions, cuisine-context restrictions, compound/subword protection, and tiny runtime guards. | `dm matcher add pnb|fpb|ksbc|gpb`, `runtime_rule_overlays.toml`, `recipe_context.py` for `CUISINE_CONTEXT`, `compound_text.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
-| Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
+| Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/KSBC/GPB additions, cuisine-context restrictions, compound/subword protection, and tiny runtime guards. | `dm matcher add pnb|fpb|ksbc|gpb`, `runtime_rule_overlays.toml`, `dm matcher add smart-blocker` scaffolds, `recipe_context.py` for `CUISINE_CONTEXT`, `compound_text.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
+| Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. Use `dm matcher modify no-match-policy`, `dm matcher modify match-bridge`, and `dm matcher fixture remove` for supported mechanical rewrites/removals. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
 
 There is one deliberately small path between those two: **lightweight registry
 alias**. Use it for exact spelling/plural/compound aliases on already-wired
@@ -653,7 +713,7 @@ table.
 | --- | --- | --- | --- |
 | Exact synonym or spelling alias | `./bin/dm matcher add keyword-synonym ...` for `keyword_synonym`; otherwise the matching parent/routing registry entry | One term is the same ingredient family as another. Default to the lightweight alias path for spelling/plural/compound aliases; escalate to Track B only for routing/parity/product-policy implications. | Ad-hoc extraction code or full fixture/inventory ceremony for a plain alias. |
 | Ingredient/offer bridge (recipe wording differs from product wording) | `./bin/dm matcher add keyword-extra-parent ...` (preferred for fan-out) or `./bin/dm matcher add ingredient-parent ...` | Recipe term and product term differ but should match (e.g. `nori` → `alger`, `citrusfrukter` → `citron`/`lime`/`apelsin`). These surfaces are wired into the runtime matcher today. | Adding only to `match_bridge.toml`. That surface is **declarative-only / staged for migration** — it does not affect runtime routing on its own. See the match_bridge note below the table. |
-| No-match/blocking policy | `./bin/dm matcher add no-match-policy ...` after a durable negative fixture exists | Ingredient pattern plus offer keyword/pattern should never match. | One-off Python if a declarative policy can express it. |
+| No-match/blocking policy | `./bin/dm matcher add no-match-policy ...` after a durable negative fixture exists; `./bin/dm matcher modify no-match-policy ...` for simple existing policies | Ingredient pattern plus offer keyword/pattern should never match. | One-off Python if a declarative policy can express it, or manual TOML rewrites when the modifier supports the shape. |
 | Offer keyword extraction | `./bin/dm matcher add offer-extra-keyword ...` or `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Product wording should expose an additional canonical offer keyword. | Adding recipe synonyms when only offer extraction is missing. |
 | Recipe extraction helper | `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures. |
 | Parent/canonical fallback | `./bin/dm matcher add ingredient-parent ...`, `parent-match-only ...`, or `keyword-extra-parent ...` | A child term should expose a broader canonical, sometimes only for matching. | Parent mappings that erase meaningful product-form differences. |
@@ -674,6 +734,7 @@ table.
 | Product qualifier required for a keyword | `./bin/dm matcher add qualifier-required-keyword ...` | A keyword should match product variants only when product qualifier words also appear in the ingredient line. | Specialty qualifier rules when the qualifier belongs to a specific product family rather than every product-side word. |
 | Product keyword substitution | `./bin/dm matcher add product-name-substitution ...` | Product extraction should rewrite one extracted keyword to a more specific canonical only when required product words are also present. | Synonym/parent rules when the terms are always equivalent, regardless of product wording. |
 | Secondary ingredient pattern | `./bin/dm matcher add secondary-ingredient-pattern ...` | A product is mainly another food and only contains the matched keyword as a secondary ingredient, with optional product-side exceptions. | Broad ingredient-family policy that belongs in PNB/FPB/processed/form logic. |
+| Smart backend blocker | `./bin/dm matcher add smart-blocker ...` for scaffold/chain only, then manual `matching.py` logic | A repeated backend-only guard shape needs a named helper and the existing declarative/runtime overlays cannot express it. | Letting the generated stub pass as a finished rule; it intentionally contains no domain logic. |
 | Declarative bridge guard | `match_bridge.toml` nested `blockers` / `backend_allowances` | A bridge needs scoped negative guards or backend allowance metadata with fixture refs. | Hiding broad bridge behavior in unrelated backend code. |
 | Backend-only validation | `recipe_matcher_backend.py` | The rule needs recipe context, retry behavior, or materialization-time validation. | Fixing only backend when fast/fullscan/routing also need the rule. |
 | Routing-only gap | `./bin/dm matcher add ingredient-routing-parent ...`, `recipe-routing-helper ...`, or `term_indexes.py` helper | Fullscan matches but routed cache never sees the pair. | Backend allowances that hide missing route terms. |
@@ -940,10 +1001,10 @@ fallback/debug form.
 ### Registry Entries
 
 If the change uses a live term-registry rule surface, prefer the matching
-`dm matcher add` authoring command. Use `./bin/dm matcher guide <shape>` when
-unsure. Manual TOML editing is still valid for careful fallback/debug work,
-inactivation/removal, or changes outside the supported authoring shapes. Those
-files live under:
+`dm matcher add` or `dm matcher modify` command. Use
+`./bin/dm matcher guide <shape>` when unsure. Manual TOML editing is still valid
+for careful fallback/debug work, inactivation/removal, or changes outside the
+supported authoring shapes. Those files live under:
 
 ```text
 app/languages/sv/ingredient_matching/term_registry/entries/
@@ -956,8 +1017,10 @@ Common files and their normal authoring path:
 - `ingredient_routing_parent.toml` — `dm matcher add ingredient-routing-parent`
 - `keyword_extra_parent.toml` — `dm matcher add keyword-extra-parent`
 - `keyword_synonym.toml` — `dm matcher add keyword-synonym`
-- `match_bridge.toml` — staged/declarative-only; see the match_bridge callout
-- `no_match_policy.toml` — `dm matcher add no-match-policy`
+- `match_bridge.toml` — staged/declarative-only; `dm matcher modify match-bridge`
+  can narrow simple existing rows; see the match_bridge callout
+- `no_match_policy.toml` — `dm matcher add no-match-policy` or
+  `dm matcher modify no-match-policy`
 - `offer_extra_keyword.toml` — `dm matcher add offer-extra-keyword`
 - `parent_match_only.toml` — `dm matcher add parent-match-only`
 - `recipe_routing_helper.toml` — `dm matcher add recipe-routing-helper`
@@ -1247,7 +1310,8 @@ Useful wrapper options:
 - `--no-generate-coverage` disables the automatic derived coverage refresh
   when you intentionally want pre-flight to report stale coverage.
 - `--baseline-output-dir` stages baseline promotion output and stops; apply the
-  staged files, then rerun the wrapper without that flag.
+  staged files with `./bin/dm matcher promote --apply-staged <dir>`, then rerun
+  the wrapper without that flag.
 - `--reload-cache --fresh-cache-gates` adds `dev_reload.py` and final
   cache-fresh fixture/parity gates.
 - `--dry-run` prints the exact script list without running it.

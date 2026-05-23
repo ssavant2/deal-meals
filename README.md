@@ -17,7 +17,7 @@ when I can, but maintenance is best-effort.
 
 
 **Built with AI.** The code is written by [Claude](https://claude.ai) and [Codex](https://openai.com/codex/). 
-The design, logic, product decisions, and direction are mine — I describe what I want, review the results, and decide what stays. I have technically written 4 or 5 lines of code, but the rest of it was done by AI.
+The design, logic, product decisions, and direction are mine — I describe what I want, review the results, and decide what stays. I have probably written 6 or 7 lines of code myself, but the rest of it was done by AI.
 
 
 **How it works:** Choose the store you do your weekly shopping at. The app fetches their current offers and matches them against thousands of recipes. The result is a personalized list of meal suggestions based on what's actually on sale this week — organized by category (meat, fish, vegetarian, smart buys) and ranked by how much you save.

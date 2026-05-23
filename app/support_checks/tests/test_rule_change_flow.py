@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 
 from cli import dm as dm_cli
@@ -1129,6 +1130,267 @@ def normalize_probe(text: str) -> str:
                 gate_result.stdout.find("generate_matcher_contract_json_from_toml_sources.py"),
                 gate_result.stdout.find("generate_matcher_registry_coverage.py"),
             )
+
+    def test_cli_fixture_remove_cascades_fixture_refs_and_regen(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            fixture_id = "matcher_regression_riven_cheddarost_spread_negative"
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "fixture",
+                    "remove",
+                    fixture_id,
+                    "--tree-root",
+                    str(tree_root),
+                    "--drop-empty-inventory",
+                    "--drop-empty-registry-entries",
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            fixture_source = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            ).read_text(encoding="utf-8")
+            fixture_json = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+            ).read_text(encoding="utf-8")
+            inventory_source = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
+            ).read_text(encoding="utf-8")
+            no_match_policy = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "no_match_policy.toml"
+            ).read_text(encoding="utf-8")
+            generated_fixture_coverage = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "matcher_regression_case.toml"
+            ).read_text(encoding="utf-8")
+
+            self.assertNotIn(fixture_id, fixture_source)
+            self.assertNotIn(fixture_id, fixture_json)
+            self.assertNotIn(fixture_id, inventory_source)
+            self.assertNotIn(fixture_id, no_match_policy)
+            self.assertNotIn(fixture_id, generated_fixture_coverage)
+
+    def test_cli_modify_no_match_policy_rewrites_synced_guard_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "modify",
+                    "no-match-policy",
+                    "policy_generic_oil",
+                    "--set-ingredient-patterns",
+                    r"\bolja\b",
+                    "--set-blocked-offer-keywords",
+                    "",
+                    "--set-blocked-offer-patterns",
+                    r"\brapsolja\b",
+                    "--no-run-gates",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            no_match_policy_file = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "no_match_policy.toml"
+            )
+            blocks = re.split(r"(?m)^(?=\[\[entries\]\]\s*$)", no_match_policy_file.read_text(encoding="utf-8"))
+            policy_entry = None
+            for block in blocks:
+                if 'id = "policy_generic_oil"' not in block:
+                    continue
+                payload = tomllib.loads(block)
+                policy_entry = payload["entries"][0]
+                break
+
+            self.assertIsNotNone(policy_entry)
+            assert policy_entry is not None
+            payload = policy_entry["language_payload"]["no_match_policy"]
+            self.assertEqual(policy_entry["variants"], [r"generic_oil_no_match ! \brapsolja\b"])
+            self.assertEqual(policy_entry["negative_guards"], [r"generic_oil_no_match ! \brapsolja\b"])
+            self.assertEqual(payload["ingredient_patterns"], [r"\bolja\b"])
+            self.assertEqual(payload["blocked_offer_keywords"], [])
+            self.assertEqual(payload["blocked_offer_patterns"], [r"\brapsolja\b"])
+            self.assertEqual(payload["rule_version"], 2)
+            self.assertEqual(policy_entry["coverage"][0]["variant"], r"generic_oil_no_match ! \brapsolja\b")
+            self.assertEqual(policy_entry["negative_examples"][0]["offer_name"], r"generic_oil_no_match ! \brapsolja\b")
+
+    def test_cli_modify_match_bridge_rewrites_synced_offer_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "modify",
+                    "match-bridge",
+                    "bridge_alger_nori",
+                    "--remove-offer-patterns",
+                    r"\bseeweed\b",
+                    "--no-run-gates",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            match_bridge_file = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "match_bridge.toml"
+            )
+            blocks = re.split(r"(?m)^(?=\[\[entries\]\]\s*$)", match_bridge_file.read_text(encoding="utf-8"))
+            bridge_entry = None
+            for block in blocks:
+                if 'id = "bridge_alger_nori"' not in block:
+                    continue
+                payload = tomllib.loads(block)
+                bridge_entry = payload["entries"][0]
+                break
+
+            self.assertIsNotNone(bridge_entry)
+            assert bridge_entry is not None
+            payload = bridge_entry["language_payload"]["match_bridge"]
+            self.assertEqual(payload["rule_version"], 2)
+            self.assertEqual(payload["offer_patterns"], [r"\bnori\b", r"\bseaweed\b"])
+            self.assertNotIn(r"\bseeweed\b", bridge_entry["offer_terms"])
+            self.assertNotIn(r"\balger\b -> \bseeweed\b", bridge_entry["variants"])
+            self.assertTrue(
+                all(row["variant"] != r"\balger\b -> \bseeweed\b" for row in bridge_entry["coverage"])
+            )
+
+    def test_cli_promote_apply_staged_manifest_copies_changed_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = tree_root / "app"
+            app_dir.mkdir(parents=True)
+            target = app_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "baselines"
+            target.mkdir(parents=True)
+            target_file = target / "verified_matcher_terms.json"
+            target_file.write_text('{"old": true}\n', encoding="utf-8")
+
+            output_dir = tree_root / "promotion-output"
+            staged_file = output_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "baselines" / "verified_matcher_terms.json"
+            staged_file.parent.mkdir(parents=True)
+            staged_file.write_text('{"new": true}\n', encoding="utf-8")
+            (output_dir / "promotion_manifest.json").write_text(
+                json.dumps({
+                    "changed_files": [
+                        {
+                            "source_path": "languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json",
+                            "staged_path": str(staged_file),
+                        }
+                    ]
+                }),
+                encoding="utf-8",
+            )
+
+            paths = dm_cli.MatcherPaths(
+                tree_root=tree_root,
+                app_dir=app_dir,
+                repo_root=tree_root,
+                fixture_file=app_dir / "fixture.json",
+                inventory_file=app_dir / "inventory.json",
+                fixture_source_file=app_dir / "fixture.toml",
+                inventory_source_file=app_dir / "inventory.toml",
+                registry_entries_dir=app_dir / "entries",
+                keyword_extra_parent_file=app_dir / "keyword_extra_parent.toml",
+                keyword_synonym_file=app_dir / "keyword_synonym.toml",
+                runtime_overlay_file=app_dir / "runtime_rule_overlays.toml",
+                deep_sanity_file=app_dir / "run_deep_matcher_sanity.py",
+            )
+
+            dm_cli._apply_promote_staged_output(paths=paths, output_dir=output_dir, dry_run=False)
+            self.assertEqual(target_file.read_text(encoding="utf-8"), '{"new": true}\n')
+
+    def test_cli_add_smart_blocker_scaffolds_function_and_chain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "smart-blocker",
+                    "phase4 sample blocker",
+                    "--description",
+                    "Synthetic smart-blocker scaffold for CLI coverage.",
+                    "--no-run-gates",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            matching_py = (
+                app_dir / "languages" / "sv" / "ingredient_matching" / "matching.py"
+            ).read_text(encoding="utf-8")
+            self.assertIn("def _phase4_sample_blocker_requirement_allows_product(", matching_py)
+            self.assertIn(
+                "and _phase4_sample_blocker_requirement_allows_product(product_lower, ingredient_lower, matched_keyword)",
+                matching_py,
+            )
+            self.assertIn("return True", matching_py)
 
     def test_phase4_cli_dry_run_canary_does_not_write(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

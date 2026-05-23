@@ -8,7 +8,7 @@ variants = ["färskpotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Inactivated 2026-05-16: färskpotatis is a specific variety, not generic potatis (Stefan policy)."
+notes = "Inactivated 2026-05-16: färskpotatis is a specific variety, not generic potatis."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -31,7 +31,7 @@ variants = ["farskpotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Inactivated 2026-05-16: färskpotatis is a specific variety (Stefan policy)."
+notes = "Inactivated 2026-05-16: färskpotatis is a specific variety."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -54,7 +54,7 @@ variants = ["bakpotatis"]
 offer_terms = ["potatis"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Inactivated 2026-05-16: bakpotatis is a specific variety (Stefan policy)."
+notes = "Inactivated 2026-05-16: bakpotatis is a specific variety."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"

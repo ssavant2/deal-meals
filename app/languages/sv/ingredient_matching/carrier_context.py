@@ -395,7 +395,7 @@ CARRIER_PRODUCTS: FrozenSet[str] = frozenset({
     # Spice mix brands (contain salt/herb names as ingredients, not standalone)
     'herbamare',  # "Ört Havssalt Herbamare" - havssalt is an ingredient in spice mix
 
-    # === BATCH 2: MORE ADDITIONS FROM WILLYS CATALOG (8245 products) ===
+    # Additional carrier products from the Willys catalog.
 
     # Preserves/jams - "Hallonsylt" should NOT match "hallon" recipe
     'sylt',  # 30 products (hallonsylt, jordgubbssylt, lingonsylt, etc.)

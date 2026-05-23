@@ -10192,7 +10192,7 @@ test("svartvinbärsdryck drickfärdig matches svartvinbärssaft", match("Svartvi
 test("saft svartvinbär still matches", match("Saft Svartvinbär 500ml Herrljunga", "svartvinbärssaft", "beverages"), "svartvinbärssaft")
 # Regression: blandsaft jordgubb must still map to jordgubbssaft, not be broken
 test("blandsaft jordgubb still matches jordgubbssaft", match("Blandsaft Jordgubb 500ml", "jordgubbssaft", "beverages"), "jordgubbssaft")
-# Regression: bare kokos must NOT match kokosmjölk (Stefan policy: kokos = dry coconut only)
+# Regression: bare kokos must NOT match kokosmjölk (kokos = dry coconut only)
 test("bare kokos does not match kokosmjölk", match("kokos", "Kokosmjölk 400ml ICA", "dairy"), None)
 
 section("Batch 16-18 P1/medium melon/sallad/snabbkaffe regressions")

@@ -128,7 +128,8 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('pressgurka', 'inlagdgurka'),
     # saltgurka removed from inlagdgurka mapping — saltgurka is lake-fermented
     # (Polish/Russian style), distinct in taste/texture from ättiks-pickled
-    # smörgåsgurka/bordsgurka/cornichons. Stefan policy: specific → exact or zero.
+    # smörgåsgurka/bordsgurka/cornichons. Specific varieties should exact-match
+    # or stay unmatched.
     ('saltgurkor', 'inlagdgurka'),
     ('pickles', 'inlagdgurka'),
     ('pickle', 'inlagdgurka'),

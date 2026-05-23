@@ -806,7 +806,7 @@ _READY_PACKAGED_LENTIL_PRODUCT_CUES = frozenset({
     'färdigkokta', 'fardigkokta',
     'burk', 'tetra',
     # 380g is the standard tetra-pak weight for cooked/ready-to-serve lentils
-    # across brands (ICA, Zeta, Garant, GoGreen). Stefan-confirmed convention.
+    # across brands (ICA, Zeta, Garant, GoGreen).
     '380g', '380 g',
 })
 _DRY_LENTIL_INGREDIENT_CUES = frozenset({
@@ -1711,12 +1711,12 @@ def _hjortronsylt_requirement_allows_product(
     return 'hjortron' in product_lower
 
 
-def _batch10_form_requirement_allows_product(
+def _produce_form_requirement_allows_product(
     product_lower: str,
     ingredient_lower: str,
     matched_keyword: Optional[str],
 ) -> bool:
-    """Batch-review form constraints that are general grocery principles."""
+    """Fresh, preserved, and color-specific produce wording must match product form."""
 
     if matched_keyword in {'persika', 'persikor'} and any(cue in ingredient_lower for cue in ('färsk persika', 'farsk persika', 'färska persikor', 'farska persikor')):
         if any(cue in product_lower for cue in _PRESERVED_FRUIT_PRODUCT_CUES):
@@ -2287,7 +2287,7 @@ def _raw_sill_requirement_allows_product(
     return not any(cue in product_lower for cue in _FINISHED_INLAGD_SILL_PRODUCT_CUES)
 
 
-def _batch15_requirement_allows_product(
+def _product_requirement_guards_allow_product(
     product_lower: str,
     ingredient_lower: str,
     matched_keyword: Optional[str],
@@ -2308,13 +2308,13 @@ def _batch15_requirement_allows_product(
     )
 
 
-def _batch14_completion_requirement_allows_product(
+def _recipe_specific_product_guards_allow_product(
     product_lower: str,
     ingredient_lower: str,
     matched_keyword: Optional[str],
     product_keywords: Iterable[str] = (),
 ) -> bool:
-    """Principle fixes gathered from the final Batch 14 completion pass."""
+    """Miscellaneous recipe-specific product guards that do not fit a narrower helper."""
 
     product_kw_set = set(product_keywords)
 
@@ -3478,7 +3478,7 @@ def matches_ingredient(
         return None
     if not _hjortronsylt_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
         return None
-    if not _batch10_form_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+    if not _produce_form_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
         return None
     if not _noodle_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
         return None
@@ -3496,14 +3496,14 @@ def matches_ingredient(
         return None
     if not _falafel_mix_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
         return None
-    if not _batch14_completion_requirement_allows_product(
+    if not _recipe_specific_product_guards_allow_product(
         product_lower,
         ingredient_lower,
         matched_keyword,
         product_keywords,
     ):
         return None
-    if not _batch15_requirement_allows_product(
+    if not _product_requirement_guards_allow_product(
         product_lower,
         ingredient_lower,
         matched_keyword,
@@ -5010,7 +5010,7 @@ def matches_ingredient_fast(
         matched_keyword,
     ):
         return None
-    if not _batch10_form_requirement_allows_product(
+    if not _produce_form_requirement_allows_product(
         offer_data['name_normalized'],
         ingredient_lower,
         matched_keyword,
@@ -5064,14 +5064,14 @@ def matches_ingredient_fast(
         matched_keyword,
     ):
         return None
-    if not _batch14_completion_requirement_allows_product(
+    if not _recipe_specific_product_guards_allow_product(
         offer_data['name_normalized'],
         ingredient_lower,
         matched_keyword,
         offer_data.get('keywords', ()),
     ):
         return None
-    if not _batch15_requirement_allows_product(
+    if not _product_requirement_guards_allow_product(
         offer_data['name_normalized'],
         ingredient_lower,
         matched_keyword,

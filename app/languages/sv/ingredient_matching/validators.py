@@ -542,9 +542,8 @@ def check_specialty_qualifiers(
                     and base_word in {'färskost', 'fraiche'}
                     and 'naturell' in offer_quals
                 ):
-                    # Stefan policy: when a recipe asks for a flavored
-                    # färskost/fraiche, the requested flavor and the naturell
-                    # base product are both acceptable fallbacks.
+                    # Flavored färskost/fraiche recipes allow the requested
+                    # flavor and the naturell base product as fallbacks.
                     matched = True
                 if not matched:
                     continue

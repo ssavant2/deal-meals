@@ -262,7 +262,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # Lätt yoghurt — recipe "lättyoghurt" should match only "Lätt"-labeled products,
     # not full-fat 10% turkisk yoghurt. Bidirectional via BIDIRECTIONAL_PER_KEYWORD.
     # Trade-off accepted: low-fat products without the word "lätt" in name (e.g.
-    # "Yoghurt 0.5%") also don't match — but it's OK per Stefan.
+    # "Yoghurt 0.5%") also do not match.
     'yoghurt': {
         'lätt', 'latt', 'light',
     },

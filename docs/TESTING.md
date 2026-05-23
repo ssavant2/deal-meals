@@ -165,9 +165,13 @@ Refresh moved inventory anchors with:
 `refresh-line-refs` updates the inventory TOML source and regenerates its
 generated JSON, so it should not be run against a read-only production
 filesystem. The raw support-check scripts remain fallback/debug forms.
+Use `./bin/dm matcher refresh-line-refs --fix` when you want the write-mode
+intent to be explicit; it is the same write operation, while `--dry-run` remains
+read-only.
 
 The Swedish term registry is now the vocabulary coverage surface for matcher
-terms. For live registry rule surfaces, prefer `dm matcher add`:
+terms. For live registry rule surfaces, prefer the supported `dm matcher`
+authoring or maintenance command:
 
 ```bash
 ./bin/dm matcher add keyword-synonym ...
@@ -201,6 +205,10 @@ terms. For live registry rule surfaces, prefer `dm matcher add`:
 ./bin/dm matcher add qualifier-required-keyword ...
 ./bin/dm matcher add product-name-substitution ...
 ./bin/dm matcher add secondary-ingredient-pattern ...
+./bin/dm matcher add smart-blocker ...
+./bin/dm matcher modify no-match-policy ...
+./bin/dm matcher modify match-bridge ...
+./bin/dm matcher fixture remove <fixture_id>
 ```
 
 Use `./bin/dm matcher guide <shape>` when the right authoring surface is
@@ -208,6 +216,10 @@ unclear. Supported runtime data surfaces should go through `dm matcher add` so
 the runtime overlay and focused sanity canary are generated. Form rules and
 backend-only guards remain manual edits plus `./bin/dm matcher gates --track
 A|B`.
+`smart-blocker` is scaffold-only: it creates the helper and chain insertion, then
+the rule body still needs a normal Python implementation and gates. The
+`modify ...` and `fixture remove` commands are for mechanical TOML/contract
+bookkeeping around existing durable rules.
 
 After adding or changing registry TOML manually, run `./bin/dm matcher gates`
 for the chosen track. For targeted registry-only troubleshooting, the underlying
