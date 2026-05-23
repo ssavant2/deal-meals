@@ -1046,22 +1046,24 @@ def main() -> int:
             output_dir=args.output_dir,
         )
     except PermissionError as exc:
+        # Default behavior: write to checkout. If write fails (caller ran as a
+        # UID that doesn't own the host-mounted files, e.g. root instead of
+        # appuser), fail loudly with the fix instead of silently staging.
+        # Explicit --output-dir is the supported way to opt in to staging for
+        # read-only container environments.
         if args.output_dir is not None or args.dry_run:
             raise
-        fallback_dir = Path(os.environ.get("DEAL_MEALS_BASELINE_OUTPUT_DIR", "/tmp/term-baseline-promotion"))
         print(
-            "\nWARNING: baseline promotion could not write to the checkout "
-            f"({exc}). Staging generated files instead."
+            f"\nERROR: baseline promotion could not write to the checkout ({exc}).",
+            flush=True,
         )
-        print("Tip: in dev, prefer running the wrapper with `docker compose exec -T -u appuser -w /app web ...`.")
-        return promote(
-            config=config,
-            dry_run=args.dry_run,
-            migrate_hashes=args.migrate_hashes,
-            allow_removals=args.allow_removals,
-            confirm_large_removals=args.confirm_large_removals,
-            output_dir=fallback_dir,
+        print(
+            "In dev, re-run as the file-owning user:\n"
+            "  docker compose exec -T -u appuser -w /app web python support_checks/promote_term_baseline.py ...\n"
+            "Or, for read-only container environments, pass --output-dir explicitly to stage files.",
+            flush=True,
         )
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

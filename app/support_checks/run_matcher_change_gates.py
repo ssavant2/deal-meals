@@ -737,12 +737,14 @@ def _warn_before_running(args: argparse.Namespace, changes: ChangeFlags) -> None
         baseline_dir = APP_DIR / "languages" / "sv" / "ingredient_matching" / "term_registry" / "baselines"
         if not os.access(baseline_dir, os.W_OK):
             print(
-                "\nNOTE: baseline promotion may need the file-owning dev user. Prefer:\n"
+                "\nERROR: baseline directory is not writable as the current user. "
+                "Re-run as the file-owning user:\n"
                 "  docker compose exec -T -u appuser -w /app web "
                 "python support_checks/run_matcher_change_gates.py ...\n"
-                "If that is not available, promotion will stage files under /tmp/term-baseline-promotion.",
+                "Or pass --baseline-output-dir to explicitly stage files for a read-only environment.",
                 flush=True,
             )
+            raise SystemExit(1)
     if _stages_baseline(args, changes):
         print(
             "\nNOTE: --baseline-output-dir stages generated files outside the checkout. "
