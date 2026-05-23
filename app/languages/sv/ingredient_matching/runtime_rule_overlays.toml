@@ -214,6 +214,13 @@ keyword = "limejuice"
 blockers = ["coriander"]
 reason = "Coriander-lime cooking sauces (e.g. Coriander Lime El Taco Truck) are not pure limejuice. Mirrors existing PNB lime:{coriander}."
 
+[[product_name_blockers]]
+id = "runtime_pnb_banana"
+status = "active"
+keyword = "banana"
+blockers = ["bar", "energibar"]
+reason = "Energy bars with banana flavoring are not substitutes for fresh bananas or banana-based liquids (milkshakes, smoothies). 'Bar Energi Havre Banana Corny' should not match milkshake/banana ingredients."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -367,6 +374,13 @@ status = "active"
 keyword = "äpplejuice"
 blockers = ["granat", "granatäpple", "granatappel", "granatäpplejuice", "granatappeljuice"]
 reason = "Pomegranate juice (granatäpplejuice) is not apple juice — the 'äpplejuice' substring in the ingredient is misleading. Mirrors existing FPB äpple:{granatäpple}."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_ost"
+status = "active"
+keyword = "ost"
+blockers = ["balsamicostekt"]
+reason = "Word 'ost' (cheese) substring-matches inside 'balsamicostekT' (balsamic-fried red onion); not a cheese ingredient"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
