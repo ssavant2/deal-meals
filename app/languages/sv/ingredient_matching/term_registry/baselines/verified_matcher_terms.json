@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 398,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 103,
-      "keyword_synonym_mapping": 119,
+      "keyword_synonym_mapping": 121,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
-      "keyword_synonym": 119,
+      "keyword_synonym": 121,
       "match_bridge": 1971,
       "matcher_regression_case": 1491,
       "matcher_rule_inventory": 459,
@@ -42,8 +42,8 @@
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5560,
-    "variants_missing_product_text": 1751,
+    "variant_count": 5562,
+    "variants_missing_product_text": 1753,
     "variants_with_product_text": 3809
   },
   "variants": [
@@ -116806,11 +116806,53 @@
       "needs_product_text": false,
       "notes": null,
       "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [868], \"output\": \"vegomargarin\"}"
+    },
+    {
+      "variant_id": "vterm-a78932af31602db9",
+      "row_index": 4720,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:kokos-flakes",
+      "source_id": "kokos-flakes",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "kokos-flakes",
+      "canonical": "kokosflingor",
+      "expected_family": "kokosflingor",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"kokosflingor\"}"
+    },
+    {
+      "variant_id": "vterm-a3fdea6fc81f6d93",
+      "row_index": 4721,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:kokosflakes",
+      "source_id": "kokosflakes",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "kokosflakes",
+      "canonical": "kokosflingor",
+      "expected_family": "kokosflingor",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"kokosflingor\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1536,
+      "no_product_text": 1538,
       "static_verified": 2533,
       "synthetic_verified": 1491
     },
@@ -116821,7 +116863,7 @@
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
-      "keyword_synonym": 119,
+      "keyword_synonym": 121,
       "match_bridge": 1971,
       "matcher_regression_case": 1491,
       "matcher_rule_inventory": 459,
@@ -116832,8 +116874,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5560
+      "audited": 5562
     },
-    "variant_count": 5560
+    "variant_count": 5562
   }
 }

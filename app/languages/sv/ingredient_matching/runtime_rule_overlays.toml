@@ -200,6 +200,20 @@ keyword = "gullök"
 blockers = ["granulerad", "granulerad lök", "granulerat"]
 reason = "Granulated dried onion (spice) is not a substitute for fresh gullök (yellow onion) in cooked recipes. Mirrors existing PNB lök:{granulerad}."
 
+[[product_name_blockers]]
+id = "runtime_pnb_pumpakarnor"
+status = "active"
+keyword = "pumpakärnor"
+blockers = ["musli", "musli"]
+reason = "Müsli/granola containing pumpkin seeds is a composite cereal product, not loose pumpkin seeds for baking or topping. Mirrors PNB frön:{musli}."
+
+[[product_name_blockers]]
+id = "runtime_pnb_limejuice"
+status = "active"
+keyword = "limejuice"
+blockers = ["coriander"]
+reason = "Coriander-lime cooking sauces (e.g. Coriander Lime El Taco Truck) are not pure limejuice. Mirrors existing PNB lime:{coriander}."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
