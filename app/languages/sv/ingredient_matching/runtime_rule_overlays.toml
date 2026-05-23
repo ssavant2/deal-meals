@@ -403,6 +403,13 @@ keyword = "lökar"
 blockers = ["knipplök", "knipplok", "knipplökar", "knipplokar", "salladslök", "salladslök", "gullök", "gullok", "rödlök", "rödlök", "purjolök", "purjolok", "vitlök", "vitlök", "gräslök", "graslok", "silverlök", "silverlok", "pärllök", "parllok", "ramslök", "ramslok", "schalottenlök", "schalottenlok", "steklök", "steklok", "syltlök", "syltlok", "vårlök", "varlok", "schalotten"]
 reason = "Plural 'lökar' keyword needs same FPB blockers as singular 'lök' to prevent generic onion matches when ingredient names a specific onion variant (knipplök/salladslök/etc.)"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_inlagdgurka"
+status = "active"
+keyword = "inlagdgurka"
+blockers = ["smörgåsgurka", "smorgasgurka", "ättiksgurka", "attiksgurka", "saltgurka"]
+reason = "Isolate smörgåsgurka offers — these are pickled cucumber in vinegar with different flavor profile, should not match generic inlagdgurka or saltgurka recipes; Isolate ättiksgurka offers — sharp vinegar-pickled cucumber, different from smörgåsgurka and generic inlagdgurka; Isolate saltgurka offers — salt-brined cucumber, different preparation from ättiksgurka and smörgåsgurka"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -507,6 +514,20 @@ status = "active"
 keyword = "bönor"
 context = ["matvete"]
 reason = "Zeta Bönor Matvete Durum är en pastaprodukt (food wheat pasta tillverkad av bönmjöl), inte hela bönor för matlagning. När ingredienstexten innehåller 'matvete' avses specialty-pastan, inte generiska bönor (svarta bönor/edamame/kidney)."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_chips"
+status = "active"
+keyword = "chips"
+context = ["pommes"]
+reason = "Pommes frites offers should not match chips/crisps recipe ingredients — pommes context indicates frozen french fries, not snack chips"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_paprika"
+status = "active"
+keyword = "paprika"
+context = ["snackpaprika"]
+reason = "Snackpaprika is a sweet snacking pepper variety — should only match snackpaprika recipe ingredients, not generic paprika recipes"
 
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
@@ -718,3 +739,11 @@ status = "active"
 qualifier = "polpa"
 equivalents = ["datterini", "datterino"]
 reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
+
+[[spice_fresh_rules]]
+id = "runtime_spice_fresh_rule_estragon"
+status = "active"
+keyword = "estragon"
+dried_indicators = ["torkad", "torkade"]
+fresh_product_words = ["färsk", "färska"]
+reason = "Fresh estragon (plant) should not match dried estragon (spice) recipe requirements — different moisture content and flavor intensity"

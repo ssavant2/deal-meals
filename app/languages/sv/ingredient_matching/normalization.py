@@ -117,20 +117,21 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('tunnskivad gurka', 'tunnskivadgurka'),
     # "Franska Örter" — both words filtered (nationality + short), join to compound keyword
     ('franska örter', 'franskaörter'),
-    ('ättiksgurka', 'inlagdgurka'),
-    ('attiksgurka', 'inlagdgurka'),
-    ('ättiksgurkor', 'inlagdgurka'),
-    ('attiksgurkor', 'inlagdgurka'),
-    ('smörgåsgurka', 'inlagdgurka'),
-    ('smorgasgurka', 'inlagdgurka'),
-    ('smörgåsgurkor', 'inlagdgurka'),
-    ('smorgasgurkor', 'inlagdgurka'),
+    # Preserve variant-specific keyword alongside inlagdgurka so FPB can isolate each type.
+    # FPB blocks inlagdgurka when ingredient_lower contains the variant word,
+    # leaving only the variant keyword for matching. Each variety → own offers only.
+    ('ättiksgurka', 'inlagdgurka ättiksgurka'),
+    ('attiksgurka', 'inlagdgurka attiksgurka'),
+    ('ättiksgurkor', 'inlagdgurka ättiksgurka'),
+    ('attiksgurkor', 'inlagdgurka attiksgurka'),
+    ('smörgåsgurka', 'inlagdgurka smörgåsgurka'),
+    ('smorgasgurka', 'inlagdgurka smorgasgurka'),
+    ('smörgåsgurkor', 'inlagdgurka smörgåsgurka'),
+    ('smorgasgurkor', 'inlagdgurka smorgasgurka'),
     ('pressgurka', 'inlagdgurka'),
-    # saltgurka removed from inlagdgurka mapping — saltgurka is lake-fermented
-    # (Polish/Russian style), distinct in taste/texture from ättiks-pickled
-    # smörgåsgurka/bordsgurka/cornichons. Specific varieties should exact-match
-    # or stay unmatched.
-    ('saltgurkor', 'inlagdgurka'),
+    # saltgurkor (plural) preserved alongside inlagdgurka so FPB can isolate saltgurka.
+    # saltgurka (singular) already stays as-is (not normalized), matches via saltgurka keyword.
+    ('saltgurkor', 'inlagdgurka saltgurka'),
     ('pickles', 'inlagdgurka'),
     ('pickle', 'inlagdgurka'),
     # Small pastry shell naming varies between Swedish krustader and French/English croustades.

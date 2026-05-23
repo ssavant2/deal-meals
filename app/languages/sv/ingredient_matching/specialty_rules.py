@@ -1003,6 +1003,7 @@ BIDIRECTIONAL_SPECIALTY_QUALIFIERS: FrozenSet[str] = frozenset({
     'soltorkad', 'soltorkade', 'soltorkat', 'soltork',
     'secchi', 'solt',  # shortened forms in product names ("Pomodori Secchi Soltork Tomat")
     'krossad', 'krossade', 'passerade',
+    'hela',   # "Hela Tomater på burk" — whole canned tomatoes ≠ fresh tomater
     'burk',   # jarred/canned (tomater, paprika) - QUALIFIER_EQUIVALENTS['burk'] covers variants
     # Stock/broth (derived product, not the base ingredient itself)
     'buljong', 'buljongtarning', 'buljongtärning', 'fond',

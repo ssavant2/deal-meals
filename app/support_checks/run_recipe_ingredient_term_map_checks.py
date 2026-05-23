@@ -121,6 +121,10 @@ test("en_gb skeleton returns no ingredient hints", probe_payload["hints"], {"tom
 search_text = "1 pkt fläsk 2 krm svartpeppar 1 dl strösocker"
 test("name_word recipe routing requires whole word", recipe_text_contains_routing_term(search_text, "läsk", "name_word"), False)
 test("name_word recipe routing does not match pepper prefix", recipe_text_contains_routing_term(search_text, "pepp", "name_word"), False)
+test("läsk keyword routing does not match inside fläsk", recipe_text_contains_routing_term(search_text, "läsk", "keyword"), False)
+test("läsk keyword routing still matches standalone words", recipe_text_contains_routing_term("2 dl läsk till drinken", "läsk", "keyword"), True)
+test("fil keyword routing does not match inside filé", recipe_text_contains_routing_term("500 g kycklingfilé 2 dl gräddfil", "fil", "keyword"), False)
+test("fil keyword routing still matches standalone words", recipe_text_contains_routing_term("2 dl fil till frukost", "fil", "keyword"), True)
 test("keyword recipe routing keeps compound substring behavior", recipe_text_contains_routing_term(search_text, "peppar", "keyword"), True)
 test("short keyword routing does not match inside longer words", recipe_text_contains_routing_term("1 msk vetemjöl 2 dl mellanmjölk", "öl", "keyword"), False)
 test("short keyword routing still matches standalone words", recipe_text_contains_routing_term("2 dl öl till gryta", "öl", "keyword"), True)

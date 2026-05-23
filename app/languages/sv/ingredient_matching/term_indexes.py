@@ -124,6 +124,14 @@ _NAME_WORD_ROUTE_STOPWORDS = frozenset({
     "garant",
 })
 
+_WHOLE_WORD_KEYWORD_ROUTE_TERMS = frozenset({
+    # These short canonical keywords are common substrings of unrelated
+    # ingredients: filé/gräddfil/filmjölk should not route plain fil, and
+    # fläsk should not route läsk.
+    "fil",
+    "läsk",
+})
+
 
 def _format_progress_duration(seconds: float | None) -> str:
     if seconds is None:
@@ -1426,6 +1434,9 @@ def recipe_text_contains_routing_term(
     if not search_text or not term:
         return False
     if term_type == "name_word":
+        words = search_words if search_words is not None else set(_WORD_PATTERN.findall(search_text))
+        return term in words
+    if term in _WHOLE_WORD_KEYWORD_ROUTE_TERMS:
         words = search_words if search_words is not None else set(_WORD_PATTERN.findall(search_text))
         return term in words
     if len(term) <= 2:

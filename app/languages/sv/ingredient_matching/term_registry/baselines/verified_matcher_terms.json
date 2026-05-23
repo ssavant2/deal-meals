@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 398,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 103,
-      "keyword_synonym_mapping": 123,
+      "keyword_synonym_mapping": 125,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
-      "keyword_synonym": 123,
+      "keyword_synonym": 125,
       "match_bridge": 1969,
       "matcher_regression_case": 1489,
       "matcher_rule_inventory": 459,
@@ -42,8 +42,8 @@
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5560,
-    "variants_missing_product_text": 1755,
+    "variant_count": 5562,
+    "variants_missing_product_text": 1757,
     "variants_with_product_text": 3805
   },
   "variants": [
@@ -116806,11 +116806,53 @@
       "needs_product_text": true,
       "notes": "Pitted-olive recipe ingredient must not match olives sold with pits. Generalized to match compound olive keywords (kalamataoliver, halkidikioliver, svartaoliver, etc.) and the 'utan kärnor/kärna' phrasing alongside 'urkärnade'.",
       "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"matcher_regression_urkarnade_oliver_with_pits_negative\"], \"ingredient_patterns\": [\"\\\\b(urkärnade|utan\\\\s+kärn(a|or))\\\\b.*\\\\b\\\\w*oliver\\\\b\", \"\\\\b\\\\w*oliver\\\\b.*\\\\b(urkärnade|utan\\\\s+kärn(a|or))\\\\b\"], \"policy_ref\": \"urkarnade_oliver_with_pits_no_match\", \"reason\": \"Pitted-olive recipe ingredient must not match olives sold with pits. Generalized to match compound olive keywords (kalamataoliver, halkidikioliver, svartaoliver, etc.) and the 'utan kärnor/kärna' phrasing alongside 'urkärnade'.\", \"rule_version\": 1, \"supersedes\": []}"
+    },
+    {
+      "variant_id": "vterm-6295b0fe48b198c2",
+      "row_index": 4758,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:smörgåsgurkor",
+      "source_id": "smörgåsgurkor",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "smörgåsgurkor",
+      "canonical": "smörgåsgurka",
+      "expected_family": "smörgåsgurka",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"smörgåsgurka\"}"
+    },
+    {
+      "variant_id": "vterm-f4e0494c2768a179",
+      "row_index": 4787,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:ättiksgurkor",
+      "source_id": "ättiksgurkor",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "ättiksgurkor",
+      "canonical": "ättiksgurka",
+      "expected_family": "ättiksgurka",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"ättiksgurka\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1540,
+      "no_product_text": 1542,
       "static_verified": 2531,
       "synthetic_verified": 1489
     },
@@ -116821,7 +116863,7 @@
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
-      "keyword_synonym": 123,
+      "keyword_synonym": 125,
       "match_bridge": 1969,
       "matcher_regression_case": 1489,
       "matcher_rule_inventory": 459,
@@ -116832,8 +116874,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5560
+      "audited": 5562
     },
-    "variant_count": 5560
+    "variant_count": 5562
   }
 }
