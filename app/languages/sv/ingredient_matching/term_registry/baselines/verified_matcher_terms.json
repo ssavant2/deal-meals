@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 398,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 103,
-      "keyword_synonym_mapping": 121,
+      "keyword_synonym_mapping": 123,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
-      "keyword_synonym": 121,
+      "keyword_synonym": 123,
       "match_bridge": 1971,
       "matcher_regression_case": 1491,
       "matcher_rule_inventory": 459,
@@ -42,8 +42,8 @@
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5562,
-    "variants_missing_product_text": 1753,
+    "variant_count": 5564,
+    "variants_missing_product_text": 1755,
     "variants_with_product_text": 3809
   },
   "variants": [
@@ -109332,27 +109332,6 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"fläskkött\", \"ingredient_index\": 0, \"must_match_keyword\": \"fläskkött\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
-      "variant_id": "vterm-26e2163773a78a93",
-      "row_index": 4245,
-      "source_order": 41,
-      "source_type": "no_match_policy",
-      "source_file": "app/languages/sv/ingredient_matching/no_match_policies.py",
-      "source_ref": "no_match_policies:policy_urkärnade_oliver_not_with_pits",
-      "source_id": "policy_urkärnade_oliver_not_with_pits",
-      "variant_role": "negative_guard_pattern",
-      "variant_text": "urkärnade oliver ! \\bkärnor\\b",
-      "canonical": "urkärnade oliver",
-      "expected_family": "\\bkärnor\\b",
-      "ingredient_text": null,
-      "product_text": "\\bkärnor\\b",
-      "product_category": null,
-      "product_brand": null,
-      "expected": 0,
-      "needs_product_text": true,
-      "notes": "Pitted-olive recipe ingredient must not match olives sold with pits.",
-      "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"matcher_regression_urkarnade_oliver_with_pits_negative\"], \"ingredient_patterns\": [\"\\\\burkärnade\\\\b.*\\\\boliver\\\\b\", \"\\\\boliver\\\\b.*\\\\burkärnade\\\\b\"], \"policy_ref\": \"urkarnade_oliver_with_pits_no_match\", \"reason\": \"Pitted-olive recipe ingredient must not match olives sold with pits.\", \"rule_version\": 1, \"supersedes\": []}"
-    },
-    {
       "variant_id": "vterm-35ac6051174d32c3",
       "row_index": 2781,
       "source_order": 30,
@@ -116848,11 +116827,74 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"kokosflingor\"}"
+    },
+    {
+      "variant_id": "vterm-3a64333ddb3dfe38",
+      "row_index": 4682,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:chiabatta",
+      "source_id": "chiabatta",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "chiabatta",
+      "canonical": "ciabatta",
+      "expected_family": "ciabatta",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"ciabatta\"}"
+    },
+    {
+      "variant_id": "vterm-1327ebe1ff2d9a79",
+      "row_index": 4683,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:chiabattabröd",
+      "source_id": "chiabattabröd",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "chiabattabröd",
+      "canonical": "ciabatta",
+      "expected_family": "ciabatta",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"ciabatta\"}"
+    },
+    {
+      "variant_id": "vterm-0628934047a36e23",
+      "row_index": 4247,
+      "source_order": 41,
+      "source_type": "no_match_policy",
+      "source_file": "app/languages/sv/ingredient_matching/no_match_policies.py",
+      "source_ref": "no_match_policies:policy_urkärnade_oliver_not_with_pits",
+      "source_id": "policy_urkärnade_oliver_not_with_pits",
+      "variant_role": "negative_guard_pattern",
+      "variant_text": "urkärnade oliver ! \\bkärn(a|or)\\b",
+      "canonical": "urkärnade oliver",
+      "expected_family": "\\bkärn(a|or)\\b",
+      "ingredient_text": null,
+      "product_text": "\\bkärn(a|or)\\b",
+      "product_category": null,
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": true,
+      "notes": "Pitted-olive recipe ingredient must not match olives sold with pits. Generalized to match compound olive keywords (kalamataoliver, halkidikioliver, svartaoliver, etc.) and the 'utan kärnor/kärna' phrasing alongside 'urkärnade'.",
+      "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"matcher_regression_urkarnade_oliver_with_pits_negative\"], \"ingredient_patterns\": [\"\\\\b(urkärnade|utan\\\\s+kärn(a|or))\\\\b.*\\\\b\\\\w*oliver\\\\b\", \"\\\\b\\\\w*oliver\\\\b.*\\\\b(urkärnade|utan\\\\s+kärn(a|or))\\\\b\"], \"policy_ref\": \"urkarnade_oliver_with_pits_no_match\", \"reason\": \"Pitted-olive recipe ingredient must not match olives sold with pits. Generalized to match compound olive keywords (kalamataoliver, halkidikioliver, svartaoliver, etc.) and the 'utan kärnor/kärna' phrasing alongside 'urkärnade'.\", \"rule_version\": 1, \"supersedes\": []}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1538,
+      "no_product_text": 1540,
       "static_verified": 2533,
       "synthetic_verified": 1491
     },
@@ -116863,7 +116905,7 @@
       "ingredient_parent": 398,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
-      "keyword_synonym": 121,
+      "keyword_synonym": 123,
       "match_bridge": 1971,
       "matcher_regression_case": 1491,
       "matcher_rule_inventory": 459,
@@ -116874,8 +116916,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5562
+      "audited": 5564
     },
-    "variant_count": 5562
+    "variant_count": 5564
   }
 }

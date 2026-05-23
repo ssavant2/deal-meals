@@ -221,6 +221,20 @@ keyword = "banana"
 blockers = ["bar", "energibar"]
 reason = "Energy bars with banana flavoring are not substitutes for fresh bananas or banana-based liquids (milkshakes, smoothies). 'Bar Energi Havre Banana Corny' should not match milkshake/banana ingredients."
 
+[[product_name_blockers]]
+id = "runtime_pnb_tomat"
+status = "active"
+keyword = "tomat"
+blockers = ["san marzano", "dop"]
+reason = "San Marzano DOP = canned plum tomatoes for pasta sauces. Recipes asking for plain 'tomat' (fresh) should not match canned San Marzano DOP products. Generic tomat-keyword extraction in fresh-tomato recipes (Gazpacho, salad, fyllda tomater) should not pull in canned varieties."
+
+[[product_name_blockers]]
+id = "runtime_pnb_yoghurt"
+status = "active"
+keyword = "yoghurt"
+blockers = ["hallon", "jordgubb", "blåbär", "körsbär", "hjortron", "havtorn", "lingon", "fläder", "drottningbär", "persika", "apelsin", "citron", "citrus", "lime", "mango", "ananas", "päron", "kiwi", "banan", "plommon", "aprikos", "choklad", "blandade smaker", "fruktsmaker", "vår & sommar", "robby"]
+reason = "Yoghurt-recipes (generic + matlagnings/turkisk/grekisk) match cooking-style yoghurts only. Sweetened fruit-flavored dessert yoghurts (Hallon, Mango, Citrus, Robby etc.) do not belong in cooking. Vanilj and naturell stay allowed (used in smoothies/baking)."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"

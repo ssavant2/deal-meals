@@ -5615,22 +5615,22 @@ language = "sv"
 market = "SE"
 canonical = "urkärnade oliver"
 status = "active"
-variants = ["urkärnade oliver ! \\bkärnor\\b"]
-negative_guards = ["urkärnade oliver ! \\bkärnor\\b"]
+variants = ["urkärnade oliver ! \\bkärn(a|or)\\b"]
+negative_guards = ["urkärnade oliver ! \\bkärn(a|or)\\b"]
 source_refs = ["policy:no_match_policies:policy_urkärnade_oliver_not_with_pits"]
 layer_policy = ["negative_guard_only"]
-notes = "Explicit pitted-olive ingredient must not match olives sold with pits (kärnor)."
+notes = "Explicit pitted-olive ingredient must not match olives sold with pits (kärnor/kärna). Generalized to handle both compound olive keywords (halkidikioliver, kalamataoliver, etc.) and 'utan kärnor/kärna' phrasing variants."
 
 [entries.language_payload.no_match_policy]
 id = "policy_urkärnade_oliver_not_with_pits"
 rule_schema_version = 1
 rule_version = 1
 canonical = "urkärnade oliver"
-ingredient_patterns = ["\\burkärnade\\b.*\\boliver\\b", "\\boliver\\b.*\\burkärnade\\b"]
+ingredient_patterns = ["\\b(urkärnade|utan\\s+kärn(a|or))\\b.*\\b\\w*oliver\\b", "\\b\\w*oliver\\b.*\\b(urkärnade|utan\\s+kärn(a|or))\\b"]
 blocked_offer_keywords = []
-blocked_offer_patterns = ["\\bkärnor\\b"]
+blocked_offer_patterns = ["\\bkärn(a|or)\\b"]
 allowed_specifics = []
-reason = "Pitted-olive recipe ingredient must not match olives sold with pits."
+reason = "Pitted-olive recipe ingredient must not match olives sold with pits. Generalized to match compound olive keywords (kalamataoliver, halkidikioliver, svartaoliver, etc.) and the 'utan kärnor/kärna' phrasing alongside 'urkärnade'."
 policy_ref = "urkarnade_oliver_with_pits_no_match"
 fixture_refs = ["matcher_regression_urkarnade_oliver_with_pits_negative"]
 supersedes = []
@@ -5638,10 +5638,10 @@ supersedes = []
 [[entries.coverage]]
 source_family = "no_match_policy"
 canonical = "urkärnade oliver"
-variant = "urkärnade oliver ! \\bkärnor\\b"
+variant = "urkärnade oliver ! \\bkärn(a|or)\\b"
 layer_role = "negative_guard_pattern"
 
 [[entries.negative_examples]]
 ingredient = "urkärnade oliver"
-offer_name = "urkärnade oliver ! \\bkärnor\\b"
+offer_name = "urkärnade oliver ! \\bkärn(a|or)\\b"
 expected = 0

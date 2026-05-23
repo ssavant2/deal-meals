@@ -504,6 +504,15 @@ _BEET_PRECOOKED_CUES = frozenset({
     'förkokt', 'förkokta',
     'forkokt', 'forkokta',
 })
+# Ingredient-side precooked cues are broader than product-side: "2 kokta rödbetor"
+# is a common ingredient phrasing where "kokta" is a past-participle label, not
+# an instruction. Product names usually carry the explicit "förkokt" label.
+_BEET_PRECOOKED_INGREDIENT_CUES = frozenset({
+    'kokt', 'kokta',
+    'färdigkokt', 'fardigkokt',
+    'färdigkokta', 'fardigkokta',
+    *_BEET_PRECOOKED_CUES,
+})
 _BEET_STRONG_PRESERVED_CUES = frozenset({
     *_BEET_PICKLED_INGREDIENT_CUES,
     *_BEET_PRECOOKED_CUES,
@@ -1519,7 +1528,10 @@ def _beet_requirement_allows_product(
         return True
 
     has_pickled_wording = any(cue in ingredient_lower for cue in _BEET_PICKLED_INGREDIENT_CUES)
-    has_precooked_wording = any(cue in ingredient_lower for cue in _BEET_PRECOOKED_CUES)
+    # Ingredient side: broader set including bare "kokt"/"kokta" past-participle
+    # (e.g. "2 kokta rödbetor"). Product-side still uses the narrower _BEET_PRECOOKED_CUES
+    # so only explicitly "förkokt"-labeled products qualify.
+    has_precooked_wording = any(cue in ingredient_lower for cue in _BEET_PRECOOKED_INGREDIENT_CUES)
     has_sliced_wording = any(cue in ingredient_lower for cue in _BEET_SLICED_CUES)
     has_packaged_whole_wording = _ingredient_requests_preserved_whole_beets(ingredient_lower)
     fresh_prep = any(cue in ingredient_lower for cue in _BEET_FRESH_PREP_CUES)
@@ -5056,6 +5068,21 @@ def matches_ingredient_fast(
         'förkokt', 'förkokta',
         'forkokt', 'forkokta',
     })
+    # Ingredient cues that indicate the recipe wants ready-cooked/precooked beets
+    # (the user reaches for an already-cooked package, not raw beets).
+    # Includes plain "kokt"/"kokta" (past participle) used as a label in ingredient
+    # lists like "2 kokta rödbetor" — distinct from "koka rödbetorna" instructions.
+    _BEET_PRECOOKED_INGREDIENT_CUES = frozenset({
+        'kokt', 'kokta',
+        'färdigkokt', 'fardigkokt',
+        'färdigkokta', 'fardigkokta',
+        *_BEET_PRECOOKED,
+    })
+    # Only products explicitly labeled "förkokt"/"forkokt" are accepted for
+    # precooked-beet ingredients. Pickled/sliced products (Aptitrödbetor,
+    # Rödbetor Skivade) are NOT precooked even when ready-to-eat — they are
+    # vinegar-preserved with a sweeter profile.
+    _BEET_PRECOOKED_PRODUCT_CUES = _BEET_PRECOOKED
     _BEET_STRONG_PRESERVED = frozenset({
         *_BEET_PICKLED_INGREDIENT,
         *_BEET_PRECOOKED,
@@ -5086,6 +5113,14 @@ def matches_ingredient_fast(
         has_sliced_wording = any(ind in ingredient_lower for ind in _BEET_SLICED_WORDS)
         has_packaged_whole_beet_wording = _ingredient_requests_preserved_whole_beets(ingredient_lower)
         fresh_beet_prep = any(cue in ingredient_lower for cue in _BEET_FRESH_PREP_CUES)
+        # Precooked-only intent: ingredient text marks beets as already cooked
+        # (e.g. "2 kokta rödbetor") without any pickled/jarred wording.
+        has_precooked_wording = any(ind in ingredient_lower for ind in _BEET_PRECOOKED_INGREDIENT_CUES)
+        ingredient_wants_precooked_only = (
+            has_precooked_wording
+            and not has_pickled_wording
+            and not has_packaged_whole_beet_wording
+        )
         ingredient_wants_pickled_or_jar = (
             has_pickled_wording
             or has_packaged_whole_beet_wording
@@ -5100,7 +5135,13 @@ def matches_ingredient_fast(
         if has_sliced_wording and fresh_beet_prep and not has_strong_preserved:
             if any(ind in name_norm for ind in _BEET_PRESERVED):
                 return None  # fresh beets that will be sliced in the recipe, not preserved slices
-        if ingredient_wants_pickled_or_jar:
+        if ingredient_wants_precooked_only:
+            # Only products explicitly labeled "förkokt" qualify. Pickled-style
+            # products (Aptitrödbetor, Rödbetor Skivade) are vinegar-preserved
+            # ≠ precooked and have a different flavor profile.
+            if not any(ind in name_norm for ind in _BEET_PRECOOKED_PRODUCT_CUES):
+                return None  # ingredient wants precooked-labeled beets
+        elif ingredient_wants_pickled_or_jar:
             if not any(ind in name_norm for ind in _BEET_PICKLED_OR_JAR_PRODUCT):
                 return None  # ingredient wants inlagda/jarred beets, not merely pre-cooked beets
         elif ingredient_wants_preserved:
