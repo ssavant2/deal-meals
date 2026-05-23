@@ -193,6 +193,13 @@ keyword = "apelsinsmak"
 blockers = ["kondisrullar"]
 reason = "Kondisrullar Apelsinsmak är sponge cake rolls (bakelse-produkt), inte en bakchoklad-ingrediens. Recept som ber om 'mörk choklad apelsinsmak' avser bakchoklad med apelsinsmak, inte färdiga apelsinsmaks-bakelser."
 
+[[product_name_blockers]]
+id = "runtime_pnb_gullok"
+status = "active"
+keyword = "gullök"
+blockers = ["granulerad", "granulerad lök", "granulerat"]
+reason = "Granulated dried onion (spice) is not a substitute for fresh gullök (yellow onion) in cooked recipes. Mirrors existing PNB lök:{granulerad}."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -204,8 +211,8 @@ reason = "Crema di Balsamico Ingefära is a condiment — space-norm merges it t
 id = "runtime_fpb_bitter"
 status = "active"
 keyword = "bitter"
-blockers = ["bittermandel"]
-reason = "Tonic Bitter drink extracts 'bitter' which prefix-matches 'bittermandel' recipes — bitterness beverages are not bitter almonds"
+blockers = ["bittermandel", "bittermandlar"]
+reason = "Tonic Bitter drink extracts 'bitter' which prefix-matches 'bittermandel' recipes — bitterness beverages are not bitter almonds; Tonic Bitter (drink) matched bittermandlar (bitter almond) ingredient via shared bitter-substring keyword. Existing bittermandel blocker missed plural form."
 
 [[false_positive_blockers]]
 id = "runtime_fpb_korsbar"
@@ -339,6 +346,13 @@ status = "active"
 keyword = "biff"
 blockers = ["bönbiffar", "bönbiff", "bonbiffar", "bonbiff"]
 reason = "Bönbiffar (bean-burgers) is a vegan plant-based product; the 'biff' substring should not pull in raw beef products (Biff Färsk i bit med kappa)."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_applejuice"
+status = "active"
+keyword = "äpplejuice"
+blockers = ["granat", "granatäpple", "granatappel", "granatäpplejuice", "granatappeljuice"]
+reason = "Pomegranate juice (granatäpplejuice) is not apple juice — the 'äpplejuice' substring in the ingredient is misleading. Mirrors existing FPB äpple:{granatäpple}."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
