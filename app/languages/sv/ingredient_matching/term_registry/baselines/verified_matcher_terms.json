@@ -6,7 +6,7 @@
       "bridge_positive": 1772,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 98,
       "hardcoded_keyword_output:extract_keywords_from_product": 113,
-      "ingredient_parent_mapping": 398,
+      "ingredient_parent_mapping": 390,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 103,
       "keyword_synonym_mapping": 125,
@@ -30,7 +30,7 @@
     },
     "source_counts": {
       "extraction_helper": 211,
-      "ingredient_parent": 398,
+      "ingredient_parent": 390,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
       "keyword_synonym": 125,
@@ -42,8 +42,8 @@
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5562,
-    "variants_missing_product_text": 1757,
+    "variant_count": 5554,
+    "variants_missing_product_text": 1749,
     "variants_with_product_text": 3805
   },
   "variants": [
@@ -5781,27 +5781,6 @@
       "metadata": "{\"adapter_ref\": \"match_bridges:bridge_citronmeliss_exact\", \"adapter_refs\": [], \"fixture_refs\": [\"matcher_regression_citronmeliss_positive\"], \"policy_ref\": \"current_review_matcher_regression\", \"risk\": \"spelling_alias\", \"source_refs\": [\"current_review:positive_sibling:citronmeliss\"], \"status\": \"wrapped_adapter\"}"
     },
     {
-      "variant_id": "vterm-1afb21a273908828",
-      "row_index": 4595,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:smörgåsgurka",
-      "source_id": "smörgåsgurka",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "smörgåsgurka",
-      "canonical": "inlagdgurka",
-      "expected_family": "inlagdgurka",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"inlagdgurka\"}"
-    },
-    {
       "variant_id": "vterm-ec7c2aca53c1c5f9",
       "row_index": 1412,
       "source_order": 20,
@@ -9370,27 +9349,6 @@
       "needs_product_text": false,
       "notes": "legacy_review_regression",
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Banankladdkaka\"}"
-    },
-    {
-      "variant_id": "vterm-13610c48173adf3b",
-      "row_index": 4592,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:smorgasgurka",
-      "source_id": "smorgasgurka",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "smorgasgurka",
-      "canonical": "inlagdgurka",
-      "expected_family": "inlagdgurka",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"inlagdgurka\"}"
     },
     {
       "variant_id": "vterm-fa25265259174f33",
@@ -18862,27 +18820,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"köttbullar\"}"
-    },
-    {
-      "variant_id": "vterm-e8b6aba183869fba",
-      "row_index": 4271,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:attiksgurka",
-      "source_id": "attiksgurka",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "attiksgurka",
-      "canonical": "inlagdgurka",
-      "expected_family": "inlagdgurka",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"inlagdgurka\"}"
     },
     {
       "variant_id": "vterm-b0cee61c9b472723",
@@ -30414,27 +30351,6 @@
       "metadata": "{\"adapter_ref\": \"match_bridges:bridge_sweet_chili_sauce\", \"adapter_refs\": [], \"fixture_refs\": [\"matcher_regression_negative_chilisas_osotad_550g_felix\", \"matcher_regression_positive_sweet_chili_sas_hot_200ml_santa_maria_d9d660c5\", \"matcher_regression_positive_sweet_chili_sas_asia_mindre_socker_500ml_santa_maria_bc256c3b\", \"matcher_regression_negative_osotad\", \"matcher_regression_positive_sweet_chili_7518360f\", \"matcher_regression_positive_sot_chilisas\", \"matcher_regression_negative_chilisas_osotad\"], \"policy_ref\": \"legacy_review_regression\", \"risk\": \"backend_guard\", \"source_refs\": [\"legacy_review:explicit_sot_chilisas_still_blocks_real_sweet_chili_sauces_while_accepting_osotad_chili_sauce\"], \"status\": \"wrapped_adapter\"}"
     },
     {
-      "variant_id": "vterm-03a64c1c37ce2c5c",
-      "row_index": 4593,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:smorgasgurkor",
-      "source_id": "smorgasgurkor",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "smorgasgurkor",
-      "canonical": "inlagdgurka",
-      "expected_family": "inlagdgurka",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"inlagdgurka\"}"
-    },
-    {
       "variant_id": "vterm-5d52c7d4a2a9c8be",
       "row_index": 3973,
       "source_order": 41,
@@ -30916,27 +30832,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"aliases\": [\"rödkål\", \"spetskål\", \"vitkål\"], \"fixture_refs\": [\"matcher_regression_positive_rodkal\", \"matcher_regression_positive_spetskal\", \"matcher_regression_positive_vitkal_3bd51a65\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_review_multi_item_alternative_ingredient_lines_are_still_only_partially_represented\"]}"
-    },
-    {
-      "variant_id": "vterm-953edbe6c893756e",
-      "row_index": 4272,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:attiksgurkor",
-      "source_id": "attiksgurkor",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "attiksgurkor",
-      "canonical": "inlagdgurka",
-      "expected_family": "inlagdgurka",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"inlagdgurka\"}"
     },
     {
       "variant_id": "vterm-419ae67713be324a",
@@ -51790,27 +51685,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"majonnäs\"}"
-    },
-    {
-      "variant_id": "vterm-9a20ec948d0a10cc",
-      "row_index": 4596,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:smörgåsgurkor",
-      "source_id": "smörgåsgurkor",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "smörgåsgurkor",
-      "canonical": "inlagdgurka",
-      "expected_family": "inlagdgurka",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"inlagdgurka\"}"
     },
     {
       "variant_id": "vterm-526c09c32b23680a",
@@ -79365,27 +79239,6 @@
       "metadata": "{\"aliases\": [\"fänkålsfrön\"], \"fixture_refs\": [\"matcher_regression_positive_fankalsfron_hela\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_review_spice_list_wording_anis_fankal_eller_kummin_still_behaves_like_fresh_fennel_instead_of_fennel_seed\"]}"
     },
     {
-      "variant_id": "vterm-0342ddc53646014e",
-      "row_index": 4662,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:ättiksgurka",
-      "source_id": "ättiksgurka",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "ättiksgurka",
-      "canonical": "inlagdgurka",
-      "expected_family": "inlagdgurka",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"inlagdgurka\"}"
-    },
-    {
       "variant_id": "vterm-04285c0a602477bd",
       "row_index": 5185,
       "source_order": 54,
@@ -80875,27 +80728,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"aliases\": [], \"fixture_refs\": [\"matcher_regression_vitloksmarinad_spaced_positive\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_extraction_vitloksmarinad_spaced\"]}"
-    },
-    {
-      "variant_id": "vterm-0a5693cade50fc4c",
-      "row_index": 4663,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:ättiksgurkor",
-      "source_id": "ättiksgurkor",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "ättiksgurkor",
-      "canonical": "inlagdgurka",
-      "expected_family": "inlagdgurka",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"inlagdgurka\"}"
     },
     {
       "variant_id": "vterm-64e8eb3ad932d9cd",
@@ -116852,7 +116684,7 @@
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1542,
+      "no_product_text": 1534,
       "static_verified": 2531,
       "synthetic_verified": 1489
     },
@@ -116860,7 +116692,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 211,
-      "ingredient_parent": 398,
+      "ingredient_parent": 390,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
       "keyword_synonym": 125,
@@ -116874,8 +116706,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5562
+      "audited": 5554
     },
-    "variant_count": 5562
+    "variant_count": 5554
   }
 }

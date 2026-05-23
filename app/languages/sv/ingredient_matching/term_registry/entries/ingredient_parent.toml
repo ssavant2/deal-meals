@@ -3016,12 +3016,12 @@ entry_id = "sv-se.alias.smorgasgurka_132"
 language = "sv"
 market = "SE"
 canonical = "inlagdgurka"
-status = "active"
+status = "inactive"
 variants = ["smörgåsgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated: Q77/Q78 isolates pickled-cucumber variants; smörgåsgurka keeps its own canonical instead of collapsing to inlagdgurka."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3039,12 +3039,12 @@ entry_id = "sv-se.alias.smorgasgurka_133_2"
 language = "sv"
 market = "SE"
 canonical = "inlagdgurka"
-status = "active"
+status = "inactive"
 variants = ["smorgasgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated: Q77/Q78 isolates pickled-cucumber variants; smorgasgurka keeps its own canonical instead of collapsing to inlagdgurka."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3062,12 +3062,12 @@ entry_id = "sv-se.alias.smorgasgurkor_134"
 language = "sv"
 market = "SE"
 canonical = "inlagdgurka"
-status = "active"
+status = "inactive"
 variants = ["smörgåsgurkor"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated: Q77/Q78 isolates pickled-cucumber variants; smörgåsgurkor keeps its own canonical instead of collapsing to inlagdgurka."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3085,12 +3085,12 @@ entry_id = "sv-se.alias.smorgasgurkor_135_2"
 language = "sv"
 market = "SE"
 canonical = "inlagdgurka"
-status = "active"
+status = "inactive"
 variants = ["smorgasgurkor"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated: Q77/Q78 isolates pickled-cucumber variants; smorgasgurkor keeps its own canonical instead of collapsing to inlagdgurka."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3108,12 +3108,12 @@ entry_id = "sv-se.alias.attiksgurka_136"
 language = "sv"
 market = "SE"
 canonical = "inlagdgurka"
-status = "active"
+status = "inactive"
 variants = ["ättiksgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated: Q77/Q78 isolates pickled-cucumber variants; ättiksgurka keeps its own canonical instead of collapsing to inlagdgurka."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3131,12 +3131,12 @@ entry_id = "sv-se.alias.attiksgurka_137_2"
 language = "sv"
 market = "SE"
 canonical = "inlagdgurka"
-status = "active"
+status = "inactive"
 variants = ["attiksgurka"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated: Q77/Q78 isolates pickled-cucumber variants; attiksgurka keeps its own canonical instead of collapsing to inlagdgurka."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3154,12 +3154,12 @@ entry_id = "sv-se.alias.attiksgurkor_138"
 language = "sv"
 market = "SE"
 canonical = "inlagdgurka"
-status = "active"
+status = "inactive"
 variants = ["ättiksgurkor"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated: Q77/Q78 isolates pickled-cucumber variants; ättiksgurkor keeps its own canonical instead of collapsing to inlagdgurka."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"
@@ -3177,12 +3177,12 @@ entry_id = "sv-se.alias.attiksgurkor_139_2"
 language = "sv"
 market = "SE"
 canonical = "inlagdgurka"
-status = "active"
+status = "inactive"
 variants = ["attiksgurkor"]
 ingredient_terms = ["inlagdgurka"]
 source_refs = ["code:term_registry_entries:ingredient_parent.toml"]
 layer_policy = ["ingredient_alias"]
-notes = "Registry-owned ingredient parent mapping."
+notes = "Inactivated: Q77/Q78 isolates pickled-cucumber variants; attiksgurkor keeps its own canonical instead of collapsing to inlagdgurka."
 
 [[entries.coverage]]
 source_family = "ingredient_parent"

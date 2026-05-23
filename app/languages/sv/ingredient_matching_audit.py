@@ -459,7 +459,12 @@ def _explain_pair(ingredient: str, product: str, category: str = "", brand: str 
     if (
         recipe_style_match
         and offer_data.get('processed_checks')
-        and not check_processed_product_rules(product_lower, ingredient_lower)
+        and not check_processed_product_rules(
+            product_lower,
+            ingredient_lower,
+            matched_keyword=recipe_style_match,
+            product_keywords=set(offer_data.get('keywords', ())),
+        )
     ):
         validation_notes.append("blocked by processed-product rules")
         recipe_style_match = None

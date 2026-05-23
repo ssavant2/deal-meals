@@ -1809,7 +1809,14 @@ def validate_offer_match_candidate(
             not pressed_ginger_juice_allowed
             and not flavored_olive_oil_allowed
             and not chili_oil_allowed
-            and not check_processed_product_rules(product_lower, ing_norm)
+            and not check_processed_product_rules(
+                product_lower,
+                ing_norm,
+                matched_keyword=matched_keyword,
+                product_keywords=set(offer_precomputed.get('keywords', ()))
+                if offer_precomputed is not None
+                else set(),
+            )
         ):
             _record_validation_event(
                 validation_events,

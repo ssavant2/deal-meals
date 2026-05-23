@@ -5836,12 +5836,12 @@ def matches_ingredient_fast(
                     return None
 
     # STEP 5: Processed product check (product-side pre-computed)
-    # Run all relevant product-side checks, not just the matched keyword.
-    # This keeps fast-path behavior aligned with the full per-ingredient validator
-    # when a preserved/specialized product reaches the recipe through a broader
-    # fallback keyword (e.g. champinjoner -> svamp).
+    # Run product-side checks that belong to the matched keyword family. This
+    # keeps broader fallbacks guarded (e.g. champinjoner -> svamp), while avoiding
+    # unrelated flavor words in a product name (e.g. chorizo with smoked paprika).
     processed_checks = offer_data['processed_checks']
     if processed_checks:
+        offer_keyword_set = set(keywords)
         _SPICE_AMOUNT_IMPLICIT_GROUND = frozenset({
             'ingefära', 'ingefara',
             'gurkmeja', 'kurkuma',
@@ -5855,16 +5855,23 @@ def matches_ingredient_fast(
         _FRESH_INDICATORS_SVF = frozenset({'färsk', 'farsk', 'riven', 'hackad', 'pressad'})
         _STRICT_GENERIC_MATCHES_ALL = frozenset({'sojabönor', 'sojabonor'})
         for check in processed_checks:
+            check_base = check[0]
+            if (
+                check_base not in offer_keyword_set
+                and check_base != matched_keyword
+                and check_base != _SPECIALTY_KEYWORD_ALIASES.get(matched_keyword)
+            ):
+                continue
             if check[1] == 'strict':
                 if not any(ind in ingredient_lower for ind in check[2]):
-                    if check[0] in _STRICT_GENERIC_MATCHES_ALL:
-                        processed_indicators = PROCESSED_PRODUCT_RULES.get(check[0], ())
+                    if check_base in _STRICT_GENERIC_MATCHES_ALL:
+                        processed_indicators = PROCESSED_PRODUCT_RULES.get(check_base, ())
                         if not any(ind in ingredient_lower for ind in processed_indicators):
                             continue
                     # Spice-amount heuristic: "1 tsk/msk/krm ingefära" = ground/dried,
                     # also explicit dry markers like "torkad gurkmeja" imply ground.
                     _EXPLICIT_DRY_MARKERS_SVF = ('torkad', 'torkade', 'torkat')
-                    if (check[0] in _SPICE_AMOUNT_IMPLICIT_GROUND
+                    if (check_base in _SPICE_AMOUNT_IMPLICIT_GROUND
                             and any(ind in _GROUND_PRODUCT_INDICATORS for ind in check[2])
                             and not any(fi in ingredient_lower for fi in _FRESH_INDICATORS_SVF)
                             and (_RE_SPICE_AMOUNT.search(ingredient_lower)

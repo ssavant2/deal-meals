@@ -118,20 +118,19 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     # "Franska Örter" — both words filtered (nationality + short), join to compound keyword
     ('franska örter', 'franskaörter'),
     # Preserve variant-specific keyword alongside inlagdgurka so FPB can isolate each type.
-    # FPB blocks inlagdgurka when ingredient_lower contains the variant word,
-    # leaving only the variant keyword for matching. Each variety → own offers only.
-    ('ättiksgurka', 'inlagdgurka ättiksgurka'),
-    ('attiksgurka', 'inlagdgurka attiksgurka'),
-    ('ättiksgurkor', 'inlagdgurka ättiksgurka'),
-    ('attiksgurkor', 'inlagdgurka attiksgurka'),
-    ('smörgåsgurka', 'inlagdgurka smörgåsgurka'),
-    ('smorgasgurka', 'inlagdgurka smorgasgurka'),
-    ('smörgåsgurkor', 'inlagdgurka smörgåsgurka'),
-    ('smorgasgurkor', 'inlagdgurka smorgasgurka'),
+    # Put the specific keyword first so canonical selection returns the concrete variety.
+    ('ättiksgurka', 'ättiksgurka inlagdgurka'),
+    ('attiksgurka', 'attiksgurka inlagdgurka'),
+    ('ättiksgurkor', 'ättiksgurka inlagdgurka'),
+    ('attiksgurkor', 'attiksgurka inlagdgurka'),
+    ('smörgåsgurka', 'smörgåsgurka inlagdgurka'),
+    ('smorgasgurka', 'smorgasgurka inlagdgurka'),
+    ('smörgåsgurkor', 'smörgåsgurka inlagdgurka'),
+    ('smorgasgurkor', 'smorgasgurka inlagdgurka'),
     ('pressgurka', 'inlagdgurka'),
     # saltgurkor (plural) preserved alongside inlagdgurka so FPB can isolate saltgurka.
     # saltgurka (singular) already stays as-is (not normalized), matches via saltgurka keyword.
-    ('saltgurkor', 'inlagdgurka saltgurka'),
+    ('saltgurkor', 'saltgurka inlagdgurka'),
     ('pickles', 'inlagdgurka'),
     ('pickle', 'inlagdgurka'),
     # Small pastry shell naming varies between Swedish krustader and French/English croustades.

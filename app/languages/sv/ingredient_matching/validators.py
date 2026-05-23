@@ -12,6 +12,7 @@ from typing import Dict, Set
 
 from .compound_text import _is_whole_word
 from .extraction import extract_keywords_from_ingredient
+from ..normalization import fix_swedish_chars
 from .recipe_text import neutralize_t_ex_cheese_examples, parse_eller_alternatives
 from .processed_rules import (
     PROCESSED_RULES_COMPOUND_EXEMPTIONS,
@@ -151,6 +152,20 @@ def processed_indicator_occurs_in_product_text(
     if compact_base.endswith('er') and len(compact_base) > 2:
         compound_bases.add(compact_base[:-2])
     return any(f"{base}mix" in compact_product for base in compound_bases)
+
+
+def _processed_rule_applies_to_match(
+    base_word: str,
+    matched_keyword: str | None,
+    product_keywords: Set[str],
+) -> bool:
+    if not matched_keyword:
+        return True
+    if base_word == matched_keyword:
+        return True
+    if matched_keyword in _SPECIALTY_BASE_KEYWORD_ALIASES.get(base_word, set()):
+        return True
+    return base_word in product_keywords
 
 
 def _qualifier_present_in_text(qualifier: str, text: str) -> bool:
@@ -304,7 +319,13 @@ def check_plain_fresh_potato_match(
     return True
 
 
-def check_processed_product_rules(product_lower: str, ingredient_lower: str) -> bool:
+def check_processed_product_rules(
+    product_lower: str,
+    ingredient_lower: str,
+    *,
+    matched_keyword: str | None = None,
+    product_keywords: Set[str] | None = None,
+) -> bool:
     """
     Check if a product passes PROCESSED_PRODUCT_RULES against a SINGLE ingredient.
 
@@ -315,7 +336,24 @@ def check_processed_product_rules(product_lower: str, ingredient_lower: str) -> 
     false positives from cross-ingredient contamination, e.g., "skalade" from
     "skalade mandlar" falsely satisfying the check for "Hela Skalade Tomater").
     """
+    normalized_matched_keyword = (
+        fix_swedish_chars(matched_keyword).lower()
+        if matched_keyword
+        else None
+    )
+    normalized_product_keywords = {
+        fix_swedish_chars(keyword).lower()
+        for keyword in (product_keywords or set())
+        if keyword
+    }
+
     for base_word, processed_indicators in PROCESSED_PRODUCT_RULES.items():
+        if not _processed_rule_applies_to_match(
+            base_word,
+            normalized_matched_keyword,
+            normalized_product_keywords,
+        ):
+            continue
         if base_word in product_lower:
             # Skip exempt compound words (e.g., "körsbärstomater")
             exemptions = PROCESSED_RULES_COMPOUND_EXEMPTIONS.get(base_word)
