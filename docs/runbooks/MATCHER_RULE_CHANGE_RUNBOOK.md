@@ -75,12 +75,14 @@ Manual Track B:
 
 Inactivate or remove a registry rule/fixture:
 
-```text
-status = "inactive"
-./bin/dm matcher gates --track B --registry-changed --allow-removals
-
+```bash
+./bin/dm matcher inactivate <surface> <id-or-term> --reason "<why>"
 ./bin/dm matcher fixture remove <fixture_id>
 ```
+
+`inactivate` updates a registry or runtime-overlay entry and runs the relevant
+gate by default. Manual `status = "inactive"` edits are still valid fallback for
+awkward cases; finish those with Track B gates and `--allow-removals`.
 
 `fixture remove` cascades the fixture deletion through the authoritative fixture
 TOML source, inventory fixture refs, registry fixture refs, regenerated JSON, and
@@ -108,10 +110,11 @@ pass `--run-gates` on a command to force an immediate check. `finalize` runs
 generated JSON/coverage regen, verified-term baseline promotion, line-ref
 refresh, drift check, pre-flight, and one final gate. If a finalize step fails,
 the session marker stays active so the batch can be fixed and finalized again.
-`finalize` does not bypass baseline write-permission checks: when run through
-`./bin/dm`, it runs in the normal appuser container path; if the promote step is
-run as the wrong user or in a read-only checkout, it should fail there and leave
-the session active for a rerun after the permission issue is fixed.
+Track B `finalize` requires a writable checkout as `appuser` for baseline
+promotion. It does not bypass baseline write-permission checks: when run through
+`./bin/dm`, it uses the normal appuser container path; if the promote step is run
+as the wrong user or in a read-only checkout, it should fail there and leave the
+session active for a rerun after the permission issue is fixed.
 
 Explain one product/ingredient decision before hand-reading large matcher tables:
 
