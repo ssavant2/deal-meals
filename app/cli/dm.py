@@ -46,10 +46,26 @@ matcher_app = typer.Typer(help="Matcher rule-change workflows.")
 matcher_add_app = typer.Typer(help="Generate matcher rule-change artifacts.")
 matcher_fixture_app = typer.Typer(help="Maintain matcher regression fixtures.")
 matcher_modify_app = typer.Typer(help="Modify existing matcher rule artifacts.")
+matcher_session_app = typer.Typer(help="Group matcher edits and run one final validation sequence.")
 matcher_app.add_typer(matcher_add_app, name="add")
 matcher_app.add_typer(matcher_fixture_app, name="fixture")
 matcher_app.add_typer(matcher_modify_app, name="modify")
+matcher_app.add_typer(matcher_session_app, name="session")
 app.add_typer(matcher_app, name="matcher")
+
+
+MATCHER_SESSION_VERSION = 1
+MATCHER_SESSION_DIR = "deal-meals"
+MATCHER_SESSION_FILE = "matcher-session.json"
+MATCHER_SESSION_FALLBACK_DIR = ".dm"
+MATCHER_SESSION_RELEVANT_PREFIXES = (
+    "app/languages/sv/ingredient_matching/",
+    "app/languages/sv/matcher_contracts/",
+    "app/support_checks/",
+    "docs/runbooks/MATCHER_RULE_CHANGE_RUNBOOK.md",
+    "docs/MATCHER_REGISTRY_ARCHITECTURE.md",
+    "docs/TESTING.md",
+)
 
 
 @dataclass(frozen=True)
@@ -931,6 +947,169 @@ def _paths(tree_root: Path | None) -> MatcherPaths:
         ),
         deep_sanity_file=app_dir / "support_checks" / "run_deep_matcher_sanity.py",
     )
+
+
+def _utc_timestamp() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def _git_output(paths: MatcherPaths, args: list[str]) -> tuple[str | None, str | None]:
+    git = shutil.which("git")
+    if git is None:
+        return None, "git executable not found"
+    for cwd in (paths.repo_root, paths.app_dir):
+        try:
+            result = subprocess.run(
+                [git, *args],
+                cwd=cwd,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        except OSError as exc:
+            return None, str(exc)
+        if result.returncode == 0:
+            return result.stdout.strip(), None
+    error = (result.stderr or result.stdout or "git command failed").strip()
+    return None, error
+
+
+def _git_session_state_path(paths: MatcherPaths) -> Path | None:
+    git_dir_text, _error = _git_output(paths, ["rev-parse", "--git-dir"])
+    if not git_dir_text:
+        return None
+    git_dir = Path(git_dir_text)
+    if not git_dir.is_absolute():
+        git_dir = paths.repo_root / git_dir
+    return git_dir / MATCHER_SESSION_DIR / MATCHER_SESSION_FILE
+
+
+def _matcher_session_fallback_path(paths: MatcherPaths) -> Path:
+    return paths.app_dir / MATCHER_SESSION_FALLBACK_DIR / MATCHER_SESSION_FILE
+
+
+def _matcher_session_state_paths(paths: MatcherPaths) -> tuple[Path, ...]:
+    fallback_path = _matcher_session_fallback_path(paths)
+    git_path = _git_session_state_path(paths)
+    if git_path is None:
+        return (fallback_path,)
+    return (git_path, fallback_path)
+
+
+def _matcher_session_state_path(paths: MatcherPaths) -> Path:
+    state_paths = _matcher_session_state_paths(paths)
+    for state_path in state_paths:
+        if state_path.exists():
+            return state_path
+    return state_paths[0]
+
+
+def _read_matcher_session_state(paths: MatcherPaths) -> tuple[Path, dict[str, Any]] | None:
+    for state_path in _matcher_session_state_paths(paths):
+        if not state_path.exists():
+            continue
+        try:
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise typer.BadParameter(f"invalid matcher session state file {state_path}: {exc}") from exc
+        if not isinstance(state, dict):
+            raise typer.BadParameter(f"invalid matcher session state file {state_path}: expected object")
+        return state_path, state
+    return None
+
+
+def _write_matcher_session_state(paths: MatcherPaths, state: Mapping[str, Any]) -> Path:
+    last_error: OSError | None = None
+    for state_path in _matcher_session_state_paths(paths):
+        try:
+            state_path.parent.mkdir(parents=True, exist_ok=True)
+            state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        except OSError as exc:
+            last_error = exc
+            continue
+        return state_path
+    if last_error is not None:
+        raise typer.BadParameter(f"could not write matcher session state: {last_error}") from last_error
+    raise typer.BadParameter("could not resolve matcher session state path")
+
+
+def _matcher_session_is_active(paths: MatcherPaths) -> bool:
+    return _read_matcher_session_state(paths) is not None
+
+
+def _argv_has_option(option: str) -> bool:
+    return any(arg == option or arg.startswith(f"{option}=") for arg in sys.argv[1:])
+
+
+def _matcher_session_gates_forced() -> bool:
+    return _argv_has_option("--run-gates")
+
+
+def _matcher_session_should_defer_gates(paths: MatcherPaths) -> bool:
+    return _matcher_session_is_active(paths) and not _matcher_session_gates_forced()
+
+
+def _echo_session_deferred_gates(label: str = "gates") -> None:
+    typer.echo(f"Matcher session active; deferred {label} (use --run-gates to force now).")
+
+
+def _git_status_paths(paths: MatcherPaths) -> tuple[tuple[str, ...], str | None]:
+    git = shutil.which("git")
+    if git is None:
+        return (), "git executable not found"
+    try:
+        result = subprocess.run(
+            [git, "status", "--porcelain=v1", "-z", "--untracked-files=all"],
+            cwd=paths.repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+    except OSError as exc:
+        return (), str(exc)
+    if result.returncode != 0:
+        error = (result.stderr or result.stdout or "git status failed").strip()
+        return (), error
+
+    changed_paths: list[str] = []
+    entries = result.stdout.split("\0")
+    index = 0
+    while index < len(entries):
+        entry = entries[index]
+        if not entry:
+            index += 1
+            continue
+        status = entry[:2]
+        path = entry[3:].replace("\\", "/")
+        if status[0] in {"R", "C"} or status[1] in {"R", "C"}:
+            index += 1
+            if index < len(entries) and entries[index]:
+                path = entries[index].replace("\\", "/")
+        if path:
+            changed_paths.append(path)
+        index += 1
+    return tuple(sorted(set(changed_paths))), None
+
+
+def _matcher_relevant_path(path: str) -> bool:
+    normalized = path.strip("/")
+    forms = {normalized}
+    if normalized.startswith("app/"):
+        forms.add(normalized[4:])
+    else:
+        forms.add(f"app/{normalized}")
+    return any(
+        form == prefix.strip("/") or form.startswith(prefix.strip("/"))
+        for form in forms
+        for prefix in MATCHER_SESSION_RELEVANT_PREFIXES
+    )
+
+
+def _matcher_relevant_changed_paths(paths: MatcherPaths) -> tuple[tuple[str, ...], str | None]:
+    changed_paths, error = _git_status_paths(paths)
+    if error is not None:
+        return (), error
+    return tuple(path for path in changed_paths if _matcher_relevant_path(path)), None
 
 
 def _slug(value: str, *, fallback: str = "term") -> str:
@@ -2703,6 +2882,10 @@ def _run_track_b_change_plan(
     change: MatcherChangePlan,
     report_root: Path | None,
 ) -> int:
+    if _matcher_session_should_defer_gates(paths):
+        _echo_session_deferred_gates()
+        return 0
+
     coverage_status = _run_coverage_generator(paths)
     if coverage_status != 0:
         return coverage_status
@@ -2726,6 +2909,10 @@ def _run_keyword_synonym_light_gates(
     paths: MatcherPaths,
     report_root: Path | None,
 ) -> int:
+    if _matcher_session_should_defer_gates(paths):
+        _echo_session_deferred_gates()
+        return 0
+
     commands = [
         ("promote_term_baseline.py", []),
         ("run_matcher_change_preflight.py", []),
@@ -4103,6 +4290,10 @@ def _write_registry_entry_block(path: Path, record: RegistryEntryRecord, new_blo
 
 
 def _run_track_b_inactivation_gates(paths: MatcherPaths, report_root: Path | None) -> int:
+    if _matcher_session_should_defer_gates(paths):
+        _echo_session_deferred_gates()
+        return 0
+
     if paths.app_dir != APP_DIR:
         raise typer.BadParameter("tree-root inactivation gates are not available; use --no-run-gates")
     return _run_support_check(
@@ -5010,6 +5201,10 @@ def _append_runtime_overlay_deep_sanity_stub(
 
 
 def _run_track_a_runtime_gates(paths: MatcherPaths, report_root: Path | None) -> int:
+    if _matcher_session_should_defer_gates(paths):
+        _echo_session_deferred_gates()
+        return 0
+
     args = [
         "--track",
         "A",
@@ -5033,6 +5228,130 @@ def _raw_args(ctx: typer.Context) -> list[str]:
 
 def _tree_root_args(tree_root: Path | None) -> list[str]:
     return ["--tree-root", str(tree_root)] if tree_root is not None else []
+
+
+def _run_session_regen(
+    *,
+    tree_root: Path | None,
+    report_root: Path | None,
+    check: bool,
+) -> int:
+    mode_arg = "--check" if check else "--write"
+    common_args = _tree_root_args(tree_root)
+    for script_name in (
+        "generate_matcher_contract_json_from_toml_sources.py",
+        "generate_matcher_registry_coverage.py",
+    ):
+        status = _run_support_check(
+            script_name,
+            [*common_args, mode_arg],
+            tree_root=tree_root,
+            report_root=report_root,
+            cwd=APP_DIR,
+        )
+        if status != 0:
+            return status
+    return 0
+
+
+def _run_session_promote(
+    *,
+    allow_removals: bool,
+    confirm_large_removals: bool,
+    report_root: Path | None,
+) -> int:
+    args = ["--language", "sv", "--market", "SE"]
+    if allow_removals:
+        args.append("--allow-removals")
+    if confirm_large_removals:
+        args.append("--confirm-large-removals")
+    return _run_support_check(
+        "promote_term_baseline.py",
+        args,
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
+
+
+def _run_session_refresh_line_refs(
+    *,
+    paths: MatcherPaths,
+    tree_root: Path | None,
+    report_root: Path | None,
+) -> int:
+    return _run_support_check(
+        "refresh_matcher_rule_inventory_line_refs.py",
+        [
+            *_tree_root_args(tree_root),
+            "--repo-root",
+            str(paths.repo_root),
+            "--format",
+            "text",
+            "--write",
+        ],
+        tree_root=tree_root,
+        report_root=report_root,
+        cwd=paths.repo_root,
+    )
+
+
+def _run_session_preflight(
+    *,
+    tree_root: Path | None,
+    report_root: Path | None,
+) -> int:
+    return _run_support_check(
+        "run_matcher_change_preflight.py",
+        [*_tree_root_args(tree_root), "--format", "text"],
+        tree_root=tree_root,
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
+
+
+def _session_default_gate_args(track: Literal["A", "B"]) -> list[str]:
+    if track == "A":
+        return [
+            "--track",
+            "A",
+            "--runtime-changed",
+            "--no-registry-changed",
+            "--no-fixtures-changed",
+            "--no-inventory-changed",
+            "--no-support-checks-changed",
+        ]
+    return [
+        "--track",
+        "B",
+        "--registry-changed",
+        "--runtime-changed",
+        "--fixtures-changed",
+        "--inventory-changed",
+        "--no-support-checks-changed",
+        "--skip-baseline-promotion",
+    ]
+
+
+def _run_session_gates(
+    *,
+    track: Literal["A", "B"],
+    tree_root: Path | None,
+    report_root: Path | None,
+    raw_args: list[str],
+) -> int:
+    if "--track" in raw_args:
+        raise typer.BadParameter("pass session --track on finalize, not through raw gate args")
+    return _run_support_check(
+        "run_matcher_change_gates.py",
+        [
+            *_session_default_gate_args(track),
+            *_tree_root_args(tree_root),
+            *raw_args,
+        ],
+        tree_root=tree_root,
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
 
 
 def _guide_key(shape: str) -> str:
@@ -7954,6 +8273,9 @@ def matcher_fixture_remove(
     if not run_gates:
         typer.echo("Skipped preflight (--no-run-gates).")
         return
+    if _matcher_session_should_defer_gates(paths):
+        _echo_session_deferred_gates("preflight")
+        return
     raise typer.Exit(_run_preflight(paths, report_root))
 
 
@@ -8986,6 +9308,174 @@ def matcher_inactivate(
         typer.echo("Skipped gates (--no-run-gates).")
         return
     raise typer.Exit(_run_track_b_inactivation_gates(paths, report_root))
+
+
+@matcher_session_app.command("start", help="Start a matcher edit session and defer per-command gates.")
+def matcher_session_start(
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to use instead of /app.")] = None,
+    force: Annotated[bool, typer.Option("--force", help="Replace an existing session marker.")] = False,
+) -> None:
+    paths = _paths(tree_root)
+    existing = _read_matcher_session_state(paths)
+    if existing is not None and not force:
+        state_path, state = existing
+        started_at = state.get("started_at", "unknown")
+        raise typer.BadParameter(f"matcher session already active since {started_at}: {state_path}")
+
+    start_head, head_error = _git_output(paths, ["rev-parse", "HEAD"])
+    changed_paths, status_error = _matcher_relevant_changed_paths(paths)
+    state: dict[str, Any] = {
+        "version": MATCHER_SESSION_VERSION,
+        "started_at": _utc_timestamp(),
+        "start_head": start_head,
+        "start_head_error": head_error,
+        "repo_root": str(paths.repo_root),
+        "app_dir": str(paths.app_dir),
+        "tree_root": str(paths.tree_root),
+        "start_dirty_matcher_paths": list(changed_paths),
+        "git_status_error": status_error,
+    }
+    state_path = _write_matcher_session_state(paths, state)
+
+    typer.echo(f"Started matcher session: {state_path}")
+    if head_error is not None:
+        typer.echo(f"Git metadata unavailable: {head_error}")
+    if status_error is not None:
+        typer.echo(f"Git change listing unavailable: {status_error}")
+    elif changed_paths:
+        typer.echo("Matcher-relevant files were already dirty at session start:")
+        for path in changed_paths:
+            typer.echo(f"  {path}")
+    typer.echo("Per-command matcher gates will be deferred until session finalize unless --run-gates is passed.")
+
+
+@matcher_session_app.command("status", help="Show the active matcher session and matcher-relevant git changes.")
+def matcher_session_status(
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to use instead of /app.")] = None,
+) -> None:
+    paths = _paths(tree_root)
+    existing = _read_matcher_session_state(paths)
+    if existing is None:
+        typer.echo("No active matcher session.")
+        return
+
+    state_path, state = existing
+    typer.echo(f"Active matcher session: {state_path}")
+    typer.echo(f"  started_at: {state.get('started_at', 'unknown')}")
+    typer.echo(f"  start_head: {state.get('start_head') or 'unknown'}")
+
+    changed_paths, status_error = _matcher_relevant_changed_paths(paths)
+    if status_error is not None:
+        typer.echo(f"Git change listing unavailable: {status_error}")
+        return
+    if not changed_paths:
+        typer.echo("No matcher-relevant git changes detected.")
+        return
+    typer.echo("Matcher-relevant git changes:")
+    for path in changed_paths:
+        typer.echo(f"  {path}")
+
+
+@matcher_session_app.command(
+    "finalize",
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+    help="Regenerate/promote/refresh once, then run one final matcher gate.",
+)
+def matcher_session_finalize(
+    ctx: typer.Context,
+    track: Annotated[Literal["A", "B"], typer.Option("--track", help="Final matcher gate track.")] = "B",
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to use instead of /app.")] = None,
+    allow_removals: Annotated[
+        bool,
+        typer.Option("--allow-removals", help="Pass confirmed removal allowance to baseline promotion."),
+    ] = False,
+    confirm_large_removals: Annotated[
+        bool,
+        typer.Option("--confirm-large-removals", help="Confirm more than five baseline removals."),
+    ] = False,
+    skip_promote: Annotated[
+        bool,
+        typer.Option("--skip-promote", help="Skip verified-term baseline promotion."),
+    ] = False,
+    skip_line_refs: Annotated[
+        bool,
+        typer.Option("--skip-line-refs", help="Skip inventory line-ref refresh."),
+    ] = False,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+) -> None:
+    paths = _paths(tree_root)
+    existing = _read_matcher_session_state(paths)
+    if existing is None:
+        raise typer.BadParameter("no active matcher session; run dm matcher session start first")
+    state_path, _state = existing
+    raw_args = _raw_args(ctx)
+
+    steps: list[tuple[str, Any]] = [
+        (
+            "regen",
+            lambda: _run_session_regen(tree_root=tree_root, report_root=report_root, check=False),
+        ),
+    ]
+    if not skip_promote:
+        steps.append((
+            "promote",
+            lambda: _run_session_promote(
+                allow_removals=allow_removals,
+                confirm_large_removals=confirm_large_removals,
+                report_root=report_root,
+            ),
+        ))
+    if not skip_line_refs:
+        steps.append((
+            "refresh-line-refs",
+            lambda: _run_session_refresh_line_refs(paths=paths, tree_root=tree_root, report_root=report_root),
+        ))
+    steps.extend([
+        (
+            "regen --check",
+            lambda: _run_session_regen(tree_root=tree_root, report_root=report_root, check=True),
+        ),
+        (
+            "preflight",
+            lambda: _run_session_preflight(tree_root=tree_root, report_root=report_root),
+        ),
+        (
+            f"gates --track {track}",
+            lambda: _run_session_gates(
+                track=track,
+                tree_root=tree_root,
+                report_root=report_root,
+                raw_args=raw_args,
+            ),
+        ),
+    ])
+
+    for label, run_step in steps:
+        typer.echo(f"\n=== session finalize: {label} ===")
+        status = run_step()
+        if status != 0:
+            typer.echo(f"Session finalize failed at {label}; session remains active: {state_path}", err=True)
+            raise typer.Exit(status)
+
+    state_path.unlink(missing_ok=True)
+    typer.echo(f"\nMatcher session finalized; cleared {state_path}")
+
+
+@matcher_session_app.command("abort", help="Clear the matcher session marker without changing files.")
+def matcher_session_abort(
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to use instead of /app.")] = None,
+) -> None:
+    paths = _paths(tree_root)
+    existing = _read_matcher_session_state(paths)
+    if existing is None:
+        typer.echo("No active matcher session.")
+        return
+    state_path, _state = existing
+    state_path.unlink(missing_ok=True)
+    typer.echo(f"Aborted matcher session: {state_path}")
 
 
 @matcher_app.command(

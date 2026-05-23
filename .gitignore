@@ -36,6 +36,7 @@ app/static/vendor/
 # Trackable deterministic support checks live in app/support_checks/.
 CODEX.md
 app/tests/
+app/.dm/
 
 # AI instructions (dev-only)
 CLAUDE.md

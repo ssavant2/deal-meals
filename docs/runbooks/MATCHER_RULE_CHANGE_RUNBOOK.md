@@ -93,6 +93,26 @@ Iterate with live pre-flight feedback:
 ./bin/dm matcher dev-watch
 ```
 
+For batch work, use a matcher session instead of remembering `--no-run-gates`
+on every command:
+
+```bash
+./bin/dm matcher session start
+# run dm matcher add/modify/fixture commands, plus any manual TOML/Python edits
+./bin/dm matcher session status
+./bin/dm matcher session finalize --track B
+```
+
+While a session is active, per-command matcher gates are deferred by default;
+pass `--run-gates` on a command to force an immediate check. `finalize` runs
+generated JSON/coverage regen, verified-term baseline promotion, line-ref
+refresh, drift check, pre-flight, and one final gate. If a finalize step fails,
+the session marker stays active so the batch can be fixed and finalized again.
+`finalize` does not bypass baseline write-permission checks: when run through
+`./bin/dm`, it runs in the normal appuser container path; if the promote step is
+run as the wrong user or in a read-only checkout, it should fail there and leave
+the session active for a rerun after the permission issue is fixed.
+
 Explain one product/ingredient decision before hand-reading large matcher tables:
 
 ```bash

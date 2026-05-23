@@ -3214,6 +3214,7 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         for command in (
             "add",
+            "session",
             "gates",
             "dev-watch",
             "guide",
@@ -3227,6 +3228,98 @@ def normalize_probe(text: str) -> str:
             "explain",
         ):
             self.assertIn(command, result.stdout)
+
+    def test_phase7_dm_matcher_session_start_status_abort_uses_tree_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            state_path = dm_cli._matcher_session_fallback_path(dm_cli._paths(tree_root))
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            start = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "session",
+                    "start",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(start.returncode, 0, start.stderr + start.stdout)
+            self.assertIn("Started matcher session", start.stdout)
+            self.assertTrue(state_path.exists())
+
+            status = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "session",
+                    "status",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(status.returncode, 0, status.stderr + status.stdout)
+            self.assertIn("Active matcher session", status.stdout)
+
+            abort = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "session",
+                    "abort",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(abort.returncode, 0, abort.stderr + abort.stdout)
+            self.assertFalse(state_path.exists())
+
+    def test_phase7_active_matcher_session_defers_gates_unless_forced(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = dm_cli._paths(Path(tmp))
+            dm_cli._write_matcher_session_state(
+                paths,
+                {"version": dm_cli.MATCHER_SESSION_VERSION, "started_at": "test"},
+            )
+            calls = []
+            original_argv = sys.argv
+            original_run_support_check = dm_cli._run_support_check
+
+            def fake_run_support_check(script_name, args, *, tree_root=None, report_root=None, cwd=None):
+                calls.append((script_name, args, tree_root, report_root, cwd))
+                return 17
+
+            dm_cli._run_support_check = fake_run_support_check
+            try:
+                sys.argv = ["dm", "matcher", "add", "pnb"]
+                self.assertEqual(dm_cli._run_track_a_runtime_gates(paths, None), 0)
+                self.assertEqual(calls, [])
+
+                sys.argv = ["dm", "matcher", "add", "pnb", "--run-gates"]
+                self.assertEqual(dm_cli._run_track_a_runtime_gates(paths, None), 17)
+                self.assertEqual(len(calls), 1)
+            finally:
+                sys.argv = original_argv
+                dm_cli._run_support_check = original_run_support_check
 
     def test_phase0b_dm_matcher_explain_wraps_matcher_audit(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
