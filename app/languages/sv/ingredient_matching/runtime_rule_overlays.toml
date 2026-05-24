@@ -410,6 +410,20 @@ keyword = "inlagdgurka"
 blockers = ["smörgåsgurka", "smorgasgurka", "ättiksgurka", "attiksgurka", "saltgurka"]
 reason = "Isolate smörgåsgurka offers — these are pickled cucumber in vinegar with different flavor profile, should not match generic inlagdgurka or saltgurka recipes; Isolate ättiksgurka offers — sharp vinegar-pickled cucumber, different from smörgåsgurka and generic inlagdgurka; Isolate saltgurka offers — salt-brined cucumber, different preparation from ättiksgurka and smörgåsgurka"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_pepparkaka"
+status = "active"
+keyword = "pepparkaka"
+blockers = ["skumtomte"]
+reason = "Skumtomte Pepparkaka is a marshmallow candy, not a pepparkaka baked good — block from pepparkaka ingredient matches"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_dillsas"
+status = "active"
+keyword = "dillsås"
+blockers = ["gratäng"]
+reason = "Fiskgratäng med dillsås is a ready-meal, not a dillsås condiment — block from dillsås/sauce ingredient matches"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -542,6 +556,13 @@ status = "active"
 keyword = "fläskkarré"
 context = ["lufttorkad", "lomo"]
 reason = "lufttorkad fläskkarré (lomo) är ett charkuteri-torkat kött, ska inte matcha färsk fläskkarré"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_must"
+status = "active"
+keyword = "must"
+context = ["mustigt"]
+reason = "suppress 'must' keyword from firing inside adjective 'mustigt' (full-bodied) in ingredient text — äppelmust products falsely match wine ingredients"
 
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
