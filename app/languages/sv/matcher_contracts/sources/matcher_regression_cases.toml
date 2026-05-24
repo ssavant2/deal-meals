@@ -28724,3 +28724,27 @@ category = "vegetables"
 canonical = "småtomat"
 ingredient_index = 0
 must_match_keyword = "småtomat"
+
+[[fixtures]]
+id = "kycklingskinn_not_plain_kyckling_filet_negative"
+policy_ref = "kycklingskinn_not_plain_kyckling"
+source_ref = "current_review:kycklingskinn_not_plain_kyckling_filet"
+recipe_name = "Sanity Recipe"
+ingredients = ["kycklingskinn"]
+expected = 0
+
+[fixtures.offer]
+name = "Kycklingfilé Ca 700g Kronfågel"
+category = "meat"
+
+[[fixtures]]
+id = "kycklingskinn_not_plain_kyckling_brost_negative"
+policy_ref = "kycklingskinn_not_plain_kyckling"
+source_ref = "current_review:kycklingskinn_not_plain_kyckling_brost"
+recipe_name = "Sanity Recipe"
+ingredients = ["kycklingskinn"]
+expected = 0
+
+[fixtures.offer]
+name = "Kycklingbröst Ca 700g Kronfågel"
+category = "meat"

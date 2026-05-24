@@ -298,6 +298,34 @@ keyword = "bönor"
 blockers = ["laoganma", "fant"]
 reason = "Laoganma products are Chinese condiments/sauces — bönor i chiliolja (black beans in chili oil) is a flavoring sauce, not plain beans for cooking; Fant (Podravka brand) is a seasoning/soup powder mix — not actual whole beans for cooking"
 
+[[product_name_blockers]]
+id = "runtime_pnb_lantbrod"
+status = "active"
+keyword = "lantbröd"
+blockers = ["kungsörnen"]
+reason = "Kungsörnen säljer brödmix (mjöl+jäst för hembakning) i 1kg-paket med brödnamn — inte färdigt bröd"
+
+[[product_name_blockers]]
+id = "runtime_pnb_surdegsbrod"
+status = "active"
+keyword = "surdegsbröd"
+blockers = ["kungsörnen"]
+reason = "Kungsörnen säljer brödmix (mjöl+jäst för hembakning) i 1kg-paket med brödnamn — inte färdigt bröd"
+
+[[product_name_blockers]]
+id = "runtime_pnb_ciabatta"
+status = "active"
+keyword = "ciabatta"
+blockers = ["kungsörnen"]
+reason = "Kungsörnen säljer brödmix (mjöl+jäst för hembakning) i 1kg-paket med brödnamn — inte färdigt bröd"
+
+[[product_name_blockers]]
+id = "runtime_pnb_mozzarella"
+status = "active"
+keyword = "mozzarella"
+blockers = ["scamorza"]
+reason = "Scamorza är rökt/lagrad italiensk ost — inte färsk mozzarella. Recept för caprese/piadina vill ha färsk vit mozzarella, inte rökt scamorza som ofta säljs märkt 'Scamorza Mozzarella'"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -626,6 +654,20 @@ status = "active"
 keyword = "must"
 context = ["mustigt"]
 reason = "suppress 'must' keyword from firing inside adjective 'mustigt' (full-bodied) in ingredient text — äppelmust products falsely match wine ingredients"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_zucchini"
+status = "active"
+keyword = "zucchini"
+context = ["butternut", "pumpa"]
+reason = "Recept som säger 'butternut squash' eller 'annan pumpa' vill ha rostad pumpa/butternut-karaktär — zucchini är botaniskt squash men kulinariskt INTE substitut"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_squash"
+status = "active"
+keyword = "squash"
+context = ["butternut", "pumpa"]
+reason = "Samma som zucchini-KSBC: butternut squash / annan pumpa ska inte matcha zucchini-produkter (som har 'squash'-parent)"
 
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"

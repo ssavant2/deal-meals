@@ -29786,3 +29786,43 @@ source_family = "matcher_regression_case"
 canonical = "bordsmargarin"
 variant = "matcher_regression_breoliv_bordsmargarin_positive: BreOliv Mild 91% 200g Zeta"
 layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.kycklingskinn_not_plain_kyckling.filet_negative"
+language = "sv"
+market = "SE"
+canonical = "kycklingskinn_not_plain_kyckling"
+status = "active"
+variants = ["kycklingskinn_not_plain_kyckling_filet_negative: Kycklingfilé Ca 700g Kronfågel"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:kycklingskinn_not_plain_kyckling_filet_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture kycklingskinn_not_plain_kyckling_filet_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling_filet_negative: Kycklingfilé Ca 700g Kronfågel"
+layer_role = "negative_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.kycklingskinn_not_plain_kyckling.brost_negative"
+language = "sv"
+market = "SE"
+canonical = "kycklingskinn_not_plain_kyckling"
+status = "active"
+variants = ["kycklingskinn_not_plain_kyckling_brost_negative: Kycklingbröst Ca 700g Kronfågel"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:kycklingskinn_not_plain_kyckling_brost_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture kycklingskinn_not_plain_kyckling_brost_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling_brost_negative: Kycklingbröst Ca 700g Kronfågel"
+layer_role = "negative_regression"

@@ -5645,3 +5645,77 @@ layer_role = "negative_guard_pattern"
 ingredient = "urkärnade oliver"
 offer_name = "urkärnade oliver ! \\bmed\\s+kärn(a|or)\\b"
 expected = 0
+
+[[entries]]
+entry_id = "sv-se.guard.policy_kycklingskinn_not_plain_kyckling_kyckling"
+language = "sv"
+market = "SE"
+canonical = "kycklingskinn_not_plain_kyckling"
+status = "active"
+variants = ["kycklingskinn_not_plain_kyckling ! kyckling", "kycklingskinn_not_plain_kyckling ! kycklingfilé", "kycklingskinn_not_plain_kyckling ! kycklingbröst", "kycklingskinn_not_plain_kyckling ! kycklinglår", "kycklingskinn_not_plain_kyckling ! kycklingfile", "kycklingskinn_not_plain_kyckling ! kycklingbrost", "kycklingskinn_not_plain_kyckling ! kycklinglar"]
+negative_guards = ["kycklingskinn_not_plain_kyckling ! kyckling", "kycklingskinn_not_plain_kyckling ! kycklingfilé", "kycklingskinn_not_plain_kyckling ! kycklingbröst", "kycklingskinn_not_plain_kyckling ! kycklinglår", "kycklingskinn_not_plain_kyckling ! kycklingfile", "kycklingskinn_not_plain_kyckling ! kycklingbrost", "kycklingskinn_not_plain_kyckling ! kycklinglar"]
+source_refs = ["policy:no_match_policies:policy_kycklingskinn_not_plain_kyckling_kyckling"]
+layer_policy = ["negative_guard_only"]
+notes = "Kycklingskinn är specifikt stycke — ska inte matchas av hel kyckling/kycklingfilé/kycklingbröst/kycklinglår via parent"
+
+[entries.language_payload.no_match_policy]
+id = "policy_kycklingskinn_not_plain_kyckling_kyckling"
+rule_schema_version = 1
+rule_version = 1
+canonical = "kycklingskinn_not_plain_kyckling"
+ingredient_patterns = ["\\bkycklingskinn\\b"]
+blocked_offer_keywords = ["kyckling", "kycklingfilé", "kycklingbröst", "kycklinglår", "kycklingfile", "kycklingbrost", "kycklinglar"]
+blocked_offer_patterns = []
+allowed_specifics = []
+reason = "Kycklingskinn är specifikt stycke — ska inte matchas av hel kyckling/kycklingfilé/kycklingbröst/kycklinglår via parent"
+policy_ref = "policy_kycklingskinn_not_plain_kyckling_kyckling"
+fixture_refs = ["kycklingskinn_not_plain_kyckling_filet_negative", "kycklingskinn_not_plain_kyckling_brost_negative"]
+supersedes = []
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling ! kyckling"
+layer_role = "negative_guard_keyword"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling ! kycklingfilé"
+layer_role = "negative_guard_keyword"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling ! kycklingbröst"
+layer_role = "negative_guard_keyword"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling ! kycklinglår"
+layer_role = "negative_guard_keyword"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling ! kycklingfile"
+layer_role = "negative_guard_keyword"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling ! kycklingbrost"
+layer_role = "negative_guard_keyword"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling ! kycklinglar"
+layer_role = "negative_guard_keyword"
+
+[[entries.negative_examples]]
+ingredient = "kycklingskinn"
+offer_name = "Kycklingfilé Ca 700g Kronfågel"
+offer_category = "meat"
+expected = 0

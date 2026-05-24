@@ -85,8 +85,11 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
     # kycklingfilé would appear in French or Italian recipes where the
     # seasoning profile is completely wrong.
     'thaikryddad': {
-        # General cuisine/cooking-style cues
-        'thai', 'thaikryddad', 'wok', 'pad', 'asiatisk', 'asian',
+        # General cuisine/cooking-style cues.
+        # 'wok' removed (Q79-5): wok is too generic — teriyaki, sukiyaki, kinesisk wok all use the
+        # word but are NOT thai. Thaikryddad products must require explicit thai markers
+        # (thai/pad/asiatisk) rather than the wok cooking method.
+        'thai', 'thaikryddad', 'pad', 'asiatisk', 'asian',
         # Thai pantry ingredients that are distinctive to thai/southeast-asian cooking
         'lemongrass', 'citrongräs', 'fisksås',
         'kaffirlime', 'kaffirlimeblad', 'palmsocker',

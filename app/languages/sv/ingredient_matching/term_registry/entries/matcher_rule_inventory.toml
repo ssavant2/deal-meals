@@ -9186,3 +9186,23 @@ source_family = "matcher_rule_inventory"
 canonical = "småtomat"
 variant = "småtomat"
 layer_role = "legacy_parent"
+
+[[entries]]
+entry_id = "sv-se.policy.kycklingskinn_not_plain_kyckling.policy_kycklingskinn_not_plain_kyckling_kyckling"
+language = "sv"
+market = "SE"
+canonical = "kycklingskinn_not_plain_kyckling"
+status = "active"
+variants = ["kycklingskinn_not_plain_kyckling"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:policy_kycklingskinn_not_plain_kyckling_kyckling"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row policy_kycklingskinn_not_plain_kyckling_kyckling."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "kycklingskinn_not_plain_kyckling"
+variant = "kycklingskinn_not_plain_kyckling"
+layer_role = "legacy_no_match_policy"

@@ -33021,5 +33021,33 @@
     "policy_ref": "keyword_extra_parent_smatomat_family",
     "recipe_name": "Tomatsallad",
     "source_ref": "current_review:keyword_extra_parent_smatomat_routing"
+  },
+  {
+    "expected": 0,
+    "id": "kycklingskinn_not_plain_kyckling_filet_negative",
+    "ingredients": [
+      "kycklingskinn"
+    ],
+    "offer": {
+      "category": "meat",
+      "name": "Kycklingfilé Ca 700g Kronfågel"
+    },
+    "policy_ref": "kycklingskinn_not_plain_kyckling",
+    "recipe_name": "Sanity Recipe",
+    "source_ref": "current_review:kycklingskinn_not_plain_kyckling_filet"
+  },
+  {
+    "expected": 0,
+    "id": "kycklingskinn_not_plain_kyckling_brost_negative",
+    "ingredients": [
+      "kycklingskinn"
+    ],
+    "offer": {
+      "category": "meat",
+      "name": "Kycklingbröst Ca 700g Kronfågel"
+    },
+    "policy_ref": "kycklingskinn_not_plain_kyckling",
+    "recipe_name": "Sanity Recipe",
+    "source_ref": "current_review:kycklingskinn_not_plain_kyckling_brost"
   }
 ]
