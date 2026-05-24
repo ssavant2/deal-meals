@@ -4740,7 +4740,7 @@ expected = 0
 entry_id = "sv-se.bridge.bridge_knipplok_bunch"
 language = "sv"
 market = "SE"
-canonical = "knipplök"
+canonical = "salladslök"
 status = "active"
 variants = ["\\bknipplök\\b -> \\bsalladslök\\b", "\\bknipplök\\b -> \\bsalladslok\\b", "\\bknipplok\\b -> \\bsalladslök\\b", "\\bknipplok\\b -> \\bsalladslok\\b"]
 ingredient_terms = ["\\bknipplök\\b", "\\bknipplok\\b"]
@@ -4748,13 +4748,13 @@ offer_terms = ["\\bsalladslök\\b", "\\bsalladslok\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_knipplok_bunch"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge: bridge_knipplok_bunch. Narrowed to only salladslök; the previous '\\bknippe\\b' arm matched any product with 'knippe' (bundled yellow onion, dill, basilika, purjolök) which are not pearl/spring-onion substitutes."
+notes = "Registry-owned match bridge: bridge_knipplok_bunch. Narrowed to only salladslök; the previous '\\bknippe\\b' arm matched any product with 'knippe' (bundled yellow onion, dill, basilika, purjolök) which are not pearl/spring-onion substitutes. Canonical updated to salladslök to match keyword-synonym route."
 
 [entries.language_payload.match_bridge]
 id = "bridge_knipplok_bunch"
 rule_schema_version = 1
 rule_version = 1
-canonical = "knipplök"
+canonical = "salladslök"
 ingredient_patterns = ["\\bknipplök\\b", "\\bknipplok\\b"]
 offer_patterns = ["\\bsalladslök\\b", "\\bsalladslok\\b"]
 negative_offer_patterns = []
@@ -4768,25 +4768,25 @@ forbidden_offer_form_signals = []
 
 [[entries.coverage]]
 source_family = "match_bridge"
-canonical = "knipplök"
+canonical = "salladslök"
 variant = "\\bknipplök\\b -> \\bsalladslök\\b"
 layer_role = "bridge_positive"
 
 [[entries.coverage]]
 source_family = "match_bridge"
-canonical = "knipplök"
+canonical = "salladslök"
 variant = "\\bknipplök\\b -> \\bsalladslok\\b"
 layer_role = "bridge_positive"
 
 [[entries.coverage]]
 source_family = "match_bridge"
-canonical = "knipplök"
+canonical = "salladslök"
 variant = "\\bknipplok\\b -> \\bsalladslök\\b"
 layer_role = "bridge_positive"
 
 [[entries.coverage]]
 source_family = "match_bridge"
-canonical = "knipplök"
+canonical = "salladslök"
 variant = "\\bknipplok\\b -> \\bsalladslok\\b"
 layer_role = "bridge_positive"
 

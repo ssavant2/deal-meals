@@ -529,6 +529,13 @@ keyword = "paprika"
 context = ["snackpaprika"]
 reason = "Snackpaprika is a sweet snacking pepper variety — should only match snackpaprika recipe ingredients, not generic paprika recipes"
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_inlagdgurka"
+status = "active"
+keyword = "inlagdgurka"
+context = ["saltgurka", "saltgurkor", "smörgåsgurka", "smorgasgurka", "ättiksgurka", "attiksgurka"]
+reason = "suppress generic inlagdgurka when ingredient specifies a distinct variant; FPB cannot handle this because normalization puts inlagdgurka directly in ingredient text causing smart-blocker to allow the match"
+
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
 status = "active"

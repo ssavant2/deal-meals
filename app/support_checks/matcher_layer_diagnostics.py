@@ -130,6 +130,7 @@ _DECLARED_DIAGNOSTIC_CANONICAL_GROUPS = (
     }),
     frozenset({"salami", "pålägg"}),
     frozenset({"rostbiff", "pålägg"}),
+    frozenset({"knipplök", "knipplökar", "salladslök"}),  # knipplök/knipplökar = synonym of salladslök
     frozenset({"kalkon", "pålägg"}),
     frozenset({"aprikos", "aprikoser"}),
     frozenset({"champinjon", "champinjoner", "skogschampinjoner"}),

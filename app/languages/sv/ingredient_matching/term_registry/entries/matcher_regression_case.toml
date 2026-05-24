@@ -4648,10 +4648,10 @@ variant = "matcher_regression_knackebrod_vallmofro_positive: Vallmofrö Falu Kn�
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.knipplok.matcher_regression_knipplok_salladslok_positive"
+entry_id = "sv-se.policy.salladslok.matcher_regression_knipplok_salladslok_positive"
 language = "sv"
 market = "SE"
-canonical = "knipplök"
+canonical = "salladslök"
 status = "active"
 variants = ["matcher_regression_knipplok_salladslok_positive: Salladslök Knippe"]
 ingredient_terms = []
@@ -4663,7 +4663,7 @@ notes = "Registry coverage for matcher regression fixture matcher_regression_kni
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "knipplök"
+canonical = "salladslök"
 variant = "matcher_regression_knipplok_salladslok_positive: Salladslök Knippe"
 layer_role = "positive_regression"
 

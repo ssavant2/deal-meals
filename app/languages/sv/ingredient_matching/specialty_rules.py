@@ -58,6 +58,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'solt', 'secchi',  # abbreviated/Italian for sun-dried
         'krossad', 'krossade', 'passerade',  # canned forms
         'finkrossad', 'finkrossade',  # "Tomater Finkrossade" variant of krossade
+        'hela',  # "Hela Tomater på burk" — whole canned tomatoes, bidirectional via BIDIRECTIONAL_PER_KEYWORD
         'skalad', 'skalade',  # peeled whole tomatoes
         'burk',  # "på burk" → QUALIFIER_EQUIVALENTS maps to all canned forms
         'konserverad', 'konserverade',  # → QUALIFIER_EQUIVALENTS maps to all canned forms
@@ -72,6 +73,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'solt', 'secchi',  # abbreviated/Italian for sun-dried
         'krossad', 'krossade', 'passerade',
         'finkrossad', 'finkrossade',
+        'hela',  # "Hela Tomater på burk" — whole canned tomatoes, bidirectional via BIDIRECTIONAL_PER_KEYWORD
         'skalad', 'skalade',
         'burk', 'konserverad', 'konserverade',
         'dop',  # DOP = Italian canned-quality cert
@@ -1003,7 +1005,9 @@ BIDIRECTIONAL_SPECIALTY_QUALIFIERS: FrozenSet[str] = frozenset({
     'soltorkad', 'soltorkade', 'soltorkat', 'soltork',
     'secchi', 'solt',  # shortened forms in product names ("Pomodori Secchi Soltork Tomat")
     'krossad', 'krossade', 'passerade',
-    'hela',   # "Hela Tomater på burk" — whole canned tomatoes ≠ fresh tomater
+    # NOTE: 'hela' is intentionally NOT here — it is scoped to tomat/tomater only
+    # via BIDIRECTIONAL_PER_KEYWORD below. Global 'hela' would block Champinjoner
+    # Hela, Kaffe Hela Bönor, Fänkålsfrön Hela, etc. from their generic recipes.
     'burk',   # jarred/canned (tomater, paprika) - QUALIFIER_EQUIVALENTS['burk'] covers variants
     # Stock/broth (derived product, not the base ingredient itself)
     'buljong', 'buljongtarning', 'buljongtärning', 'fond',
@@ -1130,6 +1134,11 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
         'garlic', 'herbs',                         # English = vitlök & örter
         'grekisk',                                 # Grekisk Vitlök Färskost
     }),
+    # "Hela Tomater på burk" = whole canned tomatoes — different product form from fresh tomatoes.
+    # Scoped to tomat/tomater only. 'hela' must NOT be global (would block Champinjoner Hela,
+    # Kaffe Hela Bönor, Fänkålsfrön Hela, etc. from matching their generic ingredients).
+    'tomat': frozenset({'hela'}),
+    'tomater': frozenset({'hela'}),
     # Cloves: ground (malen) ≠ whole. "6 kryddnejlikor" means whole for infusion.
     # Ground cloves only match when recipe explicitly asks for "malen/mald nejlika".
     # 'nejlikor' is the parent keyword (nejlika → nejlikor in INGREDIENT_PARENTS).

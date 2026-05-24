@@ -4384,9 +4384,9 @@
     "expected": 1,
     "expected_matches": [
       {
-        "canonical": "knipplök",
+        "canonical": "salladslök",
         "ingredient_index": 0,
-        "must_match_keyword": "knipplök"
+        "must_match_keyword": "salladslök"
       }
     ],
     "id": "matcher_regression_knipplok_salladslok_positive",
