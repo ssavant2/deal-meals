@@ -235,6 +235,55 @@ keyword = "yoghurt"
 blockers = ["hallon", "jordgubb", "blåbär", "körsbär", "hjortron", "havtorn", "lingon", "fläder", "drottningbär", "persika", "apelsin", "citron", "citrus", "lime", "mango", "ananas", "päron", "kiwi", "banan", "plommon", "aprikos", "choklad", "blandade smaker", "fruktsmaker", "vår & sommar", "robby"]
 reason = "Yoghurt-recipes (generic + matlagnings/turkisk/grekisk) match cooking-style yoghurts only. Sweetened fruit-flavored dessert yoghurts (Hallon, Mango, Citrus, Robby etc.) do not belong in cooking. Vanilj and naturell stay allowed (used in smoothies/baking)."
 
+[[product_name_blockers]]
+id = "runtime_pnb_plommontomater"
+status = "active"
+keyword = "plommontomater"
+blockers = ["kycklingpate"]
+reason = "Kycklingpate med tomat is chicken pate flavored with tomato, not a tomato product"
+
+[[product_name_blockers]]
+id = "runtime_pnb_kvisttomater"
+status = "active"
+keyword = "kvisttomater"
+blockers = ["kycklingpate"]
+reason = "Kycklingpate med tomat is chicken pate flavored with tomato, not a tomato product"
+
+[[product_name_blockers]]
+id = "runtime_pnb_plommontomat"
+status = "active"
+keyword = "plommontomat"
+blockers = ["kycklingpate"]
+reason = "Kycklingpate med tomat is chicken pate flavored with tomato, not a tomato product"
+
+[[product_name_blockers]]
+id = "runtime_pnb_kvisttomat"
+status = "active"
+keyword = "kvisttomat"
+blockers = ["kycklingpate"]
+reason = "Kycklingpate med tomat is chicken pate flavored with tomato, not a tomato product"
+
+[[product_name_blockers]]
+id = "runtime_pnb_halleflundra"
+status = "active"
+keyword = "hälleflundra"
+blockers = ["panerad", "panerade", "sprödpanerad", "sprodpanerad"]
+reason = "Breaded halibut variant differs from plain fish needed for grilling/cooking from raw"
+
+[[product_name_blockers]]
+id = "runtime_pnb_karre"
+status = "active"
+keyword = "karré"
+blockers = ["grillkryddad"]
+reason = "Grillkryddad karré is a pre-seasoned/marinated product fundamentally different from plain fläskkarré; grillkryddad is already a PNB blocker for kycklingben"
+
+[[product_name_blockers]]
+id = "runtime_pnb_gradde"
+status = "active"
+keyword = "grädde"
+blockers = ["soja"]
+reason = "Soja-based cream products (Cuisine vispgrädde Soja, Matlagningsgrädde Soja from Alpro) are plant-based substitutes; soja in product name as standalone word indicates plant-based cream, consistent with existing sojagrädde FPB blocker"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
