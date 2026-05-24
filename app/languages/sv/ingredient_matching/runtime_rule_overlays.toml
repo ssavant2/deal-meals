@@ -113,8 +113,8 @@ reason = "Bakmix Pannkakor (baking mix to make pancakes from scratch) is not a r
 id = "runtime_pnb_vitchoklad"
 status = "active"
 keyword = "vitchoklad"
-blockers = ["havregrynsgröt", "proteinpudding", "dessertsås", "dessertsås", "glass"]
-reason = "Havregrynsgröt/proteinpudding/dessertsås with vit choklad as flavor are not actual white chocolate baking products — recipes wanting vit choklad need solid chocolate bar/chips for cooking or baking; glass products (Lejonet Björnen, etc.) should not match baking white chocolate ingredients"
+blockers = ["havregrynsgröt", "proteinpudding", "dessertsås", "dessertsås", "glass", "hallon"]
+reason = "Havregrynsgröt/proteinpudding/dessertsås with vit choklad as flavor are not actual white chocolate baking products — recipes wanting vit choklad need solid chocolate bar/chips for cooking or baking; glass products (Lejonet Björnen, etc.) should not match baking white chocolate ingredients; products with hallon in name alongside vit choklad are ice cream or flavored desserts, not baking white chocolate"
 
 [[product_name_blockers]]
 id = "runtime_pnb_lask"
@@ -283,6 +283,20 @@ status = "active"
 keyword = "grädde"
 blockers = ["soja"]
 reason = "Soja-based cream products (Cuisine vispgrädde Soja, Matlagningsgrädde Soja from Alpro) are plant-based substitutes; soja in product name as standalone word indicates plant-based cream, consistent with existing sojagrädde FPB blocker"
+
+[[product_name_blockers]]
+id = "runtime_pnb_margarin"
+status = "active"
+keyword = "margarin"
+blockers = ["proactiv"]
+reason = "ProActiv is a cholesterol-lowering functional spread, not a cooking or baking margarin"
+
+[[product_name_blockers]]
+id = "runtime_pnb_bonor"
+status = "active"
+keyword = "bönor"
+blockers = ["laoganma", "fant"]
+reason = "Laoganma products are Chinese condiments/sauces — bönor i chiliolja (black beans in chili oil) is a flavoring sauce, not plain beans for cooking; Fant (Podravka brand) is a seasoning/soup powder mix — not actual whole beans for cooking"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
