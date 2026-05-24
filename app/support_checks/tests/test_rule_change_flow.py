@@ -188,7 +188,7 @@ print(json.dumps({expression}, ensure_ascii=False, sort_keys=True))
 
 
 class MatcherRuleChangePreflightTests(unittest.TestCase):
-    def test_phase5_contract_api_round_trip_preserves_payloads(self) -> None:
+    def test_contract_api_round_trip_preserves_payloads(self) -> None:
         fixtures = load_fixture_contract(DEFAULT_FIXTURE_FILE)
         inventory = load_inventory_contract(DEFAULT_INVENTORY_FILE)
         with tempfile.TemporaryDirectory() as tmp:
@@ -218,7 +218,7 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         self.assertEqual(report["summary"]["new_issue_count"], 0)
         self.assertEqual(report["summary"]["known_issue_count"], 0)
 
-    def test_phase10_runtime_overlay_loader_validates_schema_and_merges_keys(self) -> None:
+    def test_runtime_overlay_loader_validates_schema_and_merges_keys(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             overlay_file = Path(tmp) / "runtime_rule_overlays.toml"
             overlay_file.write_text(
@@ -490,7 +490,7 @@ reason = "Synthetic empty list."
             with self.assertRaisesRegex(RuntimeRuleOverlayError, "must not be empty"):
                 load_runtime_rule_overlays(overlay_file)
 
-    def test_phase10_runtime_overlay_preserves_pnb_merge_order_in_temp_tree(self) -> None:
+    def test_runtime_overlay_preserves_pnb_merge_order_in_temp_tree(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -518,11 +518,14 @@ reason = "Synthetic CLI-overlay merge-order canary."
             self.assertIn("wasa", merged["havregryn"])
             self.assertTrue(set(baseline["havregryn"]).issubset(set(merged["havregryn"])))
 
-            historical_havregryn = (
-                "    'havregryn': {'knäcke', 'knacke', 'knäckebröd', 'knackebrod', 'wasa', 'kex',\n"
-                "                  'quinoa'},  # \"Gröt Havregryn & quinoa\" = blend ≠ plain rolled oats for smulpaj (batch 50)\n"
-            )
             blocker_data_text = blocker_data_file.read_text(encoding="utf-8")
+            historical_havregryn_match = re.search(
+                r"    'havregryn': \{'knäcke', 'knacke', 'knäckebröd', 'knackebrod', 'wasa', 'kex',\n"
+                r"                  'quinoa'\},  # \"Gröt Havregryn & quinoa\" = blend (?:≠|!=) plain rolled oats for smulpaj[^\n]*\n",
+                blocker_data_text,
+            )
+            self.assertIsNotNone(historical_havregryn_match)
+            historical_havregryn = historical_havregryn_match.group(0)
             self.assertIn(historical_havregryn, blocker_data_text)
             blocker_data_file.write_text(
                 blocker_data_text.replace(historical_havregryn, ""),
@@ -540,7 +543,7 @@ reason = "Synthetic temp-tree move of the historical havregryn overlay entry."
             moved = _runtime_overlay_probe(app_dir, probe_expression)
             self.assertEqual(moved["havregryn"], baseline["havregryn"])
 
-    def test_phase11_preflight_flags_direct_space_norm_private_usage(self) -> None:
+    def test_preflight_flags_direct_space_norm_private_usage(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -639,7 +642,7 @@ def normalize_probe(text: str) -> str:
             report,
         )
 
-    def test_phase2_coverage_generation_allows_fixture_inventory_and_synced_sources(self) -> None:
+    def test_coverage_generation_allows_fixture_inventory_and_synced_sources(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -733,7 +736,7 @@ def normalize_probe(text: str) -> str:
         self.assertNotIn("generated_coverage_stale", codes, report)
         self.assertEqual(codes, set(), report)
 
-    def test_phase3_hash_tolerance_ignores_source_ref(self) -> None:
+    def test_hash_tolerance_ignores_source_ref(self) -> None:
         variant = AuditVariant(
             source_order=20,
             source_type="matcher_regression_case",
@@ -764,13 +767,13 @@ def normalize_probe(text: str) -> str:
             ),
         )
 
-    def test_phase3_current_stable_variant_ids_are_unique(self) -> None:
+    def test_current_stable_variant_ids_are_unique(self) -> None:
         variants = build_variants(batch_size=60, hash_version=IDENTITY_HASH_VERSION_V2)
         variant_ids = [variant.variant_id for variant in variants]
 
         self.assertEqual(len(variant_ids), len(set(variant_ids)))
 
-    def test_phase6_promote_content_key_tolerates_fixture_canonical_revision_only(self) -> None:
+    def test_promote_content_key_tolerates_fixture_canonical_revision_only(self) -> None:
         config = PromotionConfig(
             language="sv",
             market="SE",
@@ -972,7 +975,7 @@ def normalize_probe(text: str) -> str:
                 )
             self.assertEqual(unchanged, [])
 
-    def test_phase6_preflight_flags_match_bridge_positive_fixture_miss(self) -> None:
+    def test_preflight_flags_match_bridge_positive_fixture_miss(self) -> None:
         fixture_id = "matcher_regression_positive_phase6_bridge_miss"
         fixtures = [
             {
@@ -1015,7 +1018,7 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(issues[0].details["bridge_id"], "phase6_bridge_miss")
         self.assertEqual(issues[0].details["fixture_ref"], fixture_id)
 
-    def test_phase4_cli_e2e(self) -> None:
+    def test_cli_e2e(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -1117,6 +1120,8 @@ def normalize_probe(text: str) -> str:
                     "--no-registry-changed",
                     "--no-runtime-changed",
                     "--no-support-checks-changed",
+                    "--baseline-output-dir",
+                    str(tree_root / "promotion-output"),
                     "--dry-run",
                 ],
                 cwd=live_app_dir,
@@ -1392,7 +1397,7 @@ def normalize_probe(text: str) -> str:
             )
             self.assertIn("return True", matching_py)
 
-    def test_phase4_cli_dry_run_canary_does_not_write(self) -> None:
+    def test_cli_dry_run_canary_does_not_write(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -1468,7 +1473,7 @@ def normalize_probe(text: str) -> str:
             self.assertIn(f"# {policy_ref}: generated by dm matcher add keyword-extra-parent", result.stdout)
             self.assertIn("Dry run only; no files written.", result.stdout)
 
-    def test_phase6_keyword_synonym_cli_dry_run_canary_does_not_write(self) -> None:
+    def test_keyword_synonym_cli_dry_run_canary_does_not_write(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -1528,7 +1533,7 @@ def normalize_probe(text: str) -> str:
             self.assertIn(f"# {policy_ref}: generated by dm matcher add keyword-synonym", result.stdout)
             self.assertIn("Dry run only; no files written.", result.stdout)
 
-    def test_phase12_keyword_synonym_space_norm_warning_only_for_spaced_variants(self) -> None:
+    def test_keyword_synonym_space_norm_warning_only_for_spaced_variants(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -1606,7 +1611,7 @@ def normalize_probe(text: str) -> str:
             }
             self.assertEqual(after, before)
 
-    def test_phase6_keyword_synonym_cli_tree_root_and_duplicate_guard(self) -> None:
+    def test_keyword_synonym_cli_tree_root_and_duplicate_guard(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -1684,7 +1689,7 @@ def normalize_probe(text: str) -> str:
             self.assertIn("phasewritealias ->", duplicate_output)
             self.assertIn("phasealias", duplicate_output)
 
-    def test_phase13_runtime_overlay_add_commands_write_expected_surfaces(self) -> None:
+    def test_runtime_overlay_add_commands_write_expected_surfaces(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -1907,7 +1912,7 @@ def normalize_probe(text: str) -> str:
             self.assertIn('status = "inactive"', overlay_text)
             self.assertIn('inactive_reason = "Synthetic inactivation."', overlay_text)
 
-    def test_phase15_gpb_cli_writes_runtime_overlay(self) -> None:
+    def test_gpb_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -2032,7 +2037,7 @@ def normalize_probe(text: str) -> str:
             )
             self.assertEqual(after_inactivate["gpb"], [])
 
-    def test_phase14_space_normalization_cli_writes_runtime_overlay(self) -> None:
+    def test_space_normalization_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -2222,7 +2227,62 @@ def normalize_probe(text: str) -> str:
             )
             self.assertEqual(after_inactivate["normalized"], "phase space")
 
-    def test_phase14_runtime_blocker_warns_for_space_normalized_compound(self) -> None:
+    def test_dual_keyword_normalization_cli_writes_ordered_runtime_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            overlay_file = app_dir / "languages" / "sv" / "ingredient_matching" / "runtime_rule_overlays.toml"
+            sanity_file = app_dir / "support_checks" / "run_deep_matcher_sanity.py"
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "dual-keyword-normalization",
+                    "phase pickles",
+                    "--primary",
+                    "phasepickles",
+                    "--extra-keywords",
+                    "phasefamily",
+                    "--reason",
+                    "Synthetic dual-keyword normalization.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+            overlay_text = overlay_file.read_text(encoding="utf-8")
+            self.assertIn('id = "runtime_space_normalization_phase_pickles_phasepickles_phasefamily"', overlay_text)
+            self.assertIn('source = "phase pickles"', overlay_text)
+            self.assertIn('target = "phasepickles phasefamily"', overlay_text)
+            self.assertIn("Canonical order: phasepickles is first", result.stdout)
+
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "normalized": _apply_space_normalizations("phase pickles"),
+}
+""",
+            )
+            self.assertEqual(runtime["normalized"], "phasepickles phasefamily")
+
+            sanity_text = sanity_file.read_text(encoding="utf-8")
+            self.assertIn("generated by dm matcher add dual-keyword-normalization", sanity_text)
+            self.assertIn("# sanity-id: runtime_dual_keyword_normalization_phase_pickles_phasepickles", sanity_text)
+            self.assertIn('"dual-keyword-normalization phase pickles -> phasepickles phasefamily"', sanity_text)
+
+    def test_runtime_blocker_warns_for_space_normalized_compound(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             _copy_matcher_tree(tree_root)
@@ -2307,7 +2367,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(covered.returncode, 0, covered.stderr + covered.stdout)
             self.assertNotIn("may not fire on the joined form", covered.stderr + covered.stdout)
 
-    def test_phase15_runtime_set_update_cli_writes_keyword_and_carrier_overlays(self) -> None:
+    def test_runtime_set_update_cli_writes_keyword_and_carrier_overlays(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -2484,7 +2544,7 @@ def normalize_probe(text: str) -> str:
             )
             self.assertEqual(after_inactivate["stop"], False)
 
-    def test_phase16_cuisine_context_cli_writes_runtime_overlay(self) -> None:
+    def test_cuisine_context_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -2641,7 +2701,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(context_listed.returncode, 0, context_listed.stderr + context_listed.stdout)
             self.assertIn("runtime_context_required_word_phasecontextrequired", context_listed.stdout)
 
-    def test_phase16_match_filter_cli_writes_runtime_overlay(self) -> None:
+    def test_match_filter_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -2744,7 +2804,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("runtime_secondary_ingredient_pattern_phasesecondary", listed.stdout)
 
-    def test_phase16b_qualifier_required_keyword_cli_writes_runtime_overlay(self) -> None:
+    def test_qualifier_required_keyword_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -2804,7 +2864,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("runtime_qualifier_required_keyword_add_phasequalifier", listed.stdout)
 
-    def test_phase16c_processed_rule_cli_writes_runtime_overlay(self) -> None:
+    def test_processed_rule_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -2890,7 +2950,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("runtime_processed_rule_phaseprocessed", listed.stdout)
 
-    def test_phase16d_spice_fresh_rule_cli_writes_runtime_overlay(self) -> None:
+    def test_spice_fresh_rule_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -2963,7 +3023,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("runtime_spice_fresh_rule_phasespice", listed.stdout)
 
-    def test_phase17_compound_protection_cli_writes_runtime_overlay(self) -> None:
+    def test_compound_protection_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -3024,7 +3084,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("runtime_compound_protection_prefix_strict_phasecompound", listed.stdout)
 
-    def test_phase18_specialty_cli_writes_runtime_overlay(self) -> None:
+    def test_specialty_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -3083,7 +3143,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(runtime["bidirectional"], True)
             self.assertEqual(runtime["equivalent"], True)
 
-    def test_phase13_registry_inactivation_cli_marks_entries_inactive(self) -> None:
+    def test_registry_inactivation_cli_marks_entries_inactive(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -3149,7 +3209,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
             self.assertIn("sv-se.alias.jasminris_001\tinactive\tingredient-parent", listed.stdout)
 
-    def test_phase7_support_check_runner_preserves_exit_code_and_env(self) -> None:
+    def test_support_check_runner_preserves_exit_code_and_env(self) -> None:
         calls = []
         original_run = dm_cli._run
 
@@ -3176,7 +3236,7 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(calls[0]["cwd"], Path("/tmp/dm-matcher-cwd"))
         self.assertEqual(calls[0]["env"]["DEAL_MEALS_SUPPORT_REPORT_ROOT"], "/tmp/dm-matcher-reports")
 
-    def test_phase14_deep_sanity_generator_has_fast_and_backend_modes(self) -> None:
+    def test_deep_sanity_generator_has_fast_and_backend_modes(self) -> None:
         fast_lines = dm_cli._deep_sanity_match_assertion(
             description="Synthetic fast sanity",
             offer_name="Phase Offer",
@@ -3201,7 +3261,7 @@ def normalize_probe(text: str) -> str:
         self.assertIn('"Phase Recipe"', "\n".join(backend_lines))
         self.assertTrue("\n".join(backend_lines).rstrip().endswith(", 0)"))
 
-    def test_phase7_dm_matcher_help_lists_unified_entry_points(self) -> None:
+    def test_dm_matcher_help_lists_unified_entry_points(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         result = subprocess.run(
             [sys.executable, "-m", "cli.dm", "matcher", "--help"],
@@ -3226,10 +3286,13 @@ def normalize_probe(text: str) -> str:
             "list",
             "inactivate",
             "explain",
+            "compare-paths",
+            "sanity-find",
+            "sanity-update",
         ):
             self.assertIn(command, result.stdout)
 
-    def test_phase7_dm_matcher_session_start_status_abort_uses_tree_state(self) -> None:
+    def test_dm_matcher_session_start_status_abort_uses_tree_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             state_path = dm_cli._matcher_session_fallback_path(dm_cli._paths(tree_root))
@@ -3293,7 +3356,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(abort.returncode, 0, abort.stderr + abort.stdout)
             self.assertFalse(state_path.exists())
 
-    def test_phase7_active_matcher_session_defers_gates_unless_forced(self) -> None:
+    def test_active_matcher_session_defers_gates_unless_forced(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             paths = dm_cli._paths(Path(tmp))
             dm_cli._write_matcher_session_state(
@@ -3321,7 +3384,7 @@ def normalize_probe(text: str) -> str:
                 sys.argv = original_argv
                 dm_cli._run_support_check = original_run_support_check
 
-    def test_phase0b_dm_matcher_explain_wraps_matcher_audit(self) -> None:
+    def test_dm_matcher_explain_wraps_matcher_audit(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         result = subprocess.run(
             [
@@ -3351,7 +3414,110 @@ def normalize_probe(text: str) -> str:
         self.assertIn("Fast matcher result: NO MATCH", payload["trace"])
         self.assertIn("false-positive blockers", payload["trace"])
 
-    def test_phase8_dm_matcher_guide_routes_manual_and_supported_shapes(self) -> None:
+    def test_dm_matcher_compare_paths_reports_processed_checks(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "compare-paths",
+                "--offer",
+                "Färskkorv Chorizo Kryddad Med Rökt Paprika 280g Köttkultur",
+                "--ingredient",
+                "200 g chorizo",
+                "--offer-category",
+                "meat",
+                "--format",
+                "json",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["legacy_live_keyword"], "chorizo")
+        self.assertEqual(payload["fast_keyword"], "chorizo")
+        self.assertTrue(payload["backend_matched"])
+        self.assertFalse(payload["live_fast_diverged"])
+        self.assertFalse(payload["fast_backend_diverged"])
+        paprika_checks = [row for row in payload["processed_checks"] if row.get("base") == "paprika"]
+        self.assertEqual(len(paprika_checks), 1, payload)
+        self.assertEqual(paprika_checks[0]["status"], "skipped_not_matched_keyword_family")
+
+    def test_dm_matcher_sanity_update_rewrites_expected_value(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            sanity_file = app_dir / "support_checks" / "run_deep_matcher_sanity.py"
+            live_app_dir = Path(__file__).resolve().parents[2]
+            sanity_file.write_text(
+                """
+def test(description, actual, expected):
+    pass
+
+def match(*args):
+    return None
+
+# phase_sanity_policy: generated by dm matcher add pnb
+# sanity-id: phase_sanity_policy
+test("Phase åäö stale canonical expectation", match("Påse räkor", "räka"), "oldcanonical")
+""".lstrip(),
+                encoding="utf-8",
+            )
+
+            found = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "sanity-find",
+                    "phase_sanity_policy",
+                    "--tree-root",
+                    str(tree_root),
+                    "--format",
+                    "json",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(found.returncode, 0, found.stderr + found.stdout)
+            found_payload = json.loads(found.stdout)
+            self.assertEqual(found_payload["count"], 1)
+            self.assertEqual(found_payload["cases"][0]["sanity_id"], "phase_sanity_policy")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "sanity-update",
+                    "phase_sanity_policy",
+                    "--expected",
+                    "newcanonical",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            sanity_text = sanity_file.read_text(encoding="utf-8")
+            self.assertIn('"newcanonical"', sanity_text)
+            self.assertNotIn('"oldcanonical"', sanity_text)
+
+    def test_dm_matcher_guide_routes_manual_and_supported_shapes(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         pnb = subprocess.run(
             [sys.executable, "-m", "cli.dm", "matcher", "guide", "pnb"],
@@ -3367,6 +3533,34 @@ def normalize_probe(text: str) -> str:
             capture_output=True,
             text=True,
         )
+        dual_normalization = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "dual-keyword-normalization"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        compare_paths = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "compare-paths"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        sanity_update = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "sanity-update"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        sanity_find = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "sanity-find"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
 
         self.assertEqual(pnb.returncode, 0, pnb.stderr + pnb.stdout)
         self.assertIn("pnb: supported by dm matcher add", pnb.stdout)
@@ -3376,8 +3570,20 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(synonym.returncode, 0, synonym.stderr + synonym.stdout)
         self.assertIn("keyword-synonym: supported by dm matcher add", synonym.stdout)
         self.assertIn("./bin/dm matcher add keyword-synonym", synonym.stdout)
+        self.assertEqual(dual_normalization.returncode, 0, dual_normalization.stderr + dual_normalization.stdout)
+        self.assertIn("dual-keyword-normalization: supported by dm matcher add", dual_normalization.stdout)
+        self.assertIn("./bin/dm matcher add dual-keyword-normalization", dual_normalization.stdout)
+        self.assertEqual(compare_paths.returncode, 0, compare_paths.stderr + compare_paths.stdout)
+        self.assertIn("compare-paths: supported by dm matcher", compare_paths.stdout)
+        self.assertIn("./bin/dm matcher compare-paths", compare_paths.stdout)
+        self.assertEqual(sanity_update.returncode, 0, sanity_update.stderr + sanity_update.stdout)
+        self.assertIn("sanity-update: supported by dm matcher", sanity_update.stdout)
+        self.assertIn("./bin/dm matcher sanity-update", sanity_update.stdout)
+        self.assertEqual(sanity_find.returncode, 0, sanity_find.stderr + sanity_find.stdout)
+        self.assertIn("sanity-find: supported by dm matcher", sanity_find.stdout)
+        self.assertIn("./bin/dm matcher sanity-find", sanity_find.stdout)
 
-    def test_phase8_dm_matcher_list_effective_blocker_origins(self) -> None:
+    def test_dm_matcher_list_effective_blocker_origins(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         pnb = subprocess.run(
             [
@@ -3438,7 +3644,7 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(overlay.returncode, 0, overlay.stderr + overlay.stdout)
         self.assertIn("runtime_overlay:runtime_rule_overlays.toml", overlay.stdout)
 
-    def test_phase8_dm_matcher_guide_rejects_unknown_shape(self) -> None:
+    def test_dm_matcher_guide_rejects_unknown_shape(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         result = subprocess.run(
             [sys.executable, "-m", "cli.dm", "matcher", "guide", "phase8-unknown-shape"],
@@ -3452,7 +3658,7 @@ def normalize_probe(text: str) -> str:
         self.assertIn("Unknown matcher rule shape: phase8-unknown-shape", result.stderr + result.stdout)
         self.assertIn("./bin/dm matcher preflight and gates", result.stderr + result.stdout)
 
-    def test_phase7_dm_matcher_regen_check_runs_json_before_coverage(self) -> None:
+    def test_dm_matcher_regen_check_runs_json_before_coverage(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             _copy_matcher_tree(tree_root)
@@ -3482,7 +3688,7 @@ def normalize_probe(text: str) -> str:
             result.stdout.find("generate_matcher_registry_coverage.py"),
         )
 
-    def test_phase7_dm_matcher_regen_rejects_all_with_raw_passthrough(self) -> None:
+    def test_dm_matcher_regen_rejects_all_with_raw_passthrough(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         result = subprocess.run(
             [
@@ -3506,7 +3712,7 @@ def normalize_probe(text: str) -> str:
         self.assertNotEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("raw pass-through args are only supported", result.stderr + result.stdout)
 
-    def test_phase7_dm_matcher_preflight_tree_root_json(self) -> None:
+    def test_dm_matcher_preflight_tree_root_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             _copy_matcher_tree(tree_root)
@@ -3535,7 +3741,7 @@ def normalize_probe(text: str) -> str:
         report = json.loads(result.stdout[json_start:])
         self.assertTrue(report["summary"]["passed"], report)
 
-    def test_phase5_prefix_schema_and_convention_entry(self) -> None:
+    def test_prefix_schema_and_convention_entry(self) -> None:
         self.assertIn("current_review:", allowed_prefixes("source_ref"))
         self.assertIn("matcher_layer_diagnostics:", allowed_prefixes("adapter_ref"))
         self.assertIn("keyword_synonyms:", allowed_prefixes("adapter_ref"))
@@ -3579,7 +3785,7 @@ def normalize_probe(text: str) -> str:
             {"phasefemapelsin": "phasefemfrukt"},
         )
 
-    def test_phase5_gate_json_generation_step_refreshes_toml_source_drift(self) -> None:
+    def test_gate_json_generation_step_refreshes_toml_source_drift(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -3608,7 +3814,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             self.assertFalse(any(result.drifted for result in check_generated_contract_json(tree_root=tree_root)))
 
-    def test_phase5_json_authority_audit_passes_current_tree(self) -> None:
+    def test_json_authority_audit_passes_current_tree(self) -> None:
         hits = audit_json_authority(Path(__file__).resolve().parents[2])
         blockers = [hit for hit in hits if hit.is_blocker]
         self.assertEqual(blockers, [])
@@ -3620,7 +3826,7 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(report["summary"]["contract_access_api"], 2)
         self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4131)
 
-    def test_phase5_toml_source_round_trip_is_lossless(self) -> None:
+    def test_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             output_dir = Path(tmp)
             results = audit_contract_sources(output_dir)
@@ -3644,7 +3850,7 @@ def normalize_probe(text: str) -> str:
             self.assertFalse((output_dir / "matcher_regression_cases.json").exists())
             self.assertFalse((output_dir / "matcher_rule_inventory.json").exists())
 
-    def test_phase5_preflight_rejects_hand_edited_generated_json(self) -> None:
+    def test_preflight_rejects_hand_edited_generated_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -3659,7 +3865,7 @@ def normalize_probe(text: str) -> str:
         codes = {issue["code"] for issue in report["new_issues"]}
         self.assertEqual(codes, {"matcher_contract_generated_json_drift"}, report)
 
-    def test_phase5_preflight_rejects_stale_toml_sources(self) -> None:
+    def test_preflight_rejects_stale_toml_sources(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -3680,7 +3886,7 @@ def normalize_probe(text: str) -> str:
         codes = {issue["code"] for issue in report["new_issues"]}
         self.assertIn("matcher_contract_generated_json_drift", codes, report)
 
-    def test_phase5_line_ref_refresh_updates_toml_source_and_generated_json(self) -> None:
+    def test_line_ref_refresh_updates_toml_source_and_generated_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             _copy_matcher_tree(tree_root)
@@ -3726,7 +3932,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(refreshed_ref["end"], expected_end)
             self.assertFalse(any(result.drifted for result in check_generated_contract_json(tree_root=tree_root)))
 
-    def test_phase9_simple_toml_add_commands_write_expected_surfaces(self) -> None:
+    def test_simple_toml_add_commands_write_expected_surfaces(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -3824,7 +4030,7 @@ def normalize_probe(text: str) -> str:
             )
             self.assertIn("generated by dm matcher add recipe-routing-helper", sanity_text)
 
-    def test_phase9_ingredient_parent_warns_when_parent_pnb_is_not_mirrored(self) -> None:
+    def test_ingredient_parent_warns_when_parent_pnb_is_not_mirrored(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -3871,7 +4077,7 @@ reason = "Synthetic parent PNB mirror warning canary."
             self.assertIn("PNB lookup does not inherit parent blockers", result.stderr)
             self.assertIn("phase9child --blockers phase9blocker", result.stderr)
 
-    def test_phase9_structured_toml_add_commands_write_expected_surfaces(self) -> None:
+    def test_structured_toml_add_commands_write_expected_surfaces(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -4001,7 +4207,7 @@ reason = "Synthetic parent PNB mirror warning canary."
                 {"hardcoded_keyword_output:extract_keywords_from_product"},
             )
 
-    def test_phase9_dm_matcher_guide_lists_all_toml_add_surfaces(self) -> None:
+    def test_dm_matcher_guide_lists_all_toml_add_surfaces(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         help_result = subprocess.run(
             [sys.executable, "-m", "cli.dm", "matcher", "add", "--help"],

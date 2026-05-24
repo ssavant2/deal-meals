@@ -173,9 +173,14 @@ entries with extra terms still need a deliberate manual edit.
 
 For runtime data-rule authoring, prefer the same CLI entry point. Supported
 runtime shapes include `pnb`, `fpb`, `ksbc`, `gpb`, stop/non-food filters,
-space-normalization, flavor/carrier, context, cuisine, compound, specialty,
-processed/form, substitution, and secondary-pattern commands; all write
-`runtime_rule_overlays.toml`.
+space-normalization, dual-keyword-normalization, flavor/carrier, context,
+cuisine, compound, specialty, processed/form, substitution, and
+secondary-pattern commands; all write `runtime_rule_overlays.toml`.
+
+`dm matcher add dual-keyword-normalization` is a small authoring wrapper around
+`space_normalizations` for ordered multi-keyword output: the primary keyword is
+written first so canonical selection remains stable, while extra family
+keywords still become available to extraction/matching.
 
 `dm matcher add smart-blocker` is different: it scaffolds and chains a
 `matching.py` helper for repeated guard logic, but the helper body is still a
@@ -189,6 +194,13 @@ runtime-wired TOML surfaces unless bridge runtime-wiring is explicitly being
 worked on. Existing simple `match_bridge.toml` rows can be narrowed with
 `dm matcher modify match-bridge`; new rows remain staged metadata unless paired
 with a runtime-wired surface.
+
+For diagnostics, use `dm matcher compare-paths` when legacy live, canonical
+fast, and backend matcher paths may disagree. New CLI-generated sanity blocks
+carry a `# sanity-id: <policy_ref>` metadata comment; use
+`dm matcher sanity-find` to locate them and `dm matcher sanity-update` for
+deliberate expectation changes instead of hand-editing a large
+`run_deep_matcher_sanity.py` file by line number.
 
 For Track B matcher-rule work, prefer the wrapper:
 
