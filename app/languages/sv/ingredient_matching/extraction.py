@@ -438,6 +438,13 @@ def extract_keywords_from_product(
     # Brand stripping removes e.g. "SIA Glass" / "Triumf Glass", which deletes the "glass"
     # carrier word and breaks ice cream normalization. Use pre_strip_name instead.
     original_name_lower = fix_swedish_chars(pre_strip_name).lower()
+    brand_lower_normalized = fix_swedish_chars(brand or '').lower()
+
+    if (
+        (brand_lower_normalized == 'oumph' or re.search(r'\boumph\b', original_name_lower))
+        and re.search(r'\b(?:chunks?|pieces?|bitar)\b', original_name_lower)
+    ):
+        return ['vegobitar']
 
     if (
         ('kesella' in original_name_lower and 'vanilj' in original_name_lower)

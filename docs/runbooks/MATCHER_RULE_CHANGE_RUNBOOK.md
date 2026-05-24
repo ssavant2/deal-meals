@@ -492,6 +492,31 @@ canonical first and still expose a broader family keyword after it. It writes a
 normal `space_normalizations` overlay row, but the command makes the canonical
 order explicit.
 
+Use a **directional canonical override** when a modifier changes the requested
+family and the base canonical must *not* remain available. Example:
+`pepparrot på tub` means prepared `pepparrotsvisp`/cream-style products, not
+plain fresh `pepparrot`; plain `pepparrot` should still mean the fresh root. This
+is different from dual-keyword normalization, which intentionally emits both the
+specific canonical and the broader family.
+
+Checklist for this shape:
+
+1. Prove both directions first: modified ingredient -> modified product; modified
+   ingredient -> plain product is no-match; plain ingredient keeps matching the
+   plain product family.
+2. Make sure the target canonical exists on the product side. If products already
+   extract it, no new registration is needed. If not, add the narrow product
+   exposure through the primary keyword/extraction surface or a scoped
+   `offer-extra-keyword`/product extraction helper.
+3. Rewrite the ingredient-side modifier to the target canonical only. Prefer
+   `space-normalization` for exact vocabulary such as `pepparrot på tub` ->
+   `pepparrotsvisp`; use an ingredient-side extraction helper when the wording is
+   regex/context dependent.
+4. Add KSBC or a backend guard only if the base canonical still leaks after the
+   rewrite or the modifier cannot be represented as a clean one-way rewrite. Do
+   not use `dual-keyword-normalization` here, because exposing the base canonical
+   is precisely what this pattern is trying to avoid.
+
 ### Read-Only Explain Trace
 
 Use `dm matcher explain` when a pair surprises you, especially before reading
@@ -536,6 +561,32 @@ entry points rather than rule intent. It compares the legacy live matcher,
 canonical fast matcher, and backend matcher for one pair and prints precomputed
 details such as `processed_checks` so product-side form rules can be diagnosed
 without opening `matching.py` first.
+
+If both sides clearly expose the same keyword but the result is still
+`NO MATCH`, stop treating it as an extraction/canonical-registration problem.
+That shape means the keyword loop found a candidate and a later guard probably
+rejected it. Work through this checklist:
+
+1. Re-run with the real category and brand:
+   `dm matcher compare-paths --offer ... --ingredient ... --offer-category ... --brand ... --format json`.
+   Category and brand feed product extraction, form checks, fresh/spice rules,
+   and plant-based/product-label validation.
+2. If `Product keywords` or `Precomputed offer keywords` are empty or missing the
+   expected term, debug extraction first: non-food filters, processed-food
+   filters, product-name substitutions, offer-extra keywords, brand stripping,
+   or stale generated/runtime overlay data.
+3. If the keyword is present on both sides, inspect validators before adding more
+   aliases: no-match policies, PNB/FPB/KSBC/GPB blockers, specialty qualifiers
+   including bidirectional product qualifiers, product-form validators,
+   `processed_checks`, spice/fresh/herb rules, recipe/product requirement
+   guards, and explicit labels such as vegan/vegetarian/lactose/gluten-free.
+4. If direct `compare-paths` passes but batch output or UI/cache output still
+   misses, treat it as materialized-cache drift: check cache freshness and run
+   the relevant reload before changing matcher semantics.
+5. If direct `compare-paths` still fails, add a focused sanity row that captures
+   the failing pair, then patch the narrow validator that rejects it. Avoid
+   piling on synonyms or parents when the trace already proves both sides have
+   the canonical keyword.
 
 Use `dm matcher sanity-find "<description-or-policy-or-id>"` before editing a
 large sanity file by hand. New CLI-generated sanity blocks include a stable
@@ -837,6 +888,7 @@ table.
 | Cuisine-specific seasoned product | `./bin/dm matcher add cuisine-context ...` | A product trigger such as `thaikryddad`, `taco`, or `texmex` should remain valid only when the recipe text contains matching cuisine context. This is better than a blanket PNB because the product stays visible for the right cuisine. | Using PNB for cuisine-seasoning products that are legitimate in matching cuisine recipes. |
 | Compound/subword bleed | `./bin/dm matcher add compound-protection ...` | A keyword is matching as an unwanted substring or compound suffix/prefix, e.g. a compound word carries another ingredient name but should require stricter word/prefix proof. | FPB/PNB when the real problem is token/compound shape rather than a semantic product or ingredient context. |
 | Multi-keyword normalization | `./bin/dm matcher add dual-keyword-normalization ...` | A surface form needs to emit both a specific canonical and a broader family keyword, with the specific canonical first. | Hand-editing `normalization.py` for ordinary dual-keyword overlays. |
+| Directional canonical override | `space-normalization` or ingredient-side extraction helper plus narrow product exposure | A modifier changes the requested canonical and the base canonical must not remain available, e.g. `pepparrot på tub` -> `pepparrotsvisp` only. | `dual-keyword-normalization`; it emits the broader family too. |
 | Form or processed-state rule | `./bin/dm matcher add processed-rule ...`, `spice-fresh-rule ...`, `processed-exemption ...`, `strict-processed-rule ...`, or `processed-food ...` for simple set add/remove; otherwise `form_rules.py` or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
 | Qualifier or bidirectional variant | `./bin/dm matcher add specialty-qualifier ... [--bidirectional]` or `qualifier-equivalent ...` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. Prefer ordinary specialty qualifiers when only ingredient qualifiers must be honored; prefer `--bidirectional` when a product-side subtype should not satisfy a plain ingredient. | Raw substring checks without word-boundary handling. |
 | Product qualifier required for a keyword | `./bin/dm matcher add qualifier-required-keyword ...` | A keyword should match product variants only when product qualifier words also appear in the ingredient line. | Specialty qualifier rules when the qualifier belongs to a specific product family rather than every product-side word. |

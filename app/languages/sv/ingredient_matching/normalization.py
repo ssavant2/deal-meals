@@ -49,6 +49,13 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('kräm av kronärtskocka', 'kronärtskockscreme'),
     ('kram av kronärtskockor', 'kronärtskockscreme'),
     ('kram av kronärtskocka', 'kronärtskockscreme'),
+    # Recipe shorthand for prepared horseradish on tube should not hit raw root.
+    ('pepparrot på tub', 'pepparrotsvisp'),
+    ('pepparrot, på tub', 'pepparrotsvisp'),
+    ('pepparrot pa tub', 'pepparrotsvisp'),
+    ('pepparrot, pa tub', 'pepparrotsvisp'),
+    ('pepparrot i tub', 'pepparrotsvisp'),
+    ('pepparrot, i tub', 'pepparrotsvisp'),
     ('corn flakes', 'cornflakes'),
     # "Mjöl Tipo 00" → specific keyword, should only match itself
     ('mjöl tipo 00', 'tipo00'),

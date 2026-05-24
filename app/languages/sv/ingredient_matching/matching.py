@@ -282,7 +282,8 @@ _EXPLICIT_VEGAN_PRODUCT_CUES = frozenset({
 _PLANT_BASED_PRODUCT_CUES = frozenset({
     *_EXPLICIT_VEGAN_PRODUCT_CUES,
     'vego', 'vegetarisk', 'vegetariskt', 'vegetariska',
-    'quorn',
+    'vegobitar',
+    'quorn', 'oumph',
     'anamma', 'jävligtgott', 'javligtgott',
     'formbar',
     'oatly', 'planti', 'alpro',

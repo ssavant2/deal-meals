@@ -1121,9 +1121,9 @@ section("8. REPORTED MATCHING ISSUES - regression tests for user-reported proble
 # ========================================================================
 
 # Helper for matching tests
-def match(product, ingredient, category=""):
+def match(product, ingredient, category="", brand=""):
     """Return matched keyword or None."""
-    od = precompute_offer_data(product, category)
+    od = precompute_offer_data(product, category, brand=brand)
     return matches_ingredient_fast(od, ingredient)
 
 # Fast-path processed checks must follow the matched keyword family. Product
@@ -1169,6 +1169,11 @@ test("Pulled Beef → [pulledbeef]", kw("Pulled Beef"), ["pulledbeef"])
 test("Pulled Pork → [pulledpork]", kw("Pulled Pork"), ["pulledpork"])
 test("Pulled Chicken → [pulledchicken]", kw("Pulled Chicken"), ["pulledchicken"])
 test("Pulled Oumph → [pulledoumph]", kw("Pulled Oumph"), ["pulledoumph"])
+test(
+    "Oumph chunks → vegobitar",
+    extract_keywords_from_product("Ch*cken Style Chunks Oumph", "frozen", brand="Oumph"),
+    ["vegobitar"],
+)
 
 # --- Pulled: should NOT cross-match between variants ---
 test("Pulled Beef ≠ 'pulled pork'", match("Pulled Beef", "1 förp pulled pork"), None)
@@ -6068,6 +6073,8 @@ test(
     0,
 )
 test("Pepparrotsvisp matches prepared whip", match("Pepparrotsvisp Örneborgs", "1 tsk pepparrotsvisp, på tub") is not None, True)
+test("Pepparrotsvisp matches pepparrot på tub", match("Pepparrotsvisp Örneborgs", "1 tsk pepparrot på tub", "pantry"), "pepparrotsvisp")
+test("Pepparrot på tub blocks fresh root", match("Pepparrot Klass 1", "1 tsk pepparrot på tub", "vegetables"), None)
 test("Pepparrotsvisp blocks fresh root", match("Pepparrot Klass 1", "1 tsk pepparrotsvisp, på tub"), None)
 test("Pepparrotsvisp blocks grated root", match("Pepparrot Riven Örneborgs", "1 tsk pepparrotsvisp, på tub"), None)
 test(
@@ -10079,6 +10086,7 @@ test("Batch 15 folköl matches folköl", recipe_match_num(["1 flaska folköl"], 
 test("Batch 15 pressad ingefärsjuice matches pressed ginger", recipe_match_num_cached(["1 msk pressad ingefärsjuice"], {"name": "Ingefära Pressad", "category": "fruit"}), 1)
 test("Batch 15 fänkålsfrö blocks ground fennel", recipe_match_num(["1 tsk fänkålsfrö"], {"name": "Fänkål Malen", "category": "spices"}), 0)
 test("Batch 15 fänkålsfrö accepts whole fennel", recipe_match_num_cached(["1 tsk fänkålsfrö"], {"name": "Fänkål Hel Påse Kockens", "category": "pantry"}), 1)
+test("Batch 15 Oumph chunks matches vegobitar", recipe_match_num_cached(["200 g vegobitar"], {"name": "Ch*cken Style Chunks Oumph", "category": "frozen", "brand": "Oumph"}), 1)
 test("Batch 15 Tzaybitar matches vegobitar", recipe_match_num(["200 g Tzaybitar"], {"name": "Vegobitar Anamma", "category": "frozen"}), 1)
 test("Batch 15 grovkornig senap blocks original mustard", recipe_match_num_cached(["1 msk grovkornig senap"], {"name": "Original Senap Slotts", "category": "pantry"}), 0)
 test("Batch 15 grovkornig senap blocks skånsk mustard", recipe_match_num(["1 msk grovkornig senap"], {"name": "Skånsk Senap Slotts", "category": "pantry"}), 0)
