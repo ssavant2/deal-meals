@@ -113,8 +113,8 @@ reason = "Bakmix Pannkakor (baking mix to make pancakes from scratch) is not a r
 id = "runtime_pnb_vitchoklad"
 status = "active"
 keyword = "vitchoklad"
-blockers = ["havregrynsgröt", "proteinpudding", "dessertsås", "dessertsås"]
-reason = "Havregrynsgröt/proteinpudding/dessertsås with vit choklad as flavor are not actual white chocolate baking products — recipes wanting vit choklad need solid chocolate bar/chips for cooking or baking"
+blockers = ["havregrynsgröt", "proteinpudding", "dessertsås", "dessertsås", "glass"]
+reason = "Havregrynsgröt/proteinpudding/dessertsås with vit choklad as flavor are not actual white chocolate baking products — recipes wanting vit choklad need solid chocolate bar/chips for cooking or baking; glass products (Lejonet Björnen, etc.) should not match baking white chocolate ingredients"
 
 [[product_name_blockers]]
 id = "runtime_pnb_lask"
@@ -536,6 +536,13 @@ keyword = "inlagdgurka"
 context = ["saltgurka", "saltgurkor", "smörgåsgurka", "smorgasgurka", "ättiksgurka", "attiksgurka"]
 reason = "suppress generic inlagdgurka when ingredient specifies a distinct variant; FPB cannot handle this because normalization puts inlagdgurka directly in ingredient text causing smart-blocker to allow the match"
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_flaskkarre"
+status = "active"
+keyword = "fläskkarré"
+context = ["lufttorkad", "lomo"]
+reason = "lufttorkad fläskkarré (lomo) är ett charkuteri-torkat kött, ska inte matcha färsk fläskkarré"
+
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
 status = "active"
@@ -648,6 +655,22 @@ keyword = "tomater"
 qualifiers = ["datterini", "datterino"]
 bidirectional = true
 reason = "Datterini canned Italian tomatoes — plural tomat keyword path"
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_bonor_fermenterad_fermenterade"
+status = "active"
+keyword = "bönor"
+qualifiers = ["fermenterad", "fermenterade"]
+bidirectional = true
+reason = "fermenterade bönor (condiment) ska inte matcha recept som kräver vanliga/frysta bönor"
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_sojabonor_fermenterad_fermenterade"
+status = "active"
+keyword = "sojabönor"
+qualifiers = ["fermenterad", "fermenterade"]
+bidirectional = true
+reason = "fermenterade sojabönor (condiment) ska inte matcha frysta/vanliga sojabönor-ingredienser"
 
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"
