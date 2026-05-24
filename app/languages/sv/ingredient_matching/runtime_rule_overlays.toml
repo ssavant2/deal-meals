@@ -326,6 +326,13 @@ keyword = "mozzarella"
 blockers = ["scamorza"]
 reason = "Scamorza är rökt/lagrad italiensk ost — inte färsk mozzarella. Recept för caprese/piadina vill ha färsk vit mozzarella, inte rökt scamorza som ofta säljs märkt 'Scamorza Mozzarella'"
 
+[[product_name_blockers]]
+id = "runtime_pnb_oliver"
+status = "active"
+keyword = "oliver"
+blockers = ["chili", "vitlök", "vitlök", "citron", "ört", "örter", "paprika", "fetaost", "feta", "grillad", "grillade", "torkad", "torkade"]
+reason = "Plain oliver-recept ska inte matcha smaksatta (chili/vitlök/citron/ört/paprika/feta) eller process-behandlade (grillade/torkade) olivvarianter. Q80-9 Stefan-policy: skilj på färg + kärnor + smaksättning/process."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -668,6 +675,48 @@ status = "active"
 keyword = "squash"
 context = ["butternut", "pumpa"]
 reason = "Samma som zucchini-KSBC: butternut squash / annan pumpa ska inte matcha zucchini-produkter (som har 'squash'-parent)"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_hummer"
+status = "active"
+keyword = "hummer"
+context = ["soppbas"]
+reason = "Färdig soppbas är förkokt produkt med smaksättning — receptet vill ha färdig bas, inte rå/fryst hummer för egen kokning"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_morot"
+status = "active"
+keyword = "morot"
+context = ["chips"]
+reason = "Rotfruktschips/potatischips i recept ska matcha chips-produkter, inte råa rotgrönsaker (Pattern 2: processed food ≠ raw ingredient)"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_rotselleri"
+status = "active"
+keyword = "rotselleri"
+context = ["chips"]
+reason = "Rotfruktschips/potatischips i recept ska matcha chips-produkter, inte råa rotgrönsaker (Pattern 2: processed food ≠ raw ingredient)"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_kalrot"
+status = "active"
+keyword = "kålrot"
+context = ["chips"]
+reason = "Rotfruktschips/potatischips i recept ska matcha chips-produkter, inte råa rotgrönsaker (Pattern 2: processed food ≠ raw ingredient)"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_palsternacka"
+status = "active"
+keyword = "palsternacka"
+context = ["chips"]
+reason = "Rotfruktschips/potatischips i recept ska matcha chips-produkter, inte råa rotgrönsaker (Pattern 2: processed food ≠ raw ingredient)"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_rodbeta"
+status = "active"
+keyword = "rödbeta"
+context = ["chips"]
+reason = "Rotfruktschips/potatischips i recept ska matcha chips-produkter, inte råa rotgrönsaker (Pattern 2: processed food ≠ raw ingredient)"
 
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"

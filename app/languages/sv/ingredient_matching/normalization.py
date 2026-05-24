@@ -56,6 +56,17 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('pepparrot, pa tub', 'pepparrotsvisp'),
     ('pepparrot i tub', 'pepparrotsvisp'),
     ('pepparrot, i tub', 'pepparrotsvisp'),
+    # Q80-3: "Syrad grädde" is the soured-cream cooking ingredient — distinct from plain
+    # grädde (matlagningsgrädde/vispgrädde) and not interchangeable. Existing PNB
+    # grädde + 'syrad' already keeps plain grädde-ingredients away from Syrad-products;
+    # this directional override makes the modifier-bearing ingredient route to its own
+    # canonical so "Grädde Syrad 30% Arla" products can match it without affecting
+    # plain grädde recipes. Both ingredient ('syrad grädde') and product
+    # ('grädde syrad') word orders covered.
+    ('syrad grädde', 'syradgrädde'),
+    ('syrad gradde', 'syradgrädde'),
+    ('grädde syrad', 'syradgrädde'),
+    ('gradde syrad', 'syradgrädde'),
     ('corn flakes', 'cornflakes'),
     # "Mjöl Tipo 00" → specific keyword, should only match itself
     ('mjöl tipo 00', 'tipo00'),

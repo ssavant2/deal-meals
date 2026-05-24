@@ -28,6 +28,45 @@ def _int_env(name: str, default: int, *, min_value: int = 1) -> int:
 
 
 DEFAULT_INCREMENTAL_ATTEMPT_MIN_CAP = _int_env("RECIPE_INCREMENTAL_ATTEMPT_MIN_CAP", 300)
+
+
+# Q80-5: Recipe names containing these terms are beauty/cosmetic DIY recipes
+# (body scrubs, face masks, hair treatments) that should not appear in food
+# matching. Keywords are deliberately specific (compound Swedish words) to avoid
+# false positives on real food recipes — e.g. plain "mask" isn't included because
+# food recipes can use it; "ansiktsmask" / "hårmask" are specific to cosmetics.
+BEAUTY_RECIPE_NAME_KEYWORDS: Set[str] = {
+    'kroppsskrubb',
+    'ansiktsskrubb',
+    'fotskrubb',
+    'ansiktsmask',
+    'hårmask',
+    'harmask',
+    'hårinpackning',
+    'harinpackning',
+    'bodyolja',
+    'kroppsolja',
+    'läppbalsam',
+    'lappbalsam',
+    'läppglans',
+    'lappglans',
+    'duschkräm',
+    'duschkram',
+    'badbomb',
+    'badsalt',
+}
+
+
+def is_beauty_recipe_name(name: Optional[str]) -> bool:
+    """Return True if the recipe name signals a DIY beauty/cosmetic recipe.
+
+    Used at recipe ingest time to auto-mark such recipes excluded so they do
+    not pollute the batch review queue or the matching pipeline.
+    """
+    if not name:
+        return False
+    name_lower = name.lower()
+    return any(keyword in name_lower for keyword in BEAUTY_RECIPE_NAME_KEYWORDS)
 DEFAULT_INCREMENTAL_ATTEMPT_TARGET_MULTIPLIER = _int_env(
     "RECIPE_INCREMENTAL_ATTEMPT_TARGET_MULTIPLIER",
     50,
@@ -929,6 +968,11 @@ def save_recipes_to_database(
                 if corrections:
                     cleaned_ingredients = corrected_ingredients
 
+                # Q80-5: auto-exclude DIY beauty/cosmetic recipes ("Kroppsskrubb...",
+                # "Ansiktsmask...", etc.). These can otherwise pollute the batch review
+                # queue and the matching pipeline with non-food ingredients.
+                is_beauty = is_beauty_recipe_name(recipe.get("name"))
+
                 if existing:
                     existing.name = recipe["name"]
                     existing.image_url = validate_image_url(recipe.get("image_url"))
@@ -936,6 +980,8 @@ def save_recipes_to_database(
                     existing.prep_time_minutes = recipe.get("prep_time_minutes")
                     existing.servings = recipe.get("servings")
                     existing.scraped_at = recipe.get("scraped_at", datetime.now(timezone.utc))
+                    if is_beauty and not existing.excluded:
+                        existing.excluded = True
                     stats["updated"] += 1
                     pending_change_kind = "updated"
                 else:
@@ -948,6 +994,7 @@ def save_recipes_to_database(
                         prep_time_minutes=recipe.get("prep_time_minutes"),
                         servings=recipe.get("servings"),
                         scraped_at=recipe.get("scraped_at", datetime.now(timezone.utc)),
+                        excluded=True if is_beauty else None,
                     ))
                     stats["created"] += 1
                     pending_change_kind = "created"
