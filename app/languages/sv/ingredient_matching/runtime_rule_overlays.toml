@@ -375,6 +375,41 @@ keyword = "sojagurt"
 blockers = ["jordgubb", "blåbär", "mango", "hallon", "banan", "ananas", "persika", "kiwi", "apelsin", "citron", "körsbär", "aprikos", "plommon", "päron", "lingon", "hjortron", "choklad", "frukt"]
 reason = "Smaksatt sojagurt (jordgubb, blåbär, mango m.fl.) ska inte matcha plain sojagurt naturell-ingrediens — samma princip som yoghurt-principen och havregurt"
 
+[[product_name_blockers]]
+id = "runtime_pnb_pumpafron"
+status = "active"
+keyword = "pumpafrön"
+blockers = ["musli"]
+reason = "Musli products contain pumpkin seeds as trace ingredient but are not pumpkin seed products"
+
+[[product_name_blockers]]
+id = "runtime_pnb_matolja"
+status = "active"
+keyword = "matolja"
+blockers = ["vitlök"]
+reason = "Vitlök-flavored oil should not match plain matolja ingredient"
+
+[[product_name_blockers]]
+id = "runtime_pnb_kyckling_örtkryddad"
+status = "active"
+keyword = "kyckling"
+blockers = ["örtkryddad"]
+reason = "Herb-seasoned chicken should not match plain kycklingfilé ingredient"
+
+[[product_name_blockers]]
+id = "runtime_pnb_kyckling_bbq"
+status = "active"
+keyword = "kyckling"
+blockers = ["bbq"]
+reason = "BBQ-marinated chicken should not match plain chicken ingredient"
+
+[[product_name_blockers]]
+id = "runtime_pnb_kycklingfile"
+status = "active"
+keyword = "kycklingfilé"
+blockers = ["bbq", "örtkryddad"]
+reason = "BBQ-marinated kycklingfilé products should not match plain kycklingfilé ingredient - flavored preparation changes the product type; Herb-seasoned kycklingfilé products should not match plain kycklingfilé ingredient"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -806,8 +841,8 @@ reason = "Grovlimpa-ingrediens ska matcha rågbröd/kavring (mörka bröd) ej s�
 id = "runtime_ksbc_kal"
 status = "active"
 keyword = "kål"
-context = ["rödkål", "rödkål", "vitkål", "vitkal", "spetskål", "spetskål", "grönkål", "gronkal", "svartkål", "svartkal", "savoykål", "savoykal", "savojkål", "savojkal", "salladskål", "salladskal", "brysselkål", "brysselkal", "fänkål"]
-reason = "Generic kål keyword is suppressed when ingredient names a specific variety (vitkål/rödkål/etc.) — prevents cross-variety FP matches. KSBC check moved inside keyword loop in matching.py so suppression causes continue (try next keyword) not return None, preserving self-match for variety-specific products."
+context = ["rödkål", "rödkål", "vitkål", "vitkal", "spetskål", "spetskål", "grönkål", "gronkal", "svartkål", "svartkal", "savoykål", "savoykal", "savojkål", "savojkal", "salladskål", "salladskal", "brysselkål", "brysselkal", "fänkål", "blomkål"]
+reason = "Generic kål keyword is suppressed when ingredient names a specific variety (vitkål/rödkål/etc.) — prevents cross-variety FP matches. KSBC check moved inside keyword loop in matching.py so suppression causes continue (try next keyword) not return None, preserving self-match for variety-specific products.; blomkål (cauliflower) is a specific vegetable that should not match generic kål varieties like vitkål/svartkål/savoykål via the generic kål parent keyword"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_tandoori"
@@ -928,6 +963,22 @@ surface = "non_food_keywords"
 action = "add"
 terms = ["blöjhink", "blöjhinksrefill", "bakplåtspapper", "bakplatspapper"]
 reason = "Q83-4 broad: blöjhink/bakplåtspapper-produkter slipper igenom kategori-filter (Luna Bambini i 'dairy', Ninjaplast i 'pantry'). Plastfolie redan blockerad batch 83 shard 4. Refill-bleed mot mat-recept (BOB Äppelmos refill etc.)."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_knivsudd"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["knivsudd"]
+reason = "Measurement unit meaning knife-tip amount, not a food ingredient"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_langden_snedden_stjalkarna"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["längden", "snedden", "stjälkarna", "finhacka", "strimla", "stammen"]
+reason = "Cooking instruction words and anatomical terms appearing in recipe text, not food ingredients"
 
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"
