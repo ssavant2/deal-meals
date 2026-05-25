@@ -95,6 +95,7 @@ _TRUNCATED_ELLER_SUFFIXES = tuple(sorted((
     'filéer', 'fileer', 'filé', 'file',
     'färs', 'fars',
     'olja',
+    'saft',
     'peppar',
     'kål', 'kal',
 ), key=len, reverse=True))

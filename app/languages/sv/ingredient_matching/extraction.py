@@ -2280,6 +2280,8 @@ def extract_keywords_from_ingredient(
     # Serving hints like "kex till ost" should not turn the ingredient into cheese.
     # Keep the purchasable base product and drop the trailing usage cue.
     name = re.sub(r'\bkex\s+till\s+ost\b', 'kex', name)
+    if 'aperitivokex' in name:
+        return ['aperitivokex']
 
     # "gurt" is informal Swedish shorthand for yoghurt (plant-based brands: Oatly Havregurt, Planti)
     # e.g., "växtbaserad gurt" → "växtbaserad yoghurt" so check_yoghurt_match vego logic applies

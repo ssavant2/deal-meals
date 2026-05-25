@@ -85,6 +85,7 @@ try:
     from languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
     from languages.sv.ingredient_matching.extraction import _is_tonic_mixer_product_text
     from languages.sv.ingredient_matching.matching import (
+        _keyword_suppressed_by_context,
         matches_ingredient_fast,
         precompute_offer_data,
         _vegan_smordeg_product_allowed,
@@ -212,6 +213,7 @@ except ModuleNotFoundError:
     from app.languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
     from app.languages.sv.ingredient_matching.extraction import _is_tonic_mixer_product_text
     from app.languages.sv.ingredient_matching.matching import (
+        _keyword_suppressed_by_context,
         matches_ingredient_fast,
         precompute_offer_data,
         _vegan_smordeg_product_allowed,
@@ -1909,7 +1911,19 @@ def validate_offer_match_candidate(
     if matched_keyword and matched_ing_idx is not None and matched_keyword in KEYWORD_SUPPRESSED_BY_CONTEXT:
         suppressors = KEYWORD_SUPPRESSED_BY_CONTEXT[matched_keyword]
         ing_norm = ingredients_normalized[matched_ing_idx]
-        if any(s in ing_norm for s in suppressors):
+        eller_arms = ()
+        if 0 <= matched_ing_idx < len(ingredient_match_data_per_ing):
+            eller_arms = getattr(
+                ingredient_match_data_per_ing[matched_ing_idx],
+                'eller_arms_prepared',
+                (),
+            )
+        if _keyword_suppressed_by_context(
+            matched_keyword,
+            ing_norm,
+            suppressors,
+            eller_arms,
+        ):
             _record_validation_event(
                 validation_events,
                 'validation_reject',

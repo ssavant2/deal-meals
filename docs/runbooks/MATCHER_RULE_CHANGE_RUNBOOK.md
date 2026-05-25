@@ -517,6 +517,161 @@ Checklist for this shape:
    not use `dual-keyword-normalization` here, because exposing the base canonical
    is precisely what this pattern is trying to avoid.
 
+### Ingredient Parser Troubleshooting
+
+Use this section when the words look right, but an ingredient phrase is parsed
+in the wrong shape before matching: alternatives, truncated compounds,
+parenthetical notes, or brand/product names with flavor words.
+
+Important parser surfaces:
+
+- `recipe_text.py` owns recipe-text rewrites before extraction. Look here for
+  `parse_eller_alternatives`, parenthetical preservation helpers, and
+  `_TRUNCATED_ELLER_SUFFIXES` such as `yuzu- eller citronsaft` ->
+  `yuzusaft eller citronsaft`.
+- `engine.py` builds `IngredientMatchData`, including `eller_arms_prepared`.
+  Routed/cache paths should use this prepared metadata instead of reparsing the
+  raw string differently.
+- `extraction.py` owns ingredient keyword extraction, including exact helpers
+  for cases where the ingredient line is really a named purchasable product.
+- `matching.py` owns live/fast keyword checks and local candidate guards.
+- `recipe_matcher_backend.py` owns backend candidate validation after a fast
+  keyword has been found.
+
+For `A eller B` failures:
+
+1. Compare the full phrase and each arm separately with `dm matcher compare-paths`.
+   If `A` alone matches but `A eller B` does not, the bug is usually parser or
+   per-arm validation, not missing vocabulary.
+2. Check whether `A` is a substring of `B` (`potatis` inside `sötpotatis`,
+   `kål` inside `spetskål`, etc.). Guards that do `keyword in ingredient_lower`
+   may accidentally apply `B`'s context to `A`.
+3. Inspect `eller_arms_prepared`. Context suppression, compound-strict checks,
+   and exact-compound-only checks should ask "does this arm mention the plain
+   keyword?" rather than "does the whole ingredient contain a suppressor?"
+4. Prove both arms with focused canaries: `A` product matches the full phrase,
+   `B` product matches the full phrase, and an unrelated product still does not
+   match.
+
+For truncated alternatives (`X- eller Ysuffix`), add the suffix to
+`_TRUNCATED_ELLER_SUFFIXES` only when the expanded form is normal Swedish
+vocabulary. Then prove the expanded left arm, not just the right arm.
+
+For parenthetical notes, first decide whether the parenthetical is a preference,
+an exclusion, or pure instruction text. Do not strip a parenthetical until a
+negative canary proves the excluded product is actually rejected.
+
+### Form-Rule Relaxation
+
+Use this when wording such as `färsk`, `färskpressad`, `torkad`, `fryst`,
+`rökt`, `kokt`, or `pulver` changes product eligibility. The important question
+is whether the form word is a hard culinary requirement or only recipe wording.
+
+Start here:
+
+1. Run `dm matcher compare-paths --format json` on the exact pair with real
+   category/brand. Look for `processed_checks`, spice/fresh/herb checks, product
+   requirement guards, or backend validation rejects.
+2. Check `processed_rules.py`, `form_rules.py`, `match_filters.py`, and the
+   requirement/processed helpers in `matching.py` before adding aliases. If the
+   canonical is already present but rejected, this is a form validator.
+3. Prefer CLI-backed form surfaces for simple rules:
+   `processed-rule`, `processed-exemption`, `strict-processed-rule`,
+   `spice-fresh-rule`, or `processed-food`.
+4. Use a narrow Python guard or extraction helper only when the rule depends on
+   full recipe context or on an exception that the declarative surfaces cannot
+   express.
+
+Relaxation pattern:
+
+1. Prove the strict negative that should remain strict. Example: plain
+   fresh-pressed citrus should not automatically accept concentrate if that is
+   the current policy.
+2. Prove the exception. Example: rare/imported `yuzu` can accept bottled
+   `yuzu juice` despite `färskpressad`, especially when the recipe gives a juice
+   alternative.
+3. Add the narrow vocabulary or parser fix needed for the exception, e.g.
+   keyword synonym `yuzusaft/yuzujuice` plus the truncated-`eller` expansion.
+4. Add regression canaries for both the accepted exception and at least one
+   non-exception form that should stay blocked.
+
+If the relaxation would apply to a whole high-traffic family (`citron`, `lime`,
+`apelsin`, `mjölk`, `grädde`, `kött`, etc.), stop and ask. That is a product
+policy decision, not a mechanical parser fix.
+
+### Brand-Product Ingredients
+
+Use this when an ingredient line is a named purchasable product, and words after
+the brand/product name are flavor or variant descriptors rather than separate
+recipe ingredients. Example: `Zeta Aperitivokex Ost & lök` should buy the named
+kex product; `ost` and `lök` are flavors and must not match cheese or onion
+offers.
+
+Preferred pattern:
+
+1. Confirm the ingredient is product-like: brand/name/package wording, a known
+   product line, or a surface that users would buy as one SKU.
+2. Add a narrow ingredient extraction helper in `extraction.py` or through
+   `dm matcher add extraction-helper` so the ingredient emits the product-line
+   canonical only.
+3. If flavor words can still leak through backend validation, add a narrow
+   guard in `_recipe_specific_product_guards_allow_product` requiring the offer
+   name/keywords to contain the product-line canonical.
+4. Prove three cases: exact product matches, first flavor word does not match as
+   a standalone ingredient, second flavor word does not match as a standalone
+   ingredient.
+
+Avoid making the brand/product-line term a global stop word unless it is never a
+purchasable food keyword. A stop word removes information; brand-product
+handling should usually preserve one precise canonical and suppress only the
+flavor bleed.
+
+### Canonical Conflict And Ambiguity
+
+Use this when diagnostics or parity reports `duplicate_signal_source` or
+`ambiguous_canonical`, especially after adding `keyword-extra-parent`,
+`ingredient-parent`, `parent-match-only`, `offer-extra-keyword`, or a routing
+helper.
+
+First classify the conflict:
+
+1. If a fixture expected the old canonical but the new broader canonical is the
+   intended behavior, update the fixture expectation with `sanity-update` or the
+   matcher contract source, then run parity.
+2. If the product should expose both a precision canonical and a broad parent,
+   declare the relationship. Prefer a runtime-wired parent surface
+   (`ingredient-parent`, `parent-match-only`, or `keyword-extra-parent`) when the
+   relationship is real matcher behavior.
+3. If runtime behavior is already correct and only diagnostics cannot see the
+   family relationship, add a diagnostic-only relation in
+   `_DECLARED_DIAGNOSTIC_CANONICAL_PARENTS` or
+   `_DECLARED_DIAGNOSTIC_CANONICAL_GROUPS` in
+   `support_checks/matcher_layer_diagnostics.py`, with a comment and a focused
+   diagnostic/parity canary.
+4. If the broader parent erases a meaningful form/subtype distinction, do not
+   declare precedence. Narrow the bridge, use `offer-extra-keyword` only for the
+   recipe-side parent case, or add a guard/no-match policy for the negative
+   subtype.
+
+Concrete example shape:
+
+```text
+Product: Vitkål Färsk
+Old signal: vitkål
+New parent signal: kål
+Question: should generic "kål" recipes match vitkål, and should "kålhuvud"
+still prefer whole white cabbage rather than every cabbage family member?
+```
+
+If yes, expose `kål` for generic recipes and add an asymmetric guard for
+`kålhuvud` instead of changing all old `vitkål` fixtures to pretend that the
+precision canonical disappeared. If no, remove or narrow the parent mapping.
+
+Note that `match_bridge.toml` has a `precedence` field in its exported model,
+but `match_bridge` is staged/declarative-only for runtime today. Do not expect a
+`match_bridge` precedence value by itself to fix live matching or routed-cache
+ambiguity.
+
 ### Read-Only Explain Trace
 
 Use `dm matcher explain` when a pair surprises you, especially before reading
@@ -889,7 +1044,7 @@ table.
 | Compound/subword bleed | `./bin/dm matcher add compound-protection ...` | A keyword is matching as an unwanted substring or compound suffix/prefix, e.g. a compound word carries another ingredient name but should require stricter word/prefix proof. | FPB/PNB when the real problem is token/compound shape rather than a semantic product or ingredient context. |
 | Multi-keyword normalization | `./bin/dm matcher add dual-keyword-normalization ...` | A surface form needs to emit both a specific canonical and a broader family keyword, with the specific canonical first. | Hand-editing `normalization.py` for ordinary dual-keyword overlays. |
 | Directional canonical override | `space-normalization` or ingredient-side extraction helper plus narrow product exposure | A modifier changes the requested canonical and the base canonical must not remain available, e.g. `pepparrot på tub` -> `pepparrotsvisp` only. | `dual-keyword-normalization`; it emits the broader family too. |
-| Form or processed-state rule | `./bin/dm matcher add processed-rule ...`, `spice-fresh-rule ...`, `processed-exemption ...`, `strict-processed-rule ...`, or `processed-food ...` for simple set add/remove; otherwise `form_rules.py` or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. | Listing every future flavor or cooked variant by hand. |
+| Form or processed-state rule | `./bin/dm matcher add processed-rule ...`, `spice-fresh-rule ...`, `processed-exemption ...`, `strict-processed-rule ...`, or `processed-food ...` for simple set add/remove; otherwise `form_rules.py` or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. See "Form-Rule Relaxation" for `färskpressad`/juice-style exceptions. | Listing every future flavor or cooked variant by hand. |
 | Qualifier or bidirectional variant | `./bin/dm matcher add specialty-qualifier ... [--bidirectional]` or `qualifier-equivalent ...` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. Prefer ordinary specialty qualifiers when only ingredient qualifiers must be honored; prefer `--bidirectional` when a product-side subtype should not satisfy a plain ingredient. | Raw substring checks without word-boundary handling. |
 | Product qualifier required for a keyword | `./bin/dm matcher add qualifier-required-keyword ...` | A keyword should match product variants only when product qualifier words also appear in the ingredient line. | Specialty qualifier rules when the qualifier belongs to a specific product family rather than every product-side word. |
 | Product keyword substitution | `./bin/dm matcher add product-name-substitution ...` | Product extraction should rewrite one extracted keyword to a more specific canonical only when required product words are also present. | Synonym/parent rules when the terms are always equivalent, regardless of product wording. |
@@ -898,7 +1053,7 @@ table.
 | Declarative bridge guard | `match_bridge.toml` nested `blockers` / `backend_allowances` | A bridge needs scoped negative guards or backend allowance metadata with fixture refs. | Hiding broad bridge behavior in unrelated backend code. |
 | Backend-only validation | `recipe_matcher_backend.py` | The rule needs recipe context, retry behavior, or materialization-time validation. | Fixing only backend when fast/fullscan/routing also need the rule. |
 | Routing-only gap | `./bin/dm matcher add ingredient-routing-parent ...`, `recipe-routing-helper ...`, or `term_indexes.py` helper | Fullscan matches but routed cache never sees the pair. | Backend allowances that hide missing route terms. |
-| Canonical conflict | parent/equivalence/precedence metadata, or a narrower bridge | Diagnostics reports duplicate signal source or ambiguous canonical. | Accepting duplicate canonicals without a declared relationship. |
+| Canonical conflict | Runtime-wired parent relation, diagnostic-only family declaration, or a narrower bridge | Diagnostics reports duplicate signal source or ambiguous canonical. See "Canonical Conflict And Ambiguity"; `match_bridge.precedence` alone is not live runtime wiring. | Accepting duplicate canonicals without a declared relationship. |
 
 If the right surface is unclear, write the fixture first and run diagnostics.
 Let the failing layer choose the implementation point.

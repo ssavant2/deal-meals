@@ -19578,29 +19578,221 @@ language = "sv"
 market = "SE"
 canonical = "kål"
 status = "active"
-variants = ["\\bbladkål\\b.*\\bspetskål\\b -> \\bvitkål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bvitkal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\brödkål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\brodkal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bspetskål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bspetskal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bvitkål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bvitkal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\brödkål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\brodkal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bspetskål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bspetskal\\b"]
-ingredient_terms = ["\\bbladkål\\b.*\\bspetskål\\b", "\\bbladkal\\b.*\\bspetskal\\b"]
-offer_terms = ["\\bvitkål\\b", "\\bvitkal\\b", "\\brödkål\\b", "\\brodkal\\b", "\\bspetskål\\b", "\\bspetskal\\b"]
+variants = ["\\bkål\\b -> \\bvitkål\\b", "\\bkål\\b -> \\bvitkal\\b", "\\bkål\\b -> \\brödkål\\b", "\\bkål\\b -> \\brodkal\\b", "\\bkål\\b -> \\bspetskål\\b", "\\bkål\\b -> \\bspetskal\\b", "\\bkål\\b -> \\bgrönkål\\b", "\\bkål\\b -> \\bgronkal\\b", "\\bkål\\b -> \\bsavoykål\\b", "\\bkål\\b -> \\bsavoykal\\b", "\\bkål\\b -> \\bsavojkål\\b", "\\bkål\\b -> \\bsavojkal\\b", "\\bkål\\b -> \\bsalladskål\\b", "\\bkål\\b -> \\bsalladskal\\b", "\\bkål\\b -> \\bsvartkål\\b", "\\bkål\\b -> \\bsvartkal\\b", "\\bkal\\b -> \\bvitkål\\b", "\\bkal\\b -> \\bvitkal\\b", "\\bkal\\b -> \\brödkål\\b", "\\bkal\\b -> \\brodkal\\b", "\\bkal\\b -> \\bspetskål\\b", "\\bkal\\b -> \\bspetskal\\b", "\\bkal\\b -> \\bgrönkål\\b", "\\bkal\\b -> \\bgronkal\\b", "\\bkal\\b -> \\bsavoykål\\b", "\\bkal\\b -> \\bsavoykal\\b", "\\bkal\\b -> \\bsavojkål\\b", "\\bkal\\b -> \\bsavojkal\\b", "\\bkal\\b -> \\bsalladskål\\b", "\\bkal\\b -> \\bsalladskal\\b", "\\bkal\\b -> \\bsvartkål\\b", "\\bkal\\b -> \\bsvartkal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bvitkål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bvitkal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\brödkål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\brodkal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bspetskål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bspetskal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bgrönkål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bgronkal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bsavoykål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bsavoykal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bsavojkål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bsavojkal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bsalladskål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bsalladskal\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bsvartkål\\b", "\\bbladkål\\b.*\\bspetskål\\b -> \\bsvartkal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bvitkål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bvitkal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\brödkål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\brodkal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bspetskål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bspetskal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bgrönkål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bgronkal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bsavoykål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bsavoykal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bsavojkål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bsavojkal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bsalladskål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bsalladskal\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bsvartkål\\b", "\\bbladkal\\b.*\\bspetskal\\b -> \\bsvartkal\\b"]
+ingredient_terms = ["\\bkål\\b", "\\bkal\\b", "\\bbladkål\\b.*\\bspetskål\\b", "\\bbladkal\\b.*\\bspetskal\\b"]
+offer_terms = ["\\bvitkål\\b", "\\bvitkal\\b", "\\brödkål\\b", "\\brodkal\\b", "\\bspetskål\\b", "\\bspetskal\\b", "\\bgrönkål\\b", "\\bgronkal\\b", "\\bsavoykål\\b", "\\bsavoykal\\b", "\\bsavojkål\\b", "\\bsavojkal\\b", "\\bsalladskål\\b", "\\bsalladskal\\b", "\\bsvartkål\\b", "\\bsvartkal\\b"]
 negative_guards = []
 source_refs = ["bridge:match_bridges:bridge_bladkal_cabbage_alternatives"]
 layer_policy = ["bridge_only"]
-notes = "Registry-owned match bridge: bridge_bladkal_cabbage_alternatives."
+notes = "Generic kål-recept ska kunna matcha den färska kål-familjen, men kålhuvud hålls separat via matcherns whole-white-cabbage guard."
 
 [entries.language_payload.match_bridge]
 id = "bridge_bladkal_cabbage_alternatives"
 rule_schema_version = 1
-rule_version = 1
+rule_version = 2
 canonical = "kål"
-ingredient_patterns = ["\\bbladkål\\b.*\\bspetskål\\b", "\\bbladkal\\b.*\\bspetskal\\b"]
-offer_patterns = ["\\bvitkål\\b", "\\bvitkal\\b", "\\brödkål\\b", "\\brodkal\\b", "\\bspetskål\\b", "\\bspetskal\\b"]
+ingredient_patterns = ["\\bkål\\b", "\\bkal\\b", "\\bbladkål\\b.*\\bspetskål\\b", "\\bbladkal\\b.*\\bspetskal\\b"]
+offer_patterns = ["\\bvitkål\\b", "\\bvitkal\\b", "\\brödkål\\b", "\\brodkal\\b", "\\bspetskål\\b", "\\bspetskal\\b", "\\bgrönkål\\b", "\\bgronkal\\b", "\\bsavoykål\\b", "\\bsavoykal\\b", "\\bsavojkål\\b", "\\bsavojkal\\b", "\\bsalladskål\\b", "\\bsalladskal\\b", "\\bsvartkål\\b", "\\bsvartkal\\b"]
 negative_offer_patterns = []
-aliases = ["rödkål", "spetskål", "vitkål"]
+aliases = ["rödkål", "spetskål", "vitkål", "grönkål", "savoykål", "savojkål", "salladskål", "svartkål"]
 fixture_refs = ["matcher_regression_positive_rodkal", "matcher_regression_positive_spetskal", "matcher_regression_positive_vitkal_3bd51a65"]
 supersedes = ["legacy_review_multi_item_alternative_ingredient_lines_are_still_only_partially_represented"]
 ingredient_form_signals = []
 offer_form_signals = []
 required_offer_form_signals = []
 forbidden_offer_form_signals = []
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bvitkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bvitkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\brödkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\brodkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bspetskål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bspetskal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bgrönkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bgronkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bsavoykål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bsavoykal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bsavojkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bsavojkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bsalladskål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bsalladskal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bsvartkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkål\\b -> \\bsvartkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bvitkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bvitkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\brödkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\brodkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bspetskål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bspetskal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bgrönkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bgronkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bsavoykål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bsavoykal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bsavojkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bsavojkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bsalladskål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bsalladskal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bsvartkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bkal\\b -> \\bsvartkal\\b"
+layer_role = "bridge_positive"
 
 [[entries.coverage]]
 source_family = "match_bridge"
@@ -19641,6 +19833,66 @@ layer_role = "bridge_positive"
 [[entries.coverage]]
 source_family = "match_bridge"
 canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bgrönkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bgronkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bsavoykål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bsavoykal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bsavojkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bsavojkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bsalladskål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bsalladskal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bsvartkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkål\\b.*\\bspetskål\\b -> \\bsvartkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
 variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bvitkål\\b"
 layer_role = "bridge_positive"
 
@@ -19674,11 +19926,70 @@ canonical = "kål"
 variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bspetskal\\b"
 layer_role = "bridge_positive"
 
-[[entries.positive_examples]]
-ingredient = "\\bbladkål\\b.*\\bspetskål\\b"
-offer_name = "\\bvitkål\\b"
-expected = 1
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bgrönkål\\b"
+layer_role = "bridge_positive"
 
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bgronkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bsavoykål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bsavoykal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bsavojkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bsavojkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bsalladskål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bsalladskal\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bsvartkål\\b"
+layer_role = "bridge_positive"
+
+[[entries.coverage]]
+source_family = "match_bridge"
+canonical = "kål"
+variant = "\\bbladkal\\b.*\\bspetskal\\b -> \\bsvartkal\\b"
+layer_role = "bridge_positive"
+
+[[entries.positive_examples]]
+ingredient = "1 dl kål, finstrimlad"
+offer_name = "Vitkål Färsk ca 1,28kg Klass 1 ICA"
+expected = 1
 [[entries]]
 entry_id = "sv-se.bridge.bridge_lax_laxfile_raw"
 language = "sv"

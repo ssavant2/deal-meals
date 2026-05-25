@@ -81,6 +81,7 @@ from .processed_rules import (
 from .recipe_context import CUISINE_CONTEXT
 from .recipe_text import (
     is_subrecipe_reference_text,
+    parse_eller_alternatives,
     preserve_cheese_preference_parentheticals,
     preserve_fresh_pasta_parenthetical,
     preserve_parenthetical_chili_alias,
@@ -1085,24 +1086,66 @@ def _blocked_by_exact_compound_only(
     Relaxation: when the ingredient explicitly signals flexibility (the arm
     containing the matched keyword has a "valfri sort" / "t.ex" / similar
     marker), broader keywords are allowed even though a specific compound
-    appears in a different arm. Without such a marker, "X eller Y" is treated
-    strictly — the broader fallback remains blocked.
+    appears in a different arm.
     """
     for compound, blocked_keywords in _EXACT_COMPOUND_ONLY_INGREDIENTS.items():
         if compound in ingredient_lower and matched_keyword in blocked_keywords:
             if _eller_arms:
-                # Find the arm where the matched keyword lives. If that arm
-                # explicitly accepts any variety (valfri sort / t.ex / etc.),
-                # allow the broader fallback.
-                matched_arms = [arm for arm in _eller_arms if matched_keyword in arm]
+                matched_arms = [
+                    arm
+                    for arm in _eller_arms
+                    if _eller_arm_mentions_plain_keyword(arm, matched_keyword)
+                ]
                 for arm in matched_arms:
                     if compound in arm:
                         # Compound is in the SAME arm — strict block applies.
                         continue
                     if any(marker in arm for marker in _FLEXIBLE_ALTERNATIVE_MARKERS):
-                        return False  # flexible arm — allow broader match
+                        return False
             return True
     return False
+
+
+def _eller_arm_mentions_plain_keyword(arm: str, keyword: str) -> bool:
+    """Return True when an alternative arm names the keyword as its own term."""
+
+    if keyword not in arm:
+        return False
+    kw_len = len(keyword)
+    for word in _WORD_PATTERN.findall(arm):
+        if word == keyword:
+            return True
+        if word.startswith(keyword):
+            suffix = word[kw_len:]
+            if suffix in {'er', 'ar', 'or', 'en', 'na', 'n', 'r', 's', 'erna'}:
+                return True
+    return False
+
+
+def _eller_arms_have_plain_keyword(_eller_arms: tuple, keyword: str) -> bool:
+    return any(_eller_arm_mentions_plain_keyword(arm, keyword) for arm in _eller_arms)
+
+
+def _keyword_suppressed_by_context(
+    keyword: str,
+    ingredient_lower: str,
+    suppressors: Iterable[str],
+    _eller_arms: tuple = (),
+) -> bool:
+    if not any(suppressor in ingredient_lower for suppressor in suppressors):
+        return False
+    if _eller_arms:
+        matched_arms = [
+            arm
+            for arm in _eller_arms
+            if _eller_arm_mentions_plain_keyword(arm, keyword)
+        ]
+        if matched_arms and all(
+            not any(suppressor in arm for suppressor in suppressors)
+            for arm in matched_arms
+        ):
+            return False
+    return True
 
 
 def _offer_is_roe_family(keywords: List[str]) -> bool:
@@ -2319,6 +2362,11 @@ def _recipe_specific_product_guards_allow_product(
 
     product_kw_set = set(product_keywords)
 
+    if 'aperitivokex' in ingredient_lower:
+        if matched_keyword not in {'aperitivokex', 'kex'}:
+            return False
+        return 'aperitivokex' in product_lower or 'aperitivokex' in product_kw_set
+
     if matched_keyword in {'chilisås', 'chilisas'} and any(
         cue in ingredient_lower for cue in ('chilisås', 'chilisas')
     ):
@@ -3116,6 +3164,11 @@ def matches_ingredient(
     ingredient_lower = _append_canonical_keyword_synonyms(ingredient_lower)
     if _ingredient_is_non_buyable_root_veg_pasta(ingredient_lower):
         return None
+    _eller_arms_prepared = (
+        tuple(parse_eller_alternatives(ingredient_lower))
+        if 'eller' in ingredient_lower
+        else ()
+    )
 
     # STEP 1: Fast keyword matching first (most products won't match at all)
     matched_keyword = None
@@ -3124,6 +3177,8 @@ def matches_ingredient(
             continue
         # Simple 'in' check first (faster than regex)
         if _keyword_occurs_in_ingredient(keyword, ingredient_lower):
+            if keyword == 'kål' and any(ind in ingredient_lower for ind in ('kålhuvud', 'kalhuvud')):
+                continue
             if keyword in _BREWED_COFFEE_BLOCKED_KEYWORDS and _is_brewed_coffee_ingredient_text(ingredient_lower):
                 continue
             # Block compound word suffix matches (e.g., "köttbullar" in "fiskköttbullar")
@@ -3180,14 +3235,20 @@ def matches_ingredient(
                 if not _fresh_chili_product_allowed(product_lower_name, ingredient_lower, keyword, ''):
                     continue
                 if not _ingredient_requests_chili_spice(ingredient_lower, keyword):
-                    if keyword in _COMPOUND_STRICT_KEYWORDS:
+                    if keyword in _COMPOUND_STRICT_KEYWORDS and not _eller_arms_have_plain_keyword(
+                        _eller_arms_prepared,
+                        keyword,
+                    ):
                         if _check_compound_strict(keyword, ingredient_lower, product_lower_name):
                             continue
-                    if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
+                    if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS and not _eller_arms_have_plain_keyword(
+                        _eller_arms_prepared,
+                        keyword,
+                    ):
                         if _check_compound_strict(keyword, ingredient_lower, product_lower_name,
                                                   check_prefix=True):
                             continue
-            if _blocked_by_exact_compound_only(ingredient_lower, keyword):
+            if _blocked_by_exact_compound_only(ingredient_lower, keyword, _eller_arms_prepared):
                 continue
             # Product-name blockers are validated later per ingredient in recipe_matcher.py.
             matched_keyword = keyword
@@ -3246,22 +3307,34 @@ def matches_ingredient(
                 # Compound strictness for parent path too
                 product_lower_name = fix_swedish_chars(product_name).lower() if product_name else ""
                 if parent in _COMPOUND_STRICT_KEYWORDS or parent in _COMPOUND_STRICT_PREFIX_KEYWORDS:
-                    if parent in _COMPOUND_STRICT_KEYWORDS:
+                    if parent in _COMPOUND_STRICT_KEYWORDS and not _eller_arms_have_plain_keyword(
+                        _eller_arms_prepared,
+                        parent,
+                    ):
                         if _check_compound_strict(parent, ingredient_lower, product_lower_name):
                             continue
-                    if parent in _COMPOUND_STRICT_PREFIX_KEYWORDS:
+                    if parent in _COMPOUND_STRICT_PREFIX_KEYWORDS and not _eller_arms_have_plain_keyword(
+                        _eller_arms_prepared,
+                        parent,
+                    ):
                         if _check_compound_strict(parent, ingredient_lower, product_lower_name,
                                                   check_prefix=True):
                             continue
                 # Also check compound-strict for the ORIGINAL product keyword
-                if keyword in _COMPOUND_STRICT_KEYWORDS:
+                if keyword in _COMPOUND_STRICT_KEYWORDS and not _eller_arms_have_plain_keyword(
+                    _eller_arms_prepared,
+                    keyword,
+                ):
                     if _check_compound_strict(keyword, ingredient_lower, product_lower_name):
                         continue
-                if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
+                if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS and not _eller_arms_have_plain_keyword(
+                    _eller_arms_prepared,
+                    keyword,
+                ):
                     if _check_compound_strict(keyword, ingredient_lower, product_lower_name,
                                               check_prefix=True):
                         continue
-                if _blocked_by_exact_compound_only(ingredient_lower, parent):
+                if _blocked_by_exact_compound_only(ingredient_lower, parent, _eller_arms_prepared):
                     continue
                 # Product-name blockers for parent matches are also validated
                 # later per ingredient in recipe_matcher.py.
@@ -3453,7 +3526,12 @@ def matches_ingredient(
     # e.g., 'chilisås' suppressed when ingredient contains 'cream cheese' (flavored cream cheese).
     if matched_keyword in KEYWORD_SUPPRESSED_BY_CONTEXT:
         suppressors = KEYWORD_SUPPRESSED_BY_CONTEXT[matched_keyword]
-        if any(s in ingredient_lower for s in suppressors):
+        if _keyword_suppressed_by_context(
+            matched_keyword,
+            ingredient_lower,
+            suppressors,
+            _eller_arms_prepared,
+        ):
             return None
 
     # STEP 2: Only normalize product_name if we have a potential match
@@ -4620,6 +4698,8 @@ def matches_ingredient_fast(
         if keyword in _RECIPE_NEVER_MATCH_KEYWORDS:
             continue
         if _keyword_occurs_in_ingredient(keyword, ingredient_lower):
+            if keyword == 'kål' and any(ind in ingredient_lower for ind in ('kålhuvud', 'kalhuvud')):
+                continue
             if keyword in _BREWED_COFFEE_BLOCKED_KEYWORDS and _is_brewed_coffee_ingredient_text(ingredient_lower):
                 continue
             # Block compound word suffix matches (e.g., "köttbullar" in "fiskköttbullar")
@@ -4679,11 +4759,17 @@ def matches_ingredient_fast(
                     and _chili_spice_product_allowed(pname, ingredient_lower, keyword)
                 )
                 if not plain_chili_variety and not chili_spice_product:
-                    if keyword in _COMPOUND_STRICT_KEYWORDS:
+                    if keyword in _COMPOUND_STRICT_KEYWORDS and not _eller_arms_have_plain_keyword(
+                        _eller_arms_prepared,
+                        keyword,
+                    ):
                         if _check_compound_strict(keyword, ingredient_lower, pname,
                                                   _ingredient_words):
                             continue
-                    if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
+                    if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS and not _eller_arms_have_plain_keyword(
+                        _eller_arms_prepared,
+                        keyword,
+                    ):
                         if _check_compound_strict(keyword, ingredient_lower, pname,
                                                   _ingredient_words, check_prefix=True):
                             continue
@@ -4696,7 +4782,12 @@ def matches_ingredient_fast(
             # of falling through to `räkost`.)
             if keyword in KEYWORD_SUPPRESSED_BY_CONTEXT:
                 suppressors = KEYWORD_SUPPRESSED_BY_CONTEXT[keyword]
-                if any(s in ingredient_lower for s in suppressors):
+                if _keyword_suppressed_by_context(
+                    keyword,
+                    ingredient_lower,
+                    suppressors,
+                    _eller_arms_prepared,
+                ):
                     continue
             # Product-name blockers are validated later per ingredient in
             # recipe_matcher.py, which avoids cross-ingredient leakage such as
@@ -4786,10 +4877,16 @@ def matches_ingredient_fast(
                 # Compound strictness for parent path too
                 pname = offer_data['name_normalized']
                 if parent in _COMPOUND_STRICT_KEYWORDS or parent in _COMPOUND_STRICT_PREFIX_KEYWORDS:
-                    if parent in _COMPOUND_STRICT_KEYWORDS:
+                    if parent in _COMPOUND_STRICT_KEYWORDS and not _eller_arms_have_plain_keyword(
+                        _eller_arms_prepared,
+                        parent,
+                    ):
                         if _check_compound_strict(parent, ingredient_lower, pname):
                             continue
-                    if parent in _COMPOUND_STRICT_PREFIX_KEYWORDS:
+                    if parent in _COMPOUND_STRICT_PREFIX_KEYWORDS and not _eller_arms_have_plain_keyword(
+                        _eller_arms_prepared,
+                        parent,
+                    ):
                         if _check_compound_strict(parent, ingredient_lower, pname,
                                                   check_prefix=True):
                             continue
@@ -4797,10 +4894,16 @@ def matches_ingredient_fast(
                 # not just the parent. Handles: product keyword 'glass' →
                 # parent 'vaniljglass', but 'glass' in compound-strict requires
                 # prefix 'vanilj' in product name to match 'vaniljglass' recipe.
-                if keyword in _COMPOUND_STRICT_KEYWORDS:
+                if keyword in _COMPOUND_STRICT_KEYWORDS and not _eller_arms_have_plain_keyword(
+                    _eller_arms_prepared,
+                    keyword,
+                ):
                     if _check_compound_strict(keyword, ingredient_lower, pname):
                         continue
-                if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS:
+                if keyword in _COMPOUND_STRICT_PREFIX_KEYWORDS and not _eller_arms_have_plain_keyword(
+                    _eller_arms_prepared,
+                    keyword,
+                ):
                     if _check_compound_strict(keyword, ingredient_lower, pname,
                                               check_prefix=True):
                         continue
@@ -4911,7 +5014,12 @@ def matches_ingredient_fast(
             return None
     if matched_keyword in KEYWORD_SUPPRESSED_BY_CONTEXT:
         suppressors = KEYWORD_SUPPRESSED_BY_CONTEXT[matched_keyword]
-        if any(s in ingredient_lower for s in suppressors):
+        if _keyword_suppressed_by_context(
+            matched_keyword,
+            ingredient_lower,
+            suppressors,
+            _eller_arms_prepared,
+        ):
             return None
     if not _pimiento_product_allowed(
         offer_data['name_normalized'],
@@ -5420,9 +5528,11 @@ def matches_ingredient_fast(
 
     # "kålhuvud" should mean a whole fresh white-cabbage head, not red cabbage,
     # pointed cabbage, or pre-cut white cabbage products.
-    if matched_keyword in {'vitkål', 'kålhuvud', 'kalhuvud'}:
+    if matched_keyword in {'vitkål', 'kålhuvud', 'kalhuvud', 'kål'}:
         name_norm = offer_data['name_normalized']
         if any(ind in ingredient_lower for ind in ('kålhuvud', 'kalhuvud')):
+            if matched_keyword == 'kål':
+                return None
             if any(ind in offer_data.get('keywords', ()) for ind in ('rödkål', 'rodkål', 'spetskål', 'spetskal')):
                 return None
             if any(ind in name_norm for ind in ('strimlad', 'delad', 'fryst', 'frysta')):
