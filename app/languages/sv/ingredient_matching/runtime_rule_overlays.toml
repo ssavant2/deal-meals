@@ -347,6 +347,13 @@ keyword = "svartabönor"
 blockers = ["laoganma", "chiliolja"]
 reason = "Svarta Bönor i Chiliolja (Laoganma) är kinesisk kondiment/chilisås, inte plain svarta bönor. Analog till befintlig PNB bönor + laoganma (batch 78). Q83 shard 5."
 
+[[product_name_blockers]]
+id = "runtime_pnb_flaskfileer"
+status = "active"
+keyword = "fläskfileer"
+blockers = ["grönpepparsås", "gronpepparsås", "rökt", "rokt"]
+reason = "Plural-form av fläskfilé behöver samma PNB-blockers som singular (befintlig PNB fläskfilé). Q85-6 rank 8485."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -535,6 +542,13 @@ status = "active"
 keyword = "dillsås"
 blockers = ["gratäng"]
 reason = "Fiskgratäng med dillsås is a ready-meal, not a dillsås condiment — block from dillsås/sauce ingredient matches"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_sotpotatis"
+status = "active"
+keyword = "sötpotatis"
+blockers = ["nudlar", "sötpotatisnudlar"]
+reason = "Sötpotatisnudlar = glasnudlar av sötpotatisstärkelse, INTE rotfrukten. Recept som anger 'sötpotatisnudlar' ska bara matcha nudlar-produkter, inte raw sötpotatis. Analog till Q60-1 vaniljgrädde/Q61-8 kex compound-strict-prefix. Q85-1."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
