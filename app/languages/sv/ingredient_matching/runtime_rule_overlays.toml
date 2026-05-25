@@ -1106,6 +1106,14 @@ qualifiers = ["cocktail"]
 bidirectional = true
 reason = "Cocktailkapris (capers with stems for garnish) is a distinct product from regular kapris; should not be interchangeable"
 
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_tapenade_soltorkad_tomat"
+status = "active"
+keyword = "tapenade"
+qualifiers = ["soltorkad", "tomat"]
+bidirectional = true
+reason = "Tomato tapenade (soltorkade tomater) is a different product from olive tapenade — not interchangeable"
+
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"
 status = "active"
