@@ -224,17 +224,12 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         'solrosolja', 'olja', 'vatten',  # product indicators (canned)
         'burk', 'konserv', 'förp', 'forp', 'förpackning', 'forpackning',  # ingredient indicators (recipe says canned)
     },
-    'sojabönor': {
-        # "sojabönor konserv" should not fall through to frozen soybeans.
-        # Treat canned/jarred soybeans and frozen soybeans as distinct forms,
-        # while still letting plain generic "sojabönor" remain broad.
-        'burk', 'konserv', 'konserverad', 'konserverade',
-        'fryst', 'frysta',
-    },
-    'sojabonor': {
-        'burk', 'konserv', 'konserverad', 'konserverade',
-        'fryst', 'frysta',
-    },
+    # Q86-2: sojabönor fryst↔konserv tilläts som substitut (extension av Q79-10
+    # 'färsk vs fryst OK'). Fryst soybeans måste kokas oavsett — praktiskt samma
+    # användning som konserverade. Tomma sets behåller plain-form-broad-matchen
+    # men slipper blockera mellan fryst och konserv.
+    'sojabönor': set(),
+    'sojabonor': set(),
     'lax': {
         # Smoked/cured salmon ≠ fresh salmon
         # "Kallrökt Laxfilé" should NOT match "300 g laxfilé utan skinn" (= fresh)

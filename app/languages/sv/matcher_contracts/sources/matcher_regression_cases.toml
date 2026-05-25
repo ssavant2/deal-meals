@@ -6437,17 +6437,26 @@ ingredient_index = 0
 must_match_keyword = "sojabönor"
 
 [[fixtures]]
-expected = 0
+# Q86-2 update (2026-05-25): Stefan extended Q79-10 (färsk/fryst OK) to
+# sojabönor konserv↔fryst. Expectation flipped 0→1. Renamed _negative→_positive
+# would break inventory ref; keeping the id but updating expected + the trailing
+# comment to document the policy change.
+expected = 1
 id = "matcher_regression_sojabonor_burk_fryst_negative"
 ingredients = ["1 burk sojabönor"]
 policy_ref = "legacy_import_curated_regression"
 recipe_name = "Soppa med sojabönor"
-source_ref = "legacy_review:plain_generic_sojabonor_still_blocks_exact_frozen_soybeans_even_though_the_processed_form_rule_says_plain_lines_should_remain_broad"
+source_ref = "current_review:q86_2_sojabonor_burk_fryst_substitution_allowed"
 
 [fixtures.offer]
 brand = "ICA"
 category = "vegetables"
 name = "Sojabönor Fryst 250g ICA"
+
+[[fixtures.expected_matches]]
+canonical = "sojabönor"
+ingredient_index = 0
+must_match_keyword = "sojabönor"
 
 [[fixtures]]
 expected = 1

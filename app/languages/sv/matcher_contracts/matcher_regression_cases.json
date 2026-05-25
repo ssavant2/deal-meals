@@ -7759,7 +7759,14 @@
     "source_ref": "legacy_review:plain_generic_sojabonor_still_blocks_exact_frozen_soybeans_even_though_the_processed_form_rule_says_plain_lines_should_remain_broad"
   },
   {
-    "expected": 0,
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "sojabönor",
+        "ingredient_index": 0,
+        "must_match_keyword": "sojabönor"
+      }
+    ],
     "id": "matcher_regression_sojabonor_burk_fryst_negative",
     "ingredients": [
       "1 burk sojabönor"
@@ -7771,7 +7778,7 @@
     },
     "policy_ref": "legacy_import_curated_regression",
     "recipe_name": "Soppa med sojabönor",
-    "source_ref": "legacy_review:plain_generic_sojabonor_still_blocks_exact_frozen_soybeans_even_though_the_processed_form_rule_says_plain_lines_should_remain_broad"
+    "source_ref": "current_review:q86_2_sojabonor_burk_fryst_substitution_allowed"
   },
   {
     "expected": 1,

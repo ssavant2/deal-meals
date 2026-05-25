@@ -26608,24 +26608,24 @@ variant = "matcher_regression_sodavatten_positive: Naturell Kolsyrat Vatten Pet 
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.legacy_import_curated_regression.matcher_regression_sojabonor_burk_fryst_negative"
+entry_id = "sv-se.policy.sojabonor.matcher_regression_sojabonor_burk_fryst_negative"
 language = "sv"
 market = "SE"
-canonical = "legacy_import_curated_regression"
+canonical = "sojabönor"
 status = "active"
 variants = ["matcher_regression_sojabonor_burk_fryst_negative: Sojabönor Fryst 250g ICA"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_sojabonor_burk_fryst_negative"]
-layer_policy = ["accepted_filter", "normal"]
+layer_policy = ["normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_sojabonor_burk_fryst_negative."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "legacy_import_curated_regression"
+canonical = "sojabönor"
 variant = "matcher_regression_sojabonor_burk_fryst_negative: Sojabönor Fryst 250g ICA"
-layer_role = "negative_regression"
+layer_role = "positive_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.sojabonor.matcher_regression_sojabonor_fryst_positive"

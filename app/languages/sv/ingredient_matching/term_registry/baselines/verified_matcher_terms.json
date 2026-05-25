@@ -22,10 +22,10 @@
       "legacy_validator": 249,
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 332,
-      "negative_regression": 831,
+      "negative_regression": 830,
       "offer_extra_keyword_mapping": 401,
       "parent_match_only_mapping": 17,
-      "positive_regression": 660,
+      "positive_regression": 661,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
@@ -14347,27 +14347,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"aliases\": [], \"fixture_refs\": [\"matcher_regression_positive_ingefara_syltad_kub\", \"matcher_regression_positive_ingefara_syltad_kub_240g_risberg\", \"matcher_regression_positive_syltad_ingefara\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_review_cached_syltad_ingefara_results_diverge_from_the_current_live_matcher_and_the_live_path_also_misses_the_exact_syltad_product\"]}"
-    },
-    {
-      "variant_id": "vterm-f58f361440fdb0da",
-      "row_index": 1797,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "legacy_review:plain_generic_sojabonor_still_blocks_exact_frozen_soybeans_even_though_the_processed_form_rule_says_plain_lines_should_remain_broad",
-      "source_id": "matcher_regression_sojabonor_burk_fryst_negative",
-      "variant_role": "negative_regression",
-      "variant_text": "matcher_regression_sojabonor_burk_fryst_negative: Sojabönor Fryst 250g ICA",
-      "canonical": null,
-      "expected_family": "legacy_import_curated_regression",
-      "ingredient_text": "1 burk sojabönor",
-      "product_text": "Sojabönor Fryst 250g ICA",
-      "product_category": "vegetables",
-      "product_brand": "ICA",
-      "expected": 0,
-      "needs_product_text": false,
-      "notes": "legacy_import_curated_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"legacy_import_curated_regression\", \"recipe_name\": \"Soppa med sojabönor\"}"
     },
     {
       "variant_id": "vterm-f5e7f9b513d6df81",
@@ -117058,6 +117037,27 @@
       "needs_product_text": false,
       "notes": null,
       "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [447], \"output\": \"vegobitar\"}"
+    },
+    {
+      "variant_id": "vterm-5a25ab12ee7300dc",
+      "row_index": 1803,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "current_review:q86_2_sojabonor_burk_fryst_substitution_allowed",
+      "source_id": "matcher_regression_sojabonor_burk_fryst_negative",
+      "variant_role": "positive_regression",
+      "variant_text": "matcher_regression_sojabonor_burk_fryst_negative: Sojabönor Fryst 250g ICA",
+      "canonical": "sojabönor",
+      "expected_family": "sojabönor",
+      "ingredient_text": "1 burk sojabönor",
+      "product_text": "Sojabönor Fryst 250g ICA",
+      "product_category": "vegetables",
+      "product_brand": "ICA",
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": "legacy_import_curated_regression",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"sojabönor\", \"ingredient_index\": 0, \"must_match_keyword\": \"sojabönor\"}], \"policy_ref\": \"legacy_import_curated_regression\", \"recipe_name\": \"Soppa med sojabönor\"}"
     }
   ],
   "verification": {

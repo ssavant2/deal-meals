@@ -192,8 +192,9 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('salsiccia vitlök', 'salsicciavitlök'),
     ('salsiccia vitlok', 'salsicciavitlok'),
     ('salsiccia chili', 'salsicciachili'),
-    # Tabasco = pepparsås (brand name used generically in recipes)
-    ('tabasco', 'pepparsås'),
+    # Q86-1: Tabasco normalization removed — when this ran before FPB
+    # `pepparsås: {tabasco}`, the blocker became dead code. Stefan-policy:
+    # Tabasco strikt isolerad från generic pepparsås (1 krm Tabasco = brand-specifik krydda).
     # "Flytande smör" in Swedish grocery recipes typically means the buyable
     # butter/rapeseed liquid cooking blend, not a block of solid butter.
     ('flytande smör', 'flytandesmör'),

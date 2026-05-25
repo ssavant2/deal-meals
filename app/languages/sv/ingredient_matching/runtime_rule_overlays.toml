@@ -354,6 +354,20 @@ keyword = "fläskfileer"
 blockers = ["grönpepparsås", "gronpepparsås", "rökt", "rokt"]
 reason = "Plural-form av fläskfilé behöver samma PNB-blockers som singular (befintlig PNB fläskfilé). Q85-6 rank 8485."
 
+[[product_name_blockers]]
+id = "runtime_pnb_digestive"
+status = "active"
+keyword = "digestive"
+blockers = ["oliv"]
+reason = "Göteborgs Digestive Oliv = savory cracker with olive oil (bread category), not sweet digestive biscuit used for pie crusts/banoffee"
+
+[[product_name_blockers]]
+id = "runtime_pnb_buljongpulver"
+status = "active"
+keyword = "buljongpulver"
+blockers = ["dashi"]
+reason = "Dashi = japansk fisk/tång-buljong, ej grönsaks-/hönsbuljongspulver. Q83-6."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -568,8 +582,8 @@ reason = "Andfond (duck stock) is instructed as a from-scratch reduction — no 
 id = "runtime_ksbc_formbrod"
 status = "active"
 keyword = "formbröd"
-context = ["grov", "grova"]
-reason = "\"Grova brödskivor\" (coarse bread slices, e.g. rågbröd) requests dense coarse bread — soft white formbröd/formfranska should not match. Routes via brödskivor→formbröd canonical synonym. FPB cannot be used here due to smart-blocker/synonym-append interaction."
+context = ["grov", "grova", "limpa", "rågbröd", "kavring", "skogaholmslimpa"]
+reason = "\"Grova brödskivor\" (coarse bread slices, e.g. rågbröd) requests dense coarse bread — soft white formbröd/formfranska should not match. Routes via brödskivor→formbröd canonical synonym. FPB cannot be used here due to smart-blocker/synonym-append interaction.; Recept som specificerar mörkt/sött brödtyp (Skogaholmslimpa, rågbröd, kavring) ska inte matcha formbröd-typer (Vallmorost, Toastbröd, Roast'n toast). Q85-5."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_kex"
@@ -760,6 +774,13 @@ keyword = "västerbottensost"
 context = ["philadelphia"]
 reason = "Philadelphia Västerbottensost® är en cream cheese-variant (mjuk/smörig pastej). Hård Västerbottensost (block/riven) är fel produkt-typ. Q81-7."
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_skinka"
+status = "active"
+keyword = "skinka"
+context = ["färsk"]
+reason = "Recept som anger 'färsk skinka' vill ha rå skinkstycke (skinkstek-typ) för t.ex. schnitzel, inte kokt deli-skinka. Q83-1."
+
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
 status = "active"
@@ -864,6 +885,14 @@ surface = "non_food_keywords"
 action = "add"
 terms = ["plastfolie"]
 reason = "Plastic cling film — non-food household item ('100% fummelfri plastfolie refill 150m Ninjaplast' incorrectly matched 'refill' keyword from äppelmos ingredient)"
+
+[[keyword_set_updates]]
+id = "runtime_non_food_keyword_add_blojhink_blojhinksrefill_bakplatspapper"
+status = "active"
+surface = "non_food_keywords"
+action = "add"
+terms = ["blöjhink", "blöjhinksrefill", "bakplåtspapper", "bakplatspapper"]
+reason = "Q83-4 broad: blöjhink/bakplåtspapper-produkter slipper igenom kategori-filter (Luna Bambini i 'dairy', Ninjaplast i 'pantry'). Plastfolie redan blockerad batch 83 shard 4. Refill-bleed mot mat-recept (BOB Äppelmos refill etc.)."
 
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"
