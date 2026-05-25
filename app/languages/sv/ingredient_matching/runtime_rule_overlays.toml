@@ -368,6 +368,13 @@ keyword = "buljongpulver"
 blockers = ["dashi"]
 reason = "Dashi = japansk fisk/tång-buljong, ej grönsaks-/hönsbuljongspulver. Q83-6."
 
+[[product_name_blockers]]
+id = "runtime_pnb_sojagurt"
+status = "active"
+keyword = "sojagurt"
+blockers = ["jordgubb", "blåbär", "mango", "hallon", "banan", "ananas", "persika", "kiwi", "apelsin", "citron", "körsbär", "aprikos", "plommon", "päron", "lingon", "hjortron", "choklad", "frukt"]
+reason = "Smaksatt sojagurt (jordgubb, blåbär, mango m.fl.) ska inte matcha plain sojagurt naturell-ingrediens — samma princip som yoghurt-principen och havregurt"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
