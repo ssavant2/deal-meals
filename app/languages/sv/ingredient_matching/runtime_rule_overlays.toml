@@ -802,6 +802,20 @@ keyword = "limpa"
 context = ["grov", "grovlimpa"]
 reason = "Grovlimpa-ingrediens ska matcha rågbröd/kavring (mörka bröd) ej söt ljus limpa (Carlssons Fyrkant Skogaholms). Q85-5 etablerade liknande KSBC formbröd+limpa."
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_kal"
+status = "active"
+keyword = "kål"
+context = ["rödkål", "rödkål", "vitkål", "vitkal", "spetskål", "spetskål", "grönkål", "gronkal", "svartkål", "svartkal", "savoykål", "savoykal", "savojkål", "savojkal", "salladskål", "salladskal", "brysselkål", "brysselkal", "fänkål"]
+reason = "Generic kål keyword is suppressed when ingredient names a specific variety (vitkål/rödkål/etc.) — prevents cross-variety FP matches. KSBC check moved inside keyword loop in matching.py so suppression causes continue (try next keyword) not return None, preserving self-match for variety-specific products."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_tandoori"
+status = "active"
+keyword = "tandoori"
+context = ["nuggets", "ärtnuggets", "artnuggets"]
+reason = "Tandoori as a flavor-coating descriptor on plant-based nuggets (ärtnuggets, nuggets) should not match plain tandoori spice/paste — product type mismatch: ready-to-eat coated product vs. raw spice"
+
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
 status = "active"

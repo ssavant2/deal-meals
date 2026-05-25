@@ -3250,6 +3250,18 @@ def matches_ingredient(
                             continue
             if _blocked_by_exact_compound_only(ingredient_lower, keyword, _eller_arms_prepared):
                 continue
+            # KSBC inside loop: if this keyword is suppressed by context, skip it and try
+            # the next keyword instead of returning None (which would prevent vitkål from
+            # being tried after kål is suppressed in a [kål, vitkål] keyword list).
+            if keyword in KEYWORD_SUPPRESSED_BY_CONTEXT:
+                suppressors = KEYWORD_SUPPRESSED_BY_CONTEXT[keyword]
+                if _keyword_suppressed_by_context(
+                    keyword,
+                    ingredient_lower,
+                    suppressors,
+                    _eller_arms_prepared,
+                ):
+                    continue
             # Product-name blockers are validated later per ingredient in recipe_matcher.py.
             matched_keyword = keyword
             break

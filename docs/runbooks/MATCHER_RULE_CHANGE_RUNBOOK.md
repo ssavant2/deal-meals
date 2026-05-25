@@ -730,15 +730,25 @@ rejected it. Work through this checklist:
    expected term, debug extraction first: non-food filters, processed-food
    filters, product-name substitutions, offer-extra keywords, brand stripping,
    or stale generated/runtime overlay data.
-3. If the keyword is present on both sides, inspect validators before adding more
+3. If `Ingredient keywords` is empty, debug the ingredient extractor before
+   adding parents or offer-side synonyms. Check the normalized ingredient words
+   against `MIN_KEYWORD_LENGTH_STRICT` in `extraction_patterns.py`,
+   `IMPORTANT_SHORT_KEYWORDS`, `STOP_WORDS`, and `FLAVOR_WORDS` in
+   `keywords.py`. Short real ingredients such as `nougat` can be filtered only
+   because they are below the strict length threshold unless they are promoted to
+   `IMPORTANT_SHORT_KEYWORDS`; flavor words may need carrier context and should
+   not be assumed to extract as standalone ingredients. Also check early
+   name-conditional branches in `extraction.py` that can return before the
+   generic word loop.
+4. If the keyword is present on both sides, inspect validators before adding more
    aliases: no-match policies, PNB/FPB/KSBC/GPB blockers, specialty qualifiers
    including bidirectional product qualifiers, product-form validators,
    `processed_checks`, spice/fresh/herb rules, recipe/product requirement
    guards, and explicit labels such as vegan/vegetarian/lactose/gluten-free.
-4. If direct `compare-paths` passes but batch output or UI/cache output still
+5. If direct `compare-paths` passes but batch output or UI/cache output still
    misses, treat it as materialized-cache drift: check cache freshness and run
    the relevant reload before changing matcher semantics.
-5. If direct `compare-paths` still fails, add a focused sanity row that captures
+6. If direct `compare-paths` still fails, add a focused sanity row that captures
    the failing pair, then patch the narrow validator that rejects it. Avoid
    piling on synonyms or parents when the trace already proves both sides have
    the canonical keyword.
@@ -1486,6 +1496,58 @@ can make live diagnostics look right while cache/routing still diverges.
 
 Use this workflow for durable registry/contract changes and for any Track A fix
 you intentionally escalated.
+
+### Batch-Review Registry Sequence
+
+When batch review produces several registry/routing changes, keep authoring fast
+but finish with the same deterministic maintenance order:
+
+1. Add or modify rules with `dm matcher add ... --no-run-gates` while you are
+   still collecting the batch.
+2. Regenerate derived matcher artifacts before promotion:
+
+   ```bash
+   ./bin/dm matcher regen --what all
+   ```
+
+3. Promote the verified-term baseline from a writable checkout/container user:
+
+   ```bash
+   ./bin/dm matcher promote
+   ```
+
+   Use `--allow-removals` only after reviewing intentional inactivations or
+   deletions.
+4. Run pre-flight or the Track B wrapper. The wrapper normally performs the
+   regen/promote steps for standard Track B work, but the explicit sequence is
+   useful during long batch review because it tells you exactly which derived
+   layer is stale.
+
+If pre-flight reports a stale unique coverage-key constant, prefer rerunning the
+promotion/wrapper first because `promote_term_baseline.py` is supposed to refresh
+the constant. To inspect the live count directly:
+
+```bash
+docker compose exec -T -w /app web \
+  python support_checks/run_term_registry_add_term_checks.py \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["unique_coverage_key_count"])'
+```
+
+Patch `EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS` only as a last resort when
+promotion cannot write the intended files; mention that in the handoff.
+
+When `ingredient-parent` and `keyword-extra-parent` both touch the same family,
+offers may expose both a precision variant and a broad parent in
+`precomputed_keywords`. The fast matcher will materialize the first valid
+canonical, which can make a generated sanity canary expect the parent while the
+real result is the variant. In that case:
+
+- inspect `dm matcher compare-paths --format json` for the actual materialized
+  keyword;
+- update the generated sanity expectation and the authoritative
+  `matcher_regression_cases.toml` fixture expectation to the intended canonical;
+- do not force the parent canonical unless the product should genuinely stop
+  materializing as the precision variant.
 
 ### 1. Reproduce
 
