@@ -25,6 +25,7 @@ from support_checks.audit_matcher_contract_toml_sources import (
     write_contract_source,
 )
 from support_checks.generate_matcher_contract_json_from_toml_sources import check_generated_contract_json
+from support_checks.generate_matcher_registry_coverage import generate_coverage_files
 from support_checks.matcher_contracts import (
     contract_paths,
 )
@@ -48,10 +49,12 @@ matcher_add_app = typer.Typer(help="Generate matcher rule-change artifacts.")
 matcher_fixture_app = typer.Typer(help="Maintain matcher regression fixtures.")
 matcher_modify_app = typer.Typer(help="Modify existing matcher rule artifacts.")
 matcher_session_app = typer.Typer(help="Group matcher edits and run one final validation sequence.")
+matcher_batch_app = typer.Typer(help="Batch matcher edits and run one final validation sequence.")
 matcher_app.add_typer(matcher_add_app, name="add")
 matcher_app.add_typer(matcher_fixture_app, name="fixture")
 matcher_app.add_typer(matcher_modify_app, name="modify")
 matcher_app.add_typer(matcher_session_app, name="session")
+matcher_app.add_typer(matcher_batch_app, name="batch")
 app.add_typer(matcher_app, name="matcher")
 
 
@@ -117,6 +120,26 @@ class MatcherGuide:
     status: str
     summary: str
     steps: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class MatcherDoctorCheck:
+    check_id: str
+    status: Literal["ok", "needs_action", "warning", "blocking_error"]
+    summary: str
+    details: Mapping[str, Any]
+    next_command: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "id": self.check_id,
+            "status": self.status,
+            "summary": self.summary,
+            "details": dict(self.details),
+        }
+        if self.next_command:
+            payload["next_command"] = self.next_command
+        return payload
 
 
 @dataclass(frozen=True)
@@ -1163,6 +1186,275 @@ def _matcher_relevant_changed_paths(paths: MatcherPaths) -> tuple[tuple[str, ...
     if error is not None:
         return (), error
     return tuple(path for path in changed_paths if _matcher_relevant_path(path)), None
+
+
+def _repo_rel(path: Path, *, repo_root: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(repo_root.resolve()))
+    except ValueError:
+        return str(path)
+
+
+def _matcher_changed_paths_since(paths: MatcherPaths, since: str | None) -> tuple[tuple[str, ...], str | None]:
+    if since is None:
+        return _matcher_relevant_changed_paths(paths)
+    output, error = _git_output(paths, ["diff", "--name-only", since, "--"])
+    if error is not None:
+        return (), error
+    changed = tuple(
+        path.strip()
+        for path in output.splitlines()
+        if path.strip() and _matcher_relevant_path(path.strip())
+    )
+    return tuple(sorted(set(changed))), None
+
+
+def _doctor_status(checks: Iterable[MatcherDoctorCheck]) -> Literal["ok", "needs_action", "blocking_error"]:
+    statuses = [check.status for check in checks]
+    if "blocking_error" in statuses:
+        return "blocking_error"
+    if "needs_action" in statuses:
+        return "needs_action"
+    return "ok"
+
+
+def _doctor_next_action(checks: Iterable[MatcherDoctorCheck]) -> dict[str, str] | None:
+    for check in checks:
+        if check.status in {"blocking_error", "needs_action"} and check.next_command:
+            return {"command": check.next_command, "reason": check.summary}
+    return None
+
+
+def _path_is_writable_for_current_user(path: Path) -> bool:
+    target = path if path.exists() else path.parent
+    try:
+        return os.access(target, os.W_OK)
+    except OSError:
+        return False
+
+
+def _doctor_git_check(paths: MatcherPaths, since: str | None) -> MatcherDoctorCheck:
+    changed_paths, error = _matcher_changed_paths_since(paths, since)
+    if error is not None:
+        return MatcherDoctorCheck(
+            "git_changes",
+            "warning",
+            f"Git change listing unavailable: {error}",
+            {"error": error, "since": since},
+        )
+    if not changed_paths:
+        return MatcherDoctorCheck(
+            "git_changes",
+            "ok",
+            "No matcher-relevant git changes detected.",
+            {"changed_paths": [], "since": since},
+        )
+    return MatcherDoctorCheck(
+        "git_changes",
+        "needs_action",
+        f"{len(changed_paths)} matcher-relevant changed path(s).",
+        {"changed_paths": list(changed_paths), "since": since},
+        "./bin/dm matcher preflight",
+    )
+
+
+def _doctor_generated_contract_check(paths: MatcherPaths) -> MatcherDoctorCheck:
+    results = check_generated_contract_json(tree_root=paths.repo_root, write=False)
+    stale = [result for result in results if result.drifted]
+    details = {
+        "contracts": [
+            {
+                "contract": result.contract,
+                "source_toml_path": result.source_toml_path,
+                "target_json_path": result.target_json_path,
+                "row_count": result.row_count,
+                "semantic_equal": result.semantic_equal,
+                "canonical_byte_equal": result.canonical_byte_equal,
+                "raw_byte_equal": result.raw_byte_equal,
+            }
+            for result in results
+        ],
+    }
+    if not stale:
+        return MatcherDoctorCheck(
+            "generated_contract_json",
+            "ok",
+            "Generated matcher contract JSON is current.",
+            details,
+        )
+    return MatcherDoctorCheck(
+        "generated_contract_json",
+        "needs_action",
+        f"{len(stale)} generated matcher contract JSON file(s) are stale.",
+        details,
+        "./bin/dm matcher regen --what all",
+    )
+
+
+def _doctor_generated_coverage_check(paths: MatcherPaths) -> MatcherDoctorCheck:
+    files = generate_coverage_files(tree_root=paths.repo_root)
+    stale = [item for item in files if item.changed]
+    details = {
+        "files": [
+            {
+                "path": _repo_rel(item.path, repo_root=paths.repo_root),
+                "changed": item.changed,
+                "generated_entry_count": item.generated_entry_count,
+                "manual_block_count": item.manual_block_count,
+            }
+            for item in files
+        ],
+    }
+    if not stale:
+        return MatcherDoctorCheck(
+            "generated_registry_coverage",
+            "ok",
+            "Generated matcher registry coverage is current.",
+            details,
+        )
+    return MatcherDoctorCheck(
+        "generated_registry_coverage",
+        "needs_action",
+        f"{len(stale)} generated matcher registry coverage file(s) are stale.",
+        details,
+        "./bin/dm matcher regen --what all",
+    )
+
+
+def _doctor_line_refs_check(paths: MatcherPaths) -> MatcherDoctorCheck:
+    from support_checks.refresh_matcher_rule_inventory_line_refs import (
+        refresh_inventory_line_refs_from_contract_source,
+    )
+
+    summary = refresh_inventory_line_refs_from_contract_source(
+        tree_root=paths.repo_root,
+        repo_root=paths.repo_root,
+        write=False,
+    )
+    if summary["missing_anchor"] or summary["missing_path"]:
+        return MatcherDoctorCheck(
+            "line_refs",
+            "blocking_error",
+            (
+                "Matcher inventory line refs have missing anchors or paths "
+                f"({summary['missing_anchor']} missing anchors, {summary['missing_path']} missing paths)."
+            ),
+            summary,
+            "./bin/dm matcher refresh-line-refs --dry-run",
+        )
+    if summary["updated"]:
+        return MatcherDoctorCheck(
+            "line_refs",
+            "warning",
+            (
+                f"{summary['updated']} matcher inventory line-ref range(s) would move; "
+                "anchors are still valid."
+            ),
+            summary,
+        )
+    return MatcherDoctorCheck(
+        "line_refs",
+        "ok",
+        "Matcher inventory line refs are current.",
+        summary,
+    )
+
+
+def _doctor_writeability_check(paths: MatcherPaths, report_root: Path | None) -> MatcherDoctorCheck:
+    baseline_file = (
+        paths.app_dir
+        / "languages"
+        / "sv"
+        / "ingredient_matching"
+        / "term_registry"
+        / "baselines"
+        / "verified_matcher_terms.json"
+    )
+    targets = {
+        "fixture_json": paths.fixture_file,
+        "inventory_json": paths.inventory_file,
+        "fixture_toml": paths.fixture_source_file,
+        "inventory_toml": paths.inventory_source_file,
+        "registry_entries_dir": paths.registry_entries_dir,
+        "baseline": baseline_file,
+        "deep_sanity": paths.deep_sanity_file,
+        "support_report_root": report_root or Path(os.environ.get("DEAL_MEALS_SUPPORT_REPORT_ROOT", "/tmp/deal-meals-support-checks-dm")),
+    }
+    checks = {
+        label: {
+            "path": _repo_rel(path, repo_root=paths.repo_root),
+            "writable": _path_is_writable_for_current_user(path),
+            "exists": path.exists(),
+        }
+        for label, path in targets.items()
+    }
+    blocked = [label for label, payload in checks.items() if not payload["writable"]]
+    details = {
+        "current_uid": os.geteuid() if hasattr(os, "geteuid") else None,
+        "targets": checks,
+    }
+    if blocked:
+        return MatcherDoctorCheck(
+            "writeability",
+            "blocking_error",
+            "Current user cannot write required matcher generated/baseline paths: " + ", ".join(blocked),
+            details,
+            "run the matcher command as the checkout owner/appuser or fix file permissions",
+        )
+    return MatcherDoctorCheck(
+        "writeability",
+        "ok",
+        "Current user can write matcher generated/baseline paths.",
+        details,
+    )
+
+
+def _matcher_doctor_report(
+    *,
+    paths: MatcherPaths,
+    since: str | None,
+    report_root: Path | None,
+) -> dict[str, Any]:
+    checks: list[MatcherDoctorCheck] = []
+    for builder in (
+        lambda: _doctor_git_check(paths, since),
+        lambda: _doctor_generated_contract_check(paths),
+        lambda: _doctor_generated_coverage_check(paths),
+        lambda: _doctor_line_refs_check(paths),
+        lambda: _doctor_writeability_check(paths, report_root),
+    ):
+        try:
+            checks.append(builder())
+        except Exception as exc:  # noqa: BLE001 - doctor reports diagnostics rather than hiding later checks.
+            checks.append(MatcherDoctorCheck(
+                "doctor_internal_error",
+                "blocking_error",
+                f"Doctor check failed: {exc}",
+                {"error": str(exc), "type": type(exc).__name__},
+            ))
+    status = _doctor_status(checks)
+    return {
+        "schema_version": 1,
+        "status": status,
+        "checks": [check.to_dict() for check in checks],
+        "next_action": _doctor_next_action(checks),
+    }
+
+
+def _format_matcher_doctor_text(report: Mapping[str, Any]) -> str:
+    lines = ["matcher doctor", f"  status: {report['status']}"]
+    for check in report["checks"]:
+        lines.append(f"  {check['id']}: {check['status']} - {check['summary']}")
+    next_action = report.get("next_action")
+    if next_action:
+        lines.extend([
+            "next:",
+            f"  {next_action['command']}",
+            f"  reason: {next_action['reason']}",
+        ])
+    else:
+        lines.extend(["next:", "  none"])
+    return "\n".join(lines)
 
 
 def _slug(value: str, *, fallback: str = "term") -> str:
@@ -8472,6 +8764,166 @@ def matcher_dev_watch(
         raise typer.Exit(status)
 
 
+def _trace_extraction(
+    *,
+    mode: Literal["ingredient", "offer"],
+    text: str,
+    offer_category: str = "",
+    brand: str = "",
+) -> dict[str, Any]:
+    try:
+        from languages.sv.normalization import fix_swedish_chars
+        from languages.sv.ingredient_matching.extraction import (
+            extract_keywords_from_ingredient,
+            extract_keywords_from_product,
+        )
+        from languages.sv.ingredient_matching.extraction_patterns import MIN_KEYWORD_LENGTH, MIN_KEYWORD_LENGTH_STRICT
+        from languages.sv.ingredient_matching.keywords import (
+            FLAVOR_WORDS,
+            IMPORTANT_SHORT_KEYWORDS,
+            STOP_WORDS,
+        )
+        from languages.sv.ingredient_matching.normalization import _apply_space_normalizations
+        from languages.sv.ingredient_matching.synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS
+    except ModuleNotFoundError:
+        from app.languages.sv.normalization import fix_swedish_chars
+        from app.languages.sv.ingredient_matching.extraction import (
+            extract_keywords_from_ingredient,
+            extract_keywords_from_product,
+        )
+        from app.languages.sv.ingredient_matching.extraction_patterns import MIN_KEYWORD_LENGTH, MIN_KEYWORD_LENGTH_STRICT
+        from app.languages.sv.ingredient_matching.keywords import (
+            FLAVOR_WORDS,
+            IMPORTANT_SHORT_KEYWORDS,
+            STOP_WORDS,
+        )
+        from app.languages.sv.ingredient_matching.normalization import _apply_space_normalizations
+        from app.languages.sv.ingredient_matching.synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS
+
+    normalized = _apply_space_normalizations(fix_swedish_chars(text).lower())
+    tokens = re.findall(r"\b[\wåäöéèü]+\b", normalized)
+    if mode == "ingredient":
+        keywords = extract_keywords_from_ingredient(text)
+        min_length = MIN_KEYWORD_LENGTH_STRICT
+    else:
+        keywords = extract_keywords_from_product(text, offer_category, brand=brand)
+        min_length = MIN_KEYWORD_LENGTH
+    keyword_set = set(keywords)
+    token_rows: list[dict[str, Any]] = []
+    for token in tokens:
+        synonym = KEYWORD_SYNONYMS.get(token)
+        parent = INGREDIENT_PARENTS.get(synonym or token)
+        mapped = parent or synonym or token
+        sets = {
+            "stop_word": token in STOP_WORDS,
+            "flavor_word": token in FLAVOR_WORDS,
+            "important_short_keyword": token in IMPORTANT_SHORT_KEYWORDS,
+        }
+        if token in STOP_WORDS:
+            status = "dropped_stop_word"
+            reason = "token is in STOP_WORDS"
+        elif token.isdigit():
+            status = "dropped_number"
+            reason = "token is numeric"
+        elif len(token) < min_length and token not in IMPORTANT_SHORT_KEYWORDS:
+            status = "dropped_too_short"
+            reason = f"len={len(token)} < min_length={min_length} and not IMPORTANT_SHORT_KEYWORDS"
+        elif mapped in keyword_set or token in keyword_set:
+            status = "kept"
+            reason = "token or mapped token appears in extracted keywords"
+        else:
+            status = "candidate_not_in_final_keywords"
+            reason = "token passed simple filters but was removed by later extraction logic"
+        token_rows.append({
+            "token": token,
+            "status": status,
+            "reason": reason,
+            "length": len(token),
+            "min_length": min_length,
+            "mapped_keyword": mapped,
+            "sets": sets,
+        })
+    suggestions: list[str] = []
+    if mode == "ingredient" and not keywords:
+        short_candidates = [
+            row["token"]
+            for row in token_rows
+            if row["status"] == "dropped_too_short" and not row["sets"]["stop_word"]
+        ]
+        if short_candidates:
+            terms = ",".join(dict.fromkeys(short_candidates))
+            suggestions.append(
+                f"if standalone food terms are intended, add: ./bin/dm matcher add important-short-keyword --terms {terms} --reason \"<why>\""
+            )
+    return {
+        "mode": mode,
+        "input": text,
+        "normalized": normalized,
+        "offer_category": offer_category,
+        "brand": brand,
+        "keywords": list(keywords),
+        "tokens": token_rows,
+        "suggestions": suggestions,
+    }
+
+
+def _format_extraction_trace_text(payload: Mapping[str, Any]) -> str:
+    lines = [
+        f"extraction trace: {payload['mode']}",
+        f"input: {payload['input']}",
+        f"normalized: {payload['normalized']}",
+        "keywords: " + (", ".join(payload["keywords"]) if payload["keywords"] else "none"),
+        "tokens:",
+    ]
+    for row in payload["tokens"]:
+        sets = row["sets"]
+        flags = []
+        if sets["stop_word"]:
+            flags.append("STOP_WORDS")
+        if sets["flavor_word"]:
+            flags.append("FLAVOR_WORDS")
+        if sets["important_short_keyword"]:
+            flags.append("IMPORTANT_SHORT_KEYWORDS")
+        flag_text = f" [{', '.join(flags)}]" if flags else ""
+        mapped = f" -> {row['mapped_keyword']}" if row["mapped_keyword"] != row["token"] else ""
+        lines.append(f"  - {row['token']}{mapped}: {row['status']}{flag_text} ({row['reason']})")
+    if payload["suggestions"]:
+        lines.append("suggestions:")
+        lines.extend(f"  - {suggestion}" for suggestion in payload["suggestions"])
+    return "\n".join(lines)
+
+
+@matcher_app.command("trace-extraction", help="Trace ingredient or offer keyword extraction.")
+def matcher_trace_extraction(
+    ingredient: Annotated[str | None, typer.Option("--ingredient", help="Recipe ingredient text to trace.")] = None,
+    offer: Annotated[str | None, typer.Option("--offer", "--product", help="Offer/product name to trace.")] = None,
+    offer_category: Annotated[
+        str,
+        typer.Option("--offer-category", "--category", help="Optional offer category for product extraction."),
+    ] = "",
+    brand: Annotated[str, typer.Option("--brand", help="Optional offer/product brand.")] = "",
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Output format."),
+    ] = "text",
+) -> None:
+    if bool(ingredient and ingredient.strip()) == bool(offer and offer.strip()):
+        raise typer.BadParameter("provide exactly one of --ingredient or --offer")
+    if ingredient and ingredient.strip():
+        payload = _trace_extraction(mode="ingredient", text=ingredient.strip())
+    else:
+        payload = _trace_extraction(
+            mode="offer",
+            text=(offer or "").strip(),
+            offer_category=offer_category.strip(),
+            brand=brand.strip(),
+        )
+    if output_format == "json":
+        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return
+    typer.echo(_format_extraction_trace_text(payload))
+
+
 @matcher_app.command("explain", help="Explain one offer/ingredient matcher decision.")
 def matcher_explain(
     offer: Annotated[
@@ -9979,6 +10431,7 @@ def matcher_inactivate(
 
 
 @matcher_session_app.command("start", help="Start a matcher edit session and defer per-command gates.")
+@matcher_batch_app.command("start", help="Start a matcher edit batch and defer per-command gates.")
 def matcher_session_start(
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to use instead of /app.")] = None,
     force: Annotated[bool, typer.Option("--force", help="Replace an existing session marker.")] = False,
@@ -10018,6 +10471,7 @@ def matcher_session_start(
 
 
 @matcher_session_app.command("status", help="Show the active matcher session and matcher-relevant git changes.")
+@matcher_batch_app.command("status", help="Show the active matcher batch and matcher-relevant git changes.")
 def matcher_session_status(
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to use instead of /app.")] = None,
 ) -> None:
@@ -10045,6 +10499,11 @@ def matcher_session_status(
 
 
 @matcher_session_app.command(
+    "finalize",
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+    help="Regenerate/promote/refresh once, then run one final matcher gate.",
+)
+@matcher_batch_app.command(
     "finalize",
     context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
     help="Regenerate/promote/refresh once, then run one final matcher gate.",
@@ -10133,6 +10592,7 @@ def matcher_session_finalize(
 
 
 @matcher_session_app.command("abort", help="Clear the matcher session marker without changing files.")
+@matcher_batch_app.command("abort", help="Clear the matcher batch marker without changing files.")
 def matcher_session_abort(
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to use instead of /app.")] = None,
 ) -> None:
@@ -10144,6 +10604,33 @@ def matcher_session_abort(
     state_path, _state = existing
     state_path.unlink(missing_ok=True)
     typer.echo(f"Aborted matcher session: {state_path}")
+
+
+@matcher_app.command(
+    "doctor",
+    help="Read-only matcher rule-change diagnostics and next-step hints.",
+)
+def matcher_doctor(
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to inspect instead of /app.")] = None,
+    since: Annotated[str | None, typer.Option("--since", help="Compare matcher-relevant git changes since this ref.")] = None,
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Report format."),
+    ] = "text",
+    json_output: Annotated[bool, typer.Option("--json", help="Alias for --format json.")] = False,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+) -> None:
+    paths = _paths(tree_root)
+    report = _matcher_doctor_report(paths=paths, since=since, report_root=report_root)
+    if json_output or output_format == "json":
+        typer.echo(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
+    else:
+        typer.echo(_format_matcher_doctor_text(report))
+    if report["status"] == "blocking_error":
+        raise typer.Exit(1)
 
 
 @matcher_app.command(

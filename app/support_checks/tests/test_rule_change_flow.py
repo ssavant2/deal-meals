@@ -3275,9 +3275,12 @@ def normalize_probe(text: str) -> str:
         for command in (
             "add",
             "session",
+            "batch",
             "gates",
             "dev-watch",
             "guide",
+            "doctor",
+            "trace-extraction",
             "preflight",
             "sanity",
             "promote",
@@ -3712,6 +3715,98 @@ test("Phase åäö stale canonical expectation", match("Påse räkor", "räka"),
         self.assertNotEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("raw pass-through args are only supported", result.stderr + result.stdout)
 
+    def test_dm_matcher_doctor_json_reports_generated_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "doctor",
+                    "--tree-root",
+                    str(tree_root),
+                    "--format",
+                    "json",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        report = json.loads(result.stdout)
+        checks = {check["id"]: check for check in report["checks"]}
+        self.assertIn(report["status"], {"ok", "needs_action"})
+        self.assertEqual(checks["generated_contract_json"]["status"], "ok")
+        self.assertEqual(checks["generated_registry_coverage"]["status"], "ok")
+        self.assertIn(checks["line_refs"]["status"], {"ok", "warning"})
+
+    def test_dm_matcher_doctor_reports_stale_generated_json_next_action(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            fixture_json = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+            fixture_json.write_text(fixture_json.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "doctor",
+                    "--tree-root",
+                    str(tree_root),
+                    "--format",
+                    "json",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        report = json.loads(result.stdout)
+        checks = {check["id"]: check for check in report["checks"]}
+        self.assertEqual(report["status"], "needs_action")
+        self.assertEqual(checks["generated_contract_json"]["status"], "needs_action")
+        self.assertEqual(report["next_action"]["command"], "./bin/dm matcher regen --what all")
+
+    def test_dm_matcher_trace_extraction_explains_short_ingredient_drop(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "trace-extraction",
+                "--ingredient",
+                "zzzzzz",
+                "--format",
+                "json",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        report = json.loads(result.stdout)
+        self.assertEqual(report["keywords"], [])
+        short_token = next(row for row in report["tokens"] if row["token"] == "zzzzzz")
+        self.assertEqual(short_token["status"], "dropped_too_short")
+        self.assertEqual(short_token["length"], 6)
+        self.assertEqual(short_token["min_length"], 7)
+        self.assertFalse(short_token["sets"]["important_short_keyword"])
+
     def test_dm_matcher_preflight_tree_root_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
@@ -3824,7 +3919,7 @@ test("Phase åäö stale canonical expectation", match("Påse räkor", "räka"),
         self.assertEqual(report["blocker_count"], 0)
         self.assertEqual(report["blocker_baseline_count"], 0)
         self.assertEqual(report["summary"]["contract_access_api"], 2)
-        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4131)
+        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4139)
 
     def test_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

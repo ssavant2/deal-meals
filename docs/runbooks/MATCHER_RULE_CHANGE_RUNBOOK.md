@@ -58,6 +58,8 @@ Typical authoring families are:
   --apply-staged`, `dm matcher refresh-line-refs --fix`,
   `dm matcher sanity-find`, `dm matcher sanity-update`, and
   `dm matcher compare-paths`
+- diagnostics: `dm matcher doctor` for read-only source/generated/writeability
+  state, and `dm matcher trace-extraction` for token-level extraction drops
 - smart-blocker scaffolding: `dm matcher add smart-blocker` creates and chains a
   Python stub; the actual matcher logic is still a manual code edit
 
@@ -97,26 +99,27 @@ Iterate with live pre-flight feedback:
 ./bin/dm matcher dev-watch
 ```
 
-For batch work, use a matcher session instead of remembering `--no-run-gates`
+For batch work, use `dm matcher batch` instead of remembering `--no-run-gates`
 on every command:
 
 ```bash
-./bin/dm matcher session start
+./bin/dm matcher batch start
 # run dm matcher add/modify/fixture commands, plus any manual TOML/Python edits
-./bin/dm matcher session status
-./bin/dm matcher session finalize --track B
+./bin/dm matcher batch status
+./bin/dm matcher batch finalize --track B
 ```
 
-While a session is active, per-command matcher gates are deferred by default;
-pass `--run-gates` on a command to force an immediate check. `finalize` runs
+`dm matcher session` remains as a compatibility alias. While a batch is active,
+per-command matcher gates are deferred by default; pass `--run-gates` on a
+command to force an immediate check. `finalize` runs
 generated JSON/coverage regen, verified-term baseline promotion, line-ref
 refresh, drift check, pre-flight, and one final gate. If a finalize step fails,
-the session marker stays active so the batch can be fixed and finalized again.
+the marker stays active so the batch can be fixed and finalized again.
 Track B `finalize` requires a writable checkout as `appuser` for baseline
 promotion. It does not bypass baseline write-permission checks: when run through
 `./bin/dm`, it uses the normal appuser container path; if the promote step is run
 as the wrong user or in a read-only checkout, it should fail there and leave the
-session active for a rerun after the permission issue is fixed.
+batch active for a rerun after the permission issue is fixed.
 
 Explain one product/ingredient decision before hand-reading large matcher tables:
 
@@ -127,6 +130,7 @@ Explain one product/ingredient decision before hand-reading large matcher tables
 Single maintenance/check operations:
 
 ```bash
+./bin/dm matcher doctor
 ./bin/dm matcher preflight
 ./bin/dm matcher sanity
 ./bin/dm matcher promote
@@ -256,6 +260,7 @@ explicit flags above so the gate set reflects only your change.
 Common single-operation wrappers:
 
 ```bash
+./bin/dm matcher doctor                 # read-only generated/writeability/line-ref state
 ./bin/dm matcher preflight              # pre-flight only
 ./bin/dm matcher sanity                 # deep matcher sanity only
 ./bin/dm matcher promote                # verified-term baseline promotion
@@ -265,6 +270,7 @@ Common single-operation wrappers:
 ./bin/dm matcher refresh-line-refs      # refresh inventory anchors + generated JSON
 ./bin/dm matcher refresh-line-refs --fix  # explicit write-mode alias
 ./bin/dm matcher guide <shape>          # show the recommended path for a rule type
+./bin/dm matcher trace-extraction --ingredient "<text>"
 ```
 
 Raw scripts are still valid fallback/debug entry points. Prefer the wrapper
@@ -710,6 +716,21 @@ Read `explain` as a trace of the high-friction path: normalization, extracted
 product and ingredient keywords, relevant blocker context, and the current
 fast/backend-style result. It is an audit helper, not a second matcher
 implementation.
+
+Use `dm matcher trace-extraction` when the problem is earlier than matching:
+the ingredient or offer produced no keywords, or an unexpected token vanished.
+
+```bash
+./bin/dm matcher trace-extraction --ingredient "nougat"
+./bin/dm matcher trace-extraction --offer "Nougat 250g Odense" --offer-category pantry
+```
+
+The trace prints the normalized text, final extracted keywords, and token-level
+drop reasons such as `STOP_WORDS`, `FLAVOR_WORDS`, too-short tokens below
+`MIN_KEYWORD_LENGTH_STRICT`, or words that passed simple filters but were later
+removed by extraction logic. Treat it as a first-pass diagnostic; if it says a
+token was removed by later extraction logic, inspect the named extractor branch
+or use `compare-paths` on the full pair.
 
 Use `dm matcher compare-paths` when the actual mismatch is between matcher
 entry points rather than rule intent. It compares the legacy live matcher,
