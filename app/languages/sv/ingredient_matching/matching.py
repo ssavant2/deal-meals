@@ -1060,10 +1060,13 @@ def _append_canonical_keyword_synonyms(text: str) -> str:
                 break
     # "neutral olja" = rapsolja or solrosolja; both words must be present since
     # 'olja' and 'neutral' are individually stop-words and extract nothing alone.
+    # Guard: skip expansion when ingredient already names a specific oil type,
+    # e.g. "neutral rapsolja" must not pull in solrosolja.
     if 'neutral' in text and 'olja' in text:
-        if 'rapsolja' not in text and 'rapsolja' not in extras:
+        _has_rapsolja = 'rapsolja' in text or 'rapsolja' in extras
+        _has_solrosolja = 'solrosolja' in text or 'solrosolja' in extras
+        if not _has_rapsolja and not _has_solrosolja:
             extras.append('rapsolja')
-        if 'solrosolja' not in text and 'solrosolja' not in extras:
             extras.append('solrosolja')
     if not extras:
         return text

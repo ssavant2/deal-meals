@@ -634,6 +634,20 @@ keyword = "sötpotatis"
 blockers = ["nudlar", "sötpotatisnudlar"]
 reason = "Sötpotatisnudlar = glasnudlar av sötpotatisstärkelse, INTE rotfrukten. Recept som anger 'sötpotatisnudlar' ska bara matcha nudlar-produkter, inte raw sötpotatis. Analog till Q60-1 vaniljgrädde/Q61-8 kex compound-strict-prefix. Q85-1."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_acai"
+status = "active"
+keyword = "acai"
+blockers = ["bowl"]
+reason = "Acai Bowl ready-to-eat product should not match raw açaí ingredient"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_revbensspjall"
+status = "active"
+keyword = "revbensspjäll"
+blockers = ["kickin"]
+reason = "Pre-seasoned 'Kickin' ribs should not match plain revbensspjäll ingredient"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -1008,6 +1022,22 @@ action = "add"
 terms = ["längden", "snedden", "stjälkarna", "finhacka", "strimla", "stammen"]
 reason = "Cooking instruction words and anatomical terms appearing in recipe text, not food ingredients"
 
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_ljummet"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["ljummet"]
+reason = "Temperature/texture adjective meaning lukewarm; not a grocery product"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_frittering"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["frittering"]
+reason = "Cooking method word (frying/deep-frying direction); not a grocery product"
+
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"
 status = "active"
@@ -1039,6 +1069,14 @@ keyword = "sojabönor"
 qualifiers = ["fermenterad", "fermenterade"]
 bidirectional = true
 reason = "fermenterade sojabönor (condiment) ska inte matcha frysta/vanliga sojabönor-ingredienser"
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_kapris_cocktail"
+status = "active"
+keyword = "kapris"
+qualifiers = ["cocktail"]
+bidirectional = true
+reason = "Cocktailkapris (capers with stems for garnish) is a distinct product from regular kapris; should not be interchangeable"
 
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"
