@@ -345,7 +345,8 @@ CLI write the registry row and focused sanity stub:
 ./bin/dm matcher add no-match-policy cheddarost \
   --ingredient-patterns "\briven\b.*\bcheddarost\b" \
   --blocked-offer-patterns "(?=.*\bcheddarost\b)(?=.*\bkavli\b).*" \
-  --fixture-refs matcher_regression_riven_cheddarost_spread_negative \
+  --auto-fixture \
+  --auto-inventory \
   --reason "Riven cheddarost requires grated cheese, not spread." \
   --negative-ingredient "100 g riven cheddarost" \
   --negative-offer "Kavli Cheddarost"
@@ -355,6 +356,14 @@ CLI write the registry row and focused sanity stub:
   --input "Apelsinskal 100g" \
   --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:402
 ```
+
+`--auto-fixture` creates or reuses one negative fixture from
+`--negative-ingredient`, `--negative-offer`, and `--offer-category`.
+`--auto-inventory` creates the matching inventory row and line ref for the new
+registry entry. Use explicit `--fixture-refs` instead when a richer fixture
+already exists or when the policy needs several sibling fixtures. The auto flags
+only handle bookkeeping; they do not choose policy wording, regexes, blockers,
+or whether a positive sibling is needed.
 
 For an existing simple `no-match-policy`, use the modifier instead of hand
 keeping `variants`, guards, coverage, and negative-example payloads in sync:

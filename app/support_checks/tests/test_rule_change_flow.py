@@ -4334,6 +4334,78 @@ reason = "Synthetic parent PNB mirror warning canary."
             )
             self.assertEqual(no_match.returncode, 0, no_match.stderr + no_match.stdout)
 
+            auto_no_match = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "no-match-policy",
+                    "phase9auto",
+                    "--ingredient-patterns",
+                    r"\bphase9auto\b",
+                    "--blocked-offer-keywords",
+                    "phase9blocked",
+                    "--reason",
+                    "Synthetic Phase 9 auto guard.",
+                    "--negative-ingredient",
+                    "1 dl phase9auto",
+                    "--negative-offer",
+                    "Phase9blocked",
+                    "--policy-id",
+                    "policy_phase9auto_not_blocked",
+                    "--auto-fixture",
+                    "--auto-inventory",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(auto_no_match.returncode, 0, auto_no_match.stderr + auto_no_match.stdout)
+            self.assertIn("auto fixture created: phase9auto_not_blocked_negative", auto_no_match.stdout)
+            self.assertIn("auto inventory: policy_phase9auto_not_blocked", auto_no_match.stdout)
+
+            updated_fixtures = load_contract_source(fixture_spec)
+            auto_fixture = next(
+                row for row in updated_fixtures
+                if row["id"] == "phase9auto_not_blocked_negative"
+            )
+            self.assertEqual(auto_fixture["expected"], 0)
+            self.assertEqual(auto_fixture["ingredients"], ["1 dl phase9auto"])
+            self.assertEqual(auto_fixture["offer"]["name"], "Phase9blocked")
+
+            inventory_spec = contract_spec_by_name("matcher_rule_inventory", tree_root=tree_root)
+            updated_inventory = load_contract_source(inventory_spec)
+            auto_inventory = next(
+                row for row in updated_inventory
+                if row["id"] == "policy_phase9auto_not_blocked"
+            )
+            self.assertEqual(auto_inventory["kind"], "legacy_no_match_policy")
+            self.assertEqual(auto_inventory["fixture_refs"], ["phase9auto_not_blocked_negative"])
+            self.assertEqual(
+                auto_inventory["adapter_ref"],
+                "no_match_policies:policy_phase9auto_not_blocked",
+            )
+
+            no_match_policy_file = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "no_match_policy.toml"
+            )
+            self.assertIn(
+                'fixture_refs = ["phase9auto_not_blocked_negative"]',
+                no_match_policy_file.read_text(encoding="utf-8"),
+            )
+
             extraction = subprocess.run(
                 [
                     sys.executable,

@@ -822,9 +822,10 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         status="supported by dm matcher add/modify",
         summary="Declarative ingredient pattern plus blocked offer keyword/pattern should never match.",
         steps=(
-            "Run: ./bin/dm matcher add no-match-policy <canonical> --ingredient-patterns \"<regex>\" --blocked-offer-keywords <keyword> --fixture-refs <fixture_id> --reason \"<why>\" --negative-ingredient \"<ingredient>\" --negative-offer \"<offer>\"",
+            "Run: ./bin/dm matcher add no-match-policy <canonical> --ingredient-patterns \"<regex>\" --blocked-offer-keywords <keyword> --negative-ingredient \"<ingredient>\" --negative-offer \"<offer>\" --auto-fixture --auto-inventory --reason \"<why>\"",
+            "Use --fixture-refs <fixture_id> when the durable fixture already exists, and --auto-inventory when the new policy needs inventory coverage.",
             "For an existing simple policy, run: ./bin/dm matcher modify no-match-policy <policy_ref> --set-ingredient-patterns \"<regex>\" --set-blocked-offer-patterns \"<regex>\"",
-            "Create or choose the durable negative fixture before adding the policy ref.",
+            "The auto flags create mechanical fixture/inventory bookkeeping only; you still choose the semantic patterns, blocker, examples, and reason.",
         ),
     ),
     "extraction-helper": MatcherGuide(
@@ -2291,6 +2292,138 @@ def _append_no_match_deep_sanity_stub(
     return block
 
 
+def _no_match_auto_fixture_id(policy_id: str) -> str:
+    base = _slug(policy_id.removeprefix("policy_"))
+    return f"{base}_negative"
+
+
+def _no_match_auto_inventory_id(policy_id: str) -> str:
+    return policy_id if policy_id.startswith("policy_") else f"policy_{_slug(policy_id)}"
+
+
+def _no_match_fixture_row(
+    *,
+    fixture_id: str,
+    policy_ref: str,
+    source_ref: str,
+    negative_ingredient: str,
+    negative_offer: str,
+    offer_category: str,
+) -> dict[str, Any]:
+    return {
+        "id": fixture_id,
+        "policy_ref": policy_ref,
+        "source_ref": source_ref,
+        "recipe_name": "No-match policy regression",
+        "ingredients": [negative_ingredient],
+        "offer": {
+            "name": negative_offer,
+            "category": offer_category,
+        },
+        "expected": 0,
+    }
+
+
+def _no_match_fixture_rows_equivalent(existing: Mapping[str, Any], planned: Mapping[str, Any]) -> bool:
+    existing_offer = existing.get("offer") if isinstance(existing.get("offer"), dict) else {}
+    planned_offer = planned.get("offer") if isinstance(planned.get("offer"), dict) else {}
+    return (
+        existing.get("expected") == planned.get("expected")
+        and existing.get("ingredients") == planned.get("ingredients")
+        and existing_offer.get("name") == planned_offer.get("name")
+        and existing_offer.get("category") == planned_offer.get("category")
+        and str(existing.get("policy_ref") or "") == str(planned.get("policy_ref") or "")
+    )
+
+
+def _append_or_reuse_no_match_fixture(
+    *,
+    paths: MatcherPaths,
+    fixture_id: str,
+    policy_ref: str,
+    source_ref: str,
+    negative_ingredient: str,
+    negative_offer: str,
+    offer_category: str,
+    dry_run: bool,
+) -> tuple[str, bool]:
+    fixture_row = _no_match_fixture_row(
+        fixture_id=fixture_id,
+        policy_ref=policy_ref,
+        source_ref=source_ref,
+        negative_ingredient=negative_ingredient,
+        negative_offer=negative_offer,
+        offer_category=offer_category,
+    )
+    fixtures = load_contract_source(_source_spec(paths, "matcher_regression_cases"))
+    for existing in fixtures:
+        if not isinstance(existing, dict) or str(existing.get("id") or "") != fixture_id:
+            continue
+        if _no_match_fixture_rows_equivalent(existing, fixture_row):
+            return fixture_id, False
+        raise typer.BadParameter(
+            f"auto fixture id already exists with different content: {fixture_id}; "
+            "pass --fixture-refs explicitly or choose --policy-id"
+        )
+    _append_contract_source_items(
+        paths=paths,
+        contract="matcher_regression_cases",
+        items=(fixture_row,),
+        dry_run=dry_run,
+    )
+    return fixture_id, True
+
+
+def _ensure_no_match_inventory_id_available(paths: MatcherPaths, inventory_id: str) -> None:
+    inventory = load_contract_source(_source_spec(paths, "matcher_rule_inventory"))
+    existing_inventory_ids = {str(item.get("id") or "") for item in inventory if isinstance(item, dict)}
+    if inventory_id in existing_inventory_ids:
+        raise typer.BadParameter(f"inventory entry already exists: {inventory_id}")
+
+
+def _append_no_match_inventory(
+    *,
+    paths: MatcherPaths,
+    inventory_id: str,
+    policy_id: str,
+    policy_ref: str,
+    canonical: str,
+    fixture_refs: tuple[str, ...],
+    source_ref: str,
+    reason: str,
+    entry_id: str,
+    entry_line: int,
+    dry_run: bool,
+) -> None:
+    inventory_row = {
+        "id": inventory_id,
+        "status": "wrapped_adapter",
+        "kind": "legacy_no_match_policy",
+        "canonical": canonical,
+        "owner": "matcher",
+        "policy_ref": policy_ref,
+        "source_refs": [source_ref],
+        "fixture_refs": list(fixture_refs),
+        "risk": "no_match_policy",
+        "adapter_ref": f"no_match_policies:{policy_id}",
+        "line_refs": [
+            {
+                "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+                "start": entry_line,
+                "end": entry_line,
+                "anchor": f"entry_id = \"{entry_id}\"",
+            }
+        ],
+        "notes": reason,
+    }
+    _append_contract_source_items(
+        paths=paths,
+        contract="matcher_rule_inventory",
+        items=(inventory_row,),
+        dry_run=dry_run,
+    )
+
+
 def _split_set_csv(value: str | None, *, label: str, lowercase: bool = True) -> tuple[str, ...] | None:
     if value is None:
         return None
@@ -3311,6 +3444,10 @@ def _regenerate_contract_json(paths: MatcherPaths) -> None:
 def _print_dry_run_preview(change: MatcherChangePlan) -> None:
     if change.toml_preview:
         typer.echo(change.toml_preview)
+    if change.fixture_ids:
+        typer.echo(f"# fixture_refs: {', '.join(change.fixture_ids)}")
+    if change.inventory_id:
+        typer.echo(f"# inventory: {change.inventory_id}")
     if change.sanity_preview:
         typer.echo(change.sanity_preview)
     typer.echo("Dry run only; no files written.")
@@ -8066,6 +8203,22 @@ def add_no_match_policy(
         str,
         typer.Option("--fixture-refs", help="Comma-separated existing fixture refs covered by this policy."),
     ] = "",
+    auto_fixture: Annotated[
+        bool,
+        typer.Option("--auto-fixture", help="Create or reuse one negative matcher fixture from --negative-* fields."),
+    ] = False,
+    auto_inventory: Annotated[
+        bool,
+        typer.Option("--auto-inventory", help="Create one matcher inventory row covering this no-match policy."),
+    ] = False,
+    inventory_id_override: Annotated[
+        str | None,
+        typer.Option("--inventory-id", help="Stable inventory id when --auto-inventory is used."),
+    ] = None,
+    source_ref: Annotated[
+        str | None,
+        typer.Option("--source-ref", help="Stable source ref for auto-created fixture/inventory rows."),
+    ] = None,
     supersedes_csv: Annotated[
         str | None,
         typer.Option("--supersedes", help="Comma-separated legacy refs superseded by this policy."),
@@ -8111,7 +8264,6 @@ def add_no_match_policy(
         if allowed_specifics_csv
         else ()
     )
-    fixture_refs = _split_csv(fixture_refs_csv, label="--fixture-refs", lowercase=False)
     supersedes = (
         _split_csv(supersedes_csv, label="--supersedes", lowercase=False)
         if supersedes_csv
@@ -8123,12 +8275,51 @@ def add_no_match_policy(
     if not policy_id:
         raise typer.BadParameter("--policy-id must not be empty")
     policy_ref = policy_ref or policy_id
+    source_ref = source_ref.strip() if source_ref is not None else f"manual:{policy_ref}"
+    if not source_ref:
+        raise typer.BadParameter("--source-ref must not be empty")
+    explicit_fixture_refs = (
+        _split_csv(fixture_refs_csv, label="--fixture-refs", lowercase=False)
+        if fixture_refs_csv.strip()
+        else ()
+    )
+    if not explicit_fixture_refs and not auto_fixture:
+        raise typer.BadParameter("provide --fixture-refs or pass --auto-fixture")
+    if inventory_id_override is not None and not auto_inventory:
+        raise typer.BadParameter("--inventory-id requires --auto-inventory")
     paths = _paths(tree_root)
     if paths.app_dir != APP_DIR and run_gates and not dry_run:
         raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
-    _ensure_fixture_refs_exist(paths, fixture_refs)
+    if explicit_fixture_refs:
+        _ensure_fixture_refs_exist(paths, explicit_fixture_refs)
+    auto_fixture_id = _no_match_auto_fixture_id(policy_id) if auto_fixture else None
+    inventory_id = None
+    if auto_inventory:
+        inventory_id = (
+            inventory_id_override.strip()
+            if inventory_id_override is not None
+            else _no_match_auto_inventory_id(policy_id)
+        )
+        if not inventory_id:
+            raise typer.BadParameter("--inventory-id must not be empty")
+        _ensure_no_match_inventory_id_available(paths, inventory_id)
+    auto_fixture_refs: tuple[str, ...] = ()
+    auto_fixture_created = False
+    if auto_fixture_id is not None:
+        _append_or_reuse_no_match_fixture(
+            paths=paths,
+            fixture_id=auto_fixture_id,
+            policy_ref=policy_ref,
+            source_ref=source_ref,
+            negative_ingredient=negative_ingredient.strip(),
+            negative_offer=negative_offer.strip(),
+            offer_category=offer_category,
+            dry_run=True,
+        )
+        auto_fixture_refs = (auto_fixture_id,)
+    fixture_refs = tuple(dict.fromkeys((*explicit_fixture_refs, *auto_fixture_refs)))
 
-    entry_id, _entry_line, toml_preview = _append_no_match_policy_entry(
+    entry_id, entry_line, toml_preview = _append_no_match_policy_entry(
         paths=paths,
         policy_id=policy_id,
         canonical=canonical,
@@ -8145,6 +8336,32 @@ def add_no_match_policy(
         offer_category=offer_category,
         dry_run=dry_run,
     )
+    if auto_fixture_id is not None:
+        _fixture_id, auto_fixture_created = _append_or_reuse_no_match_fixture(
+            paths=paths,
+            fixture_id=auto_fixture_id,
+            policy_ref=policy_ref,
+            source_ref=source_ref,
+            negative_ingredient=negative_ingredient.strip(),
+            negative_offer=negative_offer.strip(),
+            offer_category=offer_category,
+            dry_run=dry_run,
+        )
+    if auto_inventory:
+        assert inventory_id is not None
+        _append_no_match_inventory(
+            paths=paths,
+            inventory_id=inventory_id,
+            policy_id=policy_id,
+            policy_ref=policy_ref,
+            canonical=canonical,
+            fixture_refs=fixture_refs,
+            source_ref=source_ref,
+            reason=reason.strip(),
+            entry_id=entry_id,
+            entry_line=entry_line,
+            dry_run=dry_run,
+        )
     sanity_preview = _append_no_match_deep_sanity_stub(
         paths=paths,
         policy_ref=policy_ref,
@@ -8159,7 +8376,7 @@ def add_no_match_policy(
         policy_ref=policy_ref,
         entry_ids=(entry_id,),
         fixture_ids=fixture_refs,
-        inventory_id=None,
+        inventory_id=inventory_id,
         toml_preview=toml_preview,
         sanity_preview=sanity_preview,
         runtime_delta_filename="no_match_policy.toml",
@@ -8170,10 +8387,20 @@ def add_no_match_policy(
 
     typer.echo(f"Generated no_match_policy rule: {change.policy_ref}")
     typer.echo(f"  entry: {entry_id}")
+    if auto_fixture_id is not None:
+        verb = "created" if auto_fixture_created else "reused"
+        typer.echo(f"  auto fixture {verb}: {auto_fixture_id}")
+    if inventory_id is not None:
+        typer.echo(f"  auto inventory: {inventory_id}")
+    if auto_fixture or auto_inventory:
+        _regenerate_contract_json(paths)
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
         return
-    gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
+    if auto_fixture or auto_inventory:
+        gate_status = _run_track_b_change_plan(paths=paths, change=change, report_root=report_root)
+    else:
+        gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
     raise typer.Exit(gate_status)
 
 
