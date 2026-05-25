@@ -159,7 +159,7 @@ unified CLI:
 ./bin/dm matcher add ingredient-routing-parent ...
 ./bin/dm matcher add parent-match-only ...
 ./bin/dm matcher add recipe-routing-helper ...
-./bin/dm matcher add no-match-policy ...
+./bin/dm matcher add no-match-policy ... --auto-fixture --auto-inventory
 ./bin/dm matcher add extraction-helper ...
 ./bin/dm matcher modify no-match-policy ...
 ./bin/dm matcher modify match-bridge ...
@@ -196,11 +196,26 @@ worked on. Existing simple `match_bridge.toml` rows can be narrowed with
 with a runtime-wired surface.
 
 For diagnostics, use `dm matcher compare-paths` when legacy live, canonical
-fast, and backend matcher paths may disagree. New CLI-generated sanity blocks
-carry a `# sanity-id: <policy_ref>` metadata comment; use
-`dm matcher sanity-find` to locate them and `dm matcher sanity-update` for
-deliberate expectation changes instead of hand-editing a large
-`run_deep_matcher_sanity.py` file by line number.
+fast, and backend matcher paths may disagree. Use `dm matcher doctor` for a
+read-only source/generated/writeability summary before slower gates, and
+`dm matcher trace-extraction` when the failure is earlier than matching and a
+keyword was dropped or unexpectedly added.
+
+New CLI-generated sanity blocks carry a `# sanity-id: <policy_ref>` metadata
+comment. Use `dm matcher sanity-find` to locate them,
+`dm matcher reconcile-sanity` to compare generated expectations with current
+runtime behavior, and `dm matcher sanity-update` for deliberate expectation
+changes instead of hand-editing a large `run_deep_matcher_sanity.py` file by
+line number. Positive generated `match(...)` canaries observe the current
+materialized fast-path canonical before writing the expected value, so
+parent/variant cases do not encode a guessed parent canonical when the precise
+variant wins.
+
+For grouped rule work, `dm matcher batch start` defers per-command gates and
+`dm matcher batch finalize --dry-run` prints doctor output plus the planned
+regen/promote/line-ref/preflight/gate steps without mutating files.
+`dm matcher batch metrics --start/--finish` writes an ignored local JSON note
+under `app/.dm/`; it is only for local friction tracking, not registry policy.
 
 For Track B matcher-rule work, prefer the wrapper:
 
