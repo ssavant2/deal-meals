@@ -446,6 +446,14 @@ def extract_keywords_from_product(
     ):
         return ['vegobitar']
 
+    # Q84-3: "Röd spetsig paprika" / "Gul spetsig paprika" / "Spetsig paprika"
+    # — produktnamn med två ord. Recept som anger "spetspaprika" (ett ord/
+    # compound) ska matcha dessa. Returnerar både spetspaprika (specifik
+    # canonical) och paprika (för plain paprika-recept). Analog till Q79-7
+    # Oumph chunks → vegobitar (name-conditional extraction).
+    if re.search(r'\bspetsig\s+paprika\b', original_name_lower):
+        return ['spetspaprika', 'paprika']
+
     if (
         ('kesella' in original_name_lower and 'vanilj' in original_name_lower)
         or re.search(r'\bvanilj\s+kvarg\b', original_name_lower)

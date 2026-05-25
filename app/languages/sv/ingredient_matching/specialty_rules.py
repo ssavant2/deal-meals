@@ -213,6 +213,8 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'cerignola',  # green Italian olive
         'nocellera',  # green Sicilian olive (Nocellera del Belice)
         'taggiasca',  # green Italian olive (Liguria)
+        'leccino',  # green Italian olive (Q85-4)
+        'castelvetrano',  # green Italian olive (Q85-7)
         # Black varieties
         'kalamata',  # black Greek olive
         'gemlik',  # black Turkish olive
@@ -1310,8 +1312,11 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'mjölk': {'mjölk', 'mjolk', 'milk'},
     'mjolk': {'mjölk', 'mjolk', 'milk'},
     'milk': {'mjölk', 'mjolk', 'milk'},
-    'grön': {'grön', 'gröna', 'green', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'genovese', 'basilico', 'mix', 'haricot', 'brytbönor', 'brytbonor'},
-    'gröna': {'grön', 'gröna', 'green', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'genovese', 'basilico', 'mix', 'haricot', 'brytbönor', 'brytbonor'},
+    # Q85-4 + Q85-7: leccino och castelvetrano är italienska gröna oliv-varianter
+    # som inte var i grön-familjen. Lecciono är "leccinooliver" (compound) eller
+    # "Zeta leccino". Castelvetrano är "Castelvetrano-oliver" eller "Zeta Castelvetrano".
+    'grön': {'grön', 'gröna', 'green', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano', 'genovese', 'basilico', 'mix', 'haricot', 'brytbönor', 'brytbonor'},
+    'gröna': {'grön', 'gröna', 'green', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano', 'genovese', 'basilico', 'mix', 'haricot', 'brytbönor', 'brytbonor'},
     'haricot': {'grön', 'gröna', 'haricot', 'brytbönor', 'brytbonor'},
     'brytbönor': {'grön', 'gröna', 'haricot', 'brytbönor', 'brytbonor'},
     'brytbonor': {'grön', 'gröna', 'haricot', 'brytbönor', 'brytbonor'},
@@ -1321,11 +1326,14 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'yellow': {'yellow', 'gul', 'mix'},
     # Mix = any color (paprika mix matches any color request, any color matches mix)
     'mix': {'mix', 'röd', 'rod', 'grön', 'gul', 'orange', 'red', 'green', 'yellow'},
-    'halkidiki': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca'},
-    'gordal': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca'},
-    'cerignola': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca'},
-    'nocellera': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca'},
-    'taggiasca': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca'},
+    'halkidiki': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano'},
+    'gordal': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano'},
+    'cerignola': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano'},
+    'nocellera': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano'},
+    'taggiasca': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano'},
+    'leccino': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano'},
+    'leccinooliver': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano'},
+    'castelvetrano': {'grön', 'gröna', 'halkidiki', 'gordal', 'cerignola', 'nocellera', 'taggiasca', 'leccino', 'leccinooliver', 'castelvetrano'},
     # Pesto green variants: genovese, basilico = green pesto
     'genovese': {'grön', 'gröna', 'genovese', 'basilico'},
     'basilico': {'grön', 'gröna', 'genovese', 'basilico'},

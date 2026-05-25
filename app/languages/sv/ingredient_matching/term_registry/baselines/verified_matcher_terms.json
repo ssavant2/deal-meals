@@ -5,7 +5,7 @@
       "bridge_negative_guard": 197,
       "bridge_positive": 1772,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 98,
-      "hardcoded_keyword_output:extract_keywords_from_product": 114,
+      "hardcoded_keyword_output:extract_keywords_from_product": 116,
       "ingredient_parent_mapping": 390,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 103,
@@ -29,7 +29,7 @@
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
-      "extraction_helper": 212,
+      "extraction_helper": 214,
       "ingredient_parent": 390,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
@@ -42,8 +42,8 @@
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5572,
-    "variants_missing_product_text": 1758,
+    "variant_count": 5574,
+    "variants_missing_product_text": 1760,
     "variants_with_product_text": 3814
   },
   "variants": [
@@ -117058,18 +117058,60 @@
       "needs_product_text": false,
       "notes": "legacy_import_curated_regression",
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"sojabönor\", \"ingredient_index\": 0, \"must_match_keyword\": \"sojabönor\"}], \"policy_ref\": \"legacy_import_curated_regression\", \"recipe_name\": \"Soppa med sojabönor\"}"
+    },
+    {
+      "variant_id": "vterm-558556a4f805601a",
+      "row_index": 5532,
+      "source_order": 90,
+      "source_type": "extraction_helper",
+      "source_file": "app/languages/sv/ingredient_matching/extraction.py",
+      "source_ref": "app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:455",
+      "source_id": "extract_keywords_from_product:paprika",
+      "variant_role": "hardcoded_keyword_output:extract_keywords_from_product",
+      "variant_text": "paprika",
+      "canonical": "paprika",
+      "expected_family": "paprika",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": null,
+      "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [455], \"output\": \"paprika\"}"
+    },
+    {
+      "variant_id": "vterm-cb48d161cf4eea70",
+      "row_index": 5550,
+      "source_order": 90,
+      "source_type": "extraction_helper",
+      "source_file": "app/languages/sv/ingredient_matching/extraction.py",
+      "source_ref": "app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:455",
+      "source_id": "extract_keywords_from_product:spetspaprika",
+      "variant_role": "hardcoded_keyword_output:extract_keywords_from_product",
+      "variant_text": "spetspaprika",
+      "canonical": "spetspaprika",
+      "expected_family": "spetspaprika",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": null,
+      "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [455], \"output\": \"spetspaprika\"}"
     }
   ],
   "verification": {
     "classification_counts": {
       "no_product_text": 1542,
-      "static_verified": 2539,
+      "static_verified": 2541,
       "synthetic_verified": 1491
     },
     "method": "static_contract_audit",
     "problem_counts": {},
     "source_counts": {
-      "extraction_helper": 212,
+      "extraction_helper": 214,
       "ingredient_parent": 390,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 103,
@@ -117084,8 +117126,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5572
+      "audited": 5574
     },
-    "variant_count": 5572
+    "variant_count": 5574
   }
 }

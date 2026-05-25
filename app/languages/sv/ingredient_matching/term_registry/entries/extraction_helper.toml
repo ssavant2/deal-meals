@@ -3539,3 +3539,41 @@ source_family = "extraction_helper"
 canonical = "vegobitar"
 variant = "vegobitar"
 layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.spetspaprika"
+language = "sv"
+market = "SE"
+canonical = "spetspaprika"
+status = "active"
+variants = ["spetspaprika"]
+offer_terms = ["spetspaprika"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:455"]
+layer_policy = ["normal"]
+notes = "Q84-3: 'spetsig paprika' compound detection -> ['spetspaprika', 'paprika']."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "spetspaprika"
+variant = "spetspaprika"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
+
+[[entries]]
+entry_id = "sv-se.family.paprika.spetsig_paprika"
+language = "sv"
+market = "SE"
+canonical = "paprika"
+status = "active"
+variants = ["paprika"]
+offer_terms = ["paprika"]
+negative_guards = []
+source_refs = ["code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:455"]
+layer_policy = ["normal"]
+notes = "Q84-3: 'spetsig paprika' compound also exposes 'paprika' keyword so plain paprika-recipes still match."
+
+[[entries.coverage]]
+source_family = "extraction_helper"
+canonical = "paprika"
+variant = "paprika"
+layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
