@@ -216,6 +216,7 @@ authoring or maintenance command:
 ./bin/dm matcher trace-extraction --ingredient ...
 ./bin/dm matcher sanity-find "<test description or policy>"
 ./bin/dm matcher sanity-update "<test description>" --expected ...
+./bin/dm matcher reconcile-sanity "<test description or policy>"
 ```
 
 Use `./bin/dm matcher guide <shape>` when the right authoring surface is

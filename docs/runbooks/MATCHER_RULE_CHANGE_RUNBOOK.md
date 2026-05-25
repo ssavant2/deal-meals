@@ -56,7 +56,8 @@ Typical authoring families are:
 - mechanical maintenance: `dm matcher fixture remove`, `dm matcher modify
   no-match-policy`, `dm matcher modify match-bridge`, `dm matcher promote
   --apply-staged`, `dm matcher refresh-line-refs --fix`,
-  `dm matcher sanity-find`, `dm matcher sanity-update`, and
+  `dm matcher sanity-find`, `dm matcher sanity-update`,
+  `dm matcher reconcile-sanity`, and
   `dm matcher compare-paths`
 - diagnostics: `dm matcher doctor` for read-only source/generated/writeability
   state, and `dm matcher trace-extraction` for token-level extraction drops
@@ -271,6 +272,9 @@ Common single-operation wrappers:
 ./bin/dm matcher refresh-line-refs --fix  # explicit write-mode alias
 ./bin/dm matcher guide <shape>          # show the recommended path for a rule type
 ./bin/dm matcher trace-extraction --ingredient "<text>"
+./bin/dm matcher sanity-find "<selector>"
+./bin/dm matcher sanity-update "<selector>" --expected <canonical-or-None>
+./bin/dm matcher reconcile-sanity "<selector>"
 ```
 
 Raw scripts are still valid fallback/debug entry points. Prefer the wrapper
@@ -783,6 +787,14 @@ Use `dm matcher sanity-update "<description-or-policy-or-id>" --expected <canoni
 when a deliberate rule change makes exactly one older sanity expectation stale.
 The command edits one matching `test(...)` call in `run_deep_matcher_sanity.py`
 and fails if the selector is ambiguous.
+
+Use `dm matcher reconcile-sanity "<description-or-policy-or-id>"` when a
+CLI-generated sanity row may have guessed the wrong canonical or become stale
+after a parent/variant decision. It runs the current matcher for supported
+generated `match(...)` and simple `recipe_match_num_named(...)` rows and reports
+the expected value next to the actual value. Add `--all-generated` for an audit
+pass. Add `--apply` only when the reported current behavior is the intended
+result; v1 writes only simple generated `match(...)` expected values.
 
 ### Behavior Probe
 

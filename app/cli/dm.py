@@ -879,6 +879,16 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "Use --format json when scripting a follow-up sanity-update.",
         ),
     ),
+    "reconcile-sanity": MatcherGuide(
+        label="reconcile-sanity",
+        status="supported by dm matcher",
+        summary="Compare generated sanity expectations with current matcher behavior.",
+        steps=(
+            "Run: ./bin/dm matcher reconcile-sanity \"<description-or-policy-or-id>\"",
+            "Use --all-generated for an audit pass, and --format json when scripting.",
+            "Use --apply only for simple generated match(...) rows where the current matcher behavior is the intended expectation.",
+        ),
+    ),
     "compare-paths": MatcherGuide(
         label="compare-paths",
         status="supported by dm matcher",
@@ -976,6 +986,8 @@ GUIDE_ALIASES = {
     "update-sanity": "sanity-update",
     "sanity_find": "sanity-find",
     "find-sanity": "sanity-find",
+    "reconcile_sanity": "reconcile-sanity",
+    "sanity-reconcile": "reconcile-sanity",
     "compare_paths": "compare-paths",
     "path-compare": "compare-paths",
 }
@@ -9488,6 +9500,210 @@ def _deep_sanity_cases(
     return sorted(cases, key=lambda case: int(case["line"]))
 
 
+def _literal_string(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    return None
+
+
+def _literal_expected_value(node: ast.AST) -> str | int | None:
+    if isinstance(node, ast.Constant):
+        if node.value is None or isinstance(node.value, (str, int)):
+            return node.value
+    return None
+
+
+def _literal_string_list(node: ast.AST) -> list[str] | None:
+    if not isinstance(node, ast.List):
+        return None
+    values: list[str] = []
+    for item in node.elts:
+        value = _literal_string(item)
+        if value is None:
+            return None
+        values.append(value)
+    return values
+
+
+def _literal_offer_dict(node: ast.AST) -> dict[str, str] | None:
+    if not isinstance(node, ast.Dict):
+        return None
+    payload: dict[str, str] = {}
+    for key_node, value_node in zip(node.keys, node.values, strict=False):
+        if key_node is None:
+            return None
+        key = _literal_string(key_node)
+        value = _literal_string(value_node)
+        if key is None or value is None:
+            return None
+        payload[key] = value
+    return payload
+
+
+def _sanity_reconcile_case_from_node(
+    *,
+    text: str,
+    node: ast.Call,
+    metadata: Mapping[str, str],
+    path: Path,
+) -> dict[str, Any] | None:
+    if len(node.args) < 3:
+        return None
+    description = _literal_string(node.args[0])
+    if description is None:
+        return None
+    actual_node = node.args[1]
+    expected_node = node.args[2]
+    expected_value = _literal_expected_value(expected_node)
+    expected_literal = ast.get_source_segment(text, expected_node) or ""
+    case: dict[str, Any] = {
+        "path": str(path),
+        "line": node.lineno,
+        "description": description,
+        "expected": expected_literal,
+        "expected_value": expected_value,
+        "generated": bool(metadata.get("policy_ref", "")),
+        "policy_ref": metadata.get("policy_ref", ""),
+        "sanity_id": metadata.get("sanity_id", metadata.get("policy_ref", "")),
+        "command": metadata.get("command", ""),
+    }
+    if isinstance(actual_node, ast.Call) and isinstance(actual_node.func, ast.Name):
+        if actual_node.func.id == "match" and len(actual_node.args) >= 2:
+            offer = _literal_string(actual_node.args[0])
+            ingredient = _literal_string(actual_node.args[1])
+            offer_category = _literal_string(actual_node.args[2]) if len(actual_node.args) >= 3 else ""
+            if offer is None or ingredient is None or offer_category is None:
+                case.update({"kind": "unsupported", "reason": "match() arguments are not string literals"})
+                return case
+            case.update({
+                "kind": "fast-match",
+                "offer": offer,
+                "ingredient": ingredient,
+                "offer_category": offer_category,
+            })
+            return case
+        if actual_node.func.id == "recipe_match_num_named" and len(actual_node.args) >= 3:
+            recipe_name = _literal_string(actual_node.args[0]) or "Sanity Recipe"
+            ingredients = _literal_string_list(actual_node.args[1])
+            offer_dict = _literal_offer_dict(actual_node.args[2])
+            if not ingredients or offer_dict is None or not offer_dict.get("name"):
+                case.update({"kind": "unsupported", "reason": "recipe_match_num_named() arguments are not literal/simple"})
+                return case
+            case.update({
+                "kind": "backend-match",
+                "recipe_name": recipe_name,
+                "ingredient": ingredients[0],
+                "offer": offer_dict["name"],
+                "offer_category": offer_dict.get("category", ""),
+            })
+            return case
+    case.update({"kind": "unsupported", "reason": "actual expression is not supported by reconcile-sanity"})
+    return case
+
+
+def _deep_sanity_reconcile_cases(paths: MatcherPaths) -> list[dict[str, Any]]:
+    text = paths.deep_sanity_file.read_text(encoding="utf-8")
+    tree = ast.parse(text, filename=str(paths.deep_sanity_file))
+    metadata_by_line = _deep_sanity_metadata_by_line(text)
+    cases: list[dict[str, Any]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if not isinstance(node.func, ast.Name) or node.func.id != "test":
+            continue
+        case = _sanity_reconcile_case_from_node(
+            text=text,
+            node=node,
+            metadata=metadata_by_line.get(node.lineno, {}),
+            path=paths.deep_sanity_file,
+        )
+        if case is not None:
+            cases.append(case)
+    return sorted(cases, key=lambda case: int(case["line"]))
+
+
+def _normalize_sanity_value_for_json(value: str | int | None) -> str | int | None:
+    return value
+
+
+def _sanity_expected_literal_from_value(value: str | int | None) -> str:
+    if value is None:
+        return "None"
+    if isinstance(value, int):
+        return str(value)
+    return _toml_string(value)
+
+
+def _reconcile_deep_sanity_case(case: Mapping[str, Any]) -> dict[str, Any]:
+    row = dict(case)
+    kind = str(case.get("kind") or "")
+    if kind == "fast-match":
+        payload = _compare_matcher_paths(
+            offer=str(case["offer"]),
+            ingredient=str(case["ingredient"]),
+            offer_category=str(case.get("offer_category") or ""),
+            brand="",
+            weight_grams=None,
+            recipe_name="DM Matcher Sanity Reconcile",
+        )
+        actual_value = payload["fast_keyword"] if payload["fast_matched"] else None
+        row.update({
+            "actual_value": actual_value,
+            "actual_literal": _sanity_expected_literal_from_value(actual_value),
+            "classification": (
+                "ok"
+                if actual_value == case.get("expected_value")
+                else "expected_parent_or_stale_canonical"
+            ),
+            "matches_expected": actual_value == case.get("expected_value"),
+            "fast_reason": payload["fast_reason"],
+        })
+        return row
+    if kind == "backend-match":
+        probe = _probe_matcher_pair(
+            offer=str(case["offer"]),
+            ingredient=str(case["ingredient"]),
+            offer_category=str(case.get("offer_category") or ""),
+            brand="",
+            weight_grams=None,
+            recipe_name=str(case.get("recipe_name") or "DM Matcher Sanity Reconcile"),
+        )
+        actual_value = int(probe["backend_num_matches"])
+        row.update({
+            "actual_value": actual_value,
+            "actual_literal": str(actual_value),
+            "classification": "ok" if actual_value == case.get("expected_value") else "backend_count_drift",
+            "matches_expected": actual_value == case.get("expected_value"),
+        })
+        return row
+    row.update({
+        "actual_value": None,
+        "actual_literal": "",
+        "classification": "unsupported",
+        "matches_expected": None,
+    })
+    return row
+
+
+def _filter_sanity_reconcile_cases(
+    cases: Iterable[dict[str, Any]],
+    *,
+    selector: str | None,
+    command_name: str | None,
+    all_generated: bool,
+) -> list[dict[str, Any]]:
+    normalized_command = command_name.strip() if command_name else None
+    return [
+        case for case in cases
+        if _sanity_case_matches(
+            case,
+            selector=selector,
+            command_name=normalized_command,
+            generated_only=all_generated,
+        )
+    ]
+
+
 def _sanity_case_matches(
     case: Mapping[str, Any],
     *,
@@ -9678,6 +9894,101 @@ def matcher_sanity_update(
     typer.echo(f"{prefix} {result['path']}:{result['line']}")
     typer.echo(f"  test: {result['description']}")
     typer.echo(f"  expected: {result['old']} -> {result['new']}")
+
+
+@matcher_app.command("reconcile-sanity", help="Compare generated sanity expectations with current matcher behavior.")
+def matcher_reconcile_sanity(
+    selector: Annotated[
+        str | None,
+        typer.Argument(help="Description, policy ref, sanity-id, or command substring."),
+    ] = None,
+    command_name: Annotated[
+        str | None,
+        typer.Option("--command", help="Restrict to tests generated by one dm matcher add command."),
+    ] = None,
+    all_generated: Annotated[
+        bool,
+        typer.Option("--all-generated", help="Scan all generated sanity rows. Required when no selector is given."),
+    ] = False,
+    apply: Annotated[
+        bool,
+        typer.Option("--apply", help="Update simple generated sanity expected values that differ."),
+    ] = False,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to read/edit instead of /app.")] = None,
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Output format."),
+    ] = "text",
+) -> None:
+    if not selector and not all_generated:
+        raise typer.BadParameter("pass a selector or --all-generated")
+    paths = _paths(tree_root)
+    cases = _filter_sanity_reconcile_cases(
+        _deep_sanity_reconcile_cases(paths),
+        selector=selector,
+        command_name=command_name,
+        all_generated=all_generated,
+    )
+    rows = [_reconcile_deep_sanity_case(case) for case in cases]
+    drifted = [row for row in rows if row.get("matches_expected") is False]
+    unsupported = [row for row in rows if row.get("classification") == "unsupported"]
+    applied: list[dict[str, Any]] = []
+    if apply:
+        for row in drifted:
+            if not row.get("generated"):
+                continue
+            if row.get("kind") != "fast-match":
+                continue
+            selector_id = str(row.get("description") or row.get("sanity_id") or row.get("policy_ref"))
+            actual_value = row.get("actual_value")
+            result = _update_deep_sanity_expected(
+                paths=paths,
+                selector=selector_id,
+                expected="None" if actual_value is None else str(actual_value),
+                dry_run=False,
+            )
+            applied.append(result)
+    payload = {
+        "path": str(paths.deep_sanity_file),
+        "selector": selector or "",
+        "command": command_name or "",
+        "all_generated": all_generated,
+        "count": len(rows),
+        "drift_count": len(drifted),
+        "unsupported_count": len(unsupported),
+        "applied_count": len(applied),
+        "cases": [
+            {
+                **row,
+                "expected_value": _normalize_sanity_value_for_json(row.get("expected_value")),
+                "actual_value": _normalize_sanity_value_for_json(row.get("actual_value")),
+            }
+            for row in rows
+        ],
+        "applied": applied,
+    }
+    if output_format == "json":
+        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        if not rows:
+            raise typer.Exit(1)
+        return
+    if not rows:
+        typer.echo("No matching deep sanity tests found.", err=True)
+        raise typer.Exit(1)
+    typer.echo(
+        f"reconcile-sanity: {len(rows)} checked, {len(drifted)} drifted, "
+        f"{len(unsupported)} unsupported"
+    )
+    for row in rows:
+        status = "OK" if row.get("matches_expected") is True else (
+            "DRIFT" if row.get("matches_expected") is False else "SKIP"
+        )
+        typer.echo(f"{status} {row['path']}:{row['line']}: {row['description']}")
+        typer.echo(f"  expected: {row.get('expected')}  actual: {row.get('actual_literal') or row.get('classification')}")
+        if row.get("classification") not in {"ok", "unsupported"}:
+            typer.echo(f"  classification: {row['classification']}")
+    if applied:
+        typer.echo(f"Applied {len(applied)} sanity expected update(s).")
 
 
 @matcher_app.command("guide", help="Show the recommended matcher workflow for a rule shape.")
