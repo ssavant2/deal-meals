@@ -3965,6 +3965,65 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertIn("regen --check", result.stdout)
         self.assertIn("gates --track B", result.stdout)
 
+    def test_dm_matcher_batch_metrics_start_finish_writes_local_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            metrics_path = app_dir / ".dm" / "matcher_batch_metrics.json"
+            live_app_dir = Path(__file__).resolve().parents[2]
+            start = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "batch",
+                    "metrics",
+                    "--start",
+                    "--tree-root",
+                    str(tree_root),
+                    "--note",
+                    "phase metrics start",
+                    "--format",
+                    "json",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(start.returncode, 0, start.stderr + start.stdout)
+            self.assertTrue(metrics_path.exists())
+            started = json.loads(start.stdout)
+            self.assertEqual(started["metrics"]["note"], "phase metrics start")
+
+            finish = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "batch",
+                    "metrics",
+                    "--finish",
+                    "--tree-root",
+                    str(tree_root),
+                    "--note",
+                    "phase metrics finish",
+                    "--format",
+                    "json",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(finish.returncode, 0, finish.stderr + finish.stdout)
+            payload = json.loads(finish.stdout)["metrics"]
+            self.assertEqual(payload["finished_note"], "phase metrics finish")
+            self.assertIn(payload["doctor_status"], {"ok", "needs_action", "blocking_error"})
+            self.assertIsInstance(payload["elapsed_seconds"], int)
+
     def test_dm_matcher_trace_extraction_explains_short_ingredient_drop(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         result = subprocess.run(

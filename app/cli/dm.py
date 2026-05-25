@@ -1077,6 +1077,10 @@ def _matcher_session_fallback_path(paths: MatcherPaths) -> Path:
     return paths.app_dir / MATCHER_SESSION_FALLBACK_DIR / MATCHER_SESSION_FILE
 
 
+def _matcher_batch_metrics_path(paths: MatcherPaths) -> Path:
+    return paths.app_dir / MATCHER_SESSION_FALLBACK_DIR / "matcher_batch_metrics.json"
+
+
 def _matcher_session_state_paths(paths: MatcherPaths) -> tuple[Path, ...]:
     fallback_path = _matcher_session_fallback_path(paths)
     git_path = _git_session_state_path(paths)
@@ -11099,6 +11103,77 @@ def matcher_inactivate(
         typer.echo("Skipped gates (--no-run-gates).")
         return
     raise typer.Exit(_run_track_b_inactivation_gates(paths, report_root))
+
+
+def _timestamp_elapsed_seconds(started_at: str, finished_at: str) -> int | None:
+    try:
+        started = time.mktime(time.strptime(started_at, "%Y-%m-%dT%H:%M:%SZ"))
+        finished = time.mktime(time.strptime(finished_at, "%Y-%m-%dT%H:%M:%SZ"))
+    except (TypeError, ValueError):
+        return None
+    return max(0, int(finished - started))
+
+
+def _write_batch_metrics(path: Path, payload: Mapping[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+@matcher_batch_app.command("metrics", help="Start or finish a local matcher batch metrics note.")
+def matcher_batch_metrics(
+    start: Annotated[bool, typer.Option("--start", help="Start a local metrics note.")] = False,
+    finish: Annotated[bool, typer.Option("--finish", help="Finish the current local metrics note.")] = False,
+    note: Annotated[str | None, typer.Option("--note", help="Optional free-text note stored locally.")] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to use instead of /app.")] = None,
+    output_format: Annotated[Literal["text", "json"], typer.Option("--format", help="Output format.")] = "text",
+) -> None:
+    if start == finish:
+        raise typer.BadParameter("pass exactly one of --start or --finish")
+    paths = _paths(tree_root)
+    metrics_path = _matcher_batch_metrics_path(paths)
+    if start:
+        head, head_error = _git_output(paths, ["rev-parse", "HEAD"])
+        changed_paths, status_error = _matcher_relevant_changed_paths(paths)
+        payload: dict[str, Any] = {
+            "schema_version": 1,
+            "started_at": _utc_timestamp(),
+            "start_head": head,
+            "start_head_error": head_error,
+            "start_dirty_matcher_paths": list(changed_paths),
+            "git_status_error": status_error,
+            "note": note or "",
+        }
+        _write_batch_metrics(metrics_path, payload)
+    else:
+        if not metrics_path.exists():
+            raise typer.BadParameter(f"no local batch metrics file found: {metrics_path}")
+        payload = json.loads(metrics_path.read_text(encoding="utf-8"))
+        finished_at = _utc_timestamp()
+        report = _matcher_doctor_report(paths=paths, since=None, report_root=None)
+        checks = report.get("checks") or []
+        changed_paths, status_error = _matcher_relevant_changed_paths(paths)
+        payload.update({
+            "finished_at": finished_at,
+            "elapsed_seconds": _timestamp_elapsed_seconds(str(payload.get("started_at") or ""), finished_at),
+            "finish_dirty_matcher_paths": list(changed_paths),
+            "finish_git_status_error": status_error,
+            "doctor_status": report.get("status"),
+            "doctor_blocking_error_count": sum(1 for check in checks if check.get("status") == "blocking_error"),
+            "doctor_needs_action_count": sum(1 for check in checks if check.get("status") == "needs_action"),
+            "finished_note": note or "",
+        })
+        _write_batch_metrics(metrics_path, payload)
+
+    if output_format == "json":
+        typer.echo(json.dumps({"path": str(metrics_path), "metrics": payload}, ensure_ascii=False, indent=2, sort_keys=True))
+        return
+    action = "Started" if start else "Finished"
+    typer.echo(f"{action} matcher batch metrics: {metrics_path}")
+    if finish:
+        typer.echo(f"  elapsed_seconds: {payload.get('elapsed_seconds')}")
+        typer.echo(f"  doctor_status: {payload.get('doctor_status')}")
+        typer.echo(f"  doctor_needs_action_count: {payload.get('doctor_needs_action_count')}")
+        typer.echo(f"  doctor_blocking_error_count: {payload.get('doctor_blocking_error_count')}")
 
 
 @matcher_session_app.command("start", help="Start a matcher edit session and defer per-command gates.")
