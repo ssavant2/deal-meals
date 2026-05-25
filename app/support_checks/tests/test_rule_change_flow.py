@@ -3621,6 +3621,48 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             self.assertNotIn('"\\"pakchoi\\""', sanity_text)
             self.assertNotIn('"oldcanonical"', sanity_text)
 
+    def test_generated_sanity_uses_observed_positive_materialization(self) -> None:
+        paths = dm_cli._paths(None)
+        original_compare = dm_cli._compare_matcher_paths
+
+        def fake_compare(**_kwargs):
+            return {"fast_matched": True, "fast_keyword": "phasevariant"}
+
+        dm_cli._compare_matcher_paths = fake_compare
+        try:
+            observed = dm_cli._runtime_observed_expected_canonical(
+                paths=paths,
+                requested_expected="phaseparent",
+                offer_name="Phase offer",
+                ingredient="phase ingredient",
+                offer_category="pantry",
+                sanity_mode="fast-match",
+                dry_run=False,
+            )
+            self.assertEqual(observed, "phasevariant")
+            negative_expected = dm_cli._runtime_observed_expected_canonical(
+                paths=paths,
+                requested_expected=None,
+                offer_name="Phase offer",
+                ingredient="phase ingredient",
+                offer_category="pantry",
+                sanity_mode="fast-match",
+                dry_run=False,
+            )
+            self.assertIsNone(negative_expected)
+            dry_run_expected = dm_cli._runtime_observed_expected_canonical(
+                paths=paths,
+                requested_expected="phaseparent",
+                offer_name="Phase offer",
+                ingredient="phase ingredient",
+                offer_category="pantry",
+                sanity_mode="fast-match",
+                dry_run=True,
+            )
+            self.assertEqual(dry_run_expected, "phaseparent")
+        finally:
+            dm_cli._compare_matcher_paths = original_compare
+
     def test_dm_matcher_guide_routes_manual_and_supported_shapes(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         pnb = subprocess.run(

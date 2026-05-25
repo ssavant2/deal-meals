@@ -1595,6 +1595,65 @@ def _deep_sanity_match_assertion(
     ]
 
 
+def _runtime_observed_expected_canonical(
+    *,
+    paths: MatcherPaths,
+    requested_expected: str | None,
+    offer_name: str,
+    ingredient: str,
+    offer_category: str,
+    sanity_mode: Literal["fast-match", "backend-match"],
+    dry_run: bool,
+) -> str | None:
+    if dry_run or paths.app_dir != APP_DIR or sanity_mode != "fast-match" or requested_expected is None:
+        return requested_expected
+    try:
+        payload = _compare_matcher_paths(
+            offer=offer_name,
+            ingredient=ingredient,
+            offer_category=offer_category,
+            brand="",
+            weight_grams=None,
+            recipe_name="DM Matcher Generated Sanity",
+        )
+    except Exception as exc:  # noqa: BLE001 - generated canary should not hide the actual add error path.
+        typer.secho(
+            f"WARNING: could not observe generated sanity runtime result: {exc}",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
+        return requested_expected
+    actual = payload["fast_keyword"] if payload["fast_matched"] else None
+    return actual or requested_expected
+
+
+def _print_generated_sanity_probe(paths: MatcherPaths, policy_ref: str) -> None:
+    if paths.app_dir != APP_DIR:
+        return
+    try:
+        rows = [
+            _reconcile_deep_sanity_case(case)
+            for case in _filter_sanity_reconcile_cases(
+                _deep_sanity_reconcile_cases(paths),
+                selector=policy_ref,
+                command_name=None,
+                all_generated=False,
+            )
+        ]
+    except Exception as exc:  # noqa: BLE001 - probe output is advisory; gates remain authoritative.
+        typer.secho(f"WARNING: sanity probe skipped: {exc}", fg=typer.colors.YELLOW, err=True)
+        return
+    if not rows:
+        return
+    typer.echo("Sanity probe:")
+    for row in rows:
+        status = "OK" if row.get("matches_expected") is True else (
+            "DRIFT" if row.get("matches_expected") is False else "SKIP"
+        )
+        actual = row.get("actual_literal") or row.get("classification") or "unknown"
+        typer.echo(f"  {status}: {row.get('description')} expected {row.get('expected')} actual {actual}")
+
+
 def _source_spec(paths: MatcherPaths, contract: str):
     return contract_spec_by_name(contract, tree_root=paths.repo_root)
 
@@ -2023,6 +2082,15 @@ def _append_simple_surface_deep_sanity_stub(
     sanity_mode: Literal["fast-match", "backend-match"],
     dry_run: bool,
 ) -> str:
+    expected_canonical = _runtime_observed_expected_canonical(
+        paths=paths,
+        requested_expected=canonical,
+        offer_name=sanity_offer,
+        ingredient=sanity_ingredient,
+        offer_category=offer_category,
+        sanity_mode=sanity_mode,
+        dry_run=dry_run,
+    )
     lines = [
         "",
         *_generated_sanity_header(policy_ref, surface.command),
@@ -2031,7 +2099,7 @@ def _append_simple_surface_deep_sanity_stub(
             offer_name=sanity_offer,
             ingredient=sanity_ingredient,
             offer_category=offer_category,
-            expected_canonical=canonical,
+            expected_canonical=expected_canonical,
             mode=sanity_mode,
         ),
     ]
@@ -2153,6 +2221,7 @@ def _add_simple_toml_surface(
 
     typer.echo(f"Generated {surface.file_stem} rule: {change.policy_ref}")
     typer.echo(f"  entry: {entry_id}")
+    _print_generated_sanity_probe(paths, change.policy_ref)
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
         return
@@ -3283,12 +3352,21 @@ def _append_deep_sanity_stub(
         *_generated_sanity_header(policy_ref, "keyword-extra-parent"),
     ]
     for kid, offer_name in zip(kids, offer_names, strict=True):
+        expected_canonical = _runtime_observed_expected_canonical(
+            paths=paths,
+            requested_expected=canonical,
+            offer_name=offer_name,
+            ingredient=ingredient,
+            offer_category=offer_category,
+            sanity_mode=sanity_mode,
+            dry_run=dry_run,
+        )
         lines.extend(_deep_sanity_match_assertion(
             description=_titleish(canonical) + " recipe matches " + kid,
             offer_name=offer_name,
             ingredient=ingredient,
             offer_category=offer_category,
-            expected_canonical=canonical,
+            expected_canonical=expected_canonical,
             mode=sanity_mode,
             recipe_name=_titleish(canonical) + " recipe",
         ))
@@ -3315,12 +3393,21 @@ def _append_keyword_synonym_deep_sanity_stub(
     ]
     for variant in variants:
         ingredient = ingredient_override or variant
+        expected_canonical = _runtime_observed_expected_canonical(
+            paths=paths,
+            requested_expected=canonical,
+            offer_name=sanity_offer,
+            ingredient=ingredient,
+            offer_category=offer_category,
+            sanity_mode=sanity_mode,
+            dry_run=dry_run,
+        )
         lines.extend(_deep_sanity_match_assertion(
             description="Keyword synonym " + variant + " matches " + canonical,
             offer_name=sanity_offer,
             ingredient=ingredient,
             offer_category=offer_category,
-            expected_canonical=canonical,
+            expected_canonical=expected_canonical,
             mode=sanity_mode,
         ))
     block = "\n".join(lines) + "\n"
@@ -6056,6 +6143,7 @@ def add_keyword_extra_parent(
     typer.echo(f"  entries: {', '.join(change.entry_ids)}")
     typer.echo(f"  fixtures: {', '.join(change.fixture_ids)}")
     typer.echo(f"  inventory: {change.inventory_id}")
+    _print_generated_sanity_probe(paths, change.policy_ref)
 
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
@@ -6228,6 +6316,7 @@ def add_keyword_synonym(
         typer.echo(f"  fixtures: {', '.join(fixture_ids)}")
     if inventory_id:
         typer.echo(f"  inventory: {inventory_id}")
+    _print_generated_sanity_probe(paths, change.policy_ref)
 
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
@@ -8437,6 +8526,7 @@ def add_no_match_policy(
         typer.echo(f"  auto inventory: {inventory_id}")
     if auto_fixture or auto_inventory:
         _regenerate_contract_json(paths)
+    _print_generated_sanity_probe(paths, change.policy_ref)
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
         return

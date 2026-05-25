@@ -802,6 +802,13 @@ when a deliberate rule change makes exactly one older sanity expectation stale.
 The command edits one matching `test(...)` call in `run_deep_matcher_sanity.py`
 and fails if the selector is ambiguous.
 
+`dm matcher add` commands that create simple positive `match(...)` canaries try
+to observe the current materialized fast-path canonical before writing the
+expected value. This prevents parent/variant rows from encoding a guessed parent
+when runtime correctly materializes the more precise variant. After writing, the
+command prints a short sanity probe when the generated row can be reconciled.
+Treat a `DRIFT` probe as a policy review signal; gates remain authoritative.
+
 Use `dm matcher reconcile-sanity "<description-or-policy-or-id>"` when a
 CLI-generated sanity row may have guessed the wrong canonical or become stale
 after a parent/variant decision. It runs the current matcher for supported
