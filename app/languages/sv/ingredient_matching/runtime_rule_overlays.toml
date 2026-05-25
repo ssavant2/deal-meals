@@ -438,6 +438,20 @@ keyword = "fetaost"
 blockers = ["vaccaost"]
 reason = "vaccaost (Wapnö cow's milk cheese) is not feta — incorrectly classified under fetaost keyword"
 
+[[product_name_blockers]]
+id = "runtime_pnb_flaskkotlett"
+status = "active"
+keyword = "fläskkotlett"
+blockers = ["grillkryddad"]
+reason = "Pre-seasoned grilled pork chop should not match plain fläskkotlett ingredient"
+
+[[product_name_blockers]]
+id = "runtime_pnb_kotlett"
+status = "active"
+keyword = "kotlett"
+blockers = ["grillkryddad"]
+reason = "Pre-seasoned grilled pork chop should not match plain kotlett ingredient"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
