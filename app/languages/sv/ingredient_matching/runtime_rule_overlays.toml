@@ -452,6 +452,20 @@ keyword = "kotlett"
 blockers = ["grillkryddad"]
 reason = "Pre-seasoned grilled pork chop should not match plain kotlett ingredient"
 
+[[product_name_blockers]]
+id = "runtime_pnb_cashew"
+status = "active"
+keyword = "cashew"
+blockers = ["smoked", "mexicana"]
+reason = "Flavored snack cashews (smoked, mexicana seasoning) should not match plain cashew cooking ingredient"
+
+[[product_name_blockers]]
+id = "runtime_pnb_cashewnotter"
+status = "active"
+keyword = "cashewnötter"
+blockers = ["mexicana", "smoked"]
+reason = "Flavored snack cashews (mexicana, smoked seasoning) should not match plain cashewnötter cooking ingredient"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
