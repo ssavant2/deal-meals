@@ -333,6 +333,20 @@ keyword = "oliver"
 blockers = ["chili", "vitlök", "vitlök", "citron", "ört", "örter", "paprika", "fetaost", "feta", "grillad", "grillade", "torkad", "torkade"]
 reason = "Plain oliver-recept ska inte matcha smaksatta (chili/vitlök/citron/ört/paprika/feta) eller process-behandlade (grillade/torkade) olivvarianter. Q80-9 Stefan-policy: skilj på färg + kärnor + smaksättning/process."
 
+[[product_name_blockers]]
+id = "runtime_pnb_mozzarellaost"
+status = "active"
+keyword = "mozzarellaost"
+blockers = ["scamorza"]
+reason = "Scamorza Rökt Mozzarella matchar 'mozzarellaost'-ingrediens via fast path. Analog till befintlig PNB mozzarella + scamorza (Q79-8). Scamorza är rökt/lagrad italiensk ost — inte färsk mozzarella/mozzarellaost."
+
+[[product_name_blockers]]
+id = "runtime_pnb_svartabonor"
+status = "active"
+keyword = "svartabönor"
+blockers = ["laoganma", "chiliolja"]
+reason = "Svarta Bönor i Chiliolja (Laoganma) är kinesisk kondiment/chilisås, inte plain svarta bönor. Analog till befintlig PNB bönor + laoganma (batch 78). Q83 shard 5."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -561,8 +575,8 @@ reason = "'Krutonger Vitlök & Persilja' is a flavored crouton product name wher
 id = "runtime_ksbc_chili"
 status = "active"
 keyword = "chili"
-context = ["bärta"]
-reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Recipes specifying 'Bärta Chili Lime' want the Bärta product, not fresh chili peppers. Suppress chili keyword when ingredient text contains 'bärta'."
+context = ["bärta", "chilisås"]
+reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Recipes specifying 'Bärta Chili Lime' want the Bärta product, not fresh chili peppers. Suppress chili keyword when ingredient text contains 'bärta'.; Recept med 'chilisås' vill ha sås-format (Felix/Sriracha/Sambal Oelek), inte torr chili-krydda (flakes/pulver). Skiljer sig från chili-bred-policy som gäller torra former interchangeably. Q83-3."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_mjukost"
@@ -828,6 +842,14 @@ surface = "stop_words"
 action = "add"
 terms = ["liknande"]
 reason = "Swedish 'liknande' (similar/like) is a natural-language approximation word that should never be extracted as a food keyword"
+
+[[keyword_set_updates]]
+id = "runtime_non_food_keyword_add_plastfolie"
+status = "active"
+surface = "non_food_keywords"
+action = "add"
+terms = ["plastfolie"]
+reason = "Plastic cling film — non-food household item ('100% fummelfri plastfolie refill 150m Ninjaplast' incorrectly matched 'refill' keyword from äppelmos ingredient)"
 
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"
