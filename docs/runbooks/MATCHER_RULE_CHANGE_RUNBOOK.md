@@ -107,6 +107,7 @@ on every command:
 ./bin/dm matcher batch start
 # run dm matcher add/modify/fixture commands, plus any manual TOML/Python edits
 ./bin/dm matcher batch status
+./bin/dm matcher batch finalize --track B --dry-run
 ./bin/dm matcher batch finalize --track B
 ```
 
@@ -116,6 +117,10 @@ command to force an immediate check. `finalize` runs
 generated JSON/coverage regen, verified-term baseline promotion, line-ref
 refresh, drift check, pre-flight, and one final gate. If a finalize step fails,
 the marker stays active so the batch can be fixed and finalized again.
+Use `finalize --dry-run` first when you want the doctor summary, guided
+corrections, and planned write/gate steps without mutating files or running
+gates. Dry-run also works without an active batch as a read-only "what would
+finalize do?" diagnostic.
 Track B `finalize` requires a writable checkout as `appuser` for baseline
 promotion. It does not bypass baseline write-permission checks: when run through
 `./bin/dm`, it uses the normal appuser container path; if the promote step is run

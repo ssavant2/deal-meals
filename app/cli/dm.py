@@ -1238,6 +1238,42 @@ def _doctor_next_action(checks: Iterable[MatcherDoctorCheck]) -> dict[str, str] 
     return None
 
 
+def _doctor_guided_corrections(checks: Iterable[MatcherDoctorCheck]) -> list[dict[str, str]]:
+    by_id = {check.check_id: check for check in checks}
+    corrections: list[dict[str, str]] = []
+    if any(
+        by_id.get(check_id) and by_id[check_id].status == "needs_action"
+        for check_id in ("generated_contract_json", "generated_registry_coverage")
+    ):
+        corrections.append({
+            "id": "generated_artifacts_stale",
+            "summary": "Source TOML and generated matcher artifacts are out of sync.",
+            "command": "./bin/dm matcher regen --what all",
+        })
+    line_refs = by_id.get("line_refs")
+    if line_refs and line_refs.status in {"warning", "blocking_error"}:
+        corrections.append({
+            "id": "line_refs_need_refresh",
+            "summary": line_refs.summary,
+            "command": "./bin/dm matcher refresh-line-refs --fix",
+        })
+    writeability = by_id.get("writeability")
+    if writeability and writeability.status == "blocking_error":
+        corrections.append({
+            "id": "writeability_or_appuser",
+            "summary": "Current user cannot write one or more generated/baseline paths.",
+            "command": "rerun as appuser or fix checkout/report-root permissions",
+        })
+    git_changes = by_id.get("git_changes")
+    if git_changes and git_changes.status == "needs_action":
+        corrections.append({
+            "id": "matcher_changes_need_gate",
+            "summary": "Matcher-relevant files changed; run preflight/gates before handoff.",
+            "command": "./bin/dm matcher preflight",
+        })
+    return corrections
+
+
 def _path_is_writable_for_current_user(path: Path) -> bool:
     target = path if path.exists() else path.parent
     try:
@@ -1451,6 +1487,7 @@ def _matcher_doctor_report(
         "status": status,
         "checks": [check.to_dict() for check in checks],
         "next_action": _doctor_next_action(checks),
+        "guided_corrections": _doctor_guided_corrections(checks),
     }
 
 
@@ -1467,6 +1504,12 @@ def _format_matcher_doctor_text(report: Mapping[str, Any]) -> str:
         ])
     else:
         lines.extend(["next:", "  none"])
+    corrections = report.get("guided_corrections") or []
+    if corrections:
+        lines.append("guided corrections:")
+        for correction in corrections:
+            lines.append(f"  - {correction['id']}: {correction['command']}")
+            lines.append(f"    {correction['summary']}")
     return "\n".join(lines)
 
 
@@ -11050,6 +11093,10 @@ def matcher_session_finalize(
     ctx: typer.Context,
     track: Annotated[Literal["A", "B"], typer.Option("--track", help="Final matcher gate track.")] = "B",
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to use instead of /app.")] = None,
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", help="Show doctor output and planned finalize steps without writing or running gates."),
+    ] = False,
     allow_removals: Annotated[
         bool,
         typer.Option("--allow-removals", help="Pass confirmed removal allowance to baseline promotion."),
@@ -11073,9 +11120,11 @@ def matcher_session_finalize(
 ) -> None:
     paths = _paths(tree_root)
     existing = _read_matcher_session_state(paths)
-    if existing is None:
+    if existing is None and not dry_run:
         raise typer.BadParameter("no active matcher session; run dm matcher session start first")
-    state_path, _state = existing
+    state_path: Path | None = None
+    if existing is not None:
+        state_path, _state = existing
     raw_args = _raw_args(ctx)
 
     steps: list[tuple[str, Any]] = [
@@ -11118,6 +11167,26 @@ def matcher_session_finalize(
         ),
     ])
 
+    if dry_run:
+        report = _matcher_doctor_report(paths=paths, since=None, report_root=report_root)
+        typer.echo("matcher batch finalize dry-run")
+        if state_path is None:
+            typer.echo("  active batch: none")
+        else:
+            typer.echo(f"  active batch: {state_path}")
+        typer.echo("")
+        typer.echo(_format_matcher_doctor_text(report))
+        typer.echo("")
+        typer.echo("planned finalize steps:")
+        for label, _run_step in steps:
+            typer.echo(f"  - {label}")
+        if raw_args:
+            typer.echo("raw gate args:")
+            typer.echo("  " + " ".join(raw_args))
+        typer.echo("Dry run only; no files written and no gates run.")
+        return
+
+    assert state_path is not None
     for label, run_step in steps:
         typer.echo(f"\n=== session finalize: {label} ===")
         status = run_step()

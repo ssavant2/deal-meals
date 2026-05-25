@@ -3888,6 +3888,40 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertEqual(report["status"], "needs_action")
         self.assertEqual(checks["generated_contract_json"]["status"], "needs_action")
         self.assertEqual(report["next_action"]["command"], "./bin/dm matcher regen --what all")
+        self.assertIn("generated_artifacts_stale", {row["id"] for row in report["guided_corrections"]})
+
+    def test_dm_matcher_batch_finalize_dry_run_reports_doctor_and_steps(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "batch",
+                    "finalize",
+                    "--dry-run",
+                    "--track",
+                    "B",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("matcher batch finalize dry-run", result.stdout)
+        self.assertIn("active batch: none", result.stdout)
+        self.assertIn("matcher doctor", result.stdout)
+        self.assertIn("planned finalize steps:", result.stdout)
+        self.assertIn("regen --check", result.stdout)
+        self.assertIn("gates --track B", result.stdout)
 
     def test_dm_matcher_trace_extraction_explains_short_ingredient_drop(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
