@@ -433,10 +433,10 @@ reason = "vegan salami substitutes should not match real salame/salami in charcu
 
 [[product_name_blockers]]
 id = "runtime_pnb_fetaost"
-status = "active"
+status = "inactive"
 keyword = "fetaost"
 blockers = ["vaccaost"]
-reason = "vaccaost (Wapnö cow's milk cheese) is not feta — incorrectly classified under fetaost keyword"
+reason = "DEAKTIVERAD per Q89-4 (2026-05-25): Vaccaost (Wapnö komjölksost) säljs medvetet som feta-stilös ersättning för matlagning. Aliasen vaccaost→fetaost (sv-se.alias.fetaost.vaccaost) får verka."
 
 [[product_name_blockers]]
 id = "runtime_pnb_flaskkotlett"
@@ -465,6 +465,20 @@ status = "active"
 keyword = "cashewnötter"
 blockers = ["mexicana", "smoked"]
 reason = "Flavored snack cashews (mexicana, smoked seasoning) should not match plain cashewnötter cooking ingredient"
+
+[[product_name_blockers]]
+id = "runtime_pnb_havregurt"
+status = "active"
+keyword = "havregurt"
+blockers = ["jordgubb", "blåbär", "mango", "hallon", "banan", "ananas", "persika", "kiwi", "apelsin", "citron", "körsbär", "aprikos", "plommon", "päron", "lingon", "hjortron", "choklad", "frukt", "ugnsäpple", "äpple"]
+reason = "Smaksatt havregurt (ugnsäpple, jordgubb, mango m.fl.) ska inte matcha plain havregurt-naturell-ingrediens — samma policy som yoghurt och sojagurt"
+
+[[product_name_blockers]]
+id = "runtime_pnb_appeljuice"
+status = "active"
+keyword = "äppeljuice"
+blockers = ["hallon", "jordgubb", "blåbär", "mango", "päron", "banan", "ananas", "persika", "kiwi", "citron", "lime", "apelsin", "körsbär", "aprikos", "plommon", "lingon", "hjortron", "fläder", "svartvinbär", "röda vinbär", "multifrukt"]
+reason = "Smaksatta/blandade äppeljuicer (med hallon, päron, multifrukt m.fl.) ska inte matcha plain äppeljuice-ingrediens — samma princip som yoghurt/havregurt-policyn"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
@@ -1113,6 +1127,30 @@ keyword = "tapenade"
 qualifiers = ["soltorkad", "tomat"]
 bidirectional = true
 reason = "Tomato tapenade (soltorkade tomater) is a different product from olive tapenade — not interchangeable"
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_couscous_parl"
+status = "active"
+keyword = "couscous"
+qualifiers = ["pärl"]
+bidirectional = true
+reason = "Pärlcouscous (israelisk, ~3mm runda pärlor, pasta-lik tillagning) är funktionellt distinkt från vanlig couscous (~1mm fin durum); ska inte vara utbytbara i båda riktningar"
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_brod_mork_morkt"
+status = "active"
+keyword = "bröd"
+qualifiers = ["mörk", "mörkt", "råg", "kavring", "fullkorn", "grov"]
+bidirectional = true
+reason = "Mörka bröd (rågbröd, kavring, fullkornsbröd) är funktionellt olika från ljusa bröd (vetebröd, baguette, ciabatta). Mörkt-bröd-ingrediens kräver mörka offers; ljust-bröd och plain bröd-ingrediens implicit ljusa (vanligaste recept-tolkningen)"
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_bonor_vit_vita"
+status = "active"
+keyword = "bönor"
+qualifiers = ["vit", "vita", "röd", "röda", "kidney", "svart", "svarta", "brun", "bruna", "grön", "gröna"]
+bidirectional = true
+reason = "Bönor-färger är funktionellt olika produkter: vita (cannellini/navy/butter), röda (kidney/röda), svarta, bruna (svenska bruna bönor), gröna (haricots verts skidor). Färg/typ-specifik ingrediens ska matcha bara samma färg"
 
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"
