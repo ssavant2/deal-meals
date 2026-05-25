@@ -10754,3 +10754,22 @@ path = "app/languages/sv/ingredient_matching/term_registry/entries/keyword_extra
 start = 2183
 end = 2183
 anchor = "entry_id = \"sv-se.family.ragbrod.kavring_093\""
+
+[[inventory]]
+id = "policy_boveteflingor_not_raw_bovete_i_bbovete_b_flingor"
+status = "wrapped_adapter"
+kind = "legacy_no_match_policy"
+canonical = "boveteflingor_not_raw_bovete"
+owner = "matcher"
+policy_ref = "matcher_layer_current_review"
+source_refs = ["current_review:boveteflingor_not_raw_bovete"]
+fixture_refs = ["boveteflingor_not_raw_bovete_negative"]
+risk = "no_match_policy"
+adapter_ref = "no_match_policies:policy_boveteflingor_not_raw_bovete_i_bbovete_b_flingor"
+notes = "Raw/whole buckwheat grain products should not match boveteflingor (buckwheat flakes) ingredient — only products with 'flingor' in name qualify."
+
+[[inventory.line_refs]]
+path = "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml"
+start = 5724
+end = 5724
+anchor = "entry_id = \"sv-se.guard.policy_boveteflingor_not_raw_bovete_i_bbovete_b_flingor\""

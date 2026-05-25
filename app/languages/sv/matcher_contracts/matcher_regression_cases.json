@@ -33077,5 +33077,19 @@
     "policy_ref": "keyword_extra_parent_ragbrod_family",
     "recipe_name": "Blomkålssoppa",
     "source_ref": "current_review:keyword_extra_parent_ragbrod_routing"
+  },
+  {
+    "expected": 0,
+    "id": "boveteflingor_not_raw_bovete_negative",
+    "ingredients": [
+      "boveteflingor"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Bovete 900g Nasha Kasha"
+    },
+    "policy_ref": "boveteflingor_not_raw_bovete",
+    "recipe_name": "Glutenfri müsli",
+    "source_ref": "current_review:boveteflingor_not_raw_bovete"
   }
 ]

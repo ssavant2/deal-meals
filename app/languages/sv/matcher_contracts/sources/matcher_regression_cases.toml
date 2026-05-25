@@ -28770,3 +28770,15 @@ category = "pantry"
 canonical = "grovlimpa"
 ingredient_index = 0
 must_match_keyword = "grovlimpa"
+
+[[fixtures]]
+id = "boveteflingor_not_raw_bovete_negative"
+policy_ref = "boveteflingor_not_raw_bovete"
+source_ref = "current_review:boveteflingor_not_raw_bovete"
+recipe_name = "Glutenfri müsli"
+ingredients = ["boveteflingor"]
+expected = 0
+
+[fixtures.offer]
+name = "Bovete 900g Nasha Kasha"
+category = "pantry"

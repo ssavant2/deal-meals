@@ -29846,3 +29846,23 @@ source_family = "matcher_regression_case"
 canonical = "grovlimpa"
 variant = "keyword_extra_parent_ragbrod_kavring_positive: Kavring"
 layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.boveteflingor_not_raw_bovete.negative"
+language = "sv"
+market = "SE"
+canonical = "boveteflingor_not_raw_bovete"
+status = "active"
+variants = ["boveteflingor_not_raw_bovete_negative: Bovete 900g Nasha Kasha"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:boveteflingor_not_raw_bovete_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture boveteflingor_not_raw_bovete_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "boveteflingor_not_raw_bovete"
+variant = "boveteflingor_not_raw_bovete_negative: Bovete 900g Nasha Kasha"
+layer_role = "negative_regression"

@@ -5719,3 +5719,41 @@ ingredient = "kycklingskinn"
 offer_name = "Kycklingfilé Ca 700g Kronfågel"
 offer_category = "meat"
 expected = 0
+
+[[entries]]
+entry_id = "sv-se.guard.policy_boveteflingor_not_raw_bovete_i_bbovete_b_flingor"
+language = "sv"
+market = "SE"
+canonical = "boveteflingor_not_raw_bovete"
+status = "active"
+variants = ["boveteflingor_not_raw_bovete ! (?i)\\bbovete\\b(?!.*flingor)"]
+negative_guards = ["boveteflingor_not_raw_bovete ! (?i)\\bbovete\\b(?!.*flingor)"]
+source_refs = ["policy:no_match_policies:policy_boveteflingor_not_raw_bovete_i_bbovete_b_flingor"]
+layer_policy = ["negative_guard_only"]
+notes = "Buckwheat flake ingredient should only match buckwheat flake products — raw/whole/roasted/cracked grain (Bovete 900g, Bovete röd, Bovete Rostad, Bovete Krossat) are not boveteflingor. Match only products with flingor in name."
+
+[entries.language_payload.no_match_policy]
+id = "policy_boveteflingor_not_raw_bovete_i_bbovete_b_flingor"
+rule_schema_version = 1
+rule_version = 1
+canonical = "boveteflingor_not_raw_bovete"
+ingredient_patterns = ["\\bboveteflingor\\b"]
+blocked_offer_keywords = []
+blocked_offer_patterns = ["(?i)\\bbovete\\b(?!.*flingor)"]
+allowed_specifics = []
+reason = "Buckwheat flake ingredient should only match buckwheat flake products — raw/whole/roasted/cracked grain (Bovete 900g, Bovete röd, Bovete Rostad, Bovete Krossat) are not boveteflingor. Match only products with flingor in name."
+policy_ref = "policy_boveteflingor_not_raw_bovete_i_bbovete_b_flingor"
+fixture_refs = ["boveteflingor_not_raw_bovete_negative"]
+supersedes = []
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "boveteflingor_not_raw_bovete"
+variant = "boveteflingor_not_raw_bovete ! (?i)\\bbovete\\b(?!.*flingor)"
+layer_role = "negative_guard_pattern"
+
+[[entries.negative_examples]]
+ingredient = "boveteflingor"
+offer_name = "Bovete 900g Nasha Kasha"
+offer_category = "pantry"
+expected = 0
