@@ -407,8 +407,36 @@ reason = "BBQ-marinated chicken should not match plain chicken ingredient"
 id = "runtime_pnb_kycklingfile"
 status = "active"
 keyword = "kycklingfilé"
-blockers = ["bbq", "örtkryddad"]
-reason = "BBQ-marinated kycklingfilé products should not match plain kycklingfilé ingredient - flavored preparation changes the product type; Herb-seasoned kycklingfilé products should not match plain kycklingfilé ingredient"
+blockers = ["bbq", "örtkryddad", "citron/chili", "kryddad"]
+reason = "BBQ-marinated kycklingfilé products should not match plain kycklingfilé ingredient - flavored preparation changes the product type; Herb-seasoned kycklingfilé products should not match plain kycklingfilé ingredient; Pre-marinated citron/chili kycklingbröstfilé is a flavored product, not a plain kycklingfilé substitute; kryddad (seasoned) chicken should not match plain kycklingfilé"
+
+[[product_name_blockers]]
+id = "runtime_pnb_kalrot"
+status = "active"
+keyword = "kålrot"
+blockers = ["grönkål", "vitkål", "rödkål", "savoykål", "spetskål", "svartkål", "salladskål"]
+reason = "kålrot is rutabaga, not a kål (cabbage/greens) variety — block all kål-named offers that are not actually kålrot"
+
+[[product_name_blockers]]
+id = "runtime_pnb_parlcouscous"
+status = "active"
+keyword = "pärlcouscous"
+blockers = ["currysås"]
+reason = "Pärlcouscous med currysås is a ready-made flavored product, not plain pearl couscous for cooking"
+
+[[product_name_blockers]]
+id = "runtime_pnb_salame"
+status = "active"
+keyword = "salame"
+blockers = ["vegan"]
+reason = "vegan salami substitutes should not match real salame/salami in charcuterie or meat recipes"
+
+[[product_name_blockers]]
+id = "runtime_pnb_fetaost"
+status = "active"
+keyword = "fetaost"
+blockers = ["vaccaost"]
+reason = "vaccaost (Wapnö cow's milk cheese) is not feta — incorrectly classified under fetaost keyword"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
