@@ -603,8 +603,8 @@ reason = "Dairy-free recipes ('mjölkfritt/mjölkfri margarin') must not match r
 id = "runtime_ksbc_kaka"
 status = "active"
 keyword = "kaka"
-context = ["mjuk"]
-reason = "Mjuk kaka (sockerkaka) är specifik vara för fyllning/bakning, distinkt från hårda småkakor (Finska Pinnar, Drömmar, Havreflarn, Kolasnitt). När recept säger 'mjuk kaka' avses sockerkaka-textur."
+context = ["mjuk", "mix", "kakmix"]
+reason = "Mjuk kaka (sockerkaka) är specifik vara för fyllning/bakning, distinkt från hårda småkakor (Finska Pinnar, Drömmar, Havreflarn, Kolasnitt). När recept säger 'mjuk kaka' avses sockerkaka-textur.; Recept med 'kakmix'/'mix' i ingrediens vill ha torrblandningen, inte färdiga kakor (drömmar, finska pinnar, kolasnitt etc.). Q81-1."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_gradde"
@@ -717,6 +717,20 @@ status = "active"
 keyword = "rödbeta"
 context = ["chips"]
 reason = "Rotfruktschips/potatischips i recept ska matcha chips-produkter, inte råa rotgrönsaker (Pattern 2: processed food ≠ raw ingredient)"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_kladdkaka"
+status = "active"
+keyword = "kladdkaka"
+context = ["mix", "kladdkakamix"]
+reason = "Recept som anger 'Kladdkakamix' (Kungsörnens torrblandning) vill ha mix-produkten, inte färdigbakad/fryst kladdkaka. Q81-1."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_vasterbottensost"
+status = "active"
+keyword = "västerbottensost"
+context = ["philadelphia"]
+reason = "Philadelphia Västerbottensost® är en cream cheese-variant (mjuk/smörig pastej). Hård Västerbottensost (block/riven) är fel produkt-typ. Q81-7."
 
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
