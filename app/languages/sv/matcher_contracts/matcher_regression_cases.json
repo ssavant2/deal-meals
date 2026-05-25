@@ -33056,5 +33056,26 @@
     "policy_ref": "kycklingskinn_not_plain_kyckling",
     "recipe_name": "Sanity Recipe",
     "source_ref": "current_review:kycklingskinn_not_plain_kyckling_brost"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "grovlimpa",
+        "ingredient_index": 0,
+        "must_match_keyword": "grovlimpa"
+      }
+    ],
+    "id": "keyword_extra_parent_ragbrod_kavring_positive",
+    "ingredients": [
+      "250 g grovlimpa"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Kavring"
+    },
+    "policy_ref": "keyword_extra_parent_ragbrod_family",
+    "recipe_name": "Blomkålssoppa",
+    "source_ref": "current_review:keyword_extra_parent_ragbrod_routing"
   }
 ]

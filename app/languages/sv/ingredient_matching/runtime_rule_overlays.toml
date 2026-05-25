@@ -788,6 +788,20 @@ keyword = "skinka"
 context = ["färsk"]
 reason = "Recept som anger 'färsk skinka' vill ha rå skinkstycke (skinkstek-typ) för t.ex. schnitzel, inte kokt deli-skinka. Q83-1."
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_korsbar"
+status = "active"
+keyword = "körsbär"
+context = ["vedbit", "vedbitar", "vedbitarna"]
+reason = "BBQ-rökningsrecept använder 'blötlagda vedbitar av körsbär' (körsbärsträ för rökning, inte frukt). KSBC bypasses FPB smart-blocker som inte fungerar när keyword är standalone."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_limpa"
+status = "active"
+keyword = "limpa"
+context = ["grov", "grovlimpa"]
+reason = "Grovlimpa-ingrediens ska matcha rågbröd/kavring (mörka bröd) ej söt ljus limpa (Carlssons Fyrkant Skogaholms). Q85-5 etablerade liknande KSBC formbröd+limpa."
+
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
 status = "active"

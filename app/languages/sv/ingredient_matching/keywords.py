@@ -2021,6 +2021,9 @@ IMPORTANT_SHORT_KEYWORDS: FrozenSet[str] = frozenset({
     'oreo',  # exact cookie brand ingredient in baking/dessert recipes
     'läsk', 'lask',  # explicit soft-drink ingredients
     'tonic',  # tonic water — used in gin & tonic and mixed drinks
+    'nougat',  # bulk nougat used as baking ingredient ("250 g nougat" in julgodis/Wienernougat).
+               # Also in FLAVOR_WORDS for glass/choklad product stripping — exemption needed
+               # so ingredient-side extraction matches Nougat Frondi/Bajadera Nougat bulk products.
 })
 
 FLAVOR_WORDS = _apply_keyword_set_updates("flavor_words", FLAVOR_WORDS)

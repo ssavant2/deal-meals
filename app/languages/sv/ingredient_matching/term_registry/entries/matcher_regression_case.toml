@@ -29826,3 +29826,23 @@ source_family = "matcher_regression_case"
 canonical = "kycklingskinn_not_plain_kyckling"
 variant = "kycklingskinn_not_plain_kyckling_brost_negative: Kycklingbröst Ca 700g Kronfågel"
 layer_role = "negative_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_ragbrod_family.kavring_positive"
+language = "sv"
+market = "SE"
+canonical = "grovlimpa"
+status = "active"
+variants = ["keyword_extra_parent_ragbrod_kavring_positive: Kavring"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_ragbrod_kavring_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_ragbrod_kavring_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "grovlimpa"
+variant = "keyword_extra_parent_ragbrod_kavring_positive: Kavring"
+layer_role = "positive_regression"

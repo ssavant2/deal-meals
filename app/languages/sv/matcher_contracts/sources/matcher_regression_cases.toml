@@ -6437,10 +6437,6 @@ ingredient_index = 0
 must_match_keyword = "sojabönor"
 
 [[fixtures]]
-# Q86-2 update (2026-05-25): Stefan extended Q79-10 (färsk/fryst OK) to
-# sojabönor konserv↔fryst. Expectation flipped 0→1. Renamed _negative→_positive
-# would break inventory ref; keeping the id but updating expected + the trailing
-# comment to document the policy change.
 expected = 1
 id = "matcher_regression_sojabonor_burk_fryst_negative"
 ingredients = ["1 burk sojabönor"]
@@ -28757,3 +28753,20 @@ expected = 0
 [fixtures.offer]
 name = "Kycklingbröst Ca 700g Kronfågel"
 category = "meat"
+
+[[fixtures]]
+id = "keyword_extra_parent_ragbrod_kavring_positive"
+policy_ref = "keyword_extra_parent_ragbrod_family"
+source_ref = "current_review:keyword_extra_parent_ragbrod_routing"
+recipe_name = "Blomkålssoppa"
+ingredients = ["250 g grovlimpa"]
+expected = 1
+
+[fixtures.offer]
+name = "Kavring"
+category = "pantry"
+
+[[fixtures.expected_matches]]
+canonical = "grovlimpa"
+ingredient_index = 0
+must_match_keyword = "grovlimpa"

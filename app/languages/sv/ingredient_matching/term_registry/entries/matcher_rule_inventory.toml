@@ -9206,3 +9206,23 @@ source_family = "matcher_rule_inventory"
 canonical = "kycklingskinn_not_plain_kyckling"
 variant = "kycklingskinn_not_plain_kyckling"
 layer_role = "legacy_no_match_policy"
+
+[[entries]]
+entry_id = "sv-se.policy.ragbrod.legacy_parent_ragbrod_family"
+language = "sv"
+market = "SE"
+canonical = "rågbröd"
+status = "active"
+variants = ["rågbröd"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:legacy_parent_ragbrod_family"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row legacy_parent_ragbrod_family."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "rågbröd"
+variant = "rågbröd"
+layer_role = "legacy_parent"
