@@ -494,6 +494,13 @@ keyword = "färs"
 blockers = ["salsiccia"]
 reason = "Färs Salsiccia (Italian seasoned sausage mince) should not match plain färs - it is heavily pre-seasoned with Italian spices"
 
+[[product_name_blockers]]
+id = "runtime_pnb_wrap"
+status = "active"
+keyword = "wrap"
+blockers = ["asian"]
+reason = "Asian rice flour wraps (spring roll wrappers) should not match tortilla wrap ingredients — different product category, different cuisine, different texture and use"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
