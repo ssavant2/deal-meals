@@ -14,15 +14,15 @@
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
       "legacy_extraction": 31,
-      "legacy_no_match_policy": 43,
+      "legacy_no_match_policy": 44,
       "legacy_normalization": 24,
       "legacy_parent": 18,
       "legacy_prepared_text_expansion": 11,
       "legacy_synonym": 74,
       "legacy_validator": 249,
       "negative_guard_keyword": 22,
-      "negative_guard_pattern": 334,
-      "negative_regression": 835,
+      "negative_guard_pattern": 335,
+      "negative_regression": 836,
       "offer_extra_keyword_mapping": 417,
       "parent_match_only_mapping": 20,
       "positive_regression": 659,
@@ -35,16 +35,16 @@
       "keyword_extra_parent": 104,
       "keyword_synonym": 144,
       "match_bridge": 2021,
-      "matcher_regression_case": 1494,
-      "matcher_rule_inventory": 463,
-      "no_match_policy": 356,
+      "matcher_regression_case": 1495,
+      "matcher_rule_inventory": 464,
+      "no_match_policy": 357,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5673,
-    "variants_missing_product_text": 1802,
-    "variants_with_product_text": 3871
+    "variant_count": 5676,
+    "variants_missing_product_text": 1803,
+    "variants_with_product_text": 3873
   },
   "variants": [
     {
@@ -119179,13 +119179,76 @@
       "needs_product_text": false,
       "notes": null,
       "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [544], \"output\": \"tabasco\"}"
+    },
+    {
+      "variant_id": "vterm-86d3fdd84956aa08",
+      "row_index": 462,
+      "source_order": 10,
+      "source_type": "matcher_rule_inventory",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",
+      "source_ref": "manual:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
+      "source_id": "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
+      "variant_role": "legacy_no_match_policy",
+      "variant_text": "chiliolja_bean_peanut_block",
+      "canonical": "chiliolja_bean_peanut_block",
+      "expected_family": "chiliolja_bean_peanut_block",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": null,
+      "needs_product_text": true,
+      "notes": "Bean paste och peanut snack med chiliolja i namnet ska inte matcha chiliolja-recept (gäller även Laoganma brand-bypass-fall). Produkten är huvudsakligen bönor/jordnötter, inte chiliolja. Chili crisp-familjen behålls (Chilli Crispy I Olja, Crispy chilli i olja) eftersom de är chiliolja-stil.",
+      "metadata": "{\"adapter_ref\": \"no_match_policies:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b\", \"adapter_refs\": [], \"fixture_refs\": [\"chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative\"], \"policy_ref\": \"policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b\", \"risk\": \"no_match_policy\", \"source_refs\": [\"manual:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b\"], \"status\": \"wrapped_adapter\"}"
+    },
+    {
+      "variant_id": "vterm-ab06fa94f7470213",
+      "row_index": 466,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "manual:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
+      "source_id": "chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative",
+      "variant_role": "negative_regression",
+      "variant_text": "chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative: Sojabönor fermenterade i chiliolja 280g Laoganma",
+      "canonical": null,
+      "expected_family": "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
+      "ingredient_text": "1.5 msk chiliolja",
+      "product_text": "Sojabönor fermenterade i chiliolja 280g Laoganma",
+      "product_category": "pantry",
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": false,
+      "notes": "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b\", \"recipe_name\": \"No-match policy regression\"}"
+    },
+    {
+      "variant_id": "vterm-4b5ce32f3dcadc4d",
+      "row_index": 4020,
+      "source_order": 41,
+      "source_type": "no_match_policy",
+      "source_file": "app/languages/sv/ingredient_matching/no_match_policies.py",
+      "source_ref": "no_match_policies:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
+      "source_id": "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
+      "variant_role": "negative_guard_pattern",
+      "variant_text": "chiliolja_bean_peanut_block ! \\b(sojabönor|jordnötter|svarta\\s+bönor)\\b",
+      "canonical": "chiliolja_bean_peanut_block",
+      "expected_family": "\\b(sojabönor|jordnötter|svarta\\s+bönor)\\b",
+      "ingredient_text": null,
+      "product_text": "\\b(sojabönor|jordnötter|svarta\\s+bönor)\\b",
+      "product_category": null,
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": true,
+      "notes": "Bean paste och peanut snack med chiliolja i namnet ska inte matcha chiliolja-recept (gäller även Laoganma brand-bypass-fall). Produkten är huvudsakligen bönor/jordnötter, inte chiliolja. Chili crisp-familjen behålls (Chilli Crispy I Olja, Crispy chilli i olja) eftersom de är chiliolja-stil.",
+      "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative\"], \"ingredient_patterns\": [\"\\\\bchiliolja\\\\b\"], \"policy_ref\": \"policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b\", \"reason\": \"Bean paste och peanut snack med chiliolja i namnet ska inte matcha chiliolja-recept (gäller även Laoganma brand-bypass-fall). Produkten är huvudsakligen bönor/jordnötter, inte chiliolja. Chili crisp-familjen behålls (Chilli Crispy I Olja, Crispy chilli i olja) eftersom de är chiliolja-stil.\", \"rule_version\": 1, \"supersedes\": []}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1582,
-      "static_verified": 2597,
-      "synthetic_verified": 1494
+      "no_product_text": 1583,
+      "static_verified": 2598,
+      "synthetic_verified": 1495
     },
     "method": "static_contract_audit",
     "problem_counts": {},
@@ -119196,17 +119259,17 @@
       "keyword_extra_parent": 104,
       "keyword_synonym": 144,
       "match_bridge": 2021,
-      "matcher_regression_case": 1494,
-      "matcher_rule_inventory": 463,
-      "no_match_policy": 356,
+      "matcher_regression_case": 1495,
+      "matcher_rule_inventory": 464,
+      "no_match_policy": 357,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5673
+      "audited": 5676
     },
-    "variant_count": 5673
+    "variant_count": 5676
   }
 }

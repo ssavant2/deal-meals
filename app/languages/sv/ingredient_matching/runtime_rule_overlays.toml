@@ -578,6 +578,13 @@ keyword = "burrata"
 blockers = ["tryffel"]
 reason = "Truffle-burrata offers (Burrata med tryffel) should not match plain burrata ingredient — paired with existing no_match_policy_tryffelburrata_not_plain_burrata to enforce symmetric burrata/tryffelburrata separation"
 
+[[product_name_blockers]]
+id = "runtime_pnb_fond"
+status = "active"
+keyword = "fond"
+blockers = ["vegetarisk"]
+reason = "Fond Du Chef Vegetarisk ska inte matcha plain fond-ingredient (typiskt kött-fond). Symmetri behålls: vegetarisk recept som explicit ber om 'vegetarisk fond' matchar fortfarande via ingredient-text bypass."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -862,8 +869,8 @@ reason = "\"Grova brödskivor\" (coarse bread slices, e.g. rågbröd) requests d
 id = "runtime_ksbc_kex"
 status = "active"
 keyword = "kex"
-context = ["rawfood", "rawfoods"]
-reason = "Rawfood-kex are dehydrated raw seed/vegetable crackers, distinct from baked wheat crackers. Recipes with 'rawfood' should not get conventional kex products. FPB doesn't work here because 'kex' appears standalone in ingredient text 'Rawfood Kex'; KSBC suppresses at matched_keyword level."
+context = ["rawfood", "rawfoods", "tuc", "bake rolls", "bakerolls"]
+reason = "Rawfood-kex are dehydrated raw seed/vegetable crackers, distinct from baked wheat crackers. Recipes with 'rawfood' should not get conventional kex products. FPB doesn't work here because 'kex' appears standalone in ingredient text 'Rawfood Kex'; KSBC suppresses at matched_keyword level.; TUC Mini Bake Rolls är salt cracker för osttallrik — söta kex (Piruett/Knoppers/Mariekex/Biscoff) ska inte matcha när receptet specifikt anger TUC. KSBC suppressar generic kex-keyword när tuc/bake-rolls context co-extraheras. Andra kex-recept utan tuc opåverkade."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_persilja"
@@ -925,8 +932,8 @@ reason = "Mjuk kaka (sockerkaka) är specifik vara för fyllning/bakning, distin
 id = "runtime_ksbc_gradde"
 status = "active"
 keyword = "grädde"
-context = ["syrad"]
-reason = "Syrad grädde = sour cream, en specifik vara med distinkt smak/konsistens. Skiljer sig från vispgrädde och matlagningsgrädde — receptet vill ha den syrade varianten specifikt."
+context = ["syrad", "soja", "soya", "havre", "havrebaserad", "sojabaserad"]
+reason = "Syrad grädde = sour cream, en specifik vara med distinkt smak/konsistens. Skiljer sig från vispgrädde och matlagningsgrädde — receptet vill ha den syrade varianten specifikt.; När recept-ingredient är explicit plant-based (soyabaserad/havrebaserad/sojagrädde/havregrädde) — suppressa generic grädde-keyword. Då matchar bara via direkt plant-keyword (soja/havre). Plant-produkter har soja/havre som precomputed keyword. Dairy-grädde blockerad. Plain grädde-recept obeför ej (broad familj behålls). Symmetrisk med Q96-5 färskost."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_lime"
@@ -1102,6 +1109,13 @@ status = "active"
 keyword = "pasta"
 context = ["sfoglia"]
 reason = "Pasta Sfoglia (Italian puff pastry, sfoglia=thin layered dough) is not matpasta; suppresses pasta-keyword when ingredient text contains sfoglia"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_farskost"
+status = "active"
+keyword = "färskost"
+context = ["havre", "soja", "havrebaserad", "växtbaserad"]
+reason = "När recept-ingredient explicit är växtbaserad färskost — suppressa generic färskost-keyword så dairy-färskost (Philadelphia/Arla Bonjour) inte matchar. Plain färskost-recept fortsätter matcha alla varianter. Asymmetrisk directional rule analog Q96-3 plant-grädde."
 
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
@@ -1349,6 +1363,30 @@ keyword = "bönor"
 qualifiers = ["vit", "vita", "röd", "röda", "kidney", "svart", "svarta", "brun", "bruna", "grön", "gröna"]
 bidirectional = true
 reason = "Bönor-färger är funktionellt olika produkter: vita (cannellini/navy/butter), röda (kidney/röda), svarta, bruna (svenska bruna bönor), gröna (haricots verts skidor). Färg/typ-specifik ingrediens ska matcha bara samma färg"
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_surdegsbrod_mork_morkt"
+status = "active"
+keyword = "surdegsbröd"
+qualifiers = ["mörk", "mörkt", "råg", "kavring", "fullkorn", "grov"]
+bidirectional = true
+reason = "Surdegsbröd utan modifier antas vara ljus default. Mörka/råg/kavring/fullkorn/grov-explicit produkter blockas från ljus/plain surdegsbröd-recept. Bidirectional: ljus surdegsbröd-recept matchar plain 'Surdegsbröd' (no marker) men inte explicit råg-versioner. Analog Q90-2/Q92-2 compound bröd-pattern."
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_bonor_adzuki_edamame"
+status = "active"
+keyword = "bönor"
+qualifiers = ["adzuki", "edamame", "pinto", "lupin", "lupinbönor", "black-eye", "black eye", "blackeye"]
+bidirectional = true
+reason = "Adzuki, edamame, pinto, lupin och black-eye bönor är distinkta bönsorter (japansk söt/soja/mexikansk/grön baljväxt). Adzuki-recept ska inte matcha de andra sorterna och vice versa. Utvidgar Q90-3 färg-qualifier-pattern till specifika sortnamn."
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_ris_rundkornigt_rundkorn"
+status = "active"
+keyword = "ris"
+qualifiers = ["rundkornigt", "rundkorn", "rundkornsris"]
+bidirectional = true
+reason = "Sushi/risotto kräver rundkornsris (klibbigt). Befintlig code-rule täcker sushi/sushiris/klibbigt/glutinöst men inte 'rundkornigt'-ordet specifikt. --bidirectional: rundkornigt-recept blockeras från långkornigt jasmin/basmati. Plain ris-recept matchar fortfarande alla (broad familj)."
 
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"

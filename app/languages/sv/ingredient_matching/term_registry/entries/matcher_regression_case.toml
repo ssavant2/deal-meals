@@ -29886,3 +29886,23 @@ source_family = "matcher_regression_case"
 canonical = "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
 variant = "rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative: Rostbiff 100g"
 layer_role = "negative_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b.chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative"
+language = "sv"
+market = "SE"
+canonical = "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
+status = "active"
+variants = ["chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative: Sojabönor fermenterade i chiliolja 280g Laoganma"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
+variant = "chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative: Sojabönor fermenterade i chiliolja 280g Laoganma"
+layer_role = "negative_regression"

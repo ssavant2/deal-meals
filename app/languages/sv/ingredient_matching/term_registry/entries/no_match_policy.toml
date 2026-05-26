@@ -5795,3 +5795,41 @@ ingredient = "750 g Rostbiff"
 offer_name = "Rostbiff 100g"
 offer_category = "meat"
 expected = 0
+
+[[entries]]
+entry_id = "sv-se.guard.policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
+language = "sv"
+market = "SE"
+canonical = "chiliolja_bean_peanut_block"
+status = "active"
+variants = ["chiliolja_bean_peanut_block ! \\b(sojabönor|jordnötter|svarta\\s+bönor)\\b"]
+negative_guards = ["chiliolja_bean_peanut_block ! \\b(sojabönor|jordnötter|svarta\\s+bönor)\\b"]
+source_refs = ["policy:no_match_policies:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"]
+layer_policy = ["negative_guard_only"]
+notes = "Bean paste och peanut snack med chiliolja i namnet ska inte matcha chiliolja-recept (gäller även Laoganma brand-bypass-fall). Produkten är huvudsakligen bönor/jordnötter, inte chiliolja. Chili crisp-familjen behålls (Chilli Crispy I Olja, Crispy chilli i olja) eftersom de är chiliolja-stil."
+
+[entries.language_payload.no_match_policy]
+id = "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
+rule_schema_version = 1
+rule_version = 1
+canonical = "chiliolja_bean_peanut_block"
+ingredient_patterns = ["\\bchiliolja\\b"]
+blocked_offer_keywords = []
+blocked_offer_patterns = ["\\b(sojabönor|jordnötter|svarta\\s+bönor)\\b"]
+allowed_specifics = []
+reason = "Bean paste och peanut snack med chiliolja i namnet ska inte matcha chiliolja-recept (gäller även Laoganma brand-bypass-fall). Produkten är huvudsakligen bönor/jordnötter, inte chiliolja. Chili crisp-familjen behålls (Chilli Crispy I Olja, Crispy chilli i olja) eftersom de är chiliolja-stil."
+policy_ref = "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
+fixture_refs = ["chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative"]
+supersedes = []
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "chiliolja_bean_peanut_block"
+variant = "chiliolja_bean_peanut_block ! \\b(sojabönor|jordnötter|svarta\\s+bönor)\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.negative_examples]]
+ingredient = "1.5 msk chiliolja"
+offer_name = "Sojabönor fermenterade i chiliolja 280g Laoganma"
+offer_category = "pantry"
+expected = 0

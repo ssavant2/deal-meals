@@ -33084,5 +33084,19 @@
     "policy_ref": "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
     "recipe_name": "No-match policy regression",
     "source_ref": "manual:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+  },
+  {
+    "expected": 0,
+    "id": "chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative",
+    "ingredients": [
+      "1.5 msk chiliolja"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Sojabönor fermenterade i chiliolja 280g Laoganma"
+    },
+    "policy_ref": "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
+    "recipe_name": "No-match policy regression",
+    "source_ref": "manual:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
   }
 ]

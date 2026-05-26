@@ -28779,3 +28779,15 @@ expected = 0
 [fixtures.offer]
 name = "Rostbiff 100g"
 category = "meat"
+
+[[fixtures]]
+id = "chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative"
+policy_ref = "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
+source_ref = "manual:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
+recipe_name = "No-match policy regression"
+ingredients = ["1.5 msk chiliolja"]
+expected = 0
+
+[fixtures.offer]
+name = "Sojabönor fermenterade i chiliolja 280g Laoganma"
+category = "pantry"

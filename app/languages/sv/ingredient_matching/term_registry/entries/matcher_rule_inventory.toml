@@ -9266,3 +9266,23 @@ source_family = "matcher_rule_inventory"
 canonical = "rostbiff_deli_size"
 variant = "rostbiff_deli_size"
 layer_role = "legacy_no_match_policy"
+
+[[entries]]
+entry_id = "sv-se.policy.chiliolja_bean_peanut_block.policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
+language = "sv"
+market = "SE"
+canonical = "chiliolja_bean_peanut_block"
+status = "active"
+variants = ["chiliolja_bean_peanut_block"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "chiliolja_bean_peanut_block"
+variant = "chiliolja_bean_peanut_block"
+layer_role = "legacy_no_match_policy"

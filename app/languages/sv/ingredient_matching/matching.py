@@ -4540,12 +4540,18 @@ def _prepare_fast_ingredient_text(
     # Plant-based "matlagning" is recipe shorthand for cooking-cream products.
     # Mirror the ingredient extraction aliases here because the fast matcher works
     # on raw ingredient text, not extracted ingredient keywords.
-    if 'havrebaserad matlagning' in ingredient_lower:
+    if 'havrebaserad matlagning' in ingredient_lower or 'havregrädde' in ingredient_lower:
         ingredient_lower += ' havregrädde grädde'
-    if 'soyabaserad matlagning' in ingredient_lower or 'sojabaserad matlagning' in ingredient_lower:
-        # Append 'grädde' only — NOT 'soja', which would match soy sauce products (FP).
-        # Soy-based cream products (Alpro matlagningsgrädde etc.) already use 'grädde' keyword.
-        ingredient_lower += ' grädde'
+    if (
+        'soyabaserad matlagning' in ingredient_lower
+        or 'sojabaserad matlagning' in ingredient_lower
+        or 'sojagrädde' in ingredient_lower
+    ):
+        # Append 'sojagrädde' + 'grädde' as specific plant-cream anchors. Bare 'soja'
+        # is NOT appended because it would match soy sauce products (FP). The
+        # plant-grädde extraction-helper in extraction.py emits 'sojagrädde' as a
+        # specific keyword on plant-cream products only, so this is FP-safe.
+        ingredient_lower += ' grädde sojagrädde'
     if any(phrase in ingredient_lower for phrase in (
         'vegansk matlagning',
         'växtbaserad matlagning',

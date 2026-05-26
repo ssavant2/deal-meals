@@ -660,6 +660,26 @@ _SPICE_VS_FRESH_RULES_RAW: Dict[str, Dict[str, Set[str]]] = {
             'korianderfrön', 'korianderfron',        # "stötta korianderfrön" — INGREDIENT_PARENTS maps to 'koriander'
         },
     },
+    'estragon': {
+        # Block fresh tarragon products (potted/Klass 1) when recipe asks for dried/spice form.
+        # Mirrors koriander pattern. NOTE: Swedish "dragon" is normalized to canonical
+        # "estragon" by the matcher pipeline, so the rule lives under estragon even
+        # though "dragon" is the more common Swedish form. The vinegar-pickled version
+        # (Dragonblad i Vinäger) has its own keyword and isn't affected.
+        'blocked_product_words': set(),  # required by schema; no spice-form blockers needed
+        'fresh_product_words': {
+            'klass',          # "Fransk dragon Klass 1" — fresh produce
+            'kruka',          # "Dragon i kruka" — potted herb (always fresh by definition)
+            'färsk', 'farsk', # explicit fresh marker
+            'färska', 'farska',
+            'bunt',           # "Dragon Bunt" — fresh bunch
+        },
+        'dried_indicators': {
+            'torkad', 'torkade',                       # "torkad dragon"
+            'malen', 'mald', 'malda', 'malna',         # ground variants
+            'tsk', 'tesked', 'krm', 'msk', 'matsked', # spice measurement
+        },
+    },
     'kanel': {
         # "kanelstång" = whole cinnamon stick → block ground cinnamon products
         # "malen kanel" = ground → block whole cinnamon products

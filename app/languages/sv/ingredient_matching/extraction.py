@@ -543,6 +543,25 @@ def extract_keywords_from_product(
     ):
         return ['tabasco', 'pepparsås']
 
+    # Plant-based grädde (dairy-substitute): products like "Havregrädde" and
+    # "Matlagningsgrädde Soja" should extract both plant + grädde keywords. Allows
+    # explicit plant-based recipe ingredients ("3 dl sojagrädde", "havregrädde") to
+    # match while PNB grädde ← soja/havre still blocks plain grädde recipes from
+    # picking up plant-based products (asymmetric directional rule). NOTE:
+    # kokosgrädde is intentionally EXCLUDED — it's Asian coconut milk style, not
+    # a dairy-grädde substitute, and should be matched via separate kokosmjölk
+    # keywords in coconut-specific recipes.
+    if 'grädde' in original_name_lower or 'gradde' in original_name_lower:
+        for plant_words, plant_canonical, plant_gradde in (
+            (('soja', 'soya'), 'soja', 'sojagrädde'),  # Swedish and English spelling
+            (('havre', 'oatly', 'oddlygood'), 'havre', 'havregrädde'),  # Oatly/Oddlygood = exclusively oat-based brands
+        ):
+            if any(pw in original_name_lower for pw in plant_words):
+                # plant_gradde is the specific match anchor (sojagrädde/havregrädde)
+                # so plant-cream recipes match via it without triggering sojasås FP
+                # that a bare 'soja' match would cause.
+                return [plant_canonical, plant_gradde, 'grädde']
+
     if re.search(r'\bpesto\b', original_name_lower) and any(cue in original_name_lower for cue in ('rosso', 'röd', 'rod', 'tomat')):
         return ['tomatpesto', 'pesto']
 
