@@ -372,6 +372,11 @@ Other TOML registry rule surfaces follow the same pattern:
 `ingredient-parent`, `offer-extra-keyword`, `ingredient-routing-parent`,
 `parent-match-only`, and `recipe-routing-helper`. Use
 `./bin/dm matcher guide <shape>` for the exact flags and proof expectations.
+`parent-match-only` is deliberately route-only despite the historical name: it
+adds a parent fallback, but it does not block siblings or prove strictness. If
+the intended policy is "this related offer must not match", pass
+`--negative-offer` and `--negative-ingredient` so the generated sanity block
+contains that no-match proof too.
 
 For structured TOML policies, create/choose durable proof first, then let the
 CLI write the registry row and focused sanity stub:
@@ -695,7 +700,9 @@ First classify the conflict:
 2. If the product should expose both a precision canonical and a broad parent,
    declare the relationship. Prefer a runtime-wired parent surface
    (`ingredient-parent`, `parent-match-only`, or `keyword-extra-parent`) when the
-   relationship is real matcher behavior.
+   relationship is real matcher behavior. Remember that `parent-match-only` is
+   a fallback relation, not an exclusion guard; add a focused negative fixture,
+   no-match policy, FPB/PNB/KSBC, or backend guard when a sibling must stay out.
 3. If runtime behavior is already correct and only diagnostics cannot see the
    family relationship, add a diagnostic-only relation in
    `_DECLARED_DIAGNOSTIC_CANONICAL_PARENTS` or
@@ -1162,7 +1169,7 @@ table.
 | No-match/blocking policy | `./bin/dm matcher add no-match-policy ...` after a durable negative fixture exists; `./bin/dm matcher modify no-match-policy ...` for simple existing policies | Ingredient pattern plus offer keyword/pattern should never match. | One-off Python if a declarative policy can express it, or manual TOML rewrites when the modifier supports the shape. |
 | Offer keyword extraction | `./bin/dm matcher add offer-extra-keyword ...` or `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Product wording should expose an additional canonical offer keyword. | Adding recipe synonyms when only offer extraction is missing. |
 | Recipe extraction helper | `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures. |
-| Parent/canonical fallback | `./bin/dm matcher add ingredient-parent ...`, `parent-match-only ...`, or `keyword-extra-parent ...` | A child term should expose a broader canonical, sometimes only for matching. | Parent mappings that erase meaningful product-form differences. |
+| Parent/canonical fallback | `./bin/dm matcher add ingredient-parent ...`, `parent-match-only ...`, or `keyword-extra-parent ...` | A child term should expose a broader canonical, sometimes only for matching. For `parent-match-only`, include `--negative-offer` plus `--negative-ingredient` when the policy depends on strict sibling exclusion. | Treating parent fallback as a blocker. It is cosmetic/routing support unless a negative proof and an actual guard/no-match mechanism enforce the exclusion. |
 | Ingredient-context blocker | `./bin/dm matcher add fpb ...` | Ingredient wording contains a keyword only inside a context that should suppress it. Common Track A tactical fix. | Offer/product variant blocking; use a product-side blocker or form/specialty rule after confirming the issue is product-side. If the keyword is standalone in the recipe ingredient, verify with `dm matcher probe`; KSBC is usually the right suppressor for that shape. |
 | Product-name blocker | `./bin/dm matcher add pnb ...` | Offer/product wording contains a per-keyword variant, carrier, product type, or flavor that should block the matched keyword. Common Track A tactical fix. | Large flavor/form families that should be modeled declaratively. |
 | Generic keyword suppressed by specific context | `./bin/dm matcher add ksbc ...` | Ingredient text names a more specific context and the generic keyword should not fall back. Use narrowly; this is semantic. | Broad high-traffic suppressions without a focused sanity canary. |
@@ -1296,6 +1303,10 @@ where the fix is a narrow runtime dictionary/guard.
    may prove table membership before it proves behavior. Run
    `dm matcher probe --offer "<offer>" --ingredient "<ingredient>" --expect no-match`
    (or `--expect match`) on the concrete pair before calling the rule done.
+   This also applies to `parent-match-only`: its positive canary proves route
+   fallback only. Strictness needs either `--negative-offer`/`--negative-ingredient`
+   on the add command or a hand-written negative sanity/fixture, plus the actual
+   runtime guard that makes the negative pair fail.
 3. Add or adjust a focused regression inside `run_deep_matcher_sanity.py` for
    every new rule. If a nearby case already asserts the exact same behavior,
    keep or extend that case rather than duplicating it. This script is the
