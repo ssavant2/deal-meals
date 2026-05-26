@@ -564,6 +564,13 @@ keyword = "vetesurdeg"
 blockers = ["levainfralla", "levainbröd", "fralla", "surdegsbröd", "knäckebröd", "rågbröd", "pizzadeg"]
 reason = "Finished bread/pastry products containing vetesurdeg as ingredient should not match vetesurdeg-starter recipe ingredients — recipe wants sourdough starter for baking, not finished baked goods"
 
+[[product_name_blockers]]
+id = "runtime_pnb_grytbas"
+status = "active"
+keyword = "grytbas"
+blockers = ["red curry", "thai red curry"]
+reason = "Grytbas Thai red curry blockerad mot tikka masala/andra cuisine-specifika grytbas-ingredienser; tidigare bas blockerade madras/korma/tikka/satay/panaeng/massaman men saknade red curry-varianten."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1115,6 +1122,13 @@ status = "active"
 source = "svart -eller"
 target = "svart- eller"
 reason = "Recipe text formatting variant: 'svart -eller X' means 'svart- eller X' (svartkål or X) — same elision pattern handled when hyphen attaches to first word; this normalization makes the alternative formatting work too (Q94-3)"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_croissants_deg_croissantdeg"
+status = "active"
+source = "croissants deg"
+target = "croissantdeg"
+reason = "Danerolles 'Croissants Deg' product name has 'deg' (3 chars) dropped by min_length filter — compound-join so the full keyword 'croissantdeg' survives extraction and matches recipe ingredients asking for croissant dough"
 
 [[keyword_set_updates]]
 id = "runtime_important_short_keyword_add_hirs"
