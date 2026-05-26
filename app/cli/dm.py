@@ -1818,6 +1818,54 @@ def _remove_fixture_rows(
     return kept, tuple(removed)
 
 
+def _make_fixture_negative_rows(
+    *,
+    paths: MatcherPaths,
+    fixture_id: str,
+    policy_ref: str | None,
+    source_ref: str | None,
+) -> tuple[list[dict], dict[str, Any]]:
+    fixtures = load_contract_source(_source_spec(paths, "matcher_regression_cases"))
+    matches = [index for index, row in enumerate(fixtures) if str(row.get("id") or "") == fixture_id]
+    if not matches:
+        raise typer.BadParameter(f"fixture id not found: {fixture_id}")
+    if len(matches) > 1:
+        raise typer.BadParameter(f"fixture id is not unique: {fixture_id}")
+
+    index = matches[0]
+    original = fixtures[index]
+    row = dict(original)
+    previous_expected = row.get("expected")
+    if previous_expected not in (0, 1):
+        raise typer.BadParameter(
+            f"fixture {fixture_id} has unsupported expected value {previous_expected!r}; "
+            "only positive/negative fixtures can be converted"
+        )
+
+    expected_matches = row.pop("expected_matches", None)
+    removed_expected_matches = len(expected_matches) if isinstance(expected_matches, list) else 0
+    previous_policy_ref = str(row.get("policy_ref") or "")
+    previous_source_ref = str(row.get("source_ref") or "")
+
+    row["expected"] = 0
+    if policy_ref is not None:
+        row["policy_ref"] = policy_ref
+    if source_ref is not None:
+        row["source_ref"] = source_ref
+
+    fixtures[index] = row
+    return fixtures, {
+        "fixture_id": fixture_id,
+        "changed": row != original,
+        "previous_expected": previous_expected,
+        "removed_expected_matches": removed_expected_matches,
+        "previous_policy_ref": previous_policy_ref,
+        "new_policy_ref": str(row.get("policy_ref") or ""),
+        "previous_source_ref": previous_source_ref,
+        "new_source_ref": str(row.get("source_ref") or ""),
+    }
+
+
 def _remove_fixture_refs_from_contract_rows(
     rows: list[dict],
     *,
@@ -3585,6 +3633,27 @@ def _print_dry_run_preview(change: MatcherChangePlan) -> None:
     if change.sanity_preview:
         typer.echo(change.sanity_preview)
     typer.echo("Dry run only; no files written.")
+
+
+def _print_fixture_make_negative_summary(
+    summary: Mapping[str, Any],
+    *,
+    dry_run: bool,
+) -> None:
+    fixture_id = str(summary["fixture_id"])
+    if summary["changed"]:
+        action = "Would convert" if dry_run else "Converted"
+        typer.echo(f"{action} fixture to negative: {fixture_id}")
+    else:
+        typer.echo(f"Fixture already negative: {fixture_id}")
+    typer.echo(f"  expected: {summary['previous_expected']} -> 0")
+    typer.echo(f"  removed expected_matches: {summary['removed_expected_matches']}")
+    if summary["previous_policy_ref"] != summary["new_policy_ref"]:
+        typer.echo(f"  policy_ref: {summary['previous_policy_ref']} -> {summary['new_policy_ref']}")
+    if summary["previous_source_ref"] != summary["new_source_ref"]:
+        typer.echo(f"  source_ref: {summary['previous_source_ref']} -> {summary['new_source_ref']}")
+    if dry_run:
+        typer.echo("Dry run only; no files written.")
 
 
 def _run_preflight(paths: MatcherPaths, report_root: Path | None) -> int:
@@ -9005,6 +9074,66 @@ def add_extraction_helper(
         return
     gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
     raise typer.Exit(gate_status)
+
+
+@matcher_fixture_app.command("make-negative")
+def matcher_fixture_make_negative(
+    fixture_id: Annotated[str, typer.Argument(help="Existing fixture id to convert from expected=1 to expected=0.")],
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    policy_ref: Annotated[
+        str | None,
+        typer.Option("--policy-ref", help="Replace the fixture policy_ref after conversion."),
+    ] = None,
+    source_ref: Annotated[
+        str | None,
+        typer.Option("--source-ref", help="Replace the fixture source_ref after conversion."),
+    ] = None,
+    regen: Annotated[
+        bool,
+        typer.Option("--regen/--no-regen", help="Regenerate matcher contract JSON after writing."),
+    ] = True,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run matcher preflight after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Show the fixture rewrite without writing files.")] = False,
+) -> None:
+    paths = _paths(tree_root)
+    fixture_rows, summary = _make_fixture_negative_rows(
+        paths=paths,
+        fixture_id=fixture_id,
+        policy_ref=policy_ref,
+        source_ref=source_ref,
+    )
+
+    _print_fixture_make_negative_summary(summary, dry_run=dry_run)
+    if dry_run:
+        return
+
+    if summary["changed"]:
+        write_contract_source(_source_spec(paths, "matcher_regression_cases"), fixture_rows)
+    if regen:
+        _regenerate_contract_json(paths)
+        typer.echo("Regenerated matcher contract JSON.")
+    else:
+        typer.echo("Skipped regen (--no-regen).")
+
+    typer.echo(
+        "If verified-term promotion reports intentional removals, finish the batch with "
+        "`dm matcher batch finalize --track B --allow-removals` after reviewing them."
+    )
+
+    if not run_gates:
+        typer.echo("Skipped preflight (--no-run-gates).")
+        return
+    if _matcher_session_should_defer_gates(paths):
+        _echo_session_deferred_gates("preflight")
+        return
+    raise typer.Exit(_run_preflight(paths, report_root))
 
 
 @matcher_fixture_app.command("remove")

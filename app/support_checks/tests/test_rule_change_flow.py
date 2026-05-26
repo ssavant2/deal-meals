@@ -3965,6 +3965,85 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertIn("regen --check", result.stdout)
         self.assertIn("gates --track B", result.stdout)
 
+    def test_dm_matcher_fixture_make_negative_rewrites_source_and_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            fixture_spec = contract_spec_by_name("matcher_regression_cases", tree_root=tree_root)
+            fixtures = load_contract_source(fixture_spec)
+            fixtures.append({
+                "id": "phase_fixture_to_negative_positive",
+                "policy_ref": "policy_phase_fixture_old",
+                "source_ref": "manual:policy_phase_fixture_old",
+                "recipe_name": "Synthetic Positive Fixture",
+                "ingredients": ["1 dl phasefixture"],
+                "offer": {"name": "Phasefixture", "category": "pantry"},
+                "expected": 1,
+                "expected_matches": [{
+                    "canonical": "phasefixture",
+                    "ingredient_index": 0,
+                    "must_match_keyword": "phasefixture",
+                }],
+            })
+            write_contract_source(fixture_spec, fixtures)
+            check_generated_contract_json(tree_root=tree_root, write=True)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "fixture",
+                    "make-negative",
+                    "phase_fixture_to_negative_positive",
+                    "--policy-ref",
+                    "policy_phase_fixture_new_negative",
+                    "--source-ref",
+                    "manual:policy_phase_fixture_new_negative",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            self.assertIn("Converted fixture to negative: phase_fixture_to_negative_positive", result.stdout)
+            self.assertIn("removed expected_matches: 1", result.stdout)
+            self.assertIn("Regenerated matcher contract JSON.", result.stdout)
+            self.assertIn("--allow-removals", result.stdout)
+
+            updated_fixtures = load_contract_source(fixture_spec)
+            updated_fixture = next(
+                row for row in updated_fixtures
+                if row["id"] == "phase_fixture_to_negative_positive"
+            )
+            self.assertEqual(updated_fixture["expected"], 0)
+            self.assertNotIn("expected_matches", updated_fixture)
+            self.assertEqual(updated_fixture["policy_ref"], "policy_phase_fixture_new_negative")
+            self.assertEqual(updated_fixture["source_ref"], "manual:policy_phase_fixture_new_negative")
+
+            generated_fixtures = json.loads(
+                (
+                    app_dir
+                    / "languages"
+                    / "sv"
+                    / "matcher_contracts"
+                    / "matcher_regression_cases.json"
+                ).read_text(encoding="utf-8")
+            )
+            generated_fixture = next(
+                row for row in generated_fixtures
+                if row["id"] == "phase_fixture_to_negative_positive"
+            )
+            self.assertEqual(generated_fixture["expected"], 0)
+            self.assertNotIn("expected_matches", generated_fixture)
+
     def test_dm_matcher_batch_metrics_start_finish_writes_local_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)

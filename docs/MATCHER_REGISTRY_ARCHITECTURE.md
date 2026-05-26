@@ -163,6 +163,7 @@ unified CLI:
 ./bin/dm matcher add extraction-helper ...
 ./bin/dm matcher modify no-match-policy ...
 ./bin/dm matcher modify match-bridge ...
+./bin/dm matcher fixture make-negative <fixture_id>
 ./bin/dm matcher fixture remove <fixture_id>
 ```
 
@@ -216,6 +217,10 @@ For grouped rule work, `dm matcher batch start` defers per-command gates and
 regen/promote/line-ref/preflight/gate steps without mutating files.
 `dm matcher batch metrics --start/--finish` writes an ignored local JSON note
 under `app/.dm/`; it is only for local friction tracking, not registry policy.
+When a review reverses an old positive fixture into a negative proof, use
+`dm matcher fixture make-negative` instead of hand-editing
+`[[fixtures.expected_matches]]`; then finalize with `--allow-removals` if the
+promote step reports reviewed true removals.
 
 For Track B matcher-rule work, prefer the wrapper:
 
