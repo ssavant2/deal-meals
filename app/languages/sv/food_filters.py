@@ -26,6 +26,8 @@ Note on compound words:
     This means "ostbricka" → kept as food, "plastbricka" → filtered out.
 """
 
+import re
+
 # =============================================================================
 # FOOD CATEGORIES - Category strings that indicate food
 # =============================================================================
@@ -384,6 +386,60 @@ CHOCOLATE_CANDY_INDICATORS = (
 )
 
 
+PLAIN_DARK_CHOCOLATE_MIN_PERCENT = 70
+PLAIN_DARK_CHOCOLATE_REQUIRED_WORDS = (
+    'mörk', 'mork', 'dark',
+)
+PLAIN_DARK_CHOCOLATE_BLOCKERS = (
+    # Flavors/add-ins: good eating chocolate, but not plain recipe chocolate.
+    'havssalt', 'sea salt', 'salted', 'salt',
+    'karamell', 'karamel', 'caramel',
+    'apelsin', 'orange',
+    'mint',
+    'chili',
+    'fikon', 'fig',
+    'lemon', 'citron',
+    'ginger', 'ingefära', 'ingefara',
+    'pistachio', 'pistasch',
+    'hazelnut', 'hasselnöt', 'hasselnot',
+    'mandel', 'almond',
+    'russin', 'raisin',
+    'jordgubb', 'strawberry',
+    'hallon', 'raspberry',
+    'kokos', 'coconut',
+    # Milk/white/fusion/filled/gift lines are confectionery.
+    'mjölkchoklad', 'mjolkchoklad', 'milk',
+    'vit choklad', 'white chocolate',
+    'fusion',
+    'creation',
+    'creme', 'crème', 'cream', 'brulee', 'brûlée',
+    'les grandes', 'grandes',
+    'lindor', 'pralin', 'praliner',
+    'gift', 'gifting', 'edt',
+    'heart', 'hjärta',
+)
+
+
+def _plain_dark_chocolate_percent(name_lower: str) -> int | None:
+    percents = [
+        int(match.group(1))
+        for match in re.finditer(r'(?<!\d)(\d{2,3})\s*%', name_lower)
+    ]
+    return max(percents) if percents else None
+
+
+def is_plain_dark_recipe_chocolate(name_lower: str) -> bool:
+    """Allow plain high-cocoa dark chocolate bars as recipe chocolate."""
+    percent = _plain_dark_chocolate_percent(name_lower)
+    if percent is None or percent < PLAIN_DARK_CHOCOLATE_MIN_PERCENT:
+        return False
+    if not any(word in name_lower for word in PLAIN_DARK_CHOCOLATE_REQUIRED_WORDS):
+        return False
+    if any(blocker in name_lower for blocker in PLAIN_DARK_CHOCOLATE_BLOCKERS):
+        return False
+    return True
+
+
 def is_cooking_chocolate(name_lower: str) -> bool:
     """Check if a chocolate product is recipe-relevant despite candy-ish wording."""
     if 'choklad' not in name_lower:
@@ -391,6 +447,8 @@ def is_cooking_chocolate(name_lower: str) -> bool:
     if 'chokladägg' in name_lower or 'chokladagg' in name_lower:
         return True
     if any(w in name_lower for w in COOKING_CHOCOLATE_WORDS):
+        return True
+    if is_plain_dark_recipe_chocolate(name_lower):
         return True
     if any(w in name_lower for w in CHOCOLATE_CANDY_INDICATORS):
         return False

@@ -20,6 +20,7 @@ from types import SimpleNamespace
 sys.path.insert(0, '/app' if os.path.exists('/app') else os.path.join(os.path.dirname(__file__), '..'))
 
 from loguru import logger  # noqa: E402
+from languages.sv.food_filters import is_cooking_chocolate  # noqa: E402
 from languages.sv.ingredient_matching import (  # noqa: E402
     build_ingredient_match_data,
     build_offer_match_data,
@@ -175,6 +176,59 @@ def _run_matching_sanity_checks() -> None:
         test(f"{case['name']} cached", cached_val, expected)
         test(f"{case['name']} audit/full parity", audit_val, full_val)
         test(f"{case['name']} audit/cached parity", audit_val, cached_val)
+
+
+def _run_food_filter_sanity_checks() -> None:
+    print("\n--- food filter sanity ---", flush=True)
+    cases = [
+        (
+            "plain 70 dark chocolate bar is recipe chocolate",
+            "Chokladkaka EXCELLENCE 70% Kakao Mörk Choklad 100g Lindt",
+            True,
+        ),
+        (
+            "plain 85 dark chocolate bar is recipe chocolate",
+            "Chokladkaka EXCELLENCE 85% Kakao Mörk Choklad 100g Lindt",
+            True,
+        ),
+        (
+            "mild 70 dark chocolate bar is recipe chocolate",
+            "Chokladkaka EXCELLENCE Mild 70% Mörk Choklad 100g Lindt",
+            True,
+        ),
+        (
+            "sea salt dark chocolate bar stays candy",
+            "Chokladkaka EXCELLENCE Havssalt Mörk Choklad 100g Lindt",
+            False,
+        ),
+        (
+            "orange dark chocolate bar stays candy",
+            "Chokladkaka EXCELLENCE Apelsin Mörk Choklad 100g Lindt",
+            False,
+        ),
+        (
+            "milk fusion chocolate stays candy",
+            "Choklad Excellence Fusion 70% Milk 100g Lindt",
+            False,
+        ),
+        (
+            "white fusion chocolate stays candy",
+            "Vit Choklad Excellence Fusion 70% 100g Lindt",
+            False,
+        ),
+        (
+            "65 percent dark chocolate bar stays candy",
+            "Chokladkaka EXCELLENCE 65% Kakao Mörk Choklad 100g Lindt",
+            False,
+        ),
+        (
+            "explicit baking chocolate still passes",
+            "Bakchoklad Mörk 55% Garant",
+            True,
+        ),
+    ]
+    for desc, name, expected in cases:
+        test(desc, is_cooking_chocolate(name.lower()), expected)
 
 
 def _run_store_discovery_sanity_checks() -> None:
@@ -454,6 +508,7 @@ def _run_term_registry_add_term_checks() -> None:
     test("term registry add-term layer count", summary.get("known_export_layer_count"), 25)
 
 
+_run_food_filter_sanity_checks()
 _run_matching_sanity_checks()
 _run_store_discovery_sanity_checks()
 _run_store_registry_sanity_checks()
