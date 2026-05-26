@@ -14,15 +14,15 @@
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
       "legacy_extraction": 31,
-      "legacy_no_match_policy": 42,
+      "legacy_no_match_policy": 43,
       "legacy_normalization": 24,
       "legacy_parent": 18,
       "legacy_prepared_text_expansion": 11,
       "legacy_synonym": 74,
       "legacy_validator": 249,
       "negative_guard_keyword": 22,
-      "negative_guard_pattern": 333,
-      "negative_regression": 834,
+      "negative_guard_pattern": 334,
+      "negative_regression": 835,
       "offer_extra_keyword_mapping": 417,
       "parent_match_only_mapping": 20,
       "positive_regression": 659,
@@ -35,16 +35,16 @@
       "keyword_extra_parent": 104,
       "keyword_synonym": 144,
       "match_bridge": 2021,
-      "matcher_regression_case": 1493,
-      "matcher_rule_inventory": 462,
-      "no_match_policy": 355,
+      "matcher_regression_case": 1494,
+      "matcher_rule_inventory": 463,
+      "no_match_policy": 356,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5669,
-    "variants_missing_product_text": 1800,
-    "variants_with_product_text": 3869
+    "variant_count": 5672,
+    "variants_missing_product_text": 1801,
+    "variants_with_product_text": 3871
   },
   "variants": [
     {
@@ -119095,13 +119095,76 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"formbröd\"}"
+    },
+    {
+      "variant_id": "vterm-7ca230aa6a0f0e7f",
+      "row_index": 463,
+      "source_order": 10,
+      "source_type": "matcher_rule_inventory",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",
+      "source_ref": "manual:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+      "source_id": "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+      "variant_role": "legacy_no_match_policy",
+      "variant_text": "rostbiff_deli_size",
+      "canonical": "rostbiff_deli_size",
+      "expected_family": "rostbiff_deli_size",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": null,
+      "needs_product_text": true,
+      "notes": "Rostbiff under 300g är typiskt pålägg/deli/charkuteri (förpackningsstorlek 50-220g). Receptingredienser som rostbiff avser typiskt rå köttbit (300g+ förpackningar). Storleksbaserad heuristik per Stefan policy 2026-05-26.",
+      "metadata": "{\"adapter_ref\": \"no_match_policies:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b\", \"adapter_refs\": [], \"fixture_refs\": [\"rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative\"], \"policy_ref\": \"policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b\", \"risk\": \"no_match_policy\", \"source_refs\": [\"manual:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b\"], \"status\": \"wrapped_adapter\"}"
+    },
+    {
+      "variant_id": "vterm-057d5de6b3698d2a",
+      "row_index": 1941,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "manual:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+      "source_id": "rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative",
+      "variant_role": "negative_regression",
+      "variant_text": "rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative: Rostbiff 100g",
+      "canonical": null,
+      "expected_family": "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+      "ingredient_text": "750 g Rostbiff",
+      "product_text": "Rostbiff 100g",
+      "product_category": "meat",
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": false,
+      "notes": "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b\", \"recipe_name\": \"No-match policy regression\"}"
+    },
+    {
+      "variant_id": "vterm-003eaa9c16921a4e",
+      "row_index": 4268,
+      "source_order": 41,
+      "source_type": "no_match_policy",
+      "source_file": "app/languages/sv/ingredient_matching/no_match_policies.py",
+      "source_ref": "no_match_policies:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+      "source_id": "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+      "variant_role": "negative_guard_pattern",
+      "variant_text": "rostbiff_deli_size ! \\brostbiff\\b.*?\\b([1-9]\\d|1\\d\\d|2\\d\\d)\\s*g\\b",
+      "canonical": "rostbiff_deli_size",
+      "expected_family": "\\brostbiff\\b.*?\\b([1-9]\\d|1\\d\\d|2\\d\\d)\\s*g\\b",
+      "ingredient_text": null,
+      "product_text": "\\brostbiff\\b.*?\\b([1-9]\\d|1\\d\\d|2\\d\\d)\\s*g\\b",
+      "product_category": null,
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": true,
+      "notes": "Rostbiff under 300g är typiskt pålägg/deli/charkuteri (förpackningsstorlek 50-220g). Receptingredienser som rostbiff avser typiskt rå köttbit (300g+ förpackningar). Storleksbaserad heuristik per Stefan policy 2026-05-26.",
+      "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative\"], \"ingredient_patterns\": [\"\\\\brostbiff\\\\b\"], \"policy_ref\": \"policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b\", \"reason\": \"Rostbiff under 300g är typiskt pålägg/deli/charkuteri (förpackningsstorlek 50-220g). Receptingredienser som rostbiff avser typiskt rå köttbit (300g+ förpackningar). Storleksbaserad heuristik per Stefan policy 2026-05-26.\", \"rule_version\": 1, \"supersedes\": []}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1581,
-      "static_verified": 2595,
-      "synthetic_verified": 1493
+      "no_product_text": 1582,
+      "static_verified": 2596,
+      "synthetic_verified": 1494
     },
     "method": "static_contract_audit",
     "problem_counts": {},
@@ -119112,17 +119175,17 @@
       "keyword_extra_parent": 104,
       "keyword_synonym": 144,
       "match_bridge": 2021,
-      "matcher_regression_case": 1493,
-      "matcher_rule_inventory": 462,
-      "no_match_policy": 355,
+      "matcher_regression_case": 1494,
+      "matcher_rule_inventory": 463,
+      "no_match_policy": 356,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5669
+      "audited": 5672
     },
-    "variant_count": 5669
+    "variant_count": 5672
   }
 }

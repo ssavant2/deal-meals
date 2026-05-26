@@ -3989,9 +3989,9 @@
       },
       {
         "anchor": "# Corn flour is an ingredient; breadcrumb products made with corn flour are",
-        "end": 3971,
+        "end": 3975,
         "path": "app/languages/sv/ingredient_matching/blocker_data.py",
-        "start": 3971
+        "start": 3975
       }
     ],
     "notes": "Majsmjöl/corn flour accepts corn-flour products and polenta aliases, but breadcrumb products that merely contain corn flour stay blocked.",
@@ -5653,9 +5653,9 @@
       },
       {
         "anchor": "'sodavatten': {",
-        "end": 3959,
+        "end": 3963,
         "path": "app/languages/sv/ingredient_matching/blocker_data.py",
-        "start": 3959
+        "start": 3963
       }
     ],
     "notes": "Sodavatten accepts plain/naturell sparkling water and mineral-water rows while flavored sparkling waters stay blocked.",
@@ -5725,9 +5725,9 @@
       },
       {
         "anchor": "'snabbkaffe': {'3in 1', 'cappuccino', 'cappucino', 'choklad', 'karamell', 'vanilla', 'vanilj', 'latte'},",
-        "end": 3968,
+        "end": 3972,
         "path": "app/languages/sv/ingredient_matching/blocker_data.py",
-        "start": 3968
+        "start": 3972
       },
       {
         "anchor": "variant = \"snabbkaffepulver\"",
@@ -5810,9 +5810,9 @@
       },
       {
         "anchor": "'hamburgerbröd': {'korvbröd', 'korvbrod', 'fries', 'soup', 'soppa', 'hamburgare', 'burgare'},",
-        "end": 3957,
+        "end": 3961,
         "path": "app/languages/sv/ingredient_matching/blocker_data.py",
-        "start": 3957
+        "start": 3961
       }
     ],
     "notes": "Slider/minihamburger bun recipe wording and product-side Sliders naming meet on hamburgerbröd while patties, fries, soup, and hot-dog buns stay out.",
@@ -5926,9 +5926,9 @@
       },
       {
         "anchor": "'lingon': {'sylt', '35%', 'lingon 35%'},",
-        "end": 3942,
+        "end": 3946,
         "path": "app/languages/sv/ingredient_matching/blocker_data.py",
-        "start": 3942
+        "start": 3946
       }
     ],
     "notes": "Explicit frozen/raw lingon can match frozen lingonberries, while Lingon 35% and sylt/preserved forms stay out.",
@@ -6049,7 +6049,7 @@
         "start": 3862
       },
       {
-        "anchor": "'rostbiff': {'deliskivor', 'deli skivor', 'skivad', 'skivor', 'pålägg', 'palagg'},",
+        "anchor": "'rostbiff': {'deliskivor', 'deli skivor', 'skivor', 'pålägg', 'palagg'},",
         "end": 3941,
         "path": "app/languages/sv/ingredient_matching/blocker_data.py",
         "start": 3941
@@ -6172,9 +6172,9 @@
       },
       {
         "anchor": "'vegobacon': {'baconost', 'mjukost'},",
-        "end": 3958,
+        "end": 3962,
         "path": "app/languages/sv/ingredient_matching/blocker_data.py",
-        "start": 3958
+        "start": 3962
       }
     ],
     "notes": "Vegan/vegetarian bacon wording normalizes to vegobacon and rejects bacon-flavoured cheese carriers.",
@@ -6466,9 +6466,9 @@
       },
       {
         "anchor": "'vaniljkvarg': {'blåbär', 'blabar', 'fläder', 'flader', 'hallon', 'jordgubb'},",
-        "end": 3970,
+        "end": 3974,
         "path": "app/languages/sv/ingredient_matching/blocker_data.py",
-        "start": 3970
+        "start": 3974
       }
     ],
     "notes": "Kesella/kvarg with vanilla wording is treated as vaniljkvarg, while plain/naturell Kesella does not satisfy the vanilla request.",
@@ -6510,9 +6510,9 @@
       },
       {
         "anchor": "'apelsinskal': {'kanderat', 'kanderade', 'syltat', 'syltade'},",
-        "end": 3969,
+        "end": 3973,
         "path": "app/languages/sv/ingredient_matching/blocker_data.py",
-        "start": 3969
+        "start": 3973
       },
       {
         "anchor": "ingredient_lower += ' kanderatapelsinskal'",
@@ -14939,6 +14939,31 @@
     "risk": "no_match_policy",
     "source_refs": [
       "current_review:boveteflingor_not_raw_bovete"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+    "canonical": "rostbiff_deli_size",
+    "fixture_refs": [
+      "rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative"
+    ],
+    "id": "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "entry_id = \"sv-se.guard.policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b\"",
+        "end": 5762,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5762
+      }
+    ],
+    "notes": "Rostbiff under 300g är typiskt pålägg/deli/charkuteri (förpackningsstorlek 50-220g). Receptingredienser som rostbiff avser typiskt rå köttbit (300g+ förpackningar). Storleksbaserad heuristik per Stefan policy 2026-05-26.",
+    "owner": "matcher",
+    "policy_ref": "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "manual:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
     ],
     "status": "wrapped_adapter"
   }

@@ -28767,3 +28767,15 @@ expected = 0
 [fixtures.offer]
 name = "Bovete 900g Nasha Kasha"
 category = "pantry"
+
+[[fixtures]]
+id = "rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative"
+policy_ref = "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+source_ref = "manual:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+recipe_name = "No-match policy regression"
+ingredients = ["750 g Rostbiff"]
+expected = 0
+
+[fixtures.offer]
+name = "Rostbiff 100g"
+category = "meat"

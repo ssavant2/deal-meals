@@ -29866,3 +29866,23 @@ source_family = "matcher_regression_case"
 canonical = "boveteflingor_not_raw_bovete"
 variant = "boveteflingor_not_raw_bovete_negative: Bovete 900g Nasha Kasha"
 layer_role = "negative_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b.rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative"
+language = "sv"
+market = "SE"
+canonical = "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+status = "active"
+variants = ["rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative: Rostbiff 100g"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+variant = "rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative: Rostbiff 100g"
+layer_role = "negative_regression"

@@ -33070,5 +33070,19 @@
     "policy_ref": "boveteflingor_not_raw_bovete",
     "recipe_name": "Glutenfri müsli",
     "source_ref": "current_review:boveteflingor_not_raw_bovete"
+  },
+  {
+    "expected": 0,
+    "id": "rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative",
+    "ingredients": [
+      "750 g Rostbiff"
+    ],
+    "offer": {
+      "category": "meat",
+      "name": "Rostbiff 100g"
+    },
+    "policy_ref": "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+    "recipe_name": "No-match policy regression",
+    "source_ref": "manual:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
   }
 ]

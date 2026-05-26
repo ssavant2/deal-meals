@@ -5757,3 +5757,41 @@ ingredient = "boveteflingor"
 offer_name = "Bovete 900g Nasha Kasha"
 offer_category = "pantry"
 expected = 0
+
+[[entries]]
+entry_id = "sv-se.guard.policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+language = "sv"
+market = "SE"
+canonical = "rostbiff_deli_size"
+status = "active"
+variants = ["rostbiff_deli_size ! \\brostbiff\\b.*?\\b([1-9]\\d|1\\d\\d|2\\d\\d)\\s*g\\b"]
+negative_guards = ["rostbiff_deli_size ! \\brostbiff\\b.*?\\b([1-9]\\d|1\\d\\d|2\\d\\d)\\s*g\\b"]
+source_refs = ["policy:no_match_policies:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"]
+layer_policy = ["negative_guard_only"]
+notes = "Rostbiff under 300g är typiskt pålägg/deli/charkuteri (förpackningsstorlek 50-220g). Receptingredienser som rostbiff avser typiskt rå köttbit (300g+ förpackningar). Storleksbaserad heuristik per Stefan policy 2026-05-26."
+
+[entries.language_payload.no_match_policy]
+id = "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+rule_schema_version = 1
+rule_version = 1
+canonical = "rostbiff_deli_size"
+ingredient_patterns = ["^(?!.*\\bpålägg\\b)(?!.*\\bpalagg\\b).*\\brostbiff\\b"]
+blocked_offer_keywords = []
+blocked_offer_patterns = ["\\brostbiff\\b.*?\\b([1-9]\\d|1\\d\\d|2\\d\\d)\\s*g\\b"]
+allowed_specifics = []
+reason = "Rostbiff under 300g är typiskt pålägg/deli/charkuteri (förpackningsstorlek 50-220g). Receptingredienser som rostbiff avser typiskt rå köttbit (300g+ förpackningar). Storleksbaserad heuristik per Stefan policy 2026-05-26."
+policy_ref = "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+fixture_refs = ["rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative"]
+supersedes = []
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "rostbiff_deli_size"
+variant = "rostbiff_deli_size ! \\brostbiff\\b.*?\\b([1-9]\\d|1\\d\\d|2\\d\\d)\\s*g\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.negative_examples]]
+ingredient = "750 g Rostbiff"
+offer_name = "Rostbiff 100g"
+offer_category = "meat"
+expected = 0

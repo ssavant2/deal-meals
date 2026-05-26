@@ -3938,7 +3938,11 @@ _PRODUCT_NAME_BLOCKER_UPDATES: Dict[str, Set[str]] = {
                   'quinoa'},  # "Gröt Havregryn & quinoa" = blend != plain rolled oats for smulpaj
     'bröd': {'sirap'},
     'brod': {'sirap'},
-    'rostbiff': {'deliskivor', 'deli skivor', 'skivad', 'skivor', 'pålägg', 'palagg'},
+    # rostbiff: 'skivad' removed 2026-05-26 — adjective is ambiguous (rå köttbit kan
+    # säljas färdigskivad, e.g. "Rostbiff Färsk Skivad 600g"). Size-based
+    # no_match_policy rostbiff_deli_size now blocks <300g formats (typical deli range).
+    # 'skivor' (substantiv plural) and other markers below still indicate deli/pålägg.
+    'rostbiff': {'deliskivor', 'deli skivor', 'skivor', 'pålägg', 'palagg'},
     'lingon': {'sylt', '35%', 'lingon 35%'},
     'björnbär': {'marmelad', 'sylt'},
     'bjornbar': {'marmelad', 'sylt'},

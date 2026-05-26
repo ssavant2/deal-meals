@@ -2949,9 +2949,9 @@ start = 5513
 
 [[inventory.line_refs]]
 anchor = "# Corn flour is an ingredient; breadcrumb products made with corn flour are"
-end = 3971
+end = 3975
 path = "app/languages/sv/ingredient_matching/blocker_data.py"
-start = 3971
+start = 3975
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kardemummayoghurt_exact"
@@ -4253,9 +4253,9 @@ start = 5536
 
 [[inventory.line_refs]]
 anchor = "'sodavatten': {"
-end = 3959
+end = 3963
 path = "app/languages/sv/ingredient_matching/blocker_data.py"
-start = 3959
+start = 3963
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_havregryn_plain"
@@ -4309,9 +4309,9 @@ start = 487
 
 [[inventory.line_refs]]
 anchor = "'snabbkaffe': {'3in 1', 'cappuccino', 'cappucino', 'choklad', 'karamell', 'vanilla', 'vanilj', 'latte'},"
-end = 3968
+end = 3972
 path = "app/languages/sv/ingredient_matching/blocker_data.py"
-start = 3968
+start = 3972
 
 [[inventory.line_refs]]
 anchor = "variant = \"snabbkaffepulver\""
@@ -4377,9 +4377,9 @@ start = 5295
 
 [[inventory.line_refs]]
 anchor = "'hamburgerbröd': {'korvbröd', 'korvbrod', 'fries', 'soup', 'soppa', 'hamburgare', 'burgare'},"
-end = 3957
+end = 3961
 path = "app/languages/sv/ingredient_matching/blocker_data.py"
-start = 3957
+start = 3961
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_apelsinlask_soda"
@@ -4464,9 +4464,9 @@ start = 493
 
 [[inventory.line_refs]]
 anchor = "'lingon': {'sylt', '35%', 'lingon 35%'},"
-end = 3942
+end = 3946
 path = "app/languages/sv/ingredient_matching/blocker_data.py"
-start = 3942
+start = 3946
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_svampfond_kantarellfond"
@@ -4556,7 +4556,7 @@ path = "app/languages/sv/ingredient_matching/blocker_data.py"
 start = 3862
 
 [[inventory.line_refs]]
-anchor = "'rostbiff': {'deliskivor', 'deli skivor', 'skivad', 'skivor', 'pålägg', 'palagg'},"
+anchor = "'rostbiff': {'deliskivor', 'deli skivor', 'skivor', 'pålägg', 'palagg'},"
 end = 3941
 path = "app/languages/sv/ingredient_matching/blocker_data.py"
 start = 3941
@@ -4650,9 +4650,9 @@ start = 204
 
 [[inventory.line_refs]]
 anchor = "'vegobacon': {'baconost', 'mjukost'},"
-end = 3958
+end = 3962
 path = "app/languages/sv/ingredient_matching/blocker_data.py"
-start = 3958
+start = 3962
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vaxtbaserad_mjolkryck"
@@ -4874,9 +4874,9 @@ start = 462
 
 [[inventory.line_refs]]
 anchor = "'vaniljkvarg': {'blåbär', 'blabar', 'fläder', 'flader', 'hallon', 'jordgubb'},"
-end = 3970
+end = 3974
 path = "app/languages/sv/ingredient_matching/blocker_data.py"
-start = 3970
+start = 3974
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_apelsinskal_fresh_fruit", "match_bridges:bridge_kanderade_citrusskal_exact"]
@@ -4905,9 +4905,9 @@ start = 2302
 
 [[inventory.line_refs]]
 anchor = "'apelsinskal': {'kanderat', 'kanderade', 'syltat', 'syltade'},"
-end = 3969
+end = 3973
 path = "app/languages/sv/ingredient_matching/blocker_data.py"
-start = 3969
+start = 3973
 
 [[inventory.line_refs]]
 anchor = "ingredient_lower += ' kanderatapelsinskal'"
@@ -10773,3 +10773,22 @@ path = "app/languages/sv/ingredient_matching/term_registry/entries/no_match_poli
 start = 5724
 end = 5724
 anchor = "entry_id = \"sv-se.guard.policy_boveteflingor_not_raw_bovete_i_bbovete_b_flingor\""
+
+[[inventory]]
+id = "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+status = "wrapped_adapter"
+kind = "legacy_no_match_policy"
+canonical = "rostbiff_deli_size"
+owner = "matcher"
+policy_ref = "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+source_refs = ["manual:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"]
+fixture_refs = ["rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative"]
+risk = "no_match_policy"
+adapter_ref = "no_match_policies:policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b"
+notes = "Rostbiff under 300g är typiskt pålägg/deli/charkuteri (förpackningsstorlek 50-220g). Receptingredienser som rostbiff avser typiskt rå köttbit (300g+ förpackningar). Storleksbaserad heuristik per Stefan policy 2026-05-26."
+
+[[inventory.line_refs]]
+path = "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml"
+start = 5762
+end = 5762
+anchor = "entry_id = \"sv-se.guard.policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b\""
