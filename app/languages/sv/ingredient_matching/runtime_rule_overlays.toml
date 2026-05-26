@@ -508,6 +508,20 @@ keyword = "soygurt"
 blockers = ["persika", "hallon", "jordgubb", "blåbär", "mango", "banan", "ananas", "kiwi", "apelsin", "citron", "körsbär", "aprikos", "plommon", "päron", "lingon", "hjortron", "choklad", "frukt"]
 reason = "Smaksatt soygurt ska inte matcha plain soygurt-ingrediens — samma princip som yoghurt-principen, sojagurt och havregurt (Q92-5)"
 
+[[product_name_blockers]]
+id = "runtime_pnb_kaviar"
+status = "active"
+keyword = "kaviar"
+blockers = ["sill"]
+reason = "Sill (herring) products with kaviar in name are flavored herring, not plain tube kaviar — symmetric to existing PNB sill blocking kaviar"
+
+[[product_name_blockers]]
+id = "runtime_pnb_ceviche"
+status = "active"
+keyword = "ceviche"
+blockers = ["sill"]
+reason = "Sill (herring) products flavored with ceviche spices should not match when recipe is making ceviche from scratch — symmetric to existing PNB sill←ceviche that blocks ceviche-sill from sill ingredients"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -738,6 +752,13 @@ status = "active"
 keyword = "citron"
 blockers = ["citronmajonnäs"]
 reason = "Citron (fresh lemon fruit) should not match citronmajonnäs (lemon mayo) ingredient — the ingredient calls for a prepared condiment, not a fresh fruit; same pattern as citronpeppar/citronarom FPBs"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_tomat"
+status = "active"
+keyword = "tomat"
+blockers = ["tomattapenad"]
+reason = "tomattapenad (olive/tomato tapenade paste) should not match plain fresh tomatoes via tomat substring extraction"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
@@ -1135,6 +1156,14 @@ surface = "stop_words"
 action = "add"
 terms = ["frittering"]
 reason = "Cooking method word (frying/deep-frying direction); not a grocery product"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_fardigskivad_fardigskivade_fardigskivat"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["färdigskivad", "färdigskivade", "färdigskivat"]
+reason = "Pre-sliced preparation descriptor — caused FP rostbiff-ingredient matching Blodpudding Färdigskivad (only product using term)"
 
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"

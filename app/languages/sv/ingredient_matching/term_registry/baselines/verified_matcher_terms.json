@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 391,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 136,
+      "keyword_synonym_mapping": 139,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 391,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 136,
+      "keyword_synonym": 139,
       "match_bridge": 2021,
       "matcher_regression_case": 1493,
       "matcher_rule_inventory": 462,
@@ -42,8 +42,8 @@
       "parent_match_only": 18,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5655,
-    "variants_missing_product_text": 1786,
+    "variant_count": 5658,
+    "variants_missing_product_text": 1789,
     "variants_with_product_text": 3869
   },
   "variants": [
@@ -118801,11 +118801,74 @@
       "needs_product_text": false,
       "notes": "current_review_matcher_regression",
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
+    },
+    {
+      "variant_id": "vterm-7c9a88d54f17c879",
+      "row_index": 4802,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:olivtapenad",
+      "source_id": "olivtapenad",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "olivtapenad",
+      "canonical": "tapenade",
+      "expected_family": "tapenade",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"tapenade\"}"
+    },
+    {
+      "variant_id": "vterm-a82b63a22238099a",
+      "row_index": 4845,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:tapenad",
+      "source_id": "tapenad",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "tapenad",
+      "canonical": "tapenade",
+      "expected_family": "tapenade",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"tapenade\"}"
+    },
+    {
+      "variant_id": "vterm-3be37a11032a23cb",
+      "row_index": 4846,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:tomattapenad",
+      "source_id": "tomattapenad",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "tomattapenad",
+      "canonical": "tapenade",
+      "expected_family": "tapenade",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"tapenade\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1567,
+      "no_product_text": 1570,
       "static_verified": 2595,
       "synthetic_verified": 1493
     },
@@ -118816,7 +118879,7 @@
       "ingredient_parent": 391,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 136,
+      "keyword_synonym": 139,
       "match_bridge": 2021,
       "matcher_regression_case": 1493,
       "matcher_rule_inventory": 462,
@@ -118827,8 +118890,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5655
+      "audited": 5658
     },
-    "variant_count": 5655
+    "variant_count": 5658
   }
 }
