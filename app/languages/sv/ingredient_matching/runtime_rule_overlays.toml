@@ -543,6 +543,27 @@ keyword = "sillfilé"
 blockers = ["5-minuters", "inläggning"]
 reason = "Plain sillfilé (raw herring for cooking/frying) should not match pickled/marinated 5-minuters or inläggning products — they are pre-brined and not suitable for frying; covers stekt sill recipes where ingredient says plain sillfilé but recipe context is raw-fish cooking (Q94-4)"
 
+[[product_name_blockers]]
+id = "runtime_pnb_majsena"
+status = "active"
+keyword = "majsena"
+blockers = ["redning"]
+reason = "Redning Ljus/Brun is roux thickener (flour+fat mix), not pure cornstarch; Maizena brand name causes false match"
+
+[[product_name_blockers]]
+id = "runtime_pnb_ryggbit"
+status = "active"
+keyword = "ryggbit"
+blockers = ["clarias"]
+reason = "Clarias (African catfish/pangasius-relative) should not match lax-ryggbit or generic ryggbit recipe ingredients; ryggbit describes cut location, not fish species"
+
+[[product_name_blockers]]
+id = "runtime_pnb_vetesurdeg"
+status = "active"
+keyword = "vetesurdeg"
+blockers = ["levainfralla", "levainbröd", "fralla", "surdegsbröd", "knäckebröd", "rågbröd", "pizzadeg"]
+reason = "Finished bread/pastry products containing vetesurdeg as ingredient should not match vetesurdeg-starter recipe ingredients — recipe wants sourdough starter for baking, not finished baked goods"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -764,8 +785,8 @@ reason = "Sellerisalt (spice) should not match stjälkselleri/bladselleri (veget
 id = "runtime_fpb_kal"
 status = "active"
 keyword = "kål"
-blockers = ["kålrot", "kålrabbi"]
-reason = "kålrot (rutabaga) is not a kål (cabbage/greens) variety — when ingredient is kålrot, suppress generic kål keyword matches from cabbage products; kålrabbi (kohlrabi, stem vegetable) is not a kål (cabbage/greens) variety - when ingredient is kålrabbi, suppress generic kål keyword matches from cabbage products"
+blockers = ["kålrot", "kålrabbi", "skålla", "skålla mandel", "skåll"]
+reason = "kålrot (rutabaga) is not a kål (cabbage/greens) variety — when ingredient is kålrot, suppress generic kål keyword matches from cabbage products; kålrabbi (kohlrabi, stem vegetable) is not a kål (cabbage/greens) variety - when ingredient is kålrabbi, suppress generic kål keyword matches from cabbage products; skållade mandlar (blanched almonds) is preparation step, not kål; substring kål exists in skålla"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_citron"
@@ -1040,6 +1061,13 @@ keyword = "korv"
 context = ["falukorvsring", "salsicciakorv", "salsicciakorvar"]
 reason = "PARENT_MATCH_ONLY completion (Q91-2 + Q94-2): when ingredient text contains the explicit compound form (falukorvsring, salsicciakorv, salsicciakorvar), suppress generic korv keyword so other korv-types don't match. Contexts are compound-specific (not plain 'falukorv'/'salsiccia') so 'X t ex salsiccia' style ingredients (e.g. 'färskkorvar t ex salsiccia') keep broad korv-family matching — only EXPLICIT specific-sausage ingredients become strict."
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_pasta"
+status = "active"
+keyword = "pasta"
+context = ["sfoglia"]
+reason = "Pasta Sfoglia (Italian puff pastry, sfoglia=thin layered dough) is not matpasta; suppresses pasta-keyword when ingredient text contains sfoglia"
+
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
 status = "active"
@@ -1199,6 +1227,14 @@ surface = "stop_words"
 action = "add"
 terms = ["färdigskivad", "färdigskivade", "färdigskivat"]
 reason = "Pre-sliced preparation descriptor — caused FP rostbiff-ingredient matching Blodpudding Färdigskivad (only product using term)"
+
+[[keyword_set_updates]]
+id = "runtime_non_food_keyword_add_glasburk_glasburkar"
+status = "active"
+surface = "non_food_keywords"
+action = "add"
+terms = ["glasburk", "glasburkar"]
+reason = "Glass jar containers (Bormioli Quattro Stagioni mis-categorized as pantry) — not food, only equipment"
 
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"
