@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 391,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 134,
+      "keyword_synonym_mapping": 136,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 391,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 134,
+      "keyword_synonym": 136,
       "match_bridge": 2021,
       "matcher_regression_case": 1493,
       "matcher_rule_inventory": 462,
@@ -42,8 +42,8 @@
       "parent_match_only": 17,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5652,
-    "variants_missing_product_text": 1783,
+    "variant_count": 5654,
+    "variants_missing_product_text": 1785,
     "variants_with_product_text": 3869
   },
   "variants": [
@@ -118738,11 +118738,53 @@
       "needs_product_text": true,
       "notes": "Raw/whole buckwheat grain products should not match boveteflingor (buckwheat flakes) ingredient — only products with 'flingor' in name qualify.",
       "metadata": "{\"adapter_ref\": \"no_match_policies:policy_boveteflingor_not_raw_bovete_i_bbovete_b_flingor\", \"adapter_refs\": [], \"fixture_refs\": [\"boveteflingor_not_raw_bovete_negative\"], \"policy_ref\": \"matcher_layer_current_review\", \"risk\": \"no_match_policy\", \"source_refs\": [\"current_review:boveteflingor_not_raw_bovete\"], \"status\": \"wrapped_adapter\"}"
+    },
+    {
+      "variant_id": "vterm-5805c210de4b4521",
+      "row_index": 4748,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:fefferoni",
+      "source_id": "fefferoni",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "fefferoni",
+      "canonical": "peperoni",
+      "expected_family": "peperoni",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"peperoni\"}"
+    },
+    {
+      "variant_id": "vterm-8e0fdc6127ba2e0a",
+      "row_index": 4749,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:fefferonis",
+      "source_id": "fefferonis",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "fefferonis",
+      "canonical": "peperoni",
+      "expected_family": "peperoni",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"peperoni\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1564,
+      "no_product_text": 1566,
       "static_verified": 2595,
       "synthetic_verified": 1493
     },
@@ -118753,7 +118795,7 @@
       "ingredient_parent": 391,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 134,
+      "keyword_synonym": 136,
       "match_bridge": 2021,
       "matcher_regression_case": 1493,
       "matcher_rule_inventory": 462,
@@ -118764,8 +118806,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5652
+      "audited": 5654
     },
-    "variant_count": 5652
+    "variant_count": 5654
   }
 }
