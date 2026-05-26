@@ -3492,14 +3492,7 @@
     "source_ref": "current_review:accepted_direct_fix:rimmad_lax_raw_fillet"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "lax",
-        "ingredient_index": 0,
-        "must_match_keyword": "lax"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_rimmad_lax_gravad_positive",
     "ingredients": [
       "ca 250 g rimmad lax i tunna skivor"
@@ -3510,17 +3503,10 @@
     },
     "policy_ref": "current_review_matcher_regression",
     "recipe_name": "Sanity Recipe",
-    "source_ref": "current_review:positive_sibling:rimmad_lax_gravad"
+    "source_ref": "current_review:accepted_direct_fix:rimmad_lax_gravad_blocked"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "lax",
-        "ingredient_index": 0,
-        "must_match_keyword": "lax"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_rimmad_lax_kallrokt_positive",
     "ingredients": [
       "ca 250 g rimmad lax i tunna skivor"
@@ -3531,17 +3517,10 @@
     },
     "policy_ref": "current_review_matcher_regression",
     "recipe_name": "Sanity Recipe",
-    "source_ref": "current_review:positive_sibling:rimmad_lax_kallrokt"
+    "source_ref": "current_review:accepted_direct_fix:rimmad_lax_kallrokt_blocked"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "lax",
-        "ingredient_index": 0,
-        "must_match_keyword": "lax"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_rimmad_lax_najadlax_positive",
     "ingredients": [
       "ca 250 g rimmad lax i tunna skivor"
@@ -3552,7 +3531,7 @@
     },
     "policy_ref": "current_review_matcher_regression",
     "recipe_name": "Sanity Recipe",
-    "source_ref": "current_review:positive_sibling:rimmad_lax_najadlax"
+    "source_ref": "current_review:accepted_direct_fix:rimmad_lax_najadlax_blocked"
   },
   {
     "expected": 0,

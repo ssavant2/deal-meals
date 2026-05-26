@@ -5804,9 +5804,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_haricot_fryst_fresh_positive"
-end = 8747
+end = 8726
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 8747
+start = 8726
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_lingondryck_non_concentrate"
@@ -5904,9 +5904,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_musslor_lake_frozen_positive"
-end = 8908
+end = 8887
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 8908
+start = 8887
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_korvar_garna_lamm_family"
@@ -5985,9 +5985,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_fresh_champ_preserved_sliced_negative"
-end = 9188
+end = 9167
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9188
+start = 9167
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_creme_fraiche_franska_orter"
@@ -6004,9 +6004,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_creme_fraiche_franska_orter_positive"
-end = 9244
+end = 9223
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9244
+start = 9223
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_fresh_red_chilipeppar_produce", "match_bridges:bridge_sambal_oelek_exact"]
@@ -6029,9 +6029,9 @@ start = 1243
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_chili_sambal_malen_negative"
-end = 9272
+end = 9251
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9272
+start = 9251
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_generic_frozen_fiskfile"
@@ -6048,9 +6048,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_frozen_fish_fillets_positive"
-end = 9349
+end = 9328
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9349
+start = 9328
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_farskost_smaksatt_flavored"
@@ -6073,9 +6073,9 @@ start = 2039
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_flavored_fresh_cheese_positive"
-end = 9370
+end = 9349
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9370
+start = 9349
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_rodbetor_fresh_sliced"
@@ -6092,9 +6092,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_sliced_beet_fresh_positive"
-end = 9405
+end = 9384
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9405
+start = 9384
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tandoori_cooking_sauce"
@@ -6117,9 +6117,9 @@ start = 2003
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_tandoori_sauce_positive"
-end = 9440
+end = 9419
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9440
+start = 9419
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_mandariner_fruktkonserver"
@@ -6136,9 +6136,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_mandarins_canned_positive"
-end = 9475
+end = 9454
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9475
+start = 9454
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_rostbiff_palagg_deli_slice"
@@ -6161,9 +6161,9 @@ start = 132
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_kalkon_palagg_raw_negative_20be8510"
-end = 9489
+end = 9468
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9489
+start = 9468
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_paprika_later_variant"
@@ -6180,9 +6180,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_red_paprika_later_positive"
-end = 9545
+end = 9524
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9545
+start = 9524
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_maccaronetti_exact"
@@ -6205,9 +6205,9 @@ start = 2547
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_maccaronetti_prepared_pesto_negative"
-end = 9560
+end = 9539
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9560
+start = 9539
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_feferoni_kebab_variant"
@@ -6224,9 +6224,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_feferoni_kebab_positive"
-end = 9616
+end = 9595
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9616
+start = 9595
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_chilipeppar_malen_spice", "match_bridges:bridge_fresh_red_chilipeppar_produce"]
@@ -6249,9 +6249,9 @@ start = 1243
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_chili_spice_malen_positive"
-end = 9637
+end = 9616
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9637
+start = 9616
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_fiskgrytbitar_laxfile", "match_bridges:bridge_matbrodsjast_generic_route_sibling"]
@@ -6268,9 +6268,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_fiskgrytbitar_sushi_negative"
-end = 9700
+end = 9679
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9700
+start = 9679
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_smor_plain_common", "match_bridges:bridge_philadelphia_farskost"]
@@ -6287,9 +6287,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_paskcheesecake_smor_positive"
-end = 9805
+end = 9784
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9805
+start = 9784
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_chocolate_coffee_beans_not_choco_cereal"
@@ -6306,9 +6306,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_choco_corns_fullkornsmajspuffar_med_choklad"
-end = 9862
+end = 9841
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9862
+start = 9841
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_raspberry_chocolate_not_raspberry_fruit"
@@ -6325,9 +6325,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_hallon_125g"
-end = 9884
+end = 9863
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9884
+start = 9863
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_bjast_not_bakers_yeast"
@@ -6344,9 +6344,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_jast_for_matbrod_50g_kronjast"
-end = 9928
+end = 9907
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9928
+start = 9907
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_plain_sotmandel_not_roasted_salted"
@@ -6363,9 +6363,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_mandlar_rostade_och_saltade"
-end = 9972
+end = 9951
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 9972
+start = 9951
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_kottfarssaser_not_table_sauces"
@@ -6382,9 +6382,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_bearnaise_remoulade_majonnas_5129a3b2"
-end = 10016
+end = 9995
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10016
+start = 9995
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_light_rum_not_fish_roe"
@@ -6401,9 +6401,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_rod_rom_finkorning_70g_ica"
-end = 10126
+end = 10105
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10126
+start = 10105
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_harissa_exact_not_hummus"
@@ -6420,9 +6420,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_hummus_harissa_150g_sevan"
-end = 10214
+end = 10193
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10214
+start = 10193
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_fresh_ingefara_not_turmeric_or_misc"
@@ -6439,9 +6439,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_gurkmeja_80g_ica_basic"
-end = 10288
+end = 10267
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10288
+start = 10267
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_liquid_smoke_exact"
@@ -6458,9 +6458,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_liquid_smoke_147ml_try_me"
-end = 10449
+end = 10428
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10449
+start = 10428
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_chili_fruit_not_crispy_chicken_spice_mix"
@@ -6477,9 +6477,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_crispy_chicken_spice_mix"
-end = 10582
+end = 10561
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10582
+start = 10561
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_tabasco_sriracha_not_pepper_sauce"
@@ -6496,9 +6496,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_pepparsas"
-end = 10626
+end = 10605
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10626
+start = 10605
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_fresh_oregano_not_dried_spice"
@@ -6515,9 +6515,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_oregano_65g_santa_maria_2d227da0"
-end = 10648
+end = 10627
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10648
+start = 10627
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_smoothie_fruit_not_ready_drinks"
@@ -6534,9 +6534,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_smoothie"
-end = 10670
+end = 10649
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10670
+start = 10649
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fresh_chilipeppar_not_spice"
@@ -6553,9 +6553,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_chilipeppar_malen_ae6c92fe"
-end = 10758
+end = 10737
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10758
+start = 10737
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_plant_milk_not_plant_cream"
@@ -6572,9 +6572,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_vegetabilisk_visp_250ml_fazer_aito"
-end = 10832
+end = 10811
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10832
+start = 10811
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_pickled_peaches_not_dried_or_cashew_carriers"
@@ -6591,9 +6591,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_torkad_persika_200g_sunshine_delights"
-end = 10898
+end = 10877
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 10898
+start = 10877
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_oat_barista_not_lactose_dairy_milk"
@@ -6610,9 +6610,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_mellanmjolkdryck_laktosfri"
-end = 11008
+end = 10987
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11008
+start = 10987
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_fresh_oregano_not_dried_spice"
@@ -6629,9 +6629,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_prod_is_fresh_true"
-end = 11030
+end = 11009
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11030
+start = 11009
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_rapsolja_chips_not_olivolja_purpose"
@@ -6648,9 +6648,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_olivolja_till_formen_och_potatisen"
-end = 11096
+end = 11075
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11096
+start = 11075
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_farska_fikon_fresh"
@@ -6667,9 +6667,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_fikon_naturell_500g_ica"
-end = 11118
+end = 11097
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11118
+start = 11097
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_rosemary_stalk_not_dried_or_plain_stalk"
@@ -6686,9 +6686,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_rosmarin_torkad_20g_ica"
-end = 11236
+end = 11215
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11236
+start = 11215
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_herb_marinated_chicken_not_other_protein"
@@ -6705,9 +6705,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kalkonbrost_ortmarinerad_i_skivor"
-end = 11280
+end = 11259
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11280
+start = 11259
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_truffle_cheese_not_truffle_oil"
@@ -6724,9 +6724,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_olja_med_smak_av_svart_tryffel_100ml_plantin"
-end = 11324
+end = 11303
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11324
+start = 11303
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_root_veg_spaghetti_non_buyable"
@@ -6743,9 +6743,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_spaghetti_a9d44bb8"
-end = 11346
+end = 11325
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11346
+start = 11325
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_pulled_chicken_exact"
@@ -6762,9 +6762,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_pulled_chicken"
-end = 11419
+end = 11398
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11419
+start = 11398
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_maizena_sauce_context_not_premade_sauces"
@@ -6781,9 +6781,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_bearnaise_remoulade_majonnas_54189e55"
-end = 11442
+end = 11421
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11442
+start = 11421
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_dumplings_chicken_not_paprika_cheese"
@@ -6800,9 +6800,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_ost_och_olivfyllda_minipaprikor"
-end = 11574
+end = 11553
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11574
+start = 11553
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_mozzarella_loaf_note_not_bread_or_misc"
@@ -6819,9 +6819,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_carlssons_fyrkant_limpa"
-end = 11706
+end = 11685
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11706
+start = 11685
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_fresh_chilipeppar_not_ground_spice_or_onion"
@@ -6838,9 +6838,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_chilipeppar_malen_40g_ica_5a92600e"
-end = 11816
+end = 11795
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11816
+start = 11795
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_optional_egg_white_sorbet_context"
@@ -6857,9 +6857,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_sorbet"
-end = 11992
+end = 11971
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 11992
+start = 11971
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_kombuchasvamp_not_kombucha_drink"
@@ -6876,9 +6876,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kombucha_apple_330ml_humm"
-end = 12058
+end = 12037
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12058
+start = 12037
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_katrinplommonpure_not_fresh_plums_or_sushi"
@@ -6895,9 +6895,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_plommon_urkarnade_250g_ica"
-end = 12080
+end = 12059
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12080
+start = 12059
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_dried_peperoncino_not_topping_sauce"
@@ -6914,9 +6914,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_toppingsas_peperoncino_250ml_pop_bakery"
-end = 12168
+end = 12147
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12168
+start = 12147
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_fullkornsrismjol_not_rice"
@@ -6933,9 +6933,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_fullkornsris"
-end = 12256
+end = 12235
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12256
+start = 12235
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_noodle_type_parenthetical_not_plain_rice"
@@ -6952,9 +6952,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_basmatiris_622b850b"
-end = 12300
+end = 12279
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12300
+start = 12279
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_file_text_not_fil_milk"
@@ -6971,9 +6971,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_fil_naturell"
-end = 12366
+end = 12345
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12366
+start = 12345
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -6990,9 +6990,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_fankal_krydda_fresh_fennel"
-end = 12388
+end = 12367
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12388
+start = 12367
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_potatischips_lantchips_family"
@@ -7009,9 +7009,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_fast_potatis_2kg"
-end = 12410
+end = 12389
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12410
+start = 12389
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_oil_marinade_purpose_phrase"
@@ -7028,9 +7028,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_marinad_086c7a4e"
-end = 12566
+end = 12545
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12566
+start = 12545
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_hasselnotsolja_exact"
@@ -7047,9 +7047,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_hasselnot_750g_start_ecda5780"
-end = 12588
+end = 12567
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12588
+start = 12567
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_sojaglass_vanilla_not_dairy_or_mousse_carriers"
@@ -7066,9 +7066,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_vaniljsmak"
-end = 12684
+end = 12663
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12684
+start = 12663
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_hot_chocolate_drink_not_chocolate_products"
@@ -7085,9 +7085,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_bakchoklad"
-end = 12816
+end = 12795
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12816
+start = 12795
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_bostongurka_not_other_pickles"
@@ -7104,9 +7104,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_saltgurka"
-end = 12882
+end = 12861
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12882
+start = 12861
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_philadelphia_sweet_chili_not_sauce_or_plain_cream_cheese"
@@ -7123,9 +7123,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_marinad_bbq_sweet_chili_75g_santa_maria"
-end = 12926
+end = 12905
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 12926
+start = 12905
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_white_kladdkakamix_not_bread"
@@ -7142,9 +7142,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_ragmackor_450g_akes_akta_honokaka"
-end = 13080
+end = 13059
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13080
+start = 13059
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_root_veg_spaghetti_non_buyable"
@@ -7161,9 +7161,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_spaghetti_fa98a4db"
-end = 13124
+end = 13103
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13124
+start = 13103
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_barjuice_exact"
@@ -7180,9 +7180,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_tranbar_eko_225g_polarica"
-end = 13234
+end = 13213
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13234
+start = 13213
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kokkaffe_exact"
@@ -7199,9 +7199,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_bryggkaffe"
-end = 13338
+end = 13317
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13338
+start = 13317
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_explain_trace_placeholder_not_offer_terms"
@@ -7218,9 +7218,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_vinbars_och_rodlokssill"
-end = 13390
+end = 13369
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13390
+start = 13369
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tomatsas_pinsasas_alternative_line"
@@ -7237,9 +7237,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_tomatsas_f181d709"
-end = 13485
+end = 13464
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13485
+start = 13464
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vinbarsgele_variants"
@@ -7256,9 +7256,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_gele_svartvinbar"
-end = 13601
+end = 13580
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13601
+start = 13580
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_plocksallat_sallat_products"
@@ -7275,9 +7275,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_sallat_b5d3e53f"
-end = 13688
+end = 13667
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13688
+start = 13667
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_champinjoner_exact"
@@ -7294,9 +7294,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_champinjoner_i_tetra_hela_180g_ica"
-end = 13797
+end = 13776
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13797
+start = 13776
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tomatpassata_passerade_tomater"
@@ -7313,9 +7313,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_passerade_tomater_390g_ica"
-end = 13982
+end = 13961
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 13982
+start = 13961
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fresh_chilipeppar_not_spice"
@@ -7332,9 +7332,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_rod_peppar_40g_klass_1_ica_1e1333d4"
-end = 14011
+end = 13990
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14011
+start = 13990
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vaxtbaserad_gurt_naturell"
@@ -7351,9 +7351,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_havregurt"
-end = 14040
+end = 14019
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14040
+start = 14019
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_grana_padano_exact"
@@ -7370,9 +7370,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_grana_padano"
-end = 14231
+end = 14210
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14231
+start = 14210
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_dishwasher_tablets_non_food"
@@ -7389,9 +7389,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_tabletter"
-end = 14253
+end = 14232
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14253
+start = 14232
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vitlokssmor_exact"
@@ -7408,9 +7408,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_vitlokssmor"
-end = 14474
+end = 14453
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14474
+start = 14453
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_ruccola_rucola"
@@ -7427,9 +7427,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_rucola_65g_ica"
-end = 14570
+end = 14549
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14570
+start = 14549
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_paprikakrydda_pulver"
@@ -7446,9 +7446,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_paprikapulver_70g_ica_basic"
-end = 14599
+end = 14578
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14599
+start = 14578
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tacokrydda_spice_mix"
@@ -7465,9 +7465,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_taco_kryddmix_original_mild_28g_santa_maria"
-end = 14628
+end = 14607
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14628
+start = 14607
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_dill_fresh_herb", "match_bridges:bridge_koriander_fresh_herb"]
@@ -7484,9 +7484,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_dill_i_kruka_ekologisk_1_p_krav_klass_1"
-end = 14790
+end = 14769
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14790
+start = 14769
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_lax_laxfile_raw"
@@ -7503,9 +7503,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_laxfile_farsk_utan_skinn_ca_500g_ica"
-end = 14848
+end = 14827
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14848
+start = 14827
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_havrebaserad_matlagning", "match_bridges:bridge_kinesisk_japansk_soja"]
@@ -7522,9 +7522,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_matlagningsbas_havre_13_500ml_ica"
-end = 14877
+end = 14856
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 14877
+start = 14856
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_korsbarstomater_cocktail"
@@ -7541,9 +7541,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_korsbarstomater_250g_klass_1_ica"
-end = 15120
+end = 15099
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15120
+start = 15099
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_mork_chokladkaka_dark"
@@ -7560,9 +7560,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_chokladkaka_excellence_70_kakao_mork_choklad_100g_lindt"
-end = 15201
+end = 15180
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15201
+start = 15180
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_olivolja_toscana_exact"
@@ -7579,9 +7579,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_ortsalt_toscana_ekologisk"
-end = 15252
+end = 15231
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15252
+start = 15231
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_compound_candy_nut_or_peel_not_raw_components"
@@ -7598,9 +7598,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_hasselnot_750g_start_7683f09d"
-end = 15392
+end = 15371
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15392
+start = 15371
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_bladkal_cabbage_alternatives"
@@ -7617,9 +7617,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_vitkal_3bd51a65"
-end = 15465
+end = 15444
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15465
+start = 15444
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_bifftomat_exact"
@@ -7636,9 +7636,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_bifftomat_ca_185g_klass_1_ica"
-end = 15552
+end = 15531
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15552
+start = 15531
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vit_fiskfile_white_fish"
@@ -7655,9 +7655,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_torskfile"
-end = 15604
+end = 15583
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15604
+start = 15583
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_fermented_black_beans_not_bakers_yeast"
@@ -7674,9 +7674,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_jast_for_matbrod_6e6c70d7"
-end = 15852
+end = 15831
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15852
+start = 15831
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_natural_cashews_not_papaya"
@@ -7693,9 +7693,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_papaya"
-end = 15896
+end = 15875
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15896
+start = 15875
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tortillachips_ost_exact"
@@ -7712,9 +7712,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_chips_salted"
-end = 15918
+end = 15897
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 15918
+start = 15897
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_salladsblad_leafy_salad_products"
@@ -7731,9 +7731,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_kruksallat_4cf6029b"
-end = 16073
+end = 16052
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 16073
+start = 16052
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_filmjolk_naturell_not_flavored_fil"
@@ -7750,9 +7750,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_fjallfil"
-end = 16356
+end = 16335
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 16356
+start = 16335
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_pickled_beets_not_raw_or_diagnostic_terms"
@@ -7769,9 +7769,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_rodbeta"
-end = 16554
+end = 16533
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 16554
+start = 16533
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_farska_aprikoser_fresh"
@@ -7788,9 +7788,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_aprikoser_soft"
-end = 16598
+end = 16577
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 16598
+start = 16577
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_notcreme_spread"
@@ -7807,9 +7807,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_notkram"
-end = 16679
+end = 16658
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 16679
+start = 16658
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_soltorkadetomatcreme_exact"
@@ -7826,9 +7826,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_soltorkade_tomater"
-end = 16788
+end = 16767
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 16788
+start = 16767
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_blandade_bonor_bonmix"
@@ -7845,9 +7845,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_blandade_bonor"
-end = 16891
+end = 16870
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 16891
+start = 16870
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_graslok_i_kruka"
@@ -7864,9 +7864,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_graslok_i_kruka_b4efb4fb"
-end = 17001
+end = 16980
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17001
+start = 16980
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_pimenton_picante_exact"
@@ -7883,9 +7883,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_pimenton_picante_stark"
-end = 17060
+end = 17039
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17060
+start = 17039
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_worcestersas_worcestershire"
@@ -7902,9 +7902,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_worcestershire_sauce_150ml_lea_perrins"
-end = 17200
+end = 17179
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17200
+start = 17179
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_libabrod_tunnbrod"
@@ -7921,9 +7921,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_tunnbrod"
-end = 17290
+end = 17269
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17290
+start = 17269
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tomatpassata_passerade_tomater"
@@ -7940,9 +7940,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_tomat_romantica"
-end = 17335
+end = 17314
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17335
+start = 17314
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_champinjoner_exact"
@@ -7959,9 +7959,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_champinjoner_f48759cd"
-end = 17468
+end = 17447
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17468
+start = 17447
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_chocolate_pudding_not_other_puddings"
@@ -7978,9 +7978,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_protein_salted_caramel_pudding"
-end = 17513
+end = 17492
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17513
+start = 17492
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_syrade_gurkor_not_fresh_gurka"
@@ -7997,9 +7997,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_gurka_ca_300g_krav_klass_1_ica"
-end = 17579
+end = 17558
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17579
+start = 17558
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vitt_vin_matlagningsvin"
@@ -8016,9 +8016,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_marinad_3f29ff8a"
-end = 17601
+end = 17580
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17601
+start = 17580
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_proteinpudding_compound_not_other_protein_pudding"
@@ -8035,9 +8035,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_protein_salted_caramel_pudding_laktosfri_200g_arla"
-end = 17653
+end = 17632
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17653
+start = 17632
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_citron_juice_skal_whole_fruit"
@@ -8054,9 +8054,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_citron_500g_klass_1_ica"
-end = 17682
+end = 17661
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17682
+start = 17661
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_fresh_jalapeno_or_glaze_chili_not_processed_chili"
@@ -8073,9 +8073,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_jalapenos_225g_ica"
-end = 17704
+end = 17683
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17704
+start = 17683
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_varmrokt_lax_exact"
@@ -8092,9 +8092,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_varmrokt_lax"
-end = 17843
+end = 17822
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17843
+start = 17822
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tortellini_ricotta_spenat_exact"
@@ -8111,9 +8111,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_tortellini"
-end = 17976
+end = 17955
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 17976
+start = 17955
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_counted_chili_not_ground_spice"
@@ -8130,9 +8130,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_chili_original_34g_santa_maria"
-end = 18204
+end = 18183
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18204
+start = 18183
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vit_chokladkaka_white"
@@ -8149,9 +8149,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_bakchoklad_vit_100g_ica"
-end = 18299
+end = 18278
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18299
+start = 18278
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_cooking_chorizo_not_cured_chorizo"
@@ -8168,9 +8168,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_salami_chorizo_skivad"
-end = 18321
+end = 18300
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18321
+start = 18300
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_vaniljglass_not_other_flavors_or_sparse_glass"
@@ -8187,9 +8187,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_glass_vanilla_pistachio"
-end = 18431
+end = 18410
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18431
+start = 18410
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_graslok_fresh"
@@ -8206,9 +8206,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_graslok_i_kruka_ekologisk_1_p_krav_klass_1"
-end = 18504
+end = 18483
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18504
+start = 18483
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_marinerad_kronartskocka"
@@ -8225,9 +8225,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_kronartskockor_marinerade_200g_zeta"
-end = 18533
+end = 18512
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18533
+start = 18512
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kryddpeppar_exact"
@@ -8244,9 +8244,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_kryddpeppar_hel_12g_ica"
-end = 18585
+end = 18564
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18585
+start = 18564
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_chicken_fillet_not_turkey_breast"
@@ -8263,9 +8263,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kalkon_brostfile_600g_ingelsta_kalkon"
-end = 18607
+end = 18586
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18607
+start = 18586
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_cornichons_cornichoner"
@@ -8282,9 +8282,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_cornichons_350g_felix"
-end = 18636
+end = 18615
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18636
+start = 18615
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_hackade_notter_generic"
@@ -8301,9 +8301,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_notter"
-end = 18694
+end = 18673
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18694
+start = 18673
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_farsk_bladspenat_family"
@@ -8320,9 +8320,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_babyspenat"
-end = 18989
+end = 18968
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 18989
+start = 18968
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_gari_kalrotsgari_exact", "match_bridges:bridge_tapenade_exact", "match_bridges:bridge_sriracha_exact", "match_bridges:bridge_woksas_teriyaki_exact"]
@@ -8339,9 +8339,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_gari_sushi_4fa590d4"
-end = 19128
+end = 19107
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 19128
+start = 19107
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_smoked_pork_not_plain_pork_cuts"
@@ -8358,9 +8358,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_flask"
-end = 19362
+end = 19341
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 19362
+start = 19341
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_placeholder_or_sojabonor_konserv_not_components"
@@ -8377,9 +8377,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kronartskockshjarta"
-end = 19406
+end = 19385
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 19406
+start = 19385
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vitlok_torkad_burk_crushed"
@@ -8396,9 +8396,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_vitlok_krossad_210g_risberg"
-end = 19501
+end = 19480
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 19501
+start = 19480
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kardemumma_malen_spice"
@@ -8415,9 +8415,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_kardemumma_malen"
-end = 19674
+end = 19653
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 19674
+start = 19653
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_gronsallad_salladsblad"
@@ -8434,9 +8434,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_salladsblad_cc95c4bb"
-end = 19784
+end = 19763
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 19784
+start = 19763
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_graslok_fresh", "match_bridges:bridge_dill_fresh_herb", "match_bridges:bridge_couscous_plain", "match_bridges:bridge_pesto_gron", "match_bridges:bridge_vegobacon", "match_bridges:bridge_korsbar_frozen_fruit"]
@@ -8453,9 +8453,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_graslok_i_kruka_b9e60879"
-end = 19813
+end = 19792
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 19813
+start = 19792
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_pizza_spices_not_sparse_spice_carriers"
@@ -8472,9 +8472,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_asian_spices_korean_bbq_bulgogi"
-end = 20046
+end = 20025
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 20046
+start = 20025
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_mjukost_hot_jalapeno_exact"
@@ -8491,9 +8491,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_spicy_tuna"
-end = 20178
+end = 20157
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 20178
+start = 20157
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tomat_fresh_or_canned_alternative"
@@ -8510,9 +8510,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_tomat_kvist_rod_svensk_ca_120g_klass_1"
-end = 20509
+end = 20488
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 20509
+start = 20488
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_frozen_chopped_spinach_not_fresh_spinach"
@@ -8529,9 +8529,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_babyspenat"
-end = 20531
+end = 20510
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 20531
+start = 20510
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_moghrabiah_parlcouscous"
@@ -8548,9 +8548,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_parlcouscous_moghrabie"
-end = 20655
+end = 20634
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 20655
+start = 20634
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_farsk_lok_salladslok_stalks"
@@ -8567,9 +8567,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_offers_while_live"
-end = 20677
+end = 20656
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 20677
+start = 20656
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_cantuccini_biscotti_exact"
@@ -8586,9 +8586,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_cantuccini_mandel_250gzeta"
-end = 20802
+end = 20781
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 20802
+start = 20781
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_salamichips_exact"
@@ -8605,9 +8605,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_chips_saltade"
-end = 21075
+end = 21054
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 21075
+start = 21054
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fankal_seed_spice_list"
@@ -8624,9 +8624,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_fankal_ca_300g"
-end = 21187
+end = 21166
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 21187
+start = 21166
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_cooked_drumstick_not_raw_or_sparse_terms"
@@ -8643,9 +8643,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kycklingklubba_farsk"
-end = 21239
+end = 21218
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 21239
+start = 21218
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_generic_mushroom_pieces_not_preserved_champignon"
@@ -8662,9 +8662,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_champinjoner_i_tetra_hela"
-end = 21393
+end = 21372
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 21393
+start = 21372
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kantareller_burk_i_vatten"
@@ -8681,9 +8681,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kantarell_gul_bbf2c8d0"
-end = 21459
+end = 21438
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 21459
+start = 21438
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_inlagd_jalapeno_preserved"
@@ -8700,9 +8700,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_in_cached_batch_output_but_live"
-end = 21577
+end = 21556
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 21577
+start = 21556
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_grenadine_exact", "match_bridges:bridge_krossad_is_exact"]
@@ -8719,9 +8719,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_drinkmix_grenadine_350ml_mixtales"
-end = 21658
+end = 21637
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 21658
+start = 21637
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_rodcurry_paste_exact"
@@ -8738,9 +8738,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_grytbas_thai_red_curry_het"
-end = 21813
+end = 21792
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 21813
+start = 21792
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_charkbricka_platter"
@@ -8757,9 +8757,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_antipastitallrik_120g_zeta"
-end = 22039
+end = 22018
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 22039
+start = 22018
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_generic_kex_compound_products"
@@ -8776,9 +8776,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_digestivekex_400g_ica_basic"
-end = 22299
+end = 22278
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 22299
+start = 22278
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tomatsas_pastasas_products"
@@ -8795,9 +8795,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_pastasas_tomatsas"
-end = 22705
+end = 22713
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 22705
+start = 22713
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_teriyakisas_exact"
@@ -8814,9 +8814,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_torkat_kott_teriyaki_beef_jerky"
-end = 22881
+end = 22860
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 22881
+start = 22860
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_yoghurt_alt_naturell"
@@ -8833,9 +8833,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_filmjolk_svarta_vinbar_3_7_1000g_fjallfil"
-end = 23015
+end = 22994
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23015
+start = 22994
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_rod_spansk_peppar_fresh_chili"
@@ -8852,9 +8852,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_rod_peppar_40g_klass_1_ica_267de939"
-end = 23126
+end = 23105
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23126
+start = 23105
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fresh_chilipeppar_not_spice"
@@ -8871,9 +8871,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_rod_peppar_40g_klass_1_ica_24e28d05"
-end = 23178
+end = 23157
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23178
+start = 23157
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_glutenfri_cantucci_exact"
@@ -8890,9 +8890,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_cantucci_mandel_glutenfri_200g_zeta"
-end = 23207
+end = 23186
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23207
+start = 23186
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fish_roe_rom_products"
@@ -8909,9 +8909,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_forellrom"
-end = 23418
+end = 23397
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23418
+start = 23397
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kikartor_ready_packaged_guard"
@@ -8928,9 +8928,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kikartor_torra_ekologiska_500g_ica"
-end = 23462
+end = 23441
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23462
+start = 23441
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kardemummakarnor_exact"
@@ -8947,9 +8947,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kardemumma_malen_40g_ica_basic"
-end = 23574
+end = 23553
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23574
+start = 23553
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_canned_cherry_tomatoes_not_fresh_or_sparse"
@@ -8966,9 +8966,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_korsbarstomater_250g_klass_1_ica"
-end = 23766
+end = 23745
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23766
+start = 23745
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fresh_chilipeppar_not_spice"
@@ -8985,9 +8985,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_rod_peppar_40g_klass_1_ica_819732fd"
-end = 23817
+end = 23796
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23817
+start = 23796
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_chorizokorv_exact"
@@ -9004,9 +9004,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_korv_frankfurter_320g_helmut_walch_charkuteri"
-end = 23897
+end = 23876
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 23897
+start = 23876
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_avrunnen_ananas_preserved"
@@ -9023,9 +9023,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_ananas_250g_ica_5f2ad1de"
-end = 24031
+end = 24010
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 24031
+start = 24010
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_durumvete_flour_family"
@@ -9042,9 +9042,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_durumvetemjol_1000g_dallari"
-end = 24164
+end = 24143
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 24164
+start = 24143
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_rokt_paprikapulver"
@@ -9061,9 +9061,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_paprikapulver_70g_ica_basic"
-end = 24331
+end = 24310
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 24331
+start = 24310
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_kantarellpesto_not_plain_pesto"
@@ -9080,9 +9080,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_pesto"
-end = 24405
+end = 24384
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 24405
+start = 24384
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_syltad_ingefara_exact"
@@ -9099,9 +9099,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_ingefara_syltad_kub_240g_risberg"
-end = 24435
+end = 24414
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 24435
+start = 24414
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_pimientos_piquillo_exact"
@@ -9118,9 +9118,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_pimiento_padron_200_gram_klass_1_ica"
-end = 24561
+end = 24540
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 24561
+start = 24540
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_extra_virgin_olive_oil_not_flavored_or_spray"
@@ -9137,9 +9137,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_olivolja_citron_250ml_zeta"
-end = 24635
+end = 24614
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 24635
+start = 24614
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_sweet_chili_sauce"
@@ -9156,9 +9156,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_chilisas_osotad_550g_felix"
-end = 24855
+end = 24834
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 24855
+start = 24834
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_lammkotlett_exact"
@@ -9175,9 +9175,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_lammstek_farsk_benfri"
-end = 25040
+end = 25019
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 25040
+start = 25019
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_olive_oil_salmon_purpose_phrase"
@@ -9194,9 +9194,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_laxfile_farsk_800g_pacific_brand"
-end = 25290
+end = 25269
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 25290
+start = 25269
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kardemummayoghurt_exact"
@@ -9213,9 +9213,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_kardemummayoghurt"
-end = 25320
+end = 25299
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 25320
+start = 25299
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_risotto_rice_family"
@@ -9232,9 +9232,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_arborioris"
-end = 25481
+end = 25460
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 25481
+start = 25460
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_gemsallad_hjartsallad_family"
@@ -9251,9 +9251,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_hjartsallad_29db05c4"
-end = 25568
+end = 25547
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 25568
+start = 25547
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_chokladagg_exact"
@@ -9270,9 +9270,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_chokladagg_80g_anthon_berg"
-end = 25742
+end = 25721
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 25742
+start = 25721
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_rimmat_flask_exact"
@@ -9289,9 +9289,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_flaskfile_6efa96d5"
-end = 25764
+end = 25743
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 25764
+start = 25743
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_generic_sylt_berry_jams"
@@ -9308,9 +9308,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_lingonsylt"
-end = 25941
+end = 25920
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 25941
+start = 25920
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_sill_stromming_file_family"
@@ -9327,9 +9327,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_sillfile_420g_abbas"
-end = 26028
+end = 26007
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 26028
+start = 26007
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_farska_trattkantareller_exact"
@@ -9346,9 +9346,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kantareller_i_vatten_ff4c8bde"
-end = 26108
+end = 26087
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 26108
+start = 26087
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vaniljsas_alternative_line"
@@ -9365,9 +9365,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_vaniljsas"
-end = 26343
+end = 26322
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 26343
+start = 26322
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_paprika_exact_not_cheese"
@@ -9384,9 +9384,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_tarnad_ost_i_olja_paprika_1f7db5c3"
-end = 26365
+end = 26344
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 26365
+start = 26344
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fladerdryck_elderflower"
@@ -9403,9 +9403,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_fladerblomsdryck_med_druva_och_citron_1l_kiviks_musteri"
-end = 26446
+end = 26425
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 26446
+start = 26425
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_savoiardikex_specialty"
@@ -9422,9 +9422,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_savoiarde_kex"
-end = 26620
+end = 26599
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 26620
+start = 26599
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_grotris_exact"
@@ -9441,9 +9441,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_risgrynsgrot"
-end = 26780
+end = 26759
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 26780
+start = 26759
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tortiglioni_exact"
@@ -9460,9 +9460,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_tortiglioni_al_bronzo_500g_barilla"
-end = 26960
+end = 26939
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 26960
+start = 26939
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_flytande_smor_not_solid_butter"
@@ -9479,9 +9479,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_smor_normalsaltat"
-end = 27124
+end = 27103
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 27124
+start = 27103
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fitnessflingor_exact"
@@ -9498,9 +9498,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_fitnessflingor"
-end = 27153
+end = 27132
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 27153
+start = 27132
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_makrillfileer_plain"
@@ -9517,9 +9517,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_makrillfileer_citrontimjan"
-end = 27264
+end = 27243
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 27264
+start = 27243
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_generic_fron_seeds"
@@ -9536,9 +9536,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_chiafron"
-end = 27455
+end = 27434
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 27455
+start = 27434
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_grillkorv_or_precooked_lentils_not_unrelated_components"
@@ -9555,9 +9555,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_makrillfile"
-end = 27575
+end = 27554
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 27575
+start = 27554
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_durumvetemjol_not_plain_vetemjol"
@@ -9574,9 +9574,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_vetemjol"
-end = 27685
+end = 27664
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 27685
+start = 27664
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_sataysas_cooking_sauce"
@@ -9593,9 +9593,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_sataysas"
-end = 27714
+end = 27693
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 27714
+start = 27693
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kvibille_adel_blue_cheese"
@@ -9612,9 +9612,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_kvibille_adel"
-end = 27847
+end = 27826
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 27847
+start = 27826
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_sojamajonnas_not_soy_or_mayo_components"
@@ -9631,9 +9631,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_soja"
-end = 27927
+end = 27906
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 27927
+start = 27906
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_gari_kalrotsgari_exact"
@@ -9650,9 +9650,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_gari_sushi_190g_ica_asia"
-end = 28022
+end = 28001
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 28022
+start = 28001
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_shisoblad_herb_alternatives"
@@ -9669,9 +9669,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_thaibasilika_ekologisk"
-end = 28216
+end = 28195
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 28216
+start = 28195
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_glutenfri_havregryn_exact"
@@ -9688,9 +9688,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_havregryn_1_5kg_ica"
-end = 28348
+end = 28327
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 28348
+start = 28327
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_rodspatta_spattafile"
@@ -9707,9 +9707,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_rodspatta_300g_ica_gott_liv"
-end = 28541
+end = 28520
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 28541
+start = 28520
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_veg_hamburgare_vegoburgare"
@@ -9726,9 +9726,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_hamburgare"
-end = 28643
+end = 28622
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 28643
+start = 28622
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_steam_buns_not_generic_bread"
@@ -9745,9 +9745,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_naan_brod_original"
-end = 28821
+end = 28800
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 28821
+start = 28800
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_skinkschnitzel_raw_exact"
@@ -9764,9 +9764,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_panerad_schnitzel"
-end = 28909
+end = 28888
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 28909
+start = 28888
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tonfisk_farsk"
@@ -9783,9 +9783,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_tonfisk_farsk_msc_260g_ica"
-end = 29086
+end = 29065
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29086
+start = 29065
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_whole_chicken_not_cut_fillets"
@@ -9802,9 +9802,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kycklinginnerfile_farsk_600g_kronfagel"
-end = 29131
+end = 29110
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29131
+start = 29110
 
 [[inventory]]
 adapter_refs = ["matcher_layer_diagnostics:positive_allowance", "matcher_layer_diagnostics:route_exclusion"]
@@ -9821,9 +9821,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_havssalt_250g_maldon"
-end = 29204
+end = 29183
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29204
+start = 29183
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kormasas_sauce_products"
@@ -9840,9 +9840,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_cooking_spice_sauce_korma_360g_santa_maria"
-end = 29257
+end = 29236
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29257
+start = 29236
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tomatsoppa_exact"
@@ -9859,9 +9859,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_tomatsoppa_400g_heinz"
-end = 29344
+end = 29323
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29344
+start = 29323
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_chipotlepasta_paste_exact"
@@ -9878,9 +9878,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_chipotle_paste_100g_santa_maria"
-end = 29431
+end = 29410
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29431
+start = 29410
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_boveteflingor_exact"
@@ -9897,9 +9897,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_boveteflingor"
-end = 29489
+end = 29468
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29489
+start = 29468
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_mynta_grouped_herb_leaf"
@@ -9916,9 +9916,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_mynta_i_kruka"
-end = 29547
+end = 29526
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29547
+start = 29526
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fettuccine_farsk_longpasta"
@@ -9935,9 +9935,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_pasta_fettuccine_farsk_500g_ica"
-end = 29576
+end = 29555
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29576
+start = 29555
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_matbrodsjast_generic_route_sibling"
@@ -9954,9 +9954,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_jast_for_sota_degar_3ff8a7cc"
-end = 29708
+end = 29687
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29708
+start = 29687
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_parmesansas_exact_sauce"
@@ -9973,9 +9973,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_pasta_bacon_parmesansas_390g_findus"
-end = 29812
+end = 29791
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29812
+start = 29791
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_fresh_mushroom_not_preserved_or_dried"
@@ -9992,9 +9992,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_kantareller_i_vatten_200g_borgens_41a051c1"
-end = 29886
+end = 29865
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29886
+start = 29865
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_prep_biff_phrase_not_beef_product"
@@ -10011,9 +10011,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_dumpling_biff_chili_ingefara_200g_beijing8"
-end = 29974
+end = 29953
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29974
+start = 29953
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_pastadeg_reference_not_dry_pasta"
@@ -10030,9 +10030,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_tagliatelle_500g_ica_basic"
-end = 29996
+end = 29975
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 29996
+start = 29975
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_ansjovis_fileer_grouping"
@@ -10049,9 +10049,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_ansjovisfileer"
-end = 30251
+end = 30230
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 30251
+start = 30230
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_ananas_krossad_or_fryst"
@@ -10068,9 +10068,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_ananas_krossad_6b0eec41"
-end = 30338
+end = 30317
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 30338
+start = 30317
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_gochujang_chilipasta_exact"
@@ -10087,9 +10087,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_harissa_het_chilipasta_380g_sevan"
-end = 30487
+end = 30466
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 30487
+start = 30466
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_sweet_chili_sauce"
@@ -10106,9 +10106,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_sweet_chili_16af68a9"
-end = 30702
+end = 30681
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 30702
+start = 30681
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_salladsartor_sockerartor"
@@ -10125,9 +10125,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_salladsarta"
-end = 30870
+end = 30849
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 30870
+start = 30849
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_farskkorv_salsiccia_family"
@@ -10144,9 +10144,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_falukorv"
-end = 30979
+end = 30958
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 30979
+start = 30958
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_porter_beer"
@@ -10163,9 +10163,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_ol_porter_3_5_50cl_carnegie"
-end = 31276
+end = 31255
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 31276
+start = 31255
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fresh_chilipeppar_not_spice"
@@ -10182,9 +10182,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_green_chili_mild_113g_santa_maria"
-end = 31350
+end = 31329
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 31350
+start = 31329
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_salami_palagg_exact"
@@ -10201,9 +10201,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_salami_300g_ica_basic"
-end = 31409
+end = 31388
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 31409
+start = 31388
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_steklok_exact"
@@ -10220,9 +10220,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_steklok"
-end = 31635
+end = 31614
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 31635
+start = 31614
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_romsas_exact"
@@ -10239,9 +10239,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_romsas"
-end = 31687
+end = 31666
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 31687
+start = 31666
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_champinjoner_exact"
@@ -10258,9 +10258,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_champinjoner_skivade_290g_ica"
-end = 31820
+end = 31799
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 31820
+start = 31799
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kalhuvud_vitkal"
@@ -10277,9 +10277,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_vitkal_klass_1_ica"
-end = 31983
+end = 31962
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 31983
+start = 31962
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_oliver_plain_not_stuffed"
@@ -10296,9 +10296,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_negative_grona_oliver_farskostfyllda_250g_gourmet_gruppen"
-end = 32155
+end = 32134
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 32155
+start = 32134
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_chilisas_original_exact"
@@ -10315,9 +10315,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_chilisas_original"
-end = 32318
+end = 32297
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 32318
+start = 32297
 
 [[inventory]]
 adapter_refs = ["matcher_layer_diagnostics:synonyms:persiljekvistar_to_persilja", "matcher_layer_diagnostics:form_rules:fresh_herb_keywords", "matcher_layer_diagnostics:blocker_data:persilja_flavored_products"]
@@ -10352,9 +10352,9 @@ start = 3294
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_positive_persilja_i_kruka_ekologisk_1_p_krav_klass_1"
-end = 32444
+end = 32423
 path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
-start = 32444
+start = 32423
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_tomatpesto_not_green_pesto"

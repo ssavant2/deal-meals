@@ -22,10 +22,10 @@
       "legacy_validator": 249,
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 333,
-      "negative_regression": 831,
+      "negative_regression": 834,
       "offer_extra_keyword_mapping": 417,
-      "parent_match_only_mapping": 17,
-      "positive_regression": 662,
+      "parent_match_only_mapping": 18,
+      "positive_regression": 659,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
@@ -39,11 +39,11 @@
       "matcher_rule_inventory": 462,
       "no_match_policy": 355,
       "offer_extra_keyword": 417,
-      "parent_match_only": 17,
+      "parent_match_only": 18,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5654,
-    "variants_missing_product_text": 1785,
+    "variant_count": 5655,
+    "variants_missing_product_text": 1786,
     "variants_with_product_text": 3869
   },
   "variants": [
@@ -1159,27 +1159,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"aliases\": [], \"fixture_refs\": [\"matcher_regression_fresh_champ_klass_positive\", \"matcher_regression_positive_babychampinjoner\", \"matcher_regression_positive_champinjon\", \"matcher_regression_positive_champinjoner_1d9778ac\", \"matcher_regression_positive_champinjoner_250g_klass_1_ica\", \"matcher_regression_positive_champinjoner_eeaae1f9\", \"matcher_regression_positive_champinjoner_f48759cd\", \"matcher_regression_positive_skogschampinjoner\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_review_explicit_skogschampinjoner_skivade_still_accepts_preserved_sliced_champignons\", \"legacy_review_fresh_mushroom_lines_still_take_canned_tetra_products\", \"legacy_review_generic_valfri_svamp_still_gets_0_matches_despite_live_mushroom_offers\", \"legacy_validator_fresh_champinjoner_preserved_block\"]}"
-    },
-    {
-      "variant_id": "vterm-afb0e0b40f1048e0",
-      "row_index": 1746,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "current_review:positive_sibling:rimmad_lax_najadlax",
-      "source_id": "matcher_regression_rimmad_lax_najadlax_positive",
-      "variant_role": "positive_regression",
-      "variant_text": "matcher_regression_rimmad_lax_najadlax_positive: Najadlax Skivad Leröy",
-      "canonical": "lax",
-      "expected_family": "lax",
-      "ingredient_text": "ca 250 g rimmad lax i tunna skivor",
-      "product_text": "Najadlax Skivad Leröy",
-      "product_category": "fish",
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": false,
-      "notes": "current_review_matcher_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"lax\", \"ingredient_index\": 0, \"must_match_keyword\": \"lax\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
       "variant_id": "vterm-296d9164d42216e3",
@@ -43665,27 +43644,6 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"gemsallad\", \"ingredient_index\": 0, \"must_match_keyword\": \"gemsallad\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Grillad kyckling med gemsallad och halloumi\"}"
     },
     {
-      "variant_id": "vterm-d2032fed0bfd3d2f",
-      "row_index": 1745,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "current_review:positive_sibling:rimmad_lax_kallrokt",
-      "source_id": "matcher_regression_rimmad_lax_kallrokt_positive",
-      "variant_role": "positive_regression",
-      "variant_text": "matcher_regression_rimmad_lax_kallrokt_positive: Kallrökt Lax Skivad Falkenberg",
-      "canonical": "lax",
-      "expected_family": "lax",
-      "ingredient_text": "ca 250 g rimmad lax i tunna skivor",
-      "product_text": "Kallrökt Lax Skivad Falkenberg",
-      "product_category": "fish",
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": false,
-      "notes": "current_review_matcher_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"lax\", \"ingredient_index\": 0, \"must_match_keyword\": \"lax\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
-    },
-    {
       "variant_id": "vterm-0ec38110a9cb2da0",
       "row_index": 3410,
       "source_order": 30,
@@ -48640,27 +48598,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"färs\"}"
-    },
-    {
-      "variant_id": "vterm-774cd1de9928ed1f",
-      "row_index": 1743,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "current_review:positive_sibling:rimmad_lax_gravad",
-      "source_id": "matcher_regression_rimmad_lax_gravad_positive",
-      "variant_role": "positive_regression",
-      "variant_text": "matcher_regression_rimmad_lax_gravad_positive: Gravad Lax Skivad Falkenberg",
-      "canonical": "lax",
-      "expected_family": "lax",
-      "ingredient_text": "ca 250 g rimmad lax i tunna skivor",
-      "product_text": "Gravad Lax Skivad Falkenberg",
-      "product_category": "fish",
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": false,
-      "notes": "current_review_matcher_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"lax\", \"ingredient_index\": 0, \"must_match_keyword\": \"lax\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
       "variant_id": "vterm-40fd63e3a15db5cf",
@@ -118780,11 +118717,95 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"peperoni\"}"
+    },
+    {
+      "variant_id": "vterm-e0365870d250b429",
+      "row_index": 4861,
+      "source_order": 52,
+      "source_type": "parent_match_only",
+      "source_file": "app/languages/sv/ingredient_matching/parent_maps.py",
+      "source_ref": "app/languages/sv/ingredient_matching/parent_maps.py:falukorvsring",
+      "source_id": "falukorvsring",
+      "variant_role": "parent_match_only_mapping",
+      "variant_text": "falukorvsring",
+      "canonical": "falukorv",
+      "expected_family": "falukorv",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"falukorv\"}"
+    },
+    {
+      "variant_id": "vterm-58262752cd20506c",
+      "row_index": 1753,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "current_review:accepted_direct_fix:rimmad_lax_gravad_blocked",
+      "source_id": "matcher_regression_rimmad_lax_gravad_positive",
+      "variant_role": "negative_regression",
+      "variant_text": "matcher_regression_rimmad_lax_gravad_positive: Gravad Lax Skivad Falkenberg",
+      "canonical": null,
+      "expected_family": "current_review_matcher_regression",
+      "ingredient_text": "ca 250 g rimmad lax i tunna skivor",
+      "product_text": "Gravad Lax Skivad Falkenberg",
+      "product_category": "fish",
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": false,
+      "notes": "current_review_matcher_regression",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
+    },
+    {
+      "variant_id": "vterm-127e46c7ecb0eded",
+      "row_index": 1755,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "current_review:accepted_direct_fix:rimmad_lax_kallrokt_blocked",
+      "source_id": "matcher_regression_rimmad_lax_kallrokt_positive",
+      "variant_role": "negative_regression",
+      "variant_text": "matcher_regression_rimmad_lax_kallrokt_positive: Kallrökt Lax Skivad Falkenberg",
+      "canonical": null,
+      "expected_family": "current_review_matcher_regression",
+      "ingredient_text": "ca 250 g rimmad lax i tunna skivor",
+      "product_text": "Kallrökt Lax Skivad Falkenberg",
+      "product_category": "fish",
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": false,
+      "notes": "current_review_matcher_regression",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
+    },
+    {
+      "variant_id": "vterm-73d32aa8739d2157",
+      "row_index": 1756,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "current_review:accepted_direct_fix:rimmad_lax_najadlax_blocked",
+      "source_id": "matcher_regression_rimmad_lax_najadlax_positive",
+      "variant_role": "negative_regression",
+      "variant_text": "matcher_regression_rimmad_lax_najadlax_positive: Najadlax Skivad Leröy",
+      "canonical": null,
+      "expected_family": "current_review_matcher_regression",
+      "ingredient_text": "ca 250 g rimmad lax i tunna skivor",
+      "product_text": "Najadlax Skivad Leröy",
+      "product_category": "fish",
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": false,
+      "notes": "current_review_matcher_regression",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1566,
+      "no_product_text": 1567,
       "static_verified": 2595,
       "synthetic_verified": 1493
     },
@@ -118801,13 +118822,13 @@
       "matcher_rule_inventory": 462,
       "no_match_policy": 355,
       "offer_extra_keyword": 417,
-      "parent_match_only": 17,
+      "parent_match_only": 18,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5654
+      "audited": 5655
     },
-    "variant_count": 5654
+    "variant_count": 5655
   }
 }

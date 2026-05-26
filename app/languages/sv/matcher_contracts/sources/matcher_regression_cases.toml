@@ -2908,55 +2908,40 @@ category = "fish"
 name = "Laxfilé Garant"
 
 [[fixtures]]
-expected = 1
+expected = 0
 id = "matcher_regression_rimmad_lax_gravad_positive"
 ingredients = ["ca 250 g rimmad lax i tunna skivor"]
 policy_ref = "current_review_matcher_regression"
 recipe_name = "Sanity Recipe"
-source_ref = "current_review:positive_sibling:rimmad_lax_gravad"
+source_ref = "current_review:accepted_direct_fix:rimmad_lax_gravad_blocked"
 
 [fixtures.offer]
 category = "fish"
 name = "Gravad Lax Skivad Falkenberg"
 
-[[fixtures.expected_matches]]
-canonical = "lax"
-ingredient_index = 0
-must_match_keyword = "lax"
-
 [[fixtures]]
-expected = 1
+expected = 0
 id = "matcher_regression_rimmad_lax_kallrokt_positive"
 ingredients = ["ca 250 g rimmad lax i tunna skivor"]
 policy_ref = "current_review_matcher_regression"
 recipe_name = "Sanity Recipe"
-source_ref = "current_review:positive_sibling:rimmad_lax_kallrokt"
+source_ref = "current_review:accepted_direct_fix:rimmad_lax_kallrokt_blocked"
 
 [fixtures.offer]
 category = "fish"
 name = "Kallrökt Lax Skivad Falkenberg"
 
-[[fixtures.expected_matches]]
-canonical = "lax"
-ingredient_index = 0
-must_match_keyword = "lax"
-
 [[fixtures]]
-expected = 1
+expected = 0
 id = "matcher_regression_rimmad_lax_najadlax_positive"
 ingredients = ["ca 250 g rimmad lax i tunna skivor"]
 policy_ref = "current_review_matcher_regression"
 recipe_name = "Sanity Recipe"
-source_ref = "current_review:positive_sibling:rimmad_lax_najadlax"
+source_ref = "current_review:accepted_direct_fix:rimmad_lax_najadlax_blocked"
 
 [fixtures.offer]
 category = "fish"
 name = "Najadlax Skivad Leröy"
-
-[[fixtures.expected_matches]]
-canonical = "lax"
-ingredient_index = 0
-must_match_keyword = "lax"
 
 [[fixtures]]
 expected = 0

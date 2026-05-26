@@ -52,7 +52,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'picklad', 'picklade', 'picklat',  # preparation method, not ingredient
     'rökt', 'rokt', 'kallrökt', 'varmrökt', 'varmrokt', 'kallrokt',  # "laxfilé" != "varmrökt lax"
     'gravad', 'gravade',  # "lax" != "gravad lax"
-    'rimmad', 'rimmade', 'rimmat',  # "Fläsklägg Rimmad" is NOT "rimmad lax" (curing method)
+    # 'rimmad', 'rimmade', 'rimmat' — removed; rimmad is a distinct prep that should match only rimmad products
     'marinerad', 'marinerade', 'marinerats', 'marinerat',  # too specific preparation
     'örtmarinerad', 'örtmarinerade', 'ortmarinerad', 'ortmarinerade',  # herb-marinated — preparation method, not ingredient
     'rårörd', 'rårörda', 'rarörd', 'rarörda',  # "Svarta Vinbär Rårörd" — preparation method, not ingredient

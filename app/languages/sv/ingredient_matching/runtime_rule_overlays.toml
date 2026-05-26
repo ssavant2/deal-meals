@@ -501,6 +501,13 @@ keyword = "wrap"
 blockers = ["asian"]
 reason = "Asian rice flour wraps (spring roll wrappers) should not match tortilla wrap ingredients — different product category, different cuisine, different texture and use"
 
+[[product_name_blockers]]
+id = "runtime_pnb_soygurt"
+status = "active"
+keyword = "soygurt"
+blockers = ["persika", "hallon", "jordgubb", "blåbär", "mango", "banan", "ananas", "kiwi", "apelsin", "citron", "körsbär", "aprikos", "plommon", "päron", "lingon", "hjortron", "choklad", "frukt"]
+reason = "Smaksatt soygurt ska inte matcha plain soygurt-ingrediens — samma princip som yoghurt-principen, sojagurt och havregurt (Q92-5)"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -552,10 +559,10 @@ reason = "Babyspenat (young tender leaves used raw in salads) is functionally di
 
 [[false_positive_blockers]]
 id = "runtime_fpb_formbrod"
-status = "inactive"
+status = "active"
 keyword = "formbröd"
-blockers = ["grov", "grova"]
-reason = "Replaced by runtime_ksbc_formbrod_grov — FPB smart-blocker fires on the canonical synonym appended by _append_canonical_keyword_synonyms (formbröd is added standalone to ingredient text), so the blocker always sees 'has_valid=True' and never fires. KSBC operates at matched_keyword level and works correctly."
+blockers = ["grov", "grova", "fullkorns"]
+reason = "Replaced by runtime_ksbc_formbrod_grov — FPB smart-blocker fires on the canonical synonym appended by _append_canonical_keyword_synonyms (formbröd is added standalone to ingredient text), so the blocker always sees 'has_valid=True' and never fires. KSBC operates at matched_keyword level and works correctly.; fullkornsformbröd is a compound word — ingredient calling for whole grain bread should not match plain white formbröd/toastbröd (Q92-3)"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_socker"
@@ -976,6 +983,13 @@ status = "active"
 keyword = "tandoori"
 context = ["nuggets", "ärtnuggets", "artnuggets"]
 reason = "Tandoori as a flavor-coating descriptor on plant-based nuggets (ärtnuggets, nuggets) should not match plain tandoori spice/paste — product type mismatch: ready-to-eat coated product vs. raw spice"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_lax"
+status = "active"
+keyword = "lax"
+context = ["rimmad"]
+reason = "Rimmad lax (salt-cured salmon) should not match generic lax products — rimmad is a specific curing method requiring rimmad-specific products"
 
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"

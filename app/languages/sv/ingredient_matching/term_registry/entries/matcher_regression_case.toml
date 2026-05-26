@@ -25528,24 +25528,24 @@ variant = "matcher_regression_revbensspjall_spareribs_positive: Spareribs Sverig
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.lax.matcher_regression_rimmad_lax_gravad_positive"
+entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_rimmad_lax_gravad_positive"
 language = "sv"
 market = "SE"
-canonical = "lax"
+canonical = "current_review_matcher_regression"
 status = "active"
 variants = ["matcher_regression_rimmad_lax_gravad_positive: Gravad Lax Skivad Falkenberg"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_rimmad_lax_gravad_positive"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_rimmad_lax_gravad_positive."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "lax"
+canonical = "current_review_matcher_regression"
 variant = "matcher_regression_rimmad_lax_gravad_positive: Gravad Lax Skivad Falkenberg"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_rimmad_lax_hot_smoked_negative"
@@ -25568,44 +25568,44 @@ variant = "matcher_regression_rimmad_lax_hot_smoked_negative: Lax Varmr Portion 
 layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.lax.matcher_regression_rimmad_lax_kallrokt_positive"
+entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_rimmad_lax_kallrokt_positive"
 language = "sv"
 market = "SE"
-canonical = "lax"
+canonical = "current_review_matcher_regression"
 status = "active"
 variants = ["matcher_regression_rimmad_lax_kallrokt_positive: Kallrökt Lax Skivad Falkenberg"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_rimmad_lax_kallrokt_positive"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_rimmad_lax_kallrokt_positive."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "lax"
+canonical = "current_review_matcher_regression"
 variant = "matcher_regression_rimmad_lax_kallrokt_positive: Kallrökt Lax Skivad Falkenberg"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.lax.matcher_regression_rimmad_lax_najadlax_positive"
+entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_rimmad_lax_najadlax_positive"
 language = "sv"
 market = "SE"
-canonical = "lax"
+canonical = "current_review_matcher_regression"
 status = "active"
 variants = ["matcher_regression_rimmad_lax_najadlax_positive: Najadlax Skivad Leröy"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_rimmad_lax_najadlax_positive"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_rimmad_lax_najadlax_positive."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "lax"
+canonical = "current_review_matcher_regression"
 variant = "matcher_regression_rimmad_lax_najadlax_positive: Najadlax Skivad Leröy"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_rimmad_lax_raw_fillet_negative"
