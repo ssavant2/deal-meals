@@ -415,7 +415,7 @@ id = "runtime_pnb_kalrot"
 status = "active"
 keyword = "kålrot"
 blockers = ["grönkål", "vitkål", "rödkål", "savoykål", "spetskål", "svartkål", "salladskål"]
-reason = "kålrot is rutabaga, not a kål (cabbage/greens) variety — block all kål-named offers that are not actually kålrot"
+reason = "kålrot is rutabaga, not a kål (cabbage/greens) variety — block kål-named offers that are not actually kålrot"
 
 [[product_name_blockers]]
 id = "runtime_pnb_parlcouscous"
@@ -479,6 +479,20 @@ status = "active"
 keyword = "äppeljuice"
 blockers = ["hallon", "jordgubb", "blåbär", "mango", "päron", "banan", "ananas", "persika", "kiwi", "citron", "lime", "apelsin", "körsbär", "aprikos", "plommon", "lingon", "hjortron", "fläder", "svartvinbär", "röda vinbär", "multifrukt"]
 reason = "Smaksatta/blandade äppeljuicer (med hallon, päron, multifrukt m.fl.) ska inte matcha plain äppeljuice-ingrediens — samma princip som yoghurt/havregurt-policyn"
+
+[[product_name_blockers]]
+id = "runtime_pnb_kottfars"
+status = "active"
+keyword = "köttfärs"
+blockers = ["salsiccia"]
+reason = "Färs Salsiccia (Italian seasoned sausage mince) should not match plain köttfärs - it is heavily pre-seasoned with Italian spices"
+
+[[product_name_blockers]]
+id = "runtime_pnb_fars"
+status = "active"
+keyword = "färs"
+blockers = ["salsiccia"]
+reason = "Färs Salsiccia (Italian seasoned sausage mince) should not match plain färs - it is heavily pre-seasoned with Italian spices"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
@@ -689,6 +703,27 @@ status = "active"
 keyword = "revbensspjäll"
 blockers = ["kickin"]
 reason = "Pre-seasoned 'Kickin' ribs should not match plain revbensspjäll ingredient"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_selleri"
+status = "active"
+keyword = "selleri"
+blockers = ["sellerisalt"]
+reason = "Sellerisalt (spice) should not match stjälkselleri/bladselleri (vegetable) — the ingredient keyword sellerisalt routes through selleri but produces false matches to produce"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_kal"
+status = "active"
+keyword = "kål"
+blockers = ["kålrot"]
+reason = "kålrot (rutabaga) is not a kål (cabbage/greens) variety — when ingredient is kålrot, suppress generic kål keyword matches from cabbage products"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_citron"
+status = "active"
+keyword = "citron"
+blockers = ["citronmajonnäs"]
+reason = "Citron (fresh lemon fruit) should not match citronmajonnäs (lemon mayo) ingredient — the ingredient calls for a prepared condiment, not a fresh fruit; same pattern as citronpeppar/citronarom FPBs"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
