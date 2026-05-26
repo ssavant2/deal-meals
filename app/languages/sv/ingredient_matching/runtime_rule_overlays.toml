@@ -522,6 +522,20 @@ keyword = "ceviche"
 blockers = ["sill"]
 reason = "Sill (herring) products flavored with ceviche spices should not match when recipe is making ceviche from scratch — symmetric to existing PNB sill←ceviche that blocks ceviche-sill from sill ingredients"
 
+[[product_name_blockers]]
+id = "runtime_pnb_alspansrokt"
+status = "active"
+keyword = "alspånsrökt"
+blockers = ["kalkon", "tempeh"]
+reason = "Kalkon Strimlad Alspånsrökt (Ingelsta) is smoked turkey meat, not smoked tofu/tempeh — keyword alspånsrökt should not bridge meat products to plant-based ingredients; Tempeh Hel Alspånsrökt 200g Yipin is fermented whole soybean cake, not tofu — keyword alspånsrökt should not bridge tempeh products to tofu ingredients (analog to Paket Bärta Helbit Naturell smoked tempeh precedent)"
+
+[[product_name_blockers]]
+id = "runtime_pnb_rimmad"
+status = "active"
+keyword = "rimmad"
+blockers = ["oxbringa"]
+reason = "cross-protein FP from Q92-8 fix: Oxbringa rimmad extracts rimmad as standalone keyword and matches rimmad-lax ingredients; only oxbringa among rimmad products has this issue (others use compound rimmatfläsk)"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -743,8 +757,8 @@ reason = "Sellerisalt (spice) should not match stjälkselleri/bladselleri (veget
 id = "runtime_fpb_kal"
 status = "active"
 keyword = "kål"
-blockers = ["kålrot"]
-reason = "kålrot (rutabaga) is not a kål (cabbage/greens) variety — when ingredient is kålrot, suppress generic kål keyword matches from cabbage products"
+blockers = ["kålrot", "kålrabbi"]
+reason = "kålrot (rutabaga) is not a kål (cabbage/greens) variety — when ingredient is kålrot, suppress generic kål keyword matches from cabbage products; kålrabbi (kohlrabi, stem vegetable) is not a kål (cabbage/greens) variety - when ingredient is kålrabbi, suppress generic kål keyword matches from cabbage products"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_citron"
