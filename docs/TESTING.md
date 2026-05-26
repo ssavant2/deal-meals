@@ -212,6 +212,7 @@ authoring or maintenance command:
 ./bin/dm matcher modify no-match-policy ...
 ./bin/dm matcher modify match-bridge ...
 ./bin/dm matcher fixture make-negative <fixture_id>
+./bin/dm matcher fixture make-positive <fixture_id> --from-current-match
 ./bin/dm matcher fixture remove <fixture_id>
 ./bin/dm matcher compare-paths --offer ... --ingredient ...
 ./bin/dm matcher trace-extraction --ingredient ...
@@ -227,12 +228,15 @@ backend-only guards remain manual edits plus `./bin/dm matcher gates --track
 A|B`.
 `smart-blocker` is scaffold-only: it creates the helper and chain insertion, then
 the rule body still needs a normal Python implementation and gates. The
-`modify ...`, `fixture make-negative`, and `fixture remove` commands are for
-mechanical TOML/contract bookkeeping around existing durable rules. Use
-`fixture make-negative` when an old positive contract case is now the intended
-negative proof; it rewrites the fixture source and generated JSON, then the
-batch can be finalized with `--allow-removals` if baseline promotion reports
-reviewed true removals.
+`modify ...`, `fixture make-negative`, `fixture make-positive`, and
+`fixture remove` commands are for mechanical TOML/contract bookkeeping around
+existing durable rules. Use `fixture make-negative` when an old positive
+contract case is now the intended negative proof; it rewrites the fixture source
+and generated JSON, then the batch can be finalized with `--allow-removals` if
+baseline promotion reports reviewed true removals. Use
+`fixture make-positive --from-current-match` for the inverse when the current
+matcher is believed correct; it refuses to write if current diagnostics are not
+single-match and path-consistent.
 
 After adding or changing registry TOML manually, run `./bin/dm matcher gates`
 for the chosen track. For targeted registry-only troubleshooting, the underlying

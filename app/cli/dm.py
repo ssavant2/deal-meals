@@ -1818,6 +1818,16 @@ def _remove_fixture_rows(
     return kept, tuple(removed)
 
 
+def _load_fixture_row(paths: MatcherPaths, fixture_id: str) -> dict[str, Any]:
+    fixtures = load_contract_source(_source_spec(paths, "matcher_regression_cases"))
+    matches = [row for row in fixtures if str(row.get("id") or "") == fixture_id]
+    if not matches:
+        raise typer.BadParameter(f"fixture id not found: {fixture_id}")
+    if len(matches) > 1:
+        raise typer.BadParameter(f"fixture id is not unique: {fixture_id}")
+    return dict(matches[0])
+
+
 def _make_fixture_negative_rows(
     *,
     paths: MatcherPaths,
@@ -1863,6 +1873,218 @@ def _make_fixture_negative_rows(
         "new_policy_ref": str(row.get("policy_ref") or ""),
         "previous_source_ref": previous_source_ref,
         "new_source_ref": str(row.get("source_ref") or ""),
+    }
+
+
+def _fixture_offer_payload(row: Mapping[str, Any]) -> Mapping[str, Any]:
+    offer = row.get("offer") or {}
+    if not isinstance(offer, Mapping):
+        raise typer.BadParameter(f"fixture {row.get('id', '<unknown>')} offer must be an object")
+    return offer
+
+
+def _fixture_ingredients(row: Mapping[str, Any]) -> tuple[str, ...]:
+    ingredients = row.get("ingredients") or []
+    if not isinstance(ingredients, list) or not ingredients:
+        raise typer.BadParameter(f"fixture {row.get('id', '<unknown>')} requires ingredients")
+    return tuple(str(ingredient) for ingredient in ingredients)
+
+
+def _fixture_offer_weight_grams(offer: Mapping[str, Any]) -> float | None:
+    weight = offer.get("weight_grams")
+    if weight is None:
+        return None
+    if isinstance(weight, (int, float)):
+        return float(weight)
+    try:
+        return float(str(weight))
+    except ValueError:
+        return None
+
+
+def _infer_positive_expected_match_from_current_match(row: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    try:
+        from support_checks.matcher_layer_diagnostics import DiagnosticCase, diagnose_case
+    except ModuleNotFoundError as exc:
+        raise typer.BadParameter(
+            "cannot infer current match because support-check dependencies are unavailable; "
+            "run inside the dev container or pass --canonical/--ingredient-index explicitly"
+        ) from exc
+
+    fixture_id = str(row.get("id") or "<unknown>")
+    offer = _fixture_offer_payload(row)
+    ingredients = _fixture_ingredients(row)
+    offer_name = str(offer.get("name") or "")
+    offer_category = str(offer.get("category") or "")
+    offer_brand = str(offer.get("brand") or "")
+    weight_grams = _fixture_offer_weight_grams(offer)
+
+    diagnostic = diagnose_case(
+        DiagnosticCase(
+            case_id=fixture_id,
+            recipe_name=str(row.get("recipe_name") or "Sanity Recipe"),
+            ingredients=ingredients,
+            offer_name=offer_name,
+            offer_category=offer_category,
+            offer_brand=offer_brand,
+            expected=1,
+        ),
+        include_cache_freshness=False,
+    )
+
+    failures: list[str] = []
+    if diagnostic.get("actual") != 1:
+        failures.append(f"actual={diagnostic.get('actual')} (expected one current match)")
+    if diagnostic.get("diagnosis_class") != "pass":
+        failures.append(f"diagnosis_class={diagnostic.get('diagnosis_class')}")
+
+    materialized_matches = diagnostic.get("materialization", {}).get("matched_offers", [])
+    if len(materialized_matches) != 1:
+        failures.append(f"materialized_matches={len(materialized_matches)} (expected exactly one)")
+
+    match = materialized_matches[0] if len(materialized_matches) == 1 else {}
+    canonical = str(match.get("matched_keyword") or "")
+    ingredient_index = match.get("matched_ingredient_index")
+    if not canonical:
+        failures.append("materialized match has no matched_keyword")
+    if ingredient_index is None:
+        failures.append("materialized match has no matched_ingredient_index")
+    try:
+        ingredient_index_int = int(ingredient_index)
+    except (TypeError, ValueError):
+        failures.append(f"invalid matched_ingredient_index={ingredient_index!r}")
+        ingredient_index_int = -1
+    if ingredient_index_int < 0 or ingredient_index_int >= len(ingredients):
+        failures.append(f"matched_ingredient_index={ingredient_index!r} is outside fixture ingredients")
+
+    fast_match = diagnostic.get("fast_match", {})
+    if not fast_match.get("matched"):
+        failures.append("fast_match did not match")
+    if canonical and fast_match.get("matched_keyword") != canonical:
+        failures.append(
+            f"fast_match keyword {fast_match.get('matched_keyword')!r} != materialized keyword {canonical!r}"
+        )
+    if ingredient_index_int >= 0 and fast_match.get("matched_ingredient_index") != ingredient_index_int:
+        failures.append(
+            "fast_match ingredient_index "
+            f"{fast_match.get('matched_ingredient_index')!r} != {ingredient_index_int}"
+        )
+
+    backend_validation = diagnostic.get("backend_validation", {})
+    if not backend_validation.get("accepted"):
+        failures.append("backend validation did not accept the match")
+    if canonical and backend_validation.get("matched_keyword") != canonical:
+        failures.append(
+            "backend validation keyword "
+            f"{backend_validation.get('matched_keyword')!r} != materialized keyword {canonical!r}"
+        )
+    if ingredient_index_int >= 0 and backend_validation.get("matched_ingredient_index") != ingredient_index_int:
+        failures.append(
+            "backend validation ingredient_index "
+            f"{backend_validation.get('matched_ingredient_index')!r} != {ingredient_index_int}"
+        )
+
+    signal_provenance = diagnostic.get("signal_provenance", {})
+    duplicate_count = int(signal_provenance.get("duplicate_signal_source", {}).get("count") or 0)
+    ambiguous_count = int(signal_provenance.get("ambiguous_canonical", {}).get("count") or 0)
+    if duplicate_count:
+        failures.append(f"duplicate_signal_source={duplicate_count}")
+    if ambiguous_count:
+        failures.append(f"ambiguous_canonical={ambiguous_count}")
+
+    if ingredient_index_int >= 0 and canonical:
+        path_compare = _compare_matcher_paths(
+            offer=offer_name,
+            ingredient=ingredients[ingredient_index_int],
+            offer_category=offer_category,
+            brand=offer_brand,
+            weight_grams=weight_grams,
+            recipe_name=str(row.get("recipe_name") or "DM Matcher Fixture Make Positive"),
+        )
+        if path_compare["live_fast_diverged"] or path_compare["fast_backend_diverged"]:
+            failures.append("single-ingredient compare-paths diverged")
+        if path_compare["legacy_live_keyword"] != canonical:
+            failures.append(
+                f"legacy live keyword {path_compare['legacy_live_keyword']!r} != {canonical!r}"
+            )
+        if path_compare["fast_keyword"] != canonical:
+            failures.append(f"canonical fast keyword {path_compare['fast_keyword']!r} != {canonical!r}")
+        if not path_compare["backend_matched"] or int(path_compare["backend_num_matches"]) != 1:
+            failures.append(
+                "single-ingredient backend produced "
+                f"{path_compare['backend_num_matches']} match(es)"
+            )
+
+    if failures:
+        raise typer.BadParameter(
+            "cannot infer positive expected_matches from current matcher for "
+            f"{fixture_id}: " + "; ".join(failures)
+        )
+
+    expected_match = {
+        "ingredient_index": ingredient_index_int,
+        "canonical": canonical,
+        "must_match_keyword": canonical,
+    }
+    return expected_match, {
+        "canonical": canonical,
+        "ingredient_index": ingredient_index_int,
+        "must_match_keyword": canonical,
+        "diagnosis_class": diagnostic.get("diagnosis_class"),
+        "paths": "live/fast/backend/materialized agree",
+    }
+
+
+def _make_fixture_positive_rows(
+    *,
+    paths: MatcherPaths,
+    fixture_id: str,
+    expected_match: Mapping[str, Any],
+    policy_ref: str | None,
+    source_ref: str | None,
+    inference: Mapping[str, Any] | None,
+) -> tuple[list[dict], dict[str, Any]]:
+    fixtures = load_contract_source(_source_spec(paths, "matcher_regression_cases"))
+    matches = [index for index, row in enumerate(fixtures) if str(row.get("id") or "") == fixture_id]
+    if not matches:
+        raise typer.BadParameter(f"fixture id not found: {fixture_id}")
+    if len(matches) > 1:
+        raise typer.BadParameter(f"fixture id is not unique: {fixture_id}")
+
+    index = matches[0]
+    original = fixtures[index]
+    row = dict(original)
+    previous_expected = row.get("expected")
+    if previous_expected not in (0, 1):
+        raise typer.BadParameter(
+            f"fixture {fixture_id} has unsupported expected value {previous_expected!r}; "
+            "only positive/negative fixtures can be converted"
+        )
+
+    previous_expected_matches = row.get("expected_matches")
+    row["expected"] = 1
+    row["expected_matches"] = [dict(expected_match)]
+    previous_policy_ref = str(row.get("policy_ref") or "")
+    previous_source_ref = str(row.get("source_ref") or "")
+    if policy_ref is not None:
+        row["policy_ref"] = policy_ref
+    if source_ref is not None:
+        row["source_ref"] = source_ref
+
+    fixtures[index] = row
+    return fixtures, {
+        "fixture_id": fixture_id,
+        "changed": row != original,
+        "previous_expected": previous_expected,
+        "previous_expected_matches": len(previous_expected_matches)
+        if isinstance(previous_expected_matches, list)
+        else 0,
+        "expected_match": dict(expected_match),
+        "previous_policy_ref": previous_policy_ref,
+        "new_policy_ref": str(row.get("policy_ref") or ""),
+        "previous_source_ref": previous_source_ref,
+        "new_source_ref": str(row.get("source_ref") or ""),
+        "inference": dict(inference or {}),
     }
 
 
@@ -3648,6 +3870,41 @@ def _print_fixture_make_negative_summary(
         typer.echo(f"Fixture already negative: {fixture_id}")
     typer.echo(f"  expected: {summary['previous_expected']} -> 0")
     typer.echo(f"  removed expected_matches: {summary['removed_expected_matches']}")
+    if summary["previous_policy_ref"] != summary["new_policy_ref"]:
+        typer.echo(f"  policy_ref: {summary['previous_policy_ref']} -> {summary['new_policy_ref']}")
+    if summary["previous_source_ref"] != summary["new_source_ref"]:
+        typer.echo(f"  source_ref: {summary['previous_source_ref']} -> {summary['new_source_ref']}")
+    if dry_run:
+        typer.echo("Dry run only; no files written.")
+
+
+def _print_fixture_make_positive_summary(
+    summary: Mapping[str, Any],
+    *,
+    dry_run: bool,
+) -> None:
+    fixture_id = str(summary["fixture_id"])
+    inference = summary.get("inference") or {}
+    if inference:
+        typer.echo("Current matcher result:")
+        typer.echo(f"  canonical: {inference.get('canonical')}")
+        typer.echo(f"  ingredient_index: {inference.get('ingredient_index')}")
+        typer.echo(f"  must_match_keyword: {inference.get('must_match_keyword')}")
+        typer.echo(f"  paths: {inference.get('paths')}")
+    if summary["changed"]:
+        action = "Would convert" if dry_run else "Converted"
+        typer.echo(f"{action} fixture to positive: {fixture_id}")
+    else:
+        typer.echo(f"Fixture already positive with same expected_matches: {fixture_id}")
+    expected_match = summary["expected_match"]
+    typer.echo(f"  expected: {summary['previous_expected']} -> 1")
+    typer.echo(f"  previous expected_matches: {summary['previous_expected_matches']}")
+    typer.echo(
+        "  expected_match: "
+        f"ingredient_index={expected_match['ingredient_index']} "
+        f"canonical={expected_match['canonical']} "
+        f"must_match_keyword={expected_match.get('must_match_keyword', '-')}"
+    )
     if summary["previous_policy_ref"] != summary["new_policy_ref"]:
         typer.echo(f"  policy_ref: {summary['previous_policy_ref']} -> {summary['new_policy_ref']}")
     if summary["previous_source_ref"] != summary["new_source_ref"]:
@@ -9126,6 +9383,128 @@ def matcher_fixture_make_negative(
         "If verified-term promotion reports intentional removals, finish the batch with "
         "`dm matcher batch finalize --track B --allow-removals` after reviewing them."
     )
+
+    if not run_gates:
+        typer.echo("Skipped preflight (--no-run-gates).")
+        return
+    if _matcher_session_should_defer_gates(paths):
+        _echo_session_deferred_gates("preflight")
+        return
+    raise typer.Exit(_run_preflight(paths, report_root))
+
+
+@matcher_fixture_app.command("make-positive")
+def matcher_fixture_make_positive(
+    fixture_id: Annotated[str, typer.Argument(help="Existing fixture id to convert to expected=1.")],
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    from_current_match: Annotated[
+        bool,
+        typer.Option(
+            "--from-current-match",
+            help="Infer expected_matches from the current matcher when all paths agree on exactly one match.",
+        ),
+    ] = False,
+    canonical: Annotated[
+        str | None,
+        typer.Option("--canonical", help="Explicit expected canonical when not using --from-current-match."),
+    ] = None,
+    ingredient_index: Annotated[
+        int | None,
+        typer.Option("--ingredient-index", help="Explicit ingredient index when not using --from-current-match."),
+    ] = None,
+    must_match_keyword: Annotated[
+        str | None,
+        typer.Option(
+            "--must-match-keyword",
+            help="Explicit must_match_keyword; defaults to --canonical in explicit mode.",
+        ),
+    ] = None,
+    policy_ref: Annotated[
+        str | None,
+        typer.Option("--policy-ref", help="Replace the fixture policy_ref after conversion."),
+    ] = None,
+    source_ref: Annotated[
+        str | None,
+        typer.Option("--source-ref", help="Replace the fixture source_ref after conversion."),
+    ] = None,
+    regen: Annotated[
+        bool,
+        typer.Option("--regen/--no-regen", help="Regenerate matcher contract JSON after writing."),
+    ] = True,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run matcher preflight after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Show the fixture rewrite without writing files.")] = False,
+) -> None:
+    paths = _paths(tree_root)
+    fixture_row = _load_fixture_row(paths, fixture_id)
+    inference: Mapping[str, Any] | None = None
+
+    if from_current_match:
+        explicit_options = [
+            option
+            for option, value in (
+                ("--canonical", canonical),
+                ("--ingredient-index", ingredient_index),
+                ("--must-match-keyword", must_match_keyword),
+            )
+            if value is not None
+        ]
+        if explicit_options:
+            raise typer.BadParameter(
+                "--from-current-match cannot be combined with explicit match fields: "
+                + ", ".join(explicit_options)
+            )
+        expected_match, inference = _infer_positive_expected_match_from_current_match(fixture_row)
+    else:
+        if not canonical or ingredient_index is None:
+            raise typer.BadParameter(
+                "pass --from-current-match, or pass both --canonical and --ingredient-index"
+            )
+        canonical_value = canonical.strip()
+        if not canonical_value:
+            raise typer.BadParameter("--canonical must not be empty")
+        if ingredient_index < 0:
+            raise typer.BadParameter("--ingredient-index must be >= 0")
+        ingredients = _fixture_ingredients(fixture_row)
+        if ingredient_index >= len(ingredients):
+            raise typer.BadParameter(
+                f"--ingredient-index {ingredient_index} is outside fixture ingredients "
+                f"(0..{len(ingredients) - 1})"
+            )
+        must_match_value = must_match_keyword.strip() if must_match_keyword else canonical_value
+        expected_match = {
+            "ingredient_index": ingredient_index,
+            "canonical": canonical_value,
+        }
+        if must_match_value:
+            expected_match["must_match_keyword"] = must_match_value
+
+    fixture_rows, summary = _make_fixture_positive_rows(
+        paths=paths,
+        fixture_id=fixture_id,
+        expected_match=expected_match,
+        policy_ref=policy_ref,
+        source_ref=source_ref,
+        inference=inference,
+    )
+
+    _print_fixture_make_positive_summary(summary, dry_run=dry_run)
+    if dry_run:
+        return
+
+    if summary["changed"]:
+        write_contract_source(_source_spec(paths, "matcher_regression_cases"), fixture_rows)
+    if regen:
+        _regenerate_contract_json(paths)
+        typer.echo("Regenerated matcher contract JSON.")
+    else:
+        typer.echo("Skipped regen (--no-regen).")
 
     if not run_gates:
         typer.echo("Skipped preflight (--no-run-gates).")

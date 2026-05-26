@@ -4044,6 +4044,127 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             self.assertEqual(generated_fixture["expected"], 0)
             self.assertNotIn("expected_matches", generated_fixture)
 
+    def test_dm_matcher_fixture_make_positive_from_current_match_rewrites_source_and_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            fixture_spec = contract_spec_by_name("matcher_regression_cases", tree_root=tree_root)
+            fixtures = load_contract_source(fixture_spec)
+            fixtures.append({
+                "id": "phase_fixture_to_positive_negative",
+                "policy_ref": "policy_phase_fixture_old_negative",
+                "source_ref": "manual:policy_phase_fixture_old_negative",
+                "recipe_name": "Synthetic Positive Fixture",
+                "ingredients": ["2 dl jordgubbssaft"],
+                "offer": {"name": "Blandsaft Jordgubb Bob", "category": "beverages"},
+                "expected": 0,
+            })
+            fixtures.append({
+                "id": "phase_fixture_to_positive_no_match",
+                "policy_ref": "policy_phase_fixture_no_match",
+                "source_ref": "manual:policy_phase_fixture_no_match",
+                "recipe_name": "Synthetic No Match Fixture",
+                "ingredients": ["2 dl jordgubbssaft"],
+                "offer": {"name": "Jordgubbsmarmelad Bob", "category": "pantry"},
+                "expected": 0,
+            })
+            write_contract_source(fixture_spec, fixtures)
+            check_generated_contract_json(tree_root=tree_root, write=True)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "fixture",
+                    "make-positive",
+                    "phase_fixture_to_positive_negative",
+                    "--from-current-match",
+                    "--policy-ref",
+                    "policy_phase_fixture_new_positive",
+                    "--source-ref",
+                    "manual:policy_phase_fixture_new_positive",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            self.assertIn("Current matcher result:", result.stdout)
+            self.assertIn("canonical: jordgubbssaft", result.stdout)
+            self.assertIn("paths: live/fast/backend/materialized agree", result.stdout)
+            self.assertIn("Converted fixture to positive: phase_fixture_to_positive_negative", result.stdout)
+            self.assertIn("Regenerated matcher contract JSON.", result.stdout)
+
+            updated_fixtures = load_contract_source(fixture_spec)
+            updated_fixture = next(
+                row for row in updated_fixtures
+                if row["id"] == "phase_fixture_to_positive_negative"
+            )
+            self.assertEqual(updated_fixture["expected"], 1)
+            self.assertEqual(updated_fixture["policy_ref"], "policy_phase_fixture_new_positive")
+            self.assertEqual(updated_fixture["source_ref"], "manual:policy_phase_fixture_new_positive")
+            self.assertEqual(
+                updated_fixture["expected_matches"],
+                [{
+                    "ingredient_index": 0,
+                    "canonical": "jordgubbssaft",
+                    "must_match_keyword": "jordgubbssaft",
+                }],
+            )
+
+            generated_fixtures = json.loads(
+                (
+                    app_dir
+                    / "languages"
+                    / "sv"
+                    / "matcher_contracts"
+                    / "matcher_regression_cases.json"
+                ).read_text(encoding="utf-8")
+            )
+            generated_fixture = next(
+                row for row in generated_fixtures
+                if row["id"] == "phase_fixture_to_positive_negative"
+            )
+            self.assertEqual(generated_fixture["expected"], 1)
+            self.assertEqual(
+                generated_fixture["expected_matches"],
+                [{
+                    "ingredient_index": 0,
+                    "canonical": "jordgubbssaft",
+                    "must_match_keyword": "jordgubbssaft",
+                }],
+            )
+
+            no_match = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "fixture",
+                    "make-positive",
+                    "phase_fixture_to_positive_no_match",
+                    "--from-current-match",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(no_match.returncode, 0, no_match.stderr + no_match.stdout)
+            self.assertIn("cannot infer positive expected_matches", no_match.stderr + no_match.stdout)
+
     def test_dm_matcher_batch_metrics_start_finish_writes_local_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)

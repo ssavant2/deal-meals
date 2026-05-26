@@ -54,7 +54,7 @@ Typical authoring families are:
   `dual-keyword-normalization`, flavor/carrier, context, cuisine, compound,
   specialty, processed/form, substitution, and secondary-pattern commands
 - mechanical maintenance: `dm matcher fixture make-negative`,
-  `dm matcher fixture remove`, `dm matcher modify
+  `dm matcher fixture make-positive`, `dm matcher fixture remove`, `dm matcher modify
   no-match-policy`, `dm matcher modify match-bridge`, `dm matcher promote
   --apply-staged`, `dm matcher refresh-line-refs --fix`,
   `dm matcher sanity-find`, `dm matcher sanity-update`,
@@ -86,6 +86,10 @@ Inactivate or remove a registry rule/fixture:
 ./bin/dm matcher fixture make-negative <fixture_id> \
   --policy-ref <new_policy_ref> \
   --source-ref <review_or_manual_ref>
+./bin/dm matcher fixture make-positive <fixture_id> \
+  --from-current-match \
+  --policy-ref <new_policy_ref> \
+  --source-ref <review_or_manual_ref>
 ./bin/dm matcher fixture remove <fixture_id>
 ```
 
@@ -106,6 +110,14 @@ unless a batch is active. If the later baseline promotion reports intentional
 verified-term removals from that flip, finish with
 `./bin/dm matcher batch finalize --track B --allow-removals` after reviewing the
 listed removals.
+
+`fixture make-positive` is the inverse. Prefer `--from-current-match` when the
+current matcher is believed correct: it writes `expected = 1` and fills
+`expected_matches` only if current diagnostics see exactly one match and the
+live/fast/backend/materialized paths agree on the same keyword and ingredient
+index. If that conservative inference rejects a legitimate case, diagnose the
+pair first, then pass explicit `--canonical`, `--ingredient-index`, and optional
+`--must-match-keyword`.
 
 Iterate with live pre-flight feedback:
 
@@ -931,7 +943,7 @@ decision in the runbook.
 | Track | Use for | Typical files | Required proof |
 | --- | --- | --- | --- |
 | Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/KSBC/GPB additions, cuisine-context restrictions, compound/subword protection, and tiny runtime guards. | `dm matcher add pnb|fpb|ksbc|gpb`, `runtime_rule_overlays.toml`, `dm matcher add smart-blocker` scaffolds, `recipe_context.py` for `CUISINE_CONTEXT`, `compound_text.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
-| Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. Use `dm matcher modify no-match-policy`, `dm matcher modify match-bridge`, `dm matcher fixture make-negative`, and `dm matcher fixture remove` for supported mechanical rewrites/removals. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
+| Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. Use `dm matcher modify no-match-policy`, `dm matcher modify match-bridge`, `dm matcher fixture make-negative`, `dm matcher fixture make-positive`, and `dm matcher fixture remove` for supported mechanical rewrites/removals. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
 
 There is one deliberately small path between those two: **lightweight registry
 alias**. Use it for exact spelling/plural/compound aliases on already-wired
@@ -986,6 +998,29 @@ The command keeps the fixture id stable, sets `expected = 0`, removes
 `[[fixtures.expected_matches]]`, and regenerates the generated JSON contract.
 Use `--allow-removals` on finalize only after the promote step lists removals
 that are explained by the deliberate fixture/policy reversal.
+
+When an old negative fixture turns out to be a legitimate positive, convert it
+the same way. The smart path observes the current matcher and refuses to write
+when the result is missing, ambiguous, duplicated, or path-divergent:
+
+```bash
+./bin/dm matcher fixture make-positive <fixture_id> \
+  --from-current-match \
+  --policy-ref <current_policy_ref> \
+  --source-ref <review_question_or_manual_ref> \
+  --no-run-gates
+./bin/dm matcher batch finalize --track B
+```
+
+If the match is intentionally context-dependent and the conservative inference
+rejects it, use explicit fields instead:
+
+```bash
+./bin/dm matcher fixture make-positive <fixture_id> \
+  --canonical <canonical> \
+  --ingredient-index <zero_based_index> \
+  --must-match-keyword <keyword>
+```
 
 Do not treat a live diagnostic, an ad hoc note, or a one-off sanity test as the
 durable source of truth for Track B. The durable contract is:

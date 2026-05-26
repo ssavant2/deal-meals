@@ -164,6 +164,7 @@ unified CLI:
 ./bin/dm matcher modify no-match-policy ...
 ./bin/dm matcher modify match-bridge ...
 ./bin/dm matcher fixture make-negative <fixture_id>
+./bin/dm matcher fixture make-positive <fixture_id> --from-current-match
 ./bin/dm matcher fixture remove <fixture_id>
 ```
 
@@ -221,6 +222,10 @@ When a review reverses an old positive fixture into a negative proof, use
 `dm matcher fixture make-negative` instead of hand-editing
 `[[fixtures.expected_matches]]`; then finalize with `--allow-removals` if the
 promote step reports reviewed true removals.
+When a review reverses an old negative fixture into a positive proof, use
+`dm matcher fixture make-positive --from-current-match`; it only writes the
+positive `expected_matches` block when current diagnostics agree on one stable
+match.
 
 For Track B matcher-rule work, prefer the wrapper:
 
