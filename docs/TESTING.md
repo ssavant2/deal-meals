@@ -229,6 +229,9 @@ A|B`.
 For `parent-match-only`, a positive generated sanity proves only that the parent
 route is available. Add the negative flags, or a separate negative sanity case,
 when the policy depends on a sibling/nearby product not matching.
+Use `trace-extraction --offer` or `compare-paths` when live product extraction
+and precomputed offer keywords disagree; both commands show the keyword diff so
+precompute-only additions are visible before opening `matching.py`.
 `smart-blocker` is scaffold-only: it creates the helper and chain insertion, then
 the rule body still needs a normal Python implementation and gates. The
 `modify ...`, `fixture make-negative`, `fixture make-positive`, and

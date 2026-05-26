@@ -202,10 +202,11 @@ worked on. Existing simple `match_bridge.toml` rows can be narrowed with
 with a runtime-wired surface.
 
 For diagnostics, use `dm matcher compare-paths` when legacy live, canonical
-fast, and backend matcher paths may disagree. Use `dm matcher doctor` for a
-read-only source/generated/writeability summary before slower gates, and
-`dm matcher trace-extraction` when the failure is earlier than matching and a
-keyword was dropped or unexpectedly added.
+fast, backend, or offer-precompute keyword paths may disagree. Use
+`dm matcher doctor` for a read-only source/generated/writeability summary before
+slower gates, and `dm matcher trace-extraction` when the failure is earlier than
+matching and a keyword was dropped, unexpectedly added, or added only by offer
+precompute expansion.
 
 New CLI-generated sanity blocks carry a `# sanity-id: <policy_ref>` metadata
 comment. Use `dm matcher sanity-find` to locate them,

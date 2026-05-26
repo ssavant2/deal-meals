@@ -3449,9 +3449,39 @@ def normalize_probe(text: str) -> str:
         self.assertTrue(payload["backend_matched"])
         self.assertFalse(payload["live_fast_diverged"])
         self.assertFalse(payload["fast_backend_diverged"])
+        self.assertIn("offer_keyword_diff", payload)
         paprika_checks = [row for row in payload["processed_checks"] if row.get("base") == "paprika"]
         self.assertEqual(len(paprika_checks), 1, payload)
         self.assertEqual(paprika_checks[0]["status"], "skipped_not_matched_keyword_family")
+
+    def test_dm_matcher_trace_extraction_reports_offer_precompute_diff(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "trace-extraction",
+                "--offer",
+                "Block Mörk 200g",
+                "--offer-category",
+                "pantry",
+                "--format",
+                "json",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["keywords"], [])
+        self.assertEqual(payload["precomputed_keywords"], ["blockchoklad", "bakchoklad"])
+        self.assertEqual(payload["keyword_diff"]["precomputed_only"], ["blockchoklad", "bakchoklad"])
+        self.assertTrue(payload["precomputed_keyword_explanations"])
 
     def test_dm_matcher_sanity_update_rewrites_expected_value(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -4546,6 +4576,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
                     text=True,
                 )
                 self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+                self.assertIn("Next: run", result.stdout)
 
             entries_dir = app_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
             entries = load_registry_entries(entries_dir=entries_dir, include_local=False)

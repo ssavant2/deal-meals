@@ -783,15 +783,17 @@ the ingredient or offer produced no keywords, or an unexpected token vanished.
 The trace prints the normalized text, final extracted keywords, and token-level
 drop reasons such as `STOP_WORDS`, `FLAVOR_WORDS`, too-short tokens below
 `MIN_KEYWORD_LENGTH_STRICT`, or words that passed simple filters but were later
-removed by extraction logic. Treat it as a first-pass diagnostic; if it says a
-token was removed by later extraction logic, inspect the named extractor branch
-or use `compare-paths` on the full pair.
+removed by extraction logic. For offers, it also prints precomputed offer
+keywords and a live-extraction-vs-precompute diff. Treat it as a first-pass
+diagnostic; if it says a token was removed by later extraction logic, inspect
+the named extractor branch or use `compare-paths` on the full pair.
 
 Use `dm matcher compare-paths` when the actual mismatch is between matcher
 entry points rather than rule intent. It compares the legacy live matcher,
 canonical fast matcher, and backend matcher for one pair and prints precomputed
-details such as `processed_checks` so product-side form rules can be diagnosed
-without opening `matching.py` first.
+details such as `processed_checks`, precomputed-only offer keywords, and likely
+keyword-expansion sources so product-side form rules can be diagnosed without
+opening `matching.py` first.
 
 If both sides clearly expose the same keyword but the result is still
 `NO MATCH`, stop treating it as an extraction/canonical-registration problem.
@@ -821,6 +823,9 @@ rejected it. Work through this checklist:
    including bidirectional product qualifiers, product-form validators,
    `processed_checks`, spice/fresh/herb rules, recipe/product requirement
    guards, and explicit labels such as vegan/vegetarian/lactose/gluten-free.
+   If the match is caused by an incidental product-side keyword while the
+   ingredient text names another family, prefer a scoped PNB/no-match proof over
+   another routing alias.
 5. If direct `compare-paths` passes but batch output or UI/cache output still
    misses, treat it as materialized-cache drift: check cache freshness and run
    the relevant reload before changing matcher semantics.
@@ -1268,6 +1273,15 @@ implementation point:
 6. Are checks blocked by cache freshness before any semantic result?
    Rebuild/refresh cache. Do not call a semantic failure fixed or broken based
    only on stale compiled/cache data.
+
+Strictness is never a routing mechanism. `keyword-synonym`,
+`ingredient-parent`, `ingredient-routing-parent`, `parent-match-only`,
+`recipe-routing-helper`, and `keyword-extra-parent` change what can be found or
+which canonical is exposed; they do not by themselves limit which products are
+allowed. Strict behavior always needs a blocking/validation mechanism such as
+PNB, FPB, KSBC, GPB, no-match policy, form/processed rule, specialty rule, or a
+small backend guard, plus a negative proof with `dm matcher probe --expect
+no-match` or a generated/manual sanity fixture.
 
 ## Track A Runtime Workflow
 

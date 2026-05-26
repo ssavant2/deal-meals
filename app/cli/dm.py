@@ -894,10 +894,10 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
     "compare-paths": MatcherGuide(
         label="compare-paths",
         status="supported by dm matcher",
-        summary="Compare legacy live, canonical fast, and backend matcher paths for one offer/ingredient pair.",
+        summary="Compare legacy live, canonical fast, backend, and offer precompute keyword paths for one pair.",
         steps=(
             "Run: ./bin/dm matcher compare-paths --offer \"<offer>\" --ingredient \"<ingredient>\"",
-            "Use this when live/fast/backend disagree or when precomputed checks such as processed-product rules look suspicious.",
+            "Use this when live/fast/backend disagree or when precomputed keywords/checks such as offer expansions or processed-product rules look suspicious.",
             "For a broader rule-family trace, follow up with: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
         ),
     ),
@@ -1629,6 +1629,13 @@ def _runtime_observed_expected_canonical(
         )
         return requested_expected
     actual = payload["fast_keyword"] if payload["fast_matched"] else None
+    if actual and actual != requested_expected:
+        typer.secho(
+            f"INFO: generated sanity expected observed runtime canonical {actual!r} "
+            f"instead of requested {requested_expected!r}.",
+            fg=typer.colors.CYAN,
+            err=True,
+        )
     return actual or requested_expected
 
 
@@ -2537,6 +2544,10 @@ def _add_simple_toml_surface(
     _print_generated_sanity_probe(paths, change.policy_ref)
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
+        typer.echo(
+            "Next: run `./bin/dm matcher batch finalize --track B`, or run "
+            "`./bin/dm matcher regen` + `./bin/dm matcher promote` before registry gates."
+        )
         return
     gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
     raise typer.Exit(gate_status)
@@ -9702,6 +9713,50 @@ def matcher_dev_watch(
         raise typer.Exit(status)
 
 
+def _keyword_diff_payload(
+    *,
+    extracted_keywords: Iterable[str],
+    precomputed_keywords: Iterable[str],
+) -> dict[str, list[str]]:
+    extracted = list(dict.fromkeys(str(value) for value in extracted_keywords if value))
+    precomputed = list(dict.fromkeys(str(value) for value in precomputed_keywords if value))
+    extracted_set = set(extracted)
+    precomputed_set = set(precomputed)
+    return {
+        "common": [keyword for keyword in precomputed if keyword in extracted_set],
+        "extraction_only": [keyword for keyword in extracted if keyword not in precomputed_set],
+        "precomputed_only": [keyword for keyword in precomputed if keyword not in extracted_set],
+    }
+
+
+def _precomputed_keyword_explanations(
+    *,
+    extracted_keywords: Iterable[str],
+    precomputed_only: Iterable[str],
+    normalized_offer_text: str,
+    offer_extra_keywords: Mapping[str, Iterable[str]],
+    ingredient_parents_reverse: Mapping[str, Iterable[str]],
+) -> list[dict[str, Any]]:
+    extracted = tuple(dict.fromkeys(str(value) for value in extracted_keywords if value))
+    rows: list[dict[str, Any]] = []
+    for keyword in precomputed_only:
+        keyword = str(keyword)
+        sources: list[str] = []
+        for base in extracted:
+            offer_extras = {str(value) for value in offer_extra_keywords.get(base, ())}
+            reverse_children = {str(value) for value in ingredient_parents_reverse.get(base, ())}
+            if keyword in offer_extras:
+                sources.append(f"OFFER_EXTRA_KEYWORDS from {base}")
+            if keyword in reverse_children:
+                sources.append(f"INGREDIENT_PARENTS reverse child of {base}")
+        if re.search(r"\b" + re.escape(keyword) + r"\b", normalized_offer_text):
+            sources.append("literal product word or name-conditional precompute helper")
+        if not sources:
+            sources.append("precompute expansion: reverse parent, offer-extra keyword, carrier re-add, or name-conditional helper")
+        rows.append({"keyword": keyword, "sources": sources})
+    return rows
+
+
 def _trace_extraction(
     *,
     mode: Literal["ingredient", "offer"],
@@ -9715,10 +9770,16 @@ def _trace_extraction(
             extract_keywords_from_ingredient,
             extract_keywords_from_product,
         )
-        from languages.sv.ingredient_matching.extraction_patterns import MIN_KEYWORD_LENGTH, MIN_KEYWORD_LENGTH_STRICT
+        from languages.sv.ingredient_matching.engine import build_offer_match_data
+        from languages.sv.ingredient_matching.extraction_patterns import (
+            MIN_KEYWORD_LENGTH,
+            MIN_KEYWORD_LENGTH_STRICT,
+            _INGREDIENT_PARENTS_REVERSE,
+        )
         from languages.sv.ingredient_matching.keywords import (
             FLAVOR_WORDS,
             IMPORTANT_SHORT_KEYWORDS,
+            OFFER_EXTRA_KEYWORDS,
             STOP_WORDS,
         )
         from languages.sv.ingredient_matching.normalization import _apply_space_normalizations
@@ -9729,10 +9790,16 @@ def _trace_extraction(
             extract_keywords_from_ingredient,
             extract_keywords_from_product,
         )
-        from app.languages.sv.ingredient_matching.extraction_patterns import MIN_KEYWORD_LENGTH, MIN_KEYWORD_LENGTH_STRICT
+        from app.languages.sv.ingredient_matching.engine import build_offer_match_data
+        from app.languages.sv.ingredient_matching.extraction_patterns import (
+            MIN_KEYWORD_LENGTH,
+            MIN_KEYWORD_LENGTH_STRICT,
+            _INGREDIENT_PARENTS_REVERSE,
+        )
         from app.languages.sv.ingredient_matching.keywords import (
             FLAVOR_WORDS,
             IMPORTANT_SHORT_KEYWORDS,
+            OFFER_EXTRA_KEYWORDS,
             STOP_WORDS,
         )
         from app.languages.sv.ingredient_matching.normalization import _apply_space_normalizations
@@ -9746,6 +9813,23 @@ def _trace_extraction(
     else:
         keywords = extract_keywords_from_product(text, offer_category, brand=brand)
         min_length = MIN_KEYWORD_LENGTH
+    precomputed_keywords: list[str] = []
+    keyword_diff = {"common": [], "extraction_only": [], "precomputed_only": []}
+    precomputed_explanations: list[dict[str, Any]] = []
+    if mode == "offer":
+        offer_match_data = build_offer_match_data(text, offer_category, brand=brand)
+        precomputed_keywords = list(offer_match_data.precomputed.get("keywords") or ())
+        keyword_diff = _keyword_diff_payload(
+            extracted_keywords=keywords,
+            precomputed_keywords=precomputed_keywords,
+        )
+        precomputed_explanations = _precomputed_keyword_explanations(
+            extracted_keywords=keywords,
+            precomputed_only=keyword_diff["precomputed_only"],
+            normalized_offer_text=normalized,
+            offer_extra_keywords=OFFER_EXTRA_KEYWORDS,
+            ingredient_parents_reverse=_INGREDIENT_PARENTS_REVERSE,
+        )
     keyword_set = set(keywords)
     token_rows: list[dict[str, Any]] = []
     for token in tokens:
@@ -9800,6 +9884,9 @@ def _trace_extraction(
         "offer_category": offer_category,
         "brand": brand,
         "keywords": list(keywords),
+        "precomputed_keywords": precomputed_keywords,
+        "keyword_diff": keyword_diff,
+        "precomputed_keyword_explanations": precomputed_explanations,
         "tokens": token_rows,
         "suggestions": suggestions,
     }
@@ -9811,8 +9898,22 @@ def _format_extraction_trace_text(payload: Mapping[str, Any]) -> str:
         f"input: {payload['input']}",
         f"normalized: {payload['normalized']}",
         "keywords: " + (", ".join(payload["keywords"]) if payload["keywords"] else "none"),
-        "tokens:",
     ]
+    if payload["mode"] == "offer":
+        lines.append(
+            "precomputed keywords: "
+            + (", ".join(payload["precomputed_keywords"]) if payload["precomputed_keywords"] else "none")
+        )
+        diff = payload["keyword_diff"]
+        if diff["extraction_only"] or diff["precomputed_only"]:
+            lines.append("offer keyword diff:")
+            lines.append("  extraction-only: " + (", ".join(diff["extraction_only"]) if diff["extraction_only"] else "none"))
+            lines.append("  precomputed-only: " + (", ".join(diff["precomputed_only"]) if diff["precomputed_only"] else "none"))
+            if payload["precomputed_keyword_explanations"]:
+                lines.append("precomputed-only explanations:")
+                for row in payload["precomputed_keyword_explanations"]:
+                    lines.append(f"  - {row['keyword']}: {'; '.join(row['sources'])}")
+    lines.append("tokens:")
     for row in payload["tokens"]:
         sets = row["sets"]
         flags = []
@@ -10092,7 +10193,9 @@ def _compare_matcher_paths(
             build_offer_match_data,
             match_offer_to_ingredient,
         )
+        from languages.sv.ingredient_matching.extraction_patterns import _INGREDIENT_PARENTS_REVERSE
         from languages.sv.ingredient_matching.extraction import extract_keywords_from_product
+        from languages.sv.ingredient_matching.keywords import OFFER_EXTRA_KEYWORDS
         from languages.sv.ingredient_matching.matching import _SPECIALTY_KEYWORD_ALIASES, matches_ingredient
     except ModuleNotFoundError:
         from app.languages.sv.ingredient_matching import (
@@ -10100,7 +10203,9 @@ def _compare_matcher_paths(
             build_offer_match_data,
             match_offer_to_ingredient,
         )
+        from app.languages.sv.ingredient_matching.extraction_patterns import _INGREDIENT_PARENTS_REVERSE
         from app.languages.sv.ingredient_matching.extraction import extract_keywords_from_product
+        from app.languages.sv.ingredient_matching.keywords import OFFER_EXTRA_KEYWORDS
         from app.languages.sv.ingredient_matching.matching import _SPECIALTY_KEYWORD_ALIASES, matches_ingredient
 
     ingredient_data = build_ingredient_match_data(ingredient)
@@ -10117,6 +10222,11 @@ def _compare_matcher_paths(
             offer_category,
             brand=brand,
         )
+    )
+    precomputed_offer_keywords = list(offer_data.get("keywords") or ())
+    offer_keyword_diff = _keyword_diff_payload(
+        extracted_keywords=product_keywords,
+        precomputed_keywords=precomputed_offer_keywords,
     )
     live_keyword = matches_ingredient(product_keywords, ingredient, offer)
     fast_result = match_offer_to_ingredient(ingredient_data, offer_match_data)
@@ -10146,7 +10256,15 @@ def _compare_matcher_paths(
         "recipe_name": recipe_name,
         "ingredient_normalized": ingredient_data.normalized_text,
         "product_keywords": list(product_keywords),
-        "precomputed_offer_keywords": list(offer_data.get("keywords") or ()),
+        "precomputed_offer_keywords": precomputed_offer_keywords,
+        "offer_keyword_diff": offer_keyword_diff,
+        "precomputed_keyword_explanations": _precomputed_keyword_explanations(
+            extracted_keywords=product_keywords,
+            precomputed_only=offer_keyword_diff["precomputed_only"],
+            normalized_offer_text=str(offer_data.get("name_normalized") or ""),
+            offer_extra_keywords=OFFER_EXTRA_KEYWORDS,
+            ingredient_parents_reverse=_INGREDIENT_PARENTS_REVERSE,
+        ),
         "offer_specialty_qualifiers": {
             str(key): sorted(str(value) for value in values)
             for key, values in (offer_data.get("specialty_qualifiers") or {}).items()
@@ -10329,6 +10447,21 @@ def matcher_compare_paths(
     typer.echo(f"Backend matcher: {backend_status}")
     typer.echo("Product keywords: " + ", ".join(payload["product_keywords"]))
     typer.echo("Precomputed offer keywords: " + ", ".join(payload["precomputed_offer_keywords"]))
+    keyword_diff = payload["offer_keyword_diff"]
+    if keyword_diff["extraction_only"] or keyword_diff["precomputed_only"]:
+        typer.echo("Offer keyword diff:")
+        typer.echo(
+            "  extraction-only: "
+            + (", ".join(keyword_diff["extraction_only"]) if keyword_diff["extraction_only"] else "none")
+        )
+        typer.echo(
+            "  precomputed-only: "
+            + (", ".join(keyword_diff["precomputed_only"]) if keyword_diff["precomputed_only"] else "none")
+        )
+        if payload["precomputed_keyword_explanations"]:
+            typer.echo("Precomputed-only explanations:")
+            for row in payload["precomputed_keyword_explanations"]:
+                typer.echo(f"  - {row['keyword']}: {'; '.join(row['sources'])}")
     if payload["offer_specialty_qualifiers"]:
         qualifier_text = "; ".join(
             f"{key}: {', '.join(values)}"
