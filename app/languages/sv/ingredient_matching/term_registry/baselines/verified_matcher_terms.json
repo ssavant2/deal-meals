@@ -6,7 +6,7 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 99,
       "hardcoded_keyword_output:extract_keywords_from_product": 116,
-      "ingredient_parent_mapping": 391,
+      "ingredient_parent_mapping": 393,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
       "keyword_synonym_mapping": 139,
@@ -24,13 +24,13 @@
       "negative_guard_pattern": 333,
       "negative_regression": 834,
       "offer_extra_keyword_mapping": 417,
-      "parent_match_only_mapping": 18,
+      "parent_match_only_mapping": 20,
       "positive_regression": 659,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
       "extraction_helper": 215,
-      "ingredient_parent": 391,
+      "ingredient_parent": 393,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
       "keyword_synonym": 139,
@@ -39,11 +39,11 @@
       "matcher_rule_inventory": 462,
       "no_match_policy": 355,
       "offer_extra_keyword": 417,
-      "parent_match_only": 18,
+      "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5658,
-    "variants_missing_product_text": 1789,
+    "variant_count": 5662,
+    "variants_missing_product_text": 1793,
     "variants_with_product_text": 3869
   },
   "variants": [
@@ -118864,11 +118864,95 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"tapenade\"}"
+    },
+    {
+      "variant_id": "vterm-97d2304a4a48f59f",
+      "row_index": 4878,
+      "source_order": 52,
+      "source_type": "parent_match_only",
+      "source_file": "app/languages/sv/ingredient_matching/parent_maps.py",
+      "source_ref": "app/languages/sv/ingredient_matching/parent_maps.py:salsicciakorv",
+      "source_id": "salsicciakorv",
+      "variant_role": "parent_match_only_mapping",
+      "variant_text": "salsicciakorv",
+      "canonical": "salsiccia",
+      "expected_family": "salsiccia",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"salsiccia\"}"
+    },
+    {
+      "variant_id": "vterm-f02bd92c89404b3d",
+      "row_index": 4879,
+      "source_order": 52,
+      "source_type": "parent_match_only",
+      "source_file": "app/languages/sv/ingredient_matching/parent_maps.py",
+      "source_ref": "app/languages/sv/ingredient_matching/parent_maps.py:salsicciakorvar",
+      "source_id": "salsicciakorvar",
+      "variant_role": "parent_match_only_mapping",
+      "variant_text": "salsicciakorvar",
+      "canonical": "salsiccia",
+      "expected_family": "salsiccia",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"salsiccia\"}"
+    },
+    {
+      "variant_id": "vterm-2136996a0ccb065b",
+      "row_index": 4518,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:lättmjölk",
+      "source_id": "lättmjölk",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "lättmjölk",
+      "canonical": "mjölk",
+      "expected_family": "mjölk",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"mjölk\"}"
+    },
+    {
+      "variant_id": "vterm-77a703ce2de45015",
+      "row_index": 4534,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:mellanmjölk",
+      "source_id": "mellanmjölk",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "mellanmjölk",
+      "canonical": "mjölk",
+      "expected_family": "mjölk",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"mjölk\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1570,
+      "no_product_text": 1574,
       "static_verified": 2595,
       "synthetic_verified": 1493
     },
@@ -118876,7 +118960,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 215,
-      "ingredient_parent": 391,
+      "ingredient_parent": 393,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
       "keyword_synonym": 139,
@@ -118885,13 +118969,13 @@
       "matcher_rule_inventory": 462,
       "no_match_policy": 355,
       "offer_extra_keyword": 417,
-      "parent_match_only": 18,
+      "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5658
+      "audited": 5662
     },
-    "variant_count": 5658
+    "variant_count": 5662
   }
 }

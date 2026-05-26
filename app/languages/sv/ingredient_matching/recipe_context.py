@@ -54,16 +54,19 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
         'taco', 'tacos', 'texmex', 'tex mex', 'tex-mex',
         'mexikansk', 'burrito', 'fajita', 'enchilada',
         'quesadilla', 'nacho', 'nachos', 'wrap',
+        'tortillabröd',
     },
     'texmex': {
         'taco', 'tacos', 'texmex', 'tex mex', 'tex-mex',
         'mexikansk', 'burrito', 'fajita', 'enchilada',
         'quesadilla', 'nacho', 'nachos', 'wrap',
+        'tortillabröd',
     },
     'tex mex': {
         'taco', 'tacos', 'texmex', 'tex mex', 'tex-mex',
         'mexikansk', 'burrito', 'fajita', 'enchilada',
         'quesadilla', 'nacho', 'nachos', 'wrap',
+        'tortillabröd',
     },
     # Gyros / Greek-marinated chicken products require a Greek recipe context.
     # 'pita' removed — pita is shared across Greek/Middle-Eastern/Turkish

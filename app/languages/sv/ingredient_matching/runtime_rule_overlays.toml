@@ -536,6 +536,13 @@ keyword = "rimmad"
 blockers = ["oxbringa"]
 reason = "cross-protein FP from Q92-8 fix: Oxbringa rimmad extracts rimmad as standalone keyword and matches rimmad-lax ingredients; only oxbringa among rimmad products has this issue (others use compound rimmatfläsk)"
 
+[[product_name_blockers]]
+id = "runtime_pnb_sillfile"
+status = "active"
+keyword = "sillfilé"
+blockers = ["5-minuters", "inläggning"]
+reason = "Plain sillfilé (raw herring for cooking/frying) should not match pickled/marinated 5-minuters or inläggning products — they are pre-brined and not suitable for frying; covers stekt sill recipes where ingredient says plain sillfilé but recipe context is raw-fish cooking (Q94-4)"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1066,6 +1073,13 @@ status = "active"
 source = "choklad mörk"
 target = "mörkchoklad"
 reason = "ICA-product naming 'Choklad Mörk 74%' has Choklad first — extracts empty keyword list without this norm. Does NOT touch 'mörk choklad' (mörk first) to preserve alternative-recipe handling like 'vit- och mörk choklad'"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_svart_eller_svart_eller"
+status = "active"
+source = "svart -eller"
+target = "svart- eller"
+reason = "Recipe text formatting variant: 'svart -eller X' means 'svart- eller X' (svartkål or X) — same elision pattern handled when hyphen attaches to first word; this normalization makes the alternative formatting work too (Q94-3)"
 
 [[keyword_set_updates]]
 id = "runtime_important_short_keyword_add_hirs"
