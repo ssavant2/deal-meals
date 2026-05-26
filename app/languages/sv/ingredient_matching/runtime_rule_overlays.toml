@@ -792,8 +792,8 @@ reason = "Sellerisalt (spice) should not match stjälkselleri/bladselleri (veget
 id = "runtime_fpb_kal"
 status = "active"
 keyword = "kål"
-blockers = ["kålrot", "kålrabbi", "skålla", "skålla mandel", "skåll"]
-reason = "kålrot (rutabaga) is not a kål (cabbage/greens) variety — when ingredient is kålrot, suppress generic kål keyword matches from cabbage products; kålrabbi (kohlrabi, stem vegetable) is not a kål (cabbage/greens) variety - when ingredient is kålrabbi, suppress generic kål keyword matches from cabbage products; skållade mandlar (blanched almonds) is preparation step, not kål; substring kål exists in skålla"
+blockers = ["kålrot", "kålrabbi", "skålla", "skålla mandel", "skåll", "surkål"]
+reason = "kålrot (rutabaga) is not a kål (cabbage/greens) variety — when ingredient is kålrot, suppress generic kål keyword matches from cabbage products; kålrabbi (kohlrabi, stem vegetable) is not a kål (cabbage/greens) variety - when ingredient is kålrabbi, suppress generic kål keyword matches from cabbage products; skållade mandlar (blanched almonds) is preparation step, not kål; substring kål exists in skålla; Surkål (fermented cabbage) ingredient should not match generic kål-keyword products (vitkål, rödkål, savoykål etc). The substring kål in surkål causes false-positive cabbage matches via the kål-parent keyword extracted from raw cabbage products."
 
 [[false_positive_blockers]]
 id = "runtime_fpb_citron"
@@ -808,6 +808,27 @@ status = "active"
 keyword = "tomat"
 blockers = ["tomattapenad"]
 reason = "tomattapenad (olive/tomato tapenade paste) should not match plain fresh tomatoes via tomat substring extraction"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_raksas"
+status = "active"
+keyword = "räksås"
+blockers = ["gratäng", "fiskgratäng"]
+reason = "Fiskgratäng räksås (ready-meal fiskgratäng with shrimp sauce) should not match plain räksås recipe ingredients — same pattern as FPB dillsås←gratäng: a gratäng product is a full dish, not the sauce ingredient"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_agg"
+status = "active"
+keyword = "ägg"
+blockers = ["marsipanägg", "marsipanagg", "godispåskägg", "godispaskagg", "godisägg", "godisagg"]
+reason = "Candy/marzipan eggs are confectionery decorations, not food eggs. Block plain ägg-keyword from matching when ingredient text is clearly candy form."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_limpa"
+status = "active"
+keyword = "limpa"
+blockers = ["rostbröd"]
+reason = "Limpa (dark rye loaf) should not match when ingredient specifies rostbröd (white toast bread) — different product category despite both being bread"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
@@ -1037,8 +1058,8 @@ reason = "BBQ-rökningsrecept använder 'blötlagda vedbitar av körsbär' (kör
 id = "runtime_ksbc_limpa"
 status = "active"
 keyword = "limpa"
-context = ["grov", "grovlimpa"]
-reason = "Grovlimpa-ingrediens ska matcha rågbröd/kavring (mörka bröd) ej söt ljus limpa (Carlssons Fyrkant Skogaholms). Q85-5 etablerade liknande KSBC formbröd+limpa."
+context = ["grov", "grovlimpa", "rostbröd"]
+reason = "Grovlimpa-ingrediens ska matcha rågbröd/kavring (mörka bröd) ej söt ljus limpa (Carlssons Fyrkant Skogaholms). Q85-5 etablerade liknande KSBC formbröd+limpa.; Limpa products should not match when ingredient specifies rostbröd (white toast bread) — limpa is dark rye loaf, rostbröd is white sliced toast"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_kal"
