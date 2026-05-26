@@ -6,7 +6,7 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 99,
       "hardcoded_keyword_output:extract_keywords_from_product": 116,
-      "ingredient_parent_mapping": 393,
+      "ingredient_parent_mapping": 395,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
       "keyword_synonym_mapping": 144,
@@ -30,7 +30,7 @@
     },
     "source_counts": {
       "extraction_helper": 215,
-      "ingredient_parent": 393,
+      "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
       "keyword_synonym": 144,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5667,
-    "variants_missing_product_text": 1798,
+    "variant_count": 5669,
+    "variants_missing_product_text": 1800,
     "variants_with_product_text": 3869
   },
   "variants": [
@@ -119053,11 +119053,53 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"matjessill\"}"
+    },
+    {
+      "variant_id": "vterm-9436373a89f34130",
+      "row_index": 4411,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:granatäppelkärnor",
+      "source_id": "granatäppelkärnor",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "granatäppelkärnor",
+      "canonical": "granatäpple",
+      "expected_family": "granatäpple",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"granatäpple\"}"
+    },
+    {
+      "variant_id": "vterm-f8795b0ad7e6f918",
+      "row_index": 4696,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:toastbrödskiva",
+      "source_id": "toastbrödskiva",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "toastbrödskiva",
+      "canonical": "formbröd",
+      "expected_family": "formbröd",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"formbröd\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1579,
+      "no_product_text": 1581,
       "static_verified": 2595,
       "synthetic_verified": 1493
     },
@@ -119065,7 +119107,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 215,
-      "ingredient_parent": 393,
+      "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
       "keyword_synonym": 144,
@@ -119079,8 +119121,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5667
+      "audited": 5669
     },
-    "variant_count": 5667
+    "variant_count": 5669
   }
 }

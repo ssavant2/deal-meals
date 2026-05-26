@@ -571,6 +571,13 @@ keyword = "grytbas"
 blockers = ["red curry", "thai red curry"]
 reason = "Grytbas Thai red curry blockerad mot tikka masala/andra cuisine-specifika grytbas-ingredienser; tidigare bas blockerade madras/korma/tikka/satay/panaeng/massaman men saknade red curry-varianten."
 
+[[product_name_blockers]]
+id = "runtime_pnb_burrata"
+status = "active"
+keyword = "burrata"
+blockers = ["tryffel"]
+reason = "Truffle-burrata offers (Burrata med tryffel) should not match plain burrata ingredient — paired with existing no_match_policy_tryffelburrata_not_plain_burrata to enforce symmetric burrata/tryffelburrata separation"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
