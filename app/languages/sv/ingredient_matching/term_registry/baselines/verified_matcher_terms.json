@@ -5,7 +5,7 @@
       "bridge_negative_guard": 197,
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 99,
-      "hardcoded_keyword_output:extract_keywords_from_product": 116,
+      "hardcoded_keyword_output:extract_keywords_from_product": 117,
       "ingredient_parent_mapping": 395,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
@@ -29,7 +29,7 @@
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
-      "extraction_helper": 215,
+      "extraction_helper": 216,
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5672,
-    "variants_missing_product_text": 1801,
+    "variant_count": 5673,
+    "variants_missing_product_text": 1802,
     "variants_with_product_text": 3871
   },
   "variants": [
@@ -119158,18 +119158,39 @@
       "needs_product_text": true,
       "notes": "Rostbiff under 300g är typiskt pålägg/deli/charkuteri (förpackningsstorlek 50-220g). Receptingredienser som rostbiff avser typiskt rå köttbit (300g+ förpackningar). Storleksbaserad heuristik per Stefan policy 2026-05-26.",
       "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b_negative\"], \"ingredient_patterns\": [\"\\\\brostbiff\\\\b\"], \"policy_ref\": \"policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b\", \"reason\": \"Rostbiff under 300g är typiskt pålägg/deli/charkuteri (förpackningsstorlek 50-220g). Receptingredienser som rostbiff avser typiskt rå köttbit (300g+ förpackningar). Storleksbaserad heuristik per Stefan policy 2026-05-26.\", \"rule_version\": 1, \"supersedes\": []}"
+    },
+    {
+      "variant_id": "vterm-4267af0bb563dffa",
+      "row_index": 5645,
+      "source_order": 90,
+      "source_type": "extraction_helper",
+      "source_file": "app/languages/sv/ingredient_matching/extraction.py",
+      "source_ref": "app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:544",
+      "source_id": "extract_keywords_from_product:tabasco",
+      "variant_role": "hardcoded_keyword_output:extract_keywords_from_product",
+      "variant_text": "tabasco",
+      "canonical": "tabasco",
+      "expected_family": "tabasco",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": null,
+      "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [544], \"output\": \"tabasco\"}"
     }
   ],
   "verification": {
     "classification_counts": {
       "no_product_text": 1582,
-      "static_verified": 2596,
+      "static_verified": 2597,
       "synthetic_verified": 1494
     },
     "method": "static_contract_audit",
     "problem_counts": {},
     "source_counts": {
-      "extraction_helper": 215,
+      "extraction_helper": 216,
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
@@ -119184,8 +119205,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5672
+      "audited": 5673
     },
-    "variant_count": 5672
+    "variant_count": 5673
   }
 }

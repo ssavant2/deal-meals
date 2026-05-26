@@ -527,6 +527,22 @@ def extract_keywords_from_product(
     ):
         return ['habanerochilisås', 'pepparsås']
 
+    # Classic Tabasco (red 57ml flask): "Pepparsås 57ml Tabasco" should match plain
+    # "tabasco" ingredient. Other Tabasco-branded products (Chipotle/Habanero/
+    # Sriracha/Scorpion/Grönpepparsås) have explicit flavor keywords and use their
+    # own extraction paths — they should NOT match plain tabasco. The FPB
+    # pepparsås ← tabasco blocks pepparsås-only matches, so we need 'tabasco'
+    # as an explicit offer keyword on the classic product.
+    if (
+        'tabasco' in original_name_lower
+        and re.search(r'\bpepparsås\b', original_name_lower)
+        and not any(flavor in original_name_lower for flavor in (
+            'chipotle', 'habanero', 'sriracha', 'scorpion',
+            'grön', 'gron', 'green',
+        ))
+    ):
+        return ['tabasco', 'pepparsås']
+
     if re.search(r'\bpesto\b', original_name_lower) and any(cue in original_name_lower for cue in ('rosso', 'röd', 'rod', 'tomat')):
         return ['tomatpesto', 'pesto']
 
