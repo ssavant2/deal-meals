@@ -13459,6 +13459,40 @@ test("ingredient-parent Lättmjölk 0,5% 1l ICA matches mjölk",
 # sanity-id: runtime_space_normalization_svart_eller_svart_eller
 test("space-normalization svart -eller -> svart- eller",
      _apply_space_normalizations("svart -eller"), "svart- eller")
+# runtime_ksbc_korv: compound-specific contexts (Q91-2 + Q94-2 PARENT_MATCH_ONLY completion)
+# Contexts are compound forms (not plain "falukorv"/"salsiccia") to keep
+# "X t ex Y" style ingredients (e.g. "färskkorvar t ex salsiccia") broad
+# while making explicit specific-sausage ingredients strict.
+from languages.sv.ingredient_matching import KEYWORD_SUPPRESSED_BY_CONTEXT
+test("KSBC korv has falukorvsring",
+     "falukorvsring" in KEYWORD_SUPPRESSED_BY_CONTEXT.get("korv", set()), True)
+test("KSBC korv has salsicciakorv",
+     "salsicciakorv" in KEYWORD_SUPPRESSED_BY_CONTEXT.get("korv", set()), True)
+test("KSBC korv has salsicciakorvar",
+     "salsicciakorvar" in KEYWORD_SUPPRESSED_BY_CONTEXT.get("korv", set()), True)
+test("KSBC korv does NOT have plain salsiccia (keeps 'X t ex salsiccia' broad)",
+     "salsiccia" in KEYWORD_SUPPRESSED_BY_CONTEXT.get("korv", set()), False)
+test("KSBC korv does NOT have plain falukorv",
+     "falukorv" in KEYWORD_SUPPRESSED_BY_CONTEXT.get("korv", set()), False)
+
+# Negative regressions: KSBC korv suppression enforces strict korv-family
+# These verify the architectural fix actually works (not just routing canonical).
+test("Falukorvsring ingredient does NOT match Wienerkorv",
+     match("Wienerkorv 85% kötthalt 700g Härryda Karlsson", "800 g falukorvsring", "pantry"), None)
+test("Falukorvsring ingredient does NOT match Chorizo",
+     match("Chorizo Hot 250g Scan", "800 g falukorvsring", "pantry"), None)
+test("Falukorvsring ingredient does NOT match Salsiccia",
+     match("Salsiccia Färsk 240g ICA", "800 g falukorvsring", "pantry"), None)
+test("Falukorvsring ingredient DOES match Falukorv (positive)",
+     match("Falukorv 800g ICA", "800 g falukorvsring", "pantry"), "falukorv")
+test("Salsicciakorvar ingredient does NOT match Wienerkorv",
+     match("Wienerkorv 85% 700g", "2 färska salsicciakorvar", "pantry"), None)
+test("Salsicciakorvar ingredient does NOT match Falukorv",
+     match("Falukorv 800g ICA", "2 färska salsicciakorvar", "pantry"), None)
+test("Salsicciakorvar ingredient DOES match Salsiccia (positive)",
+     match("Salsiccia Färsk 240g ICA", "2 färska salsicciakorvar", "pantry"), "salsiccia")
+test("Plain korv ingredient still matches Wienerkorv (broad fallback)",
+     match("Wienerkorv 85% 700g", "500g korv", "pantry"), "korv")
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")

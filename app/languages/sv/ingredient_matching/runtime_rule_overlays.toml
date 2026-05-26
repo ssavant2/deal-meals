@@ -1033,6 +1033,13 @@ keyword = "lax"
 context = ["rimmad"]
 reason = "Rimmad lax (salt-cured salmon) should not match generic lax products — rimmad is a specific curing method requiring rimmad-specific products"
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_korv"
+status = "active"
+keyword = "korv"
+context = ["falukorvsring", "salsicciakorv", "salsicciakorvar"]
+reason = "PARENT_MATCH_ONLY completion (Q91-2 + Q94-2): when ingredient text contains the explicit compound form (falukorvsring, salsicciakorv, salsicciakorvar), suppress generic korv keyword so other korv-types don't match. Contexts are compound-specific (not plain 'falukorv'/'salsiccia') so 'X t ex salsiccia' style ingredients (e.g. 'färskkorvar t ex salsiccia') keep broad korv-family matching — only EXPLICIT specific-sausage ingredients become strict."
+
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
 status = "active"
