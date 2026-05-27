@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 395,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 144,
+      "keyword_synonym_mapping": 145,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 144,
+      "keyword_synonym": 145,
       "match_bridge": 2021,
       "matcher_regression_case": 1495,
       "matcher_rule_inventory": 464,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5681,
-    "variants_missing_product_text": 1805,
+    "variant_count": 5682,
+    "variants_missing_product_text": 1806,
     "variants_with_product_text": 3876
   },
   "variants": [
@@ -119347,11 +119347,32 @@
       "needs_product_text": false,
       "notes": null,
       "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [733], \"output\": \"pickladingefära\"}"
+    },
+    {
+      "variant_id": "vterm-d8aabf9c6466d55f",
+      "row_index": 4827,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:pistagenöt",
+      "source_id": "pistagenöt",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "pistagenöt",
+      "canonical": "pistagenötter",
+      "expected_family": "pistagenötter",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"pistagenötter\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1583,
+      "no_product_text": 1584,
       "static_verified": 2603,
       "synthetic_verified": 1495
     },
@@ -119362,7 +119383,7 @@
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 144,
+      "keyword_synonym": 145,
       "match_bridge": 2021,
       "matcher_regression_case": 1495,
       "matcher_rule_inventory": 464,
@@ -119373,8 +119394,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5681
+      "audited": 5682
     },
-    "variant_count": 5681
+    "variant_count": 5682
   }
 }

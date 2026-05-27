@@ -8,18 +8,18 @@ variants = ["generic_oil_no_match ! olivolja", "generic_oil_no_match ! olja", "g
 negative_guards = ["generic_oil_no_match ! olivolja", "generic_oil_no_match ! olja", "generic_oil_no_match ! rapsolja"]
 source_refs = ["policy:no_match_policies:policy_generic_oil"]
 layer_policy = ["negative_guard_only"]
-notes = "Generic oil is a staple and must stay unmatched unless the recipe asks for a specific oil."
+notes = "Generic oil is a staple and must stay unmatched unless the recipe asks for a specific oil. Tonfisk exempted: 'olja' in tonfisk ingredient text describes the preservation medium, not an oil ingredient."
 
 [entries.language_payload.no_match_policy]
 id = "policy_generic_oil"
 rule_schema_version = 1
-rule_version = 1
+rule_version = 2
 canonical = "generic_oil_no_match"
 ingredient_patterns = ["\\bolja\\b", "\\bolja\\s+till\\s+stekning\\b"]
 blocked_offer_keywords = ["olivolja", "olja", "rapsolja"]
 blocked_offer_patterns = []
-allowed_specifics = ["olivolja", "rapsolja", "sesamolja", "smörrapsolja"]
-reason = "Generic oil is a staple and must stay unmatched unless the recipe asks for a specific oil."
+allowed_specifics = ["olivolja", "rapsolja", "sesamolja", "smörrapsolja", "tonfisk"]
+reason = "Generic oil is a staple and must stay unmatched unless the recipe asks for a specific oil. Tonfisk exempted: 'olja' in tonfisk ingredient text describes the preservation medium, not an oil ingredient."
 policy_ref = "matcher_layer_plan_initial"
 fixture_refs = ["plan_initial_generic_oil_negative", "plan_initial_generic_oil_plain_negative"]
 supersedes = ["legacy_no_match_generic_oil"]
@@ -46,7 +46,6 @@ layer_role = "negative_guard_keyword"
 ingredient = "generic_oil_no_match"
 offer_name = "generic_oil_no_match ! olivolja"
 expected = 0
-
 [[entries]]
 entry_id = "sv-se.guard.policy_generic_sugar"
 language = "sv"
