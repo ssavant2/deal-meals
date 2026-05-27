@@ -1320,6 +1320,13 @@ action = "add"
 terms = ["glasburk", "glasburkar"]
 reason = "Glass jar containers (Bormioli Quattro Stagioni mis-categorized as pantry) — not food, only equipment"
 
+[[context_word_keyword_exemptions]]
+id = "runtime_context_word_exemption_chevre"
+status = "active"
+keyword = "chevre"
+context_words = ["chevrette"]
+reason = "Chevrette is a chevre variant (diminutive form, mindre chevre). Chevre keyword should match chevrette products without requiring ingredient to explicitly mention chevrette. Policy: all chevre matches chevreost-recipes regardless of subtype."
+
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"
 status = "active"

@@ -73,6 +73,18 @@ _SINGLE_PRODUCT_EXAMPLE_PAREN_RE = re.compile(
     r'\(\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s+(bostongurka|bostongurkor)\s*\)',
     re.IGNORECASE,
 )
+# "(som X, Y och/eller Z)" — parenthetical example list signalled by "som"
+# Strictly requires a comma inside parens so descriptive parentheticals like
+# "(som varit fryst minst 2 dygn)" or "(som fått rinna av i kyl)" do NOT trigger.
+# Split handles ",", " och ", " eller ", " och/eller ".
+_PAREN_SOM_LIST_RE = re.compile(
+    r'^(.*?)\(\s*som\s+([^)]*,[^)]*)\)\s*$',
+    re.IGNORECASE,
+)
+_SOM_LIST_SPLIT_RE = re.compile(
+    r'\s*,\s*|\s+och(?:/eller)?\s+|\s+eller\s+',
+    re.IGNORECASE,
+)
 # Parenthetical plant-based/vegan labels signal a dietary requirement that must survive paren stripping
 _PLANT_BASED_PAREN_RE = re.compile(
     r'\(\s*(växtbaserad|vaxtbaserad|vegansk|veganska|veganskt|vegan|vegetarisk|vegetariskt|vegetariska|vego)\s*\)',
@@ -608,6 +620,20 @@ def parse_eller_alternatives(ingredient_text: str) -> List[str]:
         if len(items) >= 2 or (
             len(items) == 1 and base and _single_example_item_is_purchasable_alternative(base, items[0])
         ):
+            alternatives = []
+            if base:
+                alternatives.append(base)
+            alternatives.extend(items)
+            return alternatives
+
+    # "(som X, Y och/eller Z)" — herb/example list signalled by "som".
+    # Comma requirement filters descriptive parentheticals like "som varit fryst".
+    paren_som_match = _PAREN_SOM_LIST_RE.match(text)
+    if paren_som_match:
+        base = paren_som_match.group(1).strip().rstrip(',').strip()
+        items = _SOM_LIST_SPLIT_RE.split(paren_som_match.group(2))
+        items = [item.strip().rstrip('.').strip('()') for item in items if item.strip()]
+        if len(items) >= 2:
             alternatives = []
             if base:
                 alternatives.append(base)

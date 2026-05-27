@@ -1975,6 +1975,9 @@ def extract_keywords_from_ingredient(
             # split it into base+example arms for known families (tomat/svamp/etc.).
             or 't.ex' in _eller_lower or 't ex' in _eller_lower or 'tex ' in _eller_lower
             or 'exempelvis' in _eller_lower or 'till exempel' in _eller_lower
+            # "(som X, Y och/eller Z)" — parenthetical example list signalled by "som".
+            # _PAREN_SOM_LIST_RE in recipe_text requires a comma inside parens.
+            or '(som ' in _eller_lower
         ):
             alternatives = parse_eller_alternatives(ingredient)
             if len(alternatives) > 1:
