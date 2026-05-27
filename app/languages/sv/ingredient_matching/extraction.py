@@ -2188,8 +2188,10 @@ def extract_keywords_from_ingredient(
 
     # Generic frozen fish wording in recipes is usually bought as ordinary
     # frozen fish fillets, not as a separate diced-fish product family.
+    # Word-boundary check prevents compound species names like "bläckfisk" (squid)
+    # from triggering the white-fish-fillet fallback.
     if (
-        'fisk' in name
+        re.search(r'\bfisk\b', name) is not None
         and 'fiskfilé' not in name
         and 'fiskfile' not in name
         and any(cue in name for cue in ('fryst', 'frysta', 'djupfryst', 'djupfrysta'))

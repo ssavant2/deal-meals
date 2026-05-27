@@ -904,8 +904,8 @@ reason = "'Krutonger Vitlök & Persilja' is a flavored crouton product name wher
 id = "runtime_ksbc_chili"
 status = "active"
 keyword = "chili"
-context = ["bärta", "chilisås"]
-reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Recipes specifying 'Bärta Chili Lime' want the Bärta product, not fresh chili peppers. Suppress chili keyword when ingredient text contains 'bärta'.; Recept med 'chilisås' vill ha sås-format (Felix/Sriracha/Sambal Oelek), inte torr chili-krydda (flakes/pulver). Skiljer sig från chili-bred-policy som gäller torra former interchangeably. Q83-3."
+context = ["bärta", "chilisås", "sin carne"]
+reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Recipes specifying 'Bärta Chili Lime' want the Bärta product, not fresh chili peppers. Suppress chili keyword when ingredient text contains 'bärta'.; Recept med 'chilisås' vill ha sås-format (Felix/Sriracha/Sambal Oelek), inte torr chili-krydda (flakes/pulver). Skiljer sig från chili-bred-policy som gäller torra former interchangeably. Q83-3.; Knorr Chili Sin Carne är vegansk färskryddmix-paket, inte chili-peppar — suppressar chili-keyword när ingrediensen har 'sin carne'-kontext"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_mjukost"
