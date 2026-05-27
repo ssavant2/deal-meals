@@ -1030,8 +1030,8 @@ reason = "Färdig soppbas är förkokt produkt med smaksättning — receptet vi
 id = "runtime_ksbc_morot"
 status = "active"
 keyword = "morot"
-context = ["chips"]
-reason = "Rotfruktschips/potatischips i recept ska matcha chips-produkter, inte råa rotgrönsaker (Pattern 2: processed food ≠ raw ingredient)"
+context = ["chips", "marmelad"]
+reason = "Rotfruktschips/potatischips i recept ska matcha chips-produkter, inte råa rotgrönsaker (Pattern 2: processed food ≠ raw ingredient); When ingredient text contains 'marmelad', suppress 'morot' keyword. Prevents Morötter products from matching ingredients like 'marmelad, gärna morotsmarmelad' where 'morot' is a substring of 'morotsmarmelad' compound. Q100-1 FP fix."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_rotselleri"

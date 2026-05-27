@@ -5221,7 +5221,7 @@ source_refs = ["legacy_review:kalkon_palagg_is_still_too_strict_for_deli_style_t
 status = "wrapped_adapter"
 
 [[inventory.line_refs]]
-anchor = "_PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'kalkon', 'salami', 'salame', 'rostbiff'})"
+anchor = "_PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'kalkon', 'salami', 'salame', 'rostbiff', 'skinka'})"
 end = 355
 path = "app/languages/sv/ingredient_matching/matching.py"
 start = 355

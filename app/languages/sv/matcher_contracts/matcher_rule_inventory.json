@@ -6917,7 +6917,7 @@
     "kind": "legacy_validator",
     "line_refs": [
       {
-        "anchor": "_PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'kalkon', 'salami', 'salame', 'rostbiff'})",
+        "anchor": "_PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'kalkon', 'salami', 'salame', 'rostbiff', 'skinka'})",
         "end": 355,
         "path": "app/languages/sv/ingredient_matching/matching.py",
         "start": 355

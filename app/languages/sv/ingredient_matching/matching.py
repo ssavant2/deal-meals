@@ -352,7 +352,7 @@ _COOKED_KYCKLINGKLUBBA_INGREDIENT_CUES = frozenset({
     'kokt', 'kokta',
     'rökt', 'rokt',
 })
-_PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'kalkon', 'salami', 'salame', 'rostbiff'})
+_PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'kalkon', 'salami', 'salame', 'rostbiff', 'skinka'})
 # Mjukost carrier exemption: flavored "Xost" variant keywords (räkost, skinkost,
 # baconost, etc.) ARE mjukost products by definition — dedicated products like
 # "Räkost 330g Kavli" or "Skinkost 330g Kavli" don't repeat "mjukost" in the
