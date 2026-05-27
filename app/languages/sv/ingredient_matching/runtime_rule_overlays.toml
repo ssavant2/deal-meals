@@ -592,6 +592,20 @@ keyword = "äppelmust"
 blockers = ["hallon", "päron", "bär", "multifrukt", "blandfrukt", "svartavinbär", "svarta vinbär", "röda vinbär", "blåbär"]
 reason = "Blend-äppelmust (med hallon/päron/bär etc) ska inte matcha plain äppelmust-ingredient. Analog Q88-2 äppeljuice PNB och project_juice_policy: plain juice/must-ingredient matchar bara ren samma sort."
 
+[[product_name_blockers]]
+id = "runtime_pnb_frallor"
+status = "active"
+keyword = "frallor"
+blockers = ["bakmix"]
+reason = "baking mix sold as DIY ingredients, not a finished bread roll"
+
+[[product_name_blockers]]
+id = "runtime_pnb_havre"
+status = "active"
+keyword = "havre"
+blockers = ["havregrädde", "havredryck", "havremjölk"]
+reason = "oat-cream and oat-drink products must not match dry oat (havregryn) ingredient via havre parent keyword — wrong product category"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
