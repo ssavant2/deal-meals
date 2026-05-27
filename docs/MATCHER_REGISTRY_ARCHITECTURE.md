@@ -206,7 +206,9 @@ fast, backend, or offer-precompute keyword paths may disagree. Use
 `dm matcher doctor` for a read-only source/generated/writeability summary before
 slower gates, and `dm matcher trace-extraction` when the failure is earlier than
 matching and a keyword was dropped, unexpectedly added, or added only by offer
-precompute expansion.
+precompute expansion. Use `dm matcher canonical-of "<term>"` before authoring
+rules when a user-facing Swedish term may normalize to a different runtime
+canonical.
 
 New CLI-generated sanity blocks carry a `# sanity-id: <policy_ref>` metadata
 comment. Use `dm matcher sanity-find` to locate them,

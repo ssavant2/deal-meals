@@ -215,6 +215,7 @@ authoring or maintenance command:
 ./bin/dm matcher fixture make-positive <fixture_id> --from-current-match
 ./bin/dm matcher fixture remove <fixture_id>
 ./bin/dm matcher compare-paths --offer ... --ingredient ...
+./bin/dm matcher canonical-of "<term>"
 ./bin/dm matcher trace-extraction --ingredient ...
 ./bin/dm matcher sanity-find "<test description or policy>"
 ./bin/dm matcher sanity-update "<test description>" --expected ...
@@ -232,6 +233,8 @@ when the policy depends on a sibling/nearby product not matching.
 Use `trace-extraction --offer` or `compare-paths` when live product extraction
 and precomputed offer keywords disagree; both commands show the keyword diff so
 precompute-only additions are visible before opening `matching.py`.
+Use `canonical-of` when the Swedish word users say is not necessarily the
+runtime canonical name, such as `dragon` extracting as `estragon`.
 `smart-blocker` is scaffold-only: it creates the helper and chain insertion, then
 the rule body still needs a normal Python implementation and gates. The
 `modify ...`, `fixture make-negative`, `fixture make-positive`, and

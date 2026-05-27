@@ -3261,6 +3261,20 @@ def normalize_probe(text: str) -> str:
         self.assertIn('"Phase Recipe"', "\n".join(backend_lines))
         self.assertTrue("\n".join(backend_lines).rstrip().endswith(", 0)"))
 
+    def test_split_csv_preserves_regex_commas(self) -> None:
+        self.assertEqual(
+            dm_cli._split_csv(
+                r"(?=.*\bphase9.{0,40}blocked\b)(?=.*\d{2}\b).*",
+                label="--blocked-offer-patterns",
+                lowercase=False,
+            ),
+            (r"(?=.*\bphase9.{0,40}blocked\b)(?=.*\d{2}\b).*",),
+        )
+        self.assertEqual(
+            dm_cli._split_csv(r"phase9\,literal,phase9next", label="--terms", lowercase=False),
+            ("phase9,literal", "phase9next"),
+        )
+
     def test_dm_matcher_help_lists_unified_entry_points(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         result = subprocess.run(
@@ -3290,6 +3304,7 @@ def normalize_probe(text: str) -> str:
             "inactivate",
             "explain",
             "compare-paths",
+            "canonical-of",
             "sanity-find",
             "sanity-update",
             "reconcile-sanity",
@@ -3723,6 +3738,13 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             capture_output=True,
             text=True,
         )
+        canonical_of = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "canonical-of"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
         sanity_update = subprocess.run(
             [sys.executable, "-m", "cli.dm", "matcher", "guide", "sanity-update"],
             cwd=live_app_dir,
@@ -3759,6 +3781,9 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertEqual(compare_paths.returncode, 0, compare_paths.stderr + compare_paths.stdout)
         self.assertIn("compare-paths: supported by dm matcher", compare_paths.stdout)
         self.assertIn("./bin/dm matcher compare-paths", compare_paths.stdout)
+        self.assertEqual(canonical_of.returncode, 0, canonical_of.stderr + canonical_of.stdout)
+        self.assertIn("canonical-of: supported by dm matcher", canonical_of.stdout)
+        self.assertIn("./bin/dm matcher canonical-of", canonical_of.stdout)
         self.assertEqual(sanity_update.returncode, 0, sanity_update.stderr + sanity_update.stdout)
         self.assertIn("sanity-update: supported by dm matcher", sanity_update.stdout)
         self.assertIn("./bin/dm matcher sanity-update", sanity_update.stdout)
@@ -4283,6 +4308,32 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertEqual(short_token["min_length"], 7)
         self.assertFalse(short_token["sets"]["important_short_keyword"])
 
+    def test_dm_matcher_canonical_of_shows_runtime_canonical(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "canonical-of",
+                "dragon",
+                "--format",
+                "json",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["normalized"], "estragon")
+        self.assertEqual(payload["direct_canonical"], "estragon")
+        self.assertEqual(payload["ingredient_keywords"], ["estragon"])
+        self.assertIn("estragon", payload["likely_canonicals"])
+
     def test_dm_matcher_preflight_tree_root_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
@@ -4395,7 +4446,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertEqual(report["blocker_count"], 0)
         self.assertEqual(report["blocker_baseline_count"], 0)
         self.assertEqual(report["summary"]["contract_access_api"], 2)
-        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4139)
+        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4143)
 
     def test_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

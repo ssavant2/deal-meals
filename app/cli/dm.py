@@ -832,8 +832,9 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
     "extraction-helper": MatcherGuide(
         label="extraction-helper",
         status="supported by dm matcher add",
-        summary="Registry coverage and sanity proof for a hardcoded extraction.py keyword output.",
+        summary="Registry coverage and sanity proof for a hardcoded extraction.py keyword output; it does not write Python code.",
         steps=(
+            "First edit extraction.py when new extraction behavior is needed, then verify with dm matcher trace-extraction.",
             "Run: ./bin/dm matcher add extraction-helper <canonical> --side product|ingredient|both --input \"<text>\" --source-refs <code-ref>",
             "When an existing simple extraction helper loses or changes a side, rerun with --replace-existing and the remaining --side.",
             "This covers an extraction.py code change; it does not replace the code change itself.",
@@ -899,6 +900,16 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "Run: ./bin/dm matcher compare-paths --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Use this when live/fast/backend disagree or when precomputed keywords/checks such as offer expansions or processed-product rules look suspicious.",
             "For a broader rule-family trace, follow up with: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
+        ),
+    ),
+    "canonical-of": MatcherGuide(
+        label="canonical-of",
+        status="supported by dm matcher",
+        summary="Show what canonical keyword(s) a term or phrase becomes in runtime extraction.",
+        steps=(
+            "Run: ./bin/dm matcher canonical-of \"<term-or-phrase>\"",
+            "Use this before adding rules when Swedish terminology and runtime canonical names may differ, e.g. dragon -> estragon.",
+            "Pass --offer-category/--brand when product extraction depends on them.",
         ),
     ),
 }
@@ -992,6 +1003,9 @@ GUIDE_ALIASES = {
     "sanity-reconcile": "reconcile-sanity",
     "compare_paths": "compare-paths",
     "path-compare": "compare-paths",
+    "canonical_of": "canonical-of",
+    "canonical": "canonical-of",
+    "canonicalof": "canonical-of",
 }
 
 
@@ -1532,10 +1546,54 @@ def _slug(value: str, *, fallback: str = "term") -> str:
     return slug or fallback
 
 
+def _split_csv_tokens(value: str) -> tuple[str, ...]:
+    items: list[str] = []
+    buffer: list[str] = []
+    escaped = False
+    brace_depth = 0
+    bracket_depth = 0
+    paren_depth = 0
+
+    for char in value:
+        if escaped:
+            if char == ",":
+                buffer.append(",")
+            else:
+                buffer.append("\\")
+                buffer.append(char)
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if char == "{":
+            brace_depth += 1
+        elif char == "}":
+            brace_depth = max(0, brace_depth - 1)
+        elif char == "[":
+            bracket_depth += 1
+        elif char == "]":
+            bracket_depth = max(0, bracket_depth - 1)
+        elif char == "(":
+            paren_depth += 1
+        elif char == ")":
+            paren_depth = max(0, paren_depth - 1)
+        if char == "," and brace_depth == 0 and bracket_depth == 0 and paren_depth == 0:
+            items.append("".join(buffer))
+            buffer = []
+            continue
+        buffer.append(char)
+
+    if escaped:
+        buffer.append("\\")
+    items.append("".join(buffer))
+    return tuple(items)
+
+
 def _split_csv(value: str, *, label: str, lowercase: bool = True) -> tuple[str, ...]:
     items = tuple(
         item.strip().lower() if lowercase else item.strip()
-        for item in value.split(",")
+        for item in _split_csv_tokens(value)
         if item.strip()
     )
     if not items:
@@ -9386,7 +9444,8 @@ def add_extraction_helper(
     typer.echo(f"{action} extraction_helper coverage: {change.policy_ref}")
     typer.echo(f"  entry: {entry_id}")
     typer.echo(
-        "NOTE: extraction-helper covers hardcoded extraction.py output. "
+        "NOTE: extraction-helper is registry coverage for hardcoded extraction.py output; "
+        "it does not write the extraction.py branch. "
         "If the code change alters existing matcher behavior, update fixtures/inventory/bridges "
         "and finish with Track B gates.",
         err=True,
@@ -9930,6 +9989,124 @@ def _format_extraction_trace_text(payload: Mapping[str, Any]) -> str:
         lines.append("suggestions:")
         lines.extend(f"  - {suggestion}" for suggestion in payload["suggestions"])
     return "\n".join(lines)
+
+
+def _canonical_of_payload(
+    *,
+    text: str,
+    offer_category: str,
+    brand: str,
+) -> dict[str, Any]:
+    try:
+        from languages.sv.normalization import fix_swedish_chars
+        from languages.sv.ingredient_matching.engine import build_offer_match_data
+        from languages.sv.ingredient_matching.extraction import (
+            extract_keywords_from_ingredient,
+            extract_keywords_from_product,
+        )
+        from languages.sv.ingredient_matching.normalization import _apply_space_normalizations
+        from languages.sv.ingredient_matching.synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS
+    except ModuleNotFoundError:
+        from app.languages.sv.normalization import fix_swedish_chars
+        from app.languages.sv.ingredient_matching.engine import build_offer_match_data
+        from app.languages.sv.ingredient_matching.extraction import (
+            extract_keywords_from_ingredient,
+            extract_keywords_from_product,
+        )
+        from app.languages.sv.ingredient_matching.normalization import _apply_space_normalizations
+        from app.languages.sv.ingredient_matching.synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS
+
+    normalized = _apply_space_normalizations(fix_swedish_chars(text).lower()).strip()
+    synonym = KEYWORD_SYNONYMS.get(normalized)
+    after_synonym = synonym or normalized
+    parent = INGREDIENT_PARENTS.get(after_synonym)
+    direct_canonical = parent or after_synonym
+    ingredient_keywords = list(extract_keywords_from_ingredient(text))
+    product_keywords = list(extract_keywords_from_product(text, offer_category, brand=brand))
+    precomputed_keywords = list(
+        build_offer_match_data(
+            text,
+            offer_category,
+            brand=brand,
+        ).precomputed.get("keywords") or ()
+    )
+    likely_canonicals = list(dict.fromkeys([
+        *ingredient_keywords,
+        *product_keywords,
+        *precomputed_keywords,
+    ]))
+    notes: list[str] = []
+    if likely_canonicals and direct_canonical not in likely_canonicals:
+        notes.append(
+            "direct synonym/parent mapping differs from extractor output; "
+            "the runtime extractor has an additional normalization or hardcoded branch"
+        )
+    if not likely_canonicals:
+        notes.append("no runtime extractor keywords found")
+    return {
+        "input": text,
+        "normalized": normalized,
+        "direct_synonym": synonym or "",
+        "direct_parent": parent or "",
+        "direct_canonical": direct_canonical,
+        "ingredient_keywords": ingredient_keywords,
+        "product_keywords": product_keywords,
+        "precomputed_offer_keywords": precomputed_keywords,
+        "likely_canonicals": likely_canonicals,
+        "offer_category": offer_category,
+        "brand": brand,
+        "notes": notes,
+    }
+
+
+def _format_canonical_of_text(payload: Mapping[str, Any]) -> str:
+    synonym = payload["direct_synonym"] or "none"
+    parent = payload["direct_parent"] or "none"
+    lines = [
+        f"input: {payload['input']}",
+        f"normalized: {payload['normalized']}",
+        f"direct synonym: {synonym}",
+        f"direct parent: {parent}",
+        f"direct canonical: {payload['direct_canonical']}",
+        "ingredient extraction: "
+        + (", ".join(payload["ingredient_keywords"]) if payload["ingredient_keywords"] else "none"),
+        "product extraction: "
+        + (", ".join(payload["product_keywords"]) if payload["product_keywords"] else "none"),
+        "offer precompute: "
+        + (", ".join(payload["precomputed_offer_keywords"]) if payload["precomputed_offer_keywords"] else "none"),
+        "likely canonical(s): "
+        + (", ".join(payload["likely_canonicals"]) if payload["likely_canonicals"] else "none"),
+    ]
+    if payload["notes"]:
+        lines.append("notes:")
+        lines.extend(f"  - {note}" for note in payload["notes"])
+    return "\n".join(lines)
+
+
+@matcher_app.command("canonical-of", help="Show runtime canonical keyword(s) for one term or phrase.")
+def matcher_canonical_of(
+    text: Annotated[str, typer.Argument(help="Term or phrase to inspect.")],
+    offer_category: Annotated[
+        str,
+        typer.Option("--offer-category", "--category", help="Optional category for product extraction."),
+    ] = "",
+    brand: Annotated[str, typer.Option("--brand", help="Optional brand for product extraction.")] = "",
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Output format."),
+    ] = "text",
+) -> None:
+    if not text.strip():
+        raise typer.BadParameter("text must not be empty")
+    payload = _canonical_of_payload(
+        text=text.strip(),
+        offer_category=offer_category.strip(),
+        brand=brand.strip(),
+    )
+    if output_format == "json":
+        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return
+    typer.echo(_format_canonical_of_text(payload))
 
 
 @matcher_app.command("trace-extraction", help="Trace ingredient or offer keyword extraction.")

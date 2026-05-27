@@ -306,6 +306,7 @@ Common single-operation wrappers:
 ./bin/dm matcher refresh-line-refs      # refresh inventory anchors + generated JSON
 ./bin/dm matcher refresh-line-refs --fix  # explicit write-mode alias
 ./bin/dm matcher guide <shape>          # show the recommended path for a rule type
+./bin/dm matcher canonical-of "<term>"   # show runtime canonical/extraction output
 ./bin/dm matcher trace-extraction --ingredient "<text>"
 ./bin/dm matcher sanity-find "<selector>"
 ./bin/dm matcher sanity-update "<selector>" --expected <canonical-or-None>
@@ -420,6 +421,11 @@ The modifier rewrites the synchronized fields in one pass, bumps the
 `rule_version`, and runs pre-flight by default. Use `--dry-run` first when the
 existing policy has broad fixture coverage.
 
+Regex list flags such as `--blocked-offer-patterns` are comma-delimited, but
+the CLI preserves commas inside regex groups, character classes, and quantifier
+braces. A pattern containing `{0,40}` or `\d{2}` can therefore be passed as one
+value. If a literal top-level comma is part of the regex, escape it as `\,`.
+
 If a hardcoded extraction helper is narrowed after an `extraction.py` edit, do
 not hand-delete coverage rows. For a simple one-canonical entry, rewrite the
 covered side/source refs instead:
@@ -436,6 +442,12 @@ If the entry has extra offer/ingredient terms or non-canonical coverage rows,
 `--replace-existing` refuses the rewrite; edit manually and run Track B gates.
 Extraction helper changes are Track B registry work even when the behavior
 change itself is a small Python branch.
+Important: `dm matcher add extraction-helper` only registers and tests a
+hardcoded extraction output that already exists in `extraction.py`. It does not
+write Python extraction code. For brand/product disambiguation such as a product
+name that should emit `tabasco`, first add the narrow extractor branch, prove it
+with `dm matcher trace-extraction`, then register the coverage with
+`extraction-helper`.
 
 Common Python runtime data surfaces now have CLI-backed overlay coverage:
 
@@ -684,6 +696,20 @@ Avoid making the brand/product-line term a global stop word unless it is never a
 purchasable food keyword. A stop word removes information; brand-product
 handling should usually preserve one precise canonical and suppress only the
 flavor bleed.
+
+For brand-name disambiguation where the brand itself is the product cue, use a
+narrow code-first flow:
+
+1. Add an `extraction.py` branch that requires both the generic product wording
+   and the brand/product cue, e.g. product text containing `pepparsås` plus
+   brand/name `tabasco` emits `tabasco`.
+2. Run `dm matcher canonical-of "<term>"` and
+   `dm matcher trace-extraction --offer "<offer>" --brand "<brand>"` to confirm
+   the runtime canonical before adding registry metadata.
+3. Register the hardcoded behavior with `dm matcher add extraction-helper ...`.
+   The command records coverage; it does not generate the Python branch.
+4. Add a negative proof for the generic wording if it must not match other
+   brands/products.
 
 ### Canonical Conflict And Ambiguity
 
@@ -1172,8 +1198,8 @@ table.
 | Exact synonym or spelling alias | `./bin/dm matcher add keyword-synonym ...` for `keyword_synonym`; otherwise the matching parent/routing registry entry | One term is the same ingredient family as another. Default to the lightweight alias path for spelling/plural/compound aliases; escalate to Track B only for routing/parity/product-policy implications. | Ad-hoc extraction code or full fixture/inventory ceremony for a plain alias. |
 | Ingredient/offer bridge (recipe wording differs from product wording) | `./bin/dm matcher add keyword-extra-parent ...` (preferred for fan-out) or `./bin/dm matcher add ingredient-parent ...` | Recipe term and product term differ but should match (e.g. `nori` → `alger`, `citrusfrukter` → `citron`/`lime`/`apelsin`). These surfaces are wired into the runtime matcher today. | Adding only to `match_bridge.toml`. That surface is **declarative-only / staged for migration** — it does not affect runtime routing on its own. See the match_bridge note below the table. |
 | No-match/blocking policy | `./bin/dm matcher add no-match-policy ...` after a durable negative fixture exists; `./bin/dm matcher modify no-match-policy ...` for simple existing policies | Ingredient pattern plus offer keyword/pattern should never match. | One-off Python if a declarative policy can express it, or manual TOML rewrites when the modifier supports the shape. |
-| Offer keyword extraction | `./bin/dm matcher add offer-extra-keyword ...` or `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Product wording should expose an additional canonical offer keyword. | Adding recipe synonyms when only offer extraction is missing. |
-| Recipe extraction helper | `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures. |
+| Offer keyword extraction | `./bin/dm matcher add offer-extra-keyword ...` or `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Product wording should expose an additional canonical offer keyword. Use `offer-extra-keyword` for data-only bridges; use `extraction-helper` only after hardcoding extraction.py output. | Adding recipe synonyms when only offer extraction is missing, or expecting `extraction-helper` to write Python code. |
+| Recipe extraction helper | `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures, or registry-only helper rows without the matching extractor branch. |
 | Parent/canonical fallback | `./bin/dm matcher add ingredient-parent ...`, `parent-match-only ...`, or `keyword-extra-parent ...` | A child term should expose a broader canonical, sometimes only for matching. For `parent-match-only`, include `--negative-offer` plus `--negative-ingredient` when the policy depends on strict sibling exclusion. | Treating parent fallback as a blocker. It is cosmetic/routing support unless a negative proof and an actual guard/no-match mechanism enforce the exclusion. |
 | Ingredient-context blocker | `./bin/dm matcher add fpb ...` | Ingredient wording contains a keyword only inside a context that should suppress it. Common Track A tactical fix. | Offer/product variant blocking; use a product-side blocker or form/specialty rule after confirming the issue is product-side. If the keyword is standalone in the recipe ingredient, verify with `dm matcher probe`; KSBC is usually the right suppressor for that shape. |
 | Product-name blocker | `./bin/dm matcher add pnb ...` | Offer/product wording contains a per-keyword variant, carrier, product type, or flavor that should block the matched keyword. Common Track A tactical fix. | Large flavor/form families that should be modeled declaratively. |
@@ -1189,6 +1215,7 @@ table.
 | Compound/subword bleed | `./bin/dm matcher add compound-protection ...` | A keyword is matching as an unwanted substring or compound suffix/prefix, e.g. a compound word carries another ingredient name but should require stricter word/prefix proof. | FPB/PNB when the real problem is token/compound shape rather than a semantic product or ingredient context. |
 | Multi-keyword normalization | `./bin/dm matcher add dual-keyword-normalization ...` | A surface form needs to emit both a specific canonical and a broader family keyword, with the specific canonical first. | Hand-editing `normalization.py` for ordinary dual-keyword overlays. |
 | Directional canonical override | `space-normalization` or ingredient-side extraction helper plus narrow product exposure | A modifier changes the requested canonical and the base canonical must not remain available, e.g. `pepparrot på tub` -> `pepparrotsvisp` only. | `dual-keyword-normalization`; it emits the broader family too. |
+| Specific anchor for generic blocker bypass | `offer-extra-keyword`, a narrow `extraction.py` branch + `extraction-helper`, or a specific product-side canonical | A generic keyword is correctly blocked by PNB/FPB/KSBC, but one specific subtype should still match via its own keyword, e.g. plant cream or red roe anchors bypassing generic `grädde`/`rom` blockers. | Removing the generic blocker or broadening the generic family. The anchor must have positive and negative proof. |
 | Form or processed-state rule | `./bin/dm matcher add processed-rule ...`, `spice-fresh-rule ...`, `processed-exemption ...`, `strict-processed-rule ...`, or `processed-food ...` for simple set add/remove; otherwise `form_rules.py` or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. See "Form-Rule Relaxation" for `färskpressad`/juice-style exceptions. | Listing every future flavor or cooked variant by hand. |
 | Qualifier or bidirectional variant | `./bin/dm matcher add specialty-qualifier ... [--bidirectional]` or `qualifier-equivalent ...` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. Prefer ordinary specialty qualifiers when only ingredient qualifiers must be honored; prefer `--bidirectional` when a product-side subtype should not satisfy a plain ingredient. | Raw substring checks without word-boundary handling. |
 | Product qualifier required for a keyword | `./bin/dm matcher add qualifier-required-keyword ...` | A keyword should match product variants only when product qualifier words also appear in the ingredient line. | Specialty qualifier rules when the qualifier belongs to a specific product family rather than every product-side word. |
@@ -1282,6 +1309,17 @@ allowed. Strict behavior always needs a blocking/validation mechanism such as
 PNB, FPB, KSBC, GPB, no-match policy, form/processed rule, specialty rule, or a
 small backend guard, plus a negative proof with `dm matcher probe --expect
 no-match` or a generated/manual sanity fixture.
+
+When a generic blocker is correct but one subtype should still pass, do not
+delete the blocker. Add a specific anchor keyword instead. The pattern is:
+
+1. Keep the generic block on the broad keyword, e.g. `grädde` or `rom`.
+2. Make the intended subtype extract a more specific canonical on the product
+   and/or ingredient side, e.g. `sojagrädde` or `rödrom`.
+3. Ensure the offer exposes that specific keyword through
+   `offer-extra-keyword` or a narrow `extraction.py` branch registered with
+   `extraction-helper`.
+4. Prove both the positive anchored match and the negative generic case.
 
 ## Track A Runtime Workflow
 
@@ -1640,6 +1678,20 @@ When a backend validator changes, check whether `matches_ingredient_fast`,
 diagnostics, and routed parity need the same semantic check. Backend-only fixes
 can make live diagnostics look right while cache/routing still diverges.
 
+When a text-prep or extraction code edit changes what ingredient text means,
+check both runtime paths:
+
+- `extraction.py` / `extract_keywords_from_ingredient` controls live extraction
+  and many diagnostics.
+- `_prepare_fast_ingredient_text` and precomputed `IngredientMatchData` control
+  the fast/cache path.
+
+If the fix strips or rewrites words such as filler text, parentheticals, or
+alternatives, add the same semantic treatment to the fast path or prove with
+`dm matcher compare-paths` that fast/backend still agree. A live-only extraction
+fix can otherwise look correct in `explain` while cached matching keeps the old
+text.
+
 ## Track B Standard Workflow
 
 Use this workflow for durable registry/contract changes and for any Track A fix
@@ -1680,6 +1732,21 @@ docker compose exec -T -w /app web \
   python support_checks/run_term_registry_add_term_checks.py \
   | python3 -c 'import json,sys; print(json.load(sys.stdin)["unique_coverage_key_count"])'
 ```
+
+For manual code edits in `extraction.py`, `matching.py`, parser helpers, or
+validators, use the same finish sequence but think of it as post-code-edit
+cleanup:
+
+1. Register any hardcoded extraction output with
+   `dm matcher add extraction-helper ... --no-run-gates`.
+2. Run `dm matcher batch finalize --track A --dry-run` to inspect the planned
+   regen/promote/line-ref/preflight/gate steps.
+3. Run `dm matcher batch finalize --track A` for narrow runtime behavior, or
+   `--track B` when fixtures/registry/inventory changed. Add `--allow-removals`
+   only after reviewing intentional baseline removals.
+
+This wrapper is preferred over manually remembering `regen`, `refresh-line-refs`,
+`promote`, and gates in the right order.
 
 Patch `EXPECTED_VERIFIED_TERM_UNIQUE_COVERAGE_KEYS` only as a last resort when
 promotion cannot write the intended files; mention that in the handoff.
