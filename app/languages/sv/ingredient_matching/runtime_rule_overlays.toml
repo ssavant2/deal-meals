@@ -1145,6 +1145,13 @@ keyword = "korvar"
 context = ["chorizo", "salsiccia", "kabanoss", "kabanos", "bratwurst", "falukorv", "prinskorv", "isterband", "blodkorv", "merguez", "andouille", "kielbasa", "fläskkorv", "grillkorv", "julkorv", "leverkorv", "medisterkorv", "morcilla", "weisswurst", "currywurst"]
 reason = "Plural form 'korvar' — när recept anger specifik korv-typ (chorizo/kabanoss/bratwurst/falukorv etc), suppressa generic 'korvar'-keyword. Speglar singular 'korv' KSBC."
 
+[[processed_rule_compound_exemptions]]
+id = "runtime_processed_exemption_chili"
+status = "active"
+keyword = "chili"
+compounds = ["explosion"]
+reason = "Chili Explosion Kryddblandning is a brand-specific spice mix product (Santa Maria). 'explosion' is a brand-specific compound term, distinct enough to exempt from the generic 'chili ← kvarn' SVF block. Analog to existing sriracha exemption."
+
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
 status = "active"

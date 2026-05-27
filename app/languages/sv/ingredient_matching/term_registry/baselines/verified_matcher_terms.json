@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 395,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 147,
+      "keyword_synonym_mapping": 149,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 147,
+      "keyword_synonym": 149,
       "match_bridge": 2021,
       "matcher_regression_case": 1495,
       "matcher_rule_inventory": 464,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5684,
-    "variants_missing_product_text": 1808,
+    "variant_count": 5686,
+    "variants_missing_product_text": 1810,
     "variants_with_product_text": 3876
   },
   "variants": [
@@ -119410,11 +119410,53 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"chevre\"}"
+    },
+    {
+      "variant_id": "vterm-f967511949f81544",
+      "row_index": 4823,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:pannkakassirap",
+      "source_id": "pannkakassirap",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "pannkakassirap",
+      "canonical": "lönnsirap",
+      "expected_family": "lönnsirap",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"lönnsirap\"}"
+    },
+    {
+      "variant_id": "vterm-c44be50492010fcb",
+      "row_index": 4824,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:pannkakssirap",
+      "source_id": "pannkakssirap",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "pannkakssirap",
+      "canonical": "lönnsirap",
+      "expected_family": "lönnsirap",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"lönnsirap\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1586,
+      "no_product_text": 1588,
       "static_verified": 2603,
       "synthetic_verified": 1495
     },
@@ -119425,7 +119467,7 @@
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 147,
+      "keyword_synonym": 149,
       "match_bridge": 2021,
       "matcher_regression_case": 1495,
       "matcher_rule_inventory": 464,
@@ -119436,8 +119478,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5684
+      "audited": 5686
     },
-    "variant_count": 5684
+    "variant_count": 5686
   }
 }
