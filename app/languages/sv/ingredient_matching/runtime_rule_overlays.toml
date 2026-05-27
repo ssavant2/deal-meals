@@ -585,6 +585,13 @@ keyword = "fond"
 blockers = ["vegetarisk"]
 reason = "Fond Du Chef Vegetarisk ska inte matcha plain fond-ingredient (typiskt kött-fond). Symmetri behålls: vegetarisk recept som explicit ber om 'vegetarisk fond' matchar fortfarande via ingredient-text bypass."
 
+[[product_name_blockers]]
+id = "runtime_pnb_appelmust"
+status = "active"
+keyword = "äppelmust"
+blockers = ["hallon", "päron", "bär", "multifrukt", "blandfrukt", "svartavinbär", "svarta vinbär", "röda vinbär", "blåbär"]
+reason = "Blend-äppelmust (med hallon/päron/bär etc) ska inte matcha plain äppelmust-ingredient. Analog Q88-2 äppeljuice PNB och project_juice_policy: plain juice/must-ingredient matchar bara ren samma sort."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -911,8 +918,8 @@ reason = "When ingredient explicitly specifies dietary restriction (mjölkfri/la
 id = "runtime_ksbc_choklad"
 status = "active"
 keyword = "choklad"
-context = ["rispuffar"]
-reason = "rispuffar med choklad (Kinapuffar) injicerar choklad-keyword via parent-text; plain bakchoklad/chokladknappar är inte chokladpuffar"
+context = ["rispuffar", "daim"]
+reason = "rispuffar med choklad (Kinapuffar) injicerar choklad-keyword via parent-text; plain bakchoklad/chokladknappar är inte chokladpuffar; Daim choklad-recept vill ha daim-smaksatt mjölkchoklad (smörkola-knappar), inte generisk mörk/vit/mjölkfri choklad. KSBC suppressar choklad-keyword när daim co-extraheras. Andra choklad-recept utan daim opåverkade. Analog Q97-5 kex ← tuc + Q98-4 korv ← chorizo."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_margarin"
@@ -1100,8 +1107,8 @@ reason = "Rimmad lax (salt-cured salmon) should not match generic lax products �
 id = "runtime_ksbc_korv"
 status = "active"
 keyword = "korv"
-context = ["falukorvsring", "salsicciakorv", "salsicciakorvar"]
-reason = "PARENT_MATCH_ONLY completion (Q91-2 + Q94-2): when ingredient text contains the explicit compound form (falukorvsring, salsicciakorv, salsicciakorvar), suppress generic korv keyword so other korv-types don't match. Contexts are compound-specific (not plain 'falukorv'/'salsiccia') so 'X t ex salsiccia' style ingredients (e.g. 'färskkorvar t ex salsiccia') keep broad korv-family matching — only EXPLICIT specific-sausage ingredients become strict."
+context = ["falukorvsring", "salsicciakorv", "salsicciakorvar", "kabanoss", "kabanos", "bratwurst", "falukorv", "prinskorv", "isterband", "blodkorv", "merguez", "andouille", "kielbasa", "fläskkorv", "grillkorv", "julkorv", "leverkorv", "medisterkorv", "morcilla", "weisswurst", "currywurst"]
+reason = "PARENT_MATCH_ONLY completion (Q91-2 + Q94-2): when ingredient text contains the explicit compound form (falukorvsring, salsicciakorv, salsicciakorvar), suppress generic korv keyword so other korv-types don't match. Contexts are compound-specific (not plain 'falukorv'/'salsiccia') so 'X t ex salsiccia' style ingredients (e.g. 'färskkorvar t ex salsiccia') keep broad korv-family matching — only EXPLICIT specific-sausage ingredients become strict.; Utvidgning av befintlig KSBC korv (som hade chorizo + salsicciakorv*). När recept anger specifik korv-typ (kabanoss/bratwurst/falukorv etc), suppressa generic korv-keyword så bara matchande typ visas."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_pasta"
@@ -1116,6 +1123,13 @@ status = "active"
 keyword = "färskost"
 context = ["havre", "soja", "havrebaserad", "växtbaserad"]
 reason = "När recept-ingredient explicit är växtbaserad färskost — suppressa generic färskost-keyword så dairy-färskost (Philadelphia/Arla Bonjour) inte matchar. Plain färskost-recept fortsätter matcha alla varianter. Asymmetrisk directional rule analog Q96-3 plant-grädde."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_korvar"
+status = "active"
+keyword = "korvar"
+context = ["chorizo", "salsiccia", "kabanoss", "kabanos", "bratwurst", "falukorv", "prinskorv", "isterband", "blodkorv", "merguez", "andouille", "kielbasa", "fläskkorv", "grillkorv", "julkorv", "leverkorv", "medisterkorv", "morcilla", "weisswurst", "currywurst"]
+reason = "Plural form 'korvar' — när recept anger specifik korv-typ (chorizo/kabanoss/bratwurst/falukorv etc), suppressa generic 'korvar'-keyword. Speglar singular 'korv' KSBC."
 
 [[global_product_name_blockers]]
 id = "runtime_gpb_toffifee"
@@ -1387,6 +1401,22 @@ keyword = "ris"
 qualifiers = ["rundkornigt", "rundkorn", "rundkornsris"]
 bidirectional = true
 reason = "Sushi/risotto kräver rundkornsris (klibbigt). Befintlig code-rule täcker sushi/sushiris/klibbigt/glutinöst men inte 'rundkornigt'-ordet specifikt. --bidirectional: rundkornigt-recept blockeras från långkornigt jasmin/basmati. Plain ris-recept matchar fortfarande alla (broad familj)."
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_bakchoklad_vit_vita"
+status = "active"
+keyword = "bakchoklad"
+qualifiers = ["vit", "vita", "mörk", "mörka", "ljus", "ljusa", "mjölk", "mjölk"]
+bidirectional = true
+reason = "Vit/mörk/mjölkchoklad har distinkt smak och funktion i bakning (vit saknar kakao, mörk är bittert, mjölk är mjukt). Inte interchangeable. När recept specificerar färg-/typ-qualifier, produkten måste matcha."
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_chokladknappar_vit_vita"
+status = "active"
+keyword = "chokladknappar"
+qualifiers = ["vit", "vita", "mörk", "mörka", "ljus", "ljusa", "mjölk", "mjölk"]
+bidirectional = true
+reason = "Speglar bakchoklad-regeln: chokladknappar finns i vit/mörk/mjölk-varianter med olika smak/användning. Recept-qualifier måste matcha produkt-qualifier."
 
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"

@@ -513,12 +513,25 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('baugetter', 'baguetter'),
     ('surdegsbaugette', 'surdegsbaguette'),
     ('surdegsbaugetter', 'surdegsbaguetter'),
+    # Ginger ingredient lines separate into two distinct families:
+    # - syltad (candied/sweet) → baking/dessert use
+    # - picklad/inlagd (vinegar-pickled/salt) → sushi/Asian dish use
+    # Conflating them in one canonical caused FP between e.g. panettone recipes
+    # and sushi gari products. Kept as separate canonical families.
+    # Red/black rom (fish roe): "röd rom" → "rödrom" + keep 'rom' so generic rom
+    # keyword still extracts. PNB rom ← finkorning/stenbitsrom etc blocks plain rom
+    # match path, so 'rödrom'/'svartrom' becomes a specific match anchor (analogous
+    # to sojagrädde/havregrädde pattern in Q96-3). Mirrored on the offer side by a
+    # post-extraction color-tagger in extraction.py.
+    ('röd rom', 'rödrom rom'),
+    ('rod rom', 'rodrom rom'),
+    ('svart rom', 'svartrom rom'),
     ('syltad ingefära', 'syltadingefära'),
     ('syltad ingefara', 'syltadingefara'),
-    ('picklad ingefära', 'syltadingefära'),
-    ('picklad ingefara', 'syltadingefara'),
-    ('inlagd ingefära', 'syltadingefära gari'),
-    ('inlagd ingefara', 'syltadingefara gari'),
+    ('picklad ingefära', 'pickladingefära'),
+    ('picklad ingefara', 'pickladingefara'),
+    ('inlagd ingefära', 'pickladingefära gari'),
+    ('inlagd ingefara', 'pickladingefara gari'),
     # Skånsk senap: both word orders → compound (product names use both orderings)
     ('skånsk senap', 'skånsksenap'),
     ('senap skånsk', 'skånsksenap'),

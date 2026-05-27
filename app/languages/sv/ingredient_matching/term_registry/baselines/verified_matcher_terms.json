@@ -4,8 +4,8 @@
     "role_counts": {
       "bridge_negative_guard": 197,
       "bridge_positive": 1824,
-      "hardcoded_keyword_output:extract_keywords_from_ingredient": 99,
-      "hardcoded_keyword_output:extract_keywords_from_product": 117,
+      "hardcoded_keyword_output:extract_keywords_from_ingredient": 100,
+      "hardcoded_keyword_output:extract_keywords_from_product": 118,
       "ingredient_parent_mapping": 395,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
@@ -21,7 +21,7 @@
       "legacy_synonym": 74,
       "legacy_validator": 249,
       "negative_guard_keyword": 22,
-      "negative_guard_pattern": 335,
+      "negative_guard_pattern": 338,
       "negative_regression": 836,
       "offer_extra_keyword_mapping": 417,
       "parent_match_only_mapping": 20,
@@ -29,7 +29,7 @@
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
-      "extraction_helper": 216,
+      "extraction_helper": 218,
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
@@ -37,14 +37,14 @@
       "match_bridge": 2021,
       "matcher_regression_case": 1495,
       "matcher_rule_inventory": 464,
-      "no_match_policy": 357,
+      "no_match_policy": 360,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5676,
-    "variants_missing_product_text": 1803,
-    "variants_with_product_text": 3873
+    "variant_count": 5681,
+    "variants_missing_product_text": 1805,
+    "variants_with_product_text": 3876
   },
   "variants": [
     {
@@ -119242,18 +119242,123 @@
       "needs_product_text": true,
       "notes": "Bean paste och peanut snack med chiliolja i namnet ska inte matcha chiliolja-recept (gäller även Laoganma brand-bypass-fall). Produkten är huvudsakligen bönor/jordnötter, inte chiliolja. Chili crisp-familjen behålls (Chilli Crispy I Olja, Crispy chilli i olja) eftersom de är chiliolja-stil.",
       "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative\"], \"ingredient_patterns\": [\"\\\\bchiliolja\\\\b\"], \"policy_ref\": \"policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b\", \"reason\": \"Bean paste och peanut snack med chiliolja i namnet ska inte matcha chiliolja-recept (gäller även Laoganma brand-bypass-fall). Produkten är huvudsakligen bönor/jordnötter, inte chiliolja. Chili crisp-familjen behålls (Chilli Crispy I Olja, Crispy chilli i olja) eftersom de är chiliolja-stil.\", \"rule_version\": 1, \"supersedes\": []}"
+    },
+    {
+      "variant_id": "vterm-f75a8d8675cb5b7e",
+      "row_index": 4029,
+      "source_order": 41,
+      "source_type": "no_match_policy",
+      "source_file": "app/languages/sv/ingredient_matching/no_match_policies.py",
+      "source_ref": "no_match_policies:policy_compound_candy_nut_or_peel_not_raw_components",
+      "source_id": "policy_compound_candy_nut_or_peel_not_raw_components",
+      "variant_role": "negative_guard_pattern",
+      "variant_text": "compound candy and peel components ! \\bmandlar\\b",
+      "canonical": "compound candy and peel components",
+      "expected_family": "\\bmandlar\\b",
+      "ingredient_text": null,
+      "product_text": "\\bmandlar\\b",
+      "product_category": null,
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": true,
+      "notes": "Compound candy, bitter almond, and candied peel lines must not fan out to raw nut or fresh citrus components.",
+      "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"matcher_regression_negative_apelsin_klass_1\", \"matcher_regression_negative_hasselnot_750g_start_7683f09d\", \"matcher_regression_negative_mandel_500g\"], \"ingredient_patterns\": [\"\\\\bkolor\\\\b.*\\\\bnougatkräm\\\\b.*\\\\bhasselnöt\\\\b\", \"\\\\bkolor\\\\b.*\\\\bnougatkram\\\\b.*\\\\bhasselnot\\\\b\", \"\\\\bbittermandel\\\\b\", \"\\\\bsyltade\\\\s+apelsinskal\\\\b\"], \"policy_ref\": \"legacy_review_regression\", \"reason\": \"Compound candy, bitter almond, and candied peel lines must not fan out to raw nut or fresh citrus components.\", \"rule_version\": 1, \"supersedes\": [\"legacy_review_several_compound_specific_fps_look_like_ksc_candidates_but_that_mechanism_did_not_verify_cleanly_here\"]}"
+    },
+    {
+      "variant_id": "vterm-29b92ff5abb0c96d",
+      "row_index": 4030,
+      "source_order": 41,
+      "source_type": "no_match_policy",
+      "source_file": "app/languages/sv/ingredient_matching/no_match_policies.py",
+      "source_ref": "no_match_policies:policy_compound_candy_nut_or_peel_not_raw_components",
+      "source_id": "policy_compound_candy_nut_or_peel_not_raw_components",
+      "variant_role": "negative_guard_pattern",
+      "variant_text": "compound candy and peel components ! \\bsotmandel\\b",
+      "canonical": "compound candy and peel components",
+      "expected_family": "\\bsotmandel\\b",
+      "ingredient_text": null,
+      "product_text": "\\bsotmandel\\b",
+      "product_category": null,
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": true,
+      "notes": "Compound candy, bitter almond, and candied peel lines must not fan out to raw nut or fresh citrus components.",
+      "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"matcher_regression_negative_apelsin_klass_1\", \"matcher_regression_negative_hasselnot_750g_start_7683f09d\", \"matcher_regression_negative_mandel_500g\"], \"ingredient_patterns\": [\"\\\\bkolor\\\\b.*\\\\bnougatkräm\\\\b.*\\\\bhasselnöt\\\\b\", \"\\\\bkolor\\\\b.*\\\\bnougatkram\\\\b.*\\\\bhasselnot\\\\b\", \"\\\\bbittermandel\\\\b\", \"\\\\bsyltade\\\\s+apelsinskal\\\\b\"], \"policy_ref\": \"legacy_review_regression\", \"reason\": \"Compound candy, bitter almond, and candied peel lines must not fan out to raw nut or fresh citrus components.\", \"rule_version\": 1, \"supersedes\": [\"legacy_review_several_compound_specific_fps_look_like_ksc_candidates_but_that_mechanism_did_not_verify_cleanly_here\"]}"
+    },
+    {
+      "variant_id": "vterm-8735185110611178",
+      "row_index": 4031,
+      "source_order": 41,
+      "source_type": "no_match_policy",
+      "source_file": "app/languages/sv/ingredient_matching/no_match_policies.py",
+      "source_ref": "no_match_policies:policy_compound_candy_nut_or_peel_not_raw_components",
+      "source_id": "policy_compound_candy_nut_or_peel_not_raw_components",
+      "variant_role": "negative_guard_pattern",
+      "variant_text": "compound candy and peel components ! \\bsötmandel\\b",
+      "canonical": "compound candy and peel components",
+      "expected_family": "\\bsötmandel\\b",
+      "ingredient_text": null,
+      "product_text": "\\bsötmandel\\b",
+      "product_category": null,
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": true,
+      "notes": "Compound candy, bitter almond, and candied peel lines must not fan out to raw nut or fresh citrus components.",
+      "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"matcher_regression_negative_apelsin_klass_1\", \"matcher_regression_negative_hasselnot_750g_start_7683f09d\", \"matcher_regression_negative_mandel_500g\"], \"ingredient_patterns\": [\"\\\\bkolor\\\\b.*\\\\bnougatkräm\\\\b.*\\\\bhasselnöt\\\\b\", \"\\\\bkolor\\\\b.*\\\\bnougatkram\\\\b.*\\\\bhasselnot\\\\b\", \"\\\\bbittermandel\\\\b\", \"\\\\bsyltade\\\\s+apelsinskal\\\\b\"], \"policy_ref\": \"legacy_review_regression\", \"reason\": \"Compound candy, bitter almond, and candied peel lines must not fan out to raw nut or fresh citrus components.\", \"rule_version\": 1, \"supersedes\": [\"legacy_review_several_compound_specific_fps_look_like_ksc_candidates_but_that_mechanism_did_not_verify_cleanly_here\"]}"
+    },
+    {
+      "variant_id": "vterm-7885cdda46ae51e2",
+      "row_index": 5541,
+      "source_order": 90,
+      "source_type": "extraction_helper",
+      "source_file": "app/languages/sv/ingredient_matching/extraction.py",
+      "source_ref": "app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2137",
+      "source_id": "extract_keywords_from_ingredient:syltadingefära",
+      "variant_role": "hardcoded_keyword_output:extract_keywords_from_ingredient",
+      "variant_text": "syltadingefära",
+      "canonical": "syltadingefära",
+      "expected_family": "syltadingefära",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": null,
+      "metadata": "{\"function\": \"extract_keywords_from_ingredient\", \"lines\": [2137], \"output\": \"syltadingefära\"}"
+    },
+    {
+      "variant_id": "vterm-6ea76cc547f480a8",
+      "row_index": 5626,
+      "source_order": 90,
+      "source_type": "extraction_helper",
+      "source_file": "app/languages/sv/ingredient_matching/extraction.py",
+      "source_ref": "app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:733",
+      "source_id": "extract_keywords_from_product:pickladingefära",
+      "variant_role": "hardcoded_keyword_output:extract_keywords_from_product",
+      "variant_text": "pickladingefära",
+      "canonical": "pickladingefära",
+      "expected_family": "pickladingefära",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": null,
+      "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [733], \"output\": \"pickladingefära\"}"
     }
   ],
   "verification": {
     "classification_counts": {
       "no_product_text": 1583,
-      "static_verified": 2598,
+      "static_verified": 2603,
       "synthetic_verified": 1495
     },
     "method": "static_contract_audit",
     "problem_counts": {},
     "source_counts": {
-      "extraction_helper": 216,
+      "extraction_helper": 218,
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
@@ -119261,15 +119366,15 @@
       "match_bridge": 2021,
       "matcher_regression_case": 1495,
       "matcher_rule_inventory": 464,
-      "no_match_policy": 357,
+      "no_match_policy": 360,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5676
+      "audited": 5681
     },
-    "variant_count": 5676
+    "variant_count": 5681
   }
 }

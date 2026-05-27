@@ -720,14 +720,17 @@ def extract_keywords_from_product(
     if _sun_dried_tomato_creme:
         return ['soltorkadetomatcreme']
 
-    # Candied/pickled ginger should keep its own exact family instead of being
-    # treated as fresh ginger root.
-    if (
-        'ingefära' in original_name_lower or 'ingefara' in original_name_lower
-    ) and any(token in original_name_lower for token in (
-        'syltad', 'picklad', 'gari', 'sushi',
-    )):
-        return ['syltadingefära']
+    # Ginger has two distinct families:
+    # - syltad (candied/sweet) — used in baking (panettone, gingerbread)
+    # - picklad/inlagd/gari/sushi (vinegar-pickled/salt) — used in Asian/sushi dishes
+    # Products and recipes must not cross-match (sweet candied ≠ sour sushi gari).
+    if 'ingefära' in original_name_lower or 'ingefara' in original_name_lower:
+        if 'syltad' in original_name_lower:
+            return ['syltadingefära']
+        if any(token in original_name_lower for token in (
+            'picklad', 'gari', 'sushi', 'inlagd',
+        )):
+            return ['pickladingefära']
 
     # Trumpet chanterelles are a distinct mushroom family in recipes. Keep the
     # exact species visible instead of collapsing immediately into generic
@@ -1892,6 +1895,33 @@ def extract_keywords_from_product(
     if 'småtomat' in unique_keywords:
         unique_keywords = [kw for kw in unique_keywords if kw not in ('tomat', 'tomater')]
 
+    # Red/black rom (fish roe) color-tagging: PNB rom ← finkorning/stenbitsrom/
+    # caviarmix/löjrom etc. blocks specific roe products from matching a plain
+    # `rom`-ingredient via the generic rom-keyword path. To let "röd rom" /
+    # "svart rom" recipes still find their color-matched products, we expose
+    # `rödrom`/`svartrom` as specific keywords on roe-family products that have
+    # the color word in their name. The ingredient side gets the matching
+    # 'rödrom'/'svartrom' token via normalization.py space rules.
+    _roe_family_keywords = {'rom', 'stenbitsrom', 'caviar', 'caviarmix', 'löjrom', 'laxrom'}
+    if any(kw in unique_keywords for kw in _roe_family_keywords):
+        if re.search(r'\bröd\b', original_name_lower) or re.search(r'\brod\b', original_name_lower):
+            if 'rödrom' not in unique_keywords:
+                unique_keywords.append('rödrom')
+        if re.search(r'\bsvart\b', original_name_lower):
+            if 'svartrom' not in unique_keywords:
+                unique_keywords.append('svartrom')
+
+    # Korean cuisine marker: products with "korean" or "bulgogi" in their name get
+    # 'koreansk' as a cuisine-flavor keyword. CUISINE_CONTEXT then enforces that
+    # such products only match recipes with Korean-cuisine cues (analogous to
+    # thaikryddad gating thai products to thai recipes).
+    if (
+        'korean' in original_name_lower
+        or 'koreansk' in original_name_lower
+        or 'bulgogi' in original_name_lower
+    ) and 'koreansk' not in unique_keywords:
+        unique_keywords.append('koreansk')
+
     return unique_keywords
 
 
@@ -2100,10 +2130,13 @@ def extract_keywords_from_ingredient(
         return ['kycklingsteak', 'kyckling']
 
     # Candied/pickled ginger should not fall back to generic fresh ginger.
-    # Keep explicit "(gari)" hints as a secondary keyword so sushi-ginger
-    # products that only expose `gari` still match these ingredient lines.
+    # Keep two separate families: syltadingefära (sweet, baking) and
+    # pickladingefära (sour, sushi/Asian). Explicit "(gari)" hints are kept as
+    # secondary keyword on pickladingefära since gari = sushi ginger.
     if 'syltadingefära' in name or 'syltadingefara' in name:
-        return ['syltadingefära', 'gari'] if 'gari' in name else ['syltadingefära']
+        return ['syltadingefära']
+    if 'pickladingefära' in name or 'pickladingefara' in name:
+        return ['pickladingefära', 'gari'] if 'gari' in name else ['pickladingefära']
 
     # Bread-yeast wording keeps its exact primary family, with generic yeast as
     # a routing sibling for plain baker's-yeast ingredient lines.

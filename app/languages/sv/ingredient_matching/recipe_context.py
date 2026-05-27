@@ -87,6 +87,19 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
     # Without thai context (wok, pad thai, curry markers, etc.) a thaikryddad
     # kycklingfilé would appear in French or Italian recipes where the
     # seasoning profile is completely wrong.
+    # Korean-cuisine products (Korean Style kyckling, Bulgogi etc.) should only
+    # appear in Korean-context recipes. Without these cues a Korean Style
+    # marinated kycklingfilé would show up in Italian or Indian recipes where
+    # the seasoning is completely wrong.
+    'koreansk': {
+        'koreansk', 'korean', 'korean style', 'kbbq', 'korean bbq',
+        # Korean dish names — strong signal that the recipe is Korean
+        'bulgogi', 'bibimbap', 'tteokbokki', 'japchae', 'galbi',
+        'samgyeopsal', 'kimbap', 'mandu',
+        # Korean pantry ingredients distinctive to Korean cooking
+        'kimchi', 'gochujang', 'gochugaru', 'ssamjang', 'doenjang',
+        'koreansk chilipasta', 'koreansk chiliflakes',
+    },
     'thaikryddad': {
         # General cuisine/cooking-style cues.
         # 'wok' removed (Q79-5): wok is too generic — teriyaki, sukiyaki, kinesisk wok all use the

@@ -4446,6 +4446,19 @@ def _prepare_fast_ingredient_text(
     """
     ingredient_lower = ingredient_text if _prenormalized else fix_swedish_chars(ingredient_text).lower()
 
+    # Strip "gärna/helst [bread-word] med [seed/grain/nut-word]" — the seed is
+    # a bread attribute, not a separate ingredient. Without this, "linfrön" in
+    # "gärna fyrkornsbröd med linfrön" would substring-match standalone linfrö
+    # products. Pattern is intentionally tight (bread-word + seed-word) so
+    # broader "gärna X" sub-clauses (e.g. cuisine hints, fish alternatives)
+    # remain visible to other matcher logic.
+    ingredient_lower = re.sub(
+        r'\b(?:gärna|garna|helst)\s+\w*(?:bröd|brod|baguette|fralla|knäcke|knacke|skorpa|bulle)\s+med\s+(?:lin|sesam|chia|solros|kummin|pumpa|valnöt|valnot|hassel|sol|fro|frön|frön)\w*\b',
+        '',
+        ingredient_lower,
+        flags=re.IGNORECASE,
+    )
+
     # Apply space normalization so compound keywords match spaced ingredient text
     # e.g., keyword "rödcurrypasta" matches ingredient "röd currypasta".
     # Route through the helper so context-aware rules (e.g. drink-wine skip)

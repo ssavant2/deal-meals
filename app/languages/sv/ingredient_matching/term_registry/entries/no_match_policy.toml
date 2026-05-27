@@ -4049,8 +4049,8 @@ language = "sv"
 market = "SE"
 canonical = "compound candy and peel components"
 status = "active"
-variants = ["compound candy and peel components ! \\bhasselnöt\\b", "compound candy and peel components ! \\bhasselnot\\b", "compound candy and peel components ! ^\\s*mandel\\b", "compound candy and peel components ! \\bapelsin\\s+klass\\b"]
-negative_guards = ["compound candy and peel components ! \\bhasselnöt\\b", "compound candy and peel components ! \\bhasselnot\\b", "compound candy and peel components ! ^\\s*mandel\\b", "compound candy and peel components ! \\bapelsin\\s+klass\\b"]
+variants = ["compound candy and peel components ! \\bhasselnöt\\b", "compound candy and peel components ! \\bhasselnot\\b", "compound candy and peel components ! ^\\s*mandel\\b", "compound candy and peel components ! \\bsötmandel\\b", "compound candy and peel components ! \\bsotmandel\\b", "compound candy and peel components ! \\bmandlar\\b", "compound candy and peel components ! \\bapelsin\\s+klass\\b"]
+negative_guards = ["compound candy and peel components ! \\bhasselnöt\\b", "compound candy and peel components ! \\bhasselnot\\b", "compound candy and peel components ! ^\\s*mandel\\b", "compound candy and peel components ! \\bsötmandel\\b", "compound candy and peel components ! \\bsotmandel\\b", "compound candy and peel components ! \\bmandlar\\b", "compound candy and peel components ! \\bapelsin\\s+klass\\b"]
 source_refs = ["policy:no_match_policies:policy_compound_candy_nut_or_peel_not_raw_components"]
 layer_policy = ["negative_guard_only"]
 notes = "Compound candy, bitter almond, and candied peel lines must not fan out to raw nut or fresh citrus components."
@@ -4062,7 +4062,7 @@ rule_version = 1
 canonical = "compound candy and peel components"
 ingredient_patterns = ["\\bkolor\\b.*\\bnougatkräm\\b.*\\bhasselnöt\\b", "\\bkolor\\b.*\\bnougatkram\\b.*\\bhasselnot\\b", "\\bbittermandel\\b", "\\bsyltade\\s+apelsinskal\\b"]
 blocked_offer_keywords = []
-blocked_offer_patterns = ["\\bhasselnöt\\b", "\\bhasselnot\\b", "^\\s*mandel\\b", "\\bapelsin\\s+klass\\b"]
+blocked_offer_patterns = ["\\bhasselnöt\\b", "\\bhasselnot\\b", "^\\s*mandel\\b", "\\bsötmandel\\b", "\\bsotmandel\\b", "\\bmandlar\\b", "\\bapelsin\\s+klass\\b"]
 allowed_specifics = []
 reason = "Compound candy, bitter almond, and candied peel lines must not fan out to raw nut or fresh citrus components."
 policy_ref = "legacy_review_regression"
@@ -4085,6 +4085,24 @@ layer_role = "negative_guard_pattern"
 source_family = "no_match_policy"
 canonical = "compound candy and peel components"
 variant = "compound candy and peel components ! ^\\s*mandel\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "compound candy and peel components"
+variant = "compound candy and peel components ! \\bsötmandel\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "compound candy and peel components"
+variant = "compound candy and peel components ! \\bsotmandel\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "compound candy and peel components"
+variant = "compound candy and peel components ! \\bmandlar\\b"
 layer_role = "negative_guard_pattern"
 
 [[entries.coverage]]
