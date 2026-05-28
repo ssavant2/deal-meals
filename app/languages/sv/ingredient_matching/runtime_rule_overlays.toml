@@ -613,6 +613,20 @@ keyword = "halkidiki"
 blockers = ["grillade", "grillad", "chili", "vitlök", "citron", "ört", "örter", "paprika", "fetaost", "torkad", "torkade", "marinerad"]
 reason = "flavored/processed halkidiki products (grilled, chili, herb, citrus, feta-stuffed, dried) are not plain halkidiki olives — same Q80-9 policy as PNB oliver"
 
+[[product_name_blockers]]
+id = "runtime_pnb_soja"
+status = "active"
+keyword = "soja"
+blockers = ["matlagningsgrädde", "vispgrädde", "cuisine"]
+reason = "Alpro plant-cream products (Matlagningsgrädde Soja, Cuisine vispgrädde Soja) are dairy-substitute cooking creams, not soy sauce — should not match plain japansk/kinesisk soja-sauce ingredients (extraction emits both 'soja' and 'sojagrädde'; PNB soja covers the soja-keyword path while sojagrädde-ingredient still works via separate keyword)"
+
+[[product_name_blockers]]
+id = "runtime_pnb_sodavatten"
+status = "active"
+keyword = "sodavatten"
+blockers = ["stilla"]
+reason = "Still mineral water (Aqua d'Or stilla, Imsdal Källvatten Stilla) is non-carbonated; should not match kolsyrat/sodavatten ingredients"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1340,6 +1354,22 @@ surface = "non_food_keywords"
 action = "add"
 terms = ["glasburk", "glasburkar"]
 reason = "Glass jar containers (Bormioli Quattro Stagioni mis-categorized as pantry) — not food, only equipment"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_roliga_rolig_roligt"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["roliga", "rolig", "roligt"]
+reason = "Adjektiv (fun/funny) - inte ingrediens. Förhindrar produktnamn som Enkla och roliga fakta om giftiga djur från att extrahera roliga som matchnings-keyword"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_giftiga_giftig_giftigt"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["giftiga", "giftig", "giftigt"]
+reason = "Adjektiv (poisonous) - inte ingrediens. Förhindrar produktnamn (t.ex. djurbok) från att extrahera giftiga som matchnings-keyword"
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
