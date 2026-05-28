@@ -10811,3 +10811,41 @@ path = "app/languages/sv/ingredient_matching/term_registry/entries/no_match_poli
 start = 5817
 end = 5817
 anchor = "entry_id = \"sv-se.guard.policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b\""
+
+[[inventory]]
+id = "policy_pain_au_chocolat_chocolat"
+status = "wrapped_adapter"
+kind = "legacy_no_match_policy"
+canonical = "pain au chocolat"
+owner = "matcher"
+policy_ref = "policy_pain_au_chocolat_chocolat"
+source_refs = ["manual:policy_pain_au_chocolat_chocolat"]
+fixture_refs = ["pain_au_chocolat_chocolat_negative"]
+risk = "no_match_policy"
+adapter_ref = "no_match_policies:policy_pain_au_chocolat_chocolat"
+notes = "pain au chocolat is a french pastry (chocolate-filled croissant), not a chocolate product. The 'chocolat' keyword extracted from ingredient text falsely matches branded chocolate products."
+
+[[inventory.line_refs]]
+path = "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml"
+start = 5853
+end = 5853
+anchor = "entry_id = \"sv-se.guard.policy_pain_au_chocolat_chocolat\""
+
+[[inventory]]
+id = "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+status = "wrapped_adapter"
+kind = "legacy_no_match_policy"
+canonical = "gochugaru not korean bbq sauce"
+owner = "matcher"
+policy_ref = "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+source_refs = ["manual:policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"]
+fixture_refs = ["gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative"]
+risk = "no_match_policy"
+adapter_ref = "no_match_policies:policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+notes = "gochugaru is Korean chili powder/flakes. Korean BBQ sauce, marinades, wraps, salads share the 'koreansk' cuisine tag but are distinct products. Only chili keyword matches (Koreanska Chiliflingor, Chili Flakes) should remain."
+
+[[inventory.line_refs]]
+path = "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml"
+start = 5891
+end = 5891
+anchor = "entry_id = \"sv-se.guard.policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad\""

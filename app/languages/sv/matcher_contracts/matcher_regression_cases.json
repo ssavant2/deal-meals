@@ -33098,5 +33098,33 @@
     "policy_ref": "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
     "recipe_name": "No-match policy regression",
     "source_ref": "manual:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
+  },
+  {
+    "expected": 0,
+    "id": "pain_au_chocolat_chocolat_negative",
+    "ingredients": [
+      "pain au chocolat eller croissanter"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Hazelnut Milk Chocolat 100g Treatville"
+    },
+    "policy_ref": "policy_pain_au_chocolat_chocolat",
+    "recipe_name": "No-match policy regression",
+    "source_ref": "manual:policy_pain_au_chocolat_chocolat"
+  },
+  {
+    "expected": 0,
+    "id": "gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative",
+    "ingredients": [
+      "2 tsk gochugaru, koreansk chili"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Marinad Bulgogi 225g Risberg"
+    },
+    "policy_ref": "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad",
+    "recipe_name": "No-match policy regression",
+    "source_ref": "manual:policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
   }
 ]

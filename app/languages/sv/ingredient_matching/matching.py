@@ -1685,16 +1685,29 @@ def _bread_slice_requirement_allows_product(
     return not any(cue in product_lower for cue in _BREAD_SLICE_BLOCKED_PRODUCT_CUES)
 
 
+_OR_PEPPARROTSVISP_PAREN_RE = re.compile(
+    r'\(\s*eller\s+[^)]*pepparrotsvisp',
+    re.IGNORECASE,
+)
+
+
 def _pepparrotsvisp_requirement_allows_product(
     product_lower: str,
     ingredient_lower: str,
     matched_keyword: Optional[str],
 ) -> bool:
-    """Pepparrotsvisp is a prepared whipped horseradish product, not raw root."""
+    """Pepparrotsvisp is a prepared whipped horseradish product, not raw root.
+
+    Exception: OR-construct "färsk pepparrot ... (eller pepparrot på tub/burk)"
+    space-normalizes to "... (eller pepparrotsvisp/burk)" — both fresh root and
+    pepparrotsvisp products are acceptable in that case.
+    """
 
     if 'pepparrotsvisp' not in ingredient_lower:
         return True
     if matched_keyword not in {'pepparrotsvisp', 'pepparrot'}:
+        return True
+    if _OR_PEPPARROTSVISP_PAREN_RE.search(ingredient_lower):
         return True
     return 'pepparrotsvisp' in product_lower
 
@@ -6079,10 +6092,15 @@ def matches_ingredient_fast(
             and _ingredient_requests_fresh_chili(ingredient_lower, matched_keyword)
         ):
             recipe_wants_fresh = True
-        # For herbs: "1 tsk oregano" / "2 krm timjan" = small spice measurements = wants dried
+        # For herbs: "1 tsk oregano" / "2 krm timjan" = small spice measurements = wants dried.
+        # Exception: gräslök (chives) is rarely dried in Swedish cooking; "4 msk gräslök"
+        # means 4 tbsp chopped fresh/frozen chives. Skip the volume→dried inference for chives
+        # so fresh ("Gräslök flowpack") and frozen ("Gräslök Finhackad Fryst") still match.
+        _VOLUME_DRIED_EXEMPT_HERBS = ('gräslök', 'graslok')
         if not recipe_wants_fresh and not recipe_wants_dried:
-            if any(m in ingredient_lower for m in ('tsk ', 'krm ', 'msk ', ' tsk ', ' krm ', ' msk ')):
-                recipe_wants_dried = True
+            if matched_keyword not in _VOLUME_DRIED_EXEMPT_HERBS:
+                if any(m in ingredient_lower for m in ('tsk ', 'krm ', 'msk ', ' tsk ', ' krm ', ' msk ')):
+                    recipe_wants_dried = True
         # Only block on clear single-direction mismatches.
         # If recipe text has BOTH "färsk" and "torkad" (two ingredients),
         # skip — per-ingredient check in recipe_matcher handles it.

@@ -627,6 +627,13 @@ keyword = "sodavatten"
 blockers = ["stilla"]
 reason = "Still mineral water (Aqua d'Or stilla, Imsdal Källvatten Stilla) is non-carbonated; should not match kolsyrat/sodavatten ingredients"
 
+[[product_name_blockers]]
+id = "runtime_pnb_pesto"
+status = "active"
+keyword = "pesto"
+blockers = ["tomat", "rosso", "rödpesto", "röd", "soltorkad", "soltorkade"]
+reason = "tomato-based pesto (Rosso, Soltorkad Tomat, Pesto Tomat) is a distinct product from plain basilika-pesto (Genovese). Plain 'pesto' ingredient defaults to basilika; tomato variants must be named explicitly."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"

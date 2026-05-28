@@ -212,7 +212,7 @@ def main() -> int:
         "registered fixture refs stable",
         not any(has_temporary_fixture_id(fixture_ref) for fixture_ref in registered_fixture_refs),
     )
-    check("registered no-match policy count", len(NO_MATCH_POLICIES) == 117)
+    check("registered no-match policy count", len(NO_MATCH_POLICIES) == 121)
     expected_policy_ids = {
         "policy_aggnudlar_not_risnudlar",
         "policy_bjast_not_bakers_yeast",
@@ -256,6 +256,10 @@ def main() -> int:
         "policy_generic_nudlar_not_flavored_instant",
         "policy_generic_mushroom_pieces_not_preserved_champignon",
         "policy_glasnudlar_not_pasta_vermicelli",
+        "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b",
+        "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad",
+        "policy_rostbiff_deli_size_brostbiff_b_b_1_9_d_1_d_d_2_d_d_s_g_b",
+        "policy_urkärnade_oliver_not_with_pits",
         "policy_grillkorv_or_precooked_lentils_not_unrelated_components",
         "policy_grillkrydda_not_garlic_component",
         "policy_habanero_hot_sauce_not_fresh_chili",
@@ -284,6 +288,7 @@ def main() -> int:
         "policy_olive_oil_salmon_purpose_phrase",
         "policy_optional_egg_white_sorbet_context",
         "policy_oregano_not_vegan_cheese_carrier",
+        "policy_pain_au_chocolat_chocolat",
         "policy_pastadeg_reference_not_dry_pasta",
         "policy_philadelphia_sweet_chili_not_sauce_or_plain_cream_cheese",
         "policy_pickled_beets_not_raw_or_diagnostic_terms",

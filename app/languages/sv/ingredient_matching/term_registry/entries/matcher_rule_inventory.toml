@@ -9286,3 +9286,43 @@ source_family = "matcher_rule_inventory"
 canonical = "chiliolja_bean_peanut_block"
 variant = "chiliolja_bean_peanut_block"
 layer_role = "legacy_no_match_policy"
+
+[[entries]]
+entry_id = "sv-se.policy.pain_au_chocolat.policy_pain_au_chocolat_chocolat"
+language = "sv"
+market = "SE"
+canonical = "pain au chocolat"
+status = "active"
+variants = ["pain au chocolat"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:policy_pain_au_chocolat_chocolat"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row policy_pain_au_chocolat_chocolat."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "pain au chocolat"
+variant = "pain au chocolat"
+layer_role = "legacy_no_match_policy"
+
+[[entries]]
+entry_id = "sv-se.policy.gochugaru_not_korean_bbq_sauce.policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+language = "sv"
+market = "SE"
+canonical = "gochugaru not korean bbq sauce"
+status = "active"
+variants = ["gochugaru not korean bbq sauce"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "gochugaru not korean bbq sauce"
+variant = "gochugaru not korean bbq sauce"
+layer_role = "legacy_no_match_policy"

@@ -5850,3 +5850,79 @@ ingredient = "1.5 msk chiliolja"
 offer_name = "Sojabönor fermenterade i chiliolja 280g Laoganma"
 offer_category = "pantry"
 expected = 0
+
+[[entries]]
+entry_id = "sv-se.guard.policy_pain_au_chocolat_chocolat"
+language = "sv"
+market = "SE"
+canonical = "pain au chocolat"
+status = "active"
+variants = ["pain au chocolat ! .*chocolat.*"]
+negative_guards = ["pain au chocolat ! .*chocolat.*"]
+source_refs = ["policy:no_match_policies:policy_pain_au_chocolat_chocolat"]
+layer_policy = ["negative_guard_only"]
+notes = "pain au chocolat is a french pastry (chocolate-filled croissant), not a chocolate product. The 'chocolat' keyword extracted from ingredient text falsely matches branded chocolate products."
+
+[entries.language_payload.no_match_policy]
+id = "policy_pain_au_chocolat_chocolat"
+rule_schema_version = 1
+rule_version = 1
+canonical = "pain au chocolat"
+ingredient_patterns = ["\\bpain\\s+au\\s+chocolat\\b"]
+blocked_offer_keywords = []
+blocked_offer_patterns = [".*chocolat.*"]
+allowed_specifics = []
+reason = "pain au chocolat is a french pastry (chocolate-filled croissant), not a chocolate product. The 'chocolat' keyword extracted from ingredient text falsely matches branded chocolate products."
+policy_ref = "policy_pain_au_chocolat_chocolat"
+fixture_refs = ["pain_au_chocolat_chocolat_negative"]
+supersedes = []
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "pain au chocolat"
+variant = "pain au chocolat ! .*chocolat.*"
+layer_role = "negative_guard_pattern"
+
+[[entries.negative_examples]]
+ingredient = "pain au chocolat eller croissanter"
+offer_name = "Hazelnut Milk Chocolat 100g Treatville"
+offer_category = "pantry"
+expected = 0
+
+[[entries]]
+entry_id = "sv-se.guard.policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+language = "sv"
+market = "SE"
+canonical = "gochugaru not korean bbq sauce"
+status = "active"
+variants = ["gochugaru not korean bbq sauce ! .*(bulgogi|bbq|marinad korean|wrap kyckling korean|koreansk morotssallad).*"]
+negative_guards = ["gochugaru not korean bbq sauce ! .*(bulgogi|bbq|marinad korean|wrap kyckling korean|koreansk morotssallad).*"]
+source_refs = ["policy:no_match_policies:policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"]
+layer_policy = ["negative_guard_only"]
+notes = "gochugaru is Korean chili powder/flakes. Korean BBQ sauce, marinades, wraps, salads share the 'koreansk' cuisine tag but are distinct products. Only chili keyword matches (Koreanska Chiliflingor, Chili Flakes) should remain."
+
+[entries.language_payload.no_match_policy]
+id = "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+rule_schema_version = 1
+rule_version = 1
+canonical = "gochugaru not korean bbq sauce"
+ingredient_patterns = ["\\bgochugaru\\b"]
+blocked_offer_keywords = []
+blocked_offer_patterns = [".*(bulgogi|bbq|marinad korean|wrap kyckling korean|koreansk morotssallad).*"]
+allowed_specifics = []
+reason = "gochugaru is Korean chili powder/flakes. Korean BBQ sauce, marinades, wraps, salads share the 'koreansk' cuisine tag but are distinct products. Only chili keyword matches (Koreanska Chiliflingor, Chili Flakes) should remain."
+policy_ref = "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+fixture_refs = ["gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative"]
+supersedes = []
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "gochugaru not korean bbq sauce"
+variant = "gochugaru not korean bbq sauce ! .*(bulgogi|bbq|marinad korean|wrap kyckling korean|koreansk morotssallad).*"
+layer_role = "negative_guard_pattern"
+
+[[entries.negative_examples]]
+ingredient = "2 tsk gochugaru, koreansk chili"
+offer_name = "Marinad Bulgogi 225g Risberg"
+offer_category = "pantry"
+expected = 0

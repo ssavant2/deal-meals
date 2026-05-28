@@ -29906,3 +29906,43 @@ source_family = "matcher_regression_case"
 canonical = "policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
 variant = "chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b_negative: Sojabönor fermenterade i chiliolja 280g Laoganma"
 layer_role = "negative_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.policy_pain_au_chocolat_chocolat.pain_au_chocolat_chocolat_negative"
+language = "sv"
+market = "SE"
+canonical = "policy_pain_au_chocolat_chocolat"
+status = "active"
+variants = ["pain_au_chocolat_chocolat_negative: Hazelnut Milk Chocolat 100g Treatville"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:pain_au_chocolat_chocolat_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture pain_au_chocolat_chocolat_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "policy_pain_au_chocolat_chocolat"
+variant = "pain_au_chocolat_chocolat_negative: Hazelnut Milk Chocolat 100g Treatville"
+layer_role = "negative_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad.gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative"
+language = "sv"
+market = "SE"
+canonical = "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+status = "active"
+variants = ["gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative: Marinad Bulgogi 225g Risberg"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+variant = "gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative: Marinad Bulgogi 225g Risberg"
+layer_role = "negative_regression"

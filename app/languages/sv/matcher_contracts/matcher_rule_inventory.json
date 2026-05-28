@@ -14991,5 +14991,55 @@
       "manual:policy_chiliolja_bean_peanut_block_b_sojabonor_jordnotter_svarta_s_bonor_b"
     ],
     "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_pain_au_chocolat_chocolat",
+    "canonical": "pain au chocolat",
+    "fixture_refs": [
+      "pain_au_chocolat_chocolat_negative"
+    ],
+    "id": "policy_pain_au_chocolat_chocolat",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "entry_id = \"sv-se.guard.policy_pain_au_chocolat_chocolat\"",
+        "end": 5853,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5853
+      }
+    ],
+    "notes": "pain au chocolat is a french pastry (chocolate-filled croissant), not a chocolate product. The 'chocolat' keyword extracted from ingredient text falsely matches branded chocolate products.",
+    "owner": "matcher",
+    "policy_ref": "policy_pain_au_chocolat_chocolat",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "manual:policy_pain_au_chocolat_chocolat"
+    ],
+    "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad",
+    "canonical": "gochugaru not korean bbq sauce",
+    "fixture_refs": [
+      "gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative"
+    ],
+    "id": "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "entry_id = \"sv-se.guard.policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad\"",
+        "end": 5891,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 5891
+      }
+    ],
+    "notes": "gochugaru is Korean chili powder/flakes. Korean BBQ sauce, marinades, wraps, salads share the 'koreansk' cuisine tag but are distinct products. Only chili keyword matches (Koreanska Chiliflingor, Chili Flakes) should remain.",
+    "owner": "matcher",
+    "policy_ref": "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "manual:policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+    ],
+    "status": "wrapped_adapter"
   }
 ]

@@ -998,6 +998,14 @@ _DRINK_WINE_BOTTLE_RE = re.compile(
     r'\b(?:\d+(?:[.,]\d+)?|en|ett|två|tre)\s*flask(?:a|or)\b.*\b(?:r[öo]dvin|r[öo]tt\s+vin|vitvin|vitt\s+vin)\b',
     re.IGNORECASE,
 )
+# "5 dl vitt vin /alkoholfritt vin" — alkoholfritt wording marks this as drink-context.
+# Matlagningsvin always contains salt and is never sold as alkoholfritt, so any line
+# pairing wine with 'alkoholfri'/'alkoholfritt' is a drink/punch/bål recipe.
+_DRINK_WINE_ALKOHOLFRITT_RE = re.compile(
+    r'(?:r[öo]dvin|r[öo]tt\s+vin|vitvin|vitt\s+vin).{0,40}alkoholfri'
+    r'|alkoholfri.{0,40}(?:r[öo]dvin|r[öo]tt\s+vin|vitvin|vitt\s+vin)',
+    re.IGNORECASE,
+)
 
 
 def _is_drink_wine_line(text: str) -> bool:
@@ -1005,14 +1013,17 @@ def _is_drink_wine_line(text: str) -> bool:
 
     Used to skip wine→matlagningsvin normalization for drink/glögg/punsch
     recipes where the wine is the drinking base, not a cooking substitute.
-    Heuristic: cl-volumes and bottle wording. Cooking recipes use dl-volumes
-    (1-2 dl typical). Quality descriptors like 'fyllig'/'kraftigt' overlap
-    with cooking wording and are deliberately not used as triggers.
+    Heuristic: cl-volumes, bottle wording, and 'alkoholfri' pairing. Cooking
+    recipes use dl-volumes (1-2 dl typical) and never reference alkoholfritt
+    vin (matlagningsvin always contains salt). Quality descriptors like
+    'fyllig'/'kraftigt' overlap with cooking wording and are deliberately
+    not used as triggers.
     """
 
     return bool(
         _DRINK_WINE_CL_VOLUME_RE.search(text)
         or _DRINK_WINE_BOTTLE_RE.search(text)
+        or _DRINK_WINE_ALKOHOLFRITT_RE.search(text)
     )
 
 

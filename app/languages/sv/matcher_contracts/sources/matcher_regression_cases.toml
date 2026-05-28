@@ -28791,3 +28791,27 @@ expected = 0
 [fixtures.offer]
 name = "Sojabönor fermenterade i chiliolja 280g Laoganma"
 category = "pantry"
+
+[[fixtures]]
+id = "pain_au_chocolat_chocolat_negative"
+policy_ref = "policy_pain_au_chocolat_chocolat"
+source_ref = "manual:policy_pain_au_chocolat_chocolat"
+recipe_name = "No-match policy regression"
+ingredients = ["pain au chocolat eller croissanter"]
+expected = 0
+
+[fixtures.offer]
+name = "Hazelnut Milk Chocolat 100g Treatville"
+category = "pantry"
+
+[[fixtures]]
+id = "gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative"
+policy_ref = "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+source_ref = "manual:policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
+recipe_name = "No-match policy regression"
+ingredients = ["2 tsk gochugaru, koreansk chili"]
+expected = 0
+
+[fixtures.offer]
+name = "Marinad Bulgogi 225g Risberg"
+category = "pantry"
