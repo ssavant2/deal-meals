@@ -330,8 +330,8 @@ reason = "Scamorza är rökt/lagrad italiensk ost — inte färsk mozzarella. Re
 id = "runtime_pnb_oliver"
 status = "active"
 keyword = "oliver"
-blockers = ["chili", "vitlök", "vitlök", "citron", "ört", "örter", "paprika", "fetaost", "feta", "grillad", "grillade", "torkad", "torkade"]
-reason = "Plain oliver-recept ska inte matcha smaksatta (chili/vitlök/citron/ört/paprika/feta) eller process-behandlade (grillade/torkade) olivvarianter. Q80-9 Stefan-policy: skilj på färg + kärnor + smaksättning/process."
+blockers = ["chili", "vitlök", "vitlök", "citron", "ört", "örter", "paprika", "fetaost", "feta", "grillad", "grillade", "torkad", "torkade", "snack", "havssalt", "provencal"]
+reason = "Plain oliver-recept ska inte matcha smaksatta (chili/vitlök/citron/ört/paprika/feta) eller process-behandlade (grillade/torkade) olivvarianter. Q80-9 Stefan-policy: skilj på färg + kärnor + smaksättning/process.; Snack-format/specialty seasoned oliver products (Snack Provencal, Snack Havssalt, Snackoliver) blocked from plain oliver ingredient — extends established Q80-9 specialty/process policy. Snack 70g servings are seasoned snack-format, not cooking olives."
 
 [[product_name_blockers]]
 id = "runtime_pnb_mozzarellaost"
@@ -694,8 +694,8 @@ reason = "Replaced by runtime_ksbc_formbrod_grov — FPB smart-blocker fires on 
 id = "runtime_fpb_socker"
 status = "active"
 keyword = "socker"
-blockers = ["sockermassa", "vanillinsocker"]
-reason = "Sockermassa (fondant/rolled sugar paste for cake decoration) is not plain socker — Strösocker products should not match svart sockermassa ingredients; Vanillinsocker (concentrated vanilla flavoring, ~2 tsk per cake) should not extract plain socker keyword from strösocker products — same pattern as existing vaniljsocker blocker."
+blockers = ["sockermassa", "vanillinsocker", "sockerbitar"]
+reason = "Sockermassa (fondant/rolled sugar paste for cake decoration) is not plain socker — Strösocker products should not match svart sockermassa ingredients; Vanillinsocker (concentrated vanilla flavoring, ~2 tsk per cake) should not extract plain socker keyword from strösocker products — same pattern as existing vaniljsocker blocker.; sockerbitar in ingredient text is typically a size comparison ('stora som sockerbitar' = pieces sized like sugar cubes), not actual sugar - block parent-expanded socker match"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_marsipan"
@@ -899,6 +899,20 @@ status = "active"
 keyword = "rabarber"
 blockers = ["rabarbersirap"]
 reason = "rabarbersirap is a flavored syrup, not fresh rhubarb (stalks)"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_lingon"
+status = "active"
+keyword = "lingon"
+blockers = ["lingonvodka"]
+reason = "lingonvodka är smaksatt vodka, inte lingon"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_brod"
+status = "active"
+keyword = "bröd"
+blockers = ["brödkummin", "brodkummin"]
+reason = "Brödkummin (caraway seed used in bread spice mix) is a spice ingredient, not bread; prevents bröd-keyword from matching bread products when recipe asks for brödkummin."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
@@ -1179,6 +1193,13 @@ status = "active"
 keyword = "korvar"
 context = ["chorizo", "salsiccia", "kabanoss", "kabanos", "bratwurst", "falukorv", "prinskorv", "isterband", "blodkorv", "merguez", "andouille", "kielbasa", "fläskkorv", "grillkorv", "julkorv", "leverkorv", "medisterkorv", "morcilla", "weisswurst", "currywurst"]
 reason = "Plural form 'korvar' — när recept anger specifik korv-typ (chorizo/kabanoss/bratwurst/falukorv etc), suppressa generic 'korvar'-keyword. Speglar singular 'korv' KSBC."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_potatis"
+status = "active"
+keyword = "potatis"
+context = ["nypotatis"]
+reason = "nypotatis is same isolated family as färskpotatis (new potato = thin skin, firm texture) - suppress generic potatis keyword to prevent King Edward/mjölig/baking varieties from matching nypotatis recipes"
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
