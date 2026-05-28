@@ -1164,13 +1164,16 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     # not generic vinegar. Suppress 'vinäger' so only estragon-specific products surface.
     'vinäger': {'estragon', 'dragon'},
     'vinager': {'estragon', 'dragon'},
-    # "1 dl Zeta Kikärtor Ekologiska, spadet" = aquafaba (the brine), not the chickpeas.
-    # When ingredient asks for the liquid (spadet/aquafaba), suppress kikärtor keyword
-    # so canned chickpea products don't match — only the brine is needed.
-    'kikärtor': {'spadet', 'kikärtsspad', 'aquafaba'},
-    'kikartor': {'spadet', 'kikärtsspad', 'aquafaba'},
-    'kikärter': {'spadet', 'kikärtsspad', 'aquafaba'},
-    'kikarter': {'spadet', 'kikärtsspad', 'aquafaba'},
+    # "1 dl kikärtsspad" / "1 dl aquafaba" = the brine, not the chickpeas.
+    # Suppress kikärtor keyword when ingredient asks for the liquid.
+    # NOTE: 'spadet' removed — substring-match hit 'bönspadet' (a cooking-instruction
+    # residual, e.g. "1 burk kikärtor, plus lite av bönspadet") falsely triggering
+    # suppression. 'kikärtsspad' and 'bönspad' cover legume-specific liquid forms
+    # without the false-positive on the generic 'spadet' suffix.
+    'kikärtor': {'kikärtsspad', 'aquafaba'},
+    'kikartor': {'kikärtsspad', 'kikartsspad', 'aquafaba'},
+    'kikärter': {'kikärtsspad', 'aquafaba'},
+    'kikarter': {'kikärtsspad', 'kikartsspad', 'aquafaba'},
     # "2 dl granatäpplejuice" — suppress plain äppeljuice keyword when ingredient
     # specifies granatäpple (pomegranate), so apple juice products don't bridge across.
     'äppeljuice': {'granatäpple', 'granatapple'},

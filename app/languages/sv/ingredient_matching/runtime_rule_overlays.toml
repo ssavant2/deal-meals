@@ -1378,6 +1378,14 @@ action = "add"
 terms = ["giftiga", "giftig", "giftigt"]
 reason = "Adjektiv (poisonous) - inte ingrediens. Förhindrar produktnamn (t.ex. djurbok) från att extrahera giftiga som matchnings-keyword"
 
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_bonspadet_bonpad_bonvatten"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["bönspadet", "bönpad", "bönvatten"]
+reason = "cooking instruction residuals — 'plus lite av bönspadet' appended to a legume ingredient; not a purchasable product and causes multi-keyword match failure on the primary ingredient"
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"
