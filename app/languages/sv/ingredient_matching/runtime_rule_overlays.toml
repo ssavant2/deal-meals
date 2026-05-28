@@ -634,6 +634,27 @@ keyword = "pesto"
 blockers = ["tomat", "rosso", "rödpesto", "röd", "soltorkad", "soltorkade"]
 reason = "tomato-based pesto (Rosso, Soltorkad Tomat, Pesto Tomat) is a distinct product from plain basilika-pesto (Genovese). Plain 'pesto' ingredient defaults to basilika; tomato variants must be named explicitly."
 
+[[product_name_blockers]]
+id = "runtime_pnb_salsa"
+status = "active"
+keyword = "salsa"
+blockers = ["verde", "tomatillo", "tropical", "pineapple", "ananas", "garlic", "roast", "chipotle"]
+reason = "non-tomato salsas (verde/tomatillo/tropical/pineapple) do not substitute plain tomatsalsa — color/flavor families are distinct. Q69-1 recurring pattern."
+
+[[product_name_blockers]]
+id = "runtime_pnb_noodles"
+status = "active"
+keyword = "noodles"
+blockers = ["nudelkopp", "kopp"]
+reason = "instant noodle cups (Knorr Asia Noodles Nudelkopp) are single-portion ready meals with flavoring — not dry wok noodles for cooking. Same pattern as Q2 ready meal detection."
+
+[[product_name_blockers]]
+id = "runtime_pnb_sobanudlar"
+status = "active"
+keyword = "sobanudlar"
+blockers = ["nissin", "chicken", "kyckling", "yakitori", "smak"]
+reason = "Nissin instant soba cups (Soba Chili, Soba Yakitori Chicken) are single-portion ready meals with flavoring — not dry soba noodles for cooking. Pattern: instant flavored cup = prepared meal per Q2/line 1582."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1406,6 +1427,14 @@ surface = "stop_words"
 action = "add"
 terms = ["bönspadet", "bönpad", "bönvatten"]
 reason = "cooking instruction residuals — 'plus lite av bönspadet' appended to a legume ingredient; not a purchasable product and causes multi-keyword match failure on the primary ingredient"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_smarta_smartare_kluriga"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["smarta", "smartare", "kluriga", "mysterier", "finurliga", "mattegåtor", "detektiver"]
+reason = "Book titles like 'Murdle junior : Kluriga mysterier för smarta detektiver' extracted these adjectives and matched food ingredients (e.g. vegofärs). All purely descriptive/educational adjectives, never food products. Follows Q105 pattern (roliga/giftiga)."
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"

@@ -2451,9 +2451,9 @@ recipe_name = "Sanity Recipe"
 source_ref = "current_review:positive_sibling:salsa_vodka_carrier"
 
 [fixtures.offer]
-brand = "EL TACO TRUCK"
-category = "fruit"
-name = "Salsa Pineapple Vodka El Taco Truck"
+brand = "ICA"
+category = "pantry"
+name = "Salsa 260g ICA"
 
 [[fixtures.expected_matches]]
 canonical = "salsa"

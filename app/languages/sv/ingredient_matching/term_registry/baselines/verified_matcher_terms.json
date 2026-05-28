@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 395,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 150,
+      "keyword_synonym_mapping": 151,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 150,
+      "keyword_synonym": 151,
       "match_bridge": 2021,
       "matcher_regression_case": 1498,
       "matcher_rule_inventory": 467,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5695,
-    "variants_missing_product_text": 1814,
+    "variant_count": 5696,
+    "variants_missing_product_text": 1815,
     "variants_with_product_text": 3881
   },
   "variants": [
@@ -111201,27 +111201,6 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
-      "variant_id": "vterm-798c903c2357a6dc",
-      "row_index": 1764,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "current_review:positive_sibling:salsa_vodka_carrier",
-      "source_id": "matcher_regression_salsa_vodka_carrier_positive",
-      "variant_role": "positive_regression",
-      "variant_text": "matcher_regression_salsa_vodka_carrier_positive: Salsa Pineapple Vodka El Taco Truck",
-      "canonical": "salsa",
-      "expected_family": "salsa",
-      "ingredient_text": "2 dl salsa",
-      "product_text": "Salsa Pineapple Vodka El Taco Truck",
-      "product_category": "fruit",
-      "product_brand": "EL TACO TRUCK",
-      "expected": 1,
-      "needs_product_text": false,
-      "notes": "current_review_matcher_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"salsa\", \"ingredient_index\": 0, \"must_match_keyword\": \"salsa\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
-    },
-    {
       "variant_id": "vterm-58b6076d736cad1f",
       "row_index": 2037,
       "source_order": 30,
@@ -119641,11 +119620,53 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"färskpotatis\"}"
+    },
+    {
+      "variant_id": "vterm-edc0376189f0b5f0",
+      "row_index": 4811,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:kräftstjärt",
+      "source_id": "kräftstjärt",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "kräftstjärt",
+      "canonical": "kräftstjärtar",
+      "expected_family": "kräftstjärtar",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"kräftstjärtar\"}"
+    },
+    {
+      "variant_id": "vterm-0a3180ef87808a08",
+      "row_index": 1782,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "current_review:positive_sibling:salsa_vodka_carrier",
+      "source_id": "matcher_regression_salsa_vodka_carrier_positive",
+      "variant_role": "positive_regression",
+      "variant_text": "matcher_regression_salsa_vodka_carrier_positive: Salsa 260g ICA",
+      "canonical": "salsa",
+      "expected_family": "salsa",
+      "ingredient_text": "2 dl salsa",
+      "product_text": "Salsa 260g ICA",
+      "product_category": "pantry",
+      "product_brand": "ICA",
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": "current_review_matcher_regression",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"salsa\", \"ingredient_index\": 0, \"must_match_keyword\": \"salsa\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1592,
+      "no_product_text": 1593,
       "static_verified": 2605,
       "synthetic_verified": 1498
     },
@@ -119656,7 +119677,7 @@
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 150,
+      "keyword_synonym": 151,
       "match_bridge": 2021,
       "matcher_regression_case": 1498,
       "matcher_rule_inventory": 467,
@@ -119667,8 +119688,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5695
+      "audited": 5696
     },
-    "variant_count": 5695
+    "variant_count": 5696
   }
 }

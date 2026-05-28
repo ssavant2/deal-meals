@@ -2950,9 +2950,9 @@
       "2 dl salsa"
     ],
     "offer": {
-      "brand": "EL TACO TRUCK",
-      "category": "fruit",
-      "name": "Salsa Pineapple Vodka El Taco Truck"
+      "brand": "ICA",
+      "category": "pantry",
+      "name": "Salsa 260g ICA"
     },
     "policy_ref": "current_review_matcher_regression",
     "recipe_name": "Sanity Recipe",
