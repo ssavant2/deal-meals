@@ -1204,6 +1204,25 @@ def normalize_probe(text: str) -> str:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
             live_app_dir = Path(__file__).resolve().parents[2]
+            no_match_policy_file = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "no_match_policy.toml"
+            )
+            original_rule_version = None
+            blocks = re.split(r"(?m)^(?=\[\[entries\]\]\s*$)", no_match_policy_file.read_text(encoding="utf-8"))
+            for block in blocks:
+                if 'id = "policy_generic_oil"' not in block:
+                    continue
+                payload = tomllib.loads(block)
+                original_rule_version = payload["entries"][0]["language_payload"]["no_match_policy"]["rule_version"]
+                break
+            self.assertIsNotNone(original_rule_version)
+
             result = subprocess.run(
                 [
                     sys.executable,
@@ -1230,15 +1249,6 @@ def normalize_probe(text: str) -> str:
             )
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
 
-            no_match_policy_file = (
-                app_dir
-                / "languages"
-                / "sv"
-                / "ingredient_matching"
-                / "term_registry"
-                / "entries"
-                / "no_match_policy.toml"
-            )
             blocks = re.split(r"(?m)^(?=\[\[entries\]\]\s*$)", no_match_policy_file.read_text(encoding="utf-8"))
             policy_entry = None
             for block in blocks:
@@ -1256,7 +1266,7 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(payload["ingredient_patterns"], [r"\bolja\b"])
             self.assertEqual(payload["blocked_offer_keywords"], [])
             self.assertEqual(payload["blocked_offer_patterns"], [r"\brapsolja\b"])
-            self.assertEqual(payload["rule_version"], 2)
+            self.assertEqual(payload["rule_version"], original_rule_version + 1)
             self.assertEqual(policy_entry["coverage"][0]["variant"], r"generic_oil_no_match ! \brapsolja\b")
             self.assertEqual(policy_entry["negative_examples"][0]["offer_name"], r"generic_oil_no_match ! \brapsolja\b")
 

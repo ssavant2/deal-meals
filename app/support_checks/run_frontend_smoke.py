@@ -44,6 +44,7 @@ PAGE_CHECKS = [
         "name": "home",
         "path": "/",
         "ready": "#quick-actions-row",
+        "script_ready": "() => typeof toggleSearch === 'function' && typeof bootstrap !== 'undefined'",
         "actions": [
             ("click_force", "#btn-search"),
             ("wait_visible", "#search-section"),
@@ -193,6 +194,8 @@ async def _check_page(context, base_url: str, viewport_name: str, page_check: di
     try:
         await page.goto(f"{base_url}{page_check['path']}", wait_until="domcontentloaded")
         await page.locator(page_check["ready"]).first.wait_for(state="visible")
+        if page_check.get("script_ready"):
+            await page.wait_for_function(page_check["script_ready"])
 
         for action in page_check["actions"]:
             await _run_action(page, action)
