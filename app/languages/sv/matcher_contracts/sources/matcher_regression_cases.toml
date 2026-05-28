@@ -28832,3 +28832,32 @@ expected = 0
 [fixtures.offer]
 name = "Marinad Bulgogi 225g Risberg"
 category = "pantry"
+
+[[fixtures]]
+id = "matcher_regression_pesto_rod_soltorkad_tomat_positive"
+policy_ref = "current_review_matcher_regression"
+source_ref = "current_review:q107_1_red_pesto_soltorkad_tomat"
+recipe_name = "Q107-1"
+ingredients = ["1 st Pesto Röd"]
+expected = 1
+
+[fixtures.offer]
+name = "Pesto Soltorkad Tomat 190g Zeta"
+category = "pantry"
+
+[[fixtures.expected_matches]]
+canonical = "pesto"
+ingredient_index = 0
+must_match_keyword = "pesto"
+
+[[fixtures]]
+id = "matcher_regression_pesto_rod_genovese_negative"
+policy_ref = "current_review_matcher_regression"
+source_ref = "current_review:q107_1_red_pesto_soltorkad_tomat"
+recipe_name = "Q107-1"
+ingredients = ["1 st Pesto Röd"]
+expected = 0
+
+[fixtures.offer]
+name = "Pesto Genovese Zeta"
+category = "pantry"

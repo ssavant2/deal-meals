@@ -100,6 +100,8 @@ from .specialty_rules import (
     SPECIALTY_QUALIFIERS,
     BIDIRECTIONAL_SPECIALTY_QUALIFIERS,
     BIDIRECTIONAL_PER_KEYWORD,
+    PESTO_RED_INGREDIENT_CUES,
+    PESTO_RED_QUALIFIER_EQUIVALENTS,
     QUALIFIER_EQUIVALENTS,
 )
 from .validators import (
@@ -5974,6 +5976,12 @@ def matches_ingredient_fast(
                     specialty_keyword == 'kyckling'
                     and q == 'hel'
                     and _ingredient_implies_whole_kyckling(ingredient_lower)
+                ):
+                    continue
+                if (
+                    specialty_keyword == 'pesto'
+                    and q in PESTO_RED_QUALIFIER_EQUIVALENTS
+                    and any(cue in ingredient_lower for cue in PESTO_RED_INGREDIENT_CUES)
                 ):
                     continue
                 if (

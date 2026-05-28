@@ -29966,3 +29966,43 @@ source_family = "matcher_regression_case"
 canonical = "lingon"
 variant = "matcher_regression_rarorda_lingon_with_vispgradde_positive: Lingon Rårörda 400g KRAV Björnekulla"
 layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.pesto.matcher_regression_pesto_rod_soltorkad_tomat_positive"
+language = "sv"
+market = "SE"
+canonical = "pesto"
+status = "active"
+variants = ["matcher_regression_pesto_rod_soltorkad_tomat_positive: Pesto Soltorkad Tomat 190g Zeta"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:matcher_regression_pesto_rod_soltorkad_tomat_positive"]
+layer_policy = ["normal"]
+notes = "Registry coverage for matcher regression fixture matcher_regression_pesto_rod_soltorkad_tomat_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "pesto"
+variant = "matcher_regression_pesto_rod_soltorkad_tomat_positive: Pesto Soltorkad Tomat 190g Zeta"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_pesto_rod_genovese_negative"
+language = "sv"
+market = "SE"
+canonical = "current_review_matcher_regression"
+status = "active"
+variants = ["matcher_regression_pesto_rod_genovese_negative: Pesto Genovese Zeta"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:matcher_regression_pesto_rod_genovese_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture matcher_regression_pesto_rod_genovese_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "current_review_matcher_regression"
+variant = "matcher_regression_pesto_rod_genovese_negative: Pesto Genovese Zeta"
+layer_role = "negative_regression"

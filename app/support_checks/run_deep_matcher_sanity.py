@@ -10189,6 +10189,9 @@ test("Track A chili oil does not match fresh chili", recipe_match_num(["chili oi
 test("Track A Fish&Crisp accepts exact product", recipe_match_num_cached(["Fish&Crisp"], {"name": "Fish & Crisp Gourmetfileer Findus", "category": "frozen"}), 1)
 test("Track A raw fläskkött/skinka blocks cooked sliced ham", recipe_match_num(["fläskkött bog eller skinka"], {"name": "Kokt Skinka Skivad Lönneberga", "category": "meat"}), 0)
 test("Track A burgarbröd accepts live Korvbrödbagarn hamburger buns", recipe_match_num_cached(["Burgarbröd"], {"name": "Hamburgerbröd 8-pack Korvbrödbagarn", "category": "bread"}), 1)
+test("Track A red pesto accepts sun-dried tomato pesto", recipe_match_num_cached(["1 st Pesto Röd"], {"name": "Pesto Soltorkad Tomat 190g Zeta", "category": "pantry"}), 1)
+test("Track A red pesto blocks green pesto", recipe_match_num_cached(["1 st Pesto Röd"], {"name": "Pesto Genovese Zeta", "category": "pantry"}), 0)
+test("Track A plain pesto blocks sun-dried tomato pesto", recipe_match_num_cached(["1 st pesto"], {"name": "Pesto Soltorkad Tomat 190g Zeta", "category": "pantry"}), 0)
 
 section("Track A follow-up fix wave")
 test("Track A surdegskakor accepts sliced sourdough bread", recipe_match_num_cached(["surdegskakor ca 12 skivor"], {"name": "Kärnsund Surdegsbröd Pågen", "category": "bread"}), 1)

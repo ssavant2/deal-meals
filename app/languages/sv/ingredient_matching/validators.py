@@ -26,6 +26,8 @@ from .specialty_rules import (
     SPECIALTY_QUALIFIERS,
     BIDIRECTIONAL_SPECIALTY_QUALIFIERS,
     BIDIRECTIONAL_PER_KEYWORD,
+    PESTO_RED_INGREDIENT_CUES,
+    PESTO_RED_QUALIFIER_EQUIVALENTS,
     QUALIFIER_EQUIVALENTS,
 )
 
@@ -576,8 +578,8 @@ def check_specialty_qualifiers(
                     # (Soltorkad Tomat, Rosso, Calabrese). Treat tomato/soltorkad
                     # qualifiers as equivalent to red for pesto so these recipes
                     # match the actual red-pesto products in stores.
-                    if base_word == 'pesto' and qualifier in {'röd', 'rod', 'rosso', 'röda'}:
-                        equivalents = set(equivalents) | {'tomat', 'soltorkad', 'soltorkade'}
+                    if base_word == 'pesto' and qualifier in PESTO_RED_QUALIFIER_EQUIVALENTS:
+                        equivalents = set(equivalents) | set(PESTO_RED_QUALIFIER_EQUIVALENTS)
                     if any(eq in offer_quals for eq in equivalents):
                         matched = True
                         break
@@ -716,7 +718,7 @@ def check_specialty_qualifiers(
                     base_word in {'pesto', 'tomat'}
                     and qualifier in {'tomat', 'soltorkad', 'soltorkade', 'torkad', 'torkade', 'solt'}
                     and any(
-                        any(cue in candidate for cue in ('pesto röd', 'pesto rosso', 'röd pesto', 'rosso pesto', 'rödpesto', 'rossopesto'))
+                        any(cue in candidate for cue in PESTO_RED_INGREDIENT_CUES)
                         for candidate in candidate_ingredients
                     )
                 ):

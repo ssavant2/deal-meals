@@ -18,6 +18,16 @@ from .runtime_rule_overlays import (
     SPECIALTY_QUALIFIER_CLI_UPDATES,
 )
 
+PESTO_RED_QUALIFIER_EQUIVALENTS = frozenset({
+    'röd', 'rod', 'röda', 'red', 'rosso',
+    'tomat', 'soltorkad', 'soltorkade', 'torkad', 'torkade', 'solt',
+})
+PESTO_RED_INGREDIENT_CUES = frozenset({
+    'pesto röd', 'pesto rod', 'pesto rosso', 'pesto tomat',
+    'röd pesto', 'rod pesto', 'rosso pesto', 'tomat pesto',
+    'rödpesto', 'rodpesto', 'rossopesto', 'tomatpesto',
+})
+
 _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     # Premium hams - "skinka" should not match "Serrano" unless recipe says "serrano"
     # Also handles: "kokt skinka" should NOT match "rökt skinka"
@@ -478,12 +488,14 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'marinerad', 'marinerade',
     },
 
-    # Pesto: "Pesto Grön" ≠ "Pesto Rosso" (red pesto)
+    # Pesto: "Pesto Grön" ≠ "Pesto Rosso" / tomato pesto (red pesto)
     # Direction A: ingredient "pesto grön" → product must have 'grön' (or equivalent: genovese, basilico)
-    # QUALIFIER_EQUIVALENTS maps genovese/basilico → grön, rosso → röd
+    # Tomato/sun-dried tomato pesto products are the red-pesto family even when
+    # the product name says "soltorkad tomat" instead of "rosso"/"röd".
     'pesto': {
         'grön', 'gröna', 'genovese', 'basilico', 'basilika',  # green pesto variants
         'rosso', 'röd', 'röda',                                 # red pesto variants
+        *PESTO_RED_QUALIFIER_EQUIVALENTS,
     },
 
     # Lingonberries: "Rårörda Lingon" (jam) ≠ plain lingon (fresh/frozen berries)
