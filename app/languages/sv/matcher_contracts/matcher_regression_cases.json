@@ -6716,6 +6716,27 @@
     "source_ref": "current_review:accepted_direct_fix:frysta_lingon"
   },
   {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "lingon",
+        "ingredient_index": 0,
+        "must_match_keyword": "lingon"
+      }
+    ],
+    "id": "matcher_regression_rarorda_lingon_with_vispgradde_positive",
+    "ingredients": [
+      "vispgrädde och rårörda lingon"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Lingon Rårörda 400g KRAV Björnekulla"
+    },
+    "policy_ref": "current_review_matcher_regression",
+    "recipe_name": "Pepparkakskladdkaka",
+    "source_ref": "current_review:q103_backend_flavor_carrier_conjunction_scope"
+  },
+  {
     "expected": 0,
     "id": "matcher_regression_frysta_lingon_jam_negative",
     "ingredients": [

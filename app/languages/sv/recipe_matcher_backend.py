@@ -522,6 +522,7 @@ _RE_GRAM_MEASURE = re.compile(r'\d+\s*g\b')
 _RE_CHILI_COUNT_FRESH = re.compile(
     r'\b\d+\s*(?:st\s+)?(?:chili|chilipeppar|chilifrukt|chilifrukter)\b'
 )
+_FLAVOR_CARRIER_CONJUNCTION_RE = re.compile(r'\s+(?:och|samt)\s+')
 _FLAVOR_CARRIER_GROUPS = (
     (
         frozenset({
@@ -606,6 +607,15 @@ _DARK_CHOCOLATE_FLAVOR_BLOCKERS = frozenset({
 })
 
 
+def _flavor_carrier_segment_mentions_keyword(segment: str, matched_keyword: str) -> bool:
+    if ' ' in matched_keyword:
+        return matched_keyword in segment
+    return re.search(
+        rf'(?<!\w){re.escape(matched_keyword)}(?!\w)',
+        segment,
+    ) is not None
+
+
 def _is_plain_dark_chocolate_product(product_lower: str) -> bool:
     return (
         '%' in product_lower
@@ -615,8 +625,29 @@ def _is_plain_dark_chocolate_product(product_lower: str) -> bool:
     )
 
 
-def _flavor_keyword_blocked_by_carrier_text(ingredient_text: str, matched_keyword: str) -> bool:
+def _flavor_keyword_blocked_by_carrier_text(
+    ingredient_text: str,
+    matched_keyword: str,
+    *,
+    _allow_conjunction_scope: bool = True,
+) -> bool:
     """Return True when a flavor keyword only appears inside carrier wording."""
+    if _allow_conjunction_scope:
+        keyword_segments = [
+            segment.strip()
+            for segment in _FLAVOR_CARRIER_CONJUNCTION_RE.split(ingredient_text)
+            if _flavor_carrier_segment_mentions_keyword(segment, matched_keyword)
+        ]
+        if keyword_segments and any(segment != ingredient_text for segment in keyword_segments):
+            return all(
+                _flavor_keyword_blocked_by_carrier_text(
+                    segment,
+                    matched_keyword,
+                    _allow_conjunction_scope=False,
+                )
+                for segment in keyword_segments
+            )
+
     carrier_blocked = False
     matching_multi_word_carriers = [
         carrier for carrier in _CARRIER_MULTI_WORDS

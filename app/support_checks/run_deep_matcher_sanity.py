@@ -37,7 +37,11 @@ from languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee
 from languages.sv.ingredient_matching.validators import check_specialty_qualifiers
 from languages.sv.ingredient_matching.normalization import _apply_space_normalizations
 from languages.sv.category_utils import guess_category
-from languages.sv.recipe_matcher_backend import _is_oreo_cookie_offer, _is_recipe_named_candy_offer
+from languages.sv.recipe_matcher_backend import (
+    _flavor_keyword_blocked_by_carrier_text,
+    _is_oreo_cookie_offer,
+    _is_recipe_named_candy_offer,
+)
 from languages.sv.normalization import fix_swedish_chars
 from recipe_matcher import RecipeMatcher
 from languages.sv.ingredient_matching.recipe_text import (
@@ -1036,6 +1040,16 @@ test("kött standalone OK", blocked("kött", "200 g kött"), False)
 test("lamm standalone OK", blocked("lamm", "200 g lamm"), False)
 test("lime standalone OK", blocked("lime", "200 g lime"), False)
 test("lingon standalone OK", blocked("lingon", "200 g lingon"), False)
+test(
+    "backend carrier context lets conjunction-separated lingon through",
+    _flavor_keyword_blocked_by_carrier_text("vispgrädde och rårörda lingon", "lingon"),
+    False,
+)
+test(
+    "backend carrier context does not free embedded lingon compounds",
+    _flavor_keyword_blocked_by_carrier_text("vispgrädde och lingongrädde", "lingon"),
+    True,
+)
 test("lök standalone OK", blocked("lök", "200 g lök"), False)
 test("mango standalone OK", blocked("mango", "200 g mango"), False)
 test("paprika standalone OK", blocked("paprika", "200 g paprika"), False)
@@ -6177,6 +6191,18 @@ test(
             "category": "fruit",
             "brand": "ICA",
             "weight_grams": 500,
+        },
+    ),
+    1,
+)
+test(
+    "Rårörda lingon match when listed beside vispgrädde",
+    recipe_match_num_named(
+        "Pepparkakskladdkaka",
+        ["vispgrädde och rårörda lingon"],
+        {
+            "name": "Lingon Rårörda 400g KRAV Björnekulla",
+            "category": "pantry",
         },
     ),
     1,

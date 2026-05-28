@@ -29946,3 +29946,23 @@ source_family = "matcher_regression_case"
 canonical = "policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad"
 variant = "gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative: Marinad Bulgogi 225g Risberg"
 layer_role = "negative_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.lingon.matcher_regression_rarorda_lingon_with_vispgradde_positive"
+language = "sv"
+market = "SE"
+canonical = "lingon"
+status = "active"
+variants = ["matcher_regression_rarorda_lingon_with_vispgradde_positive: Lingon Rårörda 400g KRAV Björnekulla"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:matcher_regression_rarorda_lingon_with_vispgradde_positive"]
+layer_policy = ["normal"]
+notes = "Registry coverage for matcher regression fixture matcher_regression_rarorda_lingon_with_vispgradde_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "lingon"
+variant = "matcher_regression_rarorda_lingon_with_vispgradde_positive: Lingon Rårörda 400g KRAV Björnekulla"
+layer_role = "positive_regression"

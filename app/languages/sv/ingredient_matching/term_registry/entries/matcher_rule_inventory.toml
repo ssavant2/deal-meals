@@ -9326,3 +9326,23 @@ source_family = "matcher_rule_inventory"
 canonical = "gochugaru not korean bbq sauce"
 variant = "gochugaru not korean bbq sauce"
 layer_role = "legacy_no_match_policy"
+
+[[entries]]
+entry_id = "sv-se.policy.lingon.legacy_validator_flavor_carrier_conjunction_scope"
+language = "sv"
+market = "SE"
+canonical = "lingon"
+status = "active"
+variants = ["lingon"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:legacy_validator_flavor_carrier_conjunction_scope"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row legacy_validator_flavor_carrier_conjunction_scope."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "lingon"
+variant = "lingon"
+layer_role = "legacy_validator"
