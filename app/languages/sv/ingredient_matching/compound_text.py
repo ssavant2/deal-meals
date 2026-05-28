@@ -61,7 +61,7 @@ _COMPOUND_WORDS_SET: FrozenSet[str] = frozenset({
     'paprikapulver',  # spice, not fresh paprika
 
     # Vanilla compounds (don't match generic "vanilj")
-    'vaniljsocker',  # vanilla sugar - NOT vanilla yogurt
+    'vaniljsocker', 'vanillinsocker',  # vanilla sugar forms - NOT generic socker or vanilj
     'vaniljextrakt',  # vanilla extract
     'vaniljstång', 'vaniljstang',  # vanilla pod
     'vaniljpulver',  # vanilla powder

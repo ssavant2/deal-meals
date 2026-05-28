@@ -281,8 +281,8 @@ reason = "Grillkryddad karré is a pre-seasoned/marinated product fundamentally 
 id = "runtime_pnb_gradde"
 status = "active"
 keyword = "grädde"
-blockers = ["soja"]
-reason = "Soja-based cream products (Cuisine vispgrädde Soja, Matlagningsgrädde Soja from Alpro) are plant-based substitutes; soja in product name as standalone word indicates plant-based cream, consistent with existing sojagrädde FPB blocker"
+blockers = ["soja", "oat lök"]
+reason = "Soja-based cream products (Cuisine vispgrädde Soja, Matlagningsgrädde Soja from Alpro) are plant-based substitutes; soja in product name as standalone word indicates plant-based cream, consistent with existing sojagrädde FPB blocker; Oddlygood Havregrädde Cooking Oat Lök is onion-flavored cooking cream; same pattern as paprika chili blocker for flavored cream variants that change recipe flavor profile"
 
 [[product_name_blockers]]
 id = "runtime_pnb_margarin"
@@ -606,6 +606,13 @@ keyword = "havre"
 blockers = ["havregrädde", "havredryck", "havremjölk"]
 reason = "oat-cream and oat-drink products must not match dry oat (havregryn) ingredient via havre parent keyword — wrong product category"
 
+[[product_name_blockers]]
+id = "runtime_pnb_halkidiki"
+status = "active"
+keyword = "halkidiki"
+blockers = ["grillade", "grillad", "chili", "vitlök", "citron", "ört", "örter", "paprika", "fetaost", "torkad", "torkade", "marinerad"]
+reason = "flavored/processed halkidiki products (grilled, chili, herb, citrus, feta-stuffed, dried) are not plain halkidiki olives — same Q80-9 policy as PNB oliver"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -666,8 +673,8 @@ reason = "Replaced by runtime_ksbc_formbrod_grov — FPB smart-blocker fires on 
 id = "runtime_fpb_socker"
 status = "active"
 keyword = "socker"
-blockers = ["sockermassa"]
-reason = "Sockermassa (fondant/rolled sugar paste for cake decoration) is not plain socker — Strösocker products should not match svart sockermassa ingredients"
+blockers = ["sockermassa", "vanillinsocker"]
+reason = "Sockermassa (fondant/rolled sugar paste for cake decoration) is not plain socker — Strösocker products should not match svart sockermassa ingredients; Vanillinsocker (concentrated vanilla flavoring, ~2 tsk per cake) should not extract plain socker keyword from strösocker products — same pattern as existing vaniljsocker blocker."
 
 [[false_positive_blockers]]
 id = "runtime_fpb_marsipan"
