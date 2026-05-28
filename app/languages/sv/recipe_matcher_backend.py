@@ -2684,6 +2684,19 @@ def validate_offer_match_candidate(
                     and 'risnudel' not in ingredients_normalized[matched_ing_idx]
                 ):
                     continue
+                # Explicit "röd pesto"/"pesto rosso" recipes should still match
+                # red/tomato/soltorkad pesto products. PNB pesto += tomat/rosso/röd/soltorkad
+                # is intended to keep plain "pesto" (= basilika/Genovese) away from
+                # red-family products; reverse direction (recipe explicitly wants red)
+                # must allow them through.
+                if (
+                    matched_kw_lower == 'pesto'
+                    and blocker in {'tomat', 'rosso', 'röd', 'rod', 'rödpesto', 'rodpesto', 'soltorkad', 'soltorkade'}
+                    and matched_ing_idx is not None
+                    and any(cue in ingredients_normalized[matched_ing_idx]
+                            for cue in ('röd', 'rod', 'rosso'))
+                ):
+                    continue
                 # Explicit Thai wokmix ingredients may use the Thai Style frozen
                 # wokmix line; plain wokmix still blocks the styled Findus product.
                 if (

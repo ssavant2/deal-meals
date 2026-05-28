@@ -6,7 +6,7 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 100,
       "hardcoded_keyword_output:extract_keywords_from_product": 118,
-      "ingredient_parent_mapping": 395,
+      "ingredient_parent_mapping": 397,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
       "keyword_synonym_mapping": 151,
@@ -30,7 +30,7 @@
     },
     "source_counts": {
       "extraction_helper": 218,
-      "ingredient_parent": 395,
+      "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
       "keyword_synonym": 151,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5696,
-    "variants_missing_product_text": 1815,
+    "variant_count": 5698,
+    "variants_missing_product_text": 1817,
     "variants_with_product_text": 3881
   },
   "variants": [
@@ -119662,11 +119662,53 @@
       "needs_product_text": false,
       "notes": "current_review_matcher_regression",
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"salsa\", \"ingredient_index\": 0, \"must_match_keyword\": \"salsa\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
+    },
+    {
+      "variant_id": "vterm-badf9231f36cff0b",
+      "row_index": 4369,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:betor",
+      "source_id": "betor",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "betor",
+      "canonical": "rödbeta",
+      "expected_family": "rödbeta",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"rödbeta\"}"
+    },
+    {
+      "variant_id": "vterm-7dc12a27cd456e42",
+      "row_index": 4639,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:rundkornigt ris",
+      "source_id": "rundkornigt ris",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "rundkornigt ris",
+      "canonical": "grötris",
+      "expected_family": "grötris",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"grötris\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1593,
+      "no_product_text": 1595,
       "static_verified": 2605,
       "synthetic_verified": 1498
     },
@@ -119674,7 +119716,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 218,
-      "ingredient_parent": 395,
+      "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
       "keyword_synonym": 151,
@@ -119688,8 +119730,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5696
+      "audited": 5698
     },
-    "variant_count": 5696
+    "variant_count": 5698
   }
 }

@@ -655,12 +655,33 @@ keyword = "sobanudlar"
 blockers = ["nissin", "chicken", "kyckling", "yakitori", "smak"]
 reason = "Nissin instant soba cups (Soba Chili, Soba Yakitori Chicken) are single-portion ready meals with flavoring — not dry soba noodles for cooking. Pattern: instant flavored cup = prepared meal per Q2/line 1582."
 
+[[product_name_blockers]]
+id = "runtime_pnb_bulgur"
+status = "active"
+keyword = "bulgur"
+blockers = ["vermicelli", "vermecelli", "nudlar"]
+reason = "bulgur+vermicelli/nudlar are compound products mixing bulgur with pasta — distinct texture from plain bulgur recipes"
+
+[[product_name_blockers]]
+id = "runtime_pnb_oreo"
+status = "active"
+keyword = "oreo"
+blockers = ["tårta", "fryst"]
+reason = "Oreotårta Fryst (Q81-1 analog) — ready-frozen cheesecake/tårta is a finished dessert, not crushable cookies for cheesecake base"
+
+[[product_name_blockers]]
+id = "runtime_pnb_proteinpudding"
+status = "active"
+keyword = "proteinpudding"
+blockers = ["choklad", "caramel", "karamell", "delicato", "gräddkola", "jordgubb", "salted", "delicatoboll", "vit choklad"]
+reason = "flavored protein puddings (choklad/karamell/jordgubb etc.) blocked from plain proteinpudding ingredient. Analog yoghurt policy: plain/vanilla matches all naturell, explicit flavor must be named"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
 keyword = "ingefära"
-blockers = ["balsamico", "balsamicoingefara", "balsamicoingefära"]
-reason = "Crema di Balsamico Ingefära is a condiment — space-norm merges it to balsamicoingefara compound before FPB check, so both plain and compound forms needed as blockers"
+blockers = ["balsamico", "balsamicoingefara", "balsamicoingefära", "inlagd", "gari", "picklad", "syltad", "pickladingefära", "pickladingefara", "syltadingefära", "syltadingefara"]
+reason = "Crema di Balsamico Ingefära is a condiment — space-norm merges it to balsamicoingefara compound before FPB check, so both plain and compound forms needed as blockers; picklad/syltad/inlagd ingefära (gari) has distinct sweet-sour flavor; fresh ginger does not substitute. pickladingefära has own keyword (Q98-2) so genuine picklad-products unaffected; compound forms picklad ingefära/syltad ingefära joined by space_normalization — blocker variants for joined compounds"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_bitter"

@@ -572,6 +572,12 @@ def check_specialty_qualifiers(
                         }
                     if base_word == 'bönor' and qualifier in {'grön', 'gröna'}:
                         equivalents = {eq for eq in equivalents if eq != 'mix'}
+                    # "Pesto Röd"/"pesto rosso" recipes mean the red-pesto family
+                    # (Soltorkad Tomat, Rosso, Calabrese). Treat tomato/soltorkad
+                    # qualifiers as equivalent to red for pesto so these recipes
+                    # match the actual red-pesto products in stores.
+                    if base_word == 'pesto' and qualifier in {'röd', 'rod', 'rosso', 'röda'}:
+                        equivalents = set(equivalents) | {'tomat', 'soltorkad', 'soltorkade'}
                     if any(eq in offer_quals for eq in equivalents):
                         matched = True
                         break
@@ -701,6 +707,18 @@ def check_specialty_qualifiers(
                         for candidate in candidate_ingredients
                     )
                     and any(cue in offer_quals for cue in ('örter', 'orter', 'herbs'))
+                ):
+                    continue
+                # "Pesto Röd"/"pesto rosso" recipes are explicit red-pesto requests;
+                # offer specialty qualifiers (tomat: soltorkad, torkad) should be
+                # satisfied by the red-color cue on the ingredient side.
+                if (
+                    base_word in {'pesto', 'tomat'}
+                    and qualifier in {'tomat', 'soltorkad', 'soltorkade', 'torkad', 'torkade', 'solt'}
+                    and any(
+                        any(cue in candidate for cue in ('pesto röd', 'pesto rosso', 'röd pesto', 'rosso pesto', 'rödpesto', 'rossopesto'))
+                        for candidate in candidate_ingredients
+                    )
                 ):
                     continue
                 equivalents = QUALIFIER_EQUIVALENTS.get(qualifier, {qualifier})

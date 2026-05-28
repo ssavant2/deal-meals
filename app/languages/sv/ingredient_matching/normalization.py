@@ -67,6 +67,15 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('syrad gradde', 'syradgrädde'),
     ('grädde syrad', 'syradgrädde'),
     ('gradde syrad', 'syradgrädde'),
+    # Alpro is an exclusively plant-based brand; in Sweden all Alpro cream products
+    # (Matlagningsgrädde Soja, Cuisine vispgrädde Soja) are soy-based. Recipes
+    # mentioning "Alpro vispgrädde"/"Alpro matlagningsgrädde" should route to the
+    # sojagrädde-canonical so the matcher selects Alpro Soja products rather than
+    # dairy vispgrädde.
+    ('alpro vispgrädde', 'sojagrädde'),
+    ('alpro vispgradde', 'sojagrädde'),
+    ('alpro matlagningsgrädde', 'sojagrädde'),
+    ('alpro matlagningsgradde', 'sojagrädde'),
     ('corn flakes', 'cornflakes'),
     # "Mjöl Tipo 00" → specific keyword, should only match itself
     ('mjöl tipo 00', 'tipo00'),
