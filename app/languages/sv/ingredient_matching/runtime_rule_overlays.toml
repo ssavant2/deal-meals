@@ -722,8 +722,8 @@ reason = "Bittermandelarom (liquid almond extract) is functionally distinct from
 id = "runtime_fpb_sirap"
 status = "active"
 keyword = "sirap"
-blockers = ["jordgubbssirap", "hallonsirap", "mintsirap", "fläderblomssirap", "vaniljsirap", "karamellsirap", "citronsirap"]
-reason = "Flavored cocktail/dessert syrups (jordgubbs, hallon, mint, fläderblom, vanilj, karamell, citron — Monin/Torani-type) are functionally distinct from plain ljus/mörk baking syrup. Smart-blocker prevents the sirap parent keyword when ingredient text contains a compound flavored-syrup form."
+blockers = ["jordgubbssirap", "hallonsirap", "mintsirap", "fläderblomssirap", "vaniljsirap", "karamellsirap", "citronsirap", "rabarber"]
+reason = "Flavored cocktail/dessert syrups (jordgubbs, hallon, mint, fläderblom, vanilj, karamell, citron — Monin/Torani-type) are functionally distinct from plain ljus/mörk baking syrup. Smart-blocker prevents the sirap parent keyword when ingredient text contains a compound flavored-syrup form.; rabarbersirap ingredient is flavored — plain sirap products (mörk sirap, vit sirap) do not substitute"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_choklad"
@@ -864,6 +864,13 @@ status = "active"
 keyword = "limpa"
 blockers = ["rostbröd"]
 reason = "Limpa (dark rye loaf) should not match when ingredient specifies rostbröd (white toast bread) — different product category despite both being bread"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_rabarber"
+status = "active"
+keyword = "rabarber"
+blockers = ["rabarbersirap"]
+reason = "rabarbersirap is a flavored syrup, not fresh rhubarb (stalks)"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
