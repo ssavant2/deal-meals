@@ -1196,10 +1196,10 @@ reason = "Plural form 'korvar' — när recept anger specifik korv-typ (chorizo/
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_potatis"
-status = "active"
+status = "inactive"
 keyword = "potatis"
 context = ["nypotatis"]
-reason = "nypotatis is same isolated family as färskpotatis (new potato = thin skin, firm texture) - suppress generic potatis keyword to prevent King Edward/mjölig/baking varieties from matching nypotatis recipes"
+reason = "REVERTED: nypotatis = färskpotatis (same product); should use keyword_synonym routing, not KSBC isolation"
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"

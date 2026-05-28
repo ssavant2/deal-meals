@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 395,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 149,
+      "keyword_synonym_mapping": 150,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -19,13 +19,13 @@
       "legacy_parent": 18,
       "legacy_prepared_text_expansion": 11,
       "legacy_synonym": 74,
-      "legacy_validator": 249,
+      "legacy_validator": 250,
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 340,
       "negative_regression": 838,
       "offer_extra_keyword_mapping": 417,
       "parent_match_only_mapping": 20,
-      "positive_regression": 659,
+      "positive_regression": 660,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
@@ -33,18 +33,18 @@
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 149,
+      "keyword_synonym": 150,
       "match_bridge": 2021,
-      "matcher_regression_case": 1497,
-      "matcher_rule_inventory": 466,
+      "matcher_regression_case": 1498,
+      "matcher_rule_inventory": 467,
       "no_match_policy": 362,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5692,
-    "variants_missing_product_text": 1812,
-    "variants_with_product_text": 3880
+    "variant_count": 5695,
+    "variants_missing_product_text": 1814,
+    "variants_with_product_text": 3881
   },
   "variants": [
     {
@@ -119578,13 +119578,76 @@
       "needs_product_text": true,
       "notes": "gochugaru is Korean chili powder/flakes. Korean BBQ sauce, marinades, wraps, salads share the 'koreansk' cuisine tag but are distinct products. Only chili keyword matches (Koreanska Chiliflingor, Chili Flakes) should remain.",
       "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad_negative\"], \"ingredient_patterns\": [\"\\\\bgochugaru\\\\b\"], \"policy_ref\": \"policy_gochugaru_not_korean_bbq_sauce_bulgogi_bbq_marinad_korean_wrap_kyckling_korean_koreansk_morotssallad\", \"reason\": \"gochugaru is Korean chili powder/flakes. Korean BBQ sauce, marinades, wraps, salads share the 'koreansk' cuisine tag but are distinct products. Only chili keyword matches (Koreanska Chiliflingor, Chili Flakes) should remain.\", \"rule_version\": 1, \"supersedes\": []}"
+    },
+    {
+      "variant_id": "vterm-c453107f6d717164",
+      "row_index": 396,
+      "source_order": 10,
+      "source_type": "matcher_rule_inventory",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",
+      "source_ref": "current_review:q103_backend_flavor_carrier_conjunction_scope",
+      "source_id": "legacy_validator_flavor_carrier_conjunction_scope",
+      "variant_role": "legacy_validator",
+      "variant_text": "lingon",
+      "canonical": "lingon",
+      "expected_family": "lingon",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": null,
+      "needs_product_text": true,
+      "notes": "Flavor keywords in a separate conjunction segment, such as vispgrädde och rårörda lingon, are independent ingredient items rather than carrier flavors.",
+      "metadata": "{\"adapter_ref\": \"backend_validation.events:carrier_flavor_context\", \"adapter_refs\": [], \"fixture_refs\": [\"matcher_regression_rarorda_lingon_with_vispgradde_positive\"], \"policy_ref\": \"current_review_matcher_regression\", \"risk\": \"flavor_guard\", \"source_refs\": [\"current_review:q103_backend_flavor_carrier_conjunction_scope\"], \"status\": \"wrapped_adapter\"}"
+    },
+    {
+      "variant_id": "vterm-36cfcbbe79510151",
+      "row_index": 1754,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "current_review:q103_backend_flavor_carrier_conjunction_scope",
+      "source_id": "matcher_regression_rarorda_lingon_with_vispgradde_positive",
+      "variant_role": "positive_regression",
+      "variant_text": "matcher_regression_rarorda_lingon_with_vispgradde_positive: Lingon Rårörda 400g KRAV Björnekulla",
+      "canonical": "lingon",
+      "expected_family": "lingon",
+      "ingredient_text": "vispgrädde och rårörda lingon",
+      "product_text": "Lingon Rårörda 400g KRAV Björnekulla",
+      "product_category": "pantry",
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": "current_review_matcher_regression",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"lingon\", \"ingredient_index\": 0, \"must_match_keyword\": \"lingon\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Pepparkakskladdkaka\"}"
+    },
+    {
+      "variant_id": "vterm-d00cff3b3bd7af83",
+      "row_index": 4828,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:nypotatis",
+      "source_id": "nypotatis",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "nypotatis",
+      "canonical": "färskpotatis",
+      "expected_family": "färskpotatis",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"färskpotatis\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1590,
+      "no_product_text": 1592,
       "static_verified": 2605,
-      "synthetic_verified": 1497
+      "synthetic_verified": 1498
     },
     "method": "static_contract_audit",
     "problem_counts": {},
@@ -119593,10 +119656,10 @@
       "ingredient_parent": 395,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 149,
+      "keyword_synonym": 150,
       "match_bridge": 2021,
-      "matcher_regression_case": 1497,
-      "matcher_rule_inventory": 466,
+      "matcher_regression_case": 1498,
+      "matcher_rule_inventory": 467,
       "no_match_policy": 362,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
@@ -119604,8 +119667,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5692
+      "audited": 5695
     },
-    "variant_count": 5692
+    "variant_count": 5695
   }
 }
