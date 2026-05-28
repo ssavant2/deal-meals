@@ -2120,6 +2120,24 @@ test("VEG vegosmör in qualifier words", 'vegosmör' in _veg_qualifier_words, Tr
 test("VEG vegochorizo in qualifier words", 'vegochorizo' in _veg_qualifier_words, True)
 test("VEG vegobacon in qualifier words", 'vegobacon' in _veg_qualifier_words, True)
 
+# Kassler: COMPOUND_STRICT — kalkonkassler must not match plain pork kassler products
+test("COMPOUND_STRICT kassler", 'kassler' in _COMPOUND_STRICT_KEYWORDS, True)
+test(
+    "MATCH kassler product → plain kassler ingredient",
+    match_kw("Kassler benfri ca 1kg Scan", "500 g kassler"),
+    "kassler",
+)
+test(
+    "BLOCKED plain kassler product → kalkonkassler ingredient",
+    match_kw("Kassler benfri ca 1kg Scan", "500 g Kalkonkassler"),
+    None,
+)
+test(
+    "MATCH kalkonkassler product → kalkonkassler ingredient",
+    match_kw("Kalkonkassler varmrökt 600g Ingelsta kalkon", "500 g Kalkonkassler"),
+    "kalkonkassler",
+)
+
 # Tofu: COMPOUND_STRICT + SPACE_NORM
 test("COMPOUND_STRICT tofu", 'tofu' in _COMPOUND_STRICT_KEYWORDS, True)
 test("KW naturell fast tofu → naturelltofu", extract_keywords_from_ingredient("200 g Naturell fast tofu"), ["naturelltofu"])

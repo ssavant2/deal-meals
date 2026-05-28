@@ -172,6 +172,8 @@ _COMPOUND_STRICT_KEYWORDS: FrozenSet[str] = frozenset({
         'innerfilé', 'innerfiléer', 'innerfileer',  # lamminnerfilé vs kycklinginnerfilé — animal prefix must match
         'färs',      # lammfärs vs nötfärs — animal prefix must match
                      # standalone "färs" matches all (no compound restriction)
+        'kassler',   # kalkonkassler ≠ fläskkassler — meat prefix must match
+                     # standalone "kassler" matches all (no compound restriction)
         'soja',      # tamarisoja vs soja — tamari prefix must match
         'lök',       # silverlök vs lök — silver prefix must match
         'lökar',     # silverlökar vs lökar — silver prefix must match
