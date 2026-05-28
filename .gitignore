@@ -49,6 +49,7 @@ app/scripts/
 # Dev documentation (not needed in prod)
 docs/code-review.md
 docs/context.md
+docs/*.local.md
 docs/MATCHER_LAYER_PARITY_PLAN.md
 docs/v1_todo.md
 
