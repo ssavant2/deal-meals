@@ -14043,6 +14043,41 @@ test("Q100-2: Skinka pålägg ingredient matches Skinka product (pålägg-deli e
 test("Q100-2: Skinka pålägg ingredient matches Kokt Skinka product",
      match("Kokt Skinka 200g ICA", "150 g Skinka pålägg", "deli"), "skinka")
 
+# Q101-1: "Felix BBQ Original Sås" — split branded BBQ sauce compound
+# sanity-id: q101_1_bbq_branded_split_sauce
+test("Q101-1: 'Felix BBQ Original Sås' extracts bbqsås (branded split)",
+     extract_keywords_from_ingredient("0,5 dl Felix BBQ Original Sås"), ["bbqsås"])
+test("Q101-1: 'BBQ Sweet Glaze' extracts bbqsås (glaze variant)",
+     extract_keywords_from_ingredient("2 msk BBQ Sweet Glaze"), ["bbqsås"])
+test("Q101-1: Felix BBQ Original Sås matches Sås BBQ Original Felix",
+     match("Sås BBQ Original 335ml Felix", "0,5 dl Felix BBQ Original Sås", "pantry"), "bbqsås")
+# Regression: ambiguous "bbq och annan sås" does NOT trigger bbqsås normalization
+test("Q101-1 regression: 'bbq och annan sås' (non-branded) does NOT trigger bbqsås",
+     extract_keywords_from_ingredient("bbq och annan sås"), [])
+
+# Q101-3: plain crème fraiche should NOT match flavored Tex Mex/Mango/Soltorkad variants
+# sanity-id: q101_3_fraiche_flavor_blockers
+test("Q101-3: plain crème fraiche does NOT match Tex Mex Lime Koriander variant",
+     match("Lätt Creme Fraiche Tex Mex Lime Koriander 11% 200ml Arla Köket", "2 dl crème fraiche", "dairy"), None)
+test("Q101-3: plain crème fraiche does NOT match Sötstark Mango variant",
+     match("Lätt Creme Fraiche Sötstark Mango 11% 200ml Arla Köket", "2 dl crème fraiche", "dairy"), None)
+test("Q101-3: plain crème fraiche does NOT match Feta & Soltorkad tomat variant",
+     match("Lätt Creme Fraiche Feta & Soltorkad tomat 12% 2dl Arla Köket", "2 dl crème fraiche", "dairy"), None)
+# Plain crème fraiche still matches plain naturell products
+test("Q101-3 regression: plain crème fraiche still matches naturell variants",
+     match("Creme fraiche 32% 2dl ICA", "2 dl crème fraiche", "dairy"), "fraiche")
+
+# Q101-5: havrefraiche ingredient matches Dream Fraiche (Oddlygood oat-based fraiche)
+# sanity-id: q101_5_dream_fraiche_havrefraiche_extraction
+test("Q101-5: Dream Fraiche extracts havrefraiche keyword",
+     extract_keywords_from_product("Dream Fraiche 14% 400g Oddlygood"),
+     ["fraiche", "havrefraiche"])
+test("Q101-5: havrefraiche ingredient matches Dream Fraiche product",
+     match("Dream Fraiche 14% 400g Oddlygood", "havrefraiche", "dairy"), "havrefraiche")
+# Regression: havrefraiche ingredient does NOT match plain creme fraiche (FPB protects)
+test("Q101-5 regression: havrefraiche ingredient does NOT match plain creme fraiche",
+     match("Creme fraiche 32% 2dl ICA", "havrefraiche", "dairy"), None)
+
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")
 print(f"TOTAL: {passed}/{passed+failed} tests passed ({total_sections} sections)")

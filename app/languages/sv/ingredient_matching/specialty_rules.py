@@ -659,6 +659,9 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'parmesan',  # "Parmesan Crème Fraiche"
         'karljohan',  # "Creme Fraiche Karljohan"
         'örter', 'orter',  # "Franska Örter Crème Fraiche"
+        'tex mex', 'texmex', 'lime', 'koriander',  # "Tex Mex Lime Koriander Crème Fraiche"
+        'mango', 'söt', 'sot', 'stark',  # "Sötstark Mango Crème Fraiche"
+        'soltorkad', 'soltorkade',  # "Feta & Soltorkad tomat Crème Fraiche"
         # Common recipe flavors (may not have matching product → fallback to plain)
         'vitlök', 'vitlok',  # "crème fraiche vitlök/parmesan"
         'saffran',  # "Creme Fraiche Saffran & Tomat"

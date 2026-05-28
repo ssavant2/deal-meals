@@ -1922,6 +1922,14 @@ def extract_keywords_from_product(
     ) and 'koreansk' not in unique_keywords:
         unique_keywords.append('koreansk')
 
+    # Q101-5: Dream Fraiche (Oddlygood) is an oat-based crème fraîche substitute.
+    # The product name doesn't contain 'havre' but is functionally havrefraiche.
+    # Adding the keyword lets recipes asking for 'havrefraiche' match these products
+    # while keeping the existing FPB 'fraiche ← havrefraiche' protection for plain
+    # crème fraîche recipes.
+    if 'dream fraiche' in original_name_lower and 'havrefraiche' not in unique_keywords:
+        unique_keywords.append('havrefraiche')
+
     return unique_keywords
 
 

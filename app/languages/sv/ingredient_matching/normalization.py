@@ -966,6 +966,14 @@ _SPACE_NORM_PATTERN = re.compile(
     '|'.join(r'\b' + re.escape(k) + r'\b' for k, _ in sorted(_SPACE_NORMALIZATIONS, key=lambda x: len(x[0]), reverse=True))
 ) if _SPACE_NORMALIZATIONS else None
 _SALAMI_CHIPS_HYPHEN_RE = re.compile(r'\bsalami\s*-\s*chips\b')
+# "Felix BBQ Original Sås" / "BBQ Original Sauce" — branded variant where
+# a single descriptor splits the bbq+sås compound. Recognised descriptors
+# are descriptive/stop-word style (no risk of swallowing real ingredients
+# like "bbq och annan sås"). Plain "bbq sås" is handled by SPACE_NORMALIZATIONS.
+_BBQ_SAUCE_BRANDED_RE = re.compile(
+    r'\bbbq\s+(?:original|orginal|klassisk|klassiska|classic|smoky|smokey|sweet|hot|mild|extra)\s+(?:sås|sauce|glaze)\b',
+    re.IGNORECASE,
+)
 _SPRING_ONION_BUNCH_RE = re.compile(r'\bknipp[ea]\s+färsk\s+lök\b')
 _SPRING_ONION_STALKS_RE = re.compile(r'\bfärsk(?:a)?\s+lök(?:ar)?\s*,?\s*stjälkarna\b')
 _MEASURED_DURUM_FLOUR_RE = re.compile(r'\b\d+(?:[.,]\d+)?\s*(?:dl|l|g|kg)\s+durumvete\b')
@@ -1023,6 +1031,7 @@ def _apply_space_normalizations(text: str) -> str:
         else:
             text = _SPACE_NORM_PATTERN.sub(lambda m: _SPACE_NORM_LOOKUP[m.group()], text)
     text = _SALAMI_CHIPS_HYPHEN_RE.sub('salamichips', text)
+    text = _BBQ_SAUCE_BRANDED_RE.sub('bbqsås', text)
     # Spring-onion style recipe wording should normalize before punctuation/number
     # stripping, so use regexes that tolerate commas and leading quantities.
     text = _SPRING_ONION_BUNCH_RE.sub('salladslök', text)
