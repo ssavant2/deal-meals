@@ -416,7 +416,11 @@ A visual preview shows how 12 recipe slots would be distributed based on your cu
 Enter brand names you want to avoid (one per line or comma-separated). Offers from these brands won't be matched to recipes.
 
 #### Excluded Ingredients
-Enter ingredient keywords you want to avoid. Recipes containing these ingredients won't appear in suggestions.
+Enter ingredient keywords you want to avoid. Deal Meals treats this as a
+best-effort filter based on recipe text, product names, and known matching
+rules. It can help reduce unwanted matches, but it is not a medical allergy
+safety feature. Always check the recipe and product label yourself if an
+ingredient matters for allergy, intolerance, or health reasons.
 
 #### Filtered Products
 Enter product types to exclude from offer matching (e.g., "juice concentrate", "instant noodles").
