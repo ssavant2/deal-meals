@@ -834,8 +834,8 @@ reason = "Pomegranate juice (granatäpplejuice) is not apple juice — the 'äpp
 id = "runtime_fpb_ost"
 status = "active"
 keyword = "ost"
-blockers = ["balsamicostekt"]
-reason = "Word 'ost' (cheese) substring-matches inside 'balsamicostekT' (balsamic-fried red onion); not a cheese ingredient"
+blockers = ["balsamicostekt", "ostfylld", "ostfyllda"]
+reason = "Word 'ost' (cheese) substring-matches inside 'balsamicostekT' (balsamic-fried red onion); not a cheese ingredient; ostfyllda/ostfylld in ingredient text signals a stuffed-pasta product; the 'ost' substring in those words must not route to plain cheese/cream-cheese spreads"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_lokar"
@@ -955,6 +955,13 @@ status = "active"
 keyword = "bröd"
 blockers = ["brödkummin", "brodkummin"]
 reason = "Brödkummin (caraway seed used in bread spice mix) is a spice ingredient, not bread; prevents bröd-keyword from matching bread products when recipe asks for brödkummin."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_mjol"
+status = "active"
+keyword = "mjöl"
+blockers = ["mjölig", "mjolig"]
+reason = "Potatis Mjölig (mealy potato) contains the substring mjöl; flour products must not match a mealy-potato ingredient"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
