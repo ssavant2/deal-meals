@@ -834,8 +834,8 @@ reason = "Pomegranate juice (granatäpplejuice) is not apple juice — the 'äpp
 id = "runtime_fpb_ost"
 status = "active"
 keyword = "ost"
-blockers = ["balsamicostekt", "ostfylld", "ostfyllda"]
-reason = "Word 'ost' (cheese) substring-matches inside 'balsamicostekT' (balsamic-fried red onion); not a cheese ingredient; ostfyllda/ostfylld in ingredient text signals a stuffed-pasta product; the 'ost' substring in those words must not route to plain cheese/cream-cheese spreads"
+blockers = ["balsamicostekt", "ostfylld", "ostfyllda", "ostkräme", "ostkrämen"]
+reason = "Word 'ost' (cheese) substring-matches inside 'balsamicostekT' (balsamic-fried red onion); not a cheese ingredient; ostfyllda/ostfylld in ingredient text signals a stuffed-pasta product; the 'ost' substring in those words must not route to plain cheese/cream-cheese spreads; ostkräm is a prepared cheese-cream/spread, not a block of hard cheese; the substring 'ost' inside 'ostkrämen' pulled in all hard cheeses as false positives (e.g. paprikapulver+gurkmeja line meant to color a vegan cheese cream)"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_lokar"
