@@ -30,6 +30,7 @@ CHECKS = [
     "run_candidate_term_detail_checks.py",
     "run_candidate_refresh_guard_checks.py",
     "run_recipe_ingredient_term_map_checks.py",
+    "run_matching_preference_filter_checks.py",
     "run_recipe_url_discovery_checks.py",
     "run_recipe_source_profile_checks.py",
     "run_scraper_p0_checks.py",

@@ -202,7 +202,15 @@ def _prune_shadowed_smoked_qualifiers(qualifiers: Set[str]) -> Set[str]:
 
 
 def _specialty_alternative_texts(base_word: str, qualifiers: Set[str], ingredient_lower: str) -> list[str]:
-    if ' eller ' not in ingredient_lower and '(eller' not in ingredient_lower:
+    # "alternativt" parentheticals ("6 tomater (alternativt 1 burk krossade tomater)")
+    # are OR-alternatives just like "eller". Without including it here, a qualifier
+    # that lives only inside the alternative (krossade, körsbär, ...) would be treated
+    # as a requirement on the primary ingredient and wrongly block the plain product.
+    if (
+        ' eller ' not in ingredient_lower
+        and '(eller' not in ingredient_lower
+        and 'alternativt' not in ingredient_lower
+    ):
         return [ingredient_lower]
 
     alternatives = [alt.strip() for alt in parse_eller_alternatives(ingredient_lower) if alt.strip()]
