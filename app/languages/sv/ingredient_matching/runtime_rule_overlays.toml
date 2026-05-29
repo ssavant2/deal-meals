@@ -970,6 +970,13 @@ keyword = "smör"
 blockers = ["frösmör", "frosmor"]
 reason = "frösmör (seed butter) ingredient should not match dairy smör products; smör keyword is substring of frösmör in ingredient text. Same pattern as existing sesamsmör/mandelsmör/jordnötssmör blockers."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_paprika"
+status = "active"
+keyword = "paprika"
+blockers = ["paprikapure"]
+reason = "Paprikapuré (concentrated red pepper paste in tube/jar) must not match fresh whole paprika; same pattern as existing paprikakräm/paprikapulver blockers"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -1470,6 +1477,22 @@ surface = "stop_words"
 action = "add"
 terms = ["smarta", "smartare", "kluriga", "mysterier", "finurliga", "mattegåtor", "detektiver"]
 reason = "Book titles like 'Murdle junior : Kluriga mysterier för smarta detektiver' extracted these adjectives and matched food ingredients (e.g. vegofärs). All purely descriptive/educational adjectives, never food products. Follows Q105 pattern (roliga/giftiga)."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_american"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["american"]
+reason = "English nationality/style adjective; as a standalone keyword it only matches non-cheese products (American style mayo, Cajun American style spice blend). Mirrors existing Swedish stop word 'amerikansk'."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_randig_randiga_randigt"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["randig", "randiga", "randigt"]
+reason = "Striped/pattern adjective leaking as keyword. 'klubbpinnar el randiga sugror' (craft supply, non-food) matched 'Kaviar randig Kalles' via 'randig'. Pure descriptive adjective, never a food keyword."
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
