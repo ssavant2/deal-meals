@@ -1627,7 +1627,9 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'kryddmix',    # "Korv Stroganoff Kryddmix" — spice mix, not sausage
         'stroganoff',  # "Korv Stroganoff Kryddmix"
         'prinskorv', 'prinskorvar',  # specific small sausage ≠ generic korv families
-        'vego', 'vegansk', 'växtbaserad',  # vegan sausage ≠ meat sausage
+        # Plant-based vego sausage is intentionally NOT blocked: a plain "korv"
+        # ingredient may match vego variants (substitute policy — material is
+        # irrelevant for a plain ingredient; only flavor/specific-type words stay).
         'lammkorv', 'lammkorvar',  # generic korv ≠ lammkorv (COMPOUND_STRICT
         # catches 'korv' in 'lammkorv' but NOT 'korv' in 'lammkorvar' plural)
         'ölkorv', 'olkorv',  # ölkorv is a specific Swedish beer-flavored sausage —
@@ -2468,7 +2470,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         '4 peppar',               # "Färskost 4 Peppar" ≠ explicit pepparrot / other cream cheese flavors
         'pepper',                 # English pepper-flavored variant
         'chevre',                 # goat cheese flavored/spiked cream cheese
-        'plant based', 'vegansk', 'växtbaserad',  # plant-based substitutes ≠ dairy cream cheese
+        # Plant-based färskost is intentionally NOT blocked: a plain "färskost"
+        # ingredient may match vego variants (substitute policy — material is
+        # irrelevant for a plain ingredient; flavor words below still stay blocked).
         'pineapple', 'almond',    # sweet tropical/nut flavors (Castello Pineapple&Almond) ≠ savory cooking cream cheese
         'kajmak',                 # Balkan dairy spread (Poljorad) ≠ generic cream cheese
         # Note: 'philadelphia' was here but blocked plain "Philadelphia Original" from
@@ -2704,10 +2708,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'dressing',  # "Original Hamburgare Dressing" is not a burger patty
         'hamburgerbröd', 'hamburgarbröd', 'hamburgerbrod', 'hamburgarbrod',
         'burger bun', 'burger buns',
-        'vego', 'vegansk', 'växtbaserad',  # vegan burger ≠ meat burger
+        # Plant-based burgers (vego/vegansk/växtbaserad, Beyond, Green burger,
+        # plant beef) are intentionally NOT blocked: a plain "hamburgare"
+        # ingredient may match vego variants (substitute policy — material/brand
+        # is irrelevant for a plain ingredient).
         'gummi', 'squishy', 'robetoy',    # candy/toy burgers (non-food)
-        'beyond',                          # "Beyond burger Fryst Beyond Meat" — plant-based brand
-        'green burger', 'plant beef',      # "Real/Crispy Green burger MAX", "plant beef burger" — plant-based
     },
     # Raw beef cuts ≠ processed/filled products using beef as ingredient name
     'biff': {'dumpling'},  # "Dumpling biff, chili & ingefära Beijing8" — filled dumpling, not raw beef
@@ -3601,13 +3606,17 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'cheesy',    # "Kryddkorv Cheesy Chorizo Sibylla" = hot dog with chorizo flavor + cheese ≠ real chorizo
     },
     'bacon': {
-        'vego', 'vegansk', 'växtbaserad',
+        # Plant-based vego bacon is intentionally NOT blocked: a plain "bacon"
+        # ingredient may match vego variants (substitute policy — material is
+        # irrelevant for a plain ingredient; only other-animal/other-product
+        # words below stay blocked).
         'kalkon', 'kalkonbacon',  # turkey bacon ≠ pork bacon
         'lyckans ost',  # cheese product with bacon flavor ≠ bacon slices
         'snacks',        # "Bacon snacks 175g Crispy" — snack puffs ≠ bacon rashers
         'kyckling',      # "Bacon Kyckling Skivad 100g Tulip" — chicken-based deli ≠ pork bacon
     },
-    'schnitzel': {'vego', 'vegansk', 'växtbaserad'},
+    # 'schnitzel' vego-block removed: a plain "schnitzel" ingredient may match
+    # vego variants (substitute policy). The rule only blocked vego, so it is gone.
     # ---- Frozen vegetable mixes ----
     # Cross-vegetable blockers for classic combos (e.g., "Ärtor & Morötter")
     'ärtor': {'morötter', 'morot', 'majs'},    # "Ärtor & Morötter" / "Ärter, Majs & Paprika" mix ≠ plain peas

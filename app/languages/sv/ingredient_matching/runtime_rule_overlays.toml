@@ -57,8 +57,8 @@ reason = "Panerad Alaska pollock is a fish finger / breaded fillet product — r
 id = "runtime_pnb_philadelphiaost"
 status = "active"
 keyword = "philadelphiaost"
-blockers = ["tomatsopp", "chips", "dessertost", "salad", "mediterranean", "vegansk", "kajmak", "pineapple", "almond", "chevre", "pepper", "4 peppar", "plant based", "växtbaserad", "gäsene", "gasene"]
-reason = "Philadelphiaost route inherits all färskost PNB blockers — same product types (flavored/plant cream cheese, soup products) must be excluded via this keyword path too; Gäsene Mejeri produces only hard cheeses (Hushållsost, Västgötaost, Port Salut, Kumminost); their Vitlöksost is a hard garlic-infused cheese, not a cream cheese like Philadelphia."
+blockers = ["tomatsopp", "chips", "dessertost", "salad", "mediterranean", "kajmak", "pineapple", "almond", "chevre", "pepper", "4 peppar", "gäsene", "gasene"]
+reason = "Philadelphiaost route inherits the färskost flavor/other-product PNB blockers. Plant-based variants (vegansk/plant based/växtbaserad) are intentionally NOT blocked — a plain philadelphiaost/cream-cheese ingredient may match vego variants (substitute policy: material is irrelevant for a plain ingredient; only flavor/other-product words stay). Gäsene Mejeri produces only hard cheeses (Hushållsost, Västgötaost, Port Salut, Kumminost); their Vitlöksost is a hard garlic-infused cheese, not a cream cheese like Philadelphia."
 
 [[product_name_blockers]]
 id = "runtime_pnb_persiljestjalkar"
@@ -423,13 +423,6 @@ status = "active"
 keyword = "pärlcouscous"
 blockers = ["currysås"]
 reason = "Pärlcouscous med currysås is a ready-made flavored product, not plain pearl couscous for cooking"
-
-[[product_name_blockers]]
-id = "runtime_pnb_salame"
-status = "active"
-keyword = "salame"
-blockers = ["vegan"]
-reason = "vegan salami substitutes should not match real salame/salami in charcuterie or meat recipes"
 
 [[product_name_blockers]]
 id = "runtime_pnb_fetaost"
