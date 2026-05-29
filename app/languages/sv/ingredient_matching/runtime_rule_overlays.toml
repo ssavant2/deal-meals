@@ -281,8 +281,8 @@ reason = "Grillkryddad karré is a pre-seasoned/marinated product fundamentally 
 id = "runtime_pnb_gradde"
 status = "active"
 keyword = "grädde"
-blockers = ["soja", "oat lök"]
-reason = "Soja-based cream products (Cuisine vispgrädde Soja, Matlagningsgrädde Soja from Alpro) are plant-based substitutes; soja in product name as standalone word indicates plant-based cream, consistent with existing sojagrädde FPB blocker; Oddlygood Havregrädde Cooking Oat Lök is onion-flavored cooking cream; same pattern as paprika chili blocker for flavored cream variants that change recipe flavor profile"
+blockers = ["oat lök"]
+reason = "Oddlygood Havregrädde Cooking Oat Lök is onion-flavored cooking cream; same pattern as paprika chili blocker for flavored cream variants that change recipe flavor profile. Note: plain plant-based cream (sojagrädde, havregrädde) is intentionally NOT blocked here — a plain dairy 'grädde' ingredient matches all material variants per the substitute policy; only flavored variants are blocked. The reverse direction (a plant-based recipe ingredient not matching dairy) is handled by the grädde KSBC."
 
 [[product_name_blockers]]
 id = "runtime_pnb_margarin"
@@ -675,6 +675,20 @@ status = "active"
 keyword = "proteinpudding"
 blockers = ["choklad", "caramel", "karamell", "delicato", "gräddkola", "jordgubb", "salted", "delicatoboll", "vit choklad"]
 reason = "flavored protein puddings (choklad/karamell/jordgubb etc.) blocked from plain proteinpudding ingredient. Analog yoghurt policy: plain/vanilla matches all naturell, explicit flavor must be named"
+
+[[product_name_blockers]]
+id = "runtime_pnb_kantareller"
+status = "active"
+keyword = "kantareller"
+blockers = ["torkad"]
+reason = "Torkad trattkantarell är en annan art och torkad form; färsk kantarell-recept ska inte matcha torkad svamp som kräver blötläggning."
+
+[[product_name_blockers]]
+id = "runtime_pnb_pinsasas"
+status = "active"
+keyword = "pinsasås"
+blockers = ["chili", "nduja"]
+reason = "Pinsasås Classico (plain) ska inte matcha smaksatta varianter Chili och 'Nduja; samma plain-vs-smaksatt-princip som pesto."
 
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
@@ -1264,6 +1278,34 @@ keyword = "potatis"
 context = ["nypotatis"]
 reason = "REVERTED: nypotatis = färskpotatis (same product); should use keyword_synonym routing, not KSBC isolation"
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_pommes"
+status = "active"
+keyword = "pommes"
+context = ["sötpotatis"]
+reason = "Sötpotatispommes är en annan råvara än vanlig potatispommes; recept som anger sötpotatis ska inte matcha vanliga pommes frites. Konsekvent med isoleringen av sötpotatis från generisk potatis."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_brod"
+status = "active"
+keyword = "bröd"
+context = ["piadina"]
+reason = "Piadina är en specifik italiensk tunnbrödstyp; piadina-ingrediens ska bara matcha piadina-bröd, inte generiska bröd som Levain/naan/bagels. Samma mekanism som steamed buns och tunnbröd."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_bullar"
+status = "active"
+keyword = "bullar"
+context = ["pease"]
+reason = "Pease Bullar är veganska ärtprotein-bullar, inte brödbullar; pease-ingrediens ska inte matcha släta brödbullar via bullar-keyword."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_vitlok"
+status = "active"
+keyword = "vitlök"
+context = ["grillolja"]
+reason = "Grillolja Vitlök är smaksatt olja, inte rå vitlök; recept-ingrediens som är flavored grillolja ska suppressa den generiska vitlök-keyword så råa vitlökshuvuden inte matchar. KSBC istället för FPB eftersom ingrediensen innehåller vitlök som eget ord (FPB kringgås då)."
+
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
 status = "active"
@@ -1500,6 +1542,13 @@ status = "active"
 keyword = "chevre"
 context_words = ["chevrette"]
 reason = "Chevrette is a chevre variant (diminutive form, mindre chevre). Chevre keyword should match chevrette products without requiring ingredient to explicitly mention chevrette. Policy: all chevre matches chevreost-recipes regardless of subtype."
+
+[[compound_protection_updates]]
+id = "runtime_compound_protection_suffix_strict_kal"
+status = "active"
+mode = "suffix_strict"
+keywords = ["kål"]
+reason = "Kirskål är en vild ört (Aegopodium podagraria), inte kål-familjen, men matchar idag kål-produkter via kål-suffix. Suffix-strict kräver att kål-prefixet matchar produktnamnet så kirskål inte fångar generiska kål-produkter. Generisk standalone kål och egna helordsnycklar (vitkål/grönkål) är opåverkade."
 
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_tomat_datterini_datterino"

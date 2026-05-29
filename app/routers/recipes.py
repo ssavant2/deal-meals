@@ -577,6 +577,21 @@ def get_matching_preferences():
         })
 
 
+def _normalize_matching_preference_text_list(values, *, lowercase=False):
+    if not isinstance(values, list):
+        return []
+
+    normalized = []
+    for value in values:
+        if not isinstance(value, str):
+            continue
+        text_value = value.strip()
+        if not text_value:
+            continue
+        normalized.append(text_value.lower() if lowercase else text_value)
+    return normalized
+
+
 @router.post("/matching/preferences")
 async def save_matching_preferences(request: Request):
     """API endpoint to save matching preferences."""
@@ -603,14 +618,16 @@ async def save_matching_preferences(request: Request):
         min_ingredients = max(0, min(30, int(data.get('min_ingredients', 0))))
         max_ingredients = max(0, min(30, int(data.get('max_ingredients', 0))))
 
-        if not isinstance(exclude_keywords, list):
-            exclude_keywords = []
-        if not isinstance(filtered_products, list):
-            filtered_products = []
-        if not isinstance(excluded_brands, list):
-            excluded_brands = []
+        exclude_keywords = _normalize_matching_preference_text_list(
+            exclude_keywords,
+            lowercase=True,
+        )
+        filtered_products = _normalize_matching_preference_text_list(
+            filtered_products,
+            lowercase=True,
+        )
         # Keep original case - comparison is done case-insensitively in filtering code
-        excluded_brands = [b.strip() for b in excluded_brands if isinstance(b, str) and b.strip()]
+        excluded_brands = _normalize_matching_preference_text_list(excluded_brands)
 
         with get_db_session() as db:
             db.execute(text("""
