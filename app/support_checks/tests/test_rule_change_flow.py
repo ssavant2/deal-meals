@@ -15,6 +15,7 @@ import sys
 import tempfile
 import tomllib
 import unittest
+from unittest import mock
 
 from cli import dm as dm_cli
 from support_checks.run_matcher_change_preflight import (
@@ -64,9 +65,11 @@ from support_checks.run_verified_term_audit import (
 )
 from support_checks.promote_term_baseline import (
     PromotionConfig,
+    promote,
     _content_key,
     _coverage_key,
     _expected_count_constants_are_stale,
+    _matcher_regression_case_identity,
     _update_expected_count_constants,
     _write_variant_id_migration_map,
 )
@@ -812,6 +815,63 @@ def normalize_probe(text: str) -> str:
         self.assertEqual(_content_key(fixture_variant, config), _content_key(canonical_revision, config))
         self.assertNotEqual(_content_key(fixture_variant, config), _content_key(source_rewrite, config))
         self.assertNotEqual(_content_key(registry_variant, config), _content_key(registry_canonical_revision, config))
+
+    def test_promote_reports_matcher_regression_assertion_flips(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            baseline_path = tmp_path / "verified_matcher_terms.json"
+            old_variant = {
+                "variant_id": "vterm-old-positive",
+                "language": "sv",
+                "market": "SE",
+                "source_type": "matcher_regression_case",
+                "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+                "source_id": "matcher_regression_positive_phase6_assertion_flip",
+                "variant_role": "positive_regression",
+                "variant_text": (
+                    "matcher_regression_positive_phase6_assertion_flip: Phase 6 offer"
+                ),
+                "canonical": "phase6old",
+                "expected_family": "phase6old",
+                "expected": 1,
+            }
+            fresh_variant = {
+                **old_variant,
+                "variant_id": "vterm-new-negative",
+                "variant_role": "negative_regression",
+                "canonical": None,
+                "expected_family": "phase6new_policy",
+                "expected": 0,
+            }
+            baseline_path.write_text(
+                json.dumps({"variants": [old_variant], "summary": {}, "verification": {}}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            config = PromotionConfig(
+                language="sv",
+                market="SE",
+                baseline_path=baseline_path,
+                audit_module="support_checks.run_verified_term_audit",
+                registry_module="languages.sv.ingredient_matching.term_registry.registry",
+            )
+
+            self.assertEqual(
+                _matcher_regression_case_identity(old_variant, config),
+                _matcher_regression_case_identity(fresh_variant, config),
+            )
+            stdout = io.StringIO()
+            with mock.patch(
+                "support_checks.promote_term_baseline._generate_fresh_variants",
+                return_value=[fresh_variant],
+            ), contextlib.redirect_stdout(stdout):
+                result = promote(config=config, dry_run=True)
+
+        output = stdout.getvalue()
+        self.assertEqual(result, 1, output)
+        self.assertIn("matcher-regression assertion(s) changed since the baseline", output)
+        self.assertIn("baseline: expected=1, role=positive_regression, canonical=phase6old", output)
+        self.assertIn("current:  vterm-new-negative: expected=0, role=negative_regression", output)
+        self.assertIn("--allow-removals", output)
 
     def test_promote_coverage_key_uses_expected_family_for_negative_fixtures(self) -> None:
         config = PromotionConfig(

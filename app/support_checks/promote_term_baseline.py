@@ -527,6 +527,28 @@ def _content_key(v: dict, config: PromotionConfig) -> tuple:
     )
 
 
+def _matcher_regression_case_identity(v: dict, config: PromotionConfig) -> tuple | None:
+    """Stable fixture identity for diagnosing assertion flips."""
+    if str(v.get("source_family") or v.get("source_type") or "") != "matcher_regression_case":
+        return None
+    source_id = str(v.get("source_id") or "")
+    if not source_id:
+        return None
+    return (
+        str(v.get("language") or config.language),
+        str(v.get("market") or config.market),
+        "matcher_regression_case",
+        source_id,
+        str(v.get("source_file") or ""),
+    )
+
+
+def _assertion_summary(v: dict) -> str:
+    role = str(v.get("variant_role") or v.get("layer_role") or "?")
+    canonical = str(v.get("canonical") or v.get("expected_family") or "?")
+    return f"expected={v.get('expected', None)!r}, role={role}, canonical={canonical}"
+
+
 def _coverage_key(v: dict, config: PromotionConfig) -> tuple[str, str, str, str, str, str]:
     return (
         str(v.get("language") or config.language),
@@ -710,11 +732,16 @@ def promote(
         # removals still require explicit --allow-removals approval.
         from collections import defaultdict
         fresh_queues: dict[tuple, list] = defaultdict(list)
+        fresh_regression_case_queues: dict[tuple, list] = defaultdict(list)
         for v in fresh_variants:
             if v.get("variant_id") and v["variant_id"] not in current_ids:
                 fresh_queues[_content_key(v, config)].append(v)
+                regression_case_identity = _matcher_regression_case_identity(v, config)
+                if regression_case_identity:
+                    fresh_regression_case_queues[regression_case_identity].append(v)
 
         truly_removed = []
+        changed_regression_assertions = []
         removed_id_order = [
             v["variant_id"]
             for v in baseline["variants"]
@@ -729,26 +756,58 @@ def promote(
                     hash_migrations.append((vid, fresh_v["variant_id"], old_v, fresh_v))
                     migrated_new_ids.add(fresh_v["variant_id"])
             else:
-                truly_removed.append(vid)
+                regression_case_identity = _matcher_regression_case_identity(old_v, config)
+                changed_queue = (
+                    fresh_regression_case_queues.get(regression_case_identity)
+                    if regression_case_identity
+                    else None
+                )
+                if changed_queue:
+                    changed_regression_assertions.append((vid, old_v, changed_queue.pop(0)))
+                else:
+                    truly_removed.append(vid)
 
-        if truly_removed:
-            print(f"\n⚠️  WARNING: {len(truly_removed)} variant(s) truly removed (no content match in fresh):")
-            for vid in sorted(truly_removed)[:10]:
-                v = baseline_by_id[vid]
-                print(f"   {vid}: {v.get('variant_text','')!r} ({v.get('source_type','')})")
+        removal_review_count = len(truly_removed) + len(changed_regression_assertions)
+        if removal_review_count:
+            if changed_regression_assertions:
+                print(
+                    "\n⚠️  WARNING: "
+                    f"{len(changed_regression_assertions)} matcher-regression assertion(s) "
+                    "changed since the baseline:"
+                )
+                for old_id, old_v, fresh_v in changed_regression_assertions[:10]:
+                    print(f"   {old_id}: {old_v.get('variant_text','')!r}")
+                    print(f"      baseline: {_assertion_summary(old_v)}")
+                    print(
+                        "      current:  "
+                        f"{fresh_v.get('variant_id','?')}: {_assertion_summary(fresh_v)}"
+                    )
+                print(
+                    "These usually mean an existing fixture was intentionally converted "
+                    "between positive/negative, or its expected canonical changed."
+                )
+            if truly_removed:
+                print(
+                    "\n⚠️  WARNING: "
+                    f"{len(truly_removed)} variant(s) truly removed (no content match in fresh):"
+                )
+                for vid in sorted(truly_removed)[:10]:
+                    v = baseline_by_id[vid]
+                    print(f"   {vid}: {v.get('variant_text','')!r} ({v.get('source_type','')})")
             if not allow_removals:
-                print("This usually means a TOML entry or extraction function was removed.")
+                if truly_removed:
+                    print("True removals usually mean a TOML entry or extraction function was removed.")
                 print("Re-run with --allow-removals only after confirming the removals are intentional.")
                 print("Aborting.")
                 return 1
             if (
-                len(truly_removed) > LARGE_REMOVAL_CONFIRMATION_THRESHOLD
+                removal_review_count > LARGE_REMOVAL_CONFIRMATION_THRESHOLD
                 and not dry_run
                 and not confirm_large_removals
             ):
                 print(
                     "Large removal set detected. Type 'yes' to confirm dropping "
-                    f"{len(truly_removed)} verified-term variants from the baseline."
+                    f"{removal_review_count} verified-term variants from the baseline."
                 )
                 if not sys.stdin.isatty():
                     print(
@@ -760,8 +819,9 @@ def promote(
                 if input("> ").strip().lower() != "yes":
                     print("Aborting.")
                     return 1
+            allowed_removed_ids.update(old_id for old_id, _old_v, _fresh_v in changed_regression_assertions)
             allowed_removed_ids.update(truly_removed)
-            print("Removal approval enabled: these truly removed variants will be dropped from the baseline.")
+            print("Removal approval enabled: these old baseline variants will be dropped from the baseline.")
         print(
             "\nHash migration: "
             f"{len(hash_migrations)} variant(s) will get new IDs with unchanged coverage/content."
