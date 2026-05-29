@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 397,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 155,
+      "keyword_synonym_mapping": 156,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 155,
+      "keyword_synonym": 156,
       "match_bridge": 2021,
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 468,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5705,
-    "variants_missing_product_text": 1822,
+    "variant_count": 5706,
+    "variants_missing_product_text": 1823,
     "variants_with_product_text": 3883
   },
   "variants": [
@@ -119851,11 +119851,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"polkagrisar\"}"
+    },
+    {
+      "variant_id": "vterm-6e1cb763927a6d93",
+      "row_index": 4851,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:pulverkaffe",
+      "source_id": "pulverkaffe",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "pulverkaffe",
+      "canonical": "snabbkaffe",
+      "expected_family": "snabbkaffe",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"snabbkaffe\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1600,
+      "no_product_text": 1601,
       "static_verified": 2605,
       "synthetic_verified": 1500
     },
@@ -119866,7 +119887,7 @@
       "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 155,
+      "keyword_synonym": 156,
       "match_bridge": 2021,
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 468,
@@ -119877,8 +119898,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5705
+      "audited": 5706
     },
-    "variant_count": 5705
+    "variant_count": 5706
   }
 }

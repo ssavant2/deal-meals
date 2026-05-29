@@ -1314,6 +1314,14 @@ def _fresh_chili_product_allowed(
         'klass', 'kl1',
         'färsk', 'farsk',
         'fryst', 'frysta',
+        # Adjective-before-noun (Swedish standard): "Röd Chili 50g" → 'röd chili'
+        'röd chili', 'rod chili',
+        'grön chili', 'gron chili',
+        'gul chili',
+        'röd peppar', 'rod peppar',
+        'grön peppar', 'gron peppar',
+        'gul peppar',
+        # Adjective-after-noun (some brand conventions): "Chili Röd", "Peppar Röd"
         'peppar röd', 'peppar rod',
         'peppar grön', 'peppar gron',
         'peppar gul',

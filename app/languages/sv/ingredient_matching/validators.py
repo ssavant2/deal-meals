@@ -55,6 +55,14 @@ _FRESH_CHILI_INGREDIENT_RE = re.compile(
 )
 
 
+_FRESH_CHILI_CUES = frozenset({
+    'st', 'styck', 'liten', 'lilla', 'stor', 'stora',
+    'skivad', 'skivade',
+    'finhackad', 'finhackade', 'hackad', 'hackade',
+    'urkärnad', 'urkarnad',
+})
+
+
 def _ingredient_requests_fresh_chili_text(ingredient_lower: str) -> bool:
     if any(cue in ingredient_lower for cue in _FRESH_COLOR_CHILI_INGREDIENT_CUES):
         return True
@@ -62,7 +70,15 @@ def _ingredient_requests_fresh_chili_text(ingredient_lower: str) -> bool:
     if not match:
         return False
     segment = match.group(0)
-    if any(cue in segment.split() for cue in {'st', 'styck', 'liten', 'lilla', 'stor', 'stora', 'skivad', 'skivade'}):
+    if any(cue in segment.split() for cue in _FRESH_CHILI_CUES):
+        return True
+    # Prep-method cues before the chili keyword (e.g. "finhackad chilifrukt")
+    prefix = ingredient_lower[:match.start()].split()[-2:]
+    if prefix and any(cue in prefix for cue in _FRESH_CHILI_CUES):
+        return True
+    # Prep-method cues after the chili keyword (e.g. "1 tsk chilifrukt, finhackad")
+    suffix = ingredient_lower[match.end():].split()[:3]
+    if suffix and any(any(cue == w.strip(',.') for w in suffix) for cue in _FRESH_CHILI_CUES):
         return True
     return (
         'sambal' in ingredient_lower

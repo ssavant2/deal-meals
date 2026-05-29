@@ -963,6 +963,13 @@ keyword = "mjöl"
 blockers = ["mjölig", "mjolig"]
 reason = "Potatis Mjölig (mealy potato) contains the substring mjöl; flour products must not match a mealy-potato ingredient"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_smor"
+status = "active"
+keyword = "smör"
+blockers = ["frösmör", "frosmor"]
+reason = "frösmör (seed butter) ingredient should not match dairy smör products; smör keyword is substring of frösmör in ingredient text. Same pattern as existing sesamsmör/mandelsmör/jordnötssmör blockers."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
