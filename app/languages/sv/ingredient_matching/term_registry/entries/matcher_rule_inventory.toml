@@ -9366,3 +9366,23 @@ source_family = "matcher_rule_inventory"
 canonical = "pesto"
 variant = "pesto"
 layer_role = "legacy_validator"
+
+[[entries]]
+entry_id = "sv-se.policy.korsbarstomater.current_review_canned_korsbarstomater_not_fresh"
+language = "sv"
+market = "SE"
+canonical = "körsbärstomater"
+status = "active"
+variants = ["körsbärstomater"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:current_review_canned_korsbarstomater_not_fresh"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row current_review_canned_korsbarstomater_not_fresh."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "körsbärstomater"
+variant = "körsbärstomater"
+layer_role = "legacy_validator"

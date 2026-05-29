@@ -10132,8 +10132,7 @@
     "canonical": "körsbärstomater",
     "fixture_refs": [
       "matcher_regression_positive_korsbarstomater_250g_klass_1_ica",
-      "matcher_regression_negative_pastasas_korsbarstomat_och_basilika_ica_selection",
-      "matcher_regression_positive_korsbarstomater_400g_cirio"
+      "matcher_regression_negative_pastasas_korsbarstomat_och_basilika_ica_selection"
     ],
     "id": "legacy_review_explicit_fresh_korsbarstomat_garna_pa_kvist_still_gets_0_matches",
     "kind": "legacy_validator",
@@ -10153,6 +10152,30 @@
       "legacy_review:explicit_fresh_korsbarstomat_garna_pa_kvist_still_gets_0_matches"
     ],
     "status": "wrapped_adapter"
+  },
+  {
+    "canonical": "körsbärstomater",
+    "fixture_refs": [
+      "matcher_regression_positive_korsbarstomater_400g_cirio"
+    ],
+    "id": "current_review_canned_korsbarstomater_not_fresh",
+    "kind": "legacy_validator",
+    "line_refs": [
+      {
+        "anchor": "matcher_regression_positive_korsbarstomater_400g_cirio",
+        "end": 15165,
+        "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+        "start": 15165
+      }
+    ],
+    "notes": "Canned cherry tomatoes must not satisfy fresh cherry-tomato wording such as gärna på kvist.",
+    "owner": "matcher",
+    "policy_ref": "current_review_canned_small_tomato_not_fresh",
+    "risk": "form_guard",
+    "source_refs": [
+      "current_review:canned_korsbarstomater_cirio_not_fresh"
+    ],
+    "status": "observed_legacy"
   },
   {
     "adapter_ref": "match_bridges:bridge_mork_chokladkaka_dark",

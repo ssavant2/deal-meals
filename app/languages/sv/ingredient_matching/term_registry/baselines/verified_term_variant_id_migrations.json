@@ -3,7 +3,7 @@
   "from_hash_version": "v1_source_ref",
   "to_hash_version": "v2_stable_without_source_ref",
   "description": "Permanent verified-term variant_id migration map. Current records come from the v1 source_ref-based hash to v2 stable hash migration; v2 hashes exclude source_ref provenance text so source_ref edits do not force future baseline hash migrations.",
-  "variant_count": 5521,
+  "variant_count": 5524,
   "migrations": [
     {
       "old_variant_id": "vterm-001176a79541d816",
@@ -16605,6 +16605,19 @@
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
       "source_id": "matcher_regression_potato_buns_positive",
       "source_ref": "current_review:accepted_direct_fix:potato_buns"
+    },
+    {
+      "old_variant_id": "vterm-3b7323d75fcf2125",
+      "new_variant_id": "vterm-c11f0f39b7656dfc",
+      "language": "sv",
+      "market": "SE",
+      "source_family": "matcher_regression_case",
+      "canonical": "småtomat",
+      "variant": "matcher_regression_positive_korsbarstomater_250g_klass_1_ica: Körsbärstomater 250g Klass 1 ICA",
+      "layer_role": "positive_regression",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_id": "matcher_regression_positive_korsbarstomater_250g_klass_1_ica",
+      "source_ref": "legacy_review:explicit_fresh_korsbarstomat_garna_pa_kvist_still_gets_0_matches"
     },
     {
       "old_variant_id": "vterm-3b93485a07406d3f",
@@ -43296,6 +43309,19 @@
       "source_ref": "legacy_review:explicit_lammkotletter_lines_still_collapse_to_broad_generic_lamb_cuts"
     },
     {
+      "old_variant_id": "vterm-9a8e77756b2c6365",
+      "new_variant_id": "vterm-5cb2231d560a448a",
+      "language": "sv",
+      "market": "SE",
+      "source_family": "matcher_regression_case",
+      "canonical": "småtomat",
+      "variant": "matcher_regression_konserverade_korsbarstomater_in_juice_positive: Körsbärs- Tomater i Tomatjuice Eldorado",
+      "layer_role": "positive_regression",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_id": "matcher_regression_konserverade_korsbarstomater_in_juice_positive",
+      "source_ref": "current_review:positive_sibling:konserverade_korsbarstomater_in_juice"
+    },
+    {
       "old_variant_id": "vterm-9a96e84da515134a",
       "new_variant_id": "vterm-49f47fdc2b979236",
       "language": "sv",
@@ -46427,6 +46453,19 @@
       "source_file": "app/languages/sv/ingredient_matching/match_bridges.py",
       "source_id": "bridge_styckbrod_bread_rolls",
       "source_ref": "match_bridges:bridge_styckbrod_bread_rolls"
+    },
+    {
+      "old_variant_id": "vterm-a5321d24933204d8",
+      "new_variant_id": "vterm-92cf3745f60fbe8a",
+      "language": "sv",
+      "market": "SE",
+      "source_family": "matcher_regression_case",
+      "canonical": "småtomat",
+      "variant": "matcher_regression_korsbarstomater_cocktail_positive: Cocktailtomater Klass 1",
+      "layer_role": "positive_regression",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_id": "matcher_regression_korsbarstomater_cocktail_positive",
+      "source_ref": "current_review:positive_sibling:korsbarstomater_cocktail"
     },
     {
       "old_variant_id": "vterm-a54c38d6c45b1753",

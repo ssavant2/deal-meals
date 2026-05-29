@@ -19,13 +19,13 @@
       "legacy_parent": 18,
       "legacy_prepared_text_expansion": 11,
       "legacy_synonym": 74,
-      "legacy_validator": 251,
+      "legacy_validator": 252,
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 340,
-      "negative_regression": 839,
+      "negative_regression": 840,
       "offer_extra_keyword_mapping": 417,
       "parent_match_only_mapping": 20,
-      "positive_regression": 661,
+      "positive_regression": 660,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
@@ -36,14 +36,14 @@
       "keyword_synonym": 156,
       "match_bridge": 2021,
       "matcher_regression_case": 1500,
-      "matcher_rule_inventory": 468,
+      "matcher_rule_inventory": 469,
       "no_match_policy": 362,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5706,
-    "variants_missing_product_text": 1823,
+    "variant_count": 5707,
+    "variants_missing_product_text": 1824,
     "variants_with_product_text": 3883
   },
   "variants": [
@@ -30393,27 +30393,6 @@
       "metadata": "{\"target\": \"växtdryck\"}"
     },
     {
-      "variant_id": "vterm-71663474307d11e9",
-      "row_index": 1533,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "legacy_review:explicit_fresh_korsbarstomat_garna_pa_kvist_still_gets_0_matches",
-      "source_id": "matcher_regression_positive_korsbarstomater_400g_cirio",
-      "variant_role": "positive_regression",
-      "variant_text": "matcher_regression_positive_korsbarstomater_400g_cirio: Körsbärstomater 400g Cirio",
-      "canonical": "körsbärstomater",
-      "expected_family": "körsbärstomater",
-      "ingredient_text": "250 g körsbärstomat, gärna på kvist",
-      "product_text": "Körsbärstomater 400g Cirio",
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": false,
-      "notes": "legacy_review_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"körsbärstomater\", \"ingredient_index\": 0, \"must_match_keyword\": \"körsbärstomater\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Tortellinigratäng med ostsås\"}"
-    },
-    {
       "variant_id": "vterm-da71c5b7e637705b",
       "row_index": 866,
       "source_order": 20,
@@ -34803,8 +34782,8 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
-      "variant_id": "vterm-9a8e77756b2c6365",
-      "row_index": 711,
+      "variant_id": "vterm-5cb2231d560a448a",
+      "row_index": 730,
       "source_order": 20,
       "source_type": "matcher_regression_case",
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
@@ -34812,8 +34791,8 @@
       "source_id": "matcher_regression_konserverade_korsbarstomater_in_juice_positive",
       "variant_role": "positive_regression",
       "variant_text": "matcher_regression_konserverade_korsbarstomater_in_juice_positive: Körsbärs- Tomater i Tomatjuice Eldorado",
-      "canonical": "körsbärstomater",
-      "expected_family": "körsbärstomater",
+      "canonical": "småtomat",
+      "expected_family": "småtomat",
       "ingredient_text": "1 förp konserverade körsbärstomater",
       "product_text": "Körsbärs- Tomater i Tomatjuice Eldorado",
       "product_category": "beverages",
@@ -34821,7 +34800,7 @@
       "expected": 1,
       "needs_product_text": false,
       "notes": "current_review_matcher_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"körsbärstomater\", \"ingredient_index\": 0, \"must_match_keyword\": \"körsbärstomater\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"småtomat\", \"ingredient_index\": 0, \"must_match_keyword\": \"småtomat\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
       "variant_id": "vterm-4336aef689c5f366",
@@ -82074,8 +82053,8 @@
       "metadata": "{\"aliases\": [\"sockerärtor\", \"sugar snaps\"], \"fixture_refs\": [\"matcher_regression_positive_salladsarta\", \"matcher_regression_positive_salladsarta_150g_klass_1_ica\", \"matcher_regression_positive_salladsarter\", \"matcher_regression_positive_salladsarter_150g_klass_1_ica\", \"matcher_regression_positive_salladsartor\", \"matcher_regression_salladsartor_positive\", \"matcher_regression_sugar_snaps_positive\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_review_salladsartor_still_misses_the_live_exact_salladsarta_offer\", \"legacy_synonym_salladsartor_sockerartor\"]}"
     },
     {
-      "variant_id": "vterm-a5321d24933204d8",
-      "row_index": 721,
+      "variant_id": "vterm-92cf3745f60fbe8a",
+      "row_index": 740,
       "source_order": 20,
       "source_type": "matcher_regression_case",
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
@@ -82083,8 +82062,8 @@
       "source_id": "matcher_regression_korsbarstomater_cocktail_positive",
       "variant_role": "positive_regression",
       "variant_text": "matcher_regression_korsbarstomater_cocktail_positive: Cocktailtomater Klass 1",
-      "canonical": "körsbärstomater",
-      "expected_family": "körsbärstomater",
+      "canonical": "småtomat",
+      "expected_family": "småtomat",
       "ingredient_text": "125 g Körsbärstomater",
       "product_text": "Cocktailtomater Klass 1",
       "product_category": "vegetables",
@@ -82092,7 +82071,7 @@
       "expected": 1,
       "needs_product_text": false,
       "notes": "current_review_matcher_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"körsbärstomater\", \"ingredient_index\": 0, \"must_match_keyword\": \"körsbärstomater\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"småtomat\", \"ingredient_index\": 0, \"must_match_keyword\": \"småtomat\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
       "variant_id": "vterm-64f25c135b78bbb4",
@@ -84783,8 +84762,8 @@
       "metadata": "{\"aliases\": [], \"fixture_refs\": [\"matcher_regression_chili_sambal_fresh_positive\", \"matcher_regression_red_chili_fresh_positive\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_validator_chili_spice_vs_fresh_examples\", \"legacy_validator_chilipeppar_sambal_fresh_or_sambal\"]}"
     },
     {
-      "variant_id": "vterm-3b7323d75fcf2125",
-      "row_index": 1532,
+      "variant_id": "vterm-c11f0f39b7656dfc",
+      "row_index": 1552,
       "source_order": 20,
       "source_type": "matcher_regression_case",
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
@@ -84792,8 +84771,8 @@
       "source_id": "matcher_regression_positive_korsbarstomater_250g_klass_1_ica",
       "variant_role": "positive_regression",
       "variant_text": "matcher_regression_positive_korsbarstomater_250g_klass_1_ica: Körsbärstomater 250g Klass 1 ICA",
-      "canonical": "körsbärstomater",
-      "expected_family": "körsbärstomater",
+      "canonical": "småtomat",
+      "expected_family": "småtomat",
       "ingredient_text": "250 g körsbärstomat, gärna på kvist",
       "product_text": "Körsbärstomater 250g Klass 1 ICA",
       "product_category": null,
@@ -84801,7 +84780,7 @@
       "expected": 1,
       "needs_product_text": false,
       "notes": "legacy_review_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"körsbärstomater\", \"ingredient_index\": 0, \"must_match_keyword\": \"körsbärstomater\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Tortellinigratäng med ostsås\"}"
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"småtomat\", \"ingredient_index\": 0, \"must_match_keyword\": \"småtomat\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Tortellinigratäng med ostsås\"}"
     },
     {
       "variant_id": "vterm-2013877f0ed93043",
@@ -119872,12 +119851,54 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"snabbkaffe\"}"
+    },
+    {
+      "variant_id": "vterm-6d4c616e9fcaaf98",
+      "row_index": 1553,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "current_review:canned_korsbarstomater_cirio_not_fresh",
+      "source_id": "matcher_regression_positive_korsbarstomater_400g_cirio",
+      "variant_role": "negative_regression",
+      "variant_text": "matcher_regression_positive_korsbarstomater_400g_cirio: Körsbärstomater 400g Cirio",
+      "canonical": null,
+      "expected_family": "current_review_canned_small_tomato_not_fresh",
+      "ingredient_text": "250 g körsbärstomat, gärna på kvist",
+      "product_text": "Körsbärstomater 400g Cirio",
+      "product_category": null,
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": false,
+      "notes": "current_review_canned_small_tomato_not_fresh",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_canned_small_tomato_not_fresh\", \"recipe_name\": \"Tortellinigratäng med ostsås\"}"
+    },
+    {
+      "variant_id": "vterm-cc0ae78596c5722d",
+      "row_index": 1,
+      "source_order": 10,
+      "source_type": "matcher_rule_inventory",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",
+      "source_ref": "current_review:canned_korsbarstomater_cirio_not_fresh",
+      "source_id": "current_review_canned_korsbarstomater_not_fresh",
+      "variant_role": "legacy_validator",
+      "variant_text": "körsbärstomater",
+      "canonical": "körsbärstomater",
+      "expected_family": "körsbärstomater",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": null,
+      "needs_product_text": true,
+      "notes": "Canned cherry tomatoes must not satisfy fresh cherry-tomato wording such as gärna på kvist.",
+      "metadata": "{\"adapter_ref\": null, \"adapter_refs\": [], \"fixture_refs\": [\"matcher_regression_positive_korsbarstomater_400g_cirio\"], \"policy_ref\": \"current_review_canned_small_tomato_not_fresh\", \"risk\": \"form_guard\", \"source_refs\": [\"current_review:canned_korsbarstomater_cirio_not_fresh\"], \"status\": \"observed_legacy\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1601,
-      "static_verified": 2605,
+      "no_product_text": 1597,
+      "static_verified": 2610,
       "synthetic_verified": 1500
     },
     "method": "static_contract_audit",
@@ -119890,7 +119911,7 @@
       "keyword_synonym": 156,
       "match_bridge": 2021,
       "matcher_regression_case": 1500,
-      "matcher_rule_inventory": 468,
+      "matcher_rule_inventory": 469,
       "no_match_policy": 362,
       "offer_extra_keyword": 417,
       "parent_match_only": 20,
@@ -119898,8 +119919,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5706
+      "audited": 5707
     },
-    "variant_count": 5706
+    "variant_count": 5707
   }
 }
