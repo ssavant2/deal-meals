@@ -77,6 +77,8 @@ from .processed_rules import (
     STRICT_PROCESSED_RULES,
     _PROCESSED_INDICATOR_EQUIVALENTS,
     SPICE_VS_FRESH_RULES,
+    generic_canned_small_tomato_allows_processed_check,
+    generic_canned_whole_tomato_allows_strict_check,
 )
 from .recipe_context import CUISINE_CONTEXT
 from .recipe_text import (
@@ -463,6 +465,14 @@ _INGREDIENT_PARENT_TEXT_ALIASES = {
     'ziti': 'pasta',
     'makaroner': 'pasta',
     'maccaronetti': 'pasta',
+    # The legacy live matcher works from ingredient text rather than extracted
+    # canonical keywords. Mirror the extractor's small-tomato parent mapping so
+    # variants can match products whose only extracted keyword is "småtomat".
+    'körsbärstomat': 'småtomat',
+    'körsbärstomater': 'småtomat',
+    'korsbarstomat': 'småtomat',
+    'korsbarstomater': 'småtomat',
+    'småtomater': 'småtomat',
 }
 _ROM_SPIRIT_INGREDIENT_CUES = frozenset({
     'ljus rom', 'mörk rom', 'mork rom',
@@ -1781,10 +1791,27 @@ def _hjortronsylt_requirement_allows_product(
     return 'hjortron' in product_lower
 
 
+def _offer_is_canned_small_tomato_product(product_lower: str) -> bool:
+    """Preserved small-tomato cans that do not always say konserverad/burk."""
+
+    if any(cue in product_lower for cue in ('pomodorini', 'datterini', 'datterino', 'tomatjuice')):
+        return True
+    if 'cirio' in product_lower and any(cue in product_lower for cue in ('körsbärstomat', 'korsbarstomat')):
+        return True
+    if (
+        any(cue in product_lower for cue in ('körsbärstomater', 'korsbarstomater', 'småtomater', 'smatomater'))
+        and 'hela' in product_lower
+        and 'klass' not in product_lower
+    ):
+        return True
+    return False
+
+
 def _produce_form_requirement_allows_product(
     product_lower: str,
     ingredient_lower: str,
     matched_keyword: Optional[str],
+    eller_arms_prepared: tuple = (),
 ) -> bool:
     """Fresh, preserved, and color-specific produce wording must match product form."""
 
@@ -1792,12 +1819,34 @@ def _produce_form_requirement_allows_product(
         if any(cue in product_lower for cue in _PRESERVED_FRUIT_PRODUCT_CUES):
             return False
 
+    tomato_match_keywords = {
+        'tomat', 'tomater',
+        'körsbärstomat', 'körsbärstomater',
+        'korsbarstomat', 'korsbarstomater',
+        'småtomat',
+    }
+    tomato_preserved_cues = ('konserverad', 'konserverade', 'konserv', 'burk')
+    tomato_family_cues = ('körsbärstomat', 'korsbarstomat', 'småtomat', 'smatomat', 'tomat')
     if (
-        matched_keyword in {'tomat', 'tomater', 'körsbärstomat', 'körsbärstomater', 'korsbarstomat', 'korsbarstomater', 'småtomat'}
-        and any(cue in ingredient_lower for cue in ('konserverad', 'konserverade', 'konserv', 'burk'))
-        and any(cue in ingredient_lower for cue in ('körsbärstomat', 'korsbarstomat', 'småtomat', 'smatomat', 'tomat'))
+        matched_keyword in tomato_match_keywords
+        and any(cue in ingredient_lower for cue in tomato_preserved_cues)
+        and any(cue in ingredient_lower for cue in tomato_family_cues)
         and not any(cue in ingredient_lower for cue in ('färska eller', 'farska eller', 'färsk eller', 'farsk eller'))
     ):
+        if eller_arms_prepared:
+            small_tomato_keywords = {
+                'körsbärstomat', 'körsbärstomater',
+                'korsbarstomat', 'korsbarstomater',
+                'småtomat',
+            }
+            for arm in eller_arms_prepared:
+                if any(cue in arm for cue in tomato_preserved_cues):
+                    continue
+                if matched_keyword in small_tomato_keywords:
+                    if any(cue in arm for cue in ('körsbärstomat', 'korsbarstomat', 'småtomat', 'smatomat')):
+                        return True
+                elif 'tomat' in arm:
+                    return True
         return not any(cue in product_lower for cue in _FRESH_TOMATO_PRODUCT_CUES)
 
     if matched_keyword == 'sparris' and any(cue in ingredient_lower for cue in ('färsk sparris', 'farsk sparris', 'sparris färsk', 'sparris farsk')):
@@ -3187,12 +3236,26 @@ def matches_ingredient(
     ingredient_lower = re.sub(r'\bgurt\b', 'gurt yoghurt', ingredient_lower)
     if _ingredient_requests_generic_frozen_fish_fillet(ingredient_lower):
         ingredient_lower += ' fiskfilé'
+    parsed_eller_arms = (
+        tuple(parse_eller_alternatives(ingredient_lower))
+        if (
+            ' eller ' in ingredient_lower
+            or '(eller' in ingredient_lower
+            or 'alternativt' in ingredient_lower
+        )
+        else ()
+    )
     ingredient_lower = _append_canonical_keyword_synonyms(ingredient_lower)
     if _ingredient_is_non_buyable_root_veg_pasta(ingredient_lower):
         return None
     _eller_arms_prepared = (
-        tuple(parse_eller_alternatives(ingredient_lower))
-        if 'eller' in ingredient_lower
+        tuple(_append_canonical_keyword_synonyms(arm) for arm in parsed_eller_arms if arm.strip())
+        if len(parsed_eller_arms) > 1
+        else ()
+    )
+    _eller_arms_for_specialty = (
+        tuple(arm for arm in parsed_eller_arms if arm.strip())
+        if len(parsed_eller_arms) > 1
         else ()
     )
 
@@ -3595,7 +3658,12 @@ def matches_ingredient(
         return None
     if not _hjortronsylt_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
         return None
-    if not _produce_form_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
+    if not _produce_form_requirement_allows_product(
+        product_lower,
+        ingredient_lower,
+        matched_keyword,
+        _eller_arms_prepared,
+    ):
         return None
     if not _noodle_requirement_allows_product(product_lower, ingredient_lower, matched_keyword):
         return None
@@ -3737,7 +3805,18 @@ def matches_ingredient(
             }
             if found_qualifiers:
                 offer_specialty_qualifiers[specialty_keyword] = found_qualifiers
-            if not check_specialty_qualifiers(offer_specialty_qualifiers, specialty_keyword, ingredient_lower):
+            if specialty_keyword == 'småtomat' and _offer_is_canned_small_tomato_product(product_lower):
+                offer_specialty_qualifiers.setdefault('småtomat', set()).add('konserverad')
+            specialty_ingredient_lower = (
+                ' eller '.join(_eller_arms_for_specialty)
+                if _eller_arms_for_specialty
+                else ingredient_lower
+            )
+            if not check_specialty_qualifiers(
+                offer_specialty_qualifiers,
+                specialty_keyword,
+                specialty_ingredient_lower,
+            ):
                 return None
 
         # STEP 6: Processed product check (INVERSE logic)
@@ -3765,6 +3844,12 @@ def matches_ingredient(
                     for ind in product_indicators:
                         expanded_indicators.update(_PROCESSED_INDICATOR_EQUIVALENTS.get(ind, ()))
                     if product_indicators and not any(ind in ingredient_lower for ind in expanded_indicators):
+                        if generic_canned_whole_tomato_allows_strict_check(
+                            base_word,
+                            product_lower,
+                            ingredient_lower,
+                        ):
+                            continue
                         # Spice-amount heuristic: "1 tsk ingefära" (no qualifier) = ground/dried.
                         # Small spice amounts (tsk/krm) without fresh indicators imply dried/ground.
                         _SPICE_AMOUNT_IMPLICIT_GROUND = frozenset({
@@ -3791,6 +3876,12 @@ def matches_ingredient(
                     # Relaxed: check first indicator found, allow any indicator in ingredient
                     for indicator in processed_indicators:
                         if indicator in product_lower:
+                            if generic_canned_small_tomato_allows_processed_check(
+                                base_word,
+                                indicator,
+                                ingredient_lower,
+                            ):
+                                break
                             if indicator not in ingredient_lower:
                                 has_any_indicator = any(ind in ingredient_lower for ind in processed_indicators)
                                 if not has_any_indicator:
@@ -4265,6 +4356,8 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
                     found_in_offer.add(qualifier)
             if found_in_offer:
                 found_qualifiers[base_word] = found_in_offer
+    if 'småtomat' in keywords_set and _offer_is_canned_small_tomato_product(name_normalized):
+        found_qualifiers.setdefault('småtomat', set()).add('konserverad')
     if (
         'kalamataoliver' in keywords_set
         and 'kalamata' in name_normalized
@@ -4751,10 +4844,25 @@ def matches_ingredient_fast(
     )
     # STEP 1: Fast keyword matching (most products won't match)
     matched_keyword = None
+    base_ingredient_lower = ingredient_lower
+    base_ingredient_words = _ingredient_words
     for keyword in keywords:
+        ingredient_lower = base_ingredient_lower
+        _ingredient_words = base_ingredient_words
         if keyword in _RECIPE_NEVER_MATCH_KEYWORDS:
             continue
-        if _keyword_occurs_in_ingredient(keyword, ingredient_lower):
+        arm_ingredient_lower = None
+        keyword_occurs = _keyword_occurs_in_ingredient(keyword, ingredient_lower)
+        if not keyword_occurs and _eller_arms_prepared:
+            for arm in _eller_arms_prepared:
+                if _keyword_occurs_in_ingredient(keyword, arm):
+                    arm_ingredient_lower = arm
+                    keyword_occurs = True
+                    break
+        if keyword_occurs:
+            if arm_ingredient_lower is not None:
+                ingredient_lower = arm_ingredient_lower
+                _ingredient_words = tuple(_WORD_PATTERN.findall(ingredient_lower))
             if keyword == 'kål' and any(ind in ingredient_lower for ind in ('kålhuvud', 'kalhuvud')):
                 continue
             if keyword in _BREWED_COFFEE_BLOCKED_KEYWORDS and _is_brewed_coffee_ingredient_text(ingredient_lower):
@@ -5180,6 +5288,7 @@ def matches_ingredient_fast(
         offer_data['name_normalized'],
         ingredient_lower,
         matched_keyword,
+        _eller_arms_prepared,
     ):
         return None
     if not _noodle_requirement_allows_product(
@@ -6038,6 +6147,12 @@ def matches_ingredient_fast(
                 continue
             if check[1] == 'strict':
                 if not any(ind in ingredient_lower for ind in check[2]):
+                    if generic_canned_whole_tomato_allows_strict_check(
+                        check_base,
+                        offer_data.get('name_normalized', ''),
+                        ingredient_lower,
+                    ):
+                        continue
                     if check_base in _STRICT_GENERIC_MATCHES_ALL:
                         processed_indicators = PROCESSED_PRODUCT_RULES.get(check_base, ())
                         if not any(ind in ingredient_lower for ind in processed_indicators):
@@ -6053,6 +6168,12 @@ def matches_ingredient_fast(
                         continue  # Allow: spice amount or dry marker implies ground/dried
                     return None
             else:
+                if generic_canned_small_tomato_allows_processed_check(
+                    check_base,
+                    check[2],
+                    ingredient_lower,
+                ):
+                    continue
                 if check[2] not in ingredient_lower:
                     if not any(ind in ingredient_lower for ind in check[3]):
                         return None

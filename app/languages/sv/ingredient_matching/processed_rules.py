@@ -188,7 +188,7 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         'koncentrerade', 'koncentrerad',  # concentrated
         'hela',  # "Hela Tomater" = whole canned (matches "Hela Skalade Tomater")
         'konserverade', 'konserverad',  # canned/preserved
-        'burk',  # "1 burk tomater" = wants canned, allow any canned product to match
+        'burk',  # "1 burk tomater" = whole/peeled canned tomatoes, not crushed/passata
         # Specific tomato varieties ≠ generic "tomater"
         'cocktail', 'cockt',  # cocktail tomatoes
         'mix',  # tomato mix (variety pack)
@@ -504,6 +504,68 @@ _PROCESSED_INDICATOR_EQUIVALENTS: Dict[str, FrozenSet[str]] = {
     'burk': frozenset({'burk', 'konserv', 'konserverad', 'konserverade'}),
     'konserv': frozenset({'burk', 'konserv', 'konserverad', 'konserverade'}),
 }
+
+
+_SMALL_TOMATO_BASE_WORDS = frozenset({
+    'körsbärstomat', 'körsbärstomater',
+    'korsbarstomat', 'korsbarstomater',
+    'småtomat',
+})
+_SMALL_TOMATO_CANNED_PRODUCT_INDICATORS = frozenset({
+    'konserv', 'konserverad', 'konserverade',
+    'tomatjuice', 'juice',
+})
+_GENERIC_CANNED_RECIPE_INDICATORS = frozenset({
+    'burk', 'konserv', 'konserverad', 'konserverade',
+})
+_TOMATO_BASE_WORDS = frozenset({'tomat', 'tomater'})
+_TOMATO_WHOLE_CANNED_PRODUCT_INDICATORS = frozenset({
+    'hel', 'hela', 'skalad', 'skalade',
+    'konserverad', 'konserverade',
+})
+_TOMATO_NON_WHOLE_FORM_INDICATORS = frozenset({
+    'krossad', 'krossade',
+    'finkrossad', 'finkrossade',
+    'finhackad', 'finhackade',
+    'passerad', 'passerade',
+    'polpa',
+    'koncentrerad', 'koncentrerade',
+    'soltorkad', 'soltorkade', 'soltork', 'solt',
+    'torkad', 'torkade',
+    'secchi',
+})
+
+
+def generic_canned_small_tomato_allows_processed_check(
+    base_word: str,
+    product_indicator: str,
+    ingredient_lower: str,
+) -> bool:
+    """Allow canned small-tomato recipes to match canned/in-juice products only."""
+
+    return (
+        base_word in _SMALL_TOMATO_BASE_WORDS
+        and product_indicator in _SMALL_TOMATO_CANNED_PRODUCT_INDICATORS
+        and any(ind in ingredient_lower for ind in _GENERIC_CANNED_RECIPE_INDICATORS)
+    )
+
+
+def generic_canned_whole_tomato_allows_strict_check(
+    base_word: str,
+    product_lower: str,
+    ingredient_lower: str,
+) -> bool:
+    """Let "1 burk tomater" mean whole/peeled canned tomatoes, not crushed/passata."""
+
+    if base_word not in _TOMATO_BASE_WORDS:
+        return False
+    if not any(ind in ingredient_lower for ind in _GENERIC_CANNED_RECIPE_INDICATORS):
+        return False
+    if any(ind in ingredient_lower for ind in _TOMATO_NON_WHOLE_FORM_INDICATORS):
+        return False
+    if any(ind in product_lower for ind in _TOMATO_NON_WHOLE_FORM_INDICATORS):
+        return False
+    return any(ind in product_lower for ind in _TOMATO_WHOLE_CANNED_PRODUCT_INDICATORS)
 
 
 # ============================================================================

@@ -1291,9 +1291,9 @@ category = "vegetables"
 name = "Cocktailtomater Klass 1"
 
 [[fixtures.expected_matches]]
-canonical = "körsbärstomater"
+canonical = "småtomat"
 ingredient_index = 0
-must_match_keyword = "körsbärstomater"
+must_match_keyword = "småtomat"
 
 [[fixtures]]
 expected = 0
@@ -4031,9 +4031,9 @@ category = "beverages"
 name = "Körsbärs- Tomater i Tomatjuice Eldorado"
 
 [[fixtures.expected_matches]]
-canonical = "körsbärstomater"
+canonical = "småtomat"
 ingredient_index = 0
-must_match_keyword = "körsbärstomater"
+must_match_keyword = "småtomat"
 
 [[fixtures]]
 expected = 0
@@ -12908,9 +12908,9 @@ category = ""
 name = "Körsbärstomater 250g Klass 1 ICA"
 
 [[fixtures.expected_matches]]
-canonical = "körsbärstomater"
+canonical = "småtomat"
 ingredient_index = 0
-must_match_keyword = "körsbärstomater"
+must_match_keyword = "småtomat"
 
 [[fixtures]]
 expected = 0
@@ -12934,12 +12934,12 @@ category = ""
 name = "Pastasås Körsbärstomat och Basilika ICA Selection"
 
 [[fixtures]]
-expected = 1
+expected = 0
 id = "matcher_regression_positive_korsbarstomater_400g_cirio"
 ingredients = ["250 g körsbärstomat, gärna på kvist"]
-policy_ref = "legacy_review_regression"
+policy_ref = "current_review_canned_small_tomato_not_fresh"
 recipe_name = "Tortellinigratäng med ostsås"
-source_ref = "legacy_review:explicit_fresh_korsbarstomat_garna_pa_kvist_still_gets_0_matches"
+source_ref = "current_review:canned_korsbarstomater_cirio_not_fresh"
 
 [fixtures.legacy_import]
 candidate_reason = "legacy missed product is now expected to match"
@@ -12952,11 +12952,6 @@ title = "Explicit fresh `körsbärstomat, gärna på kvist` still gets 0 matches
 [fixtures.offer]
 category = ""
 name = "Körsbärstomater 400g Cirio"
-
-[[fixtures.expected_matches]]
-canonical = "körsbärstomater"
-ingredient_index = 0
-must_match_keyword = "körsbärstomater"
 
 [[fixtures]]
 expected = 1

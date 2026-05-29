@@ -1695,6 +1695,13 @@ def extract_keywords_from_product(
 
     # Remove duplicates while preserving order (dict.fromkeys is C-optimized)
     unique_keywords = list(dict.fromkeys(keywords))
+    # Italian small-tomato varieties are sold as preserved tomato cans/jars in
+    # the current catalog. Treat them as the small-tomato family instead of
+    # exposing generic tomat, otherwise they leak into krossade/hela tomater.
+    if any(cue in original_name_lower for cue in ('datterini', 'datterino', 'pomodorini')):
+        if 'småtomat' not in unique_keywords:
+            unique_keywords.insert(0, 'småtomat')
+
     if 'tunnbröd' in unique_keywords and 'bröd' in unique_keywords:
         unique_keywords = ['tunnbröd'] + [
             kw for kw in unique_keywords if kw != 'tunnbröd'

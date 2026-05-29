@@ -10304,8 +10304,20 @@ def _processed_check_diagnostics(
     matched_keyword: str,
     offer_keywords: Iterable[str],
     ingredient_lower: str,
+    product_lower: str,
     specialty_keyword_aliases: Mapping[str, str],
 ) -> list[dict[str, Any]]:
+    try:
+        from languages.sv.ingredient_matching.processed_rules import (
+            generic_canned_small_tomato_allows_processed_check,
+            generic_canned_whole_tomato_allows_strict_check,
+        )
+    except ModuleNotFoundError:
+        from app.languages.sv.ingredient_matching.processed_rules import (
+            generic_canned_small_tomato_allows_processed_check,
+            generic_canned_whole_tomato_allows_strict_check,
+        )
+
     offer_keyword_set = set(offer_keywords)
     diagnostics: list[dict[str, Any]] = []
     for raw_check in processed_checks:
@@ -10334,19 +10346,33 @@ def _processed_check_diagnostics(
             continue
         if mode == "strict" and len(raw_check) >= 3:
             indicators = tuple(str(indicator) for indicator in raw_check[2])
+            allowance = generic_canned_whole_tomato_allows_strict_check(
+                check_base,
+                product_lower,
+                ingredient_lower,
+            )
             row["indicators"] = list(indicators)
             row["ingredient_has_indicator"] = any(indicator in ingredient_lower for indicator in indicators)
-            row["status"] = "passes" if row["ingredient_has_indicator"] else "would_block"
+            if allowance:
+                row["allowance"] = "generic_canned_whole_tomato"
+            row["status"] = "passes" if row["ingredient_has_indicator"] or allowance else "would_block"
             diagnostics.append(row)
             continue
         if mode == "relaxed" and len(raw_check) >= 4:
             indicator = str(raw_check[2])
             indicators = tuple(str(candidate) for candidate in raw_check[3])
+            allowance = generic_canned_small_tomato_allows_processed_check(
+                check_base,
+                indicator,
+                ingredient_lower,
+            )
             row["product_indicator"] = indicator
             row["all_indicators"] = list(indicators)
             row["ingredient_has_product_indicator"] = indicator in ingredient_lower
             row["ingredient_has_any_indicator"] = any(candidate in ingredient_lower for candidate in indicators)
-            row["status"] = "passes" if row["ingredient_has_any_indicator"] else "would_block"
+            if allowance:
+                row["allowance"] = "generic_canned_small_tomato"
+            row["status"] = "passes" if row["ingredient_has_any_indicator"] or allowance else "would_block"
             diagnostics.append(row)
             continue
         row["raw"] = repr(raw_check)
@@ -10417,11 +10443,18 @@ def _compare_matcher_paths(
     )
     fast_keyword = fast_result.matched_keyword or ""
     processed_checks = tuple(offer_data.get("processed_checks") or ())
+    diagnostic_ingredient_lower = ingredient_data.normalized_text
+    if fast_keyword:
+        for arm in getattr(ingredient_data, "eller_arms_prepared", ()) or ():
+            if fast_keyword in arm:
+                diagnostic_ingredient_lower = arm
+                break
     processed_check_rows = _processed_check_diagnostics(
         processed_checks=processed_checks,
         matched_keyword=fast_keyword or str(live_keyword or ""),
         offer_keywords=offer_data.get("keywords") or (),
-        ingredient_lower=ingredient_data.normalized_text,
+        ingredient_lower=diagnostic_ingredient_lower,
+        product_lower=offer_data.get("name_normalized") or "",
         specialty_keyword_aliases=_SPECIALTY_KEYWORD_ALIASES,
     )
     return {

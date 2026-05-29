@@ -103,6 +103,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'torkad', 'torkade',
         'soltorkad', 'soltorkade', 'solt', 'secchi',
         'tomatjuice', 'juice',
+        'burk', 'konserverad', 'konserverade', 'konserv',
     },
     # Whole/grilled chicken: "hel kyckling" or "grillad kyckling" should only
     # match products with those qualifiers, not generic chicken cuts.
@@ -1450,13 +1451,20 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     # patties/meatballs). Regular vegofärs/sojafärs is loose and cannot be formed.
     'formbar': {'formbar', 'formbara'},
     'formbara': {'formbar', 'formbara'},
-    # "1 burk tomater" - product doesn't need to say "burk", any canned form suffices
+    # Container cue only. Tomato form strictness is enforced by PROCESSED_PRODUCT_RULES:
+    # "1 burk tomater" accepts whole/peeled canned tomatoes, while
+    # "1 burk krossade tomater" stays specific to the crushed family.
     # NOTE: soltorkade/torkade REMOVED — sun-dried is NOT a "burk" product
     'burk': {'burk', 'konserverad', 'konserverade',
              'krossade', 'krossad', 'finkrossade', 'finkrossad',
              'passerade', 'passerad', 'skalade', 'skalad',
              'polpa', 'koncentrerade', 'koncentrerad',
              'dop'},  # DOP = Italian quality cert, always canned
+    'konserv': {'konserv', 'burk', 'konserverad', 'konserverade',
+                'krossade', 'krossad', 'finkrossade', 'finkrossad',
+                'passerade', 'passerad', 'skalade', 'skalad',
+                'polpa', 'koncentrerade', 'koncentrerad',
+                'dop'},
     # "konserverade tomater" — any canned product form is equivalent
     'konserverad': {'konserverad', 'konserverade', 'burk',
                     'krossade', 'krossad', 'finkrossade', 'finkrossad',
@@ -1468,16 +1476,22 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
                      'passerade', 'passerad', 'skalade', 'skalad',
                      'polpa', 'koncentrerade', 'koncentrerad',
                      'dop'},  # DOP (Italian quality cert) = canned product
-    # Canned tomato forms: Direction B needs reverse mapping so "1 burk tomater"
-    # satisfies Direction B for any specific canned form (passerade, krossade, etc.)
+    # Canned tomato forms: Direction B sees "burk/konserverad" as a container cue.
+    # Strict PROCESSED_PRODUCT_RULES still decides whether the actual tomato form
+    # (whole/peeled vs crushed vs passata) is compatible.
     'passerade': {'passerade', 'passerad', 'burk', 'konserverad', 'konserverade'},
     'passerad': {'passerade', 'passerad', 'burk', 'konserverad', 'konserverade'},
     'krossade': {'krossade', 'krossad', 'finkrossade', 'finkrossad', 'burk', 'konserverad', 'konserverade'},
     'krossad': {'krossade', 'krossad', 'finkrossade', 'finkrossad', 'burk', 'konserverad', 'konserverade'},
     'finkrossade': {'krossade', 'krossad', 'finkrossade', 'finkrossad', 'burk', 'konserverad', 'konserverade'},
     'finkrossad': {'krossade', 'krossad', 'finkrossade', 'finkrossad', 'burk', 'konserverad', 'konserverade'},
-    'skalade': {'skalade', 'skalad', 'burk', 'konserverad', 'konserverade', 'dop'},  # DOP = premium peeled whole tomatoes (San Marzano)
-    'skalad': {'skalade', 'skalad', 'burk', 'konserverad', 'konserverade', 'dop'},   # same
+    'hela': {'hela', 'skalade', 'skalad', 'burk', 'konserv', 'konserverad', 'konserverade', 'dop'},
+    'skalade': {'hela', 'skalade', 'skalad', 'burk', 'konserv', 'konserverad', 'konserverade', 'dop'},  # DOP = premium peeled whole tomatoes (San Marzano)
+    'skalad': {'hela', 'skalade', 'skalad', 'burk', 'konserv', 'konserverad', 'konserverade', 'dop'},   # same
+    # Small canned tomatoes are sometimes sold "i tomatjuice"; treat the liquid
+    # cue as preserved/canned context, not as a separate fresh-tomato variety.
+    'tomatjuice': {'tomatjuice', 'juice', 'burk', 'konserv', 'konserverad', 'konserverade'},
+    'juice': {'juice', 'tomatjuice', 'burk', 'konserv', 'konserverad', 'konserverade'},
     'marinerad': {'marinerad', 'marinerade'},
     'marinerade': {'marinerad', 'marinerade'},
     # Cinnamon: "kanelstång" ↔ "Kanel Hel" (stick and whole are interchangeable)

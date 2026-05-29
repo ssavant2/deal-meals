@@ -786,4 +786,5 @@ def has_eller_pattern(ingredient_text: str) -> bool:
     Returns:
         True if "eller" pattern detected
     """
-    return ' eller ' in ingredient_text.lower()
+    lowered = ingredient_text.lower()
+    return ' eller ' in lowered or '(eller' in lowered or 'alternativt' in lowered

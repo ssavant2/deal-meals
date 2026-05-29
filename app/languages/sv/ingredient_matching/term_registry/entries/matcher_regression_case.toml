@@ -4888,10 +4888,10 @@ variant = "matcher_regression_konserverade_korsbarstomater_fresh_negative_412a42
 layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.korsbarstomater.matcher_regression_konserverade_korsbarstomater_in_juice_positive"
+entry_id = "sv-se.policy.smatomat.matcher_regression_konserverade_korsbarstomater_in_juice_positive"
 language = "sv"
 market = "SE"
-canonical = "körsbärstomater"
+canonical = "småtomat"
 status = "active"
 variants = ["matcher_regression_konserverade_korsbarstomater_in_juice_positive: Körsbärs- Tomater i Tomatjuice Eldorado"]
 ingredient_terms = []
@@ -4903,7 +4903,7 @@ notes = "Registry coverage for matcher regression fixture matcher_regression_kon
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "körsbärstomater"
+canonical = "småtomat"
 variant = "matcher_regression_konserverade_korsbarstomater_in_juice_positive: Körsbärs- Tomater i Tomatjuice Eldorado"
 layer_role = "positive_regression"
 
@@ -5088,10 +5088,10 @@ variant = "matcher_regression_koriander_spice_positive: Koriander Malen Burk Koc
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.korsbarstomater.matcher_regression_korsbarstomater_cocktail_positive"
+entry_id = "sv-se.policy.smatomat.matcher_regression_korsbarstomater_cocktail_positive"
 language = "sv"
 market = "SE"
-canonical = "körsbärstomater"
+canonical = "småtomat"
 status = "active"
 variants = ["matcher_regression_korsbarstomater_cocktail_positive: Cocktailtomater Klass 1"]
 ingredient_terms = []
@@ -5103,7 +5103,7 @@ notes = "Registry coverage for matcher regression fixture matcher_regression_kor
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "körsbärstomater"
+canonical = "småtomat"
 variant = "matcher_regression_korsbarstomater_cocktail_positive: Cocktailtomater Klass 1"
 layer_role = "positive_regression"
 
@@ -21308,10 +21308,10 @@ variant = "matcher_regression_positive_korsbar_fryst: Körsbär Fryst"
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.korsbarstomater.matcher_regression_positive_korsbarstomater_250g_klass_1_ica"
+entry_id = "sv-se.policy.smatomat.matcher_regression_positive_korsbarstomater_250g_klass_1_ica"
 language = "sv"
 market = "SE"
-canonical = "körsbärstomater"
+canonical = "småtomat"
 status = "active"
 variants = ["matcher_regression_positive_korsbarstomater_250g_klass_1_ica: Körsbärstomater 250g Klass 1 ICA"]
 ingredient_terms = []
@@ -21323,29 +21323,29 @@ notes = "Registry coverage for matcher regression fixture matcher_regression_pos
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "körsbärstomater"
+canonical = "småtomat"
 variant = "matcher_regression_positive_korsbarstomater_250g_klass_1_ica: Körsbärstomater 250g Klass 1 ICA"
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.korsbarstomater.matcher_regression_positive_korsbarstomater_400g_cirio"
+entry_id = "sv-se.policy.current_review_canned_small_tomato_not_fresh.matcher_regression_positive_korsbarstomater_400g_cirio"
 language = "sv"
 market = "SE"
-canonical = "körsbärstomater"
+canonical = "current_review_canned_small_tomato_not_fresh"
 status = "active"
 variants = ["matcher_regression_positive_korsbarstomater_400g_cirio: Körsbärstomater 400g Cirio"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_positive_korsbarstomater_400g_cirio"]
-layer_policy = ["normal"]
+layer_policy = ["accepted_filter", "normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_positive_korsbarstomater_400g_cirio."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "körsbärstomater"
+canonical = "current_review_canned_small_tomato_not_fresh"
 variant = "matcher_regression_positive_korsbarstomater_400g_cirio: Körsbärstomater 400g Cirio"
-layer_role = "positive_regression"
+layer_role = "negative_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.plocksallat.matcher_regression_positive_krispsallat_6f59373f"

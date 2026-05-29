@@ -32,6 +32,7 @@ from languages.sv.ingredient_matching import (
     FLAVOR_WORDS,
     CARRIER_PRODUCTS,
     _EMBEDDED_PROTECTED_KEYWORDS,
+    matches_ingredient,
 )
 from languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
 from languages.sv.ingredient_matching.validators import check_specialty_qualifiers
@@ -1139,6 +1140,11 @@ def match(product, ingredient, category="", brand=""):
     """Return matched keyword or None."""
     od = precompute_offer_data(product, category, brand=brand)
     return matches_ingredient_fast(od, ingredient)
+
+
+def legacy_match(product, ingredient, category=""):
+    """Return the uncached live matcher keyword or None."""
+    return matches_ingredient(extract_keywords_from_product(product, category), ingredient, product)
 
 # Fast-path processed checks must follow the matched keyword family. Product
 # flavor words can carry their own processed rules without blocking unrelated
@@ -2844,6 +2850,30 @@ test(
         {"name": "Soltorkade tomater 200g", "category": "vegetables"},
     ),
     0,
+)
+test(
+    "soltorkad tomatcreme spelling matches specific creme product",
+    recipe_match_num(
+        ["3 msk soltorkad tomatcrème"],
+        {"name": "Creme av Soltorkade tomater 140g", "category": "vegetables"},
+    ),
+    1,
+)
+test(
+    "soltorkad tomat creme spaced spelling matches specific creme product",
+    recipe_match_num(
+        ["1/2 dl soltorkad tomat crème"],
+        {"name": "Creme av Soltorkade tomater 140g", "category": "vegetables"},
+    ),
+    1,
+)
+test(
+    "soltorkad tomat-creme hyphen spelling matches specific creme product",
+    recipe_match_num(
+        ["1 msk soltorkad tomat-crème"],
+        {"name": "Creme av Soltorkade tomater 140g", "category": "vegetables"},
+    ),
+    1,
 )
 test(
     "Q7 creme av soltorkade tomater does not match tapenade",
@@ -11967,6 +11997,68 @@ test("alternativt: plain fresh tomat matches despite krossade in alternative",
 test("alternativt: plain fresh tomat matches despite körsbärstomater in alternative",
      recipe_match_num(["6 tomater, hackade (alternativt en burk körsbärstomater)"],
                       {"name": "Tomat Kvist 500g Klass 1", "category": "vegetables"}), 1)
+test("alternativt legacy: plain fresh tomat matches primary arm",
+     legacy_match("Tomat Kvist 500g Klass 1",
+                  "6 tomater, hackade (alternativt en burk körsbärstomater)",
+                  "vegetables"), "tomat")
+test("canned tomato: generic burk tomater matches peeled whole tomatoes (fast)",
+     match("Skalade Tomater 400g Mutti", "1 burk tomater", "pantry"), "tomat")
+test("canned tomato: generic burk tomater matches whole canned tomatoes (backend)",
+     recipe_match_num(["1 burk tomater"],
+                      {"name": "Hela Tomater Konserverade 400g Mutti", "category": "pantry"}), 1)
+test("canned tomato: generic burk tomater does not match crushed tomatoes",
+     recipe_match_num(["1 burk tomater"],
+                      {"name": "Krossade Tomater 390g Mutti", "category": "pantry"}), 0)
+test("canned tomato: specific krossade does not match peeled whole tomatoes",
+     recipe_match_num(["1 burk krossade tomater"],
+                      {"name": "Skalade Tomater 400g Mutti", "category": "pantry"}), 0)
+test("canned tomato: krossade matches tetra packaging",
+     recipe_match_num(["1 förp krossade tomater"],
+                      {"name": "Krossade Tomater Tetra 500g", "category": "pantry"}), 1)
+test("canned tomato: generic burk tomater does not match crushed tetra",
+     recipe_match_num(["1 burk tomater"],
+                      {"name": "Krossade Tomater Tetra 500g", "category": "pantry"}), 0)
+test("canned tomato: passerade matches tetra packaging",
+     recipe_match_num(["1 förp passerade tomater"],
+                      {"name": "Passerade Tomater Tetra 500g", "category": "pantry"}), 1)
+test("canned small tomato: burk körsbärstomater matches canned product",
+     recipe_match_num(["1 burk körsbärstomater"],
+                      {"name": "Körsbärstomater Konserverade 400g", "category": "pantry"}), 1)
+test("canned small tomato: burk körsbärstomater matches in-juice product",
+     recipe_match_num(["1 burk körsbärstomater"],
+                      {"name": "Körsbärs- Tomater i Tomatjuice Eldorado", "category": "pantry"}), 1)
+test("canned small tomato: burk körsbärstomater matches pomodorini can",
+     recipe_match_num(["1 burk körsbärstomater"],
+                      {"name": "Körsbärstomater Pomodorini di collina 400g Mutti", "category": "vegetables"}), 1)
+test("canned small tomato: burk körsbärstomater matches datterini can",
+     recipe_match_num(["1 burk körsbärstomater"],
+                      {"name": "Datterini Tomater 400g ICA Selection", "category": "vegetables"}), 1)
+test("canned small tomato: burk körsbärstomater does not match sun-dried product",
+     recipe_match_num(["1 burk körsbärstomater"],
+                      {"name": "Soltorkade Körsbärstomater 400g", "category": "pantry"}), 0)
+test("fresh small tomato: körsbärstomater do not match pomodorini can",
+     recipe_match_num(["125 g Körsbärstomater"],
+                      {"name": "Körsbärstomater Pomodorini di collina 400g Mutti", "category": "vegetables"}), 0)
+test("fresh small tomato: körsbärstomater do not match whole canned small tomatoes",
+     recipe_match_num(["125 g Körsbärstomater"],
+                      {"name": "Körsbärstomater Hela Ekologiska 390g KRAV ICA I love eco", "category": "vegetables"}), 0)
+test("crushed tomato: krossade tomater do not match datterini can",
+     recipe_match_num(["4 dl krossade tomater"],
+                      {"name": "Datterini Tomater 400g ICA Selection", "category": "vegetables"}), 0)
+test("whole canned tomato: generic whole canned tomatoes do not match datterini can",
+     recipe_match_num(["1 burk hela konserverade tomater"],
+                      {"name": "Datterini Tomater 400g ICA Selection", "category": "vegetables"}), 0)
+test("alternativt: canned körsbärstomater arm matches canned small tomatoes",
+     recipe_match_num(["6 tomater, hackade (alternativt en burk körsbärstomater)"],
+                      {"name": "Körsbärstomater Konserverade 400g", "category": "pantry"}), 1)
+test("alternativt legacy: canned körsbärstomater arm matches canned small tomatoes",
+     legacy_match("Körsbärstomater Konserverade 400g",
+                  "6 tomater, hackade (alternativt en burk körsbärstomater)",
+                  "pantry"), "småtomat")
+test("alternativt legacy: canned körsbärstomater arm does not match fresh small tomatoes",
+     legacy_match("Körsbärstomater 250g Klass 1 ICA",
+                  "6 tomater, hackade (alternativt en burk körsbärstomater)",
+                  "vegetables"), None)
 # Guard against over-relaxation: a qualifier required by the primary (no alternative)
 # must still block a plain product.
 test("alternativt-guard: soltorkad-only recipe still blocks plain fresh tomat",

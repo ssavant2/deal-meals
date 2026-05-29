@@ -1536,9 +1536,9 @@
     "expected": 1,
     "expected_matches": [
       {
-        "canonical": "körsbärstomater",
+        "canonical": "småtomat",
         "ingredient_index": 0,
-        "must_match_keyword": "körsbärstomater"
+        "must_match_keyword": "småtomat"
       }
     ],
     "id": "matcher_regression_korsbarstomater_cocktail_positive",
@@ -4842,9 +4842,9 @@
     "expected": 1,
     "expected_matches": [
       {
-        "canonical": "körsbärstomater",
+        "canonical": "småtomat",
         "ingredient_index": 0,
-        "must_match_keyword": "körsbärstomater"
+        "must_match_keyword": "småtomat"
       }
     ],
     "id": "matcher_regression_konserverade_korsbarstomater_in_juice_positive",
@@ -15112,9 +15112,9 @@
     "expected": 1,
     "expected_matches": [
       {
-        "canonical": "körsbärstomater",
+        "canonical": "småtomat",
         "ingredient_index": 0,
-        "must_match_keyword": "körsbärstomater"
+        "must_match_keyword": "småtomat"
       }
     ],
     "id": "matcher_regression_positive_korsbarstomater_250g_klass_1_ica",
@@ -15161,14 +15161,7 @@
     "source_ref": "legacy_review:explicit_fresh_korsbarstomat_garna_pa_kvist_still_gets_0_matches"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "körsbärstomater",
-        "ingredient_index": 0,
-        "must_match_keyword": "körsbärstomater"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_positive_korsbarstomater_400g_cirio",
     "ingredients": [
       "250 g körsbärstomat, gärna på kvist"
@@ -15185,9 +15178,9 @@
       "category": "",
       "name": "Körsbärstomater 400g Cirio"
     },
-    "policy_ref": "legacy_review_regression",
+    "policy_ref": "current_review_canned_small_tomato_not_fresh",
     "recipe_name": "Tortellinigratäng med ostsås",
-    "source_ref": "legacy_review:explicit_fresh_korsbarstomat_garna_pa_kvist_still_gets_0_matches"
+    "source_ref": "current_review:canned_korsbarstomater_cirio_not_fresh"
   },
   {
     "expected": 1,

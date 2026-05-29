@@ -20,6 +20,8 @@ from .processed_rules import (
     STRICT_PROCESSED_RULES,
     _PROCESSED_INDICATOR_EQUIVALENTS,
     SPICE_VS_FRESH_RULES,
+    generic_canned_small_tomato_allows_processed_check,
+    generic_canned_whole_tomato_allows_strict_check,
 )
 from .form_rules import RECIPE_FROZEN_INDICATORS
 from .specialty_rules import (
@@ -404,6 +406,12 @@ def check_processed_product_rules(
                 # Use word-boundary check: 'riven' must be standalone, not suffix
                 # of compound like 'finriven' (cooking instruction ≠ product form)
                 if product_indicators and not any(_is_whole_word(ind, ingredient_lower) for ind in expanded_indicators):
+                    if generic_canned_whole_tomato_allows_strict_check(
+                        base_word,
+                        product_lower,
+                        ingredient_lower,
+                    ):
+                        continue
                     # Compound fallback: check if base_word + product's OWN indicator appears
                     # in ingredient as a compound word (e.g., "chiliflakes" satisfies
                     # 'chili' strict PPR with 'flakes' indicator when product has 'flakes')
@@ -442,6 +450,12 @@ def check_processed_product_rules(
             else:
                 for indicator in processed_indicators:
                     if processed_indicator_occurs_in_product_text(base_word, indicator, product_lower):
+                        if generic_canned_small_tomato_allows_processed_check(
+                            base_word,
+                            indicator,
+                            ingredient_lower,
+                        ):
+                            break
                         if indicator not in ingredient_lower:
                             has_any_indicator = any(ind in ingredient_lower for ind in processed_indicators)
                             if not has_any_indicator:
@@ -510,7 +524,7 @@ def check_specialty_qualifiers(
         # a DIFFERENT product ("1 burk kronärtskockscrème med soltorkad tomat").
         # When a more specific qualifier (soltorkad, krossade, etc.) is also present,
         # it takes priority over generic packaging words.
-        _PACKAGING_QUALIFIERS = {'burk', 'konserverad', 'konserverade'}
+        _PACKAGING_QUALIFIERS = {'burk', 'konserv', 'konserverad', 'konserverade'}
         if base_word not in _DIRECTION_A_SKIP:
             direction_a_checked = False
             direction_a_matched = False
