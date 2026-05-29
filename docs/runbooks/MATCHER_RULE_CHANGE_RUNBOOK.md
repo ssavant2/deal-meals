@@ -460,6 +460,37 @@ Common Python runtime data surfaces now have CLI-backed overlay coverage:
 ./bin/dm matcher add non-food-keyword --terms skurborste --reason "Cleaning tools are not recipe ingredients."
 ```
 
+Correct existing runtime-overlay rows with `modify` instead of hand-editing the
+TOML plus generated sanity canary:
+
+```bash
+./bin/dm matcher modify runtime-overlay runtime_pnb_gradde \
+  --remove-blocker soja \
+  --add-blocker "oat lök" \
+  --reason "Plain plant-based cream should remain a valid substitute; only flavored variants are blocked."
+
+./bin/dm matcher modify runtime-overlay runtime_ksbc_vitlok \
+  --add-context grillolja \
+  --reason "Garlic fallback should be suppressed when the ingredient is grill oil."
+```
+
+`modify` is overlay-only: it supports explicit-id entries in
+`runtime_rule_overlays.toml`, rewrites the generated membership canary, and runs
+Track A gates unless a matcher batch is active or `--no-run-gates` is passed.
+It intentionally does not edit historical base tables such as `blocker_data.py`.
+If removing the last blocker/context would empty a rule, use `remove` instead.
+
+Remove runtime-overlay rows deliberately, with a reason:
+
+```bash
+./bin/dm matcher remove runtime_pnb_gradde --reason "Superseded by narrower KSBC policy."
+```
+
+`remove` is a soft-disable: it keeps the TOML entry with `status = "inactive"`
+and `inactive_reason`, removes generated membership canaries for that rule, and
+runs Track A gates. Use it for policy removal; use `modify` for normal
+blocker/context corrections.
+
 Batch-review grouped fix phase:
 
 ```bash

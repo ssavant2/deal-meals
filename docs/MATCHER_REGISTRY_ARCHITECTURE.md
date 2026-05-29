@@ -53,7 +53,12 @@ rejects generated JSON that no longer matches the TOML sources byte-for-byte.
 
 `runtime_rule_overlays.toml` is the declarative authoring surface for new
 runtime data rules that used to require hand-editing large Python literals.
-Use `./bin/dm matcher add <shape>` rather than editing it by hand.
+Use `./bin/dm matcher add <shape>` rather than editing it by hand. For existing
+runtime-overlay rows with an explicit `id`, use
+`./bin/dm matcher modify runtime-overlay <id>` for ordinary value corrections
+and `./bin/dm matcher remove <id> --reason ...` for deliberate soft-removal;
+both keep generated membership sanity canaries in sync. Historical base tables
+are intentionally outside that modify/remove surface.
 
 New CLI-authored rows use v2 metadata:
 
@@ -219,6 +224,10 @@ line number. Positive generated `match(...)` canaries observe the current
 materialized fast-path canonical before writing the expected value, so
 parent/variant cases do not encode a guessed parent canonical when the precise
 variant wins.
+For runtime-overlay membership canaries,
+`dm matcher modify runtime-overlay <id>` rewrites the canary for the entry's
+current values and `dm matcher remove <id>` removes the generated membership
+assertions.
 
 For grouped rule work, `dm matcher batch start` defers per-command gates and
 `dm matcher batch finalize --dry-run` prints doctor output plus the planned

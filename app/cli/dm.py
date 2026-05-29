@@ -862,6 +862,26 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "Use this only when existing declarative/runtime overlay surfaces cannot express the rule.",
         ),
     ),
+    "modify": MatcherGuide(
+        label="modify",
+        status="supported by dm matcher",
+        summary="Correct an existing runtime-overlay rule by exact id and rewrite its generated membership canary.",
+        steps=(
+            "Run: ./bin/dm matcher modify runtime-overlay <rule-id> --add-blocker <term> --remove-blocker <term> --reason \"<why>\"",
+            "For KSBC, use --add-context/--remove-context instead of blocker options.",
+            "Only runtime_rule_overlays.toml entries with explicit id are supported; historical base tables stay manual/out of scope.",
+        ),
+    ),
+    "remove": MatcherGuide(
+        label="remove",
+        status="supported by dm matcher",
+        summary="Soft-disable one runtime-overlay rule by exact id; requires a reason and removes generated membership canaries.",
+        steps=(
+            "Run: ./bin/dm matcher remove <rule-id> --reason \"<why>\"",
+            "The entry is kept in runtime_rule_overlays.toml with status=inactive and inactive_reason for audit history.",
+            "Use this for deliberate policy removal; use modify for ordinary blocker/context corrections.",
+        ),
+    ),
     "sanity-update": MatcherGuide(
         label="sanity-update",
         status="supported by dm matcher",
@@ -1001,6 +1021,10 @@ GUIDE_ALIASES = {
     "find-sanity": "sanity-find",
     "reconcile_sanity": "reconcile-sanity",
     "sanity-reconcile": "reconcile-sanity",
+    "runtime-modify": "modify",
+    "runtime_modify": "modify",
+    "runtime-remove": "remove",
+    "runtime_remove": "remove",
     "compare_paths": "compare-paths",
     "path-compare": "compare-paths",
     "canonical_of": "canonical-of",
@@ -4784,6 +4808,200 @@ def _runtime_overlay_matching_entries(
         if selector_norm in {_runtime_rule_normalize_text(value) for value in values}:
             matches.append(entry)
     return matches
+
+
+def _find_runtime_overlay_entry_by_id(
+    sections: dict[str, list[dict[str, Any]]],
+    rule_id: str,
+) -> tuple[RuntimeOverlaySurface, dict[str, Any]]:
+    rule_id = rule_id.strip()
+    if not rule_id:
+        raise typer.BadParameter("rule-id must not be empty")
+    matches: list[tuple[RuntimeOverlaySurface, dict[str, Any]]] = []
+    for surface in RUNTIME_OVERLAY_SURFACES.values():
+        for entry in sections.get(surface.section, []):
+            if str(entry.get("id") or "").strip() == rule_id:
+                matches.append((surface, entry))
+    if not matches:
+        raise typer.BadParameter(
+            f"no runtime-overlay rule with id {rule_id!r}. "
+            "Only runtime_rule_overlays.toml entries with an explicit id are supported; "
+            "historical base tables are intentionally out of scope."
+        )
+    if len(matches) > 1:
+        labels = "\n".join(_runtime_overlay_entry_label(surface, entry) for surface, entry in matches[:20])
+        raise typer.BadParameter(f"rule id {rule_id!r} is ambiguous:\n{labels}")
+    return matches[0]
+
+
+def _runtime_overlay_requested_value_changes(
+    *,
+    surface: RuntimeOverlaySurface,
+    add_value_csv: str | None,
+    remove_value_csv: str | None,
+    add_blocker_csv: str | None,
+    remove_blocker_csv: str | None,
+    add_context_csv: str | None,
+    remove_context_csv: str | None,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    add_by_field = {
+        "blockers": add_blocker_csv,
+        "context": add_context_csv,
+    }
+    remove_by_field = {
+        "blockers": remove_blocker_csv,
+        "context": remove_context_csv,
+    }
+    unsupported_add = [
+        field
+        for field, value in add_by_field.items()
+        if value is not None and field != surface.value_field
+    ]
+    unsupported_remove = [
+        field
+        for field, value in remove_by_field.items()
+        if value is not None and field != surface.value_field
+    ]
+    if unsupported_add or unsupported_remove:
+        expected = {
+            "blockers": "--add-blocker/--remove-blocker",
+            "context": "--add-context/--remove-context",
+            "blocked_product_words": "--add-value/--remove-value",
+            "compounds": "--add-value/--remove-value",
+        }.get(surface.value_field, "--add-value/--remove-value")
+        wrong = ", ".join(f for f in (*unsupported_add, *unsupported_remove))
+        raise typer.BadParameter(
+            f"{surface.command} uses {surface.value_field}; {wrong} options do not apply. "
+            f"Use {expected}."
+        )
+    add_values = [
+        *_split_optional_csv(add_value_csv, label="--add-value"),
+        *_split_optional_csv(add_by_field.get(surface.value_field), label=f"--add-{surface.value_field}"),
+    ]
+    remove_values = [
+        *_split_optional_csv(remove_value_csv, label="--remove-value"),
+        *_split_optional_csv(remove_by_field.get(surface.value_field), label=f"--remove-{surface.value_field}"),
+    ]
+    return (
+        tuple(dict.fromkeys(_runtime_rule_normalize_text(value) for value in add_values)),
+        tuple(dict.fromkeys(_runtime_rule_normalize_text(value) for value in remove_values)),
+    )
+
+
+def _runtime_overlay_membership_test_matches(
+    actual_node: ast.AST,
+    *,
+    surface: RuntimeOverlaySurface,
+    keyword: str,
+    values: set[str],
+) -> bool:
+    if not isinstance(actual_node, ast.Compare):
+        return False
+    if len(actual_node.ops) != 1 or not isinstance(actual_node.ops[0], ast.In):
+        return False
+    if len(actual_node.comparators) != 1:
+        return False
+    value = _literal_string(actual_node.left)
+    if value is None or _runtime_rule_normalize_text(value) not in values:
+        return False
+    comparator = actual_node.comparators[0]
+    if not isinstance(comparator, ast.Call):
+        return False
+    func = comparator.func
+    if not isinstance(func, ast.Attribute) or func.attr != "get":
+        return False
+    if not isinstance(func.value, ast.Name) or func.value.id != surface.mapping_name:
+        return False
+    if not comparator.args:
+        return False
+    mapped_keyword = _literal_string(comparator.args[0])
+    return mapped_keyword is not None and _runtime_rule_normalize_text(mapped_keyword) == keyword
+
+
+def _remove_empty_generated_sanity_blocks(text: str) -> tuple[str, int]:
+    lines = text.splitlines(keepends=True)
+    starts = [
+        index
+        for index, line in enumerate(lines)
+        if _GENERATED_SANITY_COMMENT_RE.match(line.strip())
+    ]
+    if not starts:
+        return text, 0
+    final_summary = next(
+        (index for index, line in enumerate(lines) if line.startswith(DEEP_SANITY_FINAL_SUMMARY_MARKER)),
+        len(lines),
+    )
+    ranges: list[tuple[int, int]] = []
+    for position, start in enumerate(starts):
+        next_start = starts[position + 1] if position + 1 < len(starts) else len(lines)
+        end = min(next_start, final_summary if final_summary > start else next_start)
+        has_test = any(line.lstrip().startswith("test(") for line in lines[start:end])
+        if not has_test:
+            remove_start = start
+            if remove_start > 0 and not lines[remove_start - 1].strip():
+                remove_start -= 1
+            while end < len(lines) and not lines[end].strip() and end < final_summary:
+                end += 1
+            ranges.append((remove_start, end))
+    if not ranges:
+        return text, 0
+    keep = [True] * len(lines)
+    for start, end in ranges:
+        for index in range(start, end):
+            keep[index] = False
+    return "".join(line for index, line in enumerate(lines) if keep[index]), len(ranges)
+
+
+def _remove_runtime_overlay_sanity_membership_tests(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeOverlaySurface,
+    keyword: str,
+    values: tuple[str, ...],
+    dry_run: bool,
+) -> int:
+    if not values or not paths.deep_sanity_file.exists():
+        return 0
+    keyword = _runtime_rule_normalize_text(keyword)
+    value_set = {_runtime_rule_normalize_text(value) for value in values}
+    text = paths.deep_sanity_file.read_text(encoding="utf-8")
+    tree = ast.parse(text, filename=str(paths.deep_sanity_file))
+    metadata_by_line = _deep_sanity_metadata_by_line(text)
+    remove_lines: set[int] = set()
+    removed_tests = 0
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if not isinstance(node.func, ast.Name) or node.func.id != "test":
+            continue
+        if len(node.args) < 3 or not metadata_by_line.get(node.lineno, {}).get("policy_ref"):
+            continue
+        expected = node.args[2]
+        if not isinstance(expected, ast.Constant) or expected.value is not True:
+            continue
+        if not _runtime_overlay_membership_test_matches(
+            node.args[1],
+            surface=surface,
+            keyword=keyword,
+            values=value_set,
+        ):
+            continue
+        end_lineno = getattr(node, "end_lineno", node.lineno)
+        remove_lines.update(range(node.lineno, end_lineno + 1))
+        removed_tests += 1
+
+    if not remove_lines:
+        return 0
+    lines = text.splitlines(keepends=True)
+    new_text = "".join(
+        line
+        for line_number, line in enumerate(lines, start=1)
+        if line_number not in remove_lines
+    )
+    new_text, _removed_blocks = _remove_empty_generated_sanity_blocks(new_text)
+    if not dry_run:
+        paths.deep_sanity_file.write_text(new_text, encoding="utf-8")
+    return removed_tests
 
 
 def _runtime_pair_entry_label(surface: RuntimePairSurface, entry: dict[str, Any]) -> str:
@@ -8990,6 +9208,258 @@ def add_no_match_policy(
     raise typer.Exit(gate_status)
 
 
+def _modify_runtime_overlay_rule_by_id(
+    *,
+    rule_id: str,
+    add_value_csv: str | None,
+    remove_value_csv: str | None,
+    add_blocker_csv: str | None,
+    remove_blocker_csv: str | None,
+    add_context_csv: str | None,
+    remove_context_csv: str | None,
+    reason: str,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    reason = reason.strip()
+    if not reason:
+        raise typer.BadParameter("--reason is required for runtime overlay modifications")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime modify gates are not available; use --no-run-gates")
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    surface, entry = _find_runtime_overlay_entry_by_id(sections, rule_id)
+    if not _runtime_overlay_entry_is_active(entry):
+        raise typer.BadParameter(f"{rule_id} is inactive; reactivate or add a new rule instead")
+    add_values, remove_values = _runtime_overlay_requested_value_changes(
+        surface=surface,
+        add_value_csv=add_value_csv,
+        remove_value_csv=remove_value_csv,
+        add_blocker_csv=add_blocker_csv,
+        remove_blocker_csv=remove_blocker_csv,
+        add_context_csv=add_context_csv,
+        remove_context_csv=remove_context_csv,
+    )
+    if not add_values and not remove_values:
+        raise typer.BadParameter("provide at least one add/remove value option")
+
+    field = surface.value_field
+    keyword = _runtime_rule_normalize_text(str(entry.get("keyword", "")))
+    old_values = tuple(_runtime_overlay_entry_values(entry, field))
+    old_value_set = set(old_values)
+    missing = sorted(value for value in remove_values if value not in old_value_set)
+    if missing:
+        raise typer.BadParameter(f"{rule_id} does not contain {', '.join(missing)}")
+    base_values = _live_runtime_mapping_values(surface, keyword, paths) - old_value_set
+    duplicates = sorted(value for value in add_values if value in old_value_set or value in base_values)
+    if duplicates:
+        raise typer.BadParameter(f"{rule_id} already has effective {field}: {', '.join(duplicates)}")
+    new_values = [
+        value
+        for value in old_values
+        if value not in set(remove_values)
+    ]
+    for value in add_values:
+        if value not in new_values:
+            new_values.append(value)
+    if not new_values:
+        raise typer.BadParameter(
+            f"modify would empty {rule_id}; use `dm matcher remove {rule_id} --reason \"...\"` instead"
+        )
+
+    entry["id"] = str(entry.get("id") or rule_id)
+    entry["status"] = "active"
+    entry["keyword"] = keyword
+    entry[field] = new_values
+    entry.pop("inactive_reason", None)
+    existing_reason = str(entry.get("reason", "")).strip()
+    if reason not in existing_reason:
+        entry["reason"] = f"{existing_reason}; {reason}" if existing_reason else reason
+    preview = _runtime_overlay_entry_block(surface, entry)
+    if dry_run:
+        typer.echo(preview)
+        if write_sanity:
+            removed = _remove_runtime_overlay_sanity_membership_tests(
+                paths=paths,
+                surface=surface,
+                keyword=keyword,
+                values=old_values,
+                dry_run=True,
+            )
+            typer.echo(f"Would remove {removed} generated sanity membership test(s).")
+            typer.echo(_append_runtime_overlay_deep_sanity_stub(
+                paths=paths,
+                surface=surface,
+                keyword=keyword,
+                values=tuple(new_values),
+                policy_ref=rule_id,
+                dry_run=True,
+            ))
+        typer.echo("Dry run only; no files written.")
+        return
+
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    removed = 0
+    if write_sanity:
+        removed = _remove_runtime_overlay_sanity_membership_tests(
+            paths=paths,
+            surface=surface,
+            keyword=keyword,
+            values=old_values,
+            dry_run=False,
+        )
+        _append_runtime_overlay_deep_sanity_stub(
+            paths=paths,
+            surface=surface,
+            keyword=keyword,
+            values=tuple(new_values),
+            policy_ref=rule_id,
+            dry_run=False,
+        )
+    typer.echo(f"Modified runtime overlay rule: {rule_id}")
+    typer.echo(f"  surface: {surface.command}")
+    typer.echo(f"  keyword: {keyword}")
+    typer.echo(f"  {field}: {', '.join(new_values)}")
+    if write_sanity:
+        typer.echo(f"  sanity: rewrote membership canary ({removed} old test(s) removed)")
+    else:
+        typer.echo("  sanity: skipped")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+def _remove_runtime_overlay_rule_by_id(
+    *,
+    rule_id: str,
+    reason: str,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    reason = reason.strip()
+    if not reason:
+        raise typer.BadParameter("--reason is required; runtime overlay removal is a deliberate policy change")
+    paths = _paths(tree_root)
+    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+        raise typer.BadParameter("tree-root runtime remove gates are not available; use --no-run-gates")
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    surface, entry = _find_runtime_overlay_entry_by_id(sections, rule_id)
+    field = surface.value_field
+    keyword = _runtime_rule_normalize_text(str(entry.get("keyword", "")))
+    old_values = tuple(_runtime_overlay_entry_values(entry, field))
+    entry["id"] = str(entry.get("id") or rule_id)
+    entry["status"] = "inactive"
+    entry["inactive_reason"] = reason
+    preview = _runtime_overlay_entry_block(surface, entry)
+    if dry_run:
+        typer.echo(preview)
+        if write_sanity:
+            removed = _remove_runtime_overlay_sanity_membership_tests(
+                paths=paths,
+                surface=surface,
+                keyword=keyword,
+                values=old_values,
+                dry_run=True,
+            )
+            typer.echo(f"Would remove {removed} generated sanity membership test(s).")
+        typer.echo("Dry run only; no files written.")
+        return
+
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    removed = 0
+    if write_sanity:
+        removed = _remove_runtime_overlay_sanity_membership_tests(
+            paths=paths,
+            surface=surface,
+            keyword=keyword,
+            values=old_values,
+            dry_run=False,
+        )
+    typer.echo(f"Removed runtime overlay rule: {rule_id}")
+    typer.echo("  mode: soft-disable (status=inactive)")
+    typer.echo(f"  surface: {surface.command}")
+    typer.echo(f"  keyword: {keyword}")
+    if write_sanity:
+        typer.echo(f"  sanity: removed {removed} generated membership test(s)")
+    else:
+        typer.echo("  sanity: skipped")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+@matcher_modify_app.command("overlay")
+@matcher_modify_app.command("runtime-overlay")
+def modify_runtime_overlay(
+    rule_id: Annotated[
+        str,
+        typer.Argument(help="Runtime overlay rule id to modify, e.g. runtime_pnb_gradde."),
+    ],
+    add_value_csv: Annotated[
+        str | None,
+        typer.Option("--add-value", help="Comma-separated value(s) to add to the rule's value field."),
+    ] = None,
+    remove_value_csv: Annotated[
+        str | None,
+        typer.Option("--remove-value", help="Comma-separated value(s) to remove from the rule's value field."),
+    ] = None,
+    add_blocker_csv: Annotated[
+        str | None,
+        typer.Option("--add-blocker", help="Comma-separated blocker(s) to add to a PNB/FPB rule."),
+    ] = None,
+    remove_blocker_csv: Annotated[
+        str | None,
+        typer.Option("--remove-blocker", help="Comma-separated blocker(s) to remove from a PNB/FPB rule."),
+    ] = None,
+    add_context_csv: Annotated[
+        str | None,
+        typer.Option("--add-context", help="Comma-separated context term(s) to add to a KSBC rule."),
+    ] = None,
+    remove_context_csv: Annotated[
+        str | None,
+        typer.Option("--remove-context", help="Comma-separated context term(s) to remove from a KSBC rule."),
+    ] = None,
+    reason: Annotated[str, typer.Option("--reason", help="Why the overlay rule is being corrected.")] = "",
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print the change without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Rewrite generated membership canaries for this rule."),
+    ] = True,
+) -> None:
+    _modify_runtime_overlay_rule_by_id(
+        rule_id=rule_id,
+        add_value_csv=add_value_csv,
+        remove_value_csv=remove_value_csv,
+        add_blocker_csv=add_blocker_csv,
+        remove_blocker_csv=remove_blocker_csv,
+        add_context_csv=add_context_csv,
+        remove_context_csv=remove_context_csv,
+        reason=reason,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
 @matcher_modify_app.command("no-match-policy")
 def modify_no_match_policy(
     selector: Annotated[str, typer.Argument(help="Policy id, policy ref, entry id, or unique canonical.")],
@@ -11670,6 +12140,36 @@ def matcher_list(
         typer.echo(_registry_entry_label(record))
     if not matches:
         typer.echo("No entries found.")
+
+
+@matcher_app.command("remove", help="Soft-disable one runtime-overlay rule by exact id and remove its generated canary.")
+def matcher_remove(
+    rule_id: Annotated[str, typer.Argument(help="Runtime overlay rule id, e.g. runtime_pnb_gradde.")],
+    reason: Annotated[str, typer.Option("--reason", help="Why this rule is being removed.")],
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print the change without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Remove generated membership canaries for this rule."),
+    ] = True,
+) -> None:
+    _remove_runtime_overlay_rule_by_id(
+        rule_id=rule_id,
+        reason=reason,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
 
 
 @matcher_app.command("inactivate", help="Set a matcher registry or runtime-overlay entry to inactive.")
