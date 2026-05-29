@@ -23,7 +23,7 @@
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 340,
       "negative_regression": 840,
-      "offer_extra_keyword_mapping": 417,
+      "offer_extra_keyword_mapping": 419,
       "parent_match_only_mapping": 20,
       "positive_regression": 660,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 469,
       "no_match_policy": 362,
-      "offer_extra_keyword": 417,
+      "offer_extra_keyword": 419,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5707,
-    "variants_missing_product_text": 1824,
+    "variant_count": 5709,
+    "variants_missing_product_text": 1826,
     "variants_with_product_text": 3883
   },
   "variants": [
@@ -119874,6 +119874,48 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_canned_small_tomato_not_fresh\", \"recipe_name\": \"Tortellinigratäng med ostsås\"}"
     },
     {
+      "variant_id": "vterm-e9c81a752037f889",
+      "row_index": 5428,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:vegobacon",
+      "source_id": "vegobacon",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "vegobacon",
+      "canonical": "bacon",
+      "expected_family": "bacon",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"bacon\"}"
+    },
+    {
+      "variant_id": "vterm-ffbcded4cf3ab509",
+      "row_index": 5433,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:vegoschnitzel",
+      "source_id": "vegoschnitzel",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "vegoschnitzel",
+      "canonical": "schnitzel",
+      "expected_family": "schnitzel",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"schnitzel\"}"
+    },
+    {
       "variant_id": "vterm-cc0ae78596c5722d",
       "row_index": 1,
       "source_order": 10,
@@ -119897,8 +119939,8 @@
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1597,
-      "static_verified": 2610,
+      "no_product_text": 1604,
+      "static_verified": 2605,
       "synthetic_verified": 1500
     },
     "method": "static_contract_audit",
@@ -119913,14 +119955,14 @@
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 469,
       "no_match_policy": 362,
-      "offer_extra_keyword": 417,
+      "offer_extra_keyword": 419,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5707
+      "audited": 5709
     },
-    "variant_count": 5707
+    "variant_count": 5709
   }
 }

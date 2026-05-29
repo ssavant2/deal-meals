@@ -51,36 +51,6 @@
       "plain_offer_word": "bjornbarssaft"
     },
     {
-      "bridge_id": "bridge_bladkal_cabbage_alternatives",
-      "canonical": "kål",
-      "plain_offer_word": "rodkal"
-    },
-    {
-      "bridge_id": "bridge_bladkal_cabbage_alternatives",
-      "canonical": "kål",
-      "plain_offer_word": "rödkål"
-    },
-    {
-      "bridge_id": "bridge_bladkal_cabbage_alternatives",
-      "canonical": "kål",
-      "plain_offer_word": "spetskal"
-    },
-    {
-      "bridge_id": "bridge_bladkal_cabbage_alternatives",
-      "canonical": "kål",
-      "plain_offer_word": "spetskål"
-    },
-    {
-      "bridge_id": "bridge_bladkal_cabbage_alternatives",
-      "canonical": "kål",
-      "plain_offer_word": "vitkal"
-    },
-    {
-      "bridge_id": "bridge_bladkal_cabbage_alternatives",
-      "canonical": "kål",
-      "plain_offer_word": "vitkål"
-    },
-    {
       "bridge_id": "bridge_blandade_bonor_bonmix",
       "canonical": "bönor",
       "plain_offer_word": "bonmix"
@@ -89,16 +59,6 @@
       "bridge_id": "bridge_blomkalshuvud_fresh",
       "canonical": "blomkål",
       "plain_offer_word": "blomkal"
-    },
-    {
-      "bridge_id": "bridge_breoliv_spread_family",
-      "canonical": "margarin",
-      "plain_offer_word": "bregott"
-    },
-    {
-      "bridge_id": "bridge_breoliv_spread_family",
-      "canonical": "margarin",
-      "plain_offer_word": "breoliv"
     },
     {
       "bridge_id": "bridge_brodskivor_formbrod",
@@ -338,17 +298,7 @@
     {
       "bridge_id": "bridge_knipplok_bunch",
       "canonical": "salladslök",
-      "plain_offer_word": "knippe"
-    },
-    {
-      "bridge_id": "bridge_knipplok_bunch",
-      "canonical": "salladslök",
       "plain_offer_word": "salladslok"
-    },
-    {
-      "bridge_id": "bridge_knipplok_bunch",
-      "canonical": "salladslök",
-      "plain_offer_word": "salladslök"
     },
     {
       "bridge_id": "bridge_kolasas_exact",
