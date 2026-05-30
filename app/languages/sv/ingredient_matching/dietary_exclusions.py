@@ -10,7 +10,6 @@ from typing import Iterable, Sequence
 from ..category_utils import is_lactose_free
 from ..normalization import fix_swedish_chars
 from .extraction import extract_keywords_from_ingredient, extract_keywords_from_product
-from .normalization import _apply_space_normalizations
 
 
 _WORD_CHARS = "a-zåäöéèüA-ZÅÄÖÉÈÜ"
@@ -79,13 +78,21 @@ _GLUTEN_FREE_CARRIER_CUES = frozenset({
 
 _NUT_KEYWORDS = frozenset({
     "nötter", "notter",
+    "jordnöt", "jordnot",
     "jordnötter", "jordnotter",
+    "cashewnöt", "cashewnot",
     "cashewnötter", "cashewnotter",
+    "valnöt", "valnot",
     "valnötter", "valnotter",
+    "hasselnöt", "hasselnot",
     "hasselnötter", "hasselnotter",
+    "pistagenöt", "pistagenot",
     "pistagenötter", "pistagenotter",
+    "macadamianöt", "macadamianot",
     "macadamianötter", "macadamianotter",
+    "pekannöt", "pekannot",
     "pekannötter", "pekannotter",
+    "pinjenöt", "pinjenot",
     "pinjenötter", "pinjenotter",
     "mandel", "sötmandel", "sotmandel",
     "nötmix", "notmix",
@@ -142,7 +149,10 @@ _LACTOSE_EXEMPTION_CUES = frozenset({"laktosfri", "laktosfritt", "laktosfria"})
 
 
 def _normalize_text(text: str) -> str:
-    return _apply_space_normalizations(fix_swedish_chars(text or "").lower())
+    # Do not apply matcher space-normalizations here. They intentionally merge
+    # phrases like "kondenserad mjölk" for canonical matching, but dietary
+    # profile scanning needs word-level evidence such as the visible "mjölk".
+    return fix_swedish_chars(text or "").lower()
 
 
 def _word_re(cue: str) -> re.Pattern[str]:

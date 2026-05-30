@@ -16,6 +16,7 @@ import languages.sv.recipe_matcher_backend as backend  # noqa: E402
 from languages.sv.ingredient_matching.dietary_exclusions import (  # noqa: E402
     compile_recipe_ingredient_exclusion_flags,
     ingredient_exclusion_hits_for_ingredient_text,
+    ingredient_exclusion_hits_for_offer,
     selected_profiles_exclude_compiled_recipe,
     split_ingredient_exclusion_terms,
 )
@@ -272,6 +273,26 @@ test(
         "tomater",
     ]),
     [],
+)
+
+test(
+    "offer dietary text fallback sees cues before matcher phrase compaction",
+    [
+        (hit.profile, hit.evidence, hit.source)
+        for text in [
+            "Vetemjöl Special 2kg",
+            "Choklad Hasselnöt 100g",
+            "Kondenserad mjölk 397g",
+            "Naturell tofu 270g",
+        ]
+        for hit in ingredient_exclusion_hits_for_offer(text)
+    ],
+    [
+        ("gluten", "vetemjöl", "text"),
+        ("nuts", "hasselnöt", "text"),
+        ("lactose", "mjölk", "text"),
+        ("soy", "tofu", "text"),
+    ],
 )
 
 test(
