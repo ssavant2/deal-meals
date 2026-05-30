@@ -683,6 +683,13 @@ keyword = "pinsasås"
 blockers = ["chili", "nduja"]
 reason = "Pinsasås Classico (plain) ska inte matcha smaksatta varianter Chili och 'Nduja; samma plain-vs-smaksatt-princip som pesto."
 
+[[product_name_blockers]]
+id = "runtime_pnb_pepparkaka"
+status = "active"
+keyword = "pepparkaka"
+blockers = ["skumtomte"]
+reason = "Skumtomte Pepparkaka is a marshmallow candy, not a soft gingerbread — blocks via product name, not ingredient text"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -983,6 +990,13 @@ status = "active"
 keyword = "paprika"
 blockers = ["paprikapure"]
 reason = "Paprikapuré (concentrated red pepper paste in tube/jar) must not match fresh whole paprika; same pattern as existing paprikakräm/paprikapulver blockers"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_kottfars"
+status = "active"
+keyword = "köttfärs"
+blockers = ["köttfärssås", "köttfärssåser"]
+reason = "ready-made meat sauce (köttfärssåser) should not match raw mince (köttfärs) — mirrors existing FPB färs←köttfärssåser"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
