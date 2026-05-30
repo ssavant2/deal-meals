@@ -515,10 +515,14 @@ def check_specialty_qualifiers(
         # Chocolate partial skip: "mörk choklad" should match generic (no darkness),
         # but "vit choklad" must NOT match dark/generic. Skip Direction A only for
         # mörk/mork qualifiers. Enforce for vit/ljus.
+        # mörk and mjölk(choklad) both fall back to generic/unspecified chocolate
+        # (a plain "Choklad" bar is milk chocolate by default), so Direction A is
+        # skipped for them. Direction B still isolates the explicit colors so milk
+        # chocolate does not match dark/white products. vit/ljus stay strict.
         _DIRECTION_A_SKIP_QUALIFIERS: Dict[str, Set[str]] = {
-            'choklad': {'mörk', 'mork'},
-            'bakchoklad': {'mörk', 'mork'},
-            'blockchoklad': {'mörk', 'mork'},
+            'choklad': {'mörk', 'mork', 'mjölk', 'mjolk', 'milk'},
+            'bakchoklad': {'mörk', 'mork', 'mjölk', 'mjolk', 'milk'},
+            'blockchoklad': {'mörk', 'mork', 'mjölk', 'mjolk', 'milk'},
         }
         # Packaging words like 'burk' can appear in ingredient text referring to
         # a DIFFERENT product ("1 burk kronärtskockscrème med soltorkad tomat").

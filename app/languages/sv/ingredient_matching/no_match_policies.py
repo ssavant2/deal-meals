@@ -67,7 +67,7 @@ _POLICY_INGREDIENT_HINTS = {
     "policy_fresh_chili_not_crispy_chili_oil": ("chili",),
     "policy_flaskkott_not_soda_lask_substring": ("fläskkött", "flaskkott"),
     "policy_raw_flaskkott_not_prepared_souvlaki": ("fläskkött", "flaskkott"),
-    "policy_salted_potato_chips_not_flavored": ("potatischips",),
+    "policy_salted_potato_chips_not_flavored": ("chips",),
     "policy_kumminstekt_not_cumin_spice": ("kumminstekt",),
     "policy_dillpicklad_not_dill_spice": ("dillpicklad",),
     "policy_oregano_not_vegan_cheese_carrier": ("oregano",),

@@ -1369,12 +1369,34 @@ test("SQ generic smör → osaltat pass", sq_check('30 g smör', 'Smör Osaltat 
 # PNB: chips → färskost
 test("PNB färskost → chips", 'chips' in PRODUCT_NAME_BLOCKERS.get('färskost', set()), True)
 
+# Standalone "nöt" in a recipe means beef: "grytbitar av nöt" must reach nötkött
+# products (matcher exposes the nötkött parent for the bare word); "nötter"/nuts unaffected.
+test("grytbitar av nöt matches nöt stew product",
+     match("Grytbitar Nöt ca 500g ICA", "400 g grytbitar av nöt") is not None, True)
+test("nut ingredient still not beef", match("Grytbitar Nöt ca 500g ICA", "2 dl hasselnötter"), None)
+# Peanuts: salt level is not a matching distinction — naturella/saltade/plain peanuts
+# all match any peanut product (the cook adjusts seasoning).
+test("naturella jordnötter matches plain peanut product",
+     match("Jordnötter 250g ICA", "1 dl naturella jordnötter") is not None, True)
+test("naturella jordnötter matches salted peanut product",
+     match("Jordnötter Salta 250g", "1 dl naturella jordnötter") is not None, True)
+test("saltade jordnötter matches plain peanut product",
+     match("Jordnötter 250g ICA", "100 g saltade jordnötter") is not None, True)
+
 # Choklad darkness (Direction B-only via _GENERIC_MATCHES_ALL)
 test("SQ mörk choklad → vit block", sq_check('mörk choklad', 'Bakchoklad Vit', 'choklad'), False)
 test("SQ mörk choklad → mörk pass", sq_check('mörk choklad', 'Bakchoklad Mörk 55%', 'choklad'), True)
 test("SQ vit choklad → mörk block", sq_check('vit choklad', 'Bakchoklad Mörk 55%', 'choklad'), False)
 test("SQ generic choklad → vit pass", sq_check('choklad', 'Bakchoklad Vit', 'choklad'), True)
 test("SQ generic choklad → mörk pass", sq_check('choklad', 'Bakchoklad Mörk 55%', 'choklad'), True)
+# Milk chocolate is a distinct type: "mjölkchoklad" must not match dark/white chocolate,
+# but still matches a milk-chocolate or generic/unspecified product (plain bars are milk).
+test("SQ mjölkchoklad → mörk block", sq_check('mjölkchoklad', 'Mörk Choklad 72% Cloetta', 'choklad'), False)
+test("SQ mjölkchoklad → vit block", sq_check('mjölkchoklad', 'Bakchoklad Vit', 'choklad'), False)
+test("SQ mjölkchoklad → mjölk pass", sq_check('mjölkchoklad', 'Mjölk Choklad 200g Marabou', 'choklad'), True)
+test("SQ mjölkchoklad → generic pass", sq_check('mjölkchoklad', 'Choklad 100g Marabou', 'choklad'), True)
+test("SQ mörk choklad → mjölk block", sq_check('mörk choklad', 'Mjölk Choklad 200g Marabou', 'choklad'), False)
+test("SQ generic choklad → mjölk pass", sq_check('choklad', 'Mjölk Choklad 200g Marabou', 'choklad'), True)
 test(
     "dark chocolate bar product with chokladkaka extracts choklad",
     extract_keywords_from_product(
@@ -5602,6 +5624,41 @@ test(
     recipe_match_num(
         ["250 g kålrotsspaghetti Hackat och Klart"],
         {"name": "Spaghetti 500g Barilla", "category": "pantry"},
+    ),
+    0,
+)
+# Buyable spiralized-vegetable spaghetti (Coop's Hackat & klart green line):
+# isolated from wheat pasta AND from the raw vegetable, but a same-named product
+# may still match if it returns to shelves.
+test(
+    "rödbetsspaghetti does not fall through to ordinary spaghetti",
+    recipe_match_num(
+        ["250 g rödbetsspaghetti Hackat & klart"],
+        {"name": "Spaghetti 1kg Barilla", "category": "pantry"},
+    ),
+    0,
+)
+test(
+    "rödbetsspaghetti does not match plain raw beetroot",
+    recipe_match_num(
+        ["250 g rödbetsspaghetti Hackat & klart"],
+        {"name": "Rödbeta 1kg Klass 1", "category": "vegetables"},
+    ),
+    0,
+)
+test(
+    "rödbetsspaghetti still matches a same-named product",
+    recipe_match_num(
+        ["250 g rödbetsspaghetti Hackat & klart"],
+        {"name": "Rödbetsspaghetti 250g Coop", "category": "vegetables"},
+    ),
+    1,
+)
+test(
+    "zucchinispaghetti does not fall through to ordinary spaghetti",
+    recipe_match_num(
+        ["200 g zucchinispaghetti"],
+        {"name": "Spaghetti 1kg Barilla", "category": "pantry"},
     ),
     0,
 )
@@ -10218,6 +10275,18 @@ test("Batch 15 grovmalen svartpeppar blocks fine ground pepper", recipe_match_nu
 test("Batch 15 grovmalen svartpeppar is manual no-match for whole pepper", recipe_match_num_cached(["1 tsk grovmalen svartpeppar"], {"name": "Svartpeppar Hel", "category": "spices"}), 0)
 test("Batch 15 saltade potatischips blocks bacon chips", recipe_match_num(["200 g saltade potatischips"], {"name": "Potatischips Bacon Estrella", "category": "snacks"}), 0)
 test("Batch 15 saltade potatischips accepts salted chips", recipe_match_num_cached(["200 g saltade potatischips"], {"name": "Potatischips Saltade Estrella", "category": "snacks"}), 1)
+# General/plain chips ingredient matches only plain salted potato chips — not flavored
+# variants and not other chip bases (tortilla/nacho/banan/etc.). A chips ingredient that
+# names a specific flavor or base type (separate-word flavor, or a glued *chips compound)
+# stays exempt and matches that specific product.
+test("plain chips ingredient accepts lättsaltade chips", recipe_match_num(["1 påse lättsaltade chips"], {"name": "Chips Lättsaltade 275g OLW", "category": "snacks"}), 1)
+test("plain chips ingredient blocks bacon chips", recipe_match_num(["1 påse lättsaltade chips"], {"name": "Chips Bacon 150g Redhead", "category": "snacks"}), 0)
+test("plain chips ingredient blocks sourcream chips", recipe_match_num(["chips"], {"name": "Chips Sourcream & Onion 275g OLW", "category": "snacks"}), 0)
+test("plain chips ingredient blocks tortilla chips base", recipe_match_num(["chips"], {"name": "Tortillachips Naturell 200g ICA", "category": "snacks"}), 0)
+test("plain chips ingredient blocks banana chips base", recipe_match_num(["chips"], {"name": "Bananchips 200g Exotic Snacks", "category": "snacks"}), 0)
+test("sourcream chips ingredient still matches sourcream chips", recipe_match_num(["sourcream & onion chips"], {"name": "Chips Sourcream & Onion 275g OLW", "category": "snacks"}), 1)
+test("nachochips ingredient still matches nacho chips", recipe_match_num(["nachochips"], {"name": "Nachochips 200g ICA", "category": "snacks"}), 1)
+test("tortillachips ingredient still matches tortilla chips", recipe_match_num(["tortillachips"], {"name": "Tortillachips Naturell 200g ICA", "category": "snacks"}), 1)
 test("Batch 15 vegan recipe title blocks egg pasta", recipe_match_num_named("Vegansk pasta", ["250 g tagliatelle"], {"name": "Tagliatelle Ägg Garant", "category": "pantry"}), 0)
 test("Batch 15 olja till stekning stays unmatched", recipe_match_num_cached(["1 msk olja till stekning"], {"name": "Rapsolja Eldorado", "category": "pantry"}), 0)
 
@@ -14897,6 +14966,19 @@ test("KSBC ravioli has chokladravioli",
 from languages.sv.ingredient_matching import FALSE_POSITIVE_BLOCKERS
 test("FPB choklad has chokladravioli",
      "chokladravioli" in FALSE_POSITIVE_BLOCKERS.get("choklad", set()), True)
+# runtime_important_short_keyword_add_lomo: generated by dm matcher add important-short-keyword
+# sanity-id: runtime_important_short_keyword_add_lomo
+from languages.sv.ingredient_matching.keywords import IMPORTANT_SHORT_KEYWORDS
+test("important-short-keyword add lomo",
+     "lomo" in IMPORTANT_SHORT_KEYWORDS, True)
+# Cured Spanish loin: "Lomo curado" ingredient matches the "Lomo Lufttorkad" product
+# now that the 4-char charcuterie term extracts as a keyword.
+test("lomo curado matches lomo lufttorkad product",
+     match("Lomo Lufttorkad 100g ICA", "1 förp Lomo curado") is not None, True)
+# keyword_synonym_pumpafron_pumpafro: generated by dm matcher add keyword-synonym
+# sanity-id: keyword_synonym_pumpafron_pumpafro
+test("Keyword synonym pumpafrö matches pumpafrön",
+     match("Pumpafrön Rostade 180g Besler", "pumpafrö", "pantry"), "pumpafrön")
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")

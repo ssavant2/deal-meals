@@ -875,16 +875,11 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'naturell', 'naturella',
         'saltad', 'saltade', 'salta',
     },
-    'jordnötter': {
-        'naturell', 'naturella',
-        'osaltad', 'osaltade',
-        'saltad', 'saltade', 'salta',
-    },
-    'jordnotter': {
-        'naturell', 'naturella',
-        'osaltad', 'osaltade',
-        'saltad', 'saltade', 'salta',
-    },
+    # Peanuts: salt level is not a matching distinction — a recipe's "naturella
+    # jordnötter" (or "saltade jordnötter") should match any peanut product, salted
+    # or unsalted; the cook adjusts seasoning. A plain "Jordnötter" product is
+    # naturell by default, so requiring the literal word blocked the obvious match.
+    # (cashew kept distinct above per its own decision.)
 
     # Bean types - "kidneybönor" should NOT match generic "Blandade Bönor"
     # If ingredient has specific bean type, product must also have it
@@ -953,16 +948,19 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         'mörk', 'mork',
         'vit',
         'ljus',
+        'mjölk', 'mjolk', 'milk',
     },
     'bakchoklad': {
         'mörk', 'mork',
         'vit',
         'ljus',
+        'mjölk', 'mjolk', 'milk',
     },
     'blockchoklad': {
         'mörk', 'mork',
         'vit',
         'ljus',
+        'mjölk', 'mjolk', 'milk',
     },
     # Chocolate buttons share the same explicit-variant rule as cooking
     # chocolate: plain "chokladknappar" can use any variant, but "vita/mörka/
@@ -1189,16 +1187,19 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
         'mörk', 'mork',
         'vit',
         'ljus',
+        'mjölk', 'mjolk', 'milk',
     }),
     'bakchoklad': frozenset({
         'mörk', 'mork',
         'vit',
         'ljus',
+        'mjölk', 'mjolk', 'milk',
     }),
     'blockchoklad': frozenset({
         'mörk', 'mork',
         'vit',
         'ljus',
+        'mjölk', 'mjolk', 'milk',
     }),
     'chokladknappar': frozenset({
         'mörk', 'mork',

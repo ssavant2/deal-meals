@@ -1588,6 +1588,14 @@ action = "add"
 terms = ["fruktskålen"]
 reason = "Decorative serving-vessel word ('fruit bowl'), not a food. Leaked from a parenthetical recipe suggestion '(eller det du hittar i fruktskålen)' and let the 'kål' compound-suffix match every cabbage product against a grape ingredient."
 
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_lomo"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["lomo"]
+reason = "lomo = Spanish cured pork loin (Lomo curado / Lomo Lufttorkad); 4-char charcuterie term must extract as a keyword so the cured-loin ingredient matches its product"
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"

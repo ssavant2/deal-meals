@@ -2572,22 +2572,22 @@ language = "sv"
 market = "SE"
 canonical = "saltade potatischips"
 status = "active"
-variants = ["saltade potatischips ! \\bbacon\\b"]
-negative_guards = ["saltade potatischips ! \\bbacon\\b"]
+variants = ["saltade potatischips ! bacon", "saltade potatischips ! barbecue", "saltade potatischips ! bbq", "saltade potatischips ! cheddar", "saltade potatischips ! cheese", "saltade potatischips ! cheez", "saltade potatischips ! \\bost\\b", "saltade potatischips ! färskost", "saltade potatischips ! farskost", "saltade potatischips ! parmesan", "saltade potatischips ! jalapeno", "saltade potatischips ! chili", "saltade potatischips ! habanero", "saltade potatischips ! cream cheese", "saltade potatischips ! sourcream", "saltade potatischips ! sour cream", "saltade potatischips ! sourcreme", "saltade potatischips ! gräddfil", "saltade potatischips ! graddfil", "saltade potatischips ! \\bdill\\b", "saltade potatischips ! wasabi", "saltade potatischips ! gräslök", "saltade potatischips ! graslok", "saltade potatischips ! ranch", "saltade potatischips ! tzatziki", "saltade potatischips ! tryffel", "saltade potatischips ! truffle", "saltade potatischips ! sweet chili", "saltade potatischips ! paprika", "saltade potatischips ! \\blök\\b", "saltade potatischips ! vitlök", "saltade potatischips ! vitlok", "saltade potatischips ! ramslök", "saltade potatischips ! ramslok", "saltade potatischips ! rödlök", "saltade potatischips ! rodlok", "saltade potatischips ! vinegar", "saltade potatischips ! vinäger", "saltade potatischips ! vinager", "saltade potatischips ! \\bhot\\b", "saltade potatischips ! \\blime\\b", "saltade potatischips ! pico de gallo", "saltade potatischips ! mystery", "saltade potatischips ! grill", "saltade potatischips ! brynt smör", "saltade potatischips ! brynt smor", "saltade potatischips ! peppar", "saltade potatischips ! onion", "saltade potatischips ! garlic", "saltade potatischips ! nacho", "saltade potatischips ! tortilla", "saltade potatischips ! banan", "saltade potatischips ! räk", "saltade potatischips ! rotfrukt", "saltade potatischips ! rödbet", "saltade potatischips ! rodbet", "saltade potatischips ! sötpotatis", "saltade potatischips ! sotpotatis", "saltade potatischips ! salami", "saltade potatischips ! lins", "saltade potatischips ! protein", "saltade potatischips ! råg", "saltade potatischips ! pommes", "saltade potatischips ! fish", "saltade potatischips ! tunnbröd", "saltade potatischips ! tunnbrod", "saltade potatischips ! kroepoek", "saltade potatischips ! \\bcorn\\b", "saltade potatischips ! \\bmajs\\b", "saltade potatischips ! queso", "saltade potatischips ! vickning"]
+negative_guards = ["saltade potatischips ! bacon", "saltade potatischips ! barbecue", "saltade potatischips ! bbq", "saltade potatischips ! cheddar", "saltade potatischips ! cheese", "saltade potatischips ! cheez", "saltade potatischips ! \\bost\\b", "saltade potatischips ! färskost", "saltade potatischips ! farskost", "saltade potatischips ! parmesan", "saltade potatischips ! jalapeno", "saltade potatischips ! chili", "saltade potatischips ! habanero", "saltade potatischips ! cream cheese", "saltade potatischips ! sourcream", "saltade potatischips ! sour cream", "saltade potatischips ! sourcreme", "saltade potatischips ! gräddfil", "saltade potatischips ! graddfil", "saltade potatischips ! \\bdill\\b", "saltade potatischips ! wasabi", "saltade potatischips ! gräslök", "saltade potatischips ! graslok", "saltade potatischips ! ranch", "saltade potatischips ! tzatziki", "saltade potatischips ! tryffel", "saltade potatischips ! truffle", "saltade potatischips ! sweet chili", "saltade potatischips ! paprika", "saltade potatischips ! \\blök\\b", "saltade potatischips ! vitlök", "saltade potatischips ! vitlok", "saltade potatischips ! ramslök", "saltade potatischips ! ramslok", "saltade potatischips ! rödlök", "saltade potatischips ! rodlok", "saltade potatischips ! vinegar", "saltade potatischips ! vinäger", "saltade potatischips ! vinager", "saltade potatischips ! \\bhot\\b", "saltade potatischips ! \\blime\\b", "saltade potatischips ! pico de gallo", "saltade potatischips ! mystery", "saltade potatischips ! grill", "saltade potatischips ! brynt smör", "saltade potatischips ! brynt smor", "saltade potatischips ! peppar", "saltade potatischips ! onion", "saltade potatischips ! garlic", "saltade potatischips ! nacho", "saltade potatischips ! tortilla", "saltade potatischips ! banan", "saltade potatischips ! räk", "saltade potatischips ! rotfrukt", "saltade potatischips ! rödbet", "saltade potatischips ! rodbet", "saltade potatischips ! sötpotatis", "saltade potatischips ! sotpotatis", "saltade potatischips ! salami", "saltade potatischips ! lins", "saltade potatischips ! protein", "saltade potatischips ! råg", "saltade potatischips ! pommes", "saltade potatischips ! fish", "saltade potatischips ! tunnbröd", "saltade potatischips ! tunnbrod", "saltade potatischips ! kroepoek", "saltade potatischips ! \\bcorn\\b", "saltade potatischips ! \\bmajs\\b", "saltade potatischips ! queso", "saltade potatischips ! vickning"]
 source_refs = ["policy:no_match_policies:policy_salted_potato_chips_not_flavored"]
 layer_policy = ["negative_guard_only"]
-notes = "Salted potato chips stay separate from bacon-flavored chips."
+notes = "General/plain potato chips (chips, lättsaltade, saltade, naturell, original, havssalt) match only plain salted potato chips. Flavored variants and other chip bases (tortilla/nacho/banan/räk/rotfrukt/sötpotatis/salami/lins/protein/råg/pommes/corn) are blocked. \\bchips\\b word boundary means a glued specific compound (nachochips, bananchips, grillchips) does not trigger the guard and matches its own product; a separate-word flavor (sourcream chips) is exempt via allowed_specifics."
 
 [entries.language_payload.no_match_policy]
 id = "policy_salted_potato_chips_not_flavored"
 rule_schema_version = 1
-rule_version = 1
+rule_version = 4
 canonical = "saltade potatischips"
-ingredient_patterns = ["\\bsaltade\\s+potatischips\\b"]
+ingredient_patterns = ["\\bchips\\b", "\\bpotatischips\\b"]
 blocked_offer_keywords = []
-blocked_offer_patterns = ["\\bbacon\\b"]
-allowed_specifics = []
-reason = "Salted potato chips stay separate from bacon-flavored chips."
+blocked_offer_patterns = ["bacon", "barbecue", "bbq", "cheddar", "cheese", "cheez", "\\bost\\b", "färskost", "farskost", "parmesan", "jalapeno", "chili", "habanero", "cream cheese", "sourcream", "sour cream", "sourcreme", "gräddfil", "graddfil", "\\bdill\\b", "wasabi", "gräslök", "graslok", "ranch", "tzatziki", "tryffel", "truffle", "sweet chili", "paprika", "\\blök\\b", "vitlök", "vitlok", "ramslök", "ramslok", "rödlök", "rodlok", "vinegar", "vinäger", "vinager", "\\bhot\\b", "\\blime\\b", "pico de gallo", "mystery", "grill", "brynt smör", "brynt smor", "peppar", "onion", "garlic", "nacho", "tortilla", "banan", "räk", "rotfrukt", "rödbet", "rodbet", "sötpotatis", "sotpotatis", "salami", "lins", "protein", "råg", "pommes", "fish", "tunnbröd", "tunnbrod", "kroepoek", "\\bcorn\\b", "\\bmajs\\b", "queso", "vickning"]
+allowed_specifics = ["bacon", "barbecue", "bbq", "cheddar", "cheese", "ost", "färskost", "parmesan", "jalapeno", "chili", "habanero", "cream cheese", "sourcream", "sour cream", "gräddfil", "dill", "wasabi", "gräslök", "ranch", "tzatziki", "tryffel", "sweet chili", "paprika", "lök", "vitlök", "ramslök", "rödlök", "vinegar", "vinäger", "hot", "lime", "pico de gallo", "mystery", "grill", "brynt smör", "peppar", "onion", "garlic", "nacho", "tortilla", "banan", "räk", "rotfrukt", "rödbet", "sötpotatis", "salami", "lins", "protein", "råg", "pommes", "fish", "tunnbröd", "kroepoek", "corn", "majs", "queso", "vickning"]
+reason = "General/plain potato chips (chips, lättsaltade, saltade, naturell, original, havssalt) match only plain salted potato chips. Flavored variants and other chip bases (tortilla/nacho/banan/räk/rotfrukt/sötpotatis/salami/lins/protein/råg/pommes/corn) are blocked. \\bchips\\b word boundary means a glued specific compound (nachochips, bananchips, grillchips) does not trigger the guard and matches its own product; a separate-word flavor (sourcream chips) is exempt via allowed_specifics."
 policy_ref = "current_review_matcher_regression"
 fixture_refs = ["matcher_regression_saltade_potatischips_bacon_negative"]
 supersedes = ["legacy_no_match_salted_potato_chips_flavors"]
@@ -2595,14 +2595,433 @@ supersedes = ["legacy_no_match_salted_potato_chips_flavors"]
 [[entries.coverage]]
 source_family = "no_match_policy"
 canonical = "saltade potatischips"
-variant = "saltade potatischips ! \\bbacon\\b"
+variant = "saltade potatischips ! bacon"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! barbecue"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! bbq"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! cheddar"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! cheese"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! cheez"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! \\bost\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! färskost"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! farskost"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! parmesan"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! jalapeno"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! chili"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! habanero"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! cream cheese"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! sourcream"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! sour cream"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! sourcreme"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! gräddfil"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! graddfil"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! \\bdill\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! wasabi"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! gräslök"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! graslok"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! ranch"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! tzatziki"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! tryffel"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! truffle"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! sweet chili"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! paprika"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! \\blök\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! vitlök"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! vitlok"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! ramslök"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! ramslok"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! rödlök"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! rodlok"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! vinegar"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! vinäger"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! vinager"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! \\bhot\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! \\blime\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! pico de gallo"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! mystery"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! grill"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! brynt smör"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! brynt smor"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! peppar"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! onion"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! garlic"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! nacho"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! tortilla"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! banan"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! räk"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! rotfrukt"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! rödbet"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! rodbet"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! sötpotatis"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! sotpotatis"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! salami"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! lins"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! protein"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! råg"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! pommes"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! fish"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! tunnbröd"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! tunnbrod"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! kroepoek"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! \\bcorn\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! \\bmajs\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! queso"
+layer_role = "negative_guard_pattern"
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "saltade potatischips"
+variant = "saltade potatischips ! vickning"
 layer_role = "negative_guard_pattern"
 
 [[entries.negative_examples]]
 ingredient = "saltade potatischips"
-offer_name = "saltade potatischips ! \\bbacon\\b"
+offer_name = "saltade potatischips ! bacon"
 expected = 0
-
 [[entries]]
 entry_id = "sv-se.guard.policy_kumminstekt_not_cumin_spice"
 language = "sv"

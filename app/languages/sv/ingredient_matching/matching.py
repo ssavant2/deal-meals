@@ -474,6 +474,12 @@ _INGREDIENT_PARENT_TEXT_ALIASES = {
     'korsbarstomat': 'småtomat',
     'korsbarstomater': 'småtomat',
     'småtomater': 'småtomat',
+    # Standalone "nöt" in a recipe means beef (nötkött), matching the extractor's
+    # INGREDIENT_PARENTS['nöt'] = 'nötkött'. Expose the parent so raw-text matching
+    # lets "grytbitar av nöt" / "400 g nöt" reach nötkött products whose only
+    # keyword is "nötkött". Whole-word only — "nötter"/"hasselnöt" are unaffected.
+    'nöt': 'nötkött',
+    'not': 'nötkött',
 }
 _ROM_SPIRIT_INGREDIENT_CUES = frozenset({
     'ljus rom', 'mörk rom', 'mork rom',
@@ -948,6 +954,32 @@ _EXACT_COMPOUND_ONLY_INGREDIENTS = {
     'vetemjölfullkorn': frozenset({'vetemjöl'}),
     'kålrotsspaghetti': frozenset({'pasta', 'långpasta', 'langpasta', 'spaghetti', 'spagetti'}),
     'kalrotsspaghetti': frozenset({'pasta', 'långpasta', 'langpasta', 'spaghetti', 'spagetti'}),
+    # Spiralized beetroot ("Rödbetsspaghetti", Coop's Hackat & klart line) is a real
+    # buyable product, but it is neither wheat pasta nor raw beetroot: it must match
+    # only a same-named product, not ordinary spaghetti/pasta or plain beetroot. It is
+    # deliberately NOT in _NON_BUYABLE_ROOT_VEG_PASTA_CUES so the Coop product can match.
+    'rödbetsspaghetti': frozenset({
+        'rödbeta', 'rödbetor', 'rodbeta', 'rodbetor',
+        'pasta', 'långpasta', 'langpasta', 'spaghetti', 'spagetti',
+    }),
+    'rodbetsspaghetti': frozenset({
+        'rödbeta', 'rödbetor', 'rodbeta', 'rodbetor',
+        'pasta', 'långpasta', 'langpasta', 'spaghetti', 'spagetti',
+    }),
+    # Same buyable spiralized-vegetable family (Coop's green meal-solution line):
+    # match only a same-named product, never the raw vegetable or wheat pasta.
+    'zucchinispaghetti': frozenset({
+        'zucchini', 'pasta', 'långpasta', 'langpasta', 'spaghetti', 'spagetti',
+    }),
+    'squashspaghetti': frozenset({
+        'squash', 'pasta', 'långpasta', 'langpasta', 'spaghetti', 'spagetti',
+    }),
+    'sötpotatisspaghetti': frozenset({
+        'sötpotatis', 'sotpotatis', 'pasta', 'långpasta', 'langpasta', 'spaghetti', 'spagetti',
+    }),
+    'sotpotatisspaghetti': frozenset({
+        'sötpotatis', 'sotpotatis', 'pasta', 'långpasta', 'langpasta', 'spaghetti', 'spagetti',
+    }),
     'morotsspaghetti': frozenset({
         'morotsspaghetti',
         'morot', 'morötter', 'morotter', 'julienne',
