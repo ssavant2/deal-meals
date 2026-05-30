@@ -771,8 +771,8 @@ reason = "Marsipanlock (pre-rolled colored marzipan sheets for cake covering) is
 id = "runtime_fpb_mango"
 status = "active"
 keyword = "mango"
-blockers = ["mangopure", "mangopure", "mangosorbet"]
-reason = "Mangopure (mango puré) is a processed product, not fresh mango fruit. Ingredient 'mangopuré' (also written as 'mangopure') should match only true puré products, not whole fresh/frozen mango.; mangosorbet is a frozen dessert, not fresh/frozen mango — mirrors existing FPB mango←mangomarmelad/mangochutney/mangosalsa family"
+blockers = ["mangopure", "mangopure", "mangosorbet", "mangojuice", "mangojuicen"]
+reason = "Mangopure (mango puré) is a processed product, not fresh mango fruit. Ingredient 'mangopuré' (also written as 'mangopure') should match only true puré products, not whole fresh/frozen mango.; mangosorbet is a frozen dessert, not fresh/frozen mango — mirrors existing FPB mango←mangomarmelad/mangochutney/mangosalsa family; Mango juice ingredient (mangojuice) should not match whole/frozen mango fruit; juice is a distinct product. Mirrors ananas:ananasjuice and the juice policy."
 
 [[false_positive_blockers]]
 id = "runtime_fpb_ris"
@@ -1004,6 +1004,13 @@ status = "active"
 keyword = "köttfärs"
 blockers = ["köttfärssås", "köttfärssåser"]
 reason = "ready-made meat sauce (köttfärssåser) should not match raw mince (köttfärs) — mirrors existing FPB färs←köttfärssåser"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_pumpa"
+status = "active"
+keyword = "pumpa"
+blockers = ["pumpafrö", "pumpafro"]
+reason = "Pumpkin seeds (pumpafrö singular) are not the squash vegetable; existing entry only had plural pumpafrön"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
