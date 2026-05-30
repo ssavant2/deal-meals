@@ -1961,7 +1961,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     # Plain salsiccia ≠ vegan or minced variants unless recipe says so
     'salsiccia': {
-        'färs', 'fars', 'växtbaserad', 'vaxtbaserad',
+        # 'växtbaserad' removed (substitute policy — vego salsiccia may match a
+        # plain salsiccia recipe). 'färs' stays: salsiccia is a sausage, not loose mince.
+        'färs', 'fars',
     },
     # Spinach — block dumplings and pre-made stuvad
     'spenat': {
@@ -2144,7 +2146,9 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     },
     'nötfärs': {
         'högrev',  # "Högrev av nöt i bit" is a beef cut, not ground beef (416 FP recipes)
-        'vego', 'vegansk', 'soja', 'växtbaserad',  # vegan mince ≠ beef mince
+        # Plant-based vego mince intentionally NOT blocked (substitute policy —
+        # material is irrelevant for a plain ingredient; generic färs already
+        # matches vego, so nötfärs is kept consistent).
     },
     'vaniljsmak': {'marsipan', 'figurmarsipan'},  # "Figurmarsipan Vit Vaniljsmak" ≠ vanilla extract
     'schalottenlök': {'fond'},  # "Scharlottenlök Brynt Fond" is stock product, not fresh shallots
@@ -2674,10 +2678,10 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     # Fish nuggets ≠ chicken nuggets
     'nuggets': {
         'fisk', 'fish',       # "Fisk Nuggets" / "Fish & Crisp Nuggets" should NOT match chicken nuggets
-        'vegetariska', 'vego', 'vegan',  # vegan/veggie nuggets ≠ fish nuggets recipe
         'couscous',           # "Krispiga nuggets av couscous Felix" — grain-based, not fish
-        'quorn',              # "Vegetariska Crispy nuggets Quorn" — quorn brand = meat-free
-        'crispy green',       # "Crispy green nuggets Max" — plant-based
+        # Plant-based vego nuggets (vegetariska/vego/vegan/quorn/crispy green)
+        # intentionally NOT blocked (substitute policy — vego nuggets may match a
+        # plain/chicken nuggets recipe). fisk/fish (protein) + couscous (grain) stay.
     },
     # Sockermassa (fondant/sugar paste) ≠ strösocker (granulated sugar)
     # "150 g svart sockermassa" = modelling fondant for decoration, not regular sugar.

@@ -23,7 +23,7 @@
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 340,
       "negative_regression": 840,
-      "offer_extra_keyword_mapping": 419,
+      "offer_extra_keyword_mapping": 420,
       "parent_match_only_mapping": 20,
       "positive_regression": 660,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 469,
       "no_match_policy": 362,
-      "offer_extra_keyword": 419,
+      "offer_extra_keyword": 420,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5709,
-    "variants_missing_product_text": 1826,
+    "variant_count": 5710,
+    "variants_missing_product_text": 1827,
     "variants_with_product_text": 3883
   },
   "variants": [
@@ -119935,11 +119935,32 @@
       "needs_product_text": true,
       "notes": "Canned cherry tomatoes must not satisfy fresh cherry-tomato wording such as gärna på kvist.",
       "metadata": "{\"adapter_ref\": null, \"adapter_refs\": [], \"fixture_refs\": [\"matcher_regression_positive_korsbarstomater_400g_cirio\"], \"policy_ref\": \"current_review_canned_small_tomato_not_fresh\", \"risk\": \"form_guard\", \"source_refs\": [\"current_review:canned_korsbarstomater_cirio_not_fresh\"], \"status\": \"observed_legacy\"}"
+    },
+    {
+      "variant_id": "vterm-58958ebacaf893b2",
+      "row_index": 5434,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:vegonuggets",
+      "source_id": "vegonuggets",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "vegonuggets",
+      "canonical": "nuggets",
+      "expected_family": "nuggets",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"nuggets\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1604,
+      "no_product_text": 1605,
       "static_verified": 2605,
       "synthetic_verified": 1500
     },
@@ -119955,14 +119976,14 @@
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 469,
       "no_match_policy": 362,
-      "offer_extra_keyword": 419,
+      "offer_extra_keyword": 420,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5709
+      "audited": 5710
     },
-    "variant_count": 5709
+    "variant_count": 5710
   }
 }
