@@ -1220,6 +1220,34 @@ test(
     True,
 )
 
+# A "(N burgare motsvarar X g)" quantity-conversion note must NOT reactivate the
+# generic "burgare" keyword that the halloumiburgare/vegoburgare/bönburgare FP-blockers
+# suppress — otherwise a meat burger leaks into a veg-burger recipe. The standalone
+# "burgare" inside the parenthetical is a measurement aid, not an ingredient mention.
+test(
+    "Meat burger ≠ 'halloumiburgare (… burgare motsvarar 200 g)'",
+    match("Burgare av hushållsfärs 720g ICA", "4 halloumiburgare (4 burgare motsvarar 200 g)"),
+    None,
+)
+test(
+    "Meat burger ≠ 'vegoburgare (… burgare motsvarar 200 g)'",
+    match("Burgare av hushållsfärs 720g ICA", "4 vegoburgare (4 burgare motsvarar 200 g)"),
+    None,
+)
+# Guard against over-blocking: a plain "burgare" ingredient must still match a meat burger.
+test(
+    "Meat burger = plain 'burgare'",
+    match("Burgare av hushållsfärs 720g ICA", "4 burgare") is not None,
+    True,
+)
+# Guard the alternative-marker exclusion: a "(eller X, motsvarar …)" parenthetical
+# carries a real alternative and must stay intact, so the alternative still matches.
+test(
+    "Kikärtor alternative kept in '(eller kikärtor, motsvarar …)'",
+    match("Kikärtor 380g ICA", "1 dl torra linser (eller kikärtor, motsvarar drygt 1 dl torra)") is not None,
+    True,
+)
+
 # --- Batch 17-20 regression tests ---
 # NOTE: match() only tests matches_ingredient_fast (product→ingredient matching).
 # PNB, RIB, descriptor suppression run in recipe_matcher.py Phase 1 (pipeline level)

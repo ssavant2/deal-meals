@@ -3209,6 +3209,51 @@ def _rostbiff_palagg_allows_product(
     ))
 
 
+# Quantity-conversion parentheticals such as "(4 burgare motsvarar 200 g)" merely
+# restate a measurement of the primary ingredient. A standalone copy of a keyword
+# inside one is NOT an independent ingredient mention, so it must not reactivate a
+# keyword that a compound FP-blocker (e.g. "halloumiburgare" blocking "burgare")
+# is meant to suppress. We deliberately keep parentheticals that introduce a real
+# alternative or preference ("(eller kikärtor, motsvarar 1 dl torra)",
+# "(gärna penne, 4 port motsvarar ca 300 g)") so those alternatives still match.
+_MOTSVARAR_PAREN_PATTERN = re.compile(r'\([^)]*\bmotsvarar\b[^)]*\)')
+_PAREN_ALTERNATIVE_MARKERS = ('eller', 'gärna', 'garna', 'alternativt', 'helst', 't.ex', 'tex')
+
+
+def _mask_quantity_conversion_parentheticals(text: str) -> str:
+    """Blank out pure "(... motsvarar ...)" quantity-conversion notes, leaving any
+    that carry an alternative/preference marker (eller/gärna/alternativt) intact."""
+    def _repl(match: "re.Match[str]") -> str:
+        inner = match.group(0)
+        if any(marker in inner for marker in _PAREN_ALTERNATIVE_MARKERS):
+            return inner
+        return ' '
+    return _MOTSVARAR_PAREN_PATTERN.sub(_repl, text)
+
+
+def _fpb_keyword_standalone_valid(keyword: str, ingredient_lower: str, blockers,
+                                  words=None) -> bool:
+    """True if `keyword` appears standalone, or as the start of a non-blocker compound.
+
+    When the text carries a "(... motsvarar ...)" quantity-conversion note, that note is
+    masked out first so a standalone copy of the keyword inside it cannot reactivate a
+    compound-blocked keyword. When no such note is present this is a pure no-op over the
+    original per-word smart-blocker logic: callers may pass a pre-computed `words` list
+    (fast path) to preserve the existing optimization unchanged."""
+    if 'motsvarar' in ingredient_lower:
+        words = _WORD_PATTERN.findall(_mask_quantity_conversion_parentheticals(ingredient_lower))
+    elif words is None:
+        words = _WORD_PATTERN.findall(ingredient_lower)
+    for w in words:
+        if keyword not in w:
+            continue
+        if w == keyword:
+            return True
+        if w.startswith(keyword) and not any(w.startswith(b) for b in blockers):
+            return True
+    return False
+
+
 def matches_ingredient(
     product_keywords: List[str],
     ingredient_text: str,
@@ -3329,21 +3374,10 @@ def matches_ingredient(
                         keyword = None
                         break
                     # Check each word: does keyword appear in a valid context?
-                    words_in_text = _WORD_PATTERN.findall(ingredient_lower)
-                    has_valid = False
-                    for w in words_in_text:
-                        if keyword not in w:
-                            continue
-                        if w == keyword:
-                            has_valid = True  # exact standalone match
-                            break
-                        if w.startswith(keyword):
-                            # Compound word - valid unless it starts with a blocker
-                            # "ostsås" → valid, "ostronsås" → starts with "ostron" → blocked
-                            if not any(w.startswith(b) for b in blockers):
-                                has_valid = True
-                                break
-                    if not has_valid:
+                    # A standalone copy inside a "(... motsvarar ...)" quantity note
+                    # is ignored so it can't reactivate a compound-blocked keyword
+                    # (e.g. "burgare" inside "4 halloumiburgare (4 burgare motsvarar 200 g)").
+                    if not _fpb_keyword_standalone_valid(keyword, ingredient_lower, blockers):
                         continue  # keyword ONLY inside blocker words → skip
             # Compound strictness: if keyword is part of a compound word in recipe,
             # product must contain the qualifier (prefix or suffix)
@@ -3421,19 +3455,7 @@ def matches_ingredient(
                 if blockers:
                     has_blocker = any(b in ingredient_lower for b in blockers)
                     if has_blocker:
-                        words_in_text = _WORD_PATTERN.findall(ingredient_lower)
-                        has_valid = False
-                        for w in words_in_text:
-                            if parent not in w:
-                                continue
-                            if w == parent:
-                                has_valid = True
-                                break
-                            if w.startswith(parent):
-                                if not any(w.startswith(b) for b in blockers):
-                                    has_valid = True
-                                    break
-                        if not has_valid:
+                        if not _fpb_keyword_standalone_valid(parent, ingredient_lower, blockers):
                             continue
                 # Compound strictness for parent path too
                 product_lower_name = fix_swedish_chars(product_name).lower() if product_name else ""
@@ -4934,19 +4956,13 @@ def matches_ingredient_fast(
                     )
                     if multi_blocked:
                         continue  # blocked by multi-word phrase
-                    words_in_text = _ingredient_words if _ingredient_words is not None else _WORD_PATTERN.findall(ingredient_lower)
-                    has_valid = False
-                    for w in words_in_text:
-                        if keyword not in w:
-                            continue
-                        if w == keyword:
-                            has_valid = True
-                            break
-                        if w.startswith(keyword):
-                            if not any(w.startswith(b) for b in blockers):
-                                has_valid = True
-                                break
-                    if not has_valid:
+                    # Ignore standalone copies inside "(... motsvarar ...)" quantity
+                    # notes so they can't reactivate a compound-blocked keyword. Pass the
+                    # pre-computed words so the no-motsvarar path stays the prior fast-path
+                    # optimization (and stays in lockstep with the slow path).
+                    _words_for_fpb = _ingredient_words if _ingredient_words is not None else _WORD_PATTERN.findall(ingredient_lower)
+                    if not _fpb_keyword_standalone_valid(keyword, ingredient_lower, blockers,
+                                                         words=_words_for_fpb):
                         continue  # keyword ONLY inside blocker words → skip
             # Compound strictness: if keyword is part of a compound word in recipe,
             # product must contain the qualifier (prefix or suffix)
@@ -5067,19 +5083,7 @@ def matches_ingredient_fast(
                 if blockers:
                     has_blocker = any(b in ingredient_lower for b in blockers)
                     if has_blocker:
-                        words_in_text = _WORD_PATTERN.findall(ingredient_lower)
-                        has_valid = False
-                        for w in words_in_text:
-                            if parent not in w:
-                                continue
-                            if w == parent:
-                                has_valid = True
-                                break
-                            if w.startswith(parent):
-                                if not any(w.startswith(b) for b in blockers):
-                                    has_valid = True
-                                    break
-                        if not has_valid:
+                        if not _fpb_keyword_standalone_valid(parent, ingredient_lower, blockers):
                             continue
                 # Compound strictness for parent path too
                 pname = offer_data['name_normalized']
