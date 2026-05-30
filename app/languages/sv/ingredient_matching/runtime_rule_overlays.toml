@@ -820,8 +820,8 @@ reason = "Flavored cocktail/dessert syrups (jordgubbs, hallon, mint, fläderblom
 id = "runtime_fpb_choklad"
 status = "active"
 keyword = "choklad"
-blockers = ["chokladmjölk", "chokladmjolk", "pralin"]
-reason = "Chokladmjölk is a chocolate beverage (Pucko/Cocio), not solid chocolate for baking. Recipe asking for chokladmjölk should not match bakchoklad/chokladknappar via substring 'choklad' in 'chokladmjölk'.; Ingredient text containing 'pralin/praliner' indicates ready-to-eat chocolate confectionery, not baking chocolate. Bakchoklad/chokladknappar should not match recipes asking for praliner via the choklad parent keyword."
+blockers = ["chokladmjölk", "chokladmjolk", "pralin", "chokladravioli"]
+reason = "Chokladmjölk is a chocolate beverage (Pucko/Cocio), not solid chocolate for baking. Recipe asking for chokladmjölk should not match bakchoklad/chokladknappar via substring 'choklad' in 'chokladmjölk'.; Ingredient text containing 'pralin/praliner' indicates ready-to-eat chocolate confectionery, not baking chocolate. Bakchoklad/chokladknappar should not match recipes asking for praliner via the choklad parent keyword.; chokladravioli is a chocolate-filled pasta, not a chocolate bar; the choklad substring must not match chocolate confectionery offers"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_hallon"
@@ -1326,6 +1326,13 @@ status = "active"
 keyword = "vitlök"
 context = ["grillolja"]
 reason = "Grillolja Vitlök är smaksatt olja, inte rå vitlök; recept-ingrediens som är flavored grillolja ska suppressa den generiska vitlök-keyword så råa vitlökshuvuden inte matchar. KSBC istället för FPB eftersom ingrediensen innehåller vitlök som eget ord (FPB kringgås då)."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_ravioli"
+status = "active"
+keyword = "ravioli"
+context = ["chokladravioli"]
+reason = "Chocolate dessert ravioli (chokladravioli) is not plain savory ravioli; suppress the generic ravioli keyword so it does not match ricotta/spinach/mushroom/cheese raviolis"
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"

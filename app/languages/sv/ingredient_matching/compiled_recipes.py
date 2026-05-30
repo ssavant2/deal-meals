@@ -42,6 +42,7 @@ from .recipe_text import (
     expand_grouped_ingredient_text,
     is_subrecipe_reference_text,
     preserve_cheese_preference_parentheticals,
+    preserve_dessert_pasta_parenthetical,
     preserve_fresh_pasta_parenthetical,
     preserve_non_concentrate_parenthetical,
     preserve_parenthetical_chili_alias,
@@ -215,6 +216,7 @@ def prepare_recipe_match_runtime_data(recipe: FoundRecipe) -> dict[str, Any]:
         ingredient_norm = _TRUNCATED_COMPOUND_RE.sub(r" ", ingredient_norm)
         ingredient_norm = preserve_cheese_preference_parentheticals(ingredient_norm)
         ingredient_norm = preserve_fresh_pasta_parenthetical(ingredient_norm)
+        ingredient_norm = preserve_dessert_pasta_parenthetical(ingredient_norm)
         ingredient_norm = preserve_parenthetical_chili_alias(ingredient_norm)
         ingredient_norm = preserve_non_concentrate_parenthetical(ingredient_norm)
         ingredient_norm = preserve_parenthetical_grouped_herb_leaves(ingredient_norm)

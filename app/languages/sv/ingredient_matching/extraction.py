@@ -29,6 +29,7 @@ from .recipe_text import (
     is_subrecipe_reference_text,
     parse_eller_alternatives,
     preserve_cheese_preference_parentheticals,
+    preserve_dessert_pasta_parenthetical,
     preserve_fresh_pasta_parenthetical,
     preserve_parenthetical_chili_alias,
     preserve_parenthetical_grouped_herb_leaves,
@@ -2324,6 +2325,7 @@ def extract_keywords_from_ingredient(
     # "röd peppar (chili)" should behave like "röd chilipeppar".
     name = preserve_parenthetical_chili_alias(name)
     name = preserve_fresh_pasta_parenthetical(name)
+    name = preserve_dessert_pasta_parenthetical(name)
     name = preserve_non_concentrate_parenthetical(name)
     name = preserve_parenthetical_grouped_herb_leaves(name)
     # Keep explicit shiso herb fallbacks before generic paren stripping.

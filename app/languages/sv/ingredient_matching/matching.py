@@ -85,6 +85,7 @@ from .recipe_text import (
     is_subrecipe_reference_text,
     parse_eller_alternatives,
     preserve_cheese_preference_parentheticals,
+    preserve_dessert_pasta_parenthetical,
     preserve_fresh_pasta_parenthetical,
     preserve_parenthetical_chili_alias,
     preserve_parenthetical_grouped_herb_leaves,
@@ -3296,6 +3297,7 @@ def matches_ingredient(
         ingredient_lower = re.sub(r'\btandori\b', 'tandoori', ingredient_lower)
         ingredient_lower = preserve_cheese_preference_parentheticals(ingredient_lower)
         ingredient_lower = preserve_fresh_pasta_parenthetical(ingredient_lower)
+        ingredient_lower = preserve_dessert_pasta_parenthetical(ingredient_lower)
         ingredient_lower = preserve_parenthetical_grouped_herb_leaves(ingredient_lower)
         ingredient_lower = preserve_parenthetical_shiso_alternatives(ingredient_lower)
         ingredient_lower = preserve_non_concentrate_parenthetical(ingredient_lower)
@@ -4647,6 +4649,7 @@ def _prepare_fast_ingredient_text(
     ingredient_lower = preserve_cheese_preference_parentheticals(ingredient_lower)
     ingredient_lower = preserve_parenthetical_chili_alias(ingredient_lower)
     ingredient_lower = preserve_fresh_pasta_parenthetical(ingredient_lower)
+    ingredient_lower = preserve_dessert_pasta_parenthetical(ingredient_lower)
     ingredient_lower = preserve_parenthetical_grouped_herb_leaves(ingredient_lower)
     ingredient_lower = preserve_non_concentrate_parenthetical(ingredient_lower)
     ingredient_lower = preserve_parenthetical_shiso_alternatives(ingredient_lower)

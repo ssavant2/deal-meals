@@ -34,6 +34,13 @@ _FRESH_PASTA_PAREN_RE = re.compile(
     r')\s*\(\s*färsk\s*\)',
     re.IGNORECASE,
 )
+# A sweet/dessert filled-pasta type stated in a parenthetical, e.g.
+# "ravioli (chokladravioli)". The generic paren stripping would otherwise drop the
+# only cue that distinguishes a chocolate dessert ravioli from savory filled pasta.
+_DESSERT_PASTA_PAREN_RE = re.compile(
+    r'\b(ravioli|tortellini|tortelloni|pasta)\s*\(\s*([^)]*(?:choklad|nutella)[^)]*?)\s*\)',
+    re.IGNORECASE,
+)
 _SPICE_MIX_HINT_PAREN_RE = re.compile(
     r'\(([^)]*(?:gärna|garna|helst)[^)]*'
     r'(?:spice|spices|kryddmix|krydda|korean|koreansk|bulgogi|asian|asiatisk|tikka|garam|tandoori|taco)'
@@ -329,6 +336,25 @@ def preserve_fresh_pasta_parenthetical(text: str) -> str:
     """
 
     return _FRESH_PASTA_PAREN_RE.sub(lambda m: f"{m.group(1)} färsk", text)
+
+
+def preserve_dessert_pasta_parenthetical(text: str) -> str:
+    """Keep a sweet/dessert filled-pasta type cue from a parenthetical so it can
+    suppress savory filled-pasta matches.
+
+    Example:
+    - "8 st ravioli (chokladravioli)" -> "8 st ravioli chokladravioli"
+
+    A chocolate dessert ravioli must not match savory ricotta/spinach/mushroom
+    ravioli. The descriptive "(chokladravioli)" would otherwise be dropped by the
+    generic parenthetical stripping, taking the only discriminating cue with it,
+    so the lifted compound lets a KSBC rule suppress the generic "ravioli" keyword.
+    """
+
+    lowered = text.lower()
+    if 'choklad' not in lowered and 'nutella' not in lowered:
+        return text
+    return _DESSERT_PASTA_PAREN_RE.sub(lambda m: f"{m.group(1)} {m.group(2).strip()}", text)
 
 
 def preserve_spice_mix_preference_parentheticals(text: str) -> str:
