@@ -98,6 +98,10 @@ try:
         MEAT, FISH, VEGETARIAN,
         POULTRY, DELI,
     )
+    from languages.sv.ingredient_matching.dietary_exclusions import (
+        selected_ingredient_exclusion_profiles,
+        selected_profiles_exclude_compiled_recipe,
+    )
 except ModuleNotFoundError:
     from app.recipe_matcher import RecipeMatcher, get_effective_matching_preferences, get_enabled_recipe_sources
     from app.languages.matcher_runtime import (
@@ -128,6 +132,10 @@ except ModuleNotFoundError:
     from app.languages.categories import (
         MEAT, FISH, VEGETARIAN,
         POULTRY, DELI,
+    )
+    from app.languages.sv.ingredient_matching.dietary_exclusions import (
+        selected_ingredient_exclusion_profiles,
+        selected_profiles_exclude_compiled_recipe,
     )
 
 
@@ -2986,6 +2994,15 @@ class CacheManager:
             MEAT: 0.25, FISH: 0.25, VEGETARIAN: 0.25, 'smart_buy': 0.25
         })
         exclude_categories = preferences.get('exclude_categories', [])
+        ingredient_exclusion_profiles = selected_ingredient_exclusion_profiles(preferences)
+        profile_filter_active = bool(ingredient_exclusion_profiles)
+        compiled_recipe_select = ", m.compiled_data AS compiled_recipe_data" if profile_filter_active else ""
+        compiled_recipe_join = (
+            " LEFT JOIN compiled_recipe_match_data m"
+            " ON m.found_recipe_id = r.id AND m.compiler_version = :recipe_compiler_version"
+            if profile_filter_active
+            else ""
+        )
         exclude_cats_sql = []
         if any(cat in exclude_categories for cat in [MEAT, POULTRY, DELI]):
             exclude_cats_sql.append(MEAT)
@@ -2999,6 +3016,8 @@ class CacheManager:
         # based on the same eligible recipe set that the DB fallback can return.
         exclude_clause = ""
         base_params = {}
+        if profile_filter_active:
+            base_params["recipe_compiler_version"] = RECIPE_COMPILER_VERSION
         if exclude_ids_list:
             exclude_clause = " AND c.found_recipe_id != ALL(CAST(:exclude_ids AS uuid[]))"
             base_params["exclude_ids"] = exclude_ids_list
@@ -3012,6 +3031,15 @@ class CacheManager:
         if max_ing > 0:
             ing_clause += " AND jsonb_array_length(r.ingredients) <= :max_ing"
             base_params["max_ing"] = max_ing
+
+        def _row_excluded_by_ingredient_profile(row) -> bool:
+            if not profile_filter_active:
+                return False
+            return selected_profiles_exclude_compiled_recipe(
+                ingredient_exclusion_profiles,
+                getattr(row, "compiled_recipe_data", None),
+                fallback_ingredients=row.ingredients or [],
+            )
 
         with get_db_session() as db:
             count_categories = [cat for cat in [MEAT, FISH, VEGETARIAN] if cat not in exclude_cats_sql]
@@ -3041,7 +3069,7 @@ class CacheManager:
             num_budget = fetch_plan.get('smart_buy', 0)
             if num_budget > 0:
                 cat_clause = ""
-                overfetch_limit = max(num_budget * 4, num_budget + 24)
+                overfetch_limit = max(num_budget * (8 if profile_filter_active else 4), num_budget + 48)
                 params = {**base_params, "limit": overfetch_limit}
                 if exclude_cats_sql:
                     cat_clause = " AND c.recipe_category != ALL(:exclude_cats)"
@@ -3050,13 +3078,17 @@ class CacheManager:
                 rows = db.execute(text(f"""
                     SELECT c.*, r.name, r.url, r.source_name,
                            r.image_url, r.local_image_path, r.prep_time_minutes, r.ingredients, r.servings
+                           {compiled_recipe_select}
                     FROM recipe_offer_cache c JOIN found_recipes r ON c.found_recipe_id = r.id
+                    {compiled_recipe_join}
                     WHERE (r.excluded = FALSE OR r.excluded IS NULL){cat_clause}{exclude_clause}{ing_clause}
                     ORDER BY c.budget_score DESC, c.is_starred DESC LIMIT :limit
                 """), params).fetchall()
 
                 added = 0
                 for row in rows:
+                    if _row_excluded_by_ingredient_profile(row):
+                        continue
                     if is_off_season_recipe(row.name):
                         continue
                     all_recipes.append(self._db_cache_row_to_frontend(row, 'smart_buy', 'smart_buy'))
@@ -3072,8 +3104,8 @@ class CacheManager:
                     continue
 
                 all_exclude = list(exclude_set | picked_ids)
-                overfetch_limit = max(num_to_fetch * 4, num_to_fetch + 24)
-                params = {"cat": cat, "limit": overfetch_limit}
+                overfetch_limit = max(num_to_fetch * (8 if profile_filter_active else 4), num_to_fetch + 48)
+                params = {**({"recipe_compiler_version": RECIPE_COMPILER_VERSION} if profile_filter_active else {}), "cat": cat, "limit": overfetch_limit}
                 if min_ing > 0:
                     params["min_ing"] = min_ing
                 if max_ing > 0:
@@ -3090,7 +3122,9 @@ class CacheManager:
                 rows = db.execute(text(f"""
                     SELECT c.*, r.name, r.url, r.source_name,
                            r.image_url, r.local_image_path, r.prep_time_minutes, r.ingredients, r.servings
+                           {compiled_recipe_select}
                     FROM recipe_offer_cache c JOIN found_recipes r ON c.found_recipe_id = r.id
+                    {compiled_recipe_join}
                     WHERE c.recipe_category = :cat
                       AND (r.excluded = FALSE OR r.excluded IS NULL){picked_clause}{ing_clause}
                     {order_clause} LIMIT :limit
@@ -3098,6 +3132,8 @@ class CacheManager:
 
                 added = 0
                 for row in rows:
+                    if _row_excluded_by_ingredient_profile(row):
+                        continue
                     if is_off_season_recipe(row.name):
                         continue
                     recipe = self._db_cache_row_to_frontend(row, cat)

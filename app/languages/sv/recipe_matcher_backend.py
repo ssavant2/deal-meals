@@ -84,6 +84,10 @@ try:
     from languages.sv.ingredient_matching.extraction import _is_plain_sparkling_water_product_text
     from languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
     from languages.sv.ingredient_matching.extraction import _is_tonic_mixer_product_text
+    from languages.sv.ingredient_matching.dietary_exclusions import (
+        selected_profiles_exclude_offer,
+        split_ingredient_exclusion_terms,
+    )
     from languages.sv.ingredient_matching.matching import (
         _keyword_suppressed_by_context,
         matches_ingredient_fast,
@@ -212,6 +216,10 @@ except ModuleNotFoundError:
     from app.languages.sv.ingredient_matching.extraction import _is_plain_sparkling_water_product_text
     from app.languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
     from app.languages.sv.ingredient_matching.extraction import _is_tonic_mixer_product_text
+    from app.languages.sv.ingredient_matching.dietary_exclusions import (
+        selected_profiles_exclude_offer,
+        split_ingredient_exclusion_terms,
+    )
     from app.languages.sv.ingredient_matching.matching import (
         _keyword_suppressed_by_context,
         matches_ingredient_fast,
@@ -958,6 +966,7 @@ def get_filtered_offers(preferences: Dict) -> List[Offer]:
     filtered = []
     exclude_cats = preferences.get('exclude_categories', [])
     exclude_keywords = preferences.get('exclude_keywords', [])
+    ingredient_exclusion_profiles, literal_exclude_keywords = split_ingredient_exclusion_terms(exclude_keywords)
     filtered_products = preferences.get('filtered_products', [])
     local_meat_only = preferences.get('local_meat_only', True)
     excluded_brands = preferences.get('excluded_brands', [])
@@ -988,7 +997,15 @@ def get_filtered_offers(preferences: Dict) -> List[Offer]:
                 elif any(re.search(r'\b' + re.escape(brand) + r'\b', name_lower) for brand in IMPORTED_MEAT_BRANDS):
                     continue
 
-        if any(re.search(r'\b' + re.escape(keyword.lower()) + r'\b', name_lower) for keyword in exclude_keywords):
+        if selected_profiles_exclude_offer(
+            ingredient_exclusion_profiles,
+            offer.name,
+            category=offer.category or "",
+            brand=offer.brand or "",
+        ):
+            continue
+
+        if any(re.search(r'\b' + re.escape(keyword.lower()) + r'\b', name_lower) for keyword in literal_exclude_keywords):
             continue
 
         if any(re.search(r'\b' + re.escape(product_keyword.lower()) + r'\b', name_lower) for product_keyword in filtered_products):
@@ -1097,6 +1114,7 @@ def analyze_unmatched_offers(preferences: Dict, matched_offer_ids: set[str]) -> 
 
     exclude_cats = preferences.get('exclude_categories', [])
     exclude_keywords = preferences.get('exclude_keywords', [])
+    ingredient_exclusion_profiles, literal_exclude_keywords = split_ingredient_exclusion_terms(exclude_keywords)
     filtered_products = preferences.get('filtered_products', [])
     excluded_brands = preferences.get('excluded_brands', [])
     local_meat_only = preferences.get('local_meat_only', True)
@@ -1158,9 +1176,23 @@ def analyze_unmatched_offers(preferences: Dict, matched_offer_ids: set[str]) -> 
                         add_filtered(offer, "local_meat", matched_brand)
                         continue
 
+        profile_hit = selected_profiles_exclude_offer(
+            ingredient_exclusion_profiles,
+            offer.name,
+            category=offer.category or "",
+            brand=offer.brand or "",
+        )
+        if profile_hit:
+            add_filtered(
+                offer,
+                f"ingredient_profile_excluded:{profile_hit.profile}",
+                f"{profile_hit.source}:{profile_hit.evidence}",
+            )
+            continue
+
         matched_kw = next(
             (
-                keyword for keyword in exclude_keywords
+                keyword for keyword in literal_exclude_keywords
                 if re.search(r'\b' + re.escape(keyword.lower()) + r'\b', name_lower)
             ),
             None,

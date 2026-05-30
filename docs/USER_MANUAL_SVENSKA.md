@@ -417,12 +417,15 @@ En visuell förhandsgranskning visar hur 12 receptplatser fördelas baserat på 
 Ange varumärken du vill undvika (ett per rad eller kommaseparerat). Erbjudanden från dessa varumärken matchas inte mot recept.
 
 #### Exkluderade ingredienser
-Ange ingrediensord du vill undvika. Deal Meals använder detta som ett
-best-effort-filter baserat på recepttexter, varunamn och kända
-matchningsregler. Funktionen kan hjälpa till att minska oönskade träffar, men
-den är inte en medicinsk allergisäkerhetsfunktion. Kontrollera alltid recept
-och produktmärkning själv om en ingrediens är viktig av allergi-, intolerans-
-eller hälsoskäl.
+Ange ingrediensord du vill undvika. Vanliga ord som `gluten`, `nötter`,
+`skaldjur`, `ägg`, `soja` och `laktos` tolkas som enkla best-effort-profiler
+som använder recepttexter, varunamn och kända matchningsregler. Andra ord
+fortsätter fungera som enklare varunamnsfilter.
+
+Funktionen kan hjälpa till att minska oönskade träffar, men den är inte en
+medicinsk allergisäkerhetsfunktion. Kontrollera alltid recept och
+produktmärkning själv om en ingrediens är viktig av allergi-, intolerans- eller
+hälsoskäl.
 
 #### Filtrerade produkter
 Ange produkttyper att exkludera från erbjudandematchning (t.ex. "juicekoncentrat", "snabbnudlar").

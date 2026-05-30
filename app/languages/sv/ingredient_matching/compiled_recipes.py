@@ -21,6 +21,7 @@ except ModuleNotFoundError:
 from ..normalization import fix_swedish_chars
 from ..recipe_filters import KITCHEN_TOOLS, LEFTOVER_PREFIX
 from .compound_text import _WORD_PATTERN
+from .dietary_exclusions import compile_recipe_ingredient_exclusion_flags
 from .engine import build_prepared_ingredient_match_data
 from .extraction import extract_keywords_from_ingredient
 from .ingredient_data import IngredientMatchData
@@ -317,6 +318,7 @@ def prepare_recipe_match_runtime_data(recipe: FoundRecipe) -> dict[str, Any]:
         "merged_ingredients": merged_ingredients,
         "ingredient_source_texts": ingredient_source_texts,
         "ingredient_source_indices": ingredient_source_indices,
+        "ingredient_exclusion_flags": compile_recipe_ingredient_exclusion_flags(ingredient_source_texts),
         "ingredients_normalized": ingredients_normalized,
         "ingredients_search_text": ingredients_search_text,
         "full_recipe_text": full_recipe_text,
@@ -329,6 +331,7 @@ def serialize_prepared_recipe_match_runtime_data(prepared: dict[str, Any]) -> di
         "merged_ingredients": list(prepared["merged_ingredients"]),
         "ingredient_source_texts": list(prepared["ingredient_source_texts"]),
         "ingredient_source_indices": list(prepared["ingredient_source_indices"]),
+        "ingredient_exclusion_flags": list(prepared.get("ingredient_exclusion_flags", [])),
         "ingredients_normalized": list(prepared["ingredients_normalized"]),
         "ingredients_search_text": prepared["ingredients_search_text"],
         "full_recipe_text": prepared["full_recipe_text"],
@@ -344,6 +347,7 @@ def deserialize_compiled_recipe_payload(compiled_data: dict[str, Any]) -> dict[s
         "merged_ingredients": list(compiled_data.get("merged_ingredients", [])),
         "ingredient_source_texts": list(compiled_data.get("ingredient_source_texts", [])),
         "ingredient_source_indices": [int(value) for value in compiled_data.get("ingredient_source_indices", [])],
+        "ingredient_exclusion_flags": list(compiled_data.get("ingredient_exclusion_flags", [])),
         "ingredients_normalized": list(compiled_data.get("ingredients_normalized", [])),
         "ingredients_search_text": compiled_data.get("ingredients_search_text", ""),
         "full_recipe_text": compiled_data.get("full_recipe_text", ""),

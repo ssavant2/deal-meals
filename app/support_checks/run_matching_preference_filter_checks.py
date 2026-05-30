@@ -13,6 +13,12 @@ from types import SimpleNamespace
 sys.path.insert(0, "/app" if os.path.exists("/app") else os.path.join(os.path.dirname(__file__), ".."))
 
 import languages.sv.recipe_matcher_backend as backend  # noqa: E402
+from languages.sv.ingredient_matching.dietary_exclusions import (  # noqa: E402
+    compile_recipe_ingredient_exclusion_flags,
+    ingredient_exclusion_hits_for_ingredient_text,
+    selected_profiles_exclude_compiled_recipe,
+    split_ingredient_exclusion_terms,
+)
 
 
 FOOD_CATEGORIES = {
@@ -102,6 +108,16 @@ def filtered_names(offers, preferences):
         backend.get_db_session = original_get_db_session
 
 
+def unmatched_filter_reasons(offers, preferences):
+    original_get_db_session = backend.get_db_session
+    backend.get_db_session = lambda: fake_db(offers)
+    try:
+        result = backend.analyze_unmatched_offers(preferences, matched_offer_ids=set())
+        return [(item["name"], item["reason"], item["detail"]) for item in result["filtered"]]
+    finally:
+        backend.get_db_session = original_get_db_session
+
+
 BASE_PREFS = {
     "exclude_categories": [],
     "exclude_keywords": [],
@@ -152,19 +168,59 @@ test(
 )
 
 test(
-    "ingredient exclusions match whole words in offer names",
+    "ingredient exclusions apply curated profiles plus literal leftovers",
     filtered_names(
         [
             offer("Mjölk 1L Arla"),
             offer("Ägg 12-pack"),
             offer("Gluten 500g"),
             offer("Glutenfri Pasta 500g"),
+            offer("Pasta Fusilli 500g"),
+            offer("Rispasta 400g"),
+            offer("Glasnudlar 100g"),
             offer("Nötter Mix 200g"),
             offer("Cashewnötter 200g"),
+            offer("Nötfärs 500g"),
+            offer("Muskotnöt Hel 20g"),
         ],
         {**BASE_PREFS, "exclude_keywords": ["mjölk", "ägg", "gluten", "nötter"]},
     ),
-    ["Glutenfri Pasta 500g", "Cashewnötter 200g"],
+    ["Glutenfri Pasta 500g", "Rispasta 400g", "Glasnudlar 100g", "Nötfärs 500g", "Muskotnöt Hel 20g"],
+)
+
+test(
+    "lactose keyword reuses dairy/lactose offer policy",
+    filtered_names(
+        [
+            offer("Mjölk 1L Arla", "dairy"),
+            offer("Mjölk Laktosfri 1L Arla", "dairy"),
+            offer("Prästost 500g", "dairy"),
+            offer("Crème Fraiche Parmesan 2dl", "dairy"),
+            offer("Mozzarella 125g", "dairy"),
+            offer("Kokosmjölk 200ml", "dairy"),
+            offer("TUC Original 100g", "dairy"),
+        ],
+        {**BASE_PREFS, "exclude_keywords": ["laktos"]},
+    ),
+    ["Mjölk Laktosfri 1L Arla", "Prästost 500g", "Kokosmjölk 200ml", "TUC Original 100g"],
+)
+
+test(
+    "shellfish and soy profiles filter their families without filtering ordinary fish",
+    filtered_names(
+        [
+            offer("Räkor Handskalade 300g", "fish"),
+            offer("Kräftstjärtar i Lake", "fish"),
+            offer("Räkost 275g Kavli", "dairy"),
+            offer("Skagenröra 200g", "deli"),
+            offer("Laxfilé 500g", "fish"),
+            offer("Sojasås Japansk 150ml"),
+            offer("Tofu Naturell 250g"),
+            offer("Pasta 500g"),
+        ],
+        {**BASE_PREFS, "exclude_keywords": ["skaldjur", "soja"]},
+    ),
+    ["Laxfilé 500g", "Pasta 500g"],
 )
 
 test(
@@ -180,6 +236,105 @@ test(
         {**BASE_PREFS, "filtered_products": ["salami", "ölkorv"], "excluded_brands": ["Garant"]},
     ),
     ["Garant Pasta Penne 500g", "Pasta Fusilli 500g"],
+)
+
+test(
+    "profile parsing keeps unknown words literal",
+    split_ingredient_exclusion_terms(["gluten", "nötter", "koriander"]),
+    ({"gluten", "nuts"}, ["koriander"]),
+)
+
+test(
+    "recipe ingredient flags cover profiles and respect exemptions",
+    compile_recipe_ingredient_exclusion_flags([
+        "2 dl vetemjöl",
+        "1 dl glutenfritt mjöl",
+        "100 g cashewnötter",
+        "200 g nötfärs",
+        "räkor",
+        "lax",
+        "2 ägg",
+        "lägg åt sidan",
+        "soja",
+        "laktosfri grädde",
+        "vispgrädde",
+    ]),
+    ["egg", "gluten", "lactose", "nuts", "shellfish", "soy"],
+)
+
+test(
+    "recipe ingredient flags allow explicitly safe gluten/lactose lines",
+    compile_recipe_ingredient_exclusion_flags([
+        "glutenfritt mjöl",
+        "risnudlar",
+        "glasnudlar",
+        "laktosfri grädde",
+        "tomater",
+    ]),
+    [],
+)
+
+test(
+    "compiled recipe flags apply selected profiles at read time",
+    selected_profiles_exclude_compiled_recipe(
+        {"gluten"},
+        {"ingredient_exclusion_flags": ["gluten", "nuts"]},
+        fallback_ingredients=["tomater"],
+    ),
+    True,
+)
+
+test(
+    "compiled recipe flags leave unrelated profiles visible",
+    selected_profiles_exclude_compiled_recipe(
+        {"soy"},
+        {"ingredient_exclusion_flags": ["gluten", "nuts"]},
+        fallback_ingredients=["soja"],
+    ),
+    False,
+)
+
+test(
+    "missing compiled recipe flags fall back to ingredients",
+    selected_profiles_exclude_compiled_recipe(
+        {"soy"},
+        {},
+        fallback_ingredients=["1 msk soja"],
+    ),
+    True,
+)
+
+test(
+    "ingredient extraction alignment reports guarded text/keyword hits",
+    [
+        (hit.profile, hit.evidence, hit.source)
+        for text in ["Vetemjöl", "Äggnudlar", "Pasta Fusilli", "Naan bröd"]
+        for hit in ingredient_exclusion_hits_for_ingredient_text(text)
+        if hit.profile in {"gluten", "egg"}
+    ],
+    [
+        ("gluten", "vetemjöl", "keyword"),
+        ("gluten", "äggnudlar", "keyword"),
+        ("egg", "äggnudlar", "keyword"),
+        ("gluten", "pasta", "keyword"),
+        ("gluten", "bröd,naan", "keyword"),
+    ],
+)
+
+test(
+    "unmatched diagnostics name profiled ingredient exclusions",
+    unmatched_filter_reasons(
+        [
+            offer("Pasta Fusilli 500g"),
+            offer("Koriander Färsk 20g", "vegetables"),
+            offer("Tomater 500g", "vegetables"),
+        ],
+        {**BASE_PREFS, "exclude_keywords": ["gluten", "koriander"]},
+    ),
+    [
+        ("Pasta Fusilli 500g", "ingredient_profile_excluded:gluten", "keyword:pasta"),
+        ("Koriander Färsk 20g", "keyword_excluded", "koriander"),
+    ],
 )
 
 

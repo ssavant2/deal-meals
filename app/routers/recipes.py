@@ -296,13 +296,27 @@ def _build_matching_preview_payload(max_results: int, parsed_exclude: list[str])
 def recipe_search(request: Request, q: str = "", limit: int = 50, offset: int = 0, source: str = ""):
     """Search recipes by name or ingredient using PostgreSQL Full-Text Search."""
     try:
-        from languages.matcher_runtime import get_recipe_fts_config_backend
+        from languages.matcher_runtime import RECIPE_COMPILER_VERSION, get_recipe_fts_config_backend
         from languages.market_runtime import normalize_market_text
-        from recipe_matcher import get_enabled_recipe_sources
+        from languages.sv.ingredient_matching.dietary_exclusions import (
+            selected_ingredient_exclusion_profiles,
+            selected_profiles_exclude_compiled_recipe,
+        )
+        from recipe_matcher import get_effective_matching_preferences, get_enabled_recipe_sources
 
         raw_query = normalize_market_text(q.strip().lower())
         fts_config = get_recipe_fts_config_backend()
         source_filter = source.strip() if source else ""
+        preferences = get_effective_matching_preferences()
+        ingredient_exclusion_profiles = selected_ingredient_exclusion_profiles(preferences)
+        profile_filter_active = bool(ingredient_exclusion_profiles)
+        compiled_recipe_select = ", m.compiled_data AS compiled_recipe_data" if profile_filter_active else ""
+        compiled_recipe_join = (
+            "LEFT JOIN compiled_recipe_match_data m "
+            "ON m.found_recipe_id = r.id AND m.compiler_version = :recipe_compiler_version"
+            if profile_filter_active
+            else ""
+        )
 
         # Allow empty query if source filter is set (browse all from source)
         if (not raw_query or len(raw_query) < 2) and not source_filter:
@@ -385,7 +399,12 @@ def recipe_search(request: Request, q: str = "", limit: int = 50, offset: int = 
             query_sources = list(enabled_sources) if enabled_sources else None
 
         with get_db_session() as db:
-            fetch_limit = limit + 1
+            fetch_limit = min(max(limit * 4 + 1, limit + 25), 500) if profile_filter_active else limit + 1
+            profile_params = (
+                {"recipe_compiler_version": RECIPE_COMPILER_VERSION}
+                if profile_filter_active
+                else {}
+            )
 
             if tsquery:
                 # FTS search, optionally filtered by source
@@ -394,16 +413,20 @@ def recipe_search(request: Request, q: str = "", limit: int = 50, offset: int = 
                         WITH parsed AS (
                             SELECT to_tsquery(CAST(:fts_config AS regconfig), :query) AS q
                         )
-                        SELECT id, name, url, source_name, image_url, local_image_path,
-                               prep_time_minutes, servings, ingredients
-                        FROM found_recipes, parsed
-                        WHERE search_vector @@ parsed.q
-                        AND source_name = ANY(:sources)
-                        AND (excluded = FALSE OR excluded IS NULL)
-                        ORDER BY ts_rank(search_vector, parsed.q) DESC
+                        SELECT r.id, r.name, r.url, r.source_name, r.image_url, r.local_image_path,
+                               r.prep_time_minutes, r.servings, r.ingredients
+                               """ + compiled_recipe_select + """
+                        FROM found_recipes r
+                        CROSS JOIN parsed
+                        """ + compiled_recipe_join + """
+                        WHERE r.search_vector @@ parsed.q
+                        AND r.source_name = ANY(:sources)
+                        AND (r.excluded = FALSE OR r.excluded IS NULL)
+                        ORDER BY ts_rank(r.search_vector, parsed.q) DESC
                         LIMIT :limit OFFSET :offset
                     """)
                     rows = db.execute(sql, {
+                        **profile_params,
                         "query": tsquery,
                         "fts_config": fts_config,
                         "sources": query_sources,
@@ -415,15 +438,19 @@ def recipe_search(request: Request, q: str = "", limit: int = 50, offset: int = 
                         WITH parsed AS (
                             SELECT to_tsquery(CAST(:fts_config AS regconfig), :query) AS q
                         )
-                        SELECT id, name, url, source_name, image_url, local_image_path,
-                               prep_time_minutes, servings, ingredients
-                        FROM found_recipes, parsed
-                        WHERE search_vector @@ parsed.q
-                        AND (excluded = FALSE OR excluded IS NULL)
-                        ORDER BY ts_rank(search_vector, parsed.q) DESC
+                        SELECT r.id, r.name, r.url, r.source_name, r.image_url, r.local_image_path,
+                               r.prep_time_minutes, r.servings, r.ingredients
+                               """ + compiled_recipe_select + """
+                        FROM found_recipes r
+                        CROSS JOIN parsed
+                        """ + compiled_recipe_join + """
+                        WHERE r.search_vector @@ parsed.q
+                        AND (r.excluded = FALSE OR r.excluded IS NULL)
+                        ORDER BY ts_rank(r.search_vector, parsed.q) DESC
                         LIMIT :limit OFFSET :offset
                     """)
                     rows = db.execute(sql, {
+                        **profile_params,
                         "query": tsquery,
                         "fts_config": fts_config,
                         "limit": fetch_limit,
@@ -432,23 +459,39 @@ def recipe_search(request: Request, q: str = "", limit: int = 50, offset: int = 
             else:
                 # No search query — browse all recipes from source, sorted by name
                 sql = text("""
-                    SELECT id, name, url, source_name, image_url, local_image_path,
-                           prep_time_minutes, servings, ingredients
-                    FROM found_recipes
-                    WHERE source_name = ANY(:sources)
-                    AND (excluded = FALSE OR excluded IS NULL)
-                    ORDER BY name
+                    SELECT r.id, r.name, r.url, r.source_name, r.image_url, r.local_image_path,
+                           r.prep_time_minutes, r.servings, r.ingredients
+                           """ + compiled_recipe_select + """
+                    FROM found_recipes r
+                    """ + compiled_recipe_join + """
+                    WHERE r.source_name = ANY(:sources)
+                    AND (r.excluded = FALSE OR r.excluded IS NULL)
+                    ORDER BY r.name
                     LIMIT :limit OFFSET :offset
                 """)
                 rows = db.execute(sql, {
+                    **profile_params,
                     "sources": query_sources,
                     "limit": fetch_limit,
                     "offset": offset
                 }).fetchall()
 
-            has_more = len(rows) > limit
+            visible_rows = []
+            for row in rows:
+                if profile_filter_active and selected_profiles_exclude_compiled_recipe(
+                    ingredient_exclusion_profiles,
+                    getattr(row, "compiled_recipe_data", None),
+                    fallback_ingredients=row.ingredients or [],
+                ):
+                    continue
+                visible_rows.append(row)
+                if len(visible_rows) > limit:
+                    break
+
+            has_more = len(visible_rows) > limit
             if has_more:
-                rows = rows[:limit]
+                visible_rows = visible_rows[:limit]
+            rows = visible_rows
 
             recipes = []
             recipe_ids = []
