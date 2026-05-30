@@ -12032,18 +12032,33 @@ test("canned tomato: generic burk tomater matches peeled whole tomatoes (fast)",
 test("canned tomato: generic burk tomater matches whole canned tomatoes (backend)",
      recipe_match_num(["1 burk tomater"],
                       {"name": "Hela Tomater Konserverade 400g Mutti", "category": "pantry"}), 1)
-test("canned tomato: generic burk tomater does not match crushed tomatoes",
+test("canned tomato: generic burk tomater matches crushed tomatoes",
      recipe_match_num(["1 burk tomater"],
-                      {"name": "Krossade Tomater 390g Mutti", "category": "pantry"}), 0)
+                      {"name": "Krossade Tomater 390g Mutti", "category": "pantry"}), 1)
+test("canned tomato: generic burk tomater matches passata tomatoes",
+     recipe_match_num(["1 burk tomater"],
+                      {"name": "Passerade Tomater 500g", "category": "pantry"}), 1)
+test("canned tomato: generic konserverade tomater matches crushed tomatoes",
+     recipe_match_num(["konserverade tomater"],
+                      {"name": "Krossade Tomater 390g Mutti", "category": "pantry"}), 1)
+test("canned tomato: generic konserverade tomater matches passata tomatoes",
+     recipe_match_num(["konserverade tomater"],
+                      {"name": "Passerade Tomater 500g", "category": "pantry"}), 1)
 test("canned tomato: specific krossade does not match peeled whole tomatoes",
      recipe_match_num(["1 burk krossade tomater"],
                       {"name": "Skalade Tomater 400g Mutti", "category": "pantry"}), 0)
+test("canned tomato: specific krossade does not match passata tomatoes",
+     recipe_match_num(["1 burk krossade tomater"],
+                      {"name": "Passerade Tomater 500g", "category": "pantry"}), 0)
+test("canned tomato: specific passerade does not match crushed tomatoes",
+     recipe_match_num(["1 burk passerade tomater"],
+                      {"name": "Krossade Tomater 390g Mutti", "category": "pantry"}), 0)
 test("canned tomato: krossade matches tetra packaging",
      recipe_match_num(["1 förp krossade tomater"],
                       {"name": "Krossade Tomater Tetra 500g", "category": "pantry"}), 1)
-test("canned tomato: generic burk tomater does not match crushed tetra",
+test("canned tomato: generic burk tomater matches crushed tetra",
      recipe_match_num(["1 burk tomater"],
-                      {"name": "Krossade Tomater Tetra 500g", "category": "pantry"}), 0)
+                      {"name": "Krossade Tomater Tetra 500g", "category": "pantry"}), 1)
 test("canned tomato: passerade matches tetra packaging",
      recipe_match_num(["1 förp passerade tomater"],
                       {"name": "Passerade Tomater Tetra 500g", "category": "pantry"}), 1)

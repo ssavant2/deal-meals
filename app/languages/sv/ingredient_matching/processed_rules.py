@@ -188,7 +188,7 @@ _PROCESSED_PRODUCT_RULES_RAW: Dict[str, Set[str]] = {
         'koncentrerade', 'koncentrerad',  # concentrated
         'hela',  # "Hela Tomater" = whole canned (matches "Hela Skalade Tomater")
         'konserverade', 'konserverad',  # canned/preserved
-        'burk',  # "1 burk tomater" = whole/peeled canned tomatoes, not crushed/passata
+        'burk',  # "1 burk tomater" = generic canned tomatoes; allow canned forms below
         # Specific tomato varieties ≠ generic "tomater"
         'cocktail', 'cockt',  # cocktail tomatoes
         'mix',  # tomato mix (variety pack)
@@ -481,11 +481,14 @@ _PROCESSED_INDICATOR_EQUIVALENTS: Dict[str, FrozenSet[str]] = {
     'finkrossade': frozenset({'krossade', 'krossad', 'finkrossade', 'finkrossad', 'polpa'}),
     'finkrossad': frozenset({'krossade', 'krossad', 'finkrossade', 'finkrossad', 'polpa'}),
     'polpa': frozenset({'krossade', 'krossad', 'finkrossade', 'finkrossad', 'polpa'}),
-    # Whole group: hela ≈ skalade ≈ konserverade (whole/peeled/canned whole)
+    # Whole group: hela ≈ skalade (whole/peeled canned)
     'skalade': frozenset({'skalade', 'skalad', 'hela', 'konserverade', 'konserverad'}),
     'skalad': frozenset({'skalade', 'skalad', 'hela', 'konserverade', 'konserverad'}),
-    'konserverade': frozenset({'skalade', 'skalad', 'hela', 'burk', 'konserv', 'konserverade', 'konserverad'}),
-    'konserverad': frozenset({'skalade', 'skalad', 'hela', 'burk', 'konserv', 'konserverade', 'konserverad'}),
+    # Generic canned cues: "1 burk/konserverade tomater" may match crushed,
+    # passata, whole, or peeled canned tomatoes. Explicit form words remain
+    # strict through their own equivalence groups.
+    'konserverade': frozenset({'burk', 'konserv', 'konserverade', 'konserverad'}),
+    'konserverad': frozenset({'burk', 'konserv', 'konserverade', 'konserverad'}),
     # Passerade stands alone (different texture from krossade)
     'passerade': frozenset({'passerade', 'passerad'}),
     'passerad': frozenset({'passerade', 'passerad'}),
@@ -519,11 +522,17 @@ _GENERIC_CANNED_RECIPE_INDICATORS = frozenset({
     'burk', 'konserv', 'konserverad', 'konserverade',
 })
 _TOMATO_BASE_WORDS = frozenset({'tomat', 'tomater'})
-_TOMATO_WHOLE_CANNED_PRODUCT_INDICATORS = frozenset({
+_TOMATO_GENERIC_CANNED_PRODUCT_INDICATORS = frozenset({
     'hel', 'hela', 'skalad', 'skalade',
     'konserverad', 'konserverade',
+    'krossad', 'krossade',
+    'finkrossad', 'finkrossade',
+    'finhackad', 'finhackade',
+    'passerad', 'passerade',
+    'polpa',
 })
-_TOMATO_NON_WHOLE_FORM_INDICATORS = frozenset({
+_TOMATO_EXPLICIT_FORM_INDICATORS = frozenset({
+    'hel', 'hela', 'skalad', 'skalade',
     'krossad', 'krossade',
     'finkrossad', 'finkrossade',
     'finhackad', 'finhackade',
@@ -555,17 +564,20 @@ def generic_canned_whole_tomato_allows_strict_check(
     product_lower: str,
     ingredient_lower: str,
 ) -> bool:
-    """Let "1 burk tomater" mean whole/peeled canned tomatoes, not crushed/passata."""
+    """Let "1 burk tomater" mean any plain canned tomato form.
+
+    Explicit forms stay strict: "1 burk krossade tomater" does not match
+    peeled/whole tomatoes, and "soltorkade"/concentrated tomato products are
+    not considered generic canned tomato forms.
+    """
 
     if base_word not in _TOMATO_BASE_WORDS:
         return False
     if not any(ind in ingredient_lower for ind in _GENERIC_CANNED_RECIPE_INDICATORS):
         return False
-    if any(ind in ingredient_lower for ind in _TOMATO_NON_WHOLE_FORM_INDICATORS):
+    if any(ind in ingredient_lower for ind in _TOMATO_EXPLICIT_FORM_INDICATORS):
         return False
-    if any(ind in product_lower for ind in _TOMATO_NON_WHOLE_FORM_INDICATORS):
-        return False
-    return any(ind in product_lower for ind in _TOMATO_WHOLE_CANNED_PRODUCT_INDICATORS)
+    return any(ind in product_lower for ind in _TOMATO_GENERIC_CANNED_PRODUCT_INDICATORS)
 
 
 # ============================================================================

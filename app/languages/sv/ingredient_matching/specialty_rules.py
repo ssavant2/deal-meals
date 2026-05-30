@@ -1452,33 +1452,33 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'formbar': {'formbar', 'formbara'},
     'formbara': {'formbar', 'formbara'},
     # Container cue only. Tomato form strictness is enforced by PROCESSED_PRODUCT_RULES:
-    # "1 burk tomater" accepts whole/peeled canned tomatoes, while
+    # "1 burk tomater" accepts plain canned tomato forms broadly, while
     # "1 burk krossade tomater" stays specific to the crushed family.
     # NOTE: soltorkade/torkade REMOVED — sun-dried is NOT a "burk" product
     'burk': {'burk', 'konserverad', 'konserverade',
              'krossade', 'krossad', 'finkrossade', 'finkrossad',
-             'passerade', 'passerad', 'skalade', 'skalad',
+             'passerade', 'passerad', 'hela', 'hel', 'skalade', 'skalad',
              'polpa', 'koncentrerade', 'koncentrerad',
              'dop'},  # DOP = Italian quality cert, always canned
     'konserv': {'konserv', 'burk', 'konserverad', 'konserverade',
                 'krossade', 'krossad', 'finkrossade', 'finkrossad',
-                'passerade', 'passerad', 'skalade', 'skalad',
+                'passerade', 'passerad', 'hela', 'hel', 'skalade', 'skalad',
                 'polpa', 'koncentrerade', 'koncentrerad',
                 'dop'},
     # "konserverade tomater" — any canned product form is equivalent
     'konserverad': {'konserverad', 'konserverade', 'burk',
                     'krossade', 'krossad', 'finkrossade', 'finkrossad',
-                    'passerade', 'passerad', 'skalade', 'skalad',
+                    'passerade', 'passerad', 'hela', 'hel', 'skalade', 'skalad',
                     'polpa', 'koncentrerade', 'koncentrerad',
                     'dop'},  # DOP (Italian quality cert) = canned product
     'konserverade': {'konserverad', 'konserverade', 'burk',
                      'krossade', 'krossad', 'finkrossade', 'finkrossad',
-                     'passerade', 'passerad', 'skalade', 'skalad',
+                     'passerade', 'passerad', 'hela', 'hel', 'skalade', 'skalad',
                      'polpa', 'koncentrerade', 'koncentrerad',
                      'dop'},  # DOP (Italian quality cert) = canned product
     # Canned tomato forms: Direction B sees "burk/konserverad" as a container cue.
-    # Strict PROCESSED_PRODUCT_RULES still decides whether the actual tomato form
-    # (whole/peeled vs crushed vs passata) is compatible.
+    # Strict PROCESSED_PRODUCT_RULES still decides whether an explicitly named
+    # form (whole/peeled vs crushed vs passata) is compatible.
     'passerade': {'passerade', 'passerad', 'burk', 'konserverad', 'konserverade'},
     'passerad': {'passerade', 'passerad', 'burk', 'konserverad', 'konserverade'},
     'krossade': {'krossade', 'krossad', 'finkrossade', 'finkrossad', 'burk', 'konserverad', 'konserverade'},

@@ -661,6 +661,14 @@ _CANNED_TOMATO_PRODUCT_CUES = frozenset({
     'skalad', 'skalade',
     'tetra',
 })
+_TOMATO_CRUSHED_FORM_CUES = frozenset({'krossad', 'krossade', 'finkrossad', 'finkrossade', 'polpa'})
+_TOMATO_PASSATA_FORM_CUES = frozenset({'passerad', 'passerade'})
+_TOMATO_WHOLE_FORM_CUES = frozenset({'hel', 'hela', 'skalad', 'skalade'})
+_TOMATO_FORM_GROUPS = (
+    _TOMATO_CRUSHED_FORM_CUES,
+    _TOMATO_PASSATA_FORM_CUES,
+    _TOMATO_WHOLE_FORM_CUES,
+)
 _FRESH_TOMATO_PRODUCT_CUES = frozenset({
     'klass', 'kl 1', 'klass 1',
     'färsk', 'farsk',
@@ -1805,6 +1813,22 @@ def _offer_is_canned_small_tomato_product(product_lower: str) -> bool:
     ):
         return True
     return False
+
+
+def _tomato_explicit_form_groups(text_or_qualifiers: Iterable[str] | str) -> set[int]:
+    if isinstance(text_or_qualifiers, str):
+        haystack = text_or_qualifiers
+        return {
+            idx
+            for idx, group in enumerate(_TOMATO_FORM_GROUPS)
+            if any(cue in haystack for cue in group)
+        }
+    qualifiers = set(text_or_qualifiers)
+    return {
+        idx
+        for idx, group in enumerate(_TOMATO_FORM_GROUPS)
+        if qualifiers & group
+    }
 
 
 def _produce_form_requirement_allows_product(
@@ -2982,6 +3006,12 @@ def _expand_offer_keywords_for_matching(product_keywords: List[str], product_nam
         if kw != 'sylt' and kw.endswith('sylt') and 'sylt' not in seen:
             expanded.append('sylt')
             seen.add('sylt')
+        # Keep uncached matching aligned with precomputed offer data: passata
+        # is an exact canonical, but generic canned tomato ingredients should
+        # still reach it through the guarded tomato family.
+        if kw == 'tomatpassata' and 'tomat' not in seen:
+            expanded.append('tomat')
+            seen.add('tomat')
         if kw in {'signalkräftor', 'signalkraftor'}:
             for extra in (
                 'signalkräfta', 'signalkrafta',
@@ -3807,6 +3837,8 @@ def matches_ingredient(
                 offer_specialty_qualifiers[specialty_keyword] = found_qualifiers
             if specialty_keyword == 'småtomat' and _offer_is_canned_small_tomato_product(product_lower):
                 offer_specialty_qualifiers.setdefault('småtomat', set()).add('konserverad')
+            if specialty_keyword in {'tomat', 'tomater'} and 'tomatpassata' in product_keywords:
+                offer_specialty_qualifiers.setdefault(specialty_keyword, set()).add('passerade')
             specialty_ingredient_lower = (
                 ' eller '.join(_eller_arms_for_specialty)
                 if _eller_arms_for_specialty
@@ -4087,6 +4119,13 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
         if keyword not in keywords and keyword not in extra_keywords:
             extra_keywords.append(keyword)
 
+    # Passata/passerade tomater has its own exact canonical so fresh tomato
+    # recipes do not leak into passata. Generic canned tomato wording still
+    # needs to reach it via the tomato family and is guarded by specialty
+    # qualifiers below.
+    if 'tomatpassata' in keywords:
+        _append_extra_keyword('tomat')
+
     for kw in keywords:
         for child in _INGREDIENT_PARENTS_REVERSE.get(kw, ()):
             if child in {'bifftomat', 'bifftomater'} and not any(
@@ -4358,6 +4397,9 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
                 found_qualifiers[base_word] = found_in_offer
     if 'småtomat' in keywords_set and _offer_is_canned_small_tomato_product(name_normalized):
         found_qualifiers.setdefault('småtomat', set()).add('konserverad')
+    if 'tomatpassata' in keywords_set:
+        found_qualifiers.setdefault('tomat', set()).add('passerade')
+        found_qualifiers.setdefault('tomater', set()).add('passerade')
     if (
         'kalamataoliver' in keywords_set
         and 'kalamata' in name_normalized
@@ -6057,6 +6099,11 @@ def matches_ingredient_fast(
     #   "Gul Lök" should still match generic "lök" recipes.
     specialty_keyword = _SPECIALTY_KEYWORD_ALIASES.get(matched_keyword, matched_keyword)
     offer_qualifiers = offer_data['specialty_qualifiers'].get(specialty_keyword, set())
+    if specialty_keyword in {'tomat', 'tomater'} and offer_qualifiers:
+        ingredient_form_groups = _tomato_explicit_form_groups(ingredient_lower)
+        offer_form_groups = _tomato_explicit_form_groups(offer_qualifiers)
+        if ingredient_form_groups and offer_form_groups and ingredient_form_groups.isdisjoint(offer_form_groups):
+            return None
 
     if (
         specialty_keyword == 'chilisås'

@@ -962,8 +962,6 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('chiafrö', 'chiafrön'),
     ('tomat finhackad', 'tomat krossad'),
     ('tomater finhackade', 'tomater krossade'),
-    ('konserverade tomater', 'skalade tomater'),
-    ('konserverad tomat', 'skalad tomat'),
     ('körsbärstomatertomater', 'körsbärstomater'),
     ('korsbarstomatertomater', 'korsbarstomater'),
     ('portabella', 'portabellosvamp'),
