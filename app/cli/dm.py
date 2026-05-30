@@ -1033,8 +1033,20 @@ GUIDE_ALIASES = {
 }
 
 
+def _default_matcher_tree_root() -> Path | None:
+    candidates: list[Path] = []
+    configured_root = os.environ.get("DEAL_MEALS_REPO_ROOT")
+    if configured_root:
+        candidates.append(Path(configured_root))
+    candidates.append(Path("/repo"))
+    for candidate in candidates:
+        if (candidate / ".git").exists() and (candidate / "app").is_dir():
+            return candidate
+    return None
+
+
 def _paths(tree_root: Path | None) -> MatcherPaths:
-    contracts = contract_paths(tree_root)
+    contracts = contract_paths(tree_root or _default_matcher_tree_root())
     app_dir = contracts.app_dir
     repo_root = contracts.repo_root
     return MatcherPaths(

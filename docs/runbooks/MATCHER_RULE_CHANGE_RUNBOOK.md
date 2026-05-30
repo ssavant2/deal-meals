@@ -205,6 +205,12 @@ under one entry point. Raw `python support_checks/...` commands remain
 fallback/debug forms when a wrapper is unclear or a support-check script itself
 is being debugged.
 
+In dev, `docker-compose.dev.yml` installs git, mounts the repo root at `/repo`,
+and sets `DEAL_MEALS_REPO_ROOT=/repo` so matcher gates can inspect the real git
+worktree from inside the container. Production intentionally lacks git and `.git`
+metadata. If git auto-detection is unavailable and no explicit change flags are
+passed, the gate wrapper fails fast instead of silently assuming nothing changed.
+
 `dm matcher gates` runs generated JSON/coverage refresh and baseline promotion
 maintenance before validation when Track B inputs require it. Its first
 validation gate is pre-flight; you can run that alone with

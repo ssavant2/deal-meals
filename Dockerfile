@@ -1,6 +1,7 @@
 FROM python:3.14.5-slim-trixie
 
 ARG RELEASE_VERSION=""
+ARG INSTALL_DEV_TOOLS="false"
 
 # Install system dependencies for Playwright
 ENV DEBIAN_FRONTEND=noninteractive
@@ -23,7 +24,9 @@ RUN apt-get update && apt-get install -y \
     libasound2 \
     libpango-1.0-0 \
     libcairo2 \
+    && if [ "$INSTALL_DEV_TOOLS" = "true" ]; then apt-get install -y git; fi \
     && rm -rf /var/lib/apt/lists/*
+RUN if [ "$INSTALL_DEV_TOOLS" = "true" ]; then git config --system --add safe.directory /repo; fi
 
 WORKDIR /app
 

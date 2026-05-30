@@ -93,7 +93,8 @@ Python cache):
 docker compose build --no-cache && docker compose up -d
 ```
 
-**Development source build** (writable app mount, Adminer on port 8071):
+**Development source build** (writable app/repo mounts, Adminer on port 8071,
+and git tooling for matcher maintenance):
 ```bash
 # Dev .env must contain:
 #   COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml
@@ -101,7 +102,11 @@ docker compose build --no-cache && docker compose up -d
 docker compose build --no-cache && docker compose up -d
 ```
 
-The base `docker-compose.yml` is prod-ready. Dev adds `docker-compose.dev.yml` as an overlay (loaded automatically via `COMPOSE_FILE` in `.env`).
+The base `docker-compose.yml` is prod-ready. Dev adds `docker-compose.dev.yml`
+as an overlay (loaded automatically via `COMPOSE_FILE` in `.env`). The dev
+overlay also installs `git` and mounts the repo at `/repo` so matcher
+maintenance commands can use git auto-detection inside the container. Production
+does not include git or mount `.git` metadata.
 
 First startup takes ~1 minute (database initialization, cache warmup).
 
@@ -311,6 +316,9 @@ may try up to `2000` candidate URLs.
 | **Volume name** | `deal-meals_postgres_data` | `deal-meals-dev_postgres_data` |
 | **Adminer** | Not included | Included (port 8071) |
 | **App volumes** | Read-only | Writable source mount |
+| **Repo metadata** | Not mounted | Repo mounted at `/repo` for matcher git auto-detection |
+| **Dev tools** | No git in the image | Git installed via dev build arg |
+| **Matcher gates** | Use host checkout or explicit change flags for maintenance | Auto-detects changed matcher areas via `/repo` when possible |
 | **Python cache** | Disabled | Enabled |
 
 > **Running both on the same machine?** Each environment has its own named volume (external). Volumes must be created manually before first start. The separate names prevent any risk of two PostgreSQL instances touching the same data.

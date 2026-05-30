@@ -166,6 +166,17 @@ def _target_filter_args(args: argparse.Namespace) -> list[str]:
 
 
 def _discover_repo_root() -> Path:
+    candidates: list[Path] = []
+    configured_root = os.environ.get("DEAL_MEALS_REPO_ROOT")
+    if configured_root:
+        candidates.append(Path(configured_root))
+    candidates.extend([Path("/repo"), APP_DIR.parent, APP_DIR])
+    for candidate in candidates:
+        if (candidate / ".git").exists() and (candidate / "app").is_dir():
+            return candidate.resolve()
+        if (candidate / ".git").exists() and candidate == APP_DIR:
+            return candidate.resolve()
+
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -183,6 +194,19 @@ def _discover_repo_root() -> Path:
     if (APP_DIR / ".git").exists():
         return APP_DIR
     return APP_DIR
+
+
+def _has_explicit_change_flags(args: argparse.Namespace) -> bool:
+    return any(
+        value is not None
+        for value in (
+            args.registry_changed,
+            args.runtime_changed,
+            args.fixtures_changed,
+            args.inventory_changed,
+            args.support_checks_changed,
+        )
+    )
 
 
 def _git_changed_paths(repo_root: Path) -> tuple[set[str], str | None]:
@@ -980,6 +1004,18 @@ def main() -> int:
     args = parse_args()
     repo_root = repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else _discover_repo_root()
     changed_paths, git_error = _git_changed_paths(repo_root) if args.auto_detect else (set(), None)
+    if git_error and args.auto_detect and not _has_explicit_change_flags(args):
+        print(f"Repo root: {repo_root}", flush=True)
+        print(f"Git auto-detect unavailable: {git_error}", flush=True)
+        print(
+            "\nERROR: Cannot infer matcher gate scope without git. "
+            "In dev, rebuild the image so git is installed and mount the repo at /repo. "
+            "Otherwise pass explicit flags such as --registry-changed, "
+            "--fixtures-changed, --inventory-changed, --runtime-changed, or "
+            "--support-checks-changed.",
+            flush=True,
+        )
+        return 1
     detected = _detect_change_flags(changed_paths)
     changes = _resolved_change_flags(args, detected)
     generated_coverage_refresh = (

@@ -21,7 +21,10 @@ services:
 
   web:
     container_name: deal-meals-dev-web
-    build: .
+    build:
+      context: .
+      args:
+        INSTALL_DEV_TOOLS: "true"
     # NOTE: mem_limit and cpus below are TEMPORARY for batch-review runs (2026-05-15).
     # Normal values: mem_limit 1536m, cpus 4 (or remove cpus line entirely).
     # Restore when batch reviews are complete.
@@ -29,11 +32,13 @@ services:
     cpus: ${DEV_WEB_CPUS:-10}
     environment:
       DEAL_MEALS_VERSION: ${DEAL_MEALS_VERSION:-dev}
+      DEAL_MEALS_REPO_ROOT: /repo
       PYTHONDONTWRITEBYTECODE: "1"
       CACHE_REBUILD_MAX_WORKERS: ${CACHE_REBUILD_MAX_WORKERS:-8}
       CACHE_DELTA_VERIFICATION_MAX_WORKERS: ${CACHE_DELTA_VERIFICATION_MAX_WORKERS:-3}
     volumes:
       - ./app:/app
+      - .:/repo
       - ./certs:/certs
 
 volumes:
