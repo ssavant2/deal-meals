@@ -690,6 +690,13 @@ keyword = "pepparkaka"
 blockers = ["skumtomte"]
 reason = "Skumtomte Pepparkaka is a marshmallow candy, not a soft gingerbread — blocks via product name, not ingredient text"
 
+[[product_name_blockers]]
+id = "runtime_pnb_smatomat"
+status = "active"
+keyword = "småtomat"
+blockers = ["vongole"]
+reason = "Vongole (clams) dishes like 'Vongole con pomodorini' are ready clam-and-tomato sauces, not raw cherry tomatoes - block from småtomat recipes"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1542,6 +1549,14 @@ surface = "stop_words"
 action = "add"
 terms = ["randig", "randiga", "randigt"]
 reason = "Striped/pattern adjective leaking as keyword. 'klubbpinnar el randiga sugror' (craft supply, non-food) matched 'Kaviar randig Kalles' via 'randig'. Pure descriptive adjective, never a food keyword."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_vargarda"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["vårgårda"]
+reason = "Brand/place name on AXA plain dry rice that leaked through as a keyword, letting Vårgårda Ris match puffed-rice cereal recipes (puffat ris). The product still exposes the ris keyword for normal rice recipes; this only removes the brand path that bypassed the puffat-ris carrier-context suppression."
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
