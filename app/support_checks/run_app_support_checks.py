@@ -31,6 +31,7 @@ CHECKS = [
     "run_candidate_refresh_guard_checks.py",
     "run_recipe_ingredient_term_map_checks.py",
     "run_matching_preference_filter_checks.py",
+    "audit_dietary_exclusion_profiles.py",
     "run_recipe_url_discovery_checks.py",
     "run_recipe_source_profile_checks.py",
     "run_scraper_p0_checks.py",
@@ -41,6 +42,16 @@ CHECKS = [
     "run_delta_ingredient_routing_policy_checks.py",
 ]
 
+CHECK_ARGS = {
+    "audit_dietary_exclusion_profiles.py": [
+        "--check",
+        "--offer-scan-limit",
+        "5000",
+        "--recipe-scan-limit",
+        "3000",
+    ],
+}
+
 
 def main() -> int:
     support_checks_dir = Path(__file__).resolve().parent
@@ -50,7 +61,7 @@ def main() -> int:
     for check in CHECKS:
         print(f"\n=== {check} ===", flush=True)
         result = subprocess.run(
-            [sys.executable, str(support_checks_dir / check)],
+            [sys.executable, str(support_checks_dir / check), *CHECK_ARGS.get(check, [])],
             cwd=app_dir,
             check=False,
         )
