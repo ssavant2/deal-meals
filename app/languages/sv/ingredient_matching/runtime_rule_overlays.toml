@@ -771,8 +771,8 @@ reason = "Marsipanlock (pre-rolled colored marzipan sheets for cake covering) is
 id = "runtime_fpb_mango"
 status = "active"
 keyword = "mango"
-blockers = ["mangopure", "mangopure"]
-reason = "Mangopure (mango puré) is a processed product, not fresh mango fruit. Ingredient 'mangopuré' (also written as 'mangopure') should match only true puré products, not whole fresh/frozen mango."
+blockers = ["mangopure", "mangopure", "mangosorbet"]
+reason = "Mangopure (mango puré) is a processed product, not fresh mango fruit. Ingredient 'mangopuré' (also written as 'mangopure') should match only true puré products, not whole fresh/frozen mango.; mangosorbet is a frozen dessert, not fresh/frozen mango — mirrors existing FPB mango←mangomarmelad/mangochutney/mangosalsa family"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_ris"
@@ -918,8 +918,8 @@ reason = "Sellerisalt (spice) should not match stjälkselleri/bladselleri (veget
 id = "runtime_fpb_kal"
 status = "active"
 keyword = "kål"
-blockers = ["kålrot", "kålrabbi", "skålla", "skålla mandel", "skåll", "surkål"]
-reason = "kålrot (rutabaga) is not a kål (cabbage/greens) variety — when ingredient is kålrot, suppress generic kål keyword matches from cabbage products; kålrabbi (kohlrabi, stem vegetable) is not a kål (cabbage/greens) variety - when ingredient is kålrabbi, suppress generic kål keyword matches from cabbage products; skållade mandlar (blanched almonds) is preparation step, not kål; substring kål exists in skålla; Surkål (fermented cabbage) ingredient should not match generic kål-keyword products (vitkål, rödkål, savoykål etc). The substring kål in surkål causes false-positive cabbage matches via the kål-parent keyword extracted from raw cabbage products."
+blockers = ["kålrot", "kålrabbi", "skålla", "skålla mandel", "skåll", "surkål", "fruktskål"]
+reason = "kålrot (rutabaga) is not a kål (cabbage/greens) variety — when ingredient is kålrot, suppress generic kål keyword matches from cabbage products; kålrabbi (kohlrabi, stem vegetable) is not a kål (cabbage/greens) variety - when ingredient is kålrabbi, suppress generic kål keyword matches from cabbage products; skållade mandlar (blanched almonds) is preparation step, not kål; substring kål exists in skålla; Surkål (fermented cabbage) ingredient should not match generic kål-keyword products (vitkål, rödkål, savoykål etc). The substring kål in surkål causes false-positive cabbage matches via the kål-parent keyword extracted from raw cabbage products.; Serving-vessel word 'fruktskål'/'fruktskålen' ('fruit bowl') contains 'kål' as a substring; matches_ingredient scans raw ingredient text and matched every cabbage product against a grape ingredient that suggested '(eller det du hittar i fruktskålen)'. Same substring-leak pattern as existing kål blockers skålla/skåll."
 
 [[false_positive_blockers]]
 id = "runtime_fpb_citron"
@@ -1557,6 +1557,22 @@ surface = "stop_words"
 action = "add"
 terms = ["vårgårda"]
 reason = "Brand/place name on AXA plain dry rice that leaked through as a keyword, letting Vårgårda Ris match puffed-rice cereal recipes (puffat ris). The product still exposes the ris keyword for normal rice recipes; this only removes the brand path that bypassed the puffat-ris carrier-context suppression."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_reserva"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["reserva"]
+reason = "Spanish aging/quality designation (ham/cheese/wine reserva), not a food; parallels existing Italian 'riserva' stop word. Prevents Serrano ham ingredient from matching reserva olive oil."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_fruktskalen"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["fruktskålen"]
+reason = "Decorative serving-vessel word ('fruit bowl'), not a food. Leaked from a parenthetical recipe suggestion '(eller det du hittar i fruktskålen)' and let the 'kål' compound-suffix match every cabbage product against a grape ingredient."
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
