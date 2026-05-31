@@ -697,6 +697,20 @@ keyword = "småtomat"
 blockers = ["vongole"]
 reason = "Vongole (clams) dishes like 'Vongole con pomodorini' are ready clam-and-tomato sauces, not raw cherry tomatoes - block from småtomat recipes"
 
+[[product_name_blockers]]
+id = "runtime_pnb_paprikapulver"
+status = "active"
+keyword = "paprikapulver"
+blockers = ["lax", "laxfilé", "laxfilet", "fisk", "fiskfilé", "fiskfilet"]
+reason = "Smoked/flavored fish products (e.g. Lax Varmrökt Paprika) contain paprika as flavor descriptor — paprika in product name injects paprikapulver via INGREDIENT_PARENTS precompute but fish is never a paprika-powder substitute"
+
+[[product_name_blockers]]
+id = "runtime_pnb_bacon"
+status = "active"
+keyword = "bacon"
+blockers = ["hamburgare"]
+reason = "Bacon-flavored hamburger patties (Hamburgare Färsk Bacon) are ground-meat burgers, not bacon rashers/diced bacon; same precedent as nötkött:hamburgare"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1340,6 +1354,13 @@ status = "active"
 keyword = "ravioli"
 context = ["chokladravioli"]
 reason = "Chocolate dessert ravioli (chokladravioli) is not plain savory ravioli; suppress the generic ravioli keyword so it does not match ricotta/spinach/mushroom/cheese raviolis"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_apple"
+status = "active"
+keyword = "äpple"
+context = ["plant gurt", "plantgurt", "havregurt", "kokosgurt", "sojagurt"]
+reason = "Flavored plant-yoghurt drinks (plantgurt/havregurt/kokosgurt) list apple as flavor descriptor — apple keyword should not route to raw whole apples when the ingredient is clearly a gurt-drink product"
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
