@@ -1040,6 +1040,20 @@ keyword = "entrecote"
 blockers = ["lammentrecote"]
 reason = "Lamb entrecote ingredient must not match beef entrecote products; entrecote is a substring of lammentrecote causing keyword bleed"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_betor"
+status = "active"
+keyword = "betor"
+blockers = ["gulbetor", "gulbeta", "sockerbeta", "sockerbetssaft"]
+reason = "Color-prefixed beet varieties (gulbeta=yellow beet, sockerbeta=sugar beet) should not match rödbeta products via the shared 'betor' suffix — similar to the vegetable-spaghetti isolation (Q115-1)"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_majonnas"
+status = "active"
+keyword = "majonnäs"
+blockers = ["citronmajonnäs", "citronmajonnas", "currymajonnäs", "currymajonnas"]
+reason = "Flavored mayonnaise variants (lemon mayo, curry mayo) are dressings distinct from plain mayonnaise; plain majonnäs product must not satisfy a citron-/curry-flavored mayo ingredient. Mirrors existing chilimajonnäs/srirachamajonnäs isolation."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"

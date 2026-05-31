@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 397,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 160,
+      "keyword_synonym_mapping": 163,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 160,
+      "keyword_synonym": 163,
       "match_bridge": 2021,
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 469,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5784,
-    "variants_missing_product_text": 1831,
+    "variant_count": 5787,
+    "variants_missing_product_text": 1834,
     "variants_with_product_text": 3953
   },
   "variants": [
@@ -121510,11 +121510,74 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"shiitake\"}"
+    },
+    {
+      "variant_id": "vterm-efa1a092e37ec95e",
+      "row_index": 4933,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:schalottenlökar",
+      "source_id": "schalottenlökar",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "schalottenlökar",
+      "canonical": "schalottenlök",
+      "expected_family": "schalottenlök",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"schalottenlök\"}"
+    },
+    {
+      "variant_id": "vterm-3912bd3bc4edd466",
+      "row_index": 4934,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:scharlottenlök",
+      "source_id": "scharlottenlök",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "scharlottenlök",
+      "canonical": "schalottenlök",
+      "expected_family": "schalottenlök",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"schalottenlök\"}"
+    },
+    {
+      "variant_id": "vterm-e5103a1561e8b04c",
+      "row_index": 4935,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:scharlottenlökar",
+      "source_id": "scharlottenlökar",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "scharlottenlökar",
+      "canonical": "schalottenlök",
+      "expected_family": "schalottenlök",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"schalottenlök\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1609,
+      "no_product_text": 1612,
       "static_verified": 2675,
       "synthetic_verified": 1500
     },
@@ -121525,7 +121588,7 @@
       "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 160,
+      "keyword_synonym": 163,
       "match_bridge": 2021,
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 469,
@@ -121536,8 +121599,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5784
+      "audited": 5787
     },
-    "variant_count": 5784
+    "variant_count": 5787
   }
 }
