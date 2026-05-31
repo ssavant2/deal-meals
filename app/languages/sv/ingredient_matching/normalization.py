@@ -263,6 +263,9 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('vaxtbaserad mjölkryck', 'växtdryck'),
     ('vaxtbaserad mjolkryck', 'växtdryck'),
     ('vaxtbaserad dryck', 'växtdryck'),
+    ('vegetabilisk mjölk', 'växtdryck'),
+    ('vegetabilisk mjolk', 'växtdryck'),
+    ('vegetabilisk dryck', 'växtdryck'),
     # Explicit gluten-free oats should stay distinct from ordinary oats.
     ('glutenfri havregryn', 'glutenfrihavregryn'),
     ('glutenfria havregryn', 'glutenfrihavregryn'),
