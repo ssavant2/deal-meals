@@ -711,6 +711,13 @@ keyword = "bacon"
 blockers = ["hamburgare"]
 reason = "Bacon-flavored hamburger patties (Hamburgare Färsk Bacon) are ground-meat burgers, not bacon rashers/diced bacon; same precedent as nötkött:hamburgare"
 
+[[product_name_blockers]]
+id = "runtime_pnb_sillfileer"
+status = "active"
+keyword = "sillfileer"
+blockers = ["5-minuters", "inläggning"]
+reason = "Plural form of sillfilé — pre-pickled/marinated herring products (5-minuterssill, inläggningssill) are not raw herring fillets; mirrors existing PNB sillfilé←{5-minuters,inläggning} from Q94-4"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1623,6 +1630,14 @@ surface = "important_short_keywords"
 action = "add"
 terms = ["lomo"]
 reason = "lomo = Spanish cured pork loin (Lomo curado / Lomo Lufttorkad); 4-char charcuterie term must extract as a keyword so the cured-loin ingredient matches its product"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_tjock_tjocka_tjockt"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["tjock", "tjocka", "tjockt", "tjocke"]
+reason = "Thickness/cut descriptor leaking as a product keyword (e.g. Revbensspjäll Tjocka) and matching unrelated cuts like 'entrecôte i tjocka skivor' via raw ingredient text; not a food term"
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"

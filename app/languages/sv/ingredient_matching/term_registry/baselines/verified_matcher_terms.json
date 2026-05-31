@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 397,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 157,
+      "keyword_synonym_mapping": 160,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 157,
+      "keyword_synonym": 160,
       "match_bridge": 2021,
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 469,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5781,
-    "variants_missing_product_text": 1828,
+    "variant_count": 5784,
+    "variants_missing_product_text": 1831,
     "variants_with_product_text": 3953
   },
   "variants": [
@@ -121447,11 +121447,74 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"pumpafrön\"}"
+    },
+    {
+      "variant_id": "vterm-f2173f79f9e11ede",
+      "row_index": 4933,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:shitake",
+      "source_id": "shitake",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "shitake",
+      "canonical": "shiitake",
+      "expected_family": "shiitake",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"shiitake\"}"
+    },
+    {
+      "variant_id": "vterm-cb8ebac3cb46ccc3",
+      "row_index": 4934,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:shitakesvamp",
+      "source_id": "shitakesvamp",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "shitakesvamp",
+      "canonical": "shiitake",
+      "expected_family": "shiitake",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"shiitake\"}"
+    },
+    {
+      "variant_id": "vterm-8869a448d365cac1",
+      "row_index": 4935,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:shitakesvampar",
+      "source_id": "shitakesvampar",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "shitakesvampar",
+      "canonical": "shiitake",
+      "expected_family": "shiitake",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"shiitake\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1606,
+      "no_product_text": 1609,
       "static_verified": 2675,
       "synthetic_verified": 1500
     },
@@ -121462,7 +121525,7 @@
       "ingredient_parent": 397,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 157,
+      "keyword_synonym": 160,
       "match_bridge": 2021,
       "matcher_regression_case": 1500,
       "matcher_rule_inventory": 469,
@@ -121473,8 +121536,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5781
+      "audited": 5784
     },
-    "variant_count": 5781
+    "variant_count": 5784
   }
 }
