@@ -428,7 +428,12 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('gul currypasta', 'gulcurrypasta'),
     ('grön curry', 'gröncurry'),
     ('röd curry', 'rödcurry'),
-    ('gul curry', 'gulcurry'),
+    # In Swedish home cooking "gul curry" (and plain "curry") means the yellow
+    # curry-powder spice jar (e.g. "Curry 34g Santa Maria"), not Thai yellow curry
+    # paste. Route it to the plain "curry" spice keyword so it matches curry powder
+    # and does NOT match concentrated Thai currypaste. Red/green curry stay as their
+    # own Thai-paste compounds because they have no Swedish spice-powder equivalent.
+    ('gul curry', 'curry'),
     ('red curry paste', 'rödcurrypasta'),
     ('green curry paste', 'gröncurrypasta'),
     ('yellow curry paste', 'gulcurrypasta'),

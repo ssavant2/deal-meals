@@ -1260,6 +1260,15 @@ _FRESH_COLOR_CHILI_INGREDIENT_CUES = frozenset({
     'röd chilipeppar', 'rod chilipeppar',
     'grön chilipeppar', 'gron chilipeppar',
     'gul chilipeppar',
+    # Plural/definite color forms ("2 röda chili", "gröna chili i skivor") mean the
+    # same fresh colored chili as the singular forms — a recipe asking for "röda chili"
+    # wants the fresh red pepper, not chili powder/flakes.
+    'röda chili', 'roda chili',
+    'gröna chili', 'grona chili',
+    'gula chili',
+    'röda chilipeppar', 'roda chilipeppar',
+    'gröna chilipeppar', 'grona chilipeppar',
+    'gula chilipeppar',
 })
 _CHILI_COLOR_QUALIFIERS = frozenset({'röd', 'rod', 'red', 'grön', 'gron', 'green', 'gul', 'yellow'})
 _FRESH_CHILI_UNIT_CUES = frozenset({
@@ -1269,7 +1278,7 @@ _FRESH_CHILI_UNIT_CUES = frozenset({
 _FRESH_CHILI_INGREDIENT_RE = re.compile(
     r'\b(?:\d+(?:[,.]\d+)?\s*)?'
     r'(?:(?:st|styck)\s+)?'
-    r'(?:(?:liten|lilla|stor|stora|skivad|skivade|röd|rod|grön|gron|gul)\s+)*'
+    r'(?:(?:liten|lilla|stor|stora|skivad|skivade|röda|roda|röd|rod|gröna|grona|grön|gron|gula|gul)\s+)*'
     r'(?:chilipeppar|chilifrukt|chilifrukter|chili)\b'
 )
 

@@ -841,8 +841,8 @@ reason = "Flavored cocktail/dessert syrups (jordgubbs, hallon, mint, fläderblom
 id = "runtime_fpb_choklad"
 status = "active"
 keyword = "choklad"
-blockers = ["chokladmjölk", "chokladmjolk", "pralin", "chokladravioli"]
-reason = "Chokladmjölk is a chocolate beverage (Pucko/Cocio), not solid chocolate for baking. Recipe asking for chokladmjölk should not match bakchoklad/chokladknappar via substring 'choklad' in 'chokladmjölk'.; Ingredient text containing 'pralin/praliner' indicates ready-to-eat chocolate confectionery, not baking chocolate. Bakchoklad/chokladknappar should not match recipes asking for praliner via the choklad parent keyword.; chokladravioli is a chocolate-filled pasta, not a chocolate bar; the choklad substring must not match chocolate confectionery offers"
+blockers = ["chokladmjölk", "chokladmjolk", "pralin", "chokladravioli", "schweizernöt", "schweizernot"]
+reason = "Chokladmjölk is a chocolate beverage (Pucko/Cocio), not solid chocolate for baking. Recipe asking for chokladmjölk should not match bakchoklad/chokladknappar via substring 'choklad' in 'chokladmjölk'.; Ingredient text containing 'pralin/praliner' indicates ready-to-eat chocolate confectionery, not baking chocolate. Bakchoklad/chokladknappar should not match recipes asking for praliner via the choklad parent keyword.; chokladravioli is a chocolate-filled pasta, not a chocolate bar; the choklad substring must not match chocolate confectionery offers; Schweizernötchoklad is a specific milk-chocolate-with-hazelnuts specialty product, not generic chocolate; it must not match plain/dark/white/milk chocolate offers through the shared choklad keyword"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_hallon"

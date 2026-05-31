@@ -32,6 +32,20 @@ from .specialty_rules import (
     PESTO_RED_QUALIFIER_EQUIVALENTS,
     QUALIFIER_EQUIVALENTS,
 )
+from .synonyms import INGREDIENT_PARENTS
+
+# Parent keyword -> the child keywords that resolve up to it via INGREDIENT_PARENTS.
+# A match can land on a parent keyword (e.g. "nejlikor") while the product's
+# specialty qualifier is stored under the concrete child keyword the product name
+# actually used (e.g. "Nejlika Malen" stores qualifier under "nejlika": {"malen"}).
+# Direction A uses this map to roll the child-keyword qualifiers up to the parent
+# so a recipe asking for the same ground form ("Nejlikor Malda" → malda↔malen via
+# QUALIFIER_EQUIVALENTS) still finds the product's qualifier. Direction A only ever
+# relaxes matching, so this roll-up can never introduce a new false block; the child
+# qualifiers describe the very same product the match landed on.
+_SPECIALTY_PARENT_TO_CHILDREN: Dict[str, Set[str]] = {}
+for _child_keyword, _parent_keyword in INGREDIENT_PARENTS.items():
+    _SPECIALTY_PARENT_TO_CHILDREN.setdefault(_parent_keyword, set()).add(_child_keyword)
 
 _SMOKED_SPECIFIC_QUALIFIERS = frozenset({
     'kallrökt', 'kallrokt', 'kallr',
@@ -48,11 +62,20 @@ _FRESH_COLOR_CHILI_INGREDIENT_CUES = frozenset({
     'röd chilipeppar', 'rod chilipeppar',
     'grön chilipeppar', 'gron chilipeppar',
     'gul chilipeppar',
+    # Plural/definite color forms ("2 röda chili", "gröna chili i skivor") mean the
+    # same fresh colored chili as the singular forms — a recipe asking for "röda chili"
+    # wants the fresh red pepper, not chili powder/flakes.
+    'röda chili', 'roda chili',
+    'gröna chili', 'grona chili',
+    'gula chili',
+    'röda chilipeppar', 'roda chilipeppar',
+    'gröna chilipeppar', 'grona chilipeppar',
+    'gula chilipeppar',
 })
 _FRESH_CHILI_INGREDIENT_RE = re.compile(
     r'\b(?:\d+(?:[,.]\d+)?\s*)?'
     r'(?:(?:st|styck)\s+)?'
-    r'(?:(?:liten|lilla|stor|stora|skivad|skivade|röd|rod|grön|gron|gul)\s+)*'
+    r'(?:(?:liten|lilla|stor|stora|skivad|skivade|röda|roda|röd|rod|gröna|grona|grön|gron|gula|gul)\s+)*'
     r'(?:chilipeppar|chilifrukt|chilifrukter|chili)\b'
 )
 
@@ -503,6 +526,15 @@ def check_specialty_qualifiers(
         offer_quals = _prune_shadowed_smoked_qualifiers(
             set(offer_specialty_qualifiers.get(base_word, set()))
         )
+        # Direction A only: roll child-keyword qualifiers up to the matched parent.
+        # When a match lands on a parent (e.g. "nejlikor") the product may carry its
+        # qualifier under a child keyword ("nejlika": {"malen"}). Including those here
+        # lets "Nejlikor Malda" satisfy Direction A against "Nejlika Malen". Direction B
+        # below keeps using the un-rolled `offer_quals` so its blocking stays unchanged.
+        offer_quals_direction_a = set(offer_quals)
+        for _child in _SPECIALTY_PARENT_TO_CHILDREN.get(base_word, ()):  # parent → children
+            offer_quals_direction_a.update(offer_specialty_qualifiers.get(_child, set()))
+        offer_quals_direction_a = _prune_shadowed_smoked_qualifiers(offer_quals_direction_a)
 
         # Direction A: if ingredient has a specialty qualifier, offer must match it
         # Skip Direction A for keywords where plain products are valid fallbacks:
@@ -595,7 +627,7 @@ def check_specialty_qualifiers(
                 if (
                     base_word == 'chilisås'
                     and any(q in _SWEET_CHILI_QUALIFIERS for q in check_quals)
-                    and any(q in offer_quals for q in _UNSWEETENED_CHILI_QUALIFIERS)
+                    and any(q in offer_quals_direction_a for q in _UNSWEETENED_CHILI_QUALIFIERS)
                 ):
                     continue
                 # The most specific qualifier must match the offer
@@ -622,13 +654,13 @@ def check_specialty_qualifiers(
                     # match the actual red-pesto products in stores.
                     if base_word == 'pesto' and qualifier in PESTO_RED_QUALIFIER_EQUIVALENTS:
                         equivalents = set(equivalents) | set(PESTO_RED_QUALIFIER_EQUIVALENTS)
-                    if any(eq in offer_quals for eq in equivalents):
+                    if any(eq in offer_quals_direction_a for eq in equivalents):
                         matched = True
                         break
                 if (
                     not matched
                     and base_word in {'färskost', 'fraiche'}
-                    and 'naturell' in offer_quals
+                    and 'naturell' in offer_quals_direction_a
                 ):
                     # Flavored färskost/fraiche recipes allow the requested
                     # flavor and the naturell base product as fallbacks.
@@ -664,7 +696,7 @@ def check_specialty_qualifiers(
                     group_equivalents = set()
                     for qualifier in group_hits:
                         group_equivalents.update(QUALIFIER_EQUIVALENTS.get(qualifier, {qualifier}))
-                    if not any(eq in offer_quals for eq in group_equivalents):
+                    if not any(eq in offer_quals_direction_a for eq in group_equivalents):
                         additive_ok = False
                         break
                 if additive_ok:
