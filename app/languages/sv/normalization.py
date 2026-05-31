@@ -404,8 +404,16 @@ def normalize_ingredient(ingredient: str) -> str:
     # Must run before suffix removal since that strips digits/weights.
     name = re.sub(r'\b(?:mellan|standard|lätt)mjölk(?:dryck)?\b', 'mjölk', name)
 
-    # Remove common suffixes
-    name = re.sub(r'\s+(klass|färsk|fryst|sverige|brasilien|frankrike|original).*', '', name)
+    # Remove common suffixes.
+    # Grade/origin descriptors are pure trailing noise — strip them and everything after.
+    name = re.sub(r'\s+(klass|sverige|brasilien|frankrike|original).*', '', name)
+    # Freshness/frozen qualifiers ("färsk", "färska", "fryst", "frysta") are stripped
+    # as single words, NOT greedily: in product names like "Grytbitar Färska Kyckling"
+    # or "Grytbitar Färska av nöt" the word AFTER the qualifier is the actual product,
+    # not a descriptive tail, so it must be kept. Any leftover descriptive words are
+    # dropped later by stop-word / length filters.
+    name = re.sub(r'\s+(?:färsk|fryst)\w*\b', ' ', name)
+    name = re.sub(r'\s+', ' ', name)
     # Remove weights/amounts: only strip digits followed by a recognized unit.
     # Old pattern r'\s+\d+.*' was too aggressive — "Tipo 00 Siktat Vetemjöl" lost everything.
     name = re.sub(r'\s+\d+[\d,\.]*\s*(?:g|kg|ml|cl|dl|l|st|port|pack|p|mån|månader|%|gram|kilo|liter|cm|-pack)\b.*', '', name, flags=re.IGNORECASE)

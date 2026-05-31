@@ -1374,6 +1374,12 @@ test("PNB färskost → chips", 'chips' in PRODUCT_NAME_BLOCKERS.get('färskost'
 test("grytbitar av nöt matches nöt stew product",
      match("Grytbitar Nöt ca 500g ICA", "400 g grytbitar av nöt") is not None, True)
 test("nut ingredient still not beef", match("Grytbitar Nöt ca 500g ICA", "2 dl hasselnötter"), None)
+# "X Färsk/Fryst <product>" product names must keep the product word after the
+# freshness qualifier (normalize_ingredient no longer strips it greedily).
+test("grytbitar färska av nöt product extracts nötkött",
+     'nötkött' in extract_keywords_from_product("Grytbitar Färska av nöt ca 1kg ICA"), True)
+test("grytbitar färska av nöt matches grytbitar av nöt ingredient",
+     match("Grytbitar Färska av nöt ca 1kg ICA", "400 g grytbitar av nöt") is not None, True)
 # Peanuts: salt level is not a matching distinction — naturella/saltade/plain peanuts
 # all match any peanut product (the cook adjusts seasoning).
 test("naturella jordnötter matches plain peanut product",
