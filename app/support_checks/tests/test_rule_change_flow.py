@@ -3531,6 +3531,7 @@ def normalize_probe(text: str) -> str:
             "list",
             "inactivate",
             "explain",
+            "why",
             "compare-paths",
             "canonical-of",
             "sanity-find",
@@ -3696,6 +3697,41 @@ def normalize_probe(text: str) -> str:
         paprika_checks = [row for row in payload["processed_checks"] if row.get("base") == "paprika"]
         self.assertEqual(len(paprika_checks), 1, payload)
         self.assertEqual(paprika_checks[0]["status"], "skipped_not_matched_keyword_family")
+
+    def test_dm_matcher_why_reports_backend_validation_reject_rule(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "why",
+                "--offer",
+                "Kryddsmör Vitlök 100g",
+                "--ingredient",
+                "1 klyfta vitlök",
+                "--offer-category",
+                "dairy",
+                "--format",
+                "json",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["diagnosis_class"], "backend_validation_rejected")
+        self.assertEqual(payload["backend_validation"]["reject_rule"], "secondary_ingredient_pattern")
+        self.assertEqual(payload["fast_match"]["matched_keyword"], "vitlök")
+        self.assertFalse(payload["backend_validation"]["accepted"])
+        self.assertIn(
+            "secondary_ingredient_pattern",
+            [event.get("rule") for event in payload["backend_validation"]["events"]],
+        )
 
     def test_dm_matcher_trace_extraction_reports_offer_precompute_diff(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
@@ -3966,6 +4002,13 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             capture_output=True,
             text=True,
         )
+        why = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "why-no-match"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
         canonical_of = subprocess.run(
             [sys.executable, "-m", "cli.dm", "matcher", "guide", "canonical-of"],
             cwd=live_app_dir,
@@ -4009,6 +4052,9 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertEqual(compare_paths.returncode, 0, compare_paths.stderr + compare_paths.stdout)
         self.assertIn("compare-paths: supported by dm matcher", compare_paths.stdout)
         self.assertIn("./bin/dm matcher compare-paths", compare_paths.stdout)
+        self.assertEqual(why.returncode, 0, why.stderr + why.stdout)
+        self.assertIn("why: supported by dm matcher", why.stdout)
+        self.assertIn("./bin/dm matcher why", why.stdout)
         self.assertEqual(canonical_of.returncode, 0, canonical_of.stderr + canonical_of.stdout)
         self.assertIn("canonical-of: supported by dm matcher", canonical_of.stdout)
         self.assertIn("./bin/dm matcher canonical-of", canonical_of.stdout)

@@ -149,6 +149,7 @@ class DiagnosticCase:
     offer_name: str
     offer_category: str
     offer_brand: str = ""
+    offer_weight_grams: float | None = None
     expected: int | None = None
 
 
@@ -201,6 +202,7 @@ def _build_offer(case: DiagnosticCase) -> Offer:
         unit="st",
         product_url=f"matcher-layer-diagnostics://offer/{case.case_id}",
         is_multi_buy=False,
+        weight_grams=Decimal(str(case.offer_weight_grams)) if case.offer_weight_grams is not None else None,
     )
     return offer
 
@@ -961,6 +963,11 @@ def _case_from_mapping(payload: dict[str, Any]) -> DiagnosticCase:
         raise SystemExit("case requires ingredients or ingredient")
     if not offer_payload.get("name") and not payload.get("offer_name"):
         raise SystemExit("case requires offer.name or offer_name")
+    weight_grams = (
+        offer_payload.get("weight_grams")
+        if offer_payload.get("weight_grams") is not None
+        else payload.get("weight_grams")
+    )
     return DiagnosticCase(
         case_id=str(payload.get("case_id") or payload.get("id") or DEFAULT_CASE_ID),
         recipe_name=str(payload.get("recipe_name") or "Sanity Recipe"),
@@ -968,6 +975,7 @@ def _case_from_mapping(payload: dict[str, Any]) -> DiagnosticCase:
         offer_name=str(offer_payload.get("name") or payload.get("offer_name")),
         offer_category=str(offer_payload.get("category") or payload.get("offer_category") or ""),
         offer_brand=str(offer_payload.get("brand") or payload.get("offer_brand") or ""),
+        offer_weight_grams=None if weight_grams is None else float(weight_grams),
         expected=(
             None
             if payload.get("expected") is None
@@ -992,6 +1000,7 @@ def _case_from_args(args: argparse.Namespace) -> DiagnosticCase:
         offer_name=args.offer_name,
         offer_category=args.offer_category,
         offer_brand=args.offer_brand,
+        offer_weight_grams=args.offer_weight_grams,
         expected=args.expected,
     )
 
@@ -1064,6 +1073,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--offer-name")
     parser.add_argument("--offer-category", default="")
     parser.add_argument("--offer-brand", default="")
+    parser.add_argument("--offer-weight-grams", type=float)
     parser.add_argument("--expected", type=int, choices=(0, 1))
     parser.add_argument("--case-id")
     parser.add_argument("--case-file", help="JSON case file with one case or a list of cases.")

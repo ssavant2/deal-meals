@@ -919,7 +919,18 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         steps=(
             "Run: ./bin/dm matcher compare-paths --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Use this when live/fast/backend disagree or when precomputed keywords/checks such as offer expansions or processed-product rules look suspicious.",
-            "For a broader rule-family trace, follow up with: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
+            "For backend validation reject events, follow up with: ./bin/dm matcher why --offer \"<offer>\" --ingredient \"<ingredient>\"",
+            "For a broader rule-family trace, use: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
+        ),
+    ),
+    "why": MatcherGuide(
+        label="why",
+        status="supported by dm matcher",
+        summary="Explain which matcher layer or backend validation rule accepts/rejects one pair.",
+        steps=(
+            "Run: ./bin/dm matcher why --offer \"<offer>\" --ingredient \"<ingredient>\"",
+            "Defaults to --expect match, so backend rejection is framed as the thing to investigate.",
+            "Use --expect no-match for unexpected positives, and --format json when scripting validation-event analysis.",
         ),
     ),
     "canonical-of": MatcherGuide(
@@ -1027,6 +1038,8 @@ GUIDE_ALIASES = {
     "runtime_remove": "remove",
     "compare_paths": "compare-paths",
     "path-compare": "compare-paths",
+    "why-no-match": "why",
+    "whynomatch": "why",
     "canonical_of": "canonical-of",
     "canonical": "canonical-of",
     "canonicalof": "canonical-of",
@@ -2029,6 +2042,7 @@ def _infer_positive_expected_match_from_current_match(row: Mapping[str, Any]) ->
             offer_name=offer_name,
             offer_category=offer_category,
             offer_brand=offer_brand,
+            offer_weight_grams=weight_grams,
             expected=1,
         ),
         include_cache_freshness=False,
@@ -10762,6 +10776,190 @@ def _probe_matcher_pair(
         "backend_matched": backend_num_matches > 0,
         "backend_num_matches": backend_num_matches,
     }
+
+
+def _diagnostic_expected_from_expectation(value: str | None) -> int | None:
+    normalized = _normalize_probe_expectation(value, option_name="--expect")
+    if normalized is None:
+        return None
+    return 1 if normalized == "match" else 0
+
+
+def _why_matcher_pair(
+    *,
+    offer: str,
+    ingredient: str,
+    offer_category: str,
+    brand: str,
+    weight_grams: float | None,
+    recipe_name: str,
+    expect: str | None,
+    include_cache_freshness: bool,
+) -> dict[str, Any]:
+    try:
+        from support_checks.matcher_layer_diagnostics import DiagnosticCase, diagnose_case
+    except ModuleNotFoundError:
+        from app.support_checks.matcher_layer_diagnostics import DiagnosticCase, diagnose_case
+
+    case = DiagnosticCase(
+        case_id="dm_matcher_why",
+        recipe_name=recipe_name or "DM Matcher Why",
+        ingredients=(ingredient,),
+        offer_name=offer,
+        offer_category=offer_category,
+        offer_brand=brand,
+        offer_weight_grams=weight_grams,
+        expected=_diagnostic_expected_from_expectation(expect),
+    )
+    return diagnose_case(
+        case,
+        include_cache_freshness=include_cache_freshness,
+        require_fresh_cache=False,
+    )
+
+
+def _format_validation_event(event: Mapping[str, Any]) -> str:
+    parts = []
+    for key in ("rule", "detail", "keyword", "ing_idx", "from_idx", "to_idx"):
+        value = event.get(key)
+        if value is not None and value != "":
+            parts.append(f"{key}={value}")
+    if not parts:
+        parts = [f"{key}={value}" for key, value in event.items() if key != "type"]
+    return f"{event.get('type', 'event')}: " + (", ".join(parts) if parts else "-")
+
+
+def _format_matcher_why_text(payload: Mapping[str, Any]) -> str:
+    backend = payload.get("backend_validation", {})
+    fast = payload.get("fast_match", {})
+    materialization = payload.get("materialization", {})
+    routing = payload.get("candidate_routing", {})
+    recipe_signals = payload.get("recipe_signals", {})
+    offer_signals = payload.get("offer_signals", {})
+    cache = payload.get("cache_freshness", {})
+    events = list(backend.get("events") or [])
+    reject_events = [event for event in events if event.get("type") == "validation_reject"]
+    retry_events = [event for event in events if event.get("type") == "validation_retry"]
+    lines = [
+        f"case: {payload.get('case_id')}",
+        f"expected: {payload.get('expected')} actual: {payload.get('actual')} passed: {payload.get('passed')}",
+        f"diagnosis: {payload.get('diagnosis_class')}",
+        f"first action: {payload.get('first_action')}",
+        "",
+        "signals:",
+        "  recipe route_terms: " + (", ".join(recipe_signals.get("route_terms") or []) or "-"),
+        "  offer keywords: " + (", ".join(offer_signals.get("offer_keywords") or []) or "-"),
+        "  offer route_terms: " + (", ".join(offer_signals.get("route_terms") or []) or "-"),
+        "  paired route_terms: " + (", ".join(routing.get("paired_route_terms") or []) or "-"),
+        "",
+        "paths:",
+        (
+            "  fast: "
+            f"matched={fast.get('matched')} "
+            f"keyword={fast.get('matched_keyword') or '-'} "
+            f"ingredient={fast.get('matched_ingredient_index')}"
+        ),
+        (
+            "  backend validation: "
+            f"accepted={backend.get('accepted')} "
+            f"matched_keyword={backend.get('matched_keyword') or '-'} "
+            f"reject_rule={backend.get('reject_rule') or '-'} "
+            f"reject_detail={backend.get('reject_detail') or '-'}"
+        ),
+        (
+            "  materialization: "
+            f"matched={materialization.get('matched')} "
+            f"num_matches={materialization.get('num_matches')} "
+            f"fallbacks={materialization.get('fullscan_fallback_count')}"
+        ),
+    ]
+    if cache and cache.get("status") != "skipped":
+        lines.extend([
+            "",
+            "cache:",
+            f"  freshness={cache.get('status')} stale_tables={cache.get('stale_cache_tables', 0)}",
+            "  needed_refreshes=" + (", ".join(cache.get("needed_refreshes") or []) or "-"),
+        ])
+    lines.append("")
+    lines.append("validation events:")
+    if not events:
+        lines.append("  - none")
+    else:
+        if retry_events:
+            lines.append("  retries:")
+            for event in retry_events[-6:]:
+                lines.append(f"    - {_format_validation_event(event)}")
+        if reject_events:
+            lines.append("  rejects:")
+            for event in reject_events[-10:]:
+                lines.append(f"    - {_format_validation_event(event)}")
+        other_events = [
+            event
+            for event in events
+            if event.get("type") not in {"validation_retry", "validation_reject"}
+        ]
+        if other_events:
+            lines.append("  other:")
+            for event in other_events[-6:]:
+                lines.append(f"    - {_format_validation_event(event)}")
+    return "\n".join(lines)
+
+
+@matcher_app.command("why", help="Explain which matcher layer/rule accepts or rejects one offer/ingredient pair.")
+def matcher_why(
+    offer: Annotated[
+        str,
+        typer.Option("--offer", "--product", help="Offer/product name to inspect."),
+    ],
+    ingredient: Annotated[str, typer.Option("--ingredient", help="Recipe ingredient text to inspect.")],
+    offer_category: Annotated[
+        str,
+        typer.Option("--offer-category", "--category", help="Optional offer category."),
+    ] = "",
+    brand: Annotated[str, typer.Option("--brand", help="Optional offer/product brand.")] = "",
+    weight_grams: Annotated[
+        float | None,
+        typer.Option("--weight-grams", help="Optional offer/product weight in grams."),
+    ] = None,
+    recipe_name: Annotated[
+        str,
+        typer.Option("--recipe-name", help="Optional recipe name for backend context."),
+    ] = "DM Matcher Why",
+    expect: Annotated[
+        str | None,
+        typer.Option(
+            "--expect",
+            help="Expected backend result for diagnosis framing: match or no-match. Defaults to match.",
+        ),
+    ] = "match",
+    include_cache_freshness: Annotated[
+        bool,
+        typer.Option("--cache-freshness/--skip-cache-freshness", help="Include read-only compiled/cache freshness."),
+    ] = False,
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Output format."),
+    ] = "text",
+) -> None:
+    if not offer.strip():
+        raise typer.BadParameter("--offer must not be empty")
+    if not ingredient.strip():
+        raise typer.BadParameter("--ingredient must not be empty")
+
+    payload = _why_matcher_pair(
+        offer=offer.strip(),
+        ingredient=ingredient.strip(),
+        offer_category=offer_category.strip(),
+        brand=brand.strip(),
+        weight_grams=weight_grams,
+        recipe_name=recipe_name.strip(),
+        expect=expect,
+        include_cache_freshness=include_cache_freshness,
+    )
+    if output_format == "json":
+        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return
+    typer.echo(_format_matcher_why_text(payload))
 
 
 def _processed_check_applies_to_match(

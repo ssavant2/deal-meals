@@ -61,7 +61,8 @@ Typical authoring families are:
   `dm matcher reconcile-sanity`, and
   `dm matcher compare-paths`
 - diagnostics: `dm matcher doctor` for read-only source/generated/writeability
-  state, and `dm matcher trace-extraction` for token-level extraction drops
+  state, `dm matcher trace-extraction` for token-level extraction drops, and
+  `dm matcher why` for backend validation reject events
 - smart-blocker scaffolding: `dm matcher add smart-blocker` creates and chains a
   Python stub; the actual matcher logic is still a manual code edit
 
@@ -858,6 +859,21 @@ details such as `processed_checks`, precomputed-only offer keywords, and likely
 keyword-expansion sources so product-side form rules can be diagnosed without
 opening `matching.py` first.
 
+Use `dm matcher why` when the backend says `NO MATCH` and you need the exact
+validator rule that rejected an otherwise plausible candidate:
+
+```bash
+./bin/dm matcher why --offer "<offer>" --ingredient "<ingredient>" --offer-category "<category>"
+```
+
+It defaults to `--expect match`, simulates the same backend validation path as
+the diagnostics/parity tooling, and prints route terms plus validation events
+such as `rule=carrier_flavor_context detail=product_flavor_carrier`,
+`rule=spice_fresh`, `rule=specialty_qualifier`, or `rule=product_name_blocker`.
+Use `--expect no-match` for unexpected positives and `--format json` when
+scripting. Prefer this before hand-patching `_record_validation_event` or
+adding temporary debug prints.
+
 If both sides clearly expose the same keyword but the result is still
 `NO MATCH`, stop treating it as an extraction/canonical-registration problem.
 That shape means the keyword loop found a candidate and a later guard probably
@@ -881,8 +897,9 @@ rejected it. Work through this checklist:
    not be assumed to extract as standalone ingredients. Also check early
    name-conditional branches in `extraction.py` that can return before the
    generic word loop.
-4. If the keyword is present on both sides, inspect validators before adding more
-   aliases: no-match policies, PNB/FPB/KSBC/GPB blockers, specialty qualifiers
+4. If the keyword is present on both sides, run `dm matcher why` and inspect
+   validators before adding more aliases: no-match policies, PNB/FPB/KSBC/GPB
+   blockers, specialty qualifiers
    including bidirectional product qualifiers, product-form validators,
    `processed_checks`, spice/fresh/herb rules, recipe/product requirement
    guards, and explicit labels such as vegan/vegetarian/lactose/gluten-free.
