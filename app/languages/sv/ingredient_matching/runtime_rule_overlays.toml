@@ -718,6 +718,13 @@ keyword = "sillfileer"
 blockers = ["5-minuters", "inläggning"]
 reason = "Plural form of sillfilé — pre-pickled/marinated herring products (5-minuterssill, inläggningssill) are not raw herring fillets; mirrors existing PNB sillfilé←{5-minuters,inläggning} from Q94-4"
 
+[[product_name_blockers]]
+id = "runtime_pnb_paprika"
+status = "active"
+keyword = "paprika"
+blockers = ["lax", "fisk"]
+reason = "Fish products seasoned with paprika (e.g. Lax Varmrökt Paprika & Peppar) leak the paprika flavor word and falsely match plain paprika/paprikapulver ingredients. Mirrors the existing paprikapulver-lax/fisk blocker; paprika is a secondary seasoning on the fish, not the actual vegetable or spice."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -799,8 +806,8 @@ reason = "Mangopure (mango puré) is a processed product, not fresh mango fruit.
 id = "runtime_fpb_ris"
 status = "active"
 keyword = "ris"
-blockers = ["riskakor", "riskaka"]
-reason = "rice cakes are snacks not rice grain — riskakor ingredient should not pull all rice products"
+blockers = ["riskakor", "riskaka", "granris"]
+reason = "rice cakes are snacks not rice grain — riskakor ingredient should not pull all rice products; granris = spruce/fir branches (Christmas decoration garnish), not rice — 'ris' suffix bleed like björkris"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_lax"
@@ -1053,6 +1060,13 @@ status = "active"
 keyword = "majonnäs"
 blockers = ["citronmajonnäs", "citronmajonnas", "currymajonnäs", "currymajonnas"]
 reason = "Flavored mayonnaise variants (lemon mayo, curry mayo) are dressings distinct from plain mayonnaise; plain majonnäs product must not satisfy a citron-/curry-flavored mayo ingredient. Mirrors existing chilimajonnäs/srirachamajonnäs isolation."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_sylt"
+status = "active"
+keyword = "sylt"
+blockers = ["björnbärssylt"]
+reason = "Generic 'sylt' keyword cross-matches different berry jams; björnbärssylt recipe must match blackberry jam only, not strawberry/raspberry jam. Same family-isolation as other specific berry sylts already in this blocker set."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
@@ -1383,6 +1397,20 @@ keyword = "äpple"
 context = ["plant gurt", "plantgurt", "havregurt", "kokosgurt", "sojagurt"]
 reason = "Flavored plant-yoghurt drinks (plantgurt/havregurt/kokosgurt) list apple as flavor descriptor — apple keyword should not route to raw whole apples when the ingredient is clearly a gurt-drink product"
 
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_svamp"
+status = "active"
+keyword = "svamp"
+context = ["dragonsås"]
+reason = "Bong 'Svamp och Dragonsås' bottled sauce ingredient: suppress generic svamp keyword so fresh mushrooms don't match this finished sauce product"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_schalottenlok"
+status = "active"
+keyword = "schalottenlök"
+context = ["fond"]
+reason = "Bottled schalottenlöks-fond sauce (e.g. Bong Touch of Taste Brynt Schalottenlöksfond) bleeds the schalottenlök keyword to fresh shallot products — same carrier pattern as kantarellfond. KSBC suppresses shallot keyword when ingredient text contains fond."
+
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
 status = "active"
@@ -1652,6 +1680,14 @@ surface = "stop_words"
 action = "add"
 terms = ["tjock", "tjocka", "tjockt", "tjocke"]
 reason = "Thickness/cut descriptor leaking as a product keyword (e.g. Revbensspjäll Tjocka) and matching unrelated cuts like 'entrecôte i tjocka skivor' via raw ingredient text; not a food term"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_urbenad"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["urbenad"]
+reason = "Deboning preparation descriptor, not a food. Was extracted as a keyword from both ingredient and product names, causing cross-protein false positives (Kycklingsteak Urbenad matching urbenad Lammstek)."
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"

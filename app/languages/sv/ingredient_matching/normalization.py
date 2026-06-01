@@ -434,6 +434,7 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     # and does NOT match concentrated Thai currypaste. Red/green curry stay as their
     # own Thai-paste compounds because they have no Swedish spice-powder equivalent.
     ('gul curry', 'curry'),
+    ('gulcurry', 'curry'),  # compound form; same policy as spaced "gul curry"
     ('red curry paste', 'rödcurrypasta'),
     ('green curry paste', 'gröncurrypasta'),
     ('yellow curry paste', 'gulcurrypasta'),
