@@ -1896,6 +1896,14 @@ qualifiers = ["chipotle", "sriracha", "mango", "tryffel", "vitlök", "garlic", "
 bidirectional = true
 reason = "Flavored mayo is a distinct flavor-defined sauce, not interchangeable with plain mayonnaise. Plain/light/real/organic/vegan/american-style/japanese variants stay plain (no qualifier) so they match plain mayonnaise recipes. Bidirectional: a recipe specifying a flavored mayo must match the same flavor and must not match plain mayo, and plain mayonnaise recipes must not match flavored mayo products."
 
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_margarin_flytande"
+status = "active"
+keyword = "margarin"
+qualifiers = ["flytande"]
+bidirectional = true
+reason = "Liquid margarine (flytande margarin) is a distinct form used as cooking fat/oil, not interchangeable with solid baking/cooking margarine. Bidirectional: a flytande-margarin recipe matches only liquid-margarine products, and a plain margarin recipe does not match liquid-margarine products."
+
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"
 status = "active"

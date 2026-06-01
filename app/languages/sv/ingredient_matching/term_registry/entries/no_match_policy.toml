@@ -6356,18 +6356,18 @@ variants = ["margarin ! (?i)^(?!.*\\b(?:bak|stek)).*margarin"]
 negative_guards = ["margarin ! (?i)^(?!.*\\b(?:bak|stek)).*margarin"]
 source_refs = ["policy:no_match_policies:policy_margarin_i_b_bak_stek_margarin"]
 layer_policy = ["negative_guard_only"]
-notes = "Plain 'margarin' recipe ingredient means cooking/baking margarine; only products whose name includes bak/stek match. Table/spread/liquid/light margarine (bords-, smörgås-, flytande, lätt-, bredbart) excluded."
+notes = "Plain 'margarin' recipe ingredient means cooking/baking margarine; only products whose name includes bak/stek match. Table/spread/light margarine (bords-, smörgås-, lätt-, bredbart) excluded. Flytande (liquid) margarine ingredients are exempt from this guard so they can match liquid-margarine products via the bidirectional margarin/flytande specialty-qualifier instead."
 
 [entries.language_payload.no_match_policy]
 id = "policy_margarin_i_b_bak_stek_margarin"
 rule_schema_version = 1
-rule_version = 1
+rule_version = 2
 canonical = "margarin"
-ingredient_patterns = ["\\bmargarin\\b"]
+ingredient_patterns = ["(?i)^(?!.*\\bflytande\\b).*\\bmargarin\\b"]
 blocked_offer_keywords = []
 blocked_offer_patterns = ["(?i)^(?!.*\\b(?:bak|stek)).*margarin"]
 allowed_specifics = []
-reason = "Plain 'margarin' recipe ingredient means cooking/baking margarine; only products whose name includes bak/stek match. Table/spread/liquid/light margarine (bords-, smörgås-, flytande, lätt-, bredbart) excluded."
+reason = "Plain 'margarin' recipe ingredient means cooking/baking margarine; only products whose name includes bak/stek match. Table/spread/light margarine (bords-, smörgås-, lätt-, bredbart) excluded. Flytande (liquid) margarine ingredients are exempt from this guard so they can match liquid-margarine products via the bidirectional margarin/flytande specialty-qualifier instead."
 policy_ref = "policy_margarin_i_b_bak_stek_margarin"
 fixture_refs = ["margarin_i_b_bak_stek_margarin_negative"]
 supersedes = []

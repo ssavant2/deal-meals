@@ -567,9 +567,9 @@
       },
       {
         "anchor": "if 'crispychiliolja' in name:",
-        "end": 2083,
+        "end": 2102,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2083
+        "start": 2102
       },
       {
         "anchor": "if 'crispychiliolja' in ingredient_lower:",
@@ -653,9 +653,9 @@
     "line_refs": [
       {
         "anchor": "if re.search(r'\\b(?:läsk|lask)\\b', name):",
-        "end": 2436,
+        "end": 2455,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2436
+        "start": 2455
       },
       {
         "anchor": "if re.search(r'\\b(?:läsk|lask)\\b', ingredient_lower):",
@@ -853,9 +853,9 @@
     "line_refs": [
       {
         "anchor": "if re.search(r'\\b(?:folköl|folkol)\\b', name):",
-        "end": 2432,
+        "end": 2451,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2432
+        "start": 2451
       },
       {
         "anchor": "if re.search(r'\\b(?:folköl|folkol)\\b', ingredient_lower):",
@@ -1057,9 +1057,9 @@
     "line_refs": [
       {
         "anchor": "return ['rotfruktsmix', 'morot', 'palsternacka', 'kålrot', 'rotselleri', 'rödbeta']",
-        "end": 2128,
+        "end": 2147,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2128
+        "start": 2147
       },
       {
         "anchor": "ingredient_lower += ' rotfruktsmix morot palsternacka kålrot rotselleri rödbeta'",
@@ -1123,9 +1123,9 @@
     "line_refs": [
       {
         "anchor": "('vegetarisk kebab', 'vegokebab'),",
-        "end": 500,
+        "end": 501,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 500
+        "start": 501
       }
     ],
     "notes": "Vegetarisk/vegansk kebab normalizes to vegokebab so plant-based kebab does not route through generic meat kebab.",
@@ -1332,9 +1332,9 @@
       },
       {
         "anchor": "('skånsk senap', 'skånsksenap'),",
-        "end": 568,
+        "end": 569,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 568
+        "start": 569
       }
     ],
     "notes": "Grovkornig senap requires coarse/Skånsk-style mustard and rejects ordinary smooth mustard products.",
@@ -1426,9 +1426,9 @@
     "line_refs": [
       {
         "anchor": "return ['sushilax', 'lax']",
-        "end": 2134,
+        "end": 2153,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2134
+        "start": 2153
       },
       {
         "anchor": "ingredient_lower += ' sashimilax sushilax'",
@@ -1667,9 +1667,9 @@
       },
       {
         "anchor": "'nori', 'alger',  # seaweed sheets/generic algae — \"Sushi Nori Roasted Seeweed\"",
-        "end": 1877,
+        "end": 1886,
         "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 1877
+        "start": 1886
       }
     ],
     "notes": "Nori/seaweed product terms roll up to generic alger for recipes that ask for algae/seaweed sheets.",
@@ -1879,9 +1879,9 @@
     "line_refs": [
       {
         "anchor": "if 'veganost' in name or re.search(r'\\b(?:vegansk|vegan|växtbaserad|vaxtbaserad)\\s+ost\\b', name):",
-        "end": 2442,
+        "end": 2461,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2442
+        "start": 2461
       },
       {
         "anchor": "vegan_cheese_keywords.extend(['mozzarellaost', 'mozzarella'])",
@@ -1964,9 +1964,9 @@
     "line_refs": [
       {
         "anchor": "('hoisin sauce', 'hoisinsås'),",
-        "end": 469,
+        "end": 470,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 469
+        "start": 470
       },
       {
         "anchor": "variant = \"hoisin\"",
@@ -2034,9 +2034,9 @@
     "line_refs": [
       {
         "anchor": "'spareribs': 'revbensspjäll',",
-        "end": 1808,
+        "end": 1817,
         "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 1808
+        "start": 1817
       },
       {
         "anchor": "'revbensspjäll': {'rub'},  # \"BBQ rub Ribs\" — spice rub product, not actual ribs/revbensspjäll",
@@ -2160,9 +2160,9 @@
       },
       {
         "anchor": "_SPECIFIC_STOCK_KEYWORDS = {'hummerfond', 'kalvfond', 'fiskfond', 'kycklingfond',",
-        "end": 2538,
+        "end": 2557,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2538
+        "start": 2557
       }
     ],
     "notes": "Shellfish fonds such as hummerfond route to skaldjursfond, while ordinary fiskfond stays a separate fish-stock family.",
@@ -2350,9 +2350,9 @@
       },
       {
         "anchor": "('gele svartvinbär', 'svartvinbärsgele'),",
-        "end": 985,
+        "end": 986,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 985
+        "start": 986
       }
     ],
     "notes": "Specific black/red currant jelly compounds expose the generic vinbärsgelé route term so color variants and generic jelly wording preserve fullscan parity.",
@@ -2671,9 +2671,9 @@
     "line_refs": [
       {
         "anchor": "('curry paste', 'currypasta'),",
-        "end": 441,
+        "end": 442,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 441
+        "start": 442
       },
       {
         "anchor": "return not any(cue in product_lower for cue in ('kyckling', 'chicken', 'spett', 'skewers', 'färdig', 'fardig'))",
@@ -2813,9 +2813,9 @@
     "line_refs": [
       {
         "anchor": "('snackmorötter', 'snackmorot'),",
-        "end": 813,
+        "end": 814,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 813
+        "start": 814
       },
       {
         "anchor": "_CARROT_KEYWORDS = frozenset({'morot', 'morötter', 'morotter', 'morätter', 'moratter'})",
@@ -3121,9 +3121,9 @@
     "line_refs": [
       {
         "anchor": "# Recipe wording \"fransk senap\" means Dijon/French-style mustard, not",
-        "end": 570,
+        "end": 571,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 570
+        "start": 571
       },
       {
         "anchor": "'dijonsenap',  # Dijon mustard — distinct type, not interchangeable",
@@ -3592,9 +3592,9 @@
     "line_refs": [
       {
         "anchor": "('toastbröd', 'formbröd'),",
-        "end": 918,
+        "end": 919,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 918
+        "start": 919
       },
       {
         "anchor": "variant = \"rostbröd\"",
@@ -3633,9 +3633,9 @@
     "line_refs": [
       {
         "anchor": "('sötmandel spån', 'mandelspån'),",
-        "end": 776,
+        "end": 777,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 776
+        "start": 777
       }
     ],
     "notes": "Sötmandel spån means almond flakes/slivers and should not fall back to whole almonds.",
@@ -3848,9 +3848,9 @@
     "line_refs": [
       {
         "anchor": "if re.search(r'\\bfalafel\\s*mix\\b|\\bfalafelmix\\b', name):",
-        "end": 2396,
+        "end": 2415,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2396
+        "start": 2415
       },
       {
         "anchor": "return any(cue in product_lower for cue in ('falafelmix', 'falafel mix', 'mix', 'pulver'))",
@@ -3889,9 +3889,9 @@
       },
       {
         "anchor": "or re.search(r'\\bkolsyrat\\s+(?:vatten|mineralvatten)\\b', name)",
-        "end": 2401,
+        "end": 2420,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2401
+        "start": 2420
       },
       {
         "anchor": "variant = \"mineralvatten\"",
@@ -4155,9 +4155,9 @@
     "line_refs": [
       {
         "anchor": "('wok mix vegetables', 'wokmix'),",
-        "end": 523,
+        "end": 524,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 523
+        "start": 524
       },
       {
         "anchor": "and not re.search(r'\\b(?:woksås|woksas|wok\\s+sauce|sauce|sås|sas|oil)\\b', original_name_lower)",
@@ -4208,15 +4208,15 @@
       },
       {
         "anchor": "if re.search(r'\\bpolly\\b', name):",
-        "end": 2250,
+        "end": 2269,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2250
+        "start": 2269
       },
       {
         "anchor": "'polly',  # candy brand used as explicit dessert/baking ingredient",
-        "end": 2018,
+        "end": 2027,
         "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 2018
+        "start": 2027
       }
     ],
     "notes": "Explicit Polly candy ingredients stay in the named candy family instead of being filtered out as generic candy.",
@@ -4252,9 +4252,9 @@
       },
       {
         "anchor": "'strössel', 'strossel',  # \"Munk Rosa Strössel\" - strössel is the topping",
-        "end": 1716,
+        "end": 1720,
         "path": "app/languages/sv/ingredient_matching/keywords.py",
-        "start": 1716
+        "start": 1720
       }
     ],
     "notes": "Strössel matches real sprinkle/topping rows while baked donut carriers with strössel in the flavor text remain blocked.",
@@ -4280,9 +4280,9 @@
     "line_refs": [
       {
         "anchor": "# Herb cream cheese recipes can use herb/garlic-herb products, while",
-        "end": 2290,
+        "end": 2309,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2290
+        "start": 2309
       },
       {
         "anchor": "wants_herb_fresh_cheese = (",
@@ -4327,9 +4327,9 @@
     "line_refs": [
       {
         "anchor": "if re.search(r'\\bfärska?\\s+örter\\b|\\bfarska?\\s+orter\\b', name):",
-        "end": 2280,
+        "end": 2299,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2280
+        "start": 2299
       },
       {
         "anchor": "if re.search(r'\\bfärska?\\s+örter\\b|\\bfarska?\\s+orter\\b', ingredient_lower):",
@@ -4394,9 +4394,9 @@
     "line_refs": [
       {
         "anchor": "('sriracha mayo', 'chilimajo'),",
-        "end": 533,
+        "end": 534,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 533
+        "start": 534
       },
       {
         "anchor": "if 'chilimajo' in original_name_lower or 'sriracha mayo' in original_name_lower:",
@@ -4444,9 +4444,9 @@
       },
       {
         "anchor": "if 'sommargrönsaker' in name or 'sommargronsaker' in name:",
-        "end": 2262,
+        "end": 2281,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2262
+        "start": 2281
       },
       {
         "anchor": "variant = \"sommargrönsaker\"",
@@ -4514,9 +4514,9 @@
     "line_refs": [
       {
         "anchor": "if 'kruksallad' in name:",
-        "end": 2274,
+        "end": 2293,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2274
+        "start": 2293
       },
       {
         "anchor": "variant = \"kruksallad\"",
@@ -4552,9 +4552,9 @@
     "line_refs": [
       {
         "anchor": "('smör och rapsolja', 'smörrapsolja'),",
-        "end": 527,
+        "end": 528,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 527
+        "start": 528
       },
       {
         "anchor": "keywords = ['smörrapsolja']",
@@ -4564,9 +4564,9 @@
       },
       {
         "anchor": "if 'smörrapsolja' in name:",
-        "end": 2265,
+        "end": 2284,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2265
+        "start": 2284
       },
       {
         "anchor": "if 'smörrapsolja' in ingredient_lower or 'smorrapsolja' in ingredient_lower:",
@@ -5070,9 +5070,9 @@
       },
       {
         "anchor": "('tom kha gai', 'tomkha'),",
-        "end": 519,
+        "end": 520,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 519
+        "start": 520
       }
     ],
     "notes": "Tom Kha spice-mix wording keeps the exact Tom Kha variant while accepting the spice-mix route family; unrelated Indian spice mixes stay blocked.",
@@ -5136,15 +5136,15 @@
     "line_refs": [
       {
         "anchor": "('lime pepper krydda', 'limepepper'),",
-        "end": 517,
+        "end": 518,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 517
+        "start": 518
       },
       {
         "anchor": "if 'limepepper' in name:",
-        "end": 2253,
+        "end": 2272,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2253
+        "start": 2272
       },
       {
         "anchor": "return 'limepepper' in product_lower or 'limepepper' in product_kw_set",
@@ -5424,9 +5424,9 @@
       },
       {
         "anchor": "('haricoverts', 'haricot'),",
-        "end": 514,
+        "end": 515,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 514
+        "start": 515
       }
     ],
     "notes": "The common haricoverts typo routes to haricots verts/haricot products.",
@@ -5536,9 +5536,9 @@
       },
       {
         "anchor": "if re.search(r'\\boreo\\b', name):",
-        "end": 2297,
+        "end": 2316,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2297
+        "start": 2316
       },
       {
         "anchor": "'oreo',  # Oreo cookies (\"Oreo Original Kakor\" ≠ kakor in recipes)",
@@ -5674,9 +5674,9 @@
     "line_refs": [
       {
         "anchor": "('havreflingor', 'havregryn'),",
-        "end": 780,
+        "end": 781,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 780
+        "start": 781
       },
       {
         "anchor": "'havregryn': {'knäcke', 'knacke', 'knäckebröd', 'knackebrod', 'wasa', 'kex',",
@@ -5834,9 +5834,9 @@
     "line_refs": [
       {
         "anchor": "('apelsindryck', 'apelsinläsk'),",
-        "end": 450,
+        "end": 451,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 450
+        "start": 451
       },
       {
         "anchor": "re.search(r'\\b(?:läsk|lask|cola|soda|fanta|sprite|pepsi|trocadero|zingo|jarritos)\\b', original_name_lower)",
@@ -6006,9 +6006,9 @@
     "line_refs": [
       {
         "anchor": "('surdegsbaugette', 'surdegsbaguette'),",
-        "end": 546,
+        "end": 547,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 546
+        "start": 547
       },
       {
         "anchor": "variant = \"surdegsbaguette\"",
@@ -6529,9 +6529,9 @@
       },
       {
         "anchor": "return ['kanderatapelsinskal']",
-        "end": 2392,
+        "end": 2411,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2392
+        "start": 2411
       },
       {
         "anchor": "'apelsinskal': {'kanderat', 'kanderade', 'syltat', 'syltade'},",
@@ -6786,9 +6786,9 @@
     "line_refs": [
       {
         "anchor": "('brödskivor', 'formbröd'),",
-        "end": 932,
+        "end": 933,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 932
+        "start": 933
       },
       {
         "anchor": "return ['formbröd']",
@@ -6824,9 +6824,9 @@
     "line_refs": [
       {
         "anchor": "('smör- & rapsolja', 'smörrapsolja'),",
-        "end": 525,
+        "end": 526,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 525
+        "start": 526
       },
       {
         "anchor": "keywords = ['smörrapsolja']",
@@ -7117,9 +7117,9 @@
       },
       {
         "anchor": "if 'kokosdryck' in name:",
-        "end": 2188,
+        "end": 2207,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2188
+        "start": 2207
       },
       {
         "anchor": "variant = \"kokosdryck\"",
@@ -7351,9 +7351,9 @@
     "line_refs": [
       {
         "anchor": "('mousserande vitt vin', 'mousserandevin vitt'),",
-        "end": 752,
+        "end": 753,
         "path": "app/languages/sv/ingredient_matching/normalization.py",
-        "start": 752
+        "start": 753
       },
       {
         "anchor": "return ['mousserandevin']",
@@ -7730,9 +7730,9 @@
     "line_refs": [
       {
         "anchor": "if any(cue in name for cue in ('morotsspaghetti', 'kålrotsspaghetti', 'kalrotsspaghetti')):",
-        "end": 2183,
+        "end": 2202,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2183
+        "start": 2202
       },
       {
         "anchor": "_NON_BUYABLE_ROOT_VEG_PASTA_CUES = frozenset({",
@@ -7772,9 +7772,9 @@
       },
       {
         "anchor": "if 'breoliv' in name:",
-        "end": 2180,
+        "end": 2199,
         "path": "app/languages/sv/ingredient_matching/extraction.py",
-        "start": 2180
+        "start": 2199
       }
     ],
     "notes": "BreOliv branded recipe wording is isolated to its own 'breoliv' keyword (not margarin). BreOliv products still emit bordsmargarin so generic table-margarine recipe wording can find them.",
@@ -15139,9 +15139,9 @@
     "line_refs": [
       {
         "anchor": "entry_id = \"sv-se.guard.policy_margarin_i_b_bak_stek_margarin\"",
-        "end": 6348,
+        "end": 6350,
         "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
-        "start": 6348
+        "start": 6350
       }
     ],
     "notes": "Plain 'margarin' recipe ingredient means cooking/baking margarine; only products whose name includes bak/stek match. Table/spread/liquid/light margarine (bords-, smörgås-, flytande, lätt-, bredbart) excluded.",
