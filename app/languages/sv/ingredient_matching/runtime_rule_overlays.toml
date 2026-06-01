@@ -1724,6 +1724,14 @@ action = "add"
 terms = ["urbenad"]
 reason = "Deboning preparation descriptor, not a food. Was extracted as a keyword from both ingredient and product names, causing cross-protein false positives (Kycklingsteak Urbenad matching urbenad Lammstek)."
 
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_mojligt"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["möjligt"]
+reason = "Swedish qualifier 'möjligt' (possible/possibly) appears in recipe parentheticals like '(så raka som möjligt)' but is never a food ingredient. Prevents it from being extracted as a spurious keyword that blocks matches."
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"

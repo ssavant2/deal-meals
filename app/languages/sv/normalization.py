@@ -100,8 +100,10 @@ SWEDISH_CHAR_FIXES: Dict[str, str] = {
     # === SEAFOOD ===
     r'\bRakor\b': 'Räkor',
     r'\brakor\b': 'räkor',
-    r'\bRaka\b': 'Räka',
-    r'\braka\b': 'räka',
+    # "Raka"/"raka" is the Swedish adjective "straight" and must NOT be converted
+    # to "räka" (shrimp) — e.g. "3 bananer (så raka som möjligt)". Shrimp is
+    # written as "räka"/"räkor" in recipes; removing these conversions avoids
+    # false shrimp-context injection into unrelated ingredients.
     r'Skagenrora': 'Skagenröra',
     r'skagenrora': 'skagenröra',
     r'Havskraftor': 'Havskräftor',
@@ -219,6 +221,14 @@ SWEDISH_CHAR_FIXES: Dict[str, str] = {
     r'Karre\b': 'Karré',    # -Karré: Fläskkarré capitalized
     r'sas\b': 'sås',        # -sås: romsås, etc.
     r'notter\b': 'nötter',  # -nötter: any remaining nut compounds
+
+    # === CROSS-LANGUAGE FOOD TERMS (English → Swedish) ===
+    # Multi-word English ingredient names that appear in Swedish recipes but
+    # extract no keyword (all tokens below min_length). Map to Swedish equivalent.
+    r'\bblack eyed peas\b': 'ögonbönor',
+    r'\bblack-eyed peas\b': 'ögonbönor',
+    r'\bBlack Eyed Peas\b': 'Ögonbönor',
+    r'\bBlack-Eyed Peas\b': 'Ögonbönor',
 }
 
 
