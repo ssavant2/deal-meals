@@ -1783,6 +1783,22 @@ action = "add"
 terms = ["organiskt", "organisk"]
 reason = "Descriptor meaning organic (variant of ekologisk which is already a stop word); never a food itself. Its substring 'anis' was spuriously matching anis spice products."
 
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_ponzu"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["ponzu"]
+reason = "Ponzu (5 chars) is a distinct Japanese citrus-soy condiment with dedicated products on sale (Ponzu Citrus Soja 150ml Kikkoman, Ponzu Yuzu 300ml Shibanuma). Dropped by short-keyword filter without this entry."
+
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_talg"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["talg"]
+reason = "Talg (beef tallow/suet, 4 chars) is a specific fat ingredient in Swedish cooking with dedicated products on sale (Talg 250g Jureskog Selection). Dropped by short-keyword filter without this entry."
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"

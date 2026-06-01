@@ -23,7 +23,7 @@
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 411,
       "negative_regression": 841,
-      "offer_extra_keyword_mapping": 420,
+      "offer_extra_keyword_mapping": 421,
       "parent_match_only_mapping": 20,
       "positive_regression": 660,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1501,
       "matcher_rule_inventory": 470,
       "no_match_policy": 433,
-      "offer_extra_keyword": 420,
+      "offer_extra_keyword": 421,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5808,
-    "variants_missing_product_text": 1853,
+    "variant_count": 5809,
+    "variants_missing_product_text": 1854,
     "variants_with_product_text": 3955
   },
   "variants": [
@@ -122014,11 +122014,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"växtdryck\"}"
+    },
+    {
+      "variant_id": "vterm-2aeec72c6dede786",
+      "row_index": 5400,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:pomeransskal",
+      "source_id": "pomeransskal",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "pomeransskal",
+      "canonical": "pomerans",
+      "expected_family": "pomerans",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"pomerans\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1631,
+      "no_product_text": 1632,
       "static_verified": 2676,
       "synthetic_verified": 1501
     },
@@ -122034,14 +122055,14 @@
       "matcher_regression_case": 1501,
       "matcher_rule_inventory": 470,
       "no_match_policy": 433,
-      "offer_extra_keyword": 420,
+      "offer_extra_keyword": 421,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5808
+      "audited": 5809
     },
-    "variant_count": 5808
+    "variant_count": 5809
   }
 }
