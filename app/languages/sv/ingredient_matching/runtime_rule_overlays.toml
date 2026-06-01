@@ -1075,6 +1075,27 @@ keyword = "sylt"
 blockers = ["björnbärssylt"]
 reason = "Generic 'sylt' keyword cross-matches different berry jams; björnbärssylt recipe must match blackberry jam only, not strawberry/raspberry jam. Same family-isolation as other specific berry sylts already in this blocker set."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_innanlar"
+status = "active"
+keyword = "innanlår"
+blockers = ["älginnanlår", "älginnanlar"]
+reason = "Game (moose) innanlår is a distinct species from beef; explicit älginnanlår ingredient must not match generic beef lövbiff/innanlår products via the innanlår substring. Mirrors existing kalvinnanlår/skinkinnanlår species blockers."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_koreansk"
+status = "active"
+keyword = "koreansk"
+blockers = ["gochugaru"]
+reason = "Gochugaru (Korean chili powder) ingredient must not match Korean-style marinated products via the CUISINE_CONTEXT koreansk keyword; the ingredient is a specific chili spice, not a Korean-cuisine recipe. New FPB key to suppress cuisine-context bleed."
+
+[[false_positive_blockers]]
+id = "runtime_fpb_fond"
+status = "active"
+keyword = "fond"
+blockers = ["fondue"]
+reason = "ostfondue/chokladfondue/fondue are melted dipping preparations, not stock concentrates; fond keyword from product names like Fond Du Chef must not match fondue ingredient text"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -1417,6 +1438,13 @@ status = "active"
 keyword = "schalottenlök"
 context = ["fond"]
 reason = "Bottled schalottenlöks-fond sauce (e.g. Bong Touch of Taste Brynt Schalottenlöksfond) bleeds the schalottenlök keyword to fresh shallot products — same carrier pattern as kantarellfond. KSBC suppresses shallot keyword when ingredient text contains fond."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_paprikor"
+status = "active"
+keyword = "paprikor"
+context = ["snackpaprika"]
+reason = "snackpaprikor (mini sweet pepper) ingredient must not match generic grillad/processed paprika products via precomputed paprikor child-keyword. When snackpaprika is extracted, the paprikor path suppressed."
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
