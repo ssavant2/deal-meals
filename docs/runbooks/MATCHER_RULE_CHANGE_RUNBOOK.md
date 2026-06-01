@@ -1563,6 +1563,25 @@ generated inventory JSON. Use `--dry-run` to inspect changes without writing.
 The raw `refresh_matcher_rule_inventory_line_refs.py --write` script remains a
 fallback/debug form.
 
+If refresh fails with `missing anchors`, run the raw script in JSON mode without
+`--write` to see the exact inventory entry, source path, and anchor text:
+
+```bash
+docker compose exec -T web python /app/support_checks/refresh_matcher_rule_inventory_line_refs.py \
+  --repo-root /repo \
+  --format json
+```
+
+The `missing` array identifies the stale reference, for example:
+
+```json
+{
+  "id": "legacy_parent_notdryck_family",
+  "path": "app/languages/sv/ingredient_matching/term_registry/entries/keyword_extra_parent.toml",
+  "anchor": "entry_id = \"sv-se.family.notdryck.mandeldryck_096\""
+}
+```
+
 ### Registry Entries
 
 If the change uses a live term-registry rule surface, prefer the matching

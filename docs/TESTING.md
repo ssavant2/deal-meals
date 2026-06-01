@@ -169,6 +169,15 @@ Use `./bin/dm matcher refresh-line-refs --fix` when you want the write-mode
 intent to be explicit; it is the same write operation, while `--dry-run` remains
 read-only.
 
+If the refresh reports `missing anchors`, use the raw script's JSON output to
+identify the stale inventory entry without writing files:
+
+```bash
+docker compose exec -T web python /app/support_checks/refresh_matcher_rule_inventory_line_refs.py \
+  --repo-root /repo \
+  --format json
+```
+
 The Swedish term registry is now the vocabulary coverage surface for matcher
 terms. For live registry rule surfaces, prefer the supported `dm matcher`
 authoring or maintenance command:
