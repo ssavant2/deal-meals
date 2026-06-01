@@ -95,8 +95,17 @@ def get_available_languages() -> List[str]:
     return languages
 
 
-@lru_cache(maxsize=10)
-def _load_translations(lang: str) -> Dict[str, str]:
+def _translation_file_mtime_ns(lang: str) -> int:
+    lang = normalize_language_code(lang)
+    ui_path = os.path.join(LANGUAGES_DIR, lang, 'ui.py')
+    try:
+        return os.stat(ui_path).st_mtime_ns
+    except OSError:
+        return -1
+
+
+@lru_cache(maxsize=20)
+def _load_translations_cached(lang: str, ui_mtime_ns: int) -> Dict[str, str]:
     """
     Load UI translations for a specific language.
 
@@ -104,11 +113,21 @@ def _load_translations(lang: str) -> Dict[str, str]:
     """
     lang = normalize_language_code(lang)
     try:
+        importlib.invalidate_caches()
         module = importlib.import_module(f'languages.{lang}.ui')
-        return getattr(module, 'UI', {})
+        if getattr(module, "__dealmeals_ui_mtime_ns__", None) != ui_mtime_ns:
+            module = importlib.reload(module)
+            setattr(module, "__dealmeals_ui_mtime_ns__", ui_mtime_ns)
+        return dict(getattr(module, 'UI', {}))
     except (ImportError, AttributeError) as e:
         logger.warning(f"Could not load translations for '{lang}': {e}")
         return {}
+
+
+def _load_translations(lang: str) -> Dict[str, str]:
+    """Load translations, invalidating cached UI dictionaries when ui.py changes."""
+    lang = normalize_language_code(lang)
+    return _load_translations_cached(lang, _translation_file_mtime_ns(lang))
 
 
 def get_translations(lang: str) -> Dict[str, str]:
