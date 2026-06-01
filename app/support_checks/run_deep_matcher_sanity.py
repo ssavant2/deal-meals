@@ -15642,6 +15642,25 @@ test(
     ),
     1,
 )
+# "torkad eller färsk" explicitly accepts either form, so fresh/frozen products must match.
+# Previously the dried indicator alone made the spice-vs-fresh check reject both forms.
+test(
+    "torkad eller färsk chili matches fresh/frozen chili product",
+    recipe_match_num(
+        ["1 röd chilipeppar, torkad eller färsk"],
+        {"name": "Röd chili hackad Fryst 50g ICA", "category": "vegetables"},
+    ),
+    1,
+)
+# Regression: a one-sided form requirement still isolates by form.
+test(
+    "plain torkad chili does not match fresh chili product",
+    recipe_match_num(
+        ["1 tsk torkad chili"],
+        {"name": "Röd chili hackad Fryst 50g ICA", "category": "vegetables"},
+    ),
+    0,
+)
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")

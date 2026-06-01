@@ -2119,7 +2119,18 @@ def validate_offer_match_candidate(
         product_lower = precomputed_svf['name_normalized']
         ing_norm = ingredients_normalized[matched_ing_idx]
         svf_rule = precomputed_svf.get('spice_fresh_blocks', {}).get(svf_key)
-        if svf_rule:
+        # "torkad eller färsk" / "färsk eller torkad" explicitly accepts BOTH forms, so
+        # neither a fresh nor a dried product should be blocked on form grounds. Without
+        # this, the dried indicator ("torkad") alone makes the spice-vs-fresh check reject
+        # the fresh product (and vice versa), leaving the ingredient with no match at all.
+        _svf_accepts_both_forms = (
+            'eller' in ing_norm
+            and any(fi in ing_norm for fi in RECIPE_FRESH_INDICATORS)
+            and any(di in ing_norm for di in RECIPE_DRIED_INDICATORS)
+        )
+        if _svf_accepts_both_forms:
+            svf_allowed = True
+        elif svf_rule:
             if svf_rule['mode'] == 'require':
                 svf_allowed = any(ind in ing_norm for ind in svf_rule['indicators'])
             else:
@@ -2259,7 +2270,16 @@ def validate_offer_match_candidate(
                 else:
                     recipe_wants_dried = True
             should_block = False
-            if prod_is_frozen:
+            # "torkad eller färsk" (either order) explicitly accepts both forms, so no
+            # product form should be blocked. recipe_wants_fresh and recipe_wants_dried are
+            # both set from the disjunction; without this the frozen/dried branch would
+            # still block on the competing form indicator.
+            _accepts_both_forms = (
+                'eller' in ing_norm and recipe_wants_fresh and recipe_wants_dried
+            )
+            if _accepts_both_forms:
+                should_block = False
+            elif prod_is_frozen:
                 # Frozen herbs are acceptable substitutes for fresh/plain herb
                 # ingredients. Keep the check asymmetric: dried spice wording
                 # should not accept frozen herb products.
