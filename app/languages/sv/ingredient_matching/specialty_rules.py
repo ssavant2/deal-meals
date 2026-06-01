@@ -1440,13 +1440,13 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'sota': {'sweet', 'söt', 'sota'},
     # Vegetarian/vegan mince: "vegetarisk färs" ↔ "vegofärs" ↔ "växtbaserad färs"
     # Generic plant-based qualifiers are interchangeable with each other:
-    'vegetarisk': {'vegetarisk', 'vegansk', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
-    'vegansk': {'vegetarisk', 'vegansk', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
-    'vego': {'vegetarisk', 'vegansk', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
-    'vegetabilisk': {'vegetarisk', 'vegansk', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
-    'växtbaserad': {'vegetarisk', 'vegansk', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
-    'soja': {'vegetarisk', 'vegansk', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
-    'baljväxt': {'vegetarisk', 'vegansk', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
+    'vegetarisk': {'vegetarisk', 'vegetariska', 'vegansk', 'vegan', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
+    'vegansk': {'vegetarisk', 'vegetariska', 'vegansk', 'vegan', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
+    'vego': {'vegetarisk', 'vegetariska', 'vegansk', 'vegan', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
+    'vegetabilisk': {'vegetarisk', 'vegetariska', 'vegansk', 'vegan', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
+    'växtbaserad': {'vegetarisk', 'vegetariska', 'vegansk', 'vegan', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
+    'soja': {'vegetarisk', 'vegetariska', 'vegansk', 'vegan', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
+    'baljväxt': {'vegetarisk', 'vegetariska', 'vegansk', 'vegan', 'vego', 'växtbaserad', 'vegetabilisk', 'baljväxt', 'quorn', 'soja'},
     # "formbar" is a FUNCTIONAL qualifier (moldable), NOT interchangeable with generic vegan.
     # "Formbar färs" must match products that are actually formbar (can be shaped into
     # patties/meatballs). Regular vegofärs/sojafärs is loose and cannot be formed.

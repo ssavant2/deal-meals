@@ -2002,6 +2002,20 @@ qualifier = "polpa"
 equivalents = ["datterini", "datterino"]
 reason = "Datterini/datterino canned tomato qualifier — bidirectional equivalence with other canned-tomato forms"
 
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_vegetariska_vegetarian_family"
+status = "active"
+qualifier = "vegetariska"
+equivalents = ["vegetarisk", "vegetariska", "vegansk", "vegan", "vego", "växtbaserad", "vaxtbaserad", "vegetabilisk", "soja", "baljväxt", "quorn"]
+reason = "Plural 'vegetariska' had no equivalence entry, so an offer exposing both 'vegetarisk' and 'vegetariska' (the plural contains the singular as a substring) demanded the exact plural form on the ingredient side via the bidirectional check. A 'Dumplings Vegetarisk' (singular) recipe therefore failed to match a 'Vegetariska dumplings' product. The vegetarian forms (singular/plural/vegan/vego) are all the same family."
+
+[[qualifier_equivalents]]
+id = "runtime_qualifier_equivalent_vegan_vegetarian_family"
+status = "active"
+qualifier = "vegan"
+equivalents = ["vegetarisk", "vegetariska", "vegansk", "vegan", "vego", "växtbaserad", "vaxtbaserad", "vegetabilisk", "soja", "baljväxt", "quorn"]
+reason = "Mirror of the vegetariska equivalence: 'vegan' (English/short form) belongs to the same vegetarian family so a vegan-qualified offer matches vegetarisk/vego ingredient wording and vice versa."
+
 [[spice_fresh_rules]]
 id = "runtime_spice_fresh_rule_estragon"
 status = "active"

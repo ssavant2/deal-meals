@@ -15661,6 +15661,34 @@ test(
     ),
     0,
 )
+# Vegetarian filling forms (vegetarisk/vegetariska/vego/vegan/vegansk) are one family.
+# A "Dumplings Vegetarisk" recipe must match a "Vegetariska dumplings" product; the plural
+# qualifier previously had no equivalence entry so the singular ingredient was rejected.
+test(
+    "vegetarisk dumplings recipe matches vegetariska dumplings product",
+    recipe_match_num(
+        ["Dumplings Vegetarisk 200g"],
+        {"name": "Vegetariska dumplings Fryst 320g ICA", "category": "frozen"},
+    ),
+    1,
+)
+test(
+    "vego dumplings recipe matches vegetariska dumplings product",
+    recipe_match_num(
+        ["200 g vego dumplings"],
+        {"name": "Vegetariska dumplings Fryst 320g ICA", "category": "frozen"},
+    ),
+    1,
+)
+# Regression: a chicken-filled dumpling recipe must not match a vegetarian dumpling product.
+test(
+    "kyckling dumplings recipe does not match vegetariska dumplings product",
+    recipe_match_num(
+        ["Dumplings Kyckling 200g"],
+        {"name": "Vegetariska dumplings Fryst 320g ICA", "category": "frozen"},
+    ),
+    0,
+)
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")
