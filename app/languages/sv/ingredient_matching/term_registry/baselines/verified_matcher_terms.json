@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 399,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 104,
-      "keyword_synonym_mapping": 179,
+      "keyword_synonym_mapping": 181,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 399,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 179,
+      "keyword_synonym": 181,
       "match_bridge": 2021,
       "matcher_regression_case": 1501,
       "matcher_rule_inventory": 470,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5809,
-    "variants_missing_product_text": 1854,
+    "variant_count": 5811,
+    "variants_missing_product_text": 1856,
     "variants_with_product_text": 3955
   },
   "variants": [
@@ -122035,11 +122035,53 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"pomerans\"}"
+    },
+    {
+      "variant_id": "vterm-6ad3192021e1fef5",
+      "row_index": 4990,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:vaniljstanger",
+      "source_id": "vaniljstanger",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "vaniljstanger",
+      "canonical": "vaniljstång",
+      "expected_family": "vaniljstång",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"vaniljstång\"}"
+    },
+    {
+      "variant_id": "vterm-84265c29ba661bb1",
+      "row_index": 4991,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:vaniljstänger",
+      "source_id": "vaniljstänger",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "vaniljstänger",
+      "canonical": "vaniljstång",
+      "expected_family": "vaniljstång",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"vaniljstång\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1632,
+      "no_product_text": 1634,
       "static_verified": 2676,
       "synthetic_verified": 1501
     },
@@ -122050,7 +122092,7 @@
       "ingredient_parent": 399,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 104,
-      "keyword_synonym": 179,
+      "keyword_synonym": 181,
       "match_bridge": 2021,
       "matcher_regression_case": 1501,
       "matcher_rule_inventory": 470,
@@ -122061,8 +122103,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5809
+      "audited": 5811
     },
-    "variant_count": 5809
+    "variant_count": 5811
   }
 }

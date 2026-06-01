@@ -1124,6 +1124,13 @@ keyword = "fond"
 blockers = ["fondue"]
 reason = "ostfondue/chokladfondue/fondue are melted dipping preparations, not stock concentrates; fond keyword from product names like Fond Du Chef must not match fondue ingredient text"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_broccoli"
+status = "active"
+keyword = "broccoli"
+blockers = ["broccolibollar"]
+reason = "Broccolibollar = formed veggie ball half-product (Anamma-style), not raw broccoli; ost/basilika/broccoli in name are filling descriptors"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
