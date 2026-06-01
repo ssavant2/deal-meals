@@ -796,7 +796,18 @@ def extract_keywords_from_product(
     if 'strössel' in original_name_lower or 'strossel' in original_name_lower:
         return ['strössel']
 
-    if (
+    # "Wok <protein> <dish>" products (e.g. "Wok Kyckling röd curry") are complete
+    # ready meals, not raw vegetable wok mixes — let them fall through to the prepared
+    # curry/wok dish detector below instead of collapsing to 'wokmix'.
+    _wok_is_protein_dish = (
+        re.search(r'\bwok\b', original_name_lower)
+        and any(p in original_name_lower for p in (
+            'kyckling', 'chicken', 'fläsk', 'flask', 'nötkött', 'notkott', 'oxfilé',
+            'lax', 'salmon', 'scampi', 'kalkon', 'anka', 'lamm', 'kött', 'kott',
+        ))
+        and not re.search(r'\b(?:filé|file|striml|tärn|tarn|färs|fars|grill|spett|kebab)\b', original_name_lower)
+    )
+    if not _wok_is_protein_dish and (
         'wokmix' in original_name_lower
         or 'wok mix vegetables' in original_name_lower
         or re.search(r'\bwok\s+mix\b', original_name_lower)
@@ -1200,6 +1211,55 @@ def extract_keywords_from_product(
                 if not any(ex in original_name_lower for ex in PROCESSED_FOODS_EXEMPTIONS):
                     return []
                 break
+
+    # Prepared Asian curry/wok dish detection (ready meals, NOT raw ingredients).
+    # Complete frozen/chilled dishes like "Wok Kyckling röd curry", "Thai chicken red
+    # curry", "Kyckling Curry med Ris" pair a protein with a curry/wok dish word and slip
+    # through every other ready-meal filter: they have no carrier word (lasagne/gratäng),
+    # are not in PROCESSED_FOODS, lack portion markers, and their dual-line brands (Findus,
+    # ICA) also sell raw frozen produce so the brand can't be blocked. Treat them as ready
+    # meals (no keywords) so they stop matching raw protein recipes.
+    #
+    # This is deliberately conservative: it only fires when a PROTEIN co-occurs with a
+    # dish word AND no cooking-ingredient marker is present. Cooking ingredients that share
+    # these words stay fully matchable — spice mixes, pastes, sauces and cooking bases
+    # (kryddmix/krydd/currypasta/grytbas/woksås/pulver/dressing), and any raw cut that is
+    # merely curry-marinated (filé/strimlad/tärnad/bitar/färs/grill/spett/färsk/lår/bröst).
+    _DISH_PROTEINS = (
+        'kyckling', 'chicken', 'fläsk', 'flask', 'nötkött', 'notkott', 'oxfilé', 'oxfile',
+        'lax', 'salmon', 'scampi', 'kalkon', 'anka', 'lamm', 'kött', 'kott', 'tofu',
+    )
+    _DISH_WORDS = (
+        'curry', 'panang', 'paneng', 'panaeng', 'massaman', 'korma', 'tikka', 'masala',
+        'teriyaki', 'satay', 'pad thai', 'vindaloo', 'jalfrezi', 'madras', 'biryani',
+    )
+    # Cooking-ingredient markers — a product with any of these is a spice mix / paste /
+    # sauce / cooking base, NOT a ready meal, even with a protein word in the name.
+    _DISH_BASE_MARKERS = (
+        'pasta', 'paste', 'sås', 'sas ', 'sauce', ' mix', 'mix ', 'grytbas', 'pulver',
+        'dressing', 'kryddmix', 'krydd', 'buljong', 'fond', 'majonn', 'mayo', 'dipp',
+        ' dip', 'olja', 'oil', 'spice', 'marinad', 'glaze', 'rub',
+    )
+    # Raw-cut / fresh / grill markers — a product with any of these is a raw cut (possibly
+    # curry-marinated) that you cook yourself, NOT a finished dish.
+    _DISH_RAW_CUT_MARKERS = (
+        'filé', 'file', 'filæ', 'striml', 'tärn', 'tarn', 'bitar', 'färs', 'fars',
+        'skav', 'kub', 'naturell', 'marinerad', 'spett', 'skewer', 'grill', 'färsk',
+        'fresh', 'kebab', 'lår', 'lar ', 'bröst', 'brost', 'ben ', 'vinge', 'klubb',
+        'innerfil', 'hel ',
+    )
+    _name_for_dish = original_name_lower
+    _has_dish_protein = any(p in _name_for_dish for p in _DISH_PROTEINS)
+    _has_dish_word = any(d in _name_for_dish for d in _DISH_WORDS) or (
+        'wok' in _name_for_dish and _has_dish_protein
+    )
+    if (
+        _has_dish_protein
+        and _has_dish_word
+        and not any(b in _name_for_dish for b in _DISH_BASE_MARKERS)
+        and not any(r in _name_for_dish for r in _DISH_RAW_CUT_MARKERS)
+    ):
+        return []
 
     # Normalize space variants (e.g., "corn flakes" -> "cornflakes")
     # AFTER processed foods check — joining words would hide multi-word blockers

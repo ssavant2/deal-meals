@@ -15608,6 +15608,40 @@ test(
     ),
     1,
 )
+# Prepared Asian curry/wok dishes are ready meals, not raw protein. They must not match
+# raw protein recipes, while raw cuts, spice mixes, pastes and cooking bases stay matchable.
+test(
+    "prepared chicken curry ready meal does not match raw chicken recipe",
+    recipe_match_num(
+        ["400 g kycklingfilé"],
+        {"name": "Thai chicken red curry 350g Findus", "category": "frozen"},
+    ),
+    0,
+)
+test(
+    "prepared kyckling wok ready meal does not match raw chicken recipe",
+    recipe_match_num(
+        ["400 g kyckling"],
+        {"name": "Wok Kyckling röd curry Fryst 350g ICA", "category": "frozen"},
+    ),
+    0,
+)
+test(
+    "raw chicken fillet still matches chicken recipe (not a ready meal)",
+    recipe_match_num(
+        ["400 g kycklingfilé"],
+        {"name": "Kycklingfilé Fryst 1kg Kronfågel", "category": "frozen"},
+    ),
+    1,
+)
+test(
+    "curry paste cooking ingredient still matches curry-paste recipe",
+    recipe_match_num(
+        ["1 msk röd currypasta"],
+        {"name": "Currypasta Röd 114g ICA Asia", "category": "pantry"},
+    ),
+    1,
+)
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")
