@@ -157,6 +157,7 @@ UI = {
     'home.modal_save_avg_pct': 'Avg. discount ~{pct}% on {count} items',
     'home.modal_full_recipe': 'Full recipe',
     'home.modal_full_recipe_servings': 'Full recipe for {n} servings',
+    'home.modal_recipe_link': 'Recipe link',
     'home.modal_quantity_note': 'Quantities not calculated - verify you buy the right amount.',
     'home.modal_quantity_note2': 'Savings are usually highest on large packages, even if you only need a smaller amount for the recipe itself.',
     'home.modal_quantity_note3': 'Products marked with 📦 are bulk packages or at least 5 times larger than what the recipe calls for.',

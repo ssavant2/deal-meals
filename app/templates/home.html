@@ -269,6 +269,35 @@
     --bs-table-border-color: var(--bs-border-color);
 }
 
+#matchedOffersModal .modal-header {
+    gap: 0.75rem;
+}
+#matchedOffersModalLabel {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#modalRecipeLink {
+    display: none;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 0.35rem;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+@media (max-width: 576px) {
+    #matchedOffersModalLabel {
+        font-size: 1rem;
+    }
+    #modalRecipeLink {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
 /* Suggestions header bar */
 .suggestions-header {
     background: var(--subtheme2-bg);
@@ -778,6 +807,10 @@ body.setup-guide-active .no-offers-hint {
                     <i class="bi bi-basket-fill"></i>
                     <span id="modalRecipeName"></span>
                 </h5>
+                <a id="modalRecipeLink" class="btn btn-sm btn-outline-light" href="#" target="_blank" rel="noopener noreferrer">
+                    <span>{{ t('home.modal_recipe_link') }}</span>
+                    <i class="bi bi-link-45deg"></i>
+                </a>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ t('common.close') }}"></button>
             </div>
             <div class="modal-body">
@@ -914,6 +947,7 @@ window.DealMealsHomeI18n = {
     'home.modal_save_avg_pct': {{ t("home.modal_save_avg_pct")|tojson }},
     'home.modal_full_recipe_servings': {{ t("home.modal_full_recipe_servings")|tojson }},
     'home.modal_full_recipe': {{ t("home.modal_full_recipe")|tojson }},
+    'home.modal_recipe_link': {{ t("home.modal_recipe_link")|tojson }},
     'home.modal_multiple_stores': {{ t("home.modal_multiple_stores")|tojson }},
     'home.modal_and_more': {{ t("home.modal_and_more")|tojson }},
     'home.modal_offer_tooltip': {{ t("home.modal_offer_tooltip")|tojson }},

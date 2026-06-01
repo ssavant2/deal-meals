@@ -757,7 +757,8 @@ async function searchPantryRecipes() {
                         modalData.ingredients,
                         modalData.servings,
                         cardIsCapped,
-                        cardCappedSavings
+                        cardCappedSavings,
+                        card.dataset.recipeUrl
                     );
                     return;
                 }
@@ -1010,7 +1011,8 @@ async function searchRecipes(isLoadMore = false) {
                         modalData.ingredients,
                         modalData.servings,
                         cardIsCapped,
-                        cardCappedSavings
+                        cardCappedSavings,
+                        card.dataset.recipeUrl
                     );
                     return;
                 }
@@ -1863,7 +1865,8 @@ function renderSuggestions(recipes, appendOnly = false) {
                         modalData.ingredients,
                         modalData.servings,
                         cardIsCapped,
-                        cardCappedSavings
+                        cardCappedSavings,
+                        card.dataset.recipeUrl
                     );
                     return;
                 }
@@ -2248,7 +2251,7 @@ function formatSavingsBadge(savings, offer) {
     return `-${savings.toFixed(1).replace('.', ',')} kr`;
 }
 
-function showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, servings, isCapped, cappedSavings) {
+function showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, servings, isCapped, cappedSavings, recipeUrl) {
     // Store recipe ID and show exclude button for regular recipes
     currentRecipeId = recipeId;
     const excludeBtn = document.getElementById('excludeRecipeBtn');
@@ -2257,6 +2260,19 @@ function showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, ser
     }
 
     document.getElementById('modalRecipeName').textContent = recipeName;
+    const recipeLink = document.getElementById('modalRecipeLink');
+    const safeRecipeUrl = safeUrl(recipeUrl);
+    if (recipeLink && safeRecipeUrl) {
+        recipeLink.href = safeRecipeUrl;
+        recipeLink.style.display = 'inline-flex';
+        recipeLink.title = i18n['home.modal_recipe_link'];
+        recipeLink.setAttribute('aria-label', i18n['home.modal_recipe_link']);
+    } else if (recipeLink) {
+        recipeLink.removeAttribute('href');
+        recipeLink.style.display = 'none';
+        recipeLink.removeAttribute('title');
+        recipeLink.removeAttribute('aria-label');
+    }
     ingredients = ingredients || [];
     servings = servings || 0;
 

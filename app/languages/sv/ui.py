@@ -157,6 +157,7 @@ UI = {
     'home.modal_save_avg_pct': 'Snittrabatt ~{pct}% på {count} varor',
     'home.modal_full_recipe': 'Fullständigt recept',
     'home.modal_full_recipe_servings': 'Fullständigt recept för {n} portioner',
+    'home.modal_recipe_link': 'Receptlänk',
     'home.modal_quantity_note': 'Mängder räknas ej - kontrollera att du köper rätt mängd.',
     'home.modal_quantity_note2': 'Besparingen är oftast störst på stora förpackningar, även om du bara behöver en mindre mängd till receptet i sig.',
     'home.modal_quantity_note3': 'Produkter markerade med 📦 är storpack eller minst 5 gånger större än receptets behov.',
