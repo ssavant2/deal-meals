@@ -732,6 +732,20 @@ keyword = "salladslök"
 blockers = ["färskost", "färskost", "cream cheese"]
 reason = "Flavored cream cheese (Färskost gräslök & vårlök) lists spring onion as flavor, not fresh onion; mirrors existing vårlök PNB now that vårlök routes to salladslök synonym"
 
+[[product_name_blockers]]
+id = "runtime_pnb_yuzu"
+status = "active"
+keyword = "yuzu"
+blockers = ["korv", "kryddkorv"]
+reason = "Yuzu-flavored sausage (Kryddkorv Wagyu Yuzu) must not match a yuzu fruit/juice ingredient. Flavor-carrier pattern: the sausage uses yuzu as a flavoring, but the ingredient calls for the citrus fruit itself."
+
+[[product_name_blockers]]
+id = "runtime_pnb_trattkantarell"
+status = "active"
+keyword = "trattkantarell"
+blockers = ["torkad", "torkade"]
+reason = "Dried trattkantarell (torkad) is a concentrated ingredient-replacement, not fresh mushroom; a recipe calling for fresh trattkantareller should not match dried products. Mirrors existing PNB kantareller←torkad (Q110-2)."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
