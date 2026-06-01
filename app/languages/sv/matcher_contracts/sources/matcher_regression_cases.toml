@@ -28856,3 +28856,15 @@ expected = 0
 [fixtures.offer]
 name = "Pesto Genovese Zeta"
 category = "pantry"
+
+[[fixtures]]
+id = "margarin_i_b_bak_stek_margarin_negative"
+policy_ref = "policy_margarin_i_b_bak_stek_margarin"
+source_ref = "manual:policy_margarin_i_b_bak_stek_margarin"
+recipe_name = "No-match policy regression"
+ingredients = ["margarin"]
+expected = 0
+
+[fixtures.offer]
+name = "Margarin Flytande 80% 500ml ICA"
+category = "dairy"

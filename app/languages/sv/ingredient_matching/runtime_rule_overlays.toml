@@ -725,6 +725,13 @@ keyword = "paprika"
 blockers = ["lax", "fisk"]
 reason = "Fish products seasoned with paprika (e.g. Lax Varmrökt Paprika & Peppar) leak the paprika flavor word and falsely match plain paprika/paprikapulver ingredients. Mirrors the existing paprikapulver-lax/fisk blocker; paprika is a secondary seasoning on the fish, not the actual vegetable or spice."
 
+[[product_name_blockers]]
+id = "runtime_pnb_salladslok"
+status = "active"
+keyword = "salladslök"
+blockers = ["färskost", "färskost", "cream cheese"]
+reason = "Flavored cream cheese (Färskost gräslök & vårlök) lists spring onion as flavor, not fresh onion; mirrors existing vårlök PNB now that vårlök routes to salladslök synonym"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1920,3 +1927,35 @@ keyword = "estragon"
 dried_indicators = ["torkad", "torkade"]
 fresh_product_words = ["färsk", "färska"]
 reason = "Fresh estragon (plant) should not match dried estragon (spice) recipe requirements — different moisture content and flavor intensity"
+
+[[product_name_substitutions]]
+id = "runtime_product_name_substitution_bakmargarin_margarin_bakmargarin"
+status = "active"
+required_words = ["bakmargarin"]
+old_keyword = "bakmargarin"
+new_keyword = "margarin"
+reason = "Baking/cooking margarine is the type a plain 'margarin' recipe ingredient wants; route to generic margarin keyword (spreads/table/liquid margarine excluded separately)"
+
+[[product_name_substitutions]]
+id = "runtime_product_name_substitution_stekmargarin_margarin_stekmargarin"
+status = "active"
+required_words = ["stekmargarin"]
+old_keyword = "stekmargarin"
+new_keyword = "margarin"
+reason = "Baking/cooking margarine is the type a plain 'margarin' recipe ingredient wants; route to generic margarin keyword (spreads/table/liquid margarine excluded separately)"
+
+[[product_name_substitutions]]
+id = "runtime_product_name_substitution_matlagningsmargarin_margarin_matlagningsmargarin"
+status = "active"
+required_words = ["matlagningsmargarin"]
+old_keyword = "matlagningsmargarin"
+new_keyword = "margarin"
+reason = "Baking/cooking margarine is the type a plain 'margarin' recipe ingredient wants; route to generic margarin keyword (spreads/table/liquid margarine excluded separately)"
+
+[[product_name_substitutions]]
+id = "runtime_product_name_substitution_bordsmargarin_margarin_bak"
+status = "active"
+required_words = ["bak"]
+old_keyword = "bordsmargarin"
+new_keyword = "margarin"
+reason = "Baking margarine misclassified as bordsmargarin when name says 'Bak' (e.g. plant-based 'Margarin Mat & Bak') should route to plain margarin, not table-spread bordsmargarin"

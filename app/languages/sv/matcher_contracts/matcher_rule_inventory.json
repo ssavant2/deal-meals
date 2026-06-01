@@ -15127,5 +15127,30 @@
       "current_review:q107_1_red_pesto_soltorkad_tomat"
     ],
     "status": "wrapped_adapter"
+  },
+  {
+    "adapter_ref": "no_match_policies:policy_margarin_i_b_bak_stek_margarin",
+    "canonical": "margarin",
+    "fixture_refs": [
+      "margarin_i_b_bak_stek_margarin_negative"
+    ],
+    "id": "policy_margarin_i_b_bak_stek_margarin",
+    "kind": "legacy_no_match_policy",
+    "line_refs": [
+      {
+        "anchor": "entry_id = \"sv-se.guard.policy_margarin_i_b_bak_stek_margarin\"",
+        "end": 6348,
+        "path": "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml",
+        "start": 6348
+      }
+    ],
+    "notes": "Plain 'margarin' recipe ingredient means cooking/baking margarine; only products whose name includes bak/stek match. Table/spread/liquid/light margarine (bords-, smörgås-, flytande, lätt-, bredbart) excluded.",
+    "owner": "matcher",
+    "policy_ref": "policy_margarin_i_b_bak_stek_margarin",
+    "risk": "no_match_policy",
+    "source_refs": [
+      "manual:policy_margarin_i_b_bak_stek_margarin"
+    ],
+    "status": "wrapped_adapter"
   }
 ]

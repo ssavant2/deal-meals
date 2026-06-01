@@ -6345,3 +6345,41 @@ ingredient = "2 tsk gochugaru, koreansk chili"
 offer_name = "Marinad Bulgogi 225g Risberg"
 offer_category = "pantry"
 expected = 0
+
+[[entries]]
+entry_id = "sv-se.guard.policy_margarin_i_b_bak_stek_margarin"
+language = "sv"
+market = "SE"
+canonical = "margarin"
+status = "active"
+variants = ["margarin ! (?i)^(?!.*\\b(?:bak|stek)).*margarin"]
+negative_guards = ["margarin ! (?i)^(?!.*\\b(?:bak|stek)).*margarin"]
+source_refs = ["policy:no_match_policies:policy_margarin_i_b_bak_stek_margarin"]
+layer_policy = ["negative_guard_only"]
+notes = "Plain 'margarin' recipe ingredient means cooking/baking margarine; only products whose name includes bak/stek match. Table/spread/liquid/light margarine (bords-, smörgås-, flytande, lätt-, bredbart) excluded."
+
+[entries.language_payload.no_match_policy]
+id = "policy_margarin_i_b_bak_stek_margarin"
+rule_schema_version = 1
+rule_version = 1
+canonical = "margarin"
+ingredient_patterns = ["\\bmargarin\\b"]
+blocked_offer_keywords = []
+blocked_offer_patterns = ["(?i)^(?!.*\\b(?:bak|stek)).*margarin"]
+allowed_specifics = []
+reason = "Plain 'margarin' recipe ingredient means cooking/baking margarine; only products whose name includes bak/stek match. Table/spread/liquid/light margarine (bords-, smörgås-, flytande, lätt-, bredbart) excluded."
+policy_ref = "policy_margarin_i_b_bak_stek_margarin"
+fixture_refs = ["margarin_i_b_bak_stek_margarin_negative"]
+supersedes = []
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "margarin"
+variant = "margarin ! (?i)^(?!.*\\b(?:bak|stek)).*margarin"
+layer_role = "negative_guard_pattern"
+
+[[entries.negative_examples]]
+ingredient = "margarin"
+offer_name = "Margarin Flytande 80% 500ml ICA"
+offer_category = "dairy"
+expected = 0

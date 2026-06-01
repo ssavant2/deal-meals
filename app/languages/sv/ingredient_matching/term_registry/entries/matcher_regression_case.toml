@@ -30006,3 +30006,23 @@ source_family = "matcher_regression_case"
 canonical = "current_review_matcher_regression"
 variant = "matcher_regression_pesto_rod_genovese_negative: Pesto Genovese Zeta"
 layer_role = "negative_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.policy_margarin_i_b_bak_stek_margarin.margarin_i_b_bak_stek_margarin_negative"
+language = "sv"
+market = "SE"
+canonical = "policy_margarin_i_b_bak_stek_margarin"
+status = "active"
+variants = ["margarin_i_b_bak_stek_margarin_negative: Margarin Flytande 80% 500ml ICA"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:margarin_i_b_bak_stek_margarin_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture margarin_i_b_bak_stek_margarin_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "policy_margarin_i_b_bak_stek_margarin"
+variant = "margarin_i_b_bak_stek_margarin_negative: Margarin Flytande 80% 500ml ICA"
+layer_role = "negative_regression"

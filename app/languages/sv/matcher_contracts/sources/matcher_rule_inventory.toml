@@ -10917,3 +10917,22 @@ path = "app/languages/sv/ingredient_matching/matching.py"
 start = 6195
 end = 6195
 anchor = "and q in PESTO_RED_QUALIFIER_EQUIVALENTS"
+
+[[inventory]]
+id = "policy_margarin_i_b_bak_stek_margarin"
+status = "wrapped_adapter"
+kind = "legacy_no_match_policy"
+canonical = "margarin"
+owner = "matcher"
+policy_ref = "policy_margarin_i_b_bak_stek_margarin"
+source_refs = ["manual:policy_margarin_i_b_bak_stek_margarin"]
+fixture_refs = ["margarin_i_b_bak_stek_margarin_negative"]
+risk = "no_match_policy"
+adapter_ref = "no_match_policies:policy_margarin_i_b_bak_stek_margarin"
+notes = "Plain 'margarin' recipe ingredient means cooking/baking margarine; only products whose name includes bak/stek match. Table/spread/liquid/light margarine (bords-, smörgås-, flytande, lätt-, bredbart) excluded."
+
+[[inventory.line_refs]]
+path = "app/languages/sv/ingredient_matching/term_registry/entries/no_match_policy.toml"
+start = 6348
+end = 6348
+anchor = "entry_id = \"sv-se.guard.policy_margarin_i_b_bak_stek_margarin\""

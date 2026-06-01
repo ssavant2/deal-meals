@@ -33175,5 +33175,19 @@
     "policy_ref": "current_review_matcher_regression",
     "recipe_name": "Q107-1",
     "source_ref": "current_review:q107_1_red_pesto_soltorkad_tomat"
+  },
+  {
+    "expected": 0,
+    "id": "margarin_i_b_bak_stek_margarin_negative",
+    "ingredients": [
+      "margarin"
+    ],
+    "offer": {
+      "category": "dairy",
+      "name": "Margarin Flytande 80% 500ml ICA"
+    },
+    "policy_ref": "policy_margarin_i_b_bak_stek_margarin",
+    "recipe_name": "No-match policy regression",
+    "source_ref": "manual:policy_margarin_i_b_bak_stek_margarin"
   }
 ]
