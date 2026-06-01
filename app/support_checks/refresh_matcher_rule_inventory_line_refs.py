@@ -115,13 +115,13 @@ def refresh_line_refs(
             anchor = str(line_ref.get("anchor") or "")
             if not path or not anchor:
                 summary["missing_anchor"] += 1
-                missing.append({"id": entry_id, "path": path, "anchor": anchor})
+                missing.append({"type": "missing_anchor", "id": entry_id, "path": path, "anchor": anchor})
                 continue
 
             absolute_path = repo_root / path
             if not absolute_path.is_file():
                 summary["missing_path"] += 1
-                missing.append({"id": entry_id, "path": path, "anchor": anchor})
+                missing.append({"type": "missing_path", "id": entry_id, "path": path, "anchor": anchor})
                 continue
 
             source_text = source_cache.setdefault(
@@ -131,7 +131,7 @@ def refresh_line_refs(
             ranges = _anchor_ranges(source_text, anchor)
             if not ranges:
                 summary["missing_anchor"] += 1
-                missing.append({"id": entry_id, "path": path, "anchor": anchor})
+                missing.append({"type": "missing_anchor", "id": entry_id, "path": path, "anchor": anchor})
                 continue
             if len(ranges) > 1:
                 summary["ambiguous_anchor"] += 1
@@ -210,6 +210,13 @@ def main() -> int:
             f"{summary['missing_anchor']} missing anchors, {summary['missing_path']} missing paths, "
             f"{summary['ambiguous_anchor']} ambiguous anchors"
         )
+        for missing in summary.get("missing", []):
+            print(
+                "  missing "
+                f"{missing.get('type', 'line_ref')}: id={missing.get('id', '<unknown>')} "
+                f"path={missing.get('path', '')} "
+                f"anchor={json.dumps(missing.get('anchor', ''), ensure_ascii=False)}"
+            )
 
     if summary["missing_anchor"] or summary["missing_path"]:
         return 1

@@ -1259,6 +1259,121 @@ def normalize_probe(text: str) -> str:
             self.assertNotIn(fixture_id, no_match_policy)
             self.assertNotIn(fixture_id, generated_fixture_coverage)
 
+    def test_cli_modify_keyword_extra_parent_remove_kid_cascades_and_reanchors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+            policy_ref = "keyword_extra_parent_phaseparentdrink_family"
+            inventory_id = "legacy_parent_phaseparentdrink_family"
+            almond_fixture_id = "keyword_extra_parent_phaseparentdrink_phasealmonddrink_positive"
+            hazel_fixture_id = "keyword_extra_parent_phaseparentdrink_phasehazeldrink_positive"
+
+            add_result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "keyword-extra-parent",
+                    "phaseparentdrink",
+                    "--kids",
+                    "phasealmonddrink,phasehazeldrink",
+                    "--recipe-name",
+                    "Synthetic Parent Drink",
+                    "--ingredient",
+                    "2 dl phaseparentdrink",
+                    "--offer-names",
+                    "Phase Almond Drink,Phase Hazel Drink",
+                    "--offer-category",
+                    "pantry",
+                    "--policy-ref",
+                    policy_ref,
+                    "--inventory-id",
+                    inventory_id,
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(add_result.returncode, 0, add_result.stderr + add_result.stdout)
+
+            modify_result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "modify",
+                    "keyword-extra-parent",
+                    "phaseparentdrink",
+                    "--remove-kids",
+                    "phasealmonddrink",
+                    "--reason",
+                    "Synthetic child no longer belongs in this family.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(modify_result.returncode, 0, modify_result.stderr + modify_result.stdout)
+
+            keyword_extra_parent_text = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "keyword_extra_parent.toml"
+            ).read_text(encoding="utf-8")
+            self.assertNotIn("phasealmonddrink", keyword_extra_parent_text)
+            self.assertIn("phasehazeldrink", keyword_extra_parent_text)
+            hazel_entry_match = re.search(
+                r'entry_id = "(sv-se\.family\.phaseparentdrink\.phasehazeldrink_\d+)"',
+                keyword_extra_parent_text,
+            )
+            self.assertIsNotNone(hazel_entry_match)
+            hazel_entry_id = hazel_entry_match.group(1)
+
+            fixture_source = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            ).read_text(encoding="utf-8")
+            fixture_json = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+            ).read_text(encoding="utf-8")
+            self.assertNotIn(almond_fixture_id, fixture_source)
+            self.assertNotIn(almond_fixture_id, fixture_json)
+            self.assertIn(hazel_fixture_id, fixture_source)
+            self.assertIn(hazel_fixture_id, fixture_json)
+
+            inventory_source = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
+            ).read_text(encoding="utf-8")
+            inventory_json = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+            ).read_text(encoding="utf-8")
+            self.assertNotIn(almond_fixture_id, inventory_source)
+            self.assertNotIn(almond_fixture_id, inventory_json)
+            self.assertIn(hazel_fixture_id, inventory_source)
+            self.assertIn(hazel_fixture_id, inventory_json)
+            self.assertIn(f'anchor = "entry_id = \\"{hazel_entry_id}\\""', inventory_source)
+            self.assertIn("Synthetic child no longer belongs in this family.", inventory_source)
+
+            deep_sanity_text = (app_dir / "support_checks" / "run_deep_matcher_sanity.py").read_text(encoding="utf-8")
+            self.assertNotIn("Phaseparentdrink recipe matches phasealmonddrink", deep_sanity_text)
+            self.assertIn("Phaseparentdrink recipe matches phasehazeldrink", deep_sanity_text)
+            self.assertIn("Phasealmonddrink no longer matches phaseparentdrink parent", deep_sanity_text)
+
     def test_cli_modify_no_match_policy_rewrites_synced_guard_fields(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
@@ -3632,6 +3747,45 @@ def normalize_probe(text: str) -> str:
                 sys.argv = original_argv
                 dm_cli._run_support_check = original_run_support_check
 
+    def test_active_matcher_session_allows_tree_root_runtime_set_add(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            paths = dm_cli._paths(tree_root)
+            dm_cli._write_matcher_session_state(
+                paths,
+                {"version": dm_cli.MATCHER_SESSION_VERSION, "started_at": "test"},
+            )
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "important-short-keyword",
+                    "--terms",
+                    "phx",
+                    "--reason",
+                    "Synthetic short keyword for active-session gate deferral.",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            self.assertIn("Matcher session active; deferred gates", result.stdout)
+            overlay_text = (
+                app_dir / "languages" / "sv" / "ingredient_matching" / "runtime_rule_overlays.toml"
+            ).read_text(encoding="utf-8")
+            self.assertIn("phx", overlay_text)
+
     def test_dm_matcher_explain_wraps_matcher_audit(self) -> None:
         live_app_dir = Path(__file__).resolve().parents[2]
         result = subprocess.run(
@@ -3931,7 +4085,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             self.assertNotIn('"oldcanonical"', sanity_text)
 
     def test_generated_sanity_uses_observed_positive_materialization(self) -> None:
-        paths = dm_cli._paths(None)
+        paths = dm_cli._paths(dm_cli.REPO_DIR)
         original_compare = dm_cli._compare_matcher_paths
 
         def fake_compare(**_kwargs):
@@ -4211,6 +4365,8 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
                     "doctor",
                     "--tree-root",
                     str(tree_root),
+                    "--report-root",
+                    str(tree_root / "reports"),
                     "--format",
                     "json",
                 ],
@@ -4244,6 +4400,8 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
                     "doctor",
                     "--tree-root",
                     str(tree_root),
+                    "--report-root",
+                    str(tree_root / "reports"),
                     "--format",
                     "json",
                 ],
@@ -4720,7 +4878,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertEqual(report["blocker_count"], 0)
         self.assertEqual(report["blocker_baseline_count"], 0)
         self.assertEqual(report["summary"]["contract_access_api"], 2)
-        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4152)
+        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4166)
 
     def test_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -4827,6 +4985,57 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             self.assertEqual(refreshed_ref["start"], expected_start)
             self.assertEqual(refreshed_ref["end"], expected_end)
             self.assertFalse(any(result.drifted for result in check_generated_contract_json(tree_root=tree_root)))
+
+    def test_line_ref_refresh_text_output_lists_missing_anchor(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            source_file = tree_root / "source.toml"
+            inventory_file = tree_root / "inventory.json"
+            source_file.write_text('entry_id = "present"\n', encoding="utf-8")
+            inventory_file.write_text(
+                json.dumps(
+                    [
+                        {
+                            "id": "phase_missing_anchor",
+                            "line_refs": [
+                                {
+                                    "path": "source.toml",
+                                    "start": 1,
+                                    "end": 1,
+                                    "anchor": 'entry_id = "missing"',
+                                }
+                            ],
+                        }
+                    ],
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(live_app_dir / "support_checks" / "refresh_matcher_rule_inventory_line_refs.py"),
+                    "--repo-root",
+                    str(tree_root),
+                    "--inventory-file",
+                    str(inventory_file),
+                    "--format",
+                    "text",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
+            self.assertIn("1 missing anchors", result.stdout)
+            self.assertIn("id=phase_missing_anchor", result.stdout)
+            self.assertIn("path=source.toml", result.stdout)
+            self.assertIn('anchor="entry_id = \\"missing\\""', result.stdout)
 
     def test_simple_toml_add_commands_write_expected_surfaces(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

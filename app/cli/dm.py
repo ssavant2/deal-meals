@@ -509,6 +509,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         summary="Offer-side child/product terms that should roll up to a parent ingredient family.",
         steps=(
             "Run: ./bin/dm matcher add keyword-extra-parent <canonical> --kids <child1,child2> --recipe-name \"<recipe>\" --ingredient \"<ingredient>\"",
+            "To remove one child from an existing generated family, run: ./bin/dm matcher modify keyword-extra-parent <canonical> --remove-kids <child> --reason \"<why>\"",
             "The command writes registry, fixture/inventory, generated JSON/coverage, sanity, and Track B gates by default.",
         ),
     ),
@@ -976,6 +977,10 @@ GUIDE_ALIASES = {
     "match-bridges": "match-bridge",
     "match_bridges": "match-bridge",
     "bridge": "match-bridge",
+    "keyword-extra-parent-modify": "keyword-extra-parent",
+    "keyword_extra_parent_modify": "keyword-extra-parent",
+    "remove-keyword-extra-parent-kid": "keyword-extra-parent",
+    "remove_keyword_extra_parent_kid": "keyword-extra-parent",
     "smart_blocker": "smart-blocker",
     "smart-blockers": "smart-blocker",
     "smart_blockers": "smart-blocker",
@@ -1204,6 +1209,20 @@ def _matcher_session_gates_forced() -> bool:
 
 def _matcher_session_should_defer_gates(paths: MatcherPaths) -> bool:
     return _matcher_session_is_active(paths) and not _matcher_session_gates_forced()
+
+
+def _tree_root_gates_require_explicit_no_run_gates(
+    paths: MatcherPaths,
+    *,
+    run_gates: bool,
+    dry_run: bool,
+) -> bool:
+    return (
+        paths.app_dir != APP_DIR
+        and run_gates
+        and not dry_run
+        and not _matcher_session_should_defer_gates(paths)
+    )
 
 
 def _echo_session_deferred_gates(label: str = "gates") -> None:
@@ -2590,7 +2609,7 @@ def _add_simple_toml_surface(
             fg=typer.colors.YELLOW,
             err=True,
         )
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
 
     _ensure_can_add_surface_mapping(
@@ -3805,6 +3824,366 @@ def _append_deep_sanity_stub(
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
     return block
+
+
+def _registry_record_payload(record: RegistryEntryRecord) -> dict[str, Any]:
+    try:
+        payload = tomllib.loads(record.block)
+    except tomllib.TOMLDecodeError as exc:
+        raise typer.BadParameter(f"{record.entry_id}: invalid TOML entry block: {exc}") from exc
+    entries = payload.get("entries", [])
+    entry = entries[0] if isinstance(entries, list) and entries else {}
+    if not isinstance(entry, dict):
+        raise typer.BadParameter(f"{record.entry_id}: invalid registry entry payload")
+    return entry
+
+
+def _keyword_extra_parent_source_policy_refs(entry: Mapping[str, Any]) -> tuple[str, ...]:
+    refs = []
+    for source_ref in _string_tuple(entry.get("source_refs")):
+        marker = "registry:keyword_extra_parent_entries:"
+        if source_ref.startswith(marker):
+            refs.append(source_ref[len(marker):])
+    return tuple(dict.fromkeys(refs))
+
+
+def _keyword_extra_parent_entry_offer_name(entry: Mapping[str, Any]) -> str | None:
+    examples = entry.get("positive_examples")
+    if not isinstance(examples, list):
+        return None
+    for example in examples:
+        if isinstance(example, dict):
+            offer_name = str(example.get("offer_name") or "").strip()
+            if offer_name:
+                return offer_name
+    return None
+
+
+def _keyword_extra_parent_entry_ingredient(entry: Mapping[str, Any]) -> str | None:
+    examples = entry.get("positive_examples")
+    if not isinstance(examples, list):
+        return None
+    for example in examples:
+        if isinstance(example, dict):
+            ingredient = str(example.get("ingredient") or "").strip()
+            if ingredient:
+                return ingredient
+    return None
+
+
+def _line_number_for_anchor(text: str, anchor: str) -> int:
+    index = text.find(anchor)
+    if index == -1:
+        raise typer.BadParameter(f"anchor not found after rewrite: {anchor}")
+    return text[:index].count("\n") + 1
+
+
+def _keyword_extra_parent_record_matches(
+    *,
+    record: RegistryEntryRecord,
+    entry: Mapping[str, Any],
+    canonical: str,
+    kid: str,
+    policy_ref: str | None,
+) -> bool:
+    if record.status != "active":
+        return False
+    if str(entry.get("canonical") or "").strip().lower() != canonical:
+        return False
+    variants = tuple(str(value).strip().lower() for value in entry.get("variants") or [])
+    if kid not in variants:
+        return False
+    if policy_ref is None:
+        return True
+    return policy_ref in _keyword_extra_parent_source_policy_refs(entry)
+
+
+def _keyword_extra_parent_find_removal_records(
+    *,
+    paths: MatcherPaths,
+    canonical: str,
+    kids: tuple[str, ...],
+    policy_ref: str | None,
+) -> tuple[str, tuple[tuple[RegistryEntryRecord, dict[str, Any], str], ...]]:
+    records = _registry_entry_records("keyword-extra-parent", paths.keyword_extra_parent_file)
+    matches: list[tuple[RegistryEntryRecord, dict[str, Any], str]] = []
+    found_by_kid: dict[str, list[RegistryEntryRecord]] = {kid: [] for kid in kids}
+    for record in records:
+        entry = _registry_record_payload(record)
+        for kid in kids:
+            if _keyword_extra_parent_record_matches(
+                record=record,
+                entry=entry,
+                canonical=canonical,
+                kid=kid,
+                policy_ref=policy_ref,
+            ):
+                found_by_kid[kid].append(record)
+                matches.append((record, entry, kid))
+
+    missing = [kid for kid, kid_matches in found_by_kid.items() if not kid_matches]
+    if missing:
+        policy_hint = f" under policy_ref {policy_ref}" if policy_ref else ""
+        raise typer.BadParameter(
+            f"keyword_extra_parent child not found for {canonical}{policy_hint}: {', '.join(missing)}"
+        )
+    ambiguous = [kid for kid, kid_matches in found_by_kid.items() if len(kid_matches) > 1]
+    if ambiguous:
+        raise typer.BadParameter(
+            "keyword_extra_parent child selector is ambiguous; pass --policy-ref or remove one kid at a time: "
+            + ", ".join(ambiguous)
+        )
+
+    if policy_ref is not None:
+        resolved_policy_ref = policy_ref
+    else:
+        matched_refs = {
+            ref
+            for _record, entry, _kid in matches
+            for ref in _keyword_extra_parent_source_policy_refs(entry)
+        }
+        if len(matched_refs) == 1:
+            resolved_policy_ref = next(iter(matched_refs))
+        else:
+            resolved_policy_ref = f"keyword_extra_parent_{_slug(canonical)}_family"
+    return resolved_policy_ref, tuple(matches)
+
+
+def _keyword_extra_parent_remaining_records(
+    *,
+    paths: MatcherPaths,
+    canonical: str,
+    policy_ref: str,
+    removed_entry_ids: set[str],
+) -> tuple[tuple[RegistryEntryRecord, dict[str, Any]], ...]:
+    remaining: list[tuple[RegistryEntryRecord, dict[str, Any]]] = []
+    for record in _registry_entry_records("keyword-extra-parent", paths.keyword_extra_parent_file):
+        if record.entry_id in removed_entry_ids:
+            continue
+        entry = _registry_record_payload(record)
+        if record.status != "active":
+            continue
+        if str(entry.get("canonical") or "").strip().lower() != canonical:
+            continue
+        if policy_ref not in _keyword_extra_parent_source_policy_refs(entry):
+            continue
+        remaining.append((record, entry))
+    return tuple(remaining)
+
+
+def _remove_existing_fixture_rows(
+    *,
+    paths: MatcherPaths,
+    fixture_ids: tuple[str, ...],
+) -> tuple[list[dict], tuple[str, ...], dict[str, dict[str, Any]]]:
+    fixture_id_set = set(fixture_ids)
+    fixtures = load_contract_source(_source_spec(paths, "matcher_regression_cases"))
+    kept: list[dict] = []
+    removed: list[str] = []
+    removed_rows: dict[str, dict[str, Any]] = {}
+    for row in fixtures:
+        row_id = str(row.get("id") or "")
+        if row_id in fixture_id_set:
+            removed.append(row_id)
+            removed_rows[row_id] = dict(row)
+            continue
+        kept.append(row)
+    return kept, tuple(removed), removed_rows
+
+
+def _fixture_offer_details(row: Mapping[str, Any] | None) -> tuple[str | None, str | None]:
+    if not isinstance(row, Mapping):
+        return None, None
+    offer = row.get("offer")
+    if not isinstance(offer, Mapping):
+        return None, None
+    return (
+        str(offer.get("name") or "").strip() or None,
+        str(offer.get("category") or "").strip() or None,
+    )
+
+
+def _fixture_ingredient(row: Mapping[str, Any] | None) -> str | None:
+    if not isinstance(row, Mapping):
+        return None
+    ingredients = row.get("ingredients")
+    if isinstance(ingredients, list) and ingredients:
+        value = str(ingredients[0]).strip()
+        return value or None
+    return None
+
+
+def _remove_keyword_extra_parent_positive_sanity_tests(
+    *,
+    paths: MatcherPaths,
+    policy_ref: str,
+    offer_names: tuple[str, ...],
+    dry_run: bool,
+) -> int:
+    if not paths.deep_sanity_file.exists() or not offer_names:
+        return 0
+    offer_name_set = {_runtime_rule_normalize_text(offer_name) for offer_name in offer_names}
+    text = paths.deep_sanity_file.read_text(encoding="utf-8")
+    tree = ast.parse(text, filename=str(paths.deep_sanity_file))
+    metadata_by_line = _deep_sanity_metadata_by_line(text)
+    remove_lines: set[int] = set()
+    removed_tests = 0
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if not isinstance(node.func, ast.Name) or node.func.id != "test":
+            continue
+        metadata = metadata_by_line.get(node.lineno, {})
+        if metadata.get("policy_ref") != policy_ref:
+            continue
+        if len(node.args) < 3:
+            continue
+        expected = node.args[2]
+        if isinstance(expected, ast.Constant) and expected.value is None:
+            continue
+        actual = node.args[1]
+        if not isinstance(actual, ast.Call):
+            continue
+        if not isinstance(actual.func, ast.Name) or actual.func.id != "match":
+            continue
+        if not actual.args:
+            continue
+        offer_name = _literal_string(actual.args[0])
+        if offer_name is None or _runtime_rule_normalize_text(offer_name) not in offer_name_set:
+            continue
+        end_lineno = getattr(node, "end_lineno", node.lineno)
+        remove_lines.update(range(node.lineno, end_lineno + 1))
+        removed_tests += 1
+
+    if not remove_lines:
+        return 0
+    lines = text.splitlines(keepends=True)
+    new_text = "".join(
+        line
+        for line_number, line in enumerate(lines, start=1)
+        if line_number not in remove_lines
+    )
+    new_text, _removed_blocks = _remove_empty_generated_sanity_blocks(new_text)
+    if not dry_run:
+        paths.deep_sanity_file.write_text(new_text, encoding="utf-8")
+    return removed_tests
+
+
+def _append_keyword_extra_parent_negative_sanity_stub(
+    *,
+    paths: MatcherPaths,
+    canonical: str,
+    rows: tuple[dict[str, str], ...],
+    policy_ref: str,
+    dry_run: bool,
+) -> str:
+    if not rows:
+        return ""
+    lines = [
+        "",
+        *_generated_sanity_header(policy_ref, "keyword-extra-parent"),
+    ]
+    for row in rows:
+        lines.extend(_deep_sanity_match_assertion(
+            description=f"{_titleish(row['kid'])} no longer matches {canonical} parent",
+            offer_name=row["offer_name"],
+            ingredient=row["ingredient"],
+            offer_category=row["offer_category"],
+            expected_canonical=None,
+            mode="fast-match",
+            recipe_name=_titleish(canonical) + " recipe",
+        ))
+    block = "\n".join(lines) + "\n"
+    _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
+    return block
+
+
+def _update_keyword_extra_parent_inventory_rows(
+    *,
+    paths: MatcherPaths,
+    canonical: str,
+    policy_ref: str,
+    fixture_ids: tuple[str, ...],
+    removed_kids: tuple[str, ...],
+    remaining_records: tuple[tuple[RegistryEntryRecord, dict[str, Any]], ...],
+    rewritten_registry_text: str,
+    reason: str,
+) -> tuple[list[dict], tuple[str, ...], tuple[str, ...]]:
+    fixture_id_set = set(fixture_ids)
+    inventory = load_contract_source(_source_spec(paths, "matcher_rule_inventory"))
+    updated_rows: list[dict] = []
+    changed: list[str] = []
+    dropped: list[str] = []
+    target_path = "app/languages/sv/ingredient_matching/term_registry/entries/keyword_extra_parent.toml"
+    remaining_entry_id: str | None = None
+    remaining_line: int | None = None
+    remaining_kids: list[str] = []
+    if remaining_records:
+        first_record, first_entry = remaining_records[0]
+        remaining_entry_id = first_record.entry_id
+        remaining_line = _line_number_for_anchor(
+            rewritten_registry_text,
+            f'entry_id = "{remaining_entry_id}"',
+        )
+        for _record, entry in remaining_records:
+            remaining_kids.extend(str(value) for value in entry.get("variants") or [])
+
+    for row in inventory:
+        refs = [str(ref) for ref in row.get("fixture_refs") or []]
+        row_policy_ref = str(row.get("policy_ref") or "")
+        row_matches = (
+            row_policy_ref == policy_ref
+            or str(row.get("adapter_ref") or "") == f"matcher_layer_diagnostics:{policy_ref}"
+            or any(ref in fixture_id_set for ref in refs)
+        )
+        if not row_matches:
+            updated_rows.append(row)
+            continue
+
+        row_id = str(row.get("id") or "<unknown>")
+        new_refs = [ref for ref in refs if ref not in fixture_id_set]
+        if not remaining_records:
+            dropped.append(row_id)
+            continue
+        if not new_refs:
+            raise typer.BadParameter(
+                f"keyword_extra_parent removal would leave inventory row {row_id} without fixture_refs "
+                "while sibling entries still remain; repair fixture_refs first or remove the whole family."
+            )
+
+        row = dict(row)
+        row["fixture_refs"] = new_refs
+        line_refs = [dict(line_ref) for line_ref in row.get("line_refs") or [] if isinstance(line_ref, dict)]
+        replacement = {
+            "path": target_path,
+            "start": remaining_line,
+            "end": remaining_line,
+            "anchor": f'entry_id = "{remaining_entry_id}"',
+        }
+        replaced = False
+        for index, line_ref in enumerate(line_refs):
+            if str(line_ref.get("path") or "") == target_path:
+                line_refs[index] = replacement
+                replaced = True
+                break
+        if not replaced:
+            line_refs.append(replacement)
+        row["line_refs"] = line_refs
+        notes = str(row.get("notes") or "").strip()
+        generated_tail = (
+            f" roll up to generic {canonical} for recipes that ask for the parent family. "
+            "Generated by dm matcher add keyword-extra-parent."
+        )
+        if notes.endswith(generated_tail):
+            notes = f"{', '.join(remaining_kids)}{generated_tail}"
+        removal_note = f"Modified by dm matcher modify keyword-extra-parent: removed {', '.join(removed_kids)} ({reason})."
+        if removal_note not in notes:
+            notes = f"{notes} {removal_note}".strip()
+        row["notes"] = notes
+        changed.append(row_id)
+        updated_rows.append(row)
+
+    return updated_rows, tuple(changed), tuple(dropped)
 
 
 def _append_keyword_synonym_deep_sanity_stub(
@@ -6907,7 +7286,10 @@ def add_keyword_synonym(
             raise typer.BadParameter("--inventory-id must not be empty")
     elif inventory_id_override is not None:
         raise typer.BadParameter("--inventory-id requires --with-inventory")
-    if paths.app_dir != APP_DIR and run_gates and not fixture_requested and not dry_run:
+    if (
+        _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run)
+        and not fixture_requested
+    ):
         raise typer.BadParameter(
             "tree-root keyword-synonym light gates are not available; use --no-run-gates "
             "or add --with-fixture for Track B gates"
@@ -7033,7 +7415,7 @@ def _add_runtime_overlay_rule(
         raise typer.BadParameter("--reason must not be empty")
 
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
 
     _emit_runtime_authoring_warnings(
@@ -7236,7 +7618,7 @@ def add_space_normalization(
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
 
     normalized_source = _runtime_rule_normalize_text(source)
@@ -7317,7 +7699,7 @@ def add_dual_keyword_normalization(
         raise typer.BadParameter("--primary must not also appear in --extra-keywords: " + ", ".join(duplicate_targets))
 
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
 
     normalized_source = _runtime_rule_normalize_text(source)
@@ -7381,7 +7763,7 @@ def _add_runtime_set_update_rule(
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     first_slug = _slug(terms[0])
     policy_ref = policy_ref or f"runtime_{surface.command.replace('-', '_')}_{action}_{first_slug}"
@@ -7446,7 +7828,7 @@ def _add_runtime_term_set_rule(
             + ", ".join(broad_terms)
         )
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     policy_ref = policy_ref or f"runtime_{surface.command.replace('-', '_')}_{_slug(terms[0])}"
     overlay_preview = _append_runtime_term_set_entry(
@@ -8001,7 +8383,7 @@ def add_spice_fresh_rule(
     }
     _validate_spice_fresh_rule_fields(fields)
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     normalized_keyword = _runtime_rule_normalize_text(keyword)
     policy_ref = policy_ref or f"runtime_spice_fresh_rule_{_slug(normalized_keyword)}"
@@ -8234,7 +8616,7 @@ def add_cuisine_context(
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     normalized_trigger = _runtime_rule_normalize_text(trigger)
     policy_ref = policy_ref or f"runtime_cuisine_context_{_slug(normalized_trigger)}"
@@ -8301,7 +8683,7 @@ def add_context_word_exemption(
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     normalized_keyword = _runtime_rule_normalize_text(keyword)
     policy_ref = policy_ref or f"runtime_context_word_exemption_{_slug(normalized_keyword)}"
@@ -8370,7 +8752,7 @@ def add_product_name_substitution(
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     normalized_old = _runtime_rule_normalize_text(old_keyword)
     normalized_new = _runtime_rule_normalize_text(new_keyword)
@@ -8439,7 +8821,7 @@ def add_secondary_ingredient_pattern(
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     normalized_keyword = _runtime_rule_normalize_text(keyword)
     policy_ref = policy_ref or f"runtime_secondary_ingredient_pattern_{_slug(normalized_keyword)}"
@@ -8502,7 +8884,7 @@ def add_compound_protection(
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     normalized_mode = mode.replace("-", "_")
     policy_ref = policy_ref or f"runtime_compound_protection_{normalized_mode}_{_slug(keywords[0])}"
@@ -8558,7 +8940,7 @@ def _add_runtime_specialty_rule(
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     normalized_key = _runtime_rule_normalize_text(key)
     policy_ref = policy_ref or f"runtime_{surface.command.replace('-', '_')}_{_slug(normalized_key)}"
@@ -8951,7 +9333,7 @@ def add_smart_blocker(
         raise typer.BadParameter("--sanity-ingredient and --sanity-offer must be provided together")
 
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root smart-blocker gates are not available; use --no-run-gates")
 
     function_name, call = _insert_smart_blocker_scaffold(
@@ -9117,7 +9499,7 @@ def add_no_match_policy(
     if inventory_id_override is not None and not auto_inventory:
         raise typer.BadParameter("--inventory-id requires --auto-inventory")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
     if explicit_fixture_refs:
         _ensure_fixture_refs_exist(paths, explicit_fixture_refs)
@@ -9254,7 +9636,7 @@ def _modify_runtime_overlay_rule_by_id(
     if not reason:
         raise typer.BadParameter("--reason is required for runtime overlay modifications")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime modify gates are not available; use --no-run-gates")
     sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
     surface, entry = _find_runtime_overlay_entry_by_id(sections, rule_id)
@@ -9373,7 +9755,7 @@ def _remove_runtime_overlay_rule_by_id(
     if not reason:
         raise typer.BadParameter("--reason is required; runtime overlay removal is a deliberate policy change")
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime remove gates are not available; use --no-run-gates")
     sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
     surface, entry = _find_runtime_overlay_entry_by_id(sections, rule_id)
@@ -9420,6 +9802,196 @@ def _remove_runtime_overlay_rule_by_id(
         typer.echo("Skipped gates (--no-run-gates).")
         return
     raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+@matcher_modify_app.command("keyword-extra-parent")
+def modify_keyword_extra_parent(
+    canonical: Annotated[str, typer.Argument(help="Parent canonical, e.g. nötdryck.")],
+    remove_kids_csv: Annotated[
+        str,
+        typer.Option("--remove-kids", help="Comma-separated child terms to remove from this parent family."),
+    ],
+    reason: Annotated[str, typer.Option("--reason", help="Why these children no longer belong in the family.")],
+    policy_ref: Annotated[
+        str | None,
+        typer.Option("--policy-ref", help="Stable policy ref when the canonical has multiple generated families."),
+    ] = None,
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Regenerate and run light registry/sanity gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Show the cascade without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Remove old positive canaries and add negative proof rows."),
+    ] = True,
+) -> None:
+    canonical = canonical.strip().lower()
+    if not canonical:
+        raise typer.BadParameter("canonical must not be empty")
+    kids = _split_csv(remove_kids_csv, label="--remove-kids")
+    reason = reason.strip()
+    if not reason:
+        raise typer.BadParameter("--reason must not be empty")
+    paths = _paths(tree_root)
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
+        raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
+
+    resolved_policy_ref, matches = _keyword_extra_parent_find_removal_records(
+        paths=paths,
+        canonical=canonical,
+        kids=kids,
+        policy_ref=policy_ref,
+    )
+    removed_entry_ids = tuple(record.entry_id for record, _entry, _kid in matches)
+    canonical_slug = _slug(canonical)
+    fixture_ids = tuple(
+        f"keyword_extra_parent_{canonical_slug}_{_slug(kid)}_positive"
+        for _record, _entry, kid in matches
+    )
+    fixture_rows, removed_fixture_ids, removed_fixture_rows = _remove_existing_fixture_rows(
+        paths=paths,
+        fixture_ids=fixture_ids,
+    )
+
+    removed_sanity_rows: list[dict[str, str]] = []
+    offer_names_for_sanity_removal: list[str] = []
+    for (_record, entry, kid), fixture_id in zip(matches, fixture_ids, strict=True):
+        fixture_row = removed_fixture_rows.get(fixture_id)
+        fixture_offer_name, fixture_category = _fixture_offer_details(fixture_row)
+        offer_name = (
+            fixture_offer_name
+            or _keyword_extra_parent_entry_offer_name(entry)
+            or _titleish(kid)
+        )
+        ingredient = (
+            _fixture_ingredient(fixture_row)
+            or _keyword_extra_parent_entry_ingredient(entry)
+            or canonical
+        )
+        offer_category = fixture_category or ""
+        offer_names_for_sanity_removal.append(offer_name)
+        entry_offer_name = _keyword_extra_parent_entry_offer_name(entry)
+        if entry_offer_name:
+            offer_names_for_sanity_removal.append(entry_offer_name)
+        removed_sanity_rows.append({
+            "kid": kid,
+            "offer_name": offer_name,
+            "ingredient": ingredient,
+            "offer_category": offer_category,
+        })
+
+    original_registry_text = paths.keyword_extra_parent_file.read_text(encoding="utf-8")
+    rewritten_registry_text = original_registry_text
+    for record, _entry, _kid in sorted(matches, key=lambda item: item[0].start, reverse=True):
+        rewritten_registry_text = (
+            rewritten_registry_text[:record.start] + rewritten_registry_text[record.end:]
+        )
+    rewritten_registry_text = re.sub(r"\n{3,}", "\n\n", rewritten_registry_text).rstrip() + "\n"
+
+    remaining_records = _keyword_extra_parent_remaining_records(
+        paths=paths,
+        canonical=canonical,
+        policy_ref=resolved_policy_ref,
+        removed_entry_ids=set(removed_entry_ids),
+    )
+    inventory_rows, inventory_changed, inventory_dropped = _update_keyword_extra_parent_inventory_rows(
+        paths=paths,
+        canonical=canonical,
+        policy_ref=resolved_policy_ref,
+        fixture_ids=fixture_ids,
+        removed_kids=tuple(kid for _record, _entry, kid in matches),
+        remaining_records=remaining_records,
+        rewritten_registry_text=rewritten_registry_text,
+        reason=reason,
+    )
+
+    sanity_removed = 0
+    sanity_preview = ""
+    if write_sanity:
+        sanity_removed = _remove_keyword_extra_parent_positive_sanity_tests(
+            paths=paths,
+            policy_ref=resolved_policy_ref,
+            offer_names=tuple(dict.fromkeys(offer_names_for_sanity_removal)),
+            dry_run=True,
+        )
+        sanity_preview = _append_keyword_extra_parent_negative_sanity_stub(
+            paths=paths,
+            canonical=canonical,
+            rows=tuple(removed_sanity_rows),
+            policy_ref=resolved_policy_ref,
+            dry_run=True,
+        )
+
+    if dry_run:
+        typer.echo(f"Would modify keyword_extra_parent family: {resolved_policy_ref}")
+        typer.echo(f"  removed kids: {', '.join(kid for _record, _entry, kid in matches)}")
+        typer.echo(f"  removed entries: {', '.join(removed_entry_ids)}")
+        if removed_fixture_ids:
+            typer.echo(f"  removed fixtures: {', '.join(removed_fixture_ids)}")
+        else:
+            typer.echo("  removed fixtures: none already present")
+        if inventory_changed:
+            typer.echo(f"  inventory rows updated: {', '.join(inventory_changed)}")
+        if inventory_dropped:
+            typer.echo(f"  inventory rows dropped: {', '.join(inventory_dropped)}")
+        if write_sanity:
+            typer.echo(f"  sanity: would remove {sanity_removed} positive test(s)")
+            if sanity_preview:
+                typer.echo(sanity_preview)
+        else:
+            typer.echo("  sanity: skipped")
+        typer.echo("Dry run only; no files written.")
+        return
+
+    paths.keyword_extra_parent_file.write_text(rewritten_registry_text, encoding="utf-8")
+    write_contract_source(_source_spec(paths, "matcher_regression_cases"), fixture_rows)
+    write_contract_source(_source_spec(paths, "matcher_rule_inventory"), inventory_rows)
+    if write_sanity:
+        sanity_removed = _remove_keyword_extra_parent_positive_sanity_tests(
+            paths=paths,
+            policy_ref=resolved_policy_ref,
+            offer_names=tuple(dict.fromkeys(offer_names_for_sanity_removal)),
+            dry_run=False,
+        )
+        _append_keyword_extra_parent_negative_sanity_stub(
+            paths=paths,
+            canonical=canonical,
+            rows=tuple(removed_sanity_rows),
+            policy_ref=resolved_policy_ref,
+            dry_run=False,
+        )
+
+    _regenerate_contract_json(paths)
+    coverage_status = _run_coverage_generator(paths)
+    if coverage_status != 0:
+        raise typer.Exit(coverage_status)
+
+    typer.echo(f"Modified keyword_extra_parent family: {resolved_policy_ref}")
+    typer.echo(f"  removed kids: {', '.join(kid for _record, _entry, kid in matches)}")
+    typer.echo(f"  removed entries: {', '.join(removed_entry_ids)}")
+    if removed_fixture_ids:
+        typer.echo(f"  removed fixtures: {', '.join(removed_fixture_ids)}")
+    else:
+        typer.echo("  removed fixtures: none already present")
+    if inventory_changed:
+        typer.echo(f"  inventory rows updated: {', '.join(inventory_changed)}")
+    if inventory_dropped:
+        typer.echo(f"  inventory rows dropped: {', '.join(inventory_dropped)}")
+    if write_sanity:
+        typer.echo(f"  sanity: removed {sanity_removed} positive test(s), added negative proof")
+    else:
+        typer.echo("  sanity: skipped")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
+    raise typer.Exit(gate_status)
 
 
 @matcher_modify_app.command("overlay")
@@ -9545,7 +10117,7 @@ def modify_no_match_policy(
         raise typer.BadParameter("provide at least one --set-* or replacement option")
 
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
 
     target_file, record, entry, policy = _find_no_match_policy_record(paths, selector)
@@ -9729,7 +10301,7 @@ def modify_match_bridge(
         raise typer.BadParameter("provide at least one pattern/example replacement option")
 
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
 
     target_file, record, entry, bridge = _find_match_bridge_record(paths, selector)
@@ -9902,7 +10474,7 @@ def add_extraction_helper(
         raise typer.BadParameter("--input must not be empty")
     source_refs = _split_csv(source_refs_csv, label="--source-refs", lowercase=False)
     paths = _paths(tree_root)
-    if paths.app_dir != APP_DIR and run_gates and not dry_run:
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
     policy_ref = policy_ref or f"extraction_helper_{_slug(canonical)}"
     entry_id, _entry_line, toml_preview, replaced = _append_extraction_helper_entry(

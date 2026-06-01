@@ -102,6 +102,18 @@ awkward cases; finish those with Track B gates and `--allow-removals`.
 TOML source, inventory fixture refs, registry fixture refs, regenerated JSON, and
 pre-flight. It refuses to leave empty inventory or registry rows unless you pass
 the explicit `--drop-empty-inventory` or `--drop-empty-registry-entries` flags.
+It does **not** remove or rewrite the semantic registry rule itself. For example,
+to remove only `mandeldryck` from a generated `keyword-extra-parent` family, use:
+
+```bash
+./bin/dm matcher modify keyword-extra-parent nötdryck \
+  --remove-kids mandeldryck \
+  --reason "mandeldryck is not part of the nut-drink family"
+```
+
+That command removes the child registry entry, drops the corresponding positive
+fixture/canary, re-anchors inventory to a surviving sibling, regenerates derived
+contracts, and adds a negative sanity proof for the removed child.
 
 `fixture make-negative` is for policy reversals where an existing positive
 fixture is now supposed to prove "must not match". It sets `expected = 0`,
@@ -1563,8 +1575,9 @@ generated inventory JSON. Use `--dry-run` to inspect changes without writing.
 The raw `refresh_matcher_rule_inventory_line_refs.py --write` script remains a
 fallback/debug form.
 
-If refresh fails with `missing anchors`, run the raw script in JSON mode without
-`--write` to see the exact inventory entry, source path, and anchor text:
+If refresh fails with `missing anchors`, current text output prints the stale
+inventory id/path/anchor directly. For scripting or a fuller payload, run the
+raw script in JSON mode without `--write`:
 
 ```bash
 docker compose exec -T web python /app/support_checks/refresh_matcher_rule_inventory_line_refs.py \
@@ -1581,6 +1594,11 @@ The `missing` array identifies the stale reference, for example:
   "anchor": "entry_id = \"sv-se.family.notdryck.mandeldryck_096\""
 }
 ```
+
+When the anchor target was intentionally removed, do not keep retrying
+`refresh-line-refs --fix`: there is no line number to refresh. Update the
+owning inventory row so its `line_refs[].anchor` points at a surviving sibling
+entry, or use the relevant `dm matcher modify ...` command when one exists.
 
 ### Registry Entries
 
@@ -1599,7 +1617,9 @@ Common files and their normal authoring path:
 - `extraction_helper.toml` — `dm matcher add extraction-helper`
 - `ingredient_parent.toml` — `dm matcher add ingredient-parent`
 - `ingredient_routing_parent.toml` — `dm matcher add ingredient-routing-parent`
-- `keyword_extra_parent.toml` — `dm matcher add keyword-extra-parent`
+- `keyword_extra_parent.toml` — `dm matcher add keyword-extra-parent`;
+  for a generated multi-child family, remove one child with
+  `dm matcher modify keyword-extra-parent <canonical> --remove-kids <child> --reason "<why>"`
 - `keyword_synonym.toml` — `dm matcher add keyword-synonym`
 - `match_bridge.toml` — staged/declarative-only; `dm matcher modify match-bridge`
   can narrow simple existing rows; see the match_bridge callout
