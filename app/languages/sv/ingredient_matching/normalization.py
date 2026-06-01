@@ -266,6 +266,14 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('vegetabilisk mjölk', 'växtdryck'),
     ('vegetabilisk mjolk', 'växtdryck'),
     ('vegetabilisk dryck', 'växtdryck'),
+    # Oat-based drink/milk recipe lines should reach ordinary havredryck products
+    # (the bare word "dryck"/"mjölk" alone is a stop-word and drops out otherwise,
+    # leaving only "havrebaserad" which does not route to havredryck).
+    ('havrebaserad dryck', 'havredryck'),
+    ('havrebaserad mjölk', 'havredryck'),
+    ('havrebaserad mjolk', 'havredryck'),
+    ('havrebaserad mjölkdryck', 'havredryck'),
+    ('havrebaserad mjolkdryck', 'havredryck'),
     # Explicit gluten-free oats should stay distinct from ordinary oats.
     ('glutenfri havregryn', 'glutenfrihavregryn'),
     ('glutenfria havregryn', 'glutenfrihavregryn'),

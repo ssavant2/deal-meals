@@ -1827,6 +1827,14 @@ action = "add"
 terms = ["talg"]
 reason = "Talg (beef tallow/suet, 4 chars) is a specific fat ingredient in Swedish cooking with dedicated products on sale (Talg 250g Jureskog Selection). Dropped by short-keyword filter without this entry."
 
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_scampi"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["scampi"]
+reason = "Scampi (frysta stora räkor i svensk dagligvaruhandel) är 6 tecken och tappas annars av längdfiltret"
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"

@@ -4,9 +4,9 @@ import re
 from typing import FrozenSet
 
 try:
-    from languages.sv.normalization import fix_swedish_chars
+    from languages.sv.normalization import fix_swedish_chars, _diet_cue_is_optional
 except ModuleNotFoundError:
-    from app.languages.sv.normalization import fix_swedish_chars
+    from app.languages.sv.normalization import fix_swedish_chars, _diet_cue_is_optional
 
 
 ALLOWED_YOGURT_TYPES: FrozenSet[str] = frozenset({
@@ -147,7 +147,12 @@ def check_yoghurt_match(keyword: str, ingredient_lower: str,
         return False
 
     is_vanilj_recipe = any(v in ingredient_lower for v in _YOGHURT_VANILJ_INDICATORS)
-    is_vego_recipe = any(v in ingredient_lower for v in _YOGHURT_VEGO_INDICATORS)
+    # An optional plant suggestion ("välj växtbaserad", "gärna vegansk") must not
+    # turn this into a hard vego requirement — the plain dairy yoghurt is still fine.
+    is_vego_recipe = (
+        any(v in ingredient_lower for v in _YOGHURT_VEGO_INDICATORS)
+        and not _diet_cue_is_optional(ingredient_lower, _YOGHURT_VEGO_INDICATORS)
+    )
 
     # "Eller"-construction: recipe presents two alternatives (e.g.
     # "yoghurt eller havrefraiche"). Both branches should match. Detect by checking

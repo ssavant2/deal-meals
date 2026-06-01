@@ -33189,5 +33189,110 @@
     "policy_ref": "policy_margarin_i_b_bak_stek_margarin",
     "recipe_name": "No-match policy regression",
     "source_ref": "manual:policy_margarin_i_b_bak_stek_margarin"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "scampi",
+        "ingredient_index": 0,
+        "must_match_keyword": "scampi"
+      }
+    ],
+    "id": "keyword_extra_parent_scampi_tigerrakor_positive",
+    "ingredients": [
+      "300 g tinad scampi"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Tigerräkor"
+    },
+    "policy_ref": "keyword_extra_parent_scampi_family",
+    "recipe_name": "Scampi aglio e olio",
+    "source_ref": "current_review:keyword_extra_parent_scampi_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "scampi",
+        "ingredient_index": 0,
+        "must_match_keyword": "scampi"
+      }
+    ],
+    "id": "keyword_extra_parent_scampi_jatterakor_positive",
+    "ingredients": [
+      "300 g tinad scampi"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Jätteräkor"
+    },
+    "policy_ref": "keyword_extra_parent_scampi_family",
+    "recipe_name": "Scampi aglio e olio",
+    "source_ref": "current_review:keyword_extra_parent_scampi_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "nötdryck",
+        "ingredient_index": 0,
+        "must_match_keyword": "nötdryck"
+      }
+    ],
+    "id": "keyword_extra_parent_notdryck_hasselnotsdryck_positive",
+    "ingredients": [
+      "2 dl naturell nötdryck"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Hasselnötsdryck"
+    },
+    "policy_ref": "keyword_extra_parent_notdryck_family",
+    "recipe_name": "Pannkakor på nötdryck",
+    "source_ref": "current_review:keyword_extra_parent_notdryck_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "nötdryck",
+        "ingredient_index": 0,
+        "must_match_keyword": "nötdryck"
+      }
+    ],
+    "id": "keyword_extra_parent_notdryck_cashewdryck_positive",
+    "ingredients": [
+      "2 dl naturell nötdryck"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Cashewdryck"
+    },
+    "policy_ref": "keyword_extra_parent_notdryck_family",
+    "recipe_name": "Pannkakor på nötdryck",
+    "source_ref": "current_review:keyword_extra_parent_notdryck_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "nötdryck",
+        "ingredient_index": 0,
+        "must_match_keyword": "nötdryck"
+      }
+    ],
+    "id": "keyword_extra_parent_notdryck_makadamiadryck_positive",
+    "ingredients": [
+      "2 dl naturell nötdryck"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Makadamiadryck"
+    },
+    "policy_ref": "keyword_extra_parent_notdryck_family",
+    "recipe_name": "Pannkakor på nötdryck",
+    "source_ref": "current_review:keyword_extra_parent_notdryck_routing"
   }
 ]

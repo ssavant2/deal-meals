@@ -12,7 +12,49 @@ Used by:
 """
 
 import re
-from typing import Dict, List
+from typing import Dict, Iterable, List
+
+# ── Optional dietary markers ──────────────────────────────────────────────────
+# When a vegan/vegetarian/free-from cue is qualified by one of these markers
+# (e.g. "gärna vegansk", "välj växtbaserad", "kan göras vegansk"), the recipe
+# only SUGGESTS a plant-based/free-from swap — the ordinary dairy/meat/egg base
+# is still acceptable. Matching guards in matching.py, recipe_matcher_backend.py
+# and dairy_types.py share this detector so a soft suggestion never blocks the
+# base product, while a bare cue ("vegansk grädde") stays a hard requirement.
+_OPTIONAL_DIET_MARKERS = (
+    'gärna', 'garna',                       # "gärna vegansk" = preferably vegan
+    'välj', 'valj',                         # "välj växtbaserad" = choose plant-based
+    'valfri', 'valfritt', 'valfria',        # "valfri mjölk, ev. vegansk"
+    'eventuellt', 'ev.',                    # "ev. vegansk"
+    'om du vill', 'om man vill',            # "vegansk om du vill"
+    'vid behov',
+    'kan vara', 'kan göras', 'kan goras',   # "kan göras vegansk"
+    'kan bytas', 'kan ersättas', 'kan ersattas',
+    'byt gärna', 'byt garna',
+)
+
+
+def _diet_cue_is_optional(ingredient_lower: str, cues: Iterable[str]) -> bool:
+    """True when a dietary cue is only an optional suggestion, not a hard requirement.
+
+    Detects phrasing such as "gräddfil, gärna vegansk" or "yoghurt (välj
+    växtbaserad för en vegansk måltid)" where the plant-based/free-from term is
+    immediately preceded by an optional marker. In that case the ordinary
+    dairy/meat/gluten base is still acceptable, so the matching guard must not
+    block it. A bare cue with no nearby optional marker ("vegansk grädde") is a
+    hard requirement and returns False.
+    """
+    for cue in cues:
+        start = ingredient_lower.find(cue)
+        while start != -1:
+            # Only look a short distance back so the marker actually qualifies
+            # THIS cue (e.g. "välj växtbaserad"), not an unrelated earlier word.
+            window = ingredient_lower[max(0, start - 40):start]
+            if any(marker in window for marker in _OPTIONAL_DIET_MARKERS):
+                return True
+            start = ingredient_lower.find(cue, start + 1)
+    return False
+
 
 # ── Non-Swedish accent stripping ──────────────────────────────────────────────
 # Strips all European diacritics EXCEPT Swedish å, ä, ö (which we keep).

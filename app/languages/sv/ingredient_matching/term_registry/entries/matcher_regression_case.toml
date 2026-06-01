@@ -30026,3 +30026,103 @@ source_family = "matcher_regression_case"
 canonical = "policy_margarin_i_b_bak_stek_margarin"
 variant = "margarin_i_b_bak_stek_margarin_negative: Margarin Flytande 80% 500ml ICA"
 layer_role = "negative_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_scampi_family.tigerrakor_positive"
+language = "sv"
+market = "SE"
+canonical = "scampi"
+status = "active"
+variants = ["keyword_extra_parent_scampi_tigerrakor_positive: Tigerräkor"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_scampi_tigerrakor_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_scampi_tigerrakor_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "scampi"
+variant = "keyword_extra_parent_scampi_tigerrakor_positive: Tigerräkor"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_scampi_family.jatterakor_positive"
+language = "sv"
+market = "SE"
+canonical = "scampi"
+status = "active"
+variants = ["keyword_extra_parent_scampi_jatterakor_positive: Jätteräkor"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_scampi_jatterakor_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_scampi_jatterakor_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "scampi"
+variant = "keyword_extra_parent_scampi_jatterakor_positive: Jätteräkor"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_notdryck_family.hasselnotsdryck_positive"
+language = "sv"
+market = "SE"
+canonical = "nötdryck"
+status = "active"
+variants = ["keyword_extra_parent_notdryck_hasselnotsdryck_positive: Hasselnötsdryck"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_notdryck_hasselnotsdryck_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_notdryck_hasselnotsdryck_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "nötdryck"
+variant = "keyword_extra_parent_notdryck_hasselnotsdryck_positive: Hasselnötsdryck"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_notdryck_family.cashewdryck_positive"
+language = "sv"
+market = "SE"
+canonical = "nötdryck"
+status = "active"
+variants = ["keyword_extra_parent_notdryck_cashewdryck_positive: Cashewdryck"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_notdryck_cashewdryck_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_notdryck_cashewdryck_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "nötdryck"
+variant = "keyword_extra_parent_notdryck_cashewdryck_positive: Cashewdryck"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_notdryck_family.makadamiadryck_positive"
+language = "sv"
+market = "SE"
+canonical = "nötdryck"
+status = "active"
+variants = ["keyword_extra_parent_notdryck_makadamiadryck_positive: Makadamiadryck"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_notdryck_makadamiadryck_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_notdryck_makadamiadryck_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "nötdryck"
+variant = "keyword_extra_parent_notdryck_makadamiadryck_positive: Makadamiadryck"
+layer_role = "positive_regression"

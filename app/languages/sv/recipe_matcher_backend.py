@@ -140,7 +140,7 @@ try:
     from languages.sv.ingredient_matching.validators import check_explicit_liquid_honey_match
     from languages.sv.ingredient_matching.validators import check_plain_fresh_potato_match
     from languages.sv.ingredient_matching.validators import check_specialty_qualifiers
-    from languages.sv.normalization import fix_swedish_chars
+    from languages.sv.normalization import fix_swedish_chars, _diet_cue_is_optional
 except ModuleNotFoundError:
     from app.database import get_db_session
     from app.languages.categories import MEAT, FISH, VEGETARIAN
@@ -272,7 +272,7 @@ except ModuleNotFoundError:
     from app.languages.sv.ingredient_matching.validators import check_explicit_liquid_honey_match
     from app.languages.sv.ingredient_matching.validators import check_plain_fresh_potato_match
     from app.languages.sv.ingredient_matching.validators import check_specialty_qualifiers
-    from app.languages.sv.normalization import fix_swedish_chars
+    from app.languages.sv.normalization import fix_swedish_chars, _diet_cue_is_optional
 
 try:
     from models import FoundRecipe, Offer
@@ -360,6 +360,17 @@ def _is_recipe_named_candy_offer(name: str, category: str | None) -> bool:
 _EXPLICIT_VEGAN_RECIPE_CUES = frozenset({
     'vegan', 'vegansk', 'veganskt', 'veganska',
 })
+# Plant/vegan wording on the recipe side. Used together with the shared
+# optional-marker detector: when one of these is only an optional suggestion
+# ("gärna vegansk", "välj växtbaserad"), the ordinary dairy/meat/egg base stays
+# acceptable and the recipe-level vegan guard must not reject it.
+_OPTIONAL_PLANT_DIET_CUES = frozenset({
+    'vegansk', 'veganskt', 'veganska', 'vegan',
+    'växtbaserad', 'växtbaserat', 'växtbaserade',
+    'vaxtbaserad', 'vaxtbaserat', 'vaxtbaserade',
+    'plant based', 'plant-based', 'plantbased',
+    'vego', 'vegetarisk', 'vegetariskt', 'vegetariska',
+})
 _EXPLICIT_VEGAN_PRODUCT_CUES = frozenset({
     'vegan', 'vegansk', 'veganskt', 'veganska',
     'växtbaserad', 'växtbaserat', 'växtbaserade',
@@ -439,6 +450,12 @@ def _explicit_vegan_context_allows_product(
 ) -> bool:
     """Recipe-level vegan wording should not admit animal or vegetarian-only substitutes."""
     if not _has_explicit_vegan_recipe_context(full_recipe_text):
+        return True
+
+    # If THIS ingredient's plant-based wording is only an optional suggestion
+    # ("gärna vegansk", "välj växtbaserad för en vegansk måltid"), the ordinary
+    # dairy/meat/egg base is still acceptable for this ingredient — do not block.
+    if _diet_cue_is_optional(ingredient_lower, _OPTIONAL_PLANT_DIET_CUES):
         return True
 
     if (
@@ -2946,7 +2963,13 @@ def validate_offer_match_candidate(
                 and any(cue in veg_scope for cue in ('smördeg', 'smordeg'))
                 and _vegan_smordeg_product_allowed(prod_lower, offer_match_keywords)
             )
-            if ing_words & VEG_QUALIFIER_WORDS and not vegan_smordeg_allowed:
+            present_veg_qualifiers = ing_words & VEG_QUALIFIER_WORDS
+            # An optional qualifier ("gärna vegansk", "välj växtbaserad") only
+            # suggests a plant swap — the ordinary dairy/meat carrier stays valid.
+            veg_qualifier_optional = bool(present_veg_qualifiers) and _diet_cue_is_optional(
+                veg_scope, present_veg_qualifiers
+            )
+            if present_veg_qualifiers and not vegan_smordeg_allowed and not veg_qualifier_optional:
                 _record_validation_event(
                     validation_events,
                     'validation_reject',

@@ -12,9 +12,9 @@ import re
 from typing import Dict, FrozenSet, Iterable, List, Optional
 
 try:
-    from languages.sv.normalization import fix_swedish_chars
+    from languages.sv.normalization import fix_swedish_chars, _diet_cue_is_optional
 except ModuleNotFoundError:
-    from app.languages.sv.normalization import fix_swedish_chars
+    from app.languages.sv.normalization import fix_swedish_chars, _diet_cue_is_optional
 
 from .blocker_data import FALSE_POSITIVE_BLOCKERS
 from .carrier_context import (
@@ -3169,21 +3169,25 @@ def _explicit_vegan_requirement_allows_product(
         return _vegan_smordeg_product_allowed(product_lower, product_keywords)
     if (
         any(cue in scoped_ingredient for cue in _VEGAN_RECIPE_CUES)
+        and not _diet_cue_is_optional(scoped_ingredient, _VEGAN_RECIPE_CUES)
         and not _product_satisfies_recipe_label(product_lower, product_keywords, _PLANT_BASED_PRODUCT_CUES)
     ):
         return False
     if (
         any(cue in scoped_ingredient for cue in _VEGETARIAN_RECIPE_CUES)
+        and not _diet_cue_is_optional(scoped_ingredient, _VEGETARIAN_RECIPE_CUES)
         and not _product_satisfies_recipe_label(product_lower, product_keywords, _VEGETARIAN_PRODUCT_CUES)
     ):
         return False
     if (
         any(cue in scoped_ingredient for cue in _LACTOSE_FREE_RECIPE_CUES)
+        and not _diet_cue_is_optional(scoped_ingredient, _LACTOSE_FREE_RECIPE_CUES)
         and not _product_satisfies_recipe_label(product_lower, product_keywords, _LACTOSE_FREE_PRODUCT_CUES)
     ):
         return False
     if (
         any(cue in scoped_ingredient for cue in _GLUTEN_FREE_RECIPE_CUES)
+        and not _diet_cue_is_optional(scoped_ingredient, _GLUTEN_FREE_RECIPE_CUES)
         and not _product_satisfies_recipe_label(product_lower, product_keywords, _GLUTEN_FREE_PRODUCT_CUES)
     ):
         return False

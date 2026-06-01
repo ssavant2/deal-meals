@@ -9406,3 +9406,43 @@ source_family = "matcher_rule_inventory"
 canonical = "margarin"
 variant = "margarin"
 layer_role = "legacy_no_match_policy"
+
+[[entries]]
+entry_id = "sv-se.policy.scampi.legacy_parent_scampi_family"
+language = "sv"
+market = "SE"
+canonical = "scampi"
+status = "active"
+variants = ["scampi"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:legacy_parent_scampi_family"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row legacy_parent_scampi_family."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "scampi"
+variant = "scampi"
+layer_role = "legacy_parent"
+
+[[entries]]
+entry_id = "sv-se.policy.notdryck.legacy_parent_notdryck_family"
+language = "sv"
+market = "SE"
+canonical = "nötdryck"
+status = "active"
+variants = ["nötdryck"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:legacy_parent_notdryck_family"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row legacy_parent_notdryck_family."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "nötdryck"
+variant = "nötdryck"
+layer_role = "legacy_parent"

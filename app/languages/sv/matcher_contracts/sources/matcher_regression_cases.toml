@@ -28868,3 +28868,88 @@ expected = 0
 [fixtures.offer]
 name = "Margarin Flytande 80% 500ml ICA"
 category = "dairy"
+
+[[fixtures]]
+id = "keyword_extra_parent_scampi_tigerrakor_positive"
+policy_ref = "keyword_extra_parent_scampi_family"
+source_ref = "current_review:keyword_extra_parent_scampi_routing"
+recipe_name = "Scampi aglio e olio"
+ingredients = ["300 g tinad scampi"]
+expected = 1
+
+[fixtures.offer]
+name = "Tigerräkor"
+category = "pantry"
+
+[[fixtures.expected_matches]]
+canonical = "scampi"
+ingredient_index = 0
+must_match_keyword = "scampi"
+
+[[fixtures]]
+id = "keyword_extra_parent_scampi_jatterakor_positive"
+policy_ref = "keyword_extra_parent_scampi_family"
+source_ref = "current_review:keyword_extra_parent_scampi_routing"
+recipe_name = "Scampi aglio e olio"
+ingredients = ["300 g tinad scampi"]
+expected = 1
+
+[fixtures.offer]
+name = "Jätteräkor"
+category = "pantry"
+
+[[fixtures.expected_matches]]
+canonical = "scampi"
+ingredient_index = 0
+must_match_keyword = "scampi"
+
+[[fixtures]]
+id = "keyword_extra_parent_notdryck_hasselnotsdryck_positive"
+policy_ref = "keyword_extra_parent_notdryck_family"
+source_ref = "current_review:keyword_extra_parent_notdryck_routing"
+recipe_name = "Pannkakor på nötdryck"
+ingredients = ["2 dl naturell nötdryck"]
+expected = 1
+
+[fixtures.offer]
+name = "Hasselnötsdryck"
+category = "pantry"
+
+[[fixtures.expected_matches]]
+canonical = "nötdryck"
+ingredient_index = 0
+must_match_keyword = "nötdryck"
+
+[[fixtures]]
+id = "keyword_extra_parent_notdryck_cashewdryck_positive"
+policy_ref = "keyword_extra_parent_notdryck_family"
+source_ref = "current_review:keyword_extra_parent_notdryck_routing"
+recipe_name = "Pannkakor på nötdryck"
+ingredients = ["2 dl naturell nötdryck"]
+expected = 1
+
+[fixtures.offer]
+name = "Cashewdryck"
+category = "pantry"
+
+[[fixtures.expected_matches]]
+canonical = "nötdryck"
+ingredient_index = 0
+must_match_keyword = "nötdryck"
+
+[[fixtures]]
+id = "keyword_extra_parent_notdryck_makadamiadryck_positive"
+policy_ref = "keyword_extra_parent_notdryck_family"
+source_ref = "current_review:keyword_extra_parent_notdryck_routing"
+recipe_name = "Pannkakor på nötdryck"
+ingredients = ["2 dl naturell nötdryck"]
+expected = 1
+
+[fixtures.offer]
+name = "Makadamiadryck"
+category = "pantry"
+
+[[fixtures.expected_matches]]
+canonical = "nötdryck"
+ingredient_index = 0
+must_match_keyword = "nötdryck"
