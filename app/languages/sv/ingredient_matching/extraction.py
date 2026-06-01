@@ -406,6 +406,17 @@ def extract_keywords_from_product(
                 return ['läsk']
             return []
 
+        # Block seed/garden brands entirely by brand field. These sell seed packets,
+        # bulbs and plants for home growing — never edible grocery produce — but they
+        # are catalogued under food categories like 'vegetables' and their names use
+        # real produce words (Tomat, Grönkål, Vitlök). The name-based GLOBAL blocker
+        # misses items where the brand is absent/split/misspelled in the name itself
+        # ("Vitlök 'Aulxito'", "Lök ... Nelson 1-p Garden", "... Nelosn Garden"), so we
+        # gate on the brand field, which is reliable for the whole brand.
+        _NON_FOOD_BRANDS = frozenset({'nelson garden'})
+        if brand_lower in _NON_FOOD_BRANDS:
+            return []
+
         # Strip brand name from product name to prevent brand words leaking as keywords.
         # "Majonnäs QP Japan 355ml Kewpie" with brand "KEWPIE" → strip "Kewpie" from name
         # so compound splitting doesn't produce false keywords like "pie" from "Kewpie".

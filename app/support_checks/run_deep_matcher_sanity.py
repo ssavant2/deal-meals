@@ -15580,6 +15580,34 @@ test(
     ),
     0,
 )
+# Seed/garden brand (Nelson Garden) products are seed packets/bulbs/plants for home
+# growing — never edible produce — even though they are catalogued under 'vegetables'
+# with real produce words in the name. The brand-field gate blocks the whole brand,
+# including names where the brand is absent/split/misspelled ("Vitlök 'Aulxito'").
+test(
+    "seed-brand vegetable product does not match produce recipe (name has brand)",
+    recipe_match_num(
+        ["200 g grönkål"],
+        {"name": "Grönkål Half Tall 1-p Nelson Garden", "category": "vegetables", "brand": "Nelson Garden"},
+    ),
+    0,
+)
+test(
+    "seed-brand vegetable product does not match produce recipe (brand only in brand field)",
+    recipe_match_num(
+        ["2 vitlöksklyftor"],
+        {"name": "Vitlök 'Aulxito'", "category": "vegetables", "brand": "Nelson Garden"},
+    ),
+    0,
+)
+test(
+    "real garlic product still matches garlic recipe (no seed brand)",
+    recipe_match_num(
+        ["2 vitlöksklyftor"],
+        {"name": "Vitlök 2-pack ICA", "category": "vegetables"},
+    ),
+    1,
+)
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")
