@@ -1884,17 +1884,17 @@ reason = "Speglar bakchoklad-regeln: chokladknappar finns i vit/mörk/mjölk-var
 id = "runtime_specialty_qualifier_mayo_chipotle_sriracha"
 status = "active"
 keyword = "mayo"
-qualifiers = ["chipotle", "sriracha", "mango", "tryffel", "vitlök", "curry", "wasabi", "citron", "dijon"]
+qualifiers = ["chipotle", "sriracha", "mango", "tryffel", "vitlök", "garlic", "curry", "wasabi", "citron", "dijon", "chili", "chilli", "jalapeno", "lime", "habanero", "sesam", "soy", "soja", "asiatisk", "koreansk", "gochujang"]
 bidirectional = true
-reason = "Flavored mayo (chipotle, sriracha, mango, truffle, garlic, curry, wasabi, lemon, dijon) is a distinct flavor-defined sauce, not interchangeable with plain mayonnaise. Bidirectional: a recipe specifying a flavored mayo must match the same flavor and must not match plain mayo, and plain mayonnaise recipes must not match flavored mayo products."
+reason = "Flavored mayo is a distinct flavor-defined sauce, not interchangeable with plain mayonnaise. Plain/light/real/organic/vegan/american-style/japanese variants stay plain (no qualifier) so they match plain mayonnaise recipes. Bidirectional: a recipe specifying a flavored mayo must match the same flavor and must not match plain mayo, and plain mayonnaise recipes must not match flavored mayo products."
 
 [[specialty_qualifiers]]
 id = "runtime_specialty_qualifier_majonnas_chipotle_sriracha"
 status = "active"
 keyword = "majonnäs"
-qualifiers = ["chipotle", "sriracha", "mango", "tryffel", "vitlök", "curry", "wasabi", "citron", "dijon"]
+qualifiers = ["chipotle", "sriracha", "mango", "tryffel", "vitlök", "garlic", "curry", "wasabi", "citron", "dijon", "chili", "chilli", "jalapeno", "lime", "habanero", "sesam", "soy", "soja", "asiatisk", "koreansk", "gochujang"]
 bidirectional = true
-reason = "Flavored mayo (chipotle, sriracha, mango, truffle, garlic, curry, wasabi, lemon, dijon) is a distinct flavor-defined sauce, not interchangeable with plain mayonnaise. Bidirectional: a recipe specifying a flavored mayo must match the same flavor and must not match plain mayo, and plain mayonnaise recipes must not match flavored mayo products."
+reason = "Flavored mayo is a distinct flavor-defined sauce, not interchangeable with plain mayonnaise. Plain/light/real/organic/vegan/american-style/japanese variants stay plain (no qualifier) so they match plain mayonnaise recipes. Bidirectional: a recipe specifying a flavored mayo must match the same flavor and must not match plain mayo, and plain mayonnaise recipes must not match flavored mayo products."
 
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"

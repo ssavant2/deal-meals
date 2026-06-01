@@ -1938,6 +1938,25 @@ def extract_keywords_from_product(
     if 'dream fraiche' in original_name_lower and 'havrefraiche' not in unique_keywords:
         unique_keywords.append('havrefraiche')
 
+    # Mayonnaise carrier guarantee: some flavored mayo product names ("Chili Mayo",
+    # "Chipotle Chili Mayo") lose the short "mayo" carrier to flavor-word stripping and
+    # end up with zero keywords, making them unmatchable. If the name clearly names a
+    # mayonnaise but no mayonnaise keyword survived, re-add the carrier so a same-flavor
+    # recipe can match it. The flavor words are intentionally NOT re-added as keywords;
+    # plain-vs-flavored isolation is handled by the bidirectional mayo/majonnäs
+    # specialty-qualifier, which reads the flavor from the product name directly.
+    _has_mayo_word = re.search(
+        r'\b(?:mayo|majo|mayonnaise|majonnäs|majonnas|majonäs|majonas)\b',
+        original_name_lower,
+    )
+    _has_mayo_kw = any(
+        ('majonn' in kw) or ('mayo' in kw) or ('majo' in kw)
+        for kw in unique_keywords
+    )
+    if _has_mayo_word and not _has_mayo_kw:
+        unique_keywords.append('majonnäs')
+        unique_keywords.append('mayo')
+
     return unique_keywords
 
 

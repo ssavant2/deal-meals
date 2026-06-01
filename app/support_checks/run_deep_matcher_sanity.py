@@ -15508,6 +15508,34 @@ test(
     ),
     1,
 )
+# Flavored mayo PRODUCTS must stay matchable by a same-flavor recipe. Flavored mayo
+# was previously stripped to zero keywords (SKIP_IF_FLAVORED) or blocked as a processed
+# food ("chili mayo"), making the products unmatchable. The bidirectional qualifier now
+# lets a chili-mayo recipe match chili-mayo products while plain stays isolated.
+test(
+    "chili mayo ingredient matches chili mayo product",
+    recipe_match_num(
+        ["1½ dl chipotle chili mayo"],
+        {"name": "Chili Mayo 300ml Test", "category": "sauces"},
+    ),
+    1,
+)
+test(
+    "chili mayo ingredient matches chipotle chili mayo product",
+    recipe_match_num(
+        ["1½ dl chipotle chili mayo"],
+        {"name": "Chipotle Chili Mayo 250ml Test", "category": "sauces"},
+    ),
+    1,
+)
+test(
+    "plain majonnäs ingredient does not match chili mayo product",
+    recipe_match_num(
+        ["2 dl majonnäs"],
+        {"name": "Chili Mayo 300ml Test", "category": "sauces"},
+    ),
+    0,
+)
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")

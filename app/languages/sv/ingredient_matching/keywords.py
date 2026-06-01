@@ -1453,7 +1453,11 @@ PROCESSED_FOODS: FrozenSet[str] = frozenset({
     'grilloil',        # "Grilloil Chili" — always a spray/oil product
     # NOTE: 'sweet chili' removed — blocked "Färskost Sweet chili Philadelphia". Sauces caught by 'sweet chilisås'/'sweet chili sås'.
     'crispy chili',    # "Crispy Chili In Oil" — condiment (Lao Gan Ma style)
-    'chili mayo',      # "Chili Mayo Hot" — always a mayo/condiment
+    # NOTE: 'chili mayo' removed — chili mayo is a mayonnaise condiment that recipes
+    # legitimately call for (e.g. "Chipotle Chili Mayo"). Blocking it here made all
+    # chili-mayo products unmatchable. Plain-vs-flavored isolation is now handled by
+    # the bidirectional mayo/majonnäs specialty-qualifier instead, so a chili-mayo
+    # recipe matches chili-mayo products while plain majonnäs stays isolated.
     'chilimajo',       # "Chilimajo" — compound form
     'chili crunch',    # "Chilli Chili Crunch" — condiment
     'hot chili ketchup',  # "Hot Chili Ketchup" — ketchup
@@ -1756,7 +1760,12 @@ SKIP_IF_FLAVORED: FrozenSet[str] = frozenset({
     'fil', 'filmjölk', 'filmmjölk', 'filmjolk',  # Willys strips ö
     'kvarg',  # only naturell + vanilj are used in cooking (vanilj via COOKING_FLAVORS)
     'keso',
-    'majonnäs', 'majonnas', 'majonäs', 'majonas',  # flavored mayo = dressing, not plain mayo
+    # NOTE: majonnäs/mayo NOT here — moved to BIDIRECTIONAL_SPECIALTY_QUALIFIERS
+    # (same approach as crème fraiche). Stripping the keyword from flavored mayo
+    # products made them unmatchable entirely (e.g. "Chipotle Mayonnaise" extracted
+    # zero keywords). The bidirectional qualifier instead lets a flavored-mayo
+    # recipe match the same-flavor product while keeping plain majonnäs isolated
+    # from flavored products in both directions.
     'drickyoghurt',  # 18 products - ALL are flavored (jordgubb, skogsbär, mango, etc.)
     'skyr',  # flavored skyr (like yoghurt) - naturell skyr should still match
     'kefir',  # flavored kefir - naturell kefir should still match
