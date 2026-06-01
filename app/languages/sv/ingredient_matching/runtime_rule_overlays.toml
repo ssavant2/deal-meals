@@ -746,6 +746,20 @@ keyword = "trattkantarell"
 blockers = ["torkad", "torkade"]
 reason = "Dried trattkantarell (torkad) is a concentrated ingredient-replacement, not fresh mushroom; a recipe calling for fresh trattkantareller should not match dried products. Mirrors existing PNB kantareller←torkad (Q110-2)."
 
+[[product_name_blockers]]
+id = "runtime_pnb_vitlok"
+status = "active"
+keyword = "vitlök"
+blockers = ["majonnäs", "majonnas", "mayo"]
+reason = "Garlic-flavored mayonnaise (Hellmanns Majonnäs med vitlök) must not match fresh garlic clove ingredient via vitlök keyword — condiment ≠ raw ingredient"
+
+[[product_name_blockers]]
+id = "runtime_pnb_chipotle"
+status = "active"
+keyword = "chipotle"
+blockers = ["majonnäs", "majonnas", "mayo"]
+reason = "Chipotle-flavored mayonnaise (e.g. Majonnäs Smoky Chipotle) must not match a fresh chipotle chili ingredient via chipotle keyword — mayo condiment ≠ raw chili pepper"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1149,8 +1163,8 @@ reason = "'Krutonger Vitlök & Persilja' is a flavored crouton product name wher
 id = "runtime_ksbc_chili"
 status = "active"
 keyword = "chili"
-context = ["bärta", "chilisås", "sin carne", "con carne"]
-reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Recipes specifying 'Bärta Chili Lime' want the Bärta product, not fresh chili peppers. Suppress chili keyword when ingredient text contains 'bärta'.; Recept med 'chilisås' vill ha sås-format (Felix/Sriracha/Sambal Oelek), inte torr chili-krydda (flakes/pulver). Skiljer sig från chili-bred-policy som gäller torra former interchangeably. Q83-3.; Knorr Chili Sin Carne är vegansk färskryddmix-paket, inte chili-peppar — suppressar chili-keyword när ingrediensen har 'sin carne'-kontext; Chili Con Carne Burk is a canned ready-made meat-chili dish — suppress chili keyword so fresh chili peppers do not match the canned-dish ingredient."
+context = ["bärta", "chilisås", "sin carne", "con carne", "snackoliver"]
+reason = "Bärta is smoked tofu/seitan strips (vegan deli protein product). Recipes specifying 'Bärta Chili Lime' want the Bärta product, not fresh chili peppers. Suppress chili keyword when ingredient text contains 'bärta'.; Recept med 'chilisås' vill ha sås-format (Felix/Sriracha/Sambal Oelek), inte torr chili-krydda (flakes/pulver). Skiljer sig från chili-bred-policy som gäller torra former interchangeably. Q83-3.; Knorr Chili Sin Carne är vegansk färskryddmix-paket, inte chili-peppar — suppressar chili-keyword när ingrediensen har 'sin carne'-kontext; Chili Con Carne Burk is a canned ready-made meat-chili dish — suppress chili keyword so fresh chili peppers do not match the canned-dish ingredient.; Snackoliver Chili are chili-flavored snack olives; chili is the flavor, not the ingredient. Suppress generic chili keyword so chili-flavored snack olives do not match fresh chili peppers. Same pattern as the existing chiliolja/chilijam/chilisås contexts."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_mjukost"
@@ -1170,8 +1184,8 @@ reason = "When recipe specifies woksås with a flavor (Pad Thai, Satay, Teriyaki
 id = "runtime_ksbc_ost"
 status = "active"
 keyword = "ost"
-context = ["mjölkfri", "mjölkfritt", "mjolkfri", "mjolkfritt", "laktosfri", "laktosfritt", "vegan", "vegansk", "växtbaserad", "vaxtbaserad", "fårost", "farost"]
-reason = "When ingredient explicitly specifies dietary restriction (mjölkfri/laktosfri/vegan/växtbaserad), generic 'ost' keyword would match dairy-cheese products. Vegan/dairy-free recipes need plant-based alternatives only — Violife/Greenvie etc. match via dedicated 'veganost' keyword which is unaffected by this KSBC.; When ingredient explicitly specifies 'fårost' (sheep's milk cheese), generic 'ost' keyword would match dairy cow-milk cheeses. Suppress ost keyword so only dedicated sheep-milk cheese keywords (manchego, pecorino, roquefort, fårost) can match."
+context = ["mjölkfri", "mjölkfritt", "mjolkfri", "mjolkfritt", "laktosfri", "laktosfritt", "vegan", "vegansk", "växtbaserad", "vaxtbaserad", "fårost", "farost", "broccolibollar"]
+reason = "When ingredient explicitly specifies dietary restriction (mjölkfri/laktosfri/vegan/växtbaserad), generic 'ost' keyword would match dairy-cheese products. Vegan/dairy-free recipes need plant-based alternatives only — Violife/Greenvie etc. match via dedicated 'veganost' keyword which is unaffected by this KSBC.; When ingredient explicitly specifies 'fårost' (sheep's milk cheese), generic 'ost' keyword would match dairy cow-milk cheeses. Suppress ost keyword so only dedicated sheep-milk cheese keywords (manchego, pecorino, roquefort, fårost) can match.; Prepared broccoli ball product name (e.g. Broccolibollar med ost och basilika) as recipe ingredient — secondary descriptor ost should not match generic cheese offers"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_choklad"
@@ -1459,6 +1473,13 @@ status = "active"
 keyword = "paprikor"
 context = ["snackpaprika"]
 reason = "snackpaprikor (mini sweet pepper) ingredient must not match generic grillad/processed paprika products via precomputed paprikor child-keyword. When snackpaprika is extracted, the paprikor path suppressed."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_basilika"
+status = "active"
+keyword = "basilika"
+context = ["broccolibollar"]
+reason = "Prepared broccoli ball product name as recipe ingredient — secondary descriptor basilika should not match generic basil offers"
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
@@ -1753,6 +1774,14 @@ surface = "stop_words"
 action = "add"
 terms = ["lättrökt", "lattrokt"]
 reason = "Smoking-process descriptor like rökt/kallrökt/varmrökt (already stop words). 'Älgskav lättrökt' should not match 'rimmat fläsk' via the shared lättrökt token; the food noun carries the match."
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_organiskt_organisk"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["organiskt", "organisk"]
+reason = "Descriptor meaning organic (variant of ekologisk which is already a stop word); never a food itself. Its substring 'anis' was spuriously matching anis spice products."
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
