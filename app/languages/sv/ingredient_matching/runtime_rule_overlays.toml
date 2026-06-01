@@ -760,6 +760,13 @@ keyword = "chipotle"
 blockers = ["majonnäs", "majonnas", "mayo"]
 reason = "Chipotle-flavored mayonnaise (e.g. Majonnäs Smoky Chipotle) must not match a fresh chipotle chili ingredient via chipotle keyword — mayo condiment ≠ raw chili pepper"
 
+[[product_name_blockers]]
+id = "runtime_pnb_kokoschips"
+status = "active"
+keyword = "kokoschips"
+blockers = ["aminos", "nick", "pineapple", "chokladbar", "skumtoppar"]
+reason = "kokoschips via offer_extra_keyword gets kokos→kokoschips mapping, inheriting non-chip coconut products. These blockers mirror the existing kokos PNB to prevent condiments/snack bars/candy from matching kokoschips ingredients."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1131,6 +1138,13 @@ keyword = "broccoli"
 blockers = ["broccolibollar"]
 reason = "Broccolibollar = formed veggie ball half-product (Anamma-style), not raw broccoli; ost/basilika/broccoli in name are filling descriptors"
 
+[[false_positive_blockers]]
+id = "runtime_fpb_lok"
+status = "active"
+keyword = "lök"
+blockers = ["löktrav"]
+reason = "löktrav (garlic mustard / Alliaria petiolata) is a wild foraged herb, not onion. The 'lök' substring inside 'löktrav' leaks plain onion offers into foraged-herb recipes."
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -1443,8 +1457,8 @@ reason = "Pease Bullar är veganska ärtprotein-bullar, inte brödbullar; pease-
 id = "runtime_ksbc_vitlok"
 status = "active"
 keyword = "vitlök"
-context = ["grillolja"]
-reason = "Grillolja Vitlök är smaksatt olja, inte rå vitlök; recept-ingrediens som är flavored grillolja ska suppressa den generiska vitlök-keyword så råa vitlökshuvuden inte matchar. KSBC istället för FPB eftersom ingrediensen innehåller vitlök som eget ord (FPB kringgås då)."
+context = ["grillolja", "krutonger"]
+reason = "Grillolja Vitlök är smaksatt olja, inte rå vitlök; recept-ingrediens som är flavored grillolja ska suppressa den generiska vitlök-keyword så råa vitlökshuvuden inte matchar. KSBC istället för FPB eftersom ingrediensen innehåller vitlök som eget ord (FPB kringgås då).; Croutons flavored with garlic (Zeta Krutonger Vitlök & Persilja) are a crouton carrier product, not raw garlic cloves; suppress garlic keyword so the ingredient matches crouton products via krutonger, not fresh garlic bulbs. Mirrors existing persilja krutonger suppression and vitlök crostini/bruschetta carriers."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ravioli"
@@ -1487,6 +1501,13 @@ status = "active"
 keyword = "basilika"
 context = ["broccolibollar"]
 reason = "Prepared broccoli ball product name as recipe ingredient — secondary descriptor basilika should not match generic basil offers"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_kraftstjartar"
+status = "active"
+keyword = "kräftstjärtar"
+context = ["havskräft", "havskrafta"]
+reason = "Havskräftstjärtar (langoustine) ≠ kräftstjärtar i lake (freshwater crayfish tails). havskräfta/langoustine is a premium fresh seafood; lake-brined crayfish tails are a different species and preparation."
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
