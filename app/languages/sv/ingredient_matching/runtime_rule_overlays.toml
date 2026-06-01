@@ -1746,6 +1746,14 @@ action = "add"
 terms = ["möjligt"]
 reason = "Swedish qualifier 'möjligt' (possible/possibly) appears in recipe parentheticals like '(så raka som möjligt)' but is never a food ingredient. Prevents it from being extracted as a spurious keyword that blocks matches."
 
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_lattrokt_lattrokt"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["lättrökt", "lattrokt"]
+reason = "Smoking-process descriptor like rökt/kallrökt/varmrökt (already stop words). 'Älgskav lättrökt' should not match 'rimmat fläsk' via the shared lättrökt token; the food noun carries the match."
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"
