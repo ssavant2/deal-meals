@@ -256,6 +256,8 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('växtbaserad mjölkryck', 'växtdryck'),
     ('växtbaserad mjolkryck', 'växtdryck'),
     ('växtbaserad dryck', 'växtdryck'),
+    ('växtbaserad naturell dryck', 'växtdryck'),
+    ('vaxtbaserad naturell dryck', 'växtdryck'),
     ('vaxtbaserad mjölk', 'växtdryck'),
     ('vaxtbaserad mjolk', 'växtdryck'),
     ('vaxtbaserad mjölkdryck', 'växtdryck'),
@@ -996,6 +998,9 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     # "Passerade tomater" = tomatpassata (same product, different name)
     ('passerade tomater', 'tomatpassata'),
     ('passerad tomat', 'tomatpassata'),
+    # Middle Eastern herb-spice blend: apostrophe form "za'atar" → "zaatar"
+    # so it matches offers spelled without apostrophe (Krydda Zaatar Manakish etc.)
+    ("za'atar", 'zaatar'),
 ]
 _SPACE_NORMALIZATIONS.extend(SPACE_NORMALIZATION_CLI_UPDATES)
 
