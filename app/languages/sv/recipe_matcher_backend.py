@@ -708,6 +708,32 @@ def _flavor_keyword_blocked_by_carrier_text(
     return carrier_blocked
 
 
+# Markers that introduce an illustrative example list ("t ex", "tex",
+# "exempelvis", "till exempel"). After Swedish normalization the dots in
+# "t.ex" are stripped, so "t ex"/"tex" cover both spellings.
+_EXAMPLE_LIST_MARKER_RE = re.compile(r'\b(?:t\s*ex|tex|exempelvis|till\s+exempel)\b')
+
+
+def _carrier_keyword_precedes_example_list(
+    ingredient_text: str, matched_keyword: str
+) -> bool:
+    """Return True when the matched carrier keyword heads an example list.
+
+    For wording like "pasta t ex fusilli, penner rigate, gnocchi" the shape
+    words after the example marker are illustrative alternatives, not a required
+    specific form. Without this, a shape word like "gnocchi" trips the
+    carrier-flavor suppression and wrongly blocks an otherwise-correct plain
+    pasta match. We only exempt when the carrier keyword appears BEFORE the
+    marker, i.e. it is genuinely the head of the example list.
+    """
+    if not matched_keyword:
+        return False
+    marker = _EXAMPLE_LIST_MARKER_RE.search(ingredient_text)
+    if not marker:
+        return False
+    return matched_keyword in ingredient_text[:marker.start()]
+
+
 def match_recipe_to_offers(
     matcher,
     recipe: FoundRecipe,
@@ -2287,12 +2313,25 @@ def validate_offer_match_candidate(
                 else:
                     recipe_wants_dried = True
             should_block = False
+            # Plain "persilja" (no explicit "färsk"/"torkad" qualifier) accepts both
+            # fresh leaves and dried parsley — both are everyday substitutes and most
+            # recipes saying just "persilja" don't care which form. Only an explicit
+            # form word ("färsk persilja" / "torkad persilja") re-imposes isolation.
+            # Without this, the msk/tsk heuristic above defaults plain persilja to
+            # dried and wrongly blocks fresh flat-leaf parsley products.
+            persilja_accepts_both_forms = (
+                'persilja' in matched_keyword
+                and not any(fi in ing_norm for fi in RECIPE_FRESH_INDICATORS)
+                and not any(fi in ing_original for fi in RECIPE_FRESH_INDICATORS)
+                and not any(di in ing_norm for di in RECIPE_DRIED_INDICATORS)
+            )
             # "torkad eller färsk" (either order) explicitly accepts both forms, so no
             # product form should be blocked. recipe_wants_fresh and recipe_wants_dried are
             # both set from the disjunction; without this the frozen/dried branch would
             # still block on the competing form indicator.
             _accepts_both_forms = (
-                'eller' in ing_norm and recipe_wants_fresh and recipe_wants_dried
+                ('eller' in ing_norm and recipe_wants_fresh and recipe_wants_dried)
+                or persilja_accepts_both_forms
             )
             if _accepts_both_forms:
                 should_block = False
@@ -2830,15 +2869,28 @@ def validate_offer_match_candidate(
                     product_blockers,
                 ):
                     pass
-                elif not ingredient_satisfies_product_name_blockers(ing_norm, product_blockers):
-                    _record_validation_event(
-                        validation_events,
-                        'validation_reject',
-                        rule='product_name_blocker',
-                        ing_idx=matched_ing_idx,
-                        keyword=matched_keyword,
-                    )
-                    matched_keyword = None
+                else:
+                    # Excuse only the specific blockers the ingredient genuinely
+                    # asks for. Satisfying one blocker (e.g. "rökt" in "rökt
+                    # paprikapulver") must NOT bypass an unrelated blocker (e.g.
+                    # "lax"): a smoked-paprika spice recipe still must not match a
+                    # smoked-salmon product. Previously the satisfaction check was
+                    # all-or-nothing, so any one matched blocker disabled the rest.
+                    phrase_blockers = [b for b in product_blockers if ' ' in b]
+                    blockers_to_enforce = phrase_blockers or product_blockers
+                    unsatisfied_blockers = [
+                        b for b in blockers_to_enforce
+                        if not ingredient_satisfies_product_name_blockers(ing_norm, [b])
+                    ]
+                    if unsatisfied_blockers:
+                        _record_validation_event(
+                            validation_events,
+                            'validation_reject',
+                            rule='product_name_blocker',
+                            ing_idx=matched_ing_idx,
+                            keyword=matched_keyword,
+                        )
+                        matched_keyword = None
 
     # Global product name blocker — non-food products that must never match any ingredient
     # regardless of which keyword triggered the match (supplements, pet food, tobacco, etc.)
@@ -3019,11 +3071,17 @@ def validate_offer_match_candidate(
                 # already strips these words from flavored products (Yoghurt Citron,
                 # Läsk Citron, Pepsi Lime etc.) so no FP risk remains.
                 fresh_citrus_use_case = matched_kw_lower in {'citron', 'apelsin', 'lime'}
+                # "pasta t ex fusilli, gnocchi" — items after an example marker
+                # are illustrative, so the broad carrier family should still match.
+                example_list_use_case = _carrier_keyword_precedes_example_list(
+                    ing_norm, matched_kw_lower
+                )
                 if (
                     not contextual_cheese_use_case
                     and not dark_chocolate_bar_use_case
                     and not preserved_mushroom_in_water_use_case
                     and not fresh_citrus_use_case
+                    and not example_list_use_case
                 ):
                     carrier_blocked = _flavor_keyword_blocked_by_carrier_text(
                         ing_norm,

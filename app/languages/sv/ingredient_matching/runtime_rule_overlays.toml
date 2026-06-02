@@ -781,6 +781,13 @@ keyword = "tacoskal"
 blockers = ["kyckling"]
 reason = "Taco-seasoned chicken fillet (e.g. Kycklingbröstfilé Taco Finstrimlad) is not a taco shell; 'taco' substring in 'tacoskal' causes compound-bleed; taco shells/tubs must still match"
 
+[[product_name_blockers]]
+id = "runtime_pnb_notkott"
+status = "active"
+keyword = "nötkött"
+blockers = ["hamburgerfärs"]
+reason = "Hamburgerfärs (stekfärs) ska inte matcha recept som ber om grytbitar/köttbitar av nöt"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1240,8 +1247,8 @@ reason = "rispuffar med choklad (Kinapuffar) injicerar choklad-keyword via paren
 id = "runtime_ksbc_margarin"
 status = "active"
 keyword = "margarin"
-context = ["mjölkfritt", "mjolkfritt", "mjölkfri", "mjolkfri", "växtbaserat", "vaxtbaserat", "växtbaserad", "vaxtbaserad", "vegan", "vegansk"]
-reason = "Dairy-free recipes ('mjölkfritt/mjölkfri margarin') must not match regular dairy-based margarin. Follows Q68-5 pattern: dietary modifier in ingredient suppresses generic keyword. Plant-based margarin products would need dedicated keyword to match — currently 0 such products in DB.; Plant-based recipes ('växtbaserat margarin' / 'vegansk margarin') must not match regular dairy-based margarin. Mirrors mjölkfri/laktosfri context already present (Q68-5/Q69 pattern: dietary modifier in ingredient suppresses generic keyword). Plant-based margarin products would need dedicated keyword to match."
+context = ["växtbaserat", "vaxtbaserat", "växtbaserad", "vaxtbaserad", "vegan", "vegansk"]
+reason = "Plant-based recipes ('växtbaserat margarin' / 'vegansk margarin') must not match regular margarin via the generic margarin keyword; the dietary plant-based modifier suppresses it. Dairy-free wording ('mjölkfritt/mjölkfri margarin') is intentionally NOT suppressed: margarin is a vegetable-fat butter substitute and therefore inherently dairy-free, so a mjölkfritt-margarin recipe correctly matches plain bak/stek-margarin."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_kaka"
@@ -1529,6 +1536,20 @@ status = "active"
 keyword = "kräftstjärtar"
 context = ["havskräft", "havskrafta"]
 reason = "Havskräftstjärtar (langoustine) ≠ kräftstjärtar i lake (freshwater crayfish tails). havskräfta/langoustine is a premium fresh seafood; lake-brined crayfish tails are a different species and preparation."
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_hamburgare"
+status = "active"
+keyword = "hamburgare"
+context = ["burger mix", "burgermix"]
+reason = "A dry burger mix (e.g. 'Veggie burger mix') is for shaping your own patties, not a ready-made burger product; the mix wording suppresses the hamburgare keyword so it stops matching finished burgers"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_burgare"
+status = "active"
+keyword = "burgare"
+context = ["burger mix", "burgermix"]
+reason = "A dry burger mix (e.g. 'Veggie burger mix') is for shaping your own patties, not a ready-made burger; the mix wording suppresses the burgare keyword so it stops matching finished burgers"
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
@@ -2021,6 +2042,14 @@ keyword = "margarin"
 qualifiers = ["flytande"]
 bidirectional = true
 reason = "Liquid margarine (flytande margarin) is a distinct form used as cooking fat/oil, not interchangeable with solid baking/cooking margarine. Bidirectional: a flytande-margarin recipe matches only liquid-margarine products, and a plain margarin recipe does not match liquid-margarine products."
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_entrecote_lamm"
+status = "active"
+keyword = "entrecote"
+qualifiers = ["lamm"]
+bidirectional = true
+reason = "Lamm-entrecôte and nöt-entrecôte are different species cuts and must not match each other; a lamm-qualified recipe matches only lamm-entrecôte products and a plain entrecôte recipe must not match lamm-entrecôte products"
 
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"

@@ -23,7 +23,7 @@
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 411,
       "negative_regression": 841,
-      "offer_extra_keyword_mapping": 421,
+      "offer_extra_keyword_mapping": 422,
       "parent_match_only_mapping": 20,
       "positive_regression": 665,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1506,
       "matcher_rule_inventory": 472,
       "no_match_policy": 433,
-      "offer_extra_keyword": 421,
+      "offer_extra_keyword": 422,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5829,
-    "variants_missing_product_text": 1869,
+    "variant_count": 5830,
+    "variants_missing_product_text": 1870,
     "variants_with_product_text": 3960
   },
   "variants": [
@@ -122455,11 +122455,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"zaatar\"}"
+    },
+    {
+      "variant_id": "vterm-fdc7e7aa748ec940",
+      "row_index": 5341,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:lammentrecote",
+      "source_id": "lammentrecote",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "lammentrecote",
+      "canonical": "entrecote",
+      "expected_family": "entrecote",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"entrecote\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1647,
+      "no_product_text": 1648,
       "static_verified": 2676,
       "synthetic_verified": 1506
     },
@@ -122475,14 +122496,14 @@
       "matcher_regression_case": 1506,
       "matcher_rule_inventory": 472,
       "no_match_policy": 433,
-      "offer_extra_keyword": 421,
+      "offer_extra_keyword": 422,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5829
+      "audited": 5830
     },
-    "variant_count": 5829
+    "variant_count": 5830
   }
 }

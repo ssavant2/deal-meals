@@ -417,6 +417,13 @@ def check_processed_product_rules(
                 # the product matches ingredient "kycklingfile" (kyckling found as
                 # indicator) even though the ingredient has nothing to do with kryddmix.
                 if base_word not in ingredient_lower:
+                    # "gochugaru" is, by definition, Korean dried/flaked chili.
+                    # A recipe saying "2 tsk gochugaru" is asking for exactly the
+                    # dried/flaked chili form, so it must satisfy the strict chili
+                    # rule even though the literal word "chili" is absent from the
+                    # ingredient text. Allow it through instead of blocking.
+                    if base_word == 'chili' and 'gochugaru' in ingredient_lower:
+                        continue
                     return False
                 product_indicators = [
                     ind for ind in processed_indicators

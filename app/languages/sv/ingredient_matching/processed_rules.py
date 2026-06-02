@@ -464,16 +464,32 @@ STRICT_PROCESSED_RULES: FrozenSet[str] = frozenset({
 # Without this, strict processed keywords like "Spiskummin Malen" won't match
 # ingredient text saying "spiskummin, mald" because STRICT mode requires the
 # exact product indicator word in the ingredient.
+# Dried/ground spice forms are interchangeable for the STRICT spice rules
+# (ingefära, gurkmeja, chili, paprika): ground turmeric IS dried turmeric,
+# chilipulver IS dried chili, "malen ingefära" IS "torkad ingefära", etc.
+# So a product named "Gurkmeja Malen" must satisfy a recipe that explicitly
+# asks for "torkad gurkmeja". Fresh recipes ("färsk gurkmeja") stay blocked
+# because they carry no dried/ground indicator at all. Non-spice strict rules
+# (tomat/saffran/kryddmix/sojabönor) do not use these indicators, so they are
+# unaffected. Distinct forms like "pressad" (paste), "rökt" (smoked) and
+# "flakes"/"flingor" remain in their own groups and stay isolated.
+_DRIED_GROUND_SPICE_FORMS = frozenset({
+    'malen', 'mald', 'malet', 'malna',
+    'torkad', 'torkade', 'torkat',
+    'pulver',
+})
+
 _PROCESSED_INDICATOR_EQUIVALENTS: Dict[str, FrozenSet[str]] = {
-    'malen': frozenset({'malen', 'mald', 'malet', 'malna'}),
-    'mald': frozenset({'malen', 'mald', 'malet', 'malna'}),
-    'malet': frozenset({'malen', 'mald', 'malet', 'malna'}),
-    'malna': frozenset({'malen', 'mald', 'malet', 'malna'}),
+    'malen': _DRIED_GROUND_SPICE_FORMS,
+    'mald': _DRIED_GROUND_SPICE_FORMS,
+    'malet': _DRIED_GROUND_SPICE_FORMS,
+    'malna': _DRIED_GROUND_SPICE_FORMS,
+    'pulver': _DRIED_GROUND_SPICE_FORMS,
     'hel': frozenset({'hel', 'hela', 'skalade', 'skalad', 'konserverade', 'konserverad'}),
     'hela': frozenset({'hel', 'hela', 'skalade', 'skalad', 'konserverade', 'konserverad'}),
-    'torkad': frozenset({'torkad', 'torkade', 'torkat'}),
-    'torkade': frozenset({'torkad', 'torkade', 'torkat'}),
-    'torkat': frozenset({'torkad', 'torkade', 'torkat'}),
+    'torkad': _DRIED_GROUND_SPICE_FORMS,
+    'torkade': _DRIED_GROUND_SPICE_FORMS,
+    'torkat': _DRIED_GROUND_SPICE_FORMS,
     # Tomato form equivalents for STRICT mode
     # Crushed group: krossade ≈ finkrossade ≈ polpa (all crushed/chopped canned)
     'krossade': frozenset({'krossade', 'krossad', 'finkrossade', 'finkrossad', 'polpa'}),

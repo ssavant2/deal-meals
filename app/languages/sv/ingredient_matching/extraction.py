@@ -1200,7 +1200,18 @@ def extract_keywords_from_product(
     ):
         # Check exemptions (e.g., "Kryddmix Tikka Masala" is a cooking ingredient)
         if not any(ex in original_name_lower for ex in PROCESSED_FOODS_EXEMPTIONS):
-            return []
+            # Freeze-dried fruit ("Jordgubbar/Hallon Frystorkade") is the fruit
+            # itself in a preserved form, not a flavored snack. Those fruits carry a
+            # bidirectional 'frystorkad' specialty qualifier, so exposing the fruit
+            # keyword lets a recipe that explicitly asks for "frystorkade jordgubbar"
+            # match the product, while plain fresh/frozen-fruit recipes stay isolated
+            # by that qualifier. Other freeze-dried products still return no keywords.
+            _freeze_dried_qualified_fruit = (
+                any(c in original_name_lower for c in ('frystorkad', 'frystorkade', 'frystorkat'))
+                and any(f in original_name_lower for f in ('jordgubb', 'hallon'))
+            )
+            if not _freeze_dried_qualified_fruit:
+                return []
 
     # Suffix-based processed food check: compound words ending with processed suffixes
     # "Potatis & Purjolöksoppa" → "purjolöksoppa" ends with "soppa" → processed

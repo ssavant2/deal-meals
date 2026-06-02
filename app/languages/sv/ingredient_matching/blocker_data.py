@@ -45,6 +45,12 @@ _SPECIALTY_MINCE_PRODUCT_CUES: Set[str] = {
 # Format: keyword -> set of words in ingredient that block the match
 
 _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
+    # "Margarin Mjölkfritt" must not satisfy a recipe wanting a dairy-free MILK
+    # alternative via the spurious 'mjölkfritt' keyword. Kept as a keyword-level
+    # blocker (not whole-product) so that a recipe explicitly asking for
+    # "mjölkfritt margarin" still matches plain margarin on the 'margarin' keyword.
+    'mjölkfritt': {'margarin', 'bordsmargarin'},
+    'mjolkfritt': {'margarin', 'bordsmargarin'},
     'läsk': {
         'fläsk', 'flask',
         'fläskkött', 'flaskkott',
@@ -2157,8 +2163,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'gojibär': {'kokosbite', 'kokos bite'},  # "Kokosbite Gojibär" — coconut snack ≠ dried goji berries
     'gojibärbär': {'kokosbite', 'kokos bite'},
     'yuzu': {'juice äpple', 'äpple grapefrukt'},  # "Juice Äpple Grapefrukt Yuzu" — fruit juice ≠ yuzu spice/paste
-    'mjölkfritt': {'margarin', 'bordsmargarin'},  # "Margarin Mjölkfritt" — margarine is not a milk-free milk alternative
-    'mjolkfritt': {'margarin', 'bordsmargarin'},  # same, ASCII variant
+    # NOTE: 'mjölkfritt' → margarin moved from PNB to FPB (see _FALSE_POSITIVE_BLOCKERS_RAW).
+    # As a PNB it blocked the whole product, so "mjölkfritt margarin" recipes could not
+    # match plain bak/stek-margarin. As an FPB it only suppresses the spurious
+    # 'mjölkfritt' keyword on margarin products while the real 'margarin' keyword match
+    # survives. Margarine is inherently dairy-free, so the margarin match is correct.
     'hallonsmak': {'proteinshake', 'shake'},  # "Proteinshake Hallonsmak" — not raspberry-flavored chocolate
     'syrade': {'morötter', 'morot', 'morotter'},  # "Morötter Naturligt Syrade" — pickled carrots matching "syrad blomkål" via reverse substring
     'fetaost': {'sås'},  # "Sås Fetaost Original" — sauce product, not solid feta cheese

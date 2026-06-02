@@ -3167,9 +3167,21 @@ def _explicit_vegan_requirement_allows_product(
         and _ingredient_requests_vegan_smordeg(ingredient_lower)
     ):
         return _vegan_smordeg_product_allowed(product_lower, product_keywords)
+    # Margarin is a butter substitute made from vegetable fat, so a plain
+    # bak/stek/matmargarin product is inherently dairy-free. A recipe asking for
+    # "mjölkfritt margarin" is satisfied by such a product even though it carries
+    # no explicit vegan/dairy-free label. Exempt the margarin family from the
+    # vegan / lactose-free product-cue requirement so the dairy-free wording does
+    # not wrongly block an otherwise-correct margarin match. (Bak/stek vs bords
+    # margarin isolation is handled separately by the margarin qualifier rules.)
+    _margarin_inherently_dairy_free = (
+        'margarin' in matched_keyword
+        and 'margarin' in product_lower
+    )
     if (
         any(cue in scoped_ingredient for cue in _VEGAN_RECIPE_CUES)
         and not _diet_cue_is_optional(scoped_ingredient, _VEGAN_RECIPE_CUES)
+        and not _margarin_inherently_dairy_free
         and not _product_satisfies_recipe_label(product_lower, product_keywords, _PLANT_BASED_PRODUCT_CUES)
     ):
         return False
@@ -3182,6 +3194,7 @@ def _explicit_vegan_requirement_allows_product(
     if (
         any(cue in scoped_ingredient for cue in _LACTOSE_FREE_RECIPE_CUES)
         and not _diet_cue_is_optional(scoped_ingredient, _LACTOSE_FREE_RECIPE_CUES)
+        and not _margarin_inherently_dairy_free
         and not _product_satisfies_recipe_label(product_lower, product_keywords, _LACTOSE_FREE_PRODUCT_CUES)
     ):
         return False
@@ -6332,7 +6345,10 @@ def matches_ingredient_fast(
         # Exception: gräslök (chives) is rarely dried in Swedish cooking; "4 msk gräslök"
         # means 4 tbsp chopped fresh/frozen chives. Skip the volume→dried inference for chives
         # so fresh ("Gräslök flowpack") and frozen ("Gräslök Finhackad Fryst") still match.
-        _VOLUME_DRIED_EXEMPT_HERBS = ('gräslök', 'graslok')
+        # Persilja: plain "persilja" (no färsk/torkad qualifier) accepts BOTH fresh leaves
+        # and dried parsley, so it must not default to dried from "1 msk persilja" either —
+        # explicit "färsk/torkad persilja" still isolates via recipe_wants_fresh/dried.
+        _VOLUME_DRIED_EXEMPT_HERBS = ('gräslök', 'graslok', 'persilja')
         if not recipe_wants_fresh and not recipe_wants_dried:
             if matched_keyword not in _VOLUME_DRIED_EXEMPT_HERBS:
                 if any(m in ingredient_lower for m in ('tsk ', 'krm ', 'msk ', ' tsk ', ' krm ', ' msk ')):
