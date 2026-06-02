@@ -1843,6 +1843,14 @@ action = "add"
 terms = ["fruktsmak"]
 reason = "Generic flavor descriptor 'fruit flavor' is not a matchable food noun; leaked through and let candy/chocolate bags (Godispåse/Chokladpåse Fruktsmak) match fruit-flavored tea-bag ingredients"
 
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_stenugnsbakad"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["stenugnsbakad"]
+reason = "Stone-oven-baked is a baking-method attribute, not a product type. It leaked complete frozen pizzas (Pizza Capricciosa/Hawaii/Salami stenugnsbakad) into recipes asking for a plain pizza base (stenugnsbakad pizzabotten). Every product carrying this word keeps a stronger keyword (pizza, pizzabotten, tunnbröd, bröd), so dropping it loses no legitimate match."
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"
