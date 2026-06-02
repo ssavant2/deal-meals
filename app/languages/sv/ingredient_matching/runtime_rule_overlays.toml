@@ -1835,6 +1835,14 @@ action = "add"
 terms = ["scampi"]
 reason = "Scampi (frysta stora räkor i svensk dagligvaruhandel) är 6 tecken och tappas annars av längdfiltret"
 
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_fruktsmak"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["fruktsmak"]
+reason = "Generic flavor descriptor 'fruit flavor' is not a matchable food noun; leaked through and let candy/chocolate bags (Godispåse/Chokladpåse Fruktsmak) match fruit-flavored tea-bag ingredients"
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"

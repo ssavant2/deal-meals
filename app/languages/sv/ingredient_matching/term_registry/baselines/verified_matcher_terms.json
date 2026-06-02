@@ -6,7 +6,7 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 100,
       "hardcoded_keyword_output:extract_keywords_from_product": 118,
-      "ingredient_parent_mapping": 399,
+      "ingredient_parent_mapping": 400,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 109,
       "keyword_synonym_mapping": 184,
@@ -30,7 +30,7 @@
     },
     "source_counts": {
       "extraction_helper": 218,
-      "ingredient_parent": 399,
+      "ingredient_parent": 400,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 109,
       "keyword_synonym": 184,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5826,
-    "variants_missing_product_text": 1866,
+    "variant_count": 5827,
+    "variants_missing_product_text": 1867,
     "variants_with_product_text": 3960
   },
   "variants": [
@@ -122392,11 +122392,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"scampi\"}"
+    },
+    {
+      "variant_id": "vterm-6680e2b0e8916d3f",
+      "row_index": 4513,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:gochugaru",
+      "source_id": "gochugaru",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "gochugaru",
+      "canonical": "chili",
+      "expected_family": "chili",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"chili\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1644,
+      "no_product_text": 1645,
       "static_verified": 2676,
       "synthetic_verified": 1506
     },
@@ -122404,7 +122425,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 218,
-      "ingredient_parent": 399,
+      "ingredient_parent": 400,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 109,
       "keyword_synonym": 184,
@@ -122418,8 +122439,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5826
+      "audited": 5827
     },
-    "variant_count": 5826
+    "variant_count": 5827
   }
 }
