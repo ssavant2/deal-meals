@@ -1208,7 +1208,7 @@ def extract_keywords_from_product(
             # by that qualifier. Other freeze-dried products still return no keywords.
             _freeze_dried_qualified_fruit = (
                 any(c in original_name_lower for c in ('frystorkad', 'frystorkade', 'frystorkat'))
-                and any(f in original_name_lower for f in ('jordgubb', 'hallon'))
+                and any(f in original_name_lower for f in ('jordgubb', 'hallon', 'blåbär'))
             )
             if not _freeze_dried_qualified_fruit:
                 return []

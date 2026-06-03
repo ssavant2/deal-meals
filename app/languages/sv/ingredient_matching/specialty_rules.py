@@ -682,7 +682,7 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
 
     # Dried vs fresh fruit/berries - "torkade X" should NOT match fresh "X"
     # If recipe says "torkade", product must also have "torkad/torkade"
-    'blåbär': {'torkad', 'torkade'},
+    'blåbär': {'torkad', 'torkade', 'frystorkad', 'frystorkade'},
     'aprikos': {'torkad', 'torkade', 'soft'},  # "Soft" = English soft-dried form
     'aprikoser': {'torkad', 'torkade', 'soft'},
     'fikon': {'torkad', 'torkade', 'färsk', 'färska'},
@@ -1260,6 +1260,7 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
     'lingon': frozenset({'rårörda', 'rörda'}),
     'päron': frozenset({'halvor'}),
     'paron': frozenset({'halvor'}),
+    'blåbär': frozenset({'frystorkad', 'frystorkade'}),
     'hallon': frozenset({'frystorkad', 'frystorkade'}),
     'jordgubb': frozenset({'frystorkad', 'frystorkade'}),
     'jordgubbar': frozenset({'frystorkad', 'frystorkade'}),

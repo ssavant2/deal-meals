@@ -1090,9 +1090,9 @@
     "line_refs": [
       {
         "anchor": "'garlic': {'garlic', 'vitlök', 'vitlok'},",
-        "end": 1420,
+        "end": 1421,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 1420
+        "start": 1421
       },
       {
         "anchor": "'vitlöksklyftor': {",
@@ -1156,9 +1156,9 @@
       },
       {
         "anchor": "# \"Formbar färs\" must match products that are actually formbar (can be shaped into",
-        "end": 1451,
+        "end": 1452,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 1451
+        "start": 1452
       }
     ],
     "notes": "Formbar vegetarisk färs must stay on moldable plant-based mince and reject ordinary animal mince.",
@@ -3205,9 +3205,9 @@
       },
       {
         "anchor": "'rimmade': {'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt', 'kallr', 'najad', 'najadlax'},",
-        "end": 1368,
+        "end": 1369,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 1368
+        "start": 1369
       },
       {
         "anchor": "offer_qualifiers = offer_data['specialty_qualifiers'].get(specialty_keyword, set())",
@@ -3949,9 +3949,9 @@
       },
       {
         "anchor": "# Black adjective forms: lentils (beluga) + olives (kalamata/gemlik) + beans",
-        "end": 1324,
+        "end": 1325,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 1324
+        "start": 1325
       }
     ],
     "notes": "Black-olive wording keeps black/Kalamata/Gemlik fallback pragmatic. Generic urkärnade oliver remains stricter and does not match products sold with pits.",

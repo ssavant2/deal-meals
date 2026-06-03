@@ -786,9 +786,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'garlic': {'garlic', 'vitlök', 'vitlok'},"
-end = 1420
+end = 1421
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1420
+start = 1421
 
 [[inventory.line_refs]]
 anchor = "'vitlöksklyftor': {"
@@ -836,9 +836,9 @@ start = 441
 
 [[inventory.line_refs]]
 anchor = "# \"Formbar färs\" must match products that are actually formbar (can be shaped into"
-end = 1451
+end = 1452
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1451
+start = 1452
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_raw_flaskkott_not_prepared_souvlaki"
@@ -2363,9 +2363,9 @@ start = 314
 
 [[inventory.line_refs]]
 anchor = "'rimmade': {'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt', 'kallr', 'najad', 'najadlax'},"
-end = 1368
+end = 1369
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1368
+start = 1369
 
 [[inventory.line_refs]]
 anchor = "offer_qualifiers = offer_data['specialty_qualifiers'].get(specialty_keyword, set())"
@@ -2918,9 +2918,9 @@ start = 219
 
 [[inventory.line_refs]]
 anchor = "# Black adjective forms: lentils (beluga) + olives (kalamata/gemlik) + beans"
-end = 1324
+end = 1325
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1324
+start = 1325
 
 [[inventory]]
 adapter_ref = "backend_validation.events:product_name_blocker"

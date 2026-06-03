@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 400,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 109,
-      "keyword_synonym_mapping": 186,
+      "keyword_synonym_mapping": 187,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 400,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 109,
-      "keyword_synonym": 186,
+      "keyword_synonym": 187,
       "match_bridge": 2021,
       "matcher_regression_case": 1506,
       "matcher_rule_inventory": 472,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5830,
-    "variants_missing_product_text": 1870,
+    "variant_count": 5831,
+    "variants_missing_product_text": 1871,
     "variants_with_product_text": 3960
   },
   "variants": [
@@ -122476,11 +122476,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"entrecote\"}"
+    },
+    {
+      "variant_id": "vterm-b34c96188df5eee8",
+      "row_index": 4920,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:mixsallad",
+      "source_id": "mixsallad",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "mixsallad",
+      "canonical": "salladsmix",
+      "expected_family": "salladsmix",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"salladsmix\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1648,
+      "no_product_text": 1649,
       "static_verified": 2676,
       "synthetic_verified": 1506
     },
@@ -122491,7 +122512,7 @@
       "ingredient_parent": 400,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 109,
-      "keyword_synonym": 186,
+      "keyword_synonym": 187,
       "match_bridge": 2021,
       "matcher_regression_case": 1506,
       "matcher_rule_inventory": 472,
@@ -122502,8 +122523,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5830
+      "audited": 5831
     },
-    "variant_count": 5830
+    "variant_count": 5831
   }
 }
