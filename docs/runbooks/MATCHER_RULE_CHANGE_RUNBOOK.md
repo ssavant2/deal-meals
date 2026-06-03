@@ -483,21 +483,32 @@ Correct existing runtime-overlay rows with `modify` instead of hand-editing the
 TOML plus generated sanity canary:
 
 ```bash
-./bin/dm matcher modify runtime-overlay runtime_pnb_gradde \
+./bin/dm matcher modify pnb grädde \
   --remove-blocker soja \
   --add-blocker "oat lök" \
   --reason "Plain plant-based cream should remain a valid substitute; only flavored variants are blocked."
 
-./bin/dm matcher modify runtime-overlay runtime_ksbc_vitlok \
+./bin/dm matcher modify ksbc vitlök \
   --add-context grillolja \
   --reason "Garlic fallback should be suppressed when the ingredient is grill oil."
 ```
 
-`modify` is overlay-only: it supports explicit-id entries in
+Use the surface-specific forms (`modify pnb`, `modify fpb`, `modify ksbc`) when
+you know the keyword. They accept either the runtime overlay id or the keyword.
+The generic fallback is still available:
+
+```bash
+./bin/dm matcher modify runtime-overlay runtime_pnb_gradde \
+  --remove-blocker soja \
+  --reason "Remove stale product-name blocker."
+```
+
+`modify` is overlay-only: it supports runtime-overlay rows in
 `runtime_rule_overlays.toml`, rewrites the generated membership canary, and runs
-Track A gates unless a matcher batch is active or `--no-run-gates` is passed.
-It intentionally does not edit historical base tables such as `blocker_data.py`.
-If removing the last blocker/context would empty a rule, use `remove` instead.
+Track A gates unless a matcher batch is active or `--no-run-gates` is passed. It
+intentionally does not edit historical base tables such as `blocker_data.py` or
+move blockers between PNB/FPB base dictionaries. If removing the last
+blocker/context would empty a rule, use `remove` instead.
 
 Remove runtime-overlay rows deliberately, with a reason:
 
@@ -536,6 +547,14 @@ PNB and GPB are product/backend proof surfaces. Do not treat a passing or
 failing `matches_ingredient()` check alone as enough evidence for a product-name
 blocker; use backend/product diagnostics or a focused behavior sanity when the
 generated table canary is not enough.
+
+`match()` in `run_deep_matcher_sanity.py` calls the fast matcher only. Use it for
+fast-path/overlay membership proof and narrow product-to-ingredient checks. For
+backend-only fixes, materialization guards, per-blocker backend decisions,
+multi-ingredient context, or anything discovered with `dm matcher why` as a
+backend validation issue, write a `recipe_match_num(...)`,
+`recipe_match_num_named(...)`, or cached backend sanity row instead. A fast
+`match()` row can pass while the backend correctly rejects the recipe match.
 
 For repeated backend-only product/ingredient guard patterns that cannot be
 expressed as existing overlays, scaffold the function and chain with:
@@ -1425,6 +1444,10 @@ where the fix is a narrow runtime dictionary/guard.
    fallback only. Strictness needs either `--negative-offer`/`--negative-ingredient`
    on the add command or a hand-written negative sanity/fixture, plus the actual
    runtime guard that makes the negative pair fail.
+
+   When the rule lives in backend/materialization logic, use backend sanity:
+   `recipe_match_num(...)`, `recipe_match_num_named(...)`, or the cached variants.
+   The `match()` helper is fast-path-only and can miss backend-only rejects.
 3. Add or adjust a focused regression inside `run_deep_matcher_sanity.py` for
    every new rule. If a nearby case already asserts the exact same behavior,
    keep or extend that case rather than duplicating it. This script is the
@@ -2191,7 +2214,7 @@ Use the diagnosis class to choose the next move:
 | Diagnosis | Meaning | Usual next action |
 | --- | --- | --- |
 | `route_pair_missing` | Routing never sends the offer to the ingredient. | Add route/term-index exposure, then parity. |
-| `fast_match_missing` | Routing reaches the pair but fast match rejects it. | Add bridge/synonym/fast-path rule, with negative sibling. |
+| `fast_match_missing` | Routing reaches the pair but fast match rejects it. | Run `dm matcher compare-paths` and `dm matcher explain`; `why` may not expose an inner fast-path reject rule because many fast guards still return silent `None`. Add bridge/synonym/fast-path rule, with negative sibling, or inspect the local fast-path guard if those diagnostics stay blank. |
 | `backend_validation_rejected` | Initial match exists but backend validator blocks it. | Review validator or add scoped allowance. |
 | `unexpected_positive` | A negative fixture still materializes. | Add/tighten no-match policy or blocker. |
 | `duplicate_signal_source` | Same canonical comes from competing signal sources. | Declare precedence/equivalence or retire duplicate source. |

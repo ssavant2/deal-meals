@@ -2255,6 +2255,85 @@ def normalize_probe(text: str) -> str:
             sanity_text = deep_sanity_file.read_text(encoding="utf-8")
             self.assertNotIn('PRODUCT_NAME_BLOCKERS.get("phaseedit", set())', sanity_text)
 
+    def test_runtime_overlay_surface_modify_aliases_accept_keyword_selectors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            add = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "ksbc",
+                    "phaseksbcedit",
+                    "--context",
+                    "phaseoldcontext,phasekeepcontext",
+                    "--reason",
+                    "Synthetic editable KSBC overlay.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(add.returncode, 0, add.stderr + add.stdout)
+
+            modify = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "modify",
+                    "ksbc",
+                    "phaseksbcedit",
+                    "--remove-context",
+                    "phaseoldcontext",
+                    "--add-context",
+                    "phasenewcontext",
+                    "--reason",
+                    "Synthetic KSBC correction.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(modify.returncode, 0, modify.stderr + modify.stdout)
+            runtime = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "ksbc": sorted(KEYWORD_SUPPRESSED_BY_CONTEXT.get("phaseksbcedit", [])),
+}
+""",
+            )
+            self.assertEqual(runtime["ksbc"], ["phasekeepcontext", "phasenewcontext"])
+            overlay_text = (
+                app_dir / "languages" / "sv" / "ingredient_matching" / "runtime_rule_overlays.toml"
+            ).read_text(encoding="utf-8")
+            self.assertIn('id = "runtime_ksbc_phaseksbcedit"', overlay_text)
+            self.assertIn('context = ["phasekeepcontext", "phasenewcontext"]', overlay_text)
+            sanity_text = (app_dir / "support_checks" / "run_deep_matcher_sanity.py").read_text(encoding="utf-8")
+            self.assertNotIn(
+                '"phaseoldcontext" in KEYWORD_SUPPRESSED_BY_CONTEXT.get("phaseksbcedit", set())',
+                sanity_text,
+            )
+            self.assertIn(
+                '"phasenewcontext" in KEYWORD_SUPPRESSED_BY_CONTEXT.get("phaseksbcedit", set())',
+                sanity_text,
+            )
+
     def test_gpb_cli_writes_runtime_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)

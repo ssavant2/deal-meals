@@ -868,8 +868,9 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         status="supported by dm matcher",
         summary="Correct an existing runtime-overlay rule by exact id and rewrite its generated membership canary.",
         steps=(
+            "Preferred surface-specific form: ./bin/dm matcher modify pnb|fpb <keyword-or-rule-id> --add-blocker <term> --remove-blocker <term> --reason \"<why>\"",
+            "For KSBC, run: ./bin/dm matcher modify ksbc <keyword-or-rule-id> --add-context <term> --remove-context <term> --reason \"<why>\"",
             "Run: ./bin/dm matcher modify runtime-overlay <rule-id> --add-blocker <term> --remove-blocker <term> --reason \"<why>\"",
-            "For KSBC, use --add-context/--remove-context instead of blocker options.",
             "Only runtime_rule_overlays.toml entries with explicit id are supported; historical base tables stay manual/out of scope.",
         ),
     ),
@@ -5236,6 +5237,33 @@ def _find_runtime_overlay_entry_by_id(
     if len(matches) > 1:
         labels = "\n".join(_runtime_overlay_entry_label(surface, entry) for surface, entry in matches[:20])
         raise typer.BadParameter(f"rule id {rule_id!r} is ambiguous:\n{labels}")
+    return matches[0]
+
+
+def _find_runtime_overlay_entry_on_surface(
+    sections: dict[str, list[dict[str, Any]]],
+    surface: RuntimeOverlaySurface,
+    selector: str,
+) -> dict[str, Any]:
+    selector = selector.strip()
+    if not selector:
+        raise typer.BadParameter("selector must not be empty")
+    selector_norm = _runtime_rule_normalize_text(selector)
+    matches: list[dict[str, Any]] = []
+    for entry in sections.get(surface.section, []):
+        entry_id = str(entry.get("id") or _runtime_overlay_entry_id(surface, str(entry.get("keyword", ""))))
+        keyword = str(entry.get("keyword", ""))
+        if selector == entry_id or selector_norm == _runtime_rule_normalize_text(keyword):
+            matches.append(entry)
+    if not matches:
+        raise typer.BadParameter(
+            f"no {surface.command} runtime-overlay rule found for {selector!r}. "
+            "This command only edits runtime_rule_overlays.toml entries; "
+            "historical base tables are intentionally out of scope."
+        )
+    if len(matches) > 1:
+        labels = "\n".join(_runtime_overlay_entry_label(surface, entry) for entry in matches[:20])
+        raise typer.BadParameter(f"{surface.command} selector {selector!r} is ambiguous:\n{labels}")
     return matches[0]
 
 
@@ -9616,9 +9644,10 @@ def add_no_match_policy(
     raise typer.Exit(gate_status)
 
 
-def _modify_runtime_overlay_rule_by_id(
+def _modify_runtime_overlay_rule(
     *,
-    rule_id: str,
+    selector: str,
+    surface: RuntimeOverlaySurface | None,
     add_value_csv: str | None,
     remove_value_csv: str | None,
     add_blocker_csv: str | None,
@@ -9639,7 +9668,12 @@ def _modify_runtime_overlay_rule_by_id(
     if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime modify gates are not available; use --no-run-gates")
     sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
-    surface, entry = _find_runtime_overlay_entry_by_id(sections, rule_id)
+    if surface is None:
+        surface, entry = _find_runtime_overlay_entry_by_id(sections, selector)
+    else:
+        entry = _find_runtime_overlay_entry_on_surface(sections, surface, selector)
+    keyword = _runtime_rule_normalize_text(str(entry.get("keyword", "")))
+    rule_id = str(entry.get("id") or _runtime_overlay_entry_id(surface, keyword))
     if not _runtime_overlay_entry_is_active(entry):
         raise typer.BadParameter(f"{rule_id} is inactive; reactivate or add a new rule instead")
     add_values, remove_values = _runtime_overlay_requested_value_changes(
@@ -9655,7 +9689,6 @@ def _modify_runtime_overlay_rule_by_id(
         raise typer.BadParameter("provide at least one add/remove value option")
 
     field = surface.value_field
-    keyword = _runtime_rule_normalize_text(str(entry.get("keyword", "")))
     old_values = tuple(_runtime_overlay_entry_values(entry, field))
     old_value_set = set(old_values)
     missing = sorted(value for value in remove_values if value not in old_value_set)
@@ -9739,6 +9772,40 @@ def _modify_runtime_overlay_rule_by_id(
         typer.echo("Skipped gates (--no-run-gates).")
         return
     raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+def _modify_runtime_overlay_rule_by_id(
+    *,
+    rule_id: str,
+    add_value_csv: str | None,
+    remove_value_csv: str | None,
+    add_blocker_csv: str | None,
+    remove_blocker_csv: str | None,
+    add_context_csv: str | None,
+    remove_context_csv: str | None,
+    reason: str,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    _modify_runtime_overlay_rule(
+        selector=rule_id,
+        surface=None,
+        add_value_csv=add_value_csv,
+        remove_value_csv=remove_value_csv,
+        add_blocker_csv=add_blocker_csv,
+        remove_blocker_csv=remove_blocker_csv,
+        add_context_csv=add_context_csv,
+        remove_context_csv=remove_context_csv,
+        reason=reason,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
 
 
 def _remove_runtime_overlay_rule_by_id(
@@ -9992,6 +10059,142 @@ def modify_keyword_extra_parent(
         return
     gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
     raise typer.Exit(gate_status)
+
+
+@matcher_modify_app.command("pnb")
+def modify_pnb(
+    selector: Annotated[str, typer.Argument(help="PNB keyword or runtime overlay rule id.")],
+    add_blocker_csv: Annotated[
+        str | None,
+        typer.Option("--add-blocker", help="Comma-separated product-name blocker(s) to add."),
+    ] = None,
+    remove_blocker_csv: Annotated[
+        str | None,
+        typer.Option("--remove-blocker", help="Comma-separated product-name blocker(s) to remove."),
+    ] = None,
+    reason: Annotated[str, typer.Option("--reason", help="Why the PNB rule is being corrected.")] = "",
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print the change without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Rewrite generated membership canaries for this rule."),
+    ] = True,
+) -> None:
+    _modify_runtime_overlay_rule(
+        selector=selector,
+        surface=RUNTIME_OVERLAY_SURFACES["pnb"],
+        add_value_csv=None,
+        remove_value_csv=None,
+        add_blocker_csv=add_blocker_csv,
+        remove_blocker_csv=remove_blocker_csv,
+        add_context_csv=None,
+        remove_context_csv=None,
+        reason=reason,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_modify_app.command("fpb")
+def modify_fpb(
+    selector: Annotated[str, typer.Argument(help="FPB keyword or runtime overlay rule id.")],
+    add_blocker_csv: Annotated[
+        str | None,
+        typer.Option("--add-blocker", help="Comma-separated ingredient-side blocker(s) to add."),
+    ] = None,
+    remove_blocker_csv: Annotated[
+        str | None,
+        typer.Option("--remove-blocker", help="Comma-separated ingredient-side blocker(s) to remove."),
+    ] = None,
+    reason: Annotated[str, typer.Option("--reason", help="Why the FPB rule is being corrected.")] = "",
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print the change without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Rewrite generated membership canaries for this rule."),
+    ] = True,
+) -> None:
+    _modify_runtime_overlay_rule(
+        selector=selector,
+        surface=RUNTIME_OVERLAY_SURFACES["fpb"],
+        add_value_csv=None,
+        remove_value_csv=None,
+        add_blocker_csv=add_blocker_csv,
+        remove_blocker_csv=remove_blocker_csv,
+        add_context_csv=None,
+        remove_context_csv=None,
+        reason=reason,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
+
+
+@matcher_modify_app.command("ksbc")
+@matcher_modify_app.command("keyword-suppressed-by-context")
+def modify_ksbc(
+    selector: Annotated[str, typer.Argument(help="KSBC keyword or runtime overlay rule id.")],
+    add_context_csv: Annotated[
+        str | None,
+        typer.Option("--add-context", help="Comma-separated context term(s) to add."),
+    ] = None,
+    remove_context_csv: Annotated[
+        str | None,
+        typer.Option("--remove-context", help="Comma-separated context term(s) to remove."),
+    ] = None,
+    reason: Annotated[str, typer.Option("--reason", help="Why the KSBC rule is being corrected.")] = "",
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
+    run_gates: Annotated[
+        bool,
+        typer.Option("--run-gates/--no-run-gates", help="Run Track A gates after writing."),
+    ] = True,
+    report_root: Annotated[
+        Path | None,
+        typer.Option("--report-root", help="Writable DEAL_MEALS_SUPPORT_REPORT_ROOT for generated reports."),
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Print the change without writing files.")] = False,
+    write_sanity: Annotated[
+        bool,
+        typer.Option("--sanity/--no-sanity", help="Rewrite generated membership canaries for this rule."),
+    ] = True,
+) -> None:
+    _modify_runtime_overlay_rule(
+        selector=selector,
+        surface=RUNTIME_OVERLAY_SURFACES["ksbc"],
+        add_value_csv=None,
+        remove_value_csv=None,
+        add_blocker_csv=None,
+        remove_blocker_csv=None,
+        add_context_csv=add_context_csv,
+        remove_context_csv=remove_context_csv,
+        reason=reason,
+        tree_root=tree_root,
+        run_gates=run_gates,
+        report_root=report_root,
+        dry_run=dry_run,
+        write_sanity=write_sanity,
+    )
 
 
 @matcher_modify_app.command("overlay")
@@ -11445,6 +11648,13 @@ def _format_matcher_why_text(payload: Mapping[str, Any]) -> str:
             f"fallbacks={materialization.get('fullscan_fallback_count')}"
         ),
     ]
+    if payload.get("diagnosis_class") == "fast_match_missing" and not backend.get("reject_rule"):
+        lines.extend([
+            "",
+            "note:",
+            "  fast_match_missing has limited rule attribution today; many fast-path guards return silent no-match.",
+            "  Run `dm matcher compare-paths` and `dm matcher explain`; if both are blank, inspect the local fast-path guard.",
+        ])
     if cache and cache.get("status") != "skipped":
         lines.extend([
             "",
