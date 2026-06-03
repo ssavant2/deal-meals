@@ -788,6 +788,13 @@ keyword = "nötkött"
 blockers = ["hamburgerfärs"]
 reason = "Hamburgerfärs (stekfärs) ska inte matcha recept som ber om grytbitar/köttbitar av nöt"
 
+[[product_name_blockers]]
+id = "runtime_pnb_betor"
+status = "active"
+keyword = "betor"
+blockers = ["juice"]
+reason = "Root vegetable 'betor' family (rödbeta, polkabetor) should not match rödbeta-juice products; the juice guard on rödbeta does not propagate to the parent betor keyword"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -932,8 +939,8 @@ reason = "Tonfiskpastej (spreadable tuna pâté for sandwiches) is a prepared pr
 id = "runtime_fpb_biff"
 status = "active"
 keyword = "biff"
-blockers = ["bönbiffar", "bönbiff", "bonbiffar", "bonbiff"]
-reason = "Bönbiffar (bean-burgers) is a vegan plant-based product; the 'biff' substring should not pull in raw beef products (Biff Färsk i bit med kappa)."
+blockers = ["bönbiffar", "bönbiff", "bonbiffar", "bonbiff", "laxbiffar", "laxbiff"]
+reason = "Bönbiffar (bean-burgers) is a vegan plant-based product; the 'biff' substring should not pull in raw beef products (Biff Färsk i bit med kappa).; Fish cakes (laxbiffar/laxbiff) are not beef biff; the meat keyword should not match a fish-cake ingredient. Mirrors existing bonbiffar/bonbiff veggie-patty block."
 
 [[false_positive_blockers]]
 id = "runtime_fpb_applejuice"
@@ -1550,6 +1557,13 @@ status = "active"
 keyword = "burgare"
 context = ["burger mix", "burgermix"]
 reason = "A dry burger mix (e.g. 'Veggie burger mix') is for shaping your own patties, not a ready-made burger; the mix wording suppresses the burgare keyword so it stops matching finished burgers"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_taco"
+status = "active"
+keyword = "taco"
+context = ["lax"]
+reason = "Brand/flavor name 'Smokey Taco' on smoked salmon products leaks 'taco' keyword; when ingredient text already names lax, taco is a flavor/brand descriptor not a cuisine context — suppress to prevent matching taco chicken products via the taco keyword"
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
