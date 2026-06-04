@@ -2065,6 +2065,14 @@ qualifiers = ["lamm"]
 bidirectional = true
 reason = "Lamm-entrecôte and nöt-entrecôte are different species cuts and must not match each other; a lamm-qualified recipe matches only lamm-entrecôte products and a plain entrecôte recipe must not match lamm-entrecôte products"
 
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_pepparsas_hot"
+status = "active"
+keyword = "pepparsås"
+qualifiers = ["hot"]
+bidirectional = true
+reason = "Hot pepparsås (chili hot sauce) is semantically distinct from traditional pepparcorn cream sauce; isolate bidirectionally (Q139-4)"
+
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"
 status = "active"
