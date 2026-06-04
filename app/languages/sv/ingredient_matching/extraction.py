@@ -452,11 +452,13 @@ def extract_keywords_from_product(
     original_name_lower = fix_swedish_chars(pre_strip_name).lower()
     brand_lower_normalized = fix_swedish_chars(brand or '').lower()
 
-    if (
-        (brand_lower_normalized == 'oumph' or re.search(r'\boumph\b', original_name_lower))
-        and re.search(r'\b(?:chunks?|pieces?|bitar)\b', original_name_lower)
-    ):
-        return ['vegobitar']
+    if brand_lower_normalized == 'oumph' or re.search(r'\boumph\b', original_name_lower):
+        # "Pulled BBQ Chunks Oumph" = specific pulled texture; also keeps vegobitar
+        # parent so plain vegobitar recipes still match it.
+        if re.search(r'\bpulled\b', original_name_lower):
+            return ['vegopulled', 'vegobitar']
+        if re.search(r'\b(?:chunks?|pieces?|bitar)\b', original_name_lower):
+            return ['vegobitar']
 
     # Q84-3: "Röd spetsig paprika" / "Gul spetsig paprika" / "Spetsig paprika"
     # — produktnamn med två ord. Recept som anger "spetspaprika" (ett ord/
@@ -2180,6 +2182,12 @@ def extract_keywords_from_ingredient(
 
     if re.search(r'\bpuffat\s+ris\b|\bris\s+puffat\b', name):
         return ['rispuffar']
+
+    # "Vegetarisk Pulled" = plant-based pulled texture; only matches pulled-style
+    # vego products, not generic vegobitar chunks.
+    # Guard requires "vegetarisk" to avoid FP for pulled pork/chicken ingredients.
+    if re.search(r'\bvegetarisk\b', name) and re.search(r'\bpulled\b', name):
+        return ['vegopulled']
 
     if 'crispychiliolja' in name:
         return ['crispychiliolja']

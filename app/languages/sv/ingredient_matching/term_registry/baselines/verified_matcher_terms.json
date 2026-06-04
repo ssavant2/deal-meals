@@ -4,8 +4,8 @@
     "role_counts": {
       "bridge_negative_guard": 197,
       "bridge_positive": 1824,
-      "hardcoded_keyword_output:extract_keywords_from_ingredient": 100,
-      "hardcoded_keyword_output:extract_keywords_from_product": 118,
+      "hardcoded_keyword_output:extract_keywords_from_ingredient": 101,
+      "hardcoded_keyword_output:extract_keywords_from_product": 119,
       "ingredient_parent_mapping": 400,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 109,
@@ -29,7 +29,7 @@
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
-      "extraction_helper": 218,
+      "extraction_helper": 220,
       "ingredient_parent": 400,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 109,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5831,
-    "variants_missing_product_text": 1871,
+    "variant_count": 5833,
+    "variants_missing_product_text": 1873,
     "variants_with_product_text": 3960
   },
   "variants": [
@@ -122497,18 +122497,60 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"salladsmix\"}"
+    },
+    {
+      "variant_id": "vterm-b69b66e7c1880deb",
+      "row_index": 5701,
+      "source_order": 90,
+      "source_type": "extraction_helper",
+      "source_file": "app/languages/sv/ingredient_matching/extraction.py",
+      "source_ref": "app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_ingredient:2190",
+      "source_id": "extract_keywords_from_ingredient:vegopulled",
+      "variant_role": "hardcoded_keyword_output:extract_keywords_from_ingredient",
+      "variant_text": "vegopulled",
+      "canonical": "vegopulled",
+      "expected_family": "vegopulled",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": null,
+      "metadata": "{\"function\": \"extract_keywords_from_ingredient\", \"lines\": [2190], \"output\": \"vegopulled\"}"
+    },
+    {
+      "variant_id": "vterm-02b9797c17c972ee",
+      "row_index": 5818,
+      "source_order": 90,
+      "source_type": "extraction_helper",
+      "source_file": "app/languages/sv/ingredient_matching/extraction.py",
+      "source_ref": "app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:459",
+      "source_id": "extract_keywords_from_product:vegopulled",
+      "variant_role": "hardcoded_keyword_output:extract_keywords_from_product",
+      "variant_text": "vegopulled",
+      "canonical": "vegopulled",
+      "expected_family": "vegopulled",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": null,
+      "metadata": "{\"function\": \"extract_keywords_from_product\", \"lines\": [459], \"output\": \"vegopulled\"}"
     }
   ],
   "verification": {
     "classification_counts": {
       "no_product_text": 1649,
-      "static_verified": 2676,
+      "static_verified": 2678,
       "synthetic_verified": 1506
     },
     "method": "static_contract_audit",
     "problem_counts": {},
     "source_counts": {
-      "extraction_helper": 218,
+      "extraction_helper": 220,
       "ingredient_parent": 400,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 109,
@@ -122523,8 +122565,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5831
+      "audited": 5833
     },
-    "variant_count": 5831
+    "variant_count": 5833
   }
 }
