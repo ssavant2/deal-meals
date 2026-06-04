@@ -54,19 +54,34 @@ CUISINE_CONTEXT: Dict[str, Set[str]] = {
         'taco', 'tacos', 'texmex', 'tex mex', 'tex-mex',
         'mexikansk', 'burrito', 'fajita', 'enchilada',
         'quesadilla', 'nacho', 'nachos', 'wrap',
-        'tortillabröd',
+        # 'tortillabröd' intentionally NOT a taco/texmex context word on its own:
+        # Asian wrap recipes (Peking duck, gyoza wraps) use tortillabröd as a
+        # generic wrap substitute without any taco intent. A taco/texmex recipe
+        # is identified by the stronger words above (taco/tacos/burrito/fajita/
+        # enchilada/quesadilla/nacho/wrap), so a tortillabröd mention alone must
+        # not let taco-seasoned products (Tacokyckling) match.
     },
     'texmex': {
         'taco', 'tacos', 'texmex', 'tex mex', 'tex-mex',
         'mexikansk', 'burrito', 'fajita', 'enchilada',
         'quesadilla', 'nacho', 'nachos', 'wrap',
-        'tortillabröd',
+        # 'tortillabröd' intentionally NOT a taco/texmex context word on its own:
+        # Asian wrap recipes (Peking duck, gyoza wraps) use tortillabröd as a
+        # generic wrap substitute without any taco intent. A taco/texmex recipe
+        # is identified by the stronger words above (taco/tacos/burrito/fajita/
+        # enchilada/quesadilla/nacho/wrap), so a tortillabröd mention alone must
+        # not let taco-seasoned products (Tacokyckling) match.
     },
     'tex mex': {
         'taco', 'tacos', 'texmex', 'tex mex', 'tex-mex',
         'mexikansk', 'burrito', 'fajita', 'enchilada',
         'quesadilla', 'nacho', 'nachos', 'wrap',
-        'tortillabröd',
+        # 'tortillabröd' intentionally NOT a taco/texmex context word on its own:
+        # Asian wrap recipes (Peking duck, gyoza wraps) use tortillabröd as a
+        # generic wrap substitute without any taco intent. A taco/texmex recipe
+        # is identified by the stronger words above (taco/tacos/burrito/fajita/
+        # enchilada/quesadilla/nacho/wrap), so a tortillabröd mention alone must
+        # not let taco-seasoned products (Tacokyckling) match.
     },
     # Gyros / Greek-marinated chicken products require a Greek recipe context.
     # 'pita' removed — pita is shared across Greek/Middle-Eastern/Turkish

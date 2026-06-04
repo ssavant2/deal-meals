@@ -809,6 +809,20 @@ keyword = "pumpakärna"
 blockers = ["musli"]
 reason = "pumpakärna (singular) mirrors pumpakärnor PNB — musli products should not match pumpakärna ingredient"
 
+[[product_name_blockers]]
+id = "runtime_pnb_korv"
+status = "active"
+keyword = "korv"
+blockers = ["salami", "coppa", "fuet", "sudjuk", "sucuk", "lufttorkad", "lufttorkat", "lufttorkade", "salchichon", "salsichon"]
+reason = "Soft cooking korv (frukostkorv/falukorv/generisk korv) ska inte matcha lufttorkad/rökt charkuteri. Produkter märkta salami/coppa/fuet/sudjuk/lufttorkad är torkad chark, inte kokkorv. Färska kokkorvar (salsiccia/bratwurst/merguez) behåller korv-keyword."
+
+[[product_name_blockers]]
+id = "runtime_pnb_korvar"
+status = "active"
+keyword = "korvar"
+blockers = ["salami", "coppa", "fuet", "sudjuk", "sucuk", "lufttorkad", "lufttorkat", "lufttorkade", "salchichon", "salsichon"]
+reason = "Plural korvar speglar PNB korv: torkad charkuteri (salami/coppa/fuet/sudjuk/lufttorkad) blockeras från mjuk-korv-recept; färska kokkorvar behålls."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1135,8 +1149,8 @@ reason = "Lamb entrecote ingredient must not match beef entrecote products; entr
 id = "runtime_fpb_betor"
 status = "active"
 keyword = "betor"
-blockers = ["gulbetor", "gulbeta", "sockerbeta", "sockerbetssaft"]
-reason = "Color-prefixed beet varieties (gulbeta=yellow beet, sockerbeta=sugar beet) should not match rödbeta products via the shared 'betor' suffix — similar to the vegetable-spaghetti isolation (Q115-1)"
+blockers = ["gulbetor", "gulbeta", "sockerbeta", "sockerbetssaft", "polkabetor"]
+reason = "Color-prefixed beet varieties (gulbeta=yellow beet, sockerbeta=sugar beet) should not match rödbeta products via the shared 'betor' suffix — similar to the vegetable-spaghetti isolation (Q115-1); Polkabetor (randig rödbeta) är en specifik sort, inte generisk betor; randmönstret är poängen i recept. Blockera betor-substring i polkabet* så plain rödbeta-offers inte matchar polka-ingrediens."
 
 [[false_positive_blockers]]
 id = "runtime_fpb_majonnas"
@@ -1200,6 +1214,13 @@ status = "active"
 keyword = "liba"
 blockers = ["libanesisk"]
 reason = "Liba is a bread brand; must not match libanesisk* (Lebanese cuisine adjective) via substring in ingredient_parent mapping"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_sparris"
+status = "active"
+keyword = "sparris"
+blockers = ["sparrissoppa"]
+reason = "Rå sparris (keyword sparris) får inte substring-matcha 'sparrissoppa'-ingrediens. En sparrissoppa-ingrediens vill ha färdig soppa, inte rå sparris."
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
@@ -1935,6 +1956,14 @@ action = "add"
 terms = ["stenugnsbakad"]
 reason = "Stone-oven-baked is a baking-method attribute, not a product type. It leaked complete frozen pizzas (Pizza Capricciosa/Hawaii/Salami stenugnsbakad) into recipes asking for a plain pizza base (stenugnsbakad pizzabotten). Every product carrying this word keeps a stronger keyword (pizza, pizzabotten, tunnbröd, bröd), so dropping it loses no legitimate match."
 
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_curd"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["curd"]
+reason = "Bare 'curd' (4 chars) in Swedish recipes means lemon curd; force-keep so it survives the length filter and can route to lemoncurd."
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"
@@ -2100,6 +2129,14 @@ keyword = "pepparsås"
 qualifiers = ["hot"]
 bidirectional = true
 reason = "Hot pepparsås (chili hot sauce) is semantically distinct from traditional pepparcorn cream sauce; isolate bidirectionally (Q139-4)"
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_aioli_chili_lime"
+status = "active"
+keyword = "aioli"
+qualifiers = ["chili", "lime", "smokey", "smoky", "sriracha", "mango", "tryffel", "chipotle", "curry", "dill", "citron", "saffran", "wasabi"]
+bidirectional = true
+reason = "Smaksatt aioli (chili/lime/smokey/sriracha/mango/etc) isoleras från plain aioli i båda riktningar, som smaksatt mayo. Plain/vitlöksaioli matchar bas-aioli; smaksatt matchar bara samma-smak-recept."
 
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"

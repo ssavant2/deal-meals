@@ -454,16 +454,27 @@ def extract_keywords_from_product(
 
     if brand_lower_normalized == 'oumph' or re.search(r'\boumph\b', original_name_lower):
         # "Pulled BBQ Chunks Oumph" = specific pulled texture; also keeps vegobitar
-        # parent so plain vegobitar recipes still match it.
+        # parent so plain vegobitar recipes still match it. The 'oumph' brand keyword
+        # is also kept so a recipe asking for "oumph" (or "oumph eller liknande
+        # vegokött") reaches the whole Oumph range, not only the färs/strips/filé
+        # variants that retain the brand word through normal extraction.
         if re.search(r'\bpulled\b', original_name_lower):
-            return ['vegopulled', 'vegobitar']
+            return ['vegopulled', 'vegobitar', 'oumph']
         if re.search(r'\b(?:chunks?|pieces?|bitar)\b', original_name_lower):
-            return ['vegobitar']
+            return ['vegobitar', 'oumph']
 
     # "Vårgårda Ris" (AXA brand) is a puffed/roasted rice product despite the plain name.
     # Must NOT match plain-rice recipes — only puffed-rice contexts.
     if 'vårgårda' in original_name_lower and re.search(r'\bris\b', original_name_lower):
         return ['rispuffar']
+
+    # Ready-made sparrissoppa (Kelda/Blå Band) ends in "soppa", so the processed-food
+    # suffix filter would normally strip it to zero keywords (FN). A recipe asking for
+    # "sparrissoppa" wants exactly this finished soup, so expose the compound keyword.
+    # The raw-asparagus FP (offer 'sparris' substring-matching "sparrissoppa") is
+    # handled separately by FPB sparris += sparrissoppa.
+    if 'sparrissoppa' in original_name_lower:
+        return ['sparrissoppa']
 
     # Q84-3: "Röd spetsig paprika" / "Gul spetsig paprika" / "Spetsig paprika"
     # — produktnamn med två ord. Recept som anger "spetspaprika" (ett ord/

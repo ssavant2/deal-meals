@@ -3803,6 +3803,13 @@ def ingredient_satisfies_product_name_blockers(
         'pålägg': {'pålägg', 'palagg', 'deliskivor'},
         'palagg': {'pålägg', 'palagg', 'deliskivor'},
         'najad': {'najad', 'najadlax', 'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt'},
+        # A recipe explicitly asking for breaded fish ("panerad"/"färdigpanerad")
+        # also satisfies the more specific "sprödpanerad" product wording: spröd
+        # breading is still breading. Without this, a breaded-cod recipe satisfies
+        # the 'panerad' blocker but the product's extra 'sprödpanerad' blocker stays
+        # unsatisfied (per-blocker rule), so the right product is wrongly blocked.
+        'sprödpanerad': {'panerad', 'panerade', 'panerat', 'färdigpanerad', 'färdigpanerade', 'fardigpanerad', 'fardigpanerade'},
+        'sprodpanerad': {'panerad', 'panerade', 'panerat', 'fardigpanerad', 'fardigpanerade', 'färdigpanerad', 'färdigpanerade'},
     }
     phrase_blockers = [b for b in product_blockers if ' ' in b]
     blockers_to_check = phrase_blockers or product_blockers

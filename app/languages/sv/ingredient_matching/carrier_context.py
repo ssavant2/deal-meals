@@ -736,6 +736,11 @@ CONTEXT_WORD_KEYWORD_EXEMPTIONS: Dict[str, FrozenSet[str]] = {
     # implies the mozzarella type; do not require the ingredient to also say 'mozzarella'.
     'bufala': frozenset({'mozzarella', 'mozarella'}),
     'campana': frozenset({'mozzarella', 'mozarella'}),
+    # Smoked scamorza is sold as "Scamorza Rökt Mozzarella" (Zeta). PNB keeps the
+    # plain 'mozzarella' keyword blocked from scamorza products (Q79-8), but a
+    # recipe that explicitly asks for scamorza should still reach its own product
+    # without also having to spell out the 'mozzarella' family word.
+    'scamorza': frozenset({'mozzarella', 'mozarella'}),
     'coppa': frozenset({'parma'}),
     'coppadiparma': frozenset({'parma'}),
 

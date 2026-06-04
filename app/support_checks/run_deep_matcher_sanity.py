@@ -1188,14 +1188,26 @@ test("Dagens Rostad Kyckling Fryst → blocked", kw("Dagens Rostad Kyckling Frys
 test("Pulled Beef → [pulledbeef]", kw("Pulled Beef"), ["pulledbeef"])
 test("Pulled Pork → [pulledpork]", kw("Pulled Pork"), ["pulledpork"])
 test("Pulled Chicken → [pulledchicken]", kw("Pulled Chicken"), ["pulledchicken"])
-test("Pulled Oumph → [vegopulled, vegobitar]",
+test("Pulled Oumph → [vegopulled, vegobitar, oumph]",
      extract_keywords_from_product("Pulled Oumph", "frozen", brand="Oumph"),
-     ["vegopulled", "vegobitar"])
+     ["vegopulled", "vegobitar", "oumph"])
 test(
-    "Oumph chunks → vegobitar",
+    "Oumph chunks → vegobitar + oumph brand keyword",
     extract_keywords_from_product("Ch*cken Style Chunks Oumph", "frozen", brand="Oumph"),
-    ["vegobitar"],
+    ["vegobitar", "oumph"],
 )
+# A recipe asking for "oumph" (or "oumph eller liknande vegokött") reaches the
+# whole Oumph range, including the chunks/pulled variants that previously dropped
+# the brand keyword. Plain vegobitar/vegopulled recipes still match (regression).
+test("oumph ingredient matches Oumph chunks",
+     recipe_match_num(["600 g Naturell oumph eller liknande vegokött"],
+         {"name": "Oumph The Chunk 280g", "category": "frozen", "brand": "Oumph"}), 1)
+test("oumph ingredient matches Pulled Oumph",
+     recipe_match_num(["600 g Naturell oumph eller liknande vegokött"],
+         {"name": "Pulled Oumph BBQ 280g", "category": "frozen", "brand": "Oumph"}), 1)
+test("plain vegobitar still matches Oumph chunks (regression)",
+     recipe_match_num(["200 g vegobitar"],
+         {"name": "Oumph The Chunk 280g", "category": "frozen", "brand": "Oumph"}), 1)
 
 # --- Pulled: should NOT cross-match between variants ---
 test("Pulled Beef ≠ 'pulled pork'", match("Pulled Beef", "1 förp pulled pork"), None)
@@ -10513,6 +10525,15 @@ test("kanelstång accepts whole kanel", recipe_match_num(["1 kanelstång"], {"na
 # Di Bufala Campana: context_word exemption allows bufala/campana keyword to bypass mozzarella requirement
 test("di bufala matches bufala mozzarella product", recipe_match_num(["di bufala campana"], {"name": "Mozzarella di Bufala Campana 125g", "category": "dairy"}), 1)
 test("di bufala blocks plain mozzarella", recipe_match_num(["di bufala campana"], {"name": "Mozzarella 125g ICA", "category": "dairy"}), 0)
+# Scamorza: smoked scamorza is sold as "Scamorza Rökt Mozzarella". A recipe asking
+# for scamorza reaches its own product (mozzarella context_word exempt for scamorza
+# keyword), while plain mozzarella recipes stay blocked from scamorza via PNB (Q79-8).
+test("scamorza rökt matches its own smoked-scamorza product",
+     recipe_match_num(["1 frp scamorza rökt"], {"name": "Scamorza Rökt Mozzarella 250g Zeta", "category": "dairy"}), 1)
+test("plain mozzarella still blocked from scamorza product (Q79-8)",
+     recipe_match_num(["125 g mozzarella"], {"name": "Scamorza Rökt Mozzarella 250g Zeta", "category": "dairy"}), 0)
+test("scamorza does not grab plain fresh mozzarella",
+     recipe_match_num(["1 frp scamorza"], {"name": "Mozzarella Fresh 125g Galbani", "category": "dairy"}), 0)
 # Crème fraiche: sweet/dessert variants should not satisfy plain cooking crème fraiche
 test("crème fraiche blocks sötstark mango variant", recipe_match_num(["crème fraiche"], {"name": "Lätt Creme Fraiche Sötstark Mango 11% Arla", "category": "dairy"}), 0)
 test("crème fraiche accepts plain variant", recipe_match_num(["crème fraiche"], {"name": "Creme fraiche 32% ICA", "category": "dairy"}), 1)
@@ -10941,6 +10962,20 @@ test("sojasås product also suppressed by vegofärs context",
      match("Sojasås 150ml Kikkoman", "fryst vegofärs soja", "pantry"), None)
 test("plain soja recipe still matches soy sauce",
      match("Japansk soja 150ml Mrs Cheng's", "2 msk soja", "pantry"), "soja")
+
+# CUISINE_CONTEXT taco/texmex — 'tortillabröd' removed as a standalone context word.
+# Asian wrap recipes (Peking duck) use tortillabröd as a wrap substitute and must
+# not pull in taco-seasoned products; real taco recipes still trigger via taco/tacos.
+TACO_OFFER = {"name": "Tacokyckling Texmex Fryst 400g", "category": "meat"}
+test("Tacokyckling blocked in Peking duck recipe (tortillabröd only, no taco word)",
+     recipe_match_num_named("Tareqs pekinganka",
+         ["4 tortillabröd", "1 anka", "hoisinsås", "salladslök", "gurka"], TACO_OFFER), 0)
+test("Tacokyckling allowed in taco recipe (tacokrydda trigger)",
+     recipe_match_num_named("Tacokväll",
+         ["500 g kycklingfilé", "1 påse tacokrydda", "8 tortillabröd"], TACO_OFFER), 1)
+test("Tacokyckling allowed in tacos recipe",
+     recipe_match_num_named("Tacos",
+         ["kycklingfilé", "tacos", "salsa"], TACO_OFFER), 1)
 
 # CUISINE_CONTEXT thaikryddad — recipe-name-based thai cue + narrow pantry cues.
 # Coriander used to be a trigger but is too pan-cuisine (mexican/indian/middle-east/
@@ -11512,6 +11547,20 @@ test("PNB pollock has sprodpanerad",
      "sprodpanerad" in PRODUCT_NAME_BLOCKERS.get("pollock", set()), True)
 test("PNB pollock has sprödpanerad",
      "sprödpanerad" in PRODUCT_NAME_BLOCKERS.get("pollock", set()), True)
+
+# PNB ingredient-satisfies-bypass: a recipe explicitly asking for breaded cod
+# ("panerad"/"färdigpanerad") satisfies both the 'panerad' AND the more specific
+# 'sprödpanerad' product blocker, so the breaded product is reachable. Plain torsk
+# recipes stay blocked, and unrelated blockers (citronsmör) are NOT bypassed.
+test("explicit färdigpanerad torsk matches sprödpanerad torsk product",
+     recipe_match_num(["torsk, färdigpanerade bitar"],
+         {"name": "Sprödpanerad torskfilé 4-p Fryst 360g ICA", "category": "fish"}), 1)
+test("plain torsk still blocked from sprödpanerad product",
+     recipe_match_num(["400 g torsk"],
+         {"name": "Sprödpanerad torskfilé 4-p Fryst 360g ICA", "category": "fish"}), 0)
+test("panerad-satisfaction does not bypass unrelated citronsmör blocker",
+     recipe_match_num(["400 g panerad torsk"],
+         {"name": "Torskfilé med citronsmör 250g", "category": "fish"}), 0)
 
 # runtime_ksbc_fond_andfond: generated by dm matcher add ksbc
 from languages.sv.ingredient_matching import KEYWORD_SUPPRESSED_BY_CONTEXT
@@ -13883,12 +13932,14 @@ test("PNB sillfilé has 5-minuters",
 test("PNB sillfilé has inläggning",
      "inläggning" in PRODUCT_NAME_BLOCKERS.get("sillfilé", set()), True)
 
-# CUISINE_CONTEXT taco extended with tortillabröd — tortillabröd-recept matchar taco-produkter
+# CUISINE_CONTEXT taco: tortillabröd removed as a standalone taco/texmex context
+# word — Asian wrap recipes (Peking duck) use tortillabröd without taco intent, so
+# it must not let taco-seasoned products match on its own (see behavioral tests above).
 from languages.sv.ingredient_matching.recipe_context import CUISINE_CONTEXT  # noqa: F811
-test("Taco CUISINE_CONTEXT includes tortillabröd",
-     'tortillabröd' in CUISINE_CONTEXT.get('taco', set()), True)
-test("Texmex CUISINE_CONTEXT includes tortillabröd",
-     'tortillabröd' in CUISINE_CONTEXT.get('texmex', set()), True)
+test("Taco CUISINE_CONTEXT excludes standalone tortillabröd",
+     'tortillabröd' in CUISINE_CONTEXT.get('taco', set()), False)
+test("Texmex CUISINE_CONTEXT excludes standalone tortillabröd",
+     'tortillabröd' in CUISINE_CONTEXT.get('texmex', set()), False)
 # parent_match_only_salsiccia_salsicciakorv: generated by dm matcher add parent-match-only
 # sanity-id: parent_match_only_salsiccia_salsicciakorv
 test("parent-match-only Salsiccia Färsk 200g Ingelsta matches salsiccia",
@@ -15182,17 +15233,6 @@ test("PNB sillfileer has 5-minuters",
      "5-minuters" in PRODUCT_NAME_BLOCKERS.get("sillfileer", set()), True)
 test("PNB sillfileer has inläggning",
      "inläggning" in PRODUCT_NAME_BLOCKERS.get("sillfileer", set()), True)
-# runtime_fpb_betor_gulbetor: generated by dm matcher add fpb
-# sanity-id: runtime_fpb_betor_gulbetor
-from languages.sv.ingredient_matching import FALSE_POSITIVE_BLOCKERS
-test("FPB betor has gulbetor",
-     "gulbetor" in FALSE_POSITIVE_BLOCKERS.get("betor", set()), True)
-test("FPB betor has gulbeta",
-     "gulbeta" in FALSE_POSITIVE_BLOCKERS.get("betor", set()), True)
-test("FPB betor has sockerbeta",
-     "sockerbeta" in FALSE_POSITIVE_BLOCKERS.get("betor", set()), True)
-test("FPB betor has sockerbetssaft",
-     "sockerbetssaft" in FALSE_POSITIVE_BLOCKERS.get("betor", set()), True)
 # keyword_synonym_schalottenlok_scharlottenlok: generated by dm matcher add keyword-synonym
 # sanity-id: keyword_synonym_schalottenlok_scharlottenlok
 test("Keyword synonym scharlottenlök matches schalottenlök",
@@ -16144,9 +16184,9 @@ test("KSBC taco has lax",
 # extraction_helper_vegopulled: generated by dm matcher add extraction-helper
 # sanity-id: extraction_helper_vegopulled
 test("KW Vegetarisk Pulled ingredient -> vegopulled", extract_keywords_from_ingredient("Vegetarisk Pulled"), ["vegopulled"])
-test("KW Pulled BBQ Chunks Oumph product -> vegopulled+vegobitar",
+test("KW Pulled BBQ Chunks Oumph product -> vegopulled+vegobitar+oumph",
      extract_keywords_from_product("Pulled BBQ Chunks Oumph", "frozen", brand="Oumph"),
-     ["vegopulled", "vegobitar"])
+     ["vegopulled", "vegobitar", "oumph"])
 # runtime_specialty_qualifier_pepparsas: generated by dm matcher add specialty-qualifier
 # sanity-id: runtime_specialty_qualifier_pepparsas
 from languages.sv.ingredient_matching.specialty_rules import SPECIALTY_QUALIFIERS
@@ -16216,6 +16256,196 @@ test("KW pumpakärna extracts pumpafrön",
 from languages.sv.ingredient_matching import PRODUCT_NAME_BLOCKERS
 test("PNB pumpakärna has musli",
      "musli" in PRODUCT_NAME_BLOCKERS.get("pumpakärna", set()), True)
+# runtime_fpb_betor: generated by dm matcher add fpb
+# sanity-id: runtime_fpb_betor
+from languages.sv.ingredient_matching import FALSE_POSITIVE_BLOCKERS
+test("FPB betor has gulbetor",
+     "gulbetor" in FALSE_POSITIVE_BLOCKERS.get("betor", set()), True)
+test("FPB betor has gulbeta",
+     "gulbeta" in FALSE_POSITIVE_BLOCKERS.get("betor", set()), True)
+test("FPB betor has sockerbeta",
+     "sockerbeta" in FALSE_POSITIVE_BLOCKERS.get("betor", set()), True)
+test("FPB betor has sockerbetssaft",
+     "sockerbetssaft" in FALSE_POSITIVE_BLOCKERS.get("betor", set()), True)
+test("FPB betor has polkabetor",
+     "polkabetor" in FALSE_POSITIVE_BLOCKERS.get("betor", set()), True)
+# Polkabetor (striped beet) is a distinct variety; the stripe pattern is the
+# point of the recipe, so plain rödbeta is not a substitute. The betor keyword
+# must not substring-match inside "polkabetor", but the polka product itself
+# still matches via its own polkabetor keyword.
+test("Polkabetor ingredient isolated from plain rödbeta offer",
+     match("Rödbetor 500g Klass 1 ICA", "100 g Polkabetor", "vegetables"), None)
+test("Polkabetor ingredient still matches polka offer",
+     match("Polkabetor 500g ICA", "100 g Polkabetor", "vegetables"), "polkabetor")
+# runtime_specialty_qualifier_aioli: generated by dm matcher add specialty-qualifier
+# sanity-id: runtime_specialty_qualifier_aioli
+from languages.sv.ingredient_matching.specialty_rules import SPECIALTY_QUALIFIERS
+test("specialty-qualifier aioli has chili",
+     "chili" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has lime",
+     "lime" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has smokey",
+     "smokey" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has smoky",
+     "smoky" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has sriracha",
+     "sriracha" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has mango",
+     "mango" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has tryffel",
+     "tryffel" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has chipotle",
+     "chipotle" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has curry",
+     "curry" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has dill",
+     "dill" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has citron",
+     "citron" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has saffran",
+     "saffran" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+test("specialty-qualifier aioli has wasabi",
+     "wasabi" in SPECIALTY_QUALIFIERS.get("aioli", []), True)
+from languages.sv.ingredient_matching.specialty_rules import BIDIRECTIONAL_PER_KEYWORD
+test("specialty bidirectional aioli has chili",
+     "chili" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has lime",
+     "lime" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has smokey",
+     "smokey" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has smoky",
+     "smoky" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has sriracha",
+     "sriracha" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has mango",
+     "mango" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has tryffel",
+     "tryffel" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has chipotle",
+     "chipotle" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has curry",
+     "curry" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has dill",
+     "dill" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has citron",
+     "citron" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has saffran",
+     "saffran" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+test("specialty bidirectional aioli has wasabi",
+     "wasabi" in BIDIRECTIONAL_PER_KEYWORD.get("aioli", set()), True)
+# Behavioral isolation: flavored aioli isolated from plain aioli in both
+# directions (mirrors flavored mayo Q126-1). Plain/garlic aioli still matches
+# the plain product; a same-flavor recipe still reaches its flavored product.
+test("Plain aioli does not match flavored Aioli Chili",
+     recipe_match_num_named("Aiolirätt", ["1 dl aioli"],
+         {"name": "Aioli Chili 200g", "category": "condiments"}), 0)
+test("Plain aioli does not match flavored Aioli Smokey",
+     recipe_match_num_named("Aiolirätt", ["1 dl aioli"],
+         {"name": "Aioli Smokey 200g", "category": "condiments"}), 0)
+test("Plain aioli still matches plain/vitlök aioli",
+     recipe_match_num_named("Aiolirätt", ["1 dl aioli"],
+         {"name": "Aioli Vitlök 200g", "category": "condiments"}), 1)
+test("Chili-aioli recipe still matches Aioli Chili product",
+     recipe_match_num_named("Aiolirätt", ["1 dl chiliaioli"],
+         {"name": "Aioli Chili 200g", "category": "condiments"}), 1)
+# runtime_important_short_keyword_add_curd: generated by dm matcher add important-short-keyword
+# sanity-id: runtime_important_short_keyword_add_curd
+from languages.sv.ingredient_matching.keywords import IMPORTANT_SHORT_KEYWORDS
+test("important-short-keyword add curd",
+     "curd" in IMPORTANT_SHORT_KEYWORDS, True)
+# keyword_synonym_lemoncurd_curd: generated by dm matcher add keyword-synonym
+# sanity-id: keyword_synonym_lemoncurd_curd
+test("Keyword synonym curd matches lemoncurd",
+     match("Lemon Curd 320g Mackays", "curd", "pantry"), "lemoncurd")
+# runtime_pnb_korv_salami: generated by dm matcher add pnb
+# sanity-id: runtime_pnb_korv_salami
+from languages.sv.ingredient_matching import PRODUCT_NAME_BLOCKERS
+test("PNB korv has salami",
+     "salami" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+test("PNB korv has coppa",
+     "coppa" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+test("PNB korv has fuet",
+     "fuet" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+test("PNB korv has sudjuk",
+     "sudjuk" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+test("PNB korv has sucuk",
+     "sucuk" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+test("PNB korv has lufttorkad",
+     "lufttorkad" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+test("PNB korv has lufttorkat",
+     "lufttorkat" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+test("PNB korv has lufttorkade",
+     "lufttorkade" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+test("PNB korv has salchichon",
+     "salchichon" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+test("PNB korv has salsichon",
+     "salsichon" in PRODUCT_NAME_BLOCKERS.get("korv", set()), True)
+# runtime_pnb_korvar_salami: generated by dm matcher add pnb
+# sanity-id: runtime_pnb_korvar_salami
+from languages.sv.ingredient_matching import PRODUCT_NAME_BLOCKERS
+test("PNB korvar has salami",
+     "salami" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+test("PNB korvar has coppa",
+     "coppa" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+test("PNB korvar has fuet",
+     "fuet" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+test("PNB korvar has sudjuk",
+     "sudjuk" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+test("PNB korvar has sucuk",
+     "sucuk" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+test("PNB korvar has lufttorkad",
+     "lufttorkad" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+test("PNB korvar has lufttorkat",
+     "lufttorkat" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+test("PNB korvar has lufttorkade",
+     "lufttorkade" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+test("PNB korvar has salchichon",
+     "salchichon" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+test("PNB korvar has salsichon",
+     "salsichon" in PRODUCT_NAME_BLOCKERS.get("korvar", set()), True)
+# Behavioral: soft cooking korv (frukostkorv/falukorv/generic korv) is isolated
+# from air-dried/cured charcuterie (products labelled salami/coppa/fuet/sudjuk/
+# lufttorkad), while fresh cooking sausages (salsiccia/bratwurst/fresh chorizo
+# korv) and the korv staples still match. A salami recipe still finds its product.
+test("frukostkorv recipe isolated from dried Salami Chorizo",
+     recipe_match_num(["3 skivade frukostkorvar"], {"name": "Salami Chorizo 80g", "category": "meat"}), 0)
+test("plain korv recipe isolated from lufttorkad Coppa",
+     recipe_match_num(["200 g korv"], {"name": "Coppa Lufttorkad 80g", "category": "meat"}), 0)
+test("plain korv still matches Falukorv",
+     recipe_match_num(["200 g korv"], {"name": "Falukorv 800g Scan", "category": "meat"}), 1)
+test("plain korv still matches fresh Salsiccia",
+     recipe_match_num(["200 g korv"], {"name": "Salsiccia Färsk 300g", "category": "meat"}), 1)
+test("plain korv still matches fresh Chorizo grillkorv",
+     recipe_match_num(["200 g korv"], {"name": "Chorizo Grillkorv 300g", "category": "meat"}), 1)
+test("frukostkorv recipe still matches Frukostkorv product",
+     recipe_match_num(["3 skivade frukostkorvar"], {"name": "Frukostkorv 280g Scan", "category": "meat"}), 1)
+test("salami recipe still finds Salami Chorizo product",
+     recipe_match_num_named("Charkbricka", ["100 g salami"], {"name": "Salami Chorizo 80g", "category": "meat"}), 1)
+# runtime_fpb_sparris_sparrissoppa: generated by dm matcher add fpb
+# sanity-id: runtime_fpb_sparris_sparrissoppa
+from languages.sv.ingredient_matching import FALSE_POSITIVE_BLOCKERS
+test("FPB sparris has sparrissoppa",
+     "sparrissoppa" in FALSE_POSITIVE_BLOCKERS.get("sparris", set()), True)
+# Ready-made sparrissoppa: the soup ingredient reaches finished soup products
+# (which would otherwise yield zero keywords via the processed-food suffix filter)
+# and no longer matches raw asparagus; raw-asparagus recipes are unaffected.
+test("Sparrissoppa product exposes sparrissoppa keyword",
+     extract_keywords_from_product("Kelda Grön Sparrissoppa 1l", "pantry"), ["sparrissoppa"])
+test("sparrissoppa ingredient matches ready sparrissoppa product",
+     recipe_match_num(["1 liter grön sparrissoppa"],
+         {"name": "Kelda Grön Sparrissoppa 1l", "category": "pantry"}), 1)
+test("sparrissoppa ingredient does not match raw sparris",
+     recipe_match_num(["1 liter grön sparrissoppa"],
+         {"name": "Sparris Grön 250g Klass 1", "category": "vegetables"}), 0)
+test("raw sparris recipe still matches raw sparris (regression)",
+     recipe_match_num(["500 g grön sparris"],
+         {"name": "Sparris Grön 250g Klass 1", "category": "vegetables"}), 1)
+# extraction_helper_oumph: generated by dm matcher add extraction-helper
+# sanity-id: extraction_helper_oumph
+test("KW Oumph The Chunk 280g product -> vegobitar+oumph", extract_keywords_from_product("Oumph The Chunk 280g", "frozen"), ["vegobitar", "oumph"])
+# extraction_helper_sparrissoppa: generated by dm matcher add extraction-helper
+# sanity-id: extraction_helper_sparrissoppa
+test("KW Kelda Grön Sparrissoppa 1l product -> sparrissoppa", extract_keywords_from_product("Kelda Grön Sparrissoppa 1l", "pantry"), ["sparrissoppa"])
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")
