@@ -837,7 +837,8 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         steps=(
             "First edit extraction.py when new extraction behavior is needed, then verify with dm matcher trace-extraction.",
             "Run: ./bin/dm matcher add extraction-helper <canonical> --side product|ingredient|both --input \"<text>\" --source-refs <code-ref>",
-            "When an existing simple extraction helper loses or changes a side, rerun with --replace-existing and the remaining --side.",
+            "If the other side already exists, rerun the command with the missing --side; simple entries are merged instead of overwritten.",
+            "Use --replace-existing only to refresh a side that already exists; the opposite side is preserved.",
             "This covers an extraction.py code change; it does not replace the code change itself.",
         ),
     ),
@@ -3232,13 +3233,30 @@ def _first_example(entry: dict[str, Any], field: str) -> dict[str, Any]:
     return {}
 
 
+_EXTRACTION_INGREDIENT_ROLE = "hardcoded_keyword_output:extract_keywords_from_ingredient"
+_EXTRACTION_PRODUCT_ROLE = "hardcoded_keyword_output:extract_keywords_from_product"
+
+
 def _extraction_layer_roles(side: Literal["product", "ingredient", "both"]) -> tuple[str, ...]:
     roles: list[str] = []
     if side in {"ingredient", "both"}:
-        roles.append("hardcoded_keyword_output:extract_keywords_from_ingredient")
+        roles.append(_EXTRACTION_INGREDIENT_ROLE)
     if side in {"product", "both"}:
-        roles.append("hardcoded_keyword_output:extract_keywords_from_product")
+        roles.append(_EXTRACTION_PRODUCT_ROLE)
     return tuple(roles)
+
+
+def _extraction_side_from_roles(roles: Iterable[str]) -> Literal["product", "ingredient", "both"]:
+    role_set = set(roles)
+    has_ingredient = _EXTRACTION_INGREDIENT_ROLE in role_set
+    has_product = _EXTRACTION_PRODUCT_ROLE in role_set
+    if has_ingredient and has_product:
+        return "both"
+    if has_ingredient:
+        return "ingredient"
+    if has_product:
+        return "product"
+    raise typer.BadParameter("extraction_helper entry has no recognized hardcoded extraction coverage rows")
 
 
 def _extraction_helper_block(
@@ -3290,16 +3308,11 @@ def _append_extraction_helper_entry(
     source_refs: tuple[str, ...],
     replace_existing: bool,
     dry_run: bool,
-) -> tuple[str, int, str, bool]:
+) -> tuple[str, int, str, bool, Literal["product", "ingredient", "both"]]:
     target_file = _registry_entry_file(paths, "extraction_helper")
     existing_ids = _existing_entry_ids(target_file)
     entry_id = f"sv-se.family.{_slug(canonical)}"
     if entry_id in existing_ids:
-        if not replace_existing:
-            raise typer.BadParameter(
-                f"extraction_helper entry already exists: {entry_id}. "
-                "Use --replace-existing to rewrite its covered side/source refs."
-            )
         records = _registry_entry_records("extraction-helper", target_file)
         matches = [record for record in records if record.entry_id == entry_id]
         if len(matches) != 1:
@@ -3318,15 +3331,44 @@ def _append_extraction_helper_entry(
                 raise typer.BadParameter(
                     f"{entry_id} has non-canonical coverage rows; manual edit required."
                 )
+        existing_roles = {
+            str(coverage.get("layer_role") or "").strip()
+            for coverage in entry.get("coverage", [])
+            if isinstance(coverage, dict) and str(coverage.get("layer_role") or "").strip()
+        }
+        allowed_roles = set(_extraction_layer_roles("both"))
+        unexpected_roles = sorted(existing_roles - allowed_roles)
+        if unexpected_roles:
+            raise typer.BadParameter(
+                f"{entry_id} has unsupported extraction coverage roles: {', '.join(unexpected_roles)}; "
+                "manual edit required."
+            )
+        requested_roles = set(_extraction_layer_roles(side))
+        overlapping_roles = sorted(existing_roles & requested_roles)
+        missing_roles = requested_roles - existing_roles
+        if overlapping_roles and not missing_roles and not replace_existing:
+            raise typer.BadParameter(
+                f"extraction_helper coverage already exists for {canonical}: {', '.join(overlapping_roles)}. "
+                "Use --replace-existing to refresh the existing side while preserving the other side."
+            )
+        merged_roles = existing_roles | requested_roles
+        merged_side = _extraction_side_from_roles(merged_roles)
+        existing_source_refs = tuple(
+            str(source_ref).strip()
+            for source_ref in entry.get("source_refs", [])
+            if isinstance(source_ref, str) and source_ref.strip()
+        )
+        merged_source_refs = tuple(dict.fromkeys((*existing_source_refs, *source_refs)))
         block = _extraction_helper_block(
             entry_id=entry_id,
             canonical=canonical,
-            side=side,
-            source_refs=source_refs,
+            side=merged_side,
+            source_refs=merged_source_refs,
         )
         if not dry_run:
             _write_registry_entry_block(target_file, record, block, dry_run=False)
-        return entry_id, record.start, block, True
+        changed_side = _extraction_side_from_roles(requested_roles if replace_existing else missing_roles or requested_roles)
+        return entry_id, record.start, block, True, changed_side
     existing_keys = _existing_coverage_keys(paths)
     duplicate_roles = [
         role
@@ -3346,7 +3388,7 @@ def _append_extraction_helper_entry(
     existing_text = target_file.read_text(encoding="utf-8")
     start_line = len(existing_text.splitlines()) + 1
     _append_text_block(target_file, block, dry_run=dry_run)
-    return entry_id, start_line, block, False
+    return entry_id, start_line, block, False, side
 
 
 def _append_extraction_helper_deep_sanity_stub(
@@ -10680,7 +10722,7 @@ def add_extraction_helper(
     if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root light gates are not available; use --no-run-gates")
     policy_ref = policy_ref or f"extraction_helper_{_slug(canonical)}"
-    entry_id, _entry_line, toml_preview, replaced = _append_extraction_helper_entry(
+    entry_id, _entry_line, toml_preview, replaced, sanity_side = _append_extraction_helper_entry(
         paths=paths,
         canonical=canonical,
         side=side,
@@ -10692,7 +10734,7 @@ def add_extraction_helper(
         paths=paths,
         policy_ref=policy_ref,
         canonical=canonical,
-        side=side,
+        side=sanity_side,
         input_text=input_text.strip(),
         offer_category=offer_category,
         dry_run=dry_run,
@@ -10714,6 +10756,8 @@ def add_extraction_helper(
     action = "Updated" if replaced else "Generated"
     typer.echo(f"{action} extraction_helper coverage: {change.policy_ref}")
     typer.echo(f"  entry: {entry_id}")
+    if replaced and sanity_side != side:
+        typer.echo(f"  merged side: {side} request updated missing {sanity_side} coverage; existing coverage was preserved")
     typer.echo(
         "NOTE: extraction-helper is registry coverage for hardcoded extraction.py output; "
         "it does not write the extraction.py branch. "

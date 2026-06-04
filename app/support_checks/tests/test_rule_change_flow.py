@@ -5432,7 +5432,7 @@ reason = "Synthetic parent PNB mirror warning canary."
                     "extraction-helper",
                     "phase9extract",
                     "--side",
-                    "both",
+                    "product",
                     "--input",
                     "Phase9extract",
                     "--source-refs",
@@ -5457,12 +5457,49 @@ reason = "Synthetic parent PNB mirror warning canary."
             coverage_rows = extraction_entry.language_payload["coverage"]
             self.assertEqual(
                 {row["layer_role"] for row in coverage_rows},
+                {"hardcoded_keyword_output:extract_keywords_from_product"},
+            )
+            merge_ingredient = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "add",
+                    "extraction-helper",
+                    "phase9extract",
+                    "--side",
+                    "ingredient",
+                    "--input",
+                    "Phase9extract",
+                    "--source-refs",
+                    "code:extraction:synthetic:2",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(merge_ingredient.returncode, 0, merge_ingredient.stderr + merge_ingredient.stdout)
+
+            entries = load_registry_entries(entries_dir=entries_dir, include_local=False)
+            extraction_entry = next(entry for entry in entries if entry.entry_id == "sv-se.family.phase9extract")
+            helper_text = (entries_dir / "extraction_helper.toml").read_text(encoding="utf-8")
+            helper_block = helper_text[helper_text.find('entry_id = "sv-se.family.phase9extract"') :]
+            helper_block = helper_block[: helper_block.find("[[entries]]", 1)]
+            self.assertIn('ingredient_terms = ["phase9extract"]', helper_block)
+            self.assertIn('offer_terms = ["phase9extract"]', helper_block)
+            self.assertEqual(
+                {row["layer_role"] for row in extraction_entry.language_payload["coverage"]},
                 {
                     "hardcoded_keyword_output:extract_keywords_from_ingredient",
                     "hardcoded_keyword_output:extract_keywords_from_product",
                 },
             )
-            replacement = subprocess.run(
+            refresh_product = subprocess.run(
                 [
                     sys.executable,
                     "-m",
@@ -5476,7 +5513,7 @@ reason = "Synthetic parent PNB mirror warning canary."
                     "--input",
                     "Phase9extract",
                     "--source-refs",
-                    "code:extraction:synthetic:2",
+                    "code:extraction:synthetic:3",
                     "--tree-root",
                     str(tree_root),
                     "--replace-existing",
@@ -5487,18 +5524,15 @@ reason = "Synthetic parent PNB mirror warning canary."
                 capture_output=True,
                 text=True,
             )
-            self.assertEqual(replacement.returncode, 0, replacement.stderr + replacement.stdout)
-
+            self.assertEqual(refresh_product.returncode, 0, refresh_product.stderr + refresh_product.stdout)
             entries = load_registry_entries(entries_dir=entries_dir, include_local=False)
             extraction_entry = next(entry for entry in entries if entry.entry_id == "sv-se.family.phase9extract")
-            helper_text = (entries_dir / "extraction_helper.toml").read_text(encoding="utf-8")
-            helper_block = helper_text[helper_text.find('entry_id = "sv-se.family.phase9extract"') :]
-            helper_block = helper_block[: helper_block.find("[[entries]]", 1)]
-            self.assertNotIn("ingredient_terms", helper_block)
-            self.assertIn('offer_terms = ["phase9extract"]', helper_block)
             self.assertEqual(
                 {row["layer_role"] for row in extraction_entry.language_payload["coverage"]},
-                {"hardcoded_keyword_output:extract_keywords_from_product"},
+                {
+                    "hardcoded_keyword_output:extract_keywords_from_ingredient",
+                    "hardcoded_keyword_output:extract_keywords_from_product",
+                },
             )
 
     def test_dm_matcher_guide_lists_all_toml_add_surfaces(self) -> None:

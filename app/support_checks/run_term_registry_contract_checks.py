@@ -635,6 +635,14 @@ def _run_new_term_gate(
             details={
                 "count": len(stale_registry_keys),
                 "sample": [_coverage_key_to_dict(key) for key in stale_registry_keys[:20]],
+                "hint": (
+                    "Remove or update the stale [[entries.coverage]] row in the listed registry TOML entry, "
+                    "then rerun `./bin/dm matcher regen --what coverage`. For extraction_helper entries, "
+                    "this often means the canonical was re-added with only one side; rerun "
+                    "`./bin/dm matcher add extraction-helper <canonical> --side <missing-side> ...` to merge "
+                    "simple product/ingredient coverage, or use --replace-existing to refresh an existing side "
+                    "without dropping the other side."
+                ),
             },
         ))
 

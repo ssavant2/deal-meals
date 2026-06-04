@@ -445,18 +445,21 @@ the CLI preserves commas inside regex groups, character classes, and quantifier
 braces. A pattern containing `{0,40}` or `\d{2}` can therefore be passed as one
 value. If a literal top-level comma is part of the regex, escape it as `\,`.
 
-If a hardcoded extraction helper is narrowed after an `extraction.py` edit, do
-not hand-delete coverage rows. For a simple one-canonical entry, rewrite the
-covered side/source refs instead:
+If a hardcoded extraction helper gains coverage on the other side after an
+`extraction.py` edit, rerun the command for the missing side. For simple
+one-canonical entries the CLI merges product/ingredient coverage instead of
+overwriting the existing side:
 
 ```bash
 ./bin/dm matcher add extraction-helper margarin \
   --side product \
   --input "Lätta 39%" \
-  --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:829 \
-  --replace-existing
+  --source-refs code:extraction:app/languages/sv/ingredient_matching/extraction.py:extract_keywords_from_product:829
 ```
 
+Use `--replace-existing` only when refreshing a side that already exists; the
+opposite side is preserved. If a helper must truly lose a side, treat that as a
+manual Track B registry edit and review stale coverage/baseline removals.
 If the entry has extra offer/ingredient terms or non-canonical coverage rows,
 `--replace-existing` refuses the rewrite; edit manually and run Track B gates.
 Extraction helper changes are Track B registry work even when the behavior
@@ -467,6 +470,19 @@ write Python extraction code. For brand/product disambiguation such as a product
 name that should emit `tabasco`, first add the narrow extractor branch, prove it
 with `dm matcher trace-extraction`, then register the coverage with
 `extraction-helper`.
+
+Two common extraction-helper traps:
+
+- Existing entries may be one-sided. Check whether the entry already has
+  `ingredient_terms`, `offer_terms`, or both before assuming `--side` describes
+  the whole canonical. Rerunning `dm matcher add extraction-helper` with the
+  missing side merges simple one-canonical entries; it should not be used as an
+  implicit delete of the other side.
+- Some phrase recognizers have sibling logic in both `extraction.py` and
+  `matching.py`. If you widen an extraction phrase such as allowing adjectives
+  between two words, verify `dm matcher probe` or `dm matcher compare-paths`
+  across fast/backend paths so the product/ingredient extractor does not become
+  smarter than the matcher path that validates the same phrase.
 
 Common Python runtime data surfaces now have CLI-backed overlay coverage:
 
@@ -949,6 +965,10 @@ Use `dm matcher sanity-find "<description-or-policy-or-id>"` before editing a
 large sanity file by hand. New CLI-generated sanity blocks include a stable
 `# sanity-id: <policy_ref>` comment, and `sanity-find` can search by
 description, expected literal, policy ref, sanity id, or generating command.
+When a policy change intentionally inverts old behavior, run `sanity-find` for
+the old product/ingredient words before gates. Old hand-written tests may still
+say `match(...) == True` for exactly the assertion you are changing; update those
+with `sanity-update` or by hand before treating the gate failure as a new bug.
 
 Use `dm matcher sanity-update "<description-or-policy-or-id>" --expected <canonical-or-None>`
 when a deliberate rule change makes exactly one older sanity expectation stale.
@@ -1855,9 +1875,14 @@ cleanup:
 
 1. Register any hardcoded extraction output with
    `dm matcher add extraction-helper ... --no-run-gates`.
-2. Run `dm matcher batch finalize --track A --dry-run` to inspect the planned
+2. If the edit adds or widens a phrase pattern in `extraction.py`, check whether
+   the fast/live matcher has a sibling pattern in `matching.py` for the same
+   phrase. Prove the exact pair with `dm matcher probe --expect ...` or
+   `dm matcher compare-paths`; extraction-only fixes can leave backend/fast
+   paths split.
+3. Run `dm matcher batch finalize --track A --dry-run` to inspect the planned
    regen/promote/line-ref/preflight/gate steps.
-3. Run `dm matcher batch finalize --track A` for narrow runtime behavior, or
+4. Run `dm matcher batch finalize --track A` for narrow runtime behavior, or
    `--track B` when fixtures/registry/inventory changed. Add `--allow-removals`
    only after reviewing intentional baseline removals.
 
