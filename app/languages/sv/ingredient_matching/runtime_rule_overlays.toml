@@ -795,6 +795,13 @@ keyword = "betor"
 blockers = ["juice"]
 reason = "Root vegetable 'betor' family (rödbeta, polkabetor) should not match rödbeta-juice products; the juice guard on rödbeta does not propagate to the parent betor keyword"
 
+[[product_name_blockers]]
+id = "runtime_pnb_rapsolja"
+status = "active"
+keyword = "rapsolja"
+blockers = ["spray"]
+reason = "Rapsolja Spray is a pan-greasing spray oil, not a measured cooking-oil ingredient; parallels existing olivolja spray blocker"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1179,6 +1186,13 @@ status = "active"
 keyword = "taco"
 blockers = ["tacoskal"]
 reason = "Taco-seasoned products (kyckling, färs) should not match 'tacoskal' shell/tub recipes; 'taco' substring in 'tacoskal' ingredient text causes bleed — FPB suppresses 'taco' keyword when ingredient specifies tacoskal"
+
+[[false_positive_blockers]]
+id = "runtime_fpb_liba"
+status = "active"
+keyword = "liba"
+blockers = ["libanesisk"]
+reason = "Liba is a bread brand; must not match libanesisk* (Lebanese cuisine adjective) via substring in ingredient_parent mapping"
 
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
@@ -1626,6 +1640,13 @@ status = "active"
 source = "croissants deg"
 target = "croissantdeg"
 reason = "Danerolles 'Croissants Deg' product name has 'deg' (3 chars) dropped by min_length filter — compound-join so the full keyword 'croissantdeg' survives extraction and matches recipe ingredients asking for croissant dough"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_farsk_potatis_farskpotatis"
+status = "active"
+source = "färsk potatis"
+target = "färskpotatis"
+reason = "Two-word form 'färsk potatis' loses isolation because 'färsk' is a stop-word; merged form extracts färskpotatis keyword and applies existing KSBC isolation correctly"
 
 [[keyword_set_updates]]
 id = "runtime_important_short_keyword_add_hirs"
