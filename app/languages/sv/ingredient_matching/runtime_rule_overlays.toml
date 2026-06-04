@@ -239,8 +239,8 @@ reason = "Yoghurt-recipes (generic + matlagnings/turkisk/grekisk) match cooking-
 id = "runtime_pnb_plommontomater"
 status = "active"
 keyword = "plommontomater"
-blockers = ["kycklingpate"]
-reason = "Kycklingpate med tomat is chicken pate flavored with tomato, not a tomato product"
+blockers = ["kycklingpate", "passerad", "passerade"]
+reason = "Kycklingpate med tomat is chicken pate flavored with tomato, not a tomato product; Passerade tomater (passata purée) should not match fresh plum tomato ingredients — different product forms"
 
 [[product_name_blockers]]
 id = "runtime_pnb_kvisttomater"
@@ -801,6 +801,13 @@ status = "active"
 keyword = "rapsolja"
 blockers = ["spray"]
 reason = "Rapsolja Spray is a pan-greasing spray oil, not a measured cooking-oil ingredient; parallels existing olivolja spray blocker"
+
+[[product_name_blockers]]
+id = "runtime_pnb_pumpakarna"
+status = "active"
+keyword = "pumpakärna"
+blockers = ["musli"]
+reason = "pumpakärna (singular) mirrors pumpakärnor PNB — musli products should not match pumpakärna ingredient"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
