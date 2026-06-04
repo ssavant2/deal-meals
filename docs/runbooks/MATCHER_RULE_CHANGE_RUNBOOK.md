@@ -469,7 +469,16 @@ hardcoded extraction output that already exists in `extraction.py`. It does not
 write Python extraction code. For brand/product disambiguation such as a product
 name that should emit `tabasco`, first add the narrow extractor branch, prove it
 with `dm matcher trace-extraction`, then register the coverage with
-`extraction-helper`.
+`extraction-helper`. If Track B promote later says a hardcoded source term lacks
+exact active TOML coverage, this is the missing step: register the hardcoded
+output with `dm matcher add extraction-helper ...`, regenerate, then promote
+again.
+
+`dm matcher doctor` now checks this earlier: it scans hardcoded literal returns
+from `extract_keywords_from_product` and `extract_keywords_from_ingredient` and
+reports any output that lacks exact active `extraction_helper` registry coverage.
+Use the suggested command as a template, but replace `"<triggering text>"` with
+the product or ingredient text that proves the extractor branch.
 
 Two common extraction-helper traps:
 
@@ -483,6 +492,10 @@ Two common extraction-helper traps:
   between two words, verify `dm matcher probe` or `dm matcher compare-paths`
   across fast/backend paths so the product/ingredient extractor does not become
   smarter than the matcher path that validates the same phrase.
+  `dm matcher doctor` also has a small drift watchlist for known mirrored
+  patterns. A watchlist warning is not a semantic failure by itself; it means
+  the paired files should be inspected and the affected pair should be proven
+  with `compare-paths`.
 
 Common Python runtime data surfaces now have CLI-backed overlay coverage:
 
@@ -921,6 +934,14 @@ Use `--expect no-match` for unexpected positives and `--format json` when
 scripting. Prefer this before hand-patching `_record_validation_event` or
 adding temporary debug prints.
 
+For `fast_match_missing`, `why` also runs an observe-only fast-path shadow trace.
+This is not production matcher logic and it does not relax any guard; it simply
+replays common candidate checks and names likely silent skips such as
+`false_positive_blocker`, `keyword_suppressed_by_context`, `compound_strict`,
+`no_match_policy`, `specialty_qualifier`, or `processed_check`. If the shadow
+trace says no reject/skip was observed, fall back to `compare-paths`, `explain`,
+and direct inspection of the local fast-path guard.
+
 If both sides clearly expose the same keyword but the result is still
 `NO MATCH`, stop treating it as an extraction/canonical-registration problem.
 That shape means the keyword loop found a candidate and a later guard probably
@@ -1085,7 +1106,7 @@ decision in the runbook.
 
 | Track | Use for | Typical files | Required proof |
 | --- | --- | --- | --- |
-| Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/KSBC/GPB additions, cuisine-context restrictions, compound/subword protection, and tiny runtime guards. | `dm matcher add pnb|fpb|ksbc|gpb`, `runtime_rule_overlays.toml`, `dm matcher add smart-blocker` scaffolds, `recipe_context.py` for `CUISINE_CONTEXT`, `compound_text.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
+| Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/KSBC/GPB additions, cuisine-context restrictions, compound/subword protection, and tiny runtime guards. | `dm matcher add pnb|fpb|ksbc|gpb`, `runtime_rule_overlays.toml`, `dm matcher add cuisine-context|context-word-exemption|specialty-qualifier|qualifier-equivalent`, `dm matcher add smart-blocker` scaffolds, `compound_text.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
 | Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. Use `dm matcher modify no-match-policy`, `dm matcher modify match-bridge`, `dm matcher fixture make-negative`, `dm matcher fixture make-positive`, and `dm matcher fixture remove` for supported mechanical rewrites/removals. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
 
 There is one deliberately small path between those two: **lightweight registry
@@ -1322,7 +1343,7 @@ table.
 | Directional canonical override | `space-normalization` or ingredient-side extraction helper plus narrow product exposure | A modifier changes the requested canonical and the base canonical must not remain available, e.g. `pepparrot på tub` -> `pepparrotsvisp` only. | `dual-keyword-normalization`; it emits the broader family too. |
 | Specific anchor for generic blocker bypass | `offer-extra-keyword`, a narrow `extraction.py` branch + `extraction-helper`, or a specific product-side canonical | A generic keyword is correctly blocked by PNB/FPB/KSBC, but one specific subtype should still match via its own keyword, e.g. plant cream or red roe anchors bypassing generic `grädde`/`rom` blockers. | Removing the generic blocker or broadening the generic family. The anchor must have positive and negative proof. |
 | Form or processed-state rule | `./bin/dm matcher add processed-rule ...`, `spice-fresh-rule ...`, `processed-exemption ...`, `strict-processed-rule ...`, or `processed-food ...` for simple set add/remove; otherwise `form_rules.py` or a dedicated declarative form engine | Fresh/dried/frozen/cooked/plain semantics are the actual decision. See "Form-Rule Relaxation" for `färskpressad`/juice-style exceptions. | Listing every future flavor or cooked variant by hand. |
-| Qualifier or bidirectional variant | `./bin/dm matcher add specialty-qualifier ... [--bidirectional]` or `qualifier-equivalent ...` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. Prefer ordinary specialty qualifiers when only ingredient qualifiers must be honored; prefer `--bidirectional` when a product-side subtype should not satisfy a plain ingredient. | Raw substring checks without word-boundary handling. |
+| Qualifier or bidirectional variant | `./bin/dm matcher add specialty-qualifier ... [--bidirectional]` or `qualifier-equivalent ...` | Product qualifier must also appear in the ingredient, or ingredient qualifier must appear in product. Prefer ordinary specialty qualifiers when only ingredient qualifiers must be honored; prefer `--bidirectional` when a product-side subtype should not satisfy a plain ingredient. Add `--sanity-ingredient` plus `--sanity-offer` when the qualifier decision needs backend behavior proof, and `--sanity-expect no-match` for negative proof. | Raw substring checks without word-boundary handling. |
 | Product qualifier required for a keyword | `./bin/dm matcher add qualifier-required-keyword ...` | A keyword should match product variants only when product qualifier words also appear in the ingredient line. | Specialty qualifier rules when the qualifier belongs to a specific product family rather than every product-side word. |
 | Product keyword substitution | `./bin/dm matcher add product-name-substitution ...` | Product extraction should rewrite one extracted keyword to a more specific canonical only when required product words are also present. | Synonym/parent rules when the terms are always equivalent, regardless of product wording. |
 | Secondary ingredient pattern | `./bin/dm matcher add secondary-ingredient-pattern ...` | A product is mainly another food and only contains the matched keyword as a secondary ingredient, with optional product-side exceptions. | Broad ingredient-family policy that belongs in PNB/FPB/processed/form logic. |
@@ -1334,6 +1355,21 @@ table.
 
 If the right surface is unclear, write the fixture first and run diagnostics.
 Let the failing layer choose the implementation point.
+
+Known manual or asymmetric surfaces:
+
+- `context-word-exemption`, `cuisine-context`, `specialty-qualifier`, and
+  `qualifier-equivalent` all have `dm matcher add` commands. Check
+  `dm matcher guide <shape>` before hand-editing those overlays.
+- `cuisine-context` can add runtime overlay context triggers. It does not remove
+  a word from the historical base `CUISINE_CONTEXT`; a removal from base data is
+  still an explicit Python edit plus Track A gates.
+- Hardcoded extraction early-return branches still require hand-editing
+  `extraction.py`, then registering the emitted term with `extraction-helper`.
+- Backend-only equivalence/allowance logic that lives inside
+  `recipe_matcher_backend.py`, `validators.py`, or local helper functions is
+  still manual logic. Add focused backend sanity (`recipe_match_num...`) rather
+  than a fast-only `match()` test.
 
 ### Important: `match_bridge.toml` is declarative-only today
 
@@ -1874,12 +1910,15 @@ validators, use the same finish sequence but think of it as post-code-edit
 cleanup:
 
 1. Register any hardcoded extraction output with
-   `dm matcher add extraction-helper ... --no-run-gates`.
+   `dm matcher add extraction-helper ... --no-run-gates`. `dm matcher doctor`
+   reports missing hardcoded-output coverage before Track B promote reaches the
+   same problem.
 2. If the edit adds or widens a phrase pattern in `extraction.py`, check whether
    the fast/live matcher has a sibling pattern in `matching.py` for the same
    phrase. Prove the exact pair with `dm matcher probe --expect ...` or
    `dm matcher compare-paths`; extraction-only fixes can leave backend/fast
-   paths split.
+   paths split. Treat any doctor drift-watchlist warning as a prompt to inspect
+   both files, not as proof that the matcher behavior is wrong.
 3. Run `dm matcher batch finalize --track A --dry-run` to inspect the planned
    regen/promote/line-ref/preflight/gate steps.
 4. Run `dm matcher batch finalize --track A` for narrow runtime behavior, or
@@ -2239,7 +2278,7 @@ Use the diagnosis class to choose the next move:
 | Diagnosis | Meaning | Usual next action |
 | --- | --- | --- |
 | `route_pair_missing` | Routing never sends the offer to the ingredient. | Add route/term-index exposure, then parity. |
-| `fast_match_missing` | Routing reaches the pair but fast match rejects it. | Run `dm matcher compare-paths` and `dm matcher explain`; `why` may not expose an inner fast-path reject rule because many fast guards still return silent `None`. Add bridge/synonym/fast-path rule, with negative sibling, or inspect the local fast-path guard if those diagnostics stay blank. |
+| `fast_match_missing` | Routing reaches the pair but fast match rejects it. | Inspect `dm matcher why`'s observe-only fast-path shadow trace, then run `dm matcher compare-paths` and `dm matcher explain`. Add bridge/synonym/fast-path rule, with negative sibling, or inspect the local fast-path guard if those diagnostics stay blank. |
 | `backend_validation_rejected` | Initial match exists but backend validator blocks it. | Review validator or add scoped allowance. |
 | `unexpected_positive` | A negative fixture still materializes. | Add/tighten no-match policy or blocker. |
 | `duplicate_signal_source` | Same canonical comes from competing signal sources. | Declare precedence/equivalence or retire duplicate source. |

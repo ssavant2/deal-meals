@@ -70,6 +70,10 @@ MATCHER_SESSION_RELEVANT_PREFIXES = (
     "docs/MATCHER_REGISTRY_ARCHITECTURE.md",
     "docs/TESTING.md",
 )
+EXTRACTION_HELPER_FUNCTIONS = frozenset({
+    "extract_keywords_from_product",
+    "extract_keywords_from_ingredient",
+})
 
 
 @dataclass(frozen=True)
@@ -140,6 +144,36 @@ class MatcherDoctorCheck:
         if self.next_command:
             payload["next_command"] = self.next_command
         return payload
+
+
+@dataclass(frozen=True)
+class HardcodedExtractionOutput:
+    function_name: str
+    output: str
+    lines: tuple[int, ...]
+
+
+@dataclass(frozen=True)
+class CodeDriftWatchItem:
+    item_id: str
+    summary: str
+    required_tokens: Mapping[str, tuple[str, ...]]
+
+
+CODE_DRIFT_WATCHLIST = (
+    CodeDriftWatchItem(
+        item_id="puffat_ris_extraction_matching",
+        summary="puffat ris phrase handling should stay mirrored in extraction.py and matching.py",
+        required_tokens={
+            "app/languages/sv/ingredient_matching/extraction.py": (
+                r"\bpuffat(?:\s+\w+)?\s+ris\b|\bris\s+puffat\b",
+            ),
+            "app/languages/sv/ingredient_matching/matching.py": (
+                r"\bpuffat(?:\s+\w+)?\s+ris\b|\bris\s+puffat\b",
+            ),
+        },
+    ),
+)
 
 
 @dataclass(frozen=True)
@@ -806,6 +840,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         summary="Require product/ingredient qualifier agreement for a keyword family.",
         steps=(
             "Run: ./bin/dm matcher add specialty-qualifier <keyword> --qualifiers <q1,q2,...> [--bidirectional] --reason \"<why>\"",
+            "Add --sanity-ingredient and --sanity-offer for an optional backend behavior canary; use --sanity-expect no-match for negative proof.",
             "Use --bidirectional when product qualifiers should also constrain plain ingredient recipes.",
             "Prefer ordinary specialty qualifiers for recipe-specific requirements; prefer KSBC when the ingredient context should suppress a broader keyword entirely.",
         ),
@@ -1360,7 +1395,170 @@ def _doctor_guided_corrections(checks: Iterable[MatcherDoctorCheck]) -> list[dic
             "summary": "Matcher-relevant files changed; run preflight/gates before handoff.",
             "command": "./bin/dm matcher preflight",
         })
+    extraction_coverage = by_id.get("extraction_helper_coverage")
+    if extraction_coverage and extraction_coverage.status == "needs_action":
+        corrections.append({
+            "id": "extraction_helper_coverage_missing",
+            "summary": extraction_coverage.summary,
+            "command": extraction_coverage.next_command or "./bin/dm matcher add extraction-helper ...",
+        })
+    code_drift = by_id.get("extraction_matching_drift_watchlist")
+    if code_drift and code_drift.status == "warning":
+        corrections.append({
+            "id": "extraction_matching_drift_watchlist",
+            "summary": code_drift.summary,
+            "command": "inspect the listed extraction.py/matching.py watchlist tokens, then run dm matcher compare-paths",
+        })
     return corrections
+
+
+def _ast_literal_strings(node: ast.AST | None) -> list[str]:
+    values: list[str] = []
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        values.append(node.value)
+    elif isinstance(node, (ast.List, ast.Tuple, ast.Set)):
+        for child in node.elts:
+            values.extend(_ast_literal_strings(child))
+    elif isinstance(node, ast.BinOp):
+        values.extend(_ast_literal_strings(node.left))
+        values.extend(_ast_literal_strings(node.right))
+    elif isinstance(node, ast.Subscript):
+        values.extend(_ast_literal_strings(node.slice))
+    return values
+
+
+def _function_defs(path: Path, names: frozenset[str]) -> dict[str, ast.FunctionDef]:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    return {
+        node.name: node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name in names
+    }
+
+
+def _hardcoded_extraction_outputs(paths: MatcherPaths) -> tuple[HardcodedExtractionOutput, ...]:
+    extraction_file = paths.app_dir / "languages" / "sv" / "ingredient_matching" / "extraction.py"
+    outputs: dict[tuple[str, str], list[int]] = {}
+    for function_name, function_node in _function_defs(extraction_file, EXTRACTION_HELPER_FUNCTIONS).items():
+        for node in ast.walk(function_node):
+            if not isinstance(node, ast.Return):
+                continue
+            for value in _ast_literal_strings(node.value):
+                value = value.strip()
+                if value:
+                    outputs.setdefault((function_name, value), []).append(node.lineno)
+    return tuple(
+        HardcodedExtractionOutput(
+            function_name=function_name,
+            output=output,
+            lines=tuple(sorted(set(lines))),
+        )
+        for (function_name, output), lines in sorted(outputs.items())
+    )
+
+
+def _extraction_side_for_function(function_name: str) -> str:
+    return "product" if function_name == "extract_keywords_from_product" else "ingredient"
+
+
+def _source_ref_for_hardcoded_extraction_output(
+    paths: MatcherPaths,
+    output: HardcodedExtractionOutput,
+) -> str:
+    extraction_file = paths.app_dir / "languages" / "sv" / "ingredient_matching" / "extraction.py"
+    first_line = output.lines[0] if output.lines else 1
+    return (
+        "code:extraction:"
+        f"{_repo_rel(extraction_file, repo_root=paths.repo_root)}:"
+        f"{output.function_name}:{first_line}"
+    )
+
+
+def _doctor_extraction_helper_coverage_check(paths: MatcherPaths) -> MatcherDoctorCheck:
+    outputs = _hardcoded_extraction_outputs(paths)
+    coverage_keys = _existing_coverage_keys(paths, active_only=True)
+    missing: list[dict[str, Any]] = []
+    for output in outputs:
+        role = f"hardcoded_keyword_output:{output.function_name}"
+        key = ("extraction_helper", output.output.lower(), output.output.lower(), role)
+        if key in coverage_keys:
+            continue
+        side = _extraction_side_for_function(output.function_name)
+        source_ref = _source_ref_for_hardcoded_extraction_output(paths, output)
+        missing.append({
+            "canonical": output.output,
+            "side": side,
+            "function": output.function_name,
+            "lines": list(output.lines),
+            "layer_role": role,
+            "source_ref": source_ref,
+            "suggested_command": (
+                f"./bin/dm matcher add extraction-helper {output.output} "
+                f"--side {side} --input \"<triggering text>\" --source-refs {source_ref}"
+            ),
+        })
+    details = {
+        "hardcoded_output_count": len(outputs),
+        "missing_count": len(missing),
+        "missing": missing,
+    }
+    if missing:
+        return MatcherDoctorCheck(
+            "extraction_helper_coverage",
+            "needs_action",
+            f"{len(missing)} hardcoded extraction output(s) lack exact active extraction_helper coverage.",
+            details,
+            missing[0]["suggested_command"],
+        )
+    return MatcherDoctorCheck(
+        "extraction_helper_coverage",
+        "ok",
+        "Hardcoded extraction outputs have extraction_helper registry coverage.",
+        details,
+    )
+
+
+def _doctor_code_drift_watchlist_check(paths: MatcherPaths) -> MatcherDoctorCheck:
+    missing: list[dict[str, Any]] = []
+    for item in CODE_DRIFT_WATCHLIST:
+        for rel_path, tokens in item.required_tokens.items():
+            path = paths.repo_root / rel_path
+            try:
+                text = path.read_text(encoding="utf-8")
+            except OSError as exc:
+                missing.append({
+                    "watch_id": item.item_id,
+                    "summary": item.summary,
+                    "path": rel_path,
+                    "missing_tokens": list(tokens),
+                    "error": str(exc),
+                })
+                continue
+            missing_tokens = [token for token in tokens if token not in text]
+            if missing_tokens:
+                missing.append({
+                    "watch_id": item.item_id,
+                    "summary": item.summary,
+                    "path": rel_path,
+                    "missing_tokens": missing_tokens,
+                })
+    details = {
+        "watch_count": len(CODE_DRIFT_WATCHLIST),
+        "missing": missing,
+    }
+    if missing:
+        return MatcherDoctorCheck(
+            "extraction_matching_drift_watchlist",
+            "warning",
+            f"{len(missing)} extraction/matching drift watchlist item(s) need review.",
+            details,
+        )
+    return MatcherDoctorCheck(
+        "extraction_matching_drift_watchlist",
+        "ok",
+        "Extraction/matching drift watchlist is satisfied.",
+        details,
+    )
 
 
 def _path_is_writable_for_current_user(path: Path) -> bool:
@@ -1558,6 +1756,8 @@ def _matcher_doctor_report(
         lambda: _doctor_git_check(paths, since),
         lambda: _doctor_generated_contract_check(paths),
         lambda: _doctor_generated_coverage_check(paths),
+        lambda: _doctor_extraction_helper_coverage_check(paths),
+        lambda: _doctor_code_drift_watchlist_check(paths),
         lambda: _doctor_line_refs_check(paths),
         lambda: _doctor_writeability_check(paths, report_root),
     ):
@@ -1882,7 +2082,7 @@ def _coverage_rows_from_payload(payload: dict, *, path: Path) -> list[dict[str, 
     ]
 
 
-def _existing_coverage_keys(paths: MatcherPaths) -> set[tuple[str, str, str, str]]:
+def _existing_coverage_keys(paths: MatcherPaths, *, active_only: bool = False) -> set[tuple[str, str, str, str]]:
     keys: set[tuple[str, str, str, str]] = set()
     for path in sorted(paths.registry_entries_dir.glob("*.toml")):
         payload = tomllib.loads(path.read_text(encoding="utf-8"))
@@ -1890,6 +2090,8 @@ def _existing_coverage_keys(paths: MatcherPaths) -> set[tuple[str, str, str, str
         raw_entries = entries if isinstance(entries, list) else [payload]
         for entry in raw_entries:
             if not isinstance(entry, dict):
+                continue
+            if active_only and str(entry.get("status") or "active").strip().lower() != "active":
                 continue
             for row in _coverage_rows_from_payload(entry, path=path):
                 source_family = str(row.get("source_family") or row.get("source_type") or "")
@@ -6641,6 +6843,10 @@ def _append_runtime_specialty_sanity_stub(
     values: tuple[str, ...],
     policy_ref: str,
     bidirectional: bool,
+    sanity_ingredient: str | None,
+    sanity_offer: str | None,
+    offer_category: str,
+    sanity_expect: Literal["match", "no-match"],
     dry_run: bool,
 ) -> str:
     normalized_key = _runtime_rule_normalize_text(key)
@@ -6665,6 +6871,16 @@ def _append_runtime_specialty_sanity_stub(
                 f"test({_toml_string('specialty bidirectional ' + normalized_key + ' has ' + normalized_value)},",
                 f"     {_toml_string(normalized_value)} in BIDIRECTIONAL_PER_KEYWORD.get({_toml_string(normalized_key)}, set()), True)",
             ])
+    if sanity_ingredient is not None and sanity_offer is not None:
+        expected_canonical = normalized_key if sanity_expect == "match" else None
+        lines.extend(_deep_sanity_match_assertion(
+            description=f"{surface.command} {sanity_offer} {sanity_expect} {sanity_ingredient}",
+            offer_name=sanity_offer,
+            ingredient=sanity_ingredient,
+            offer_category=offer_category,
+            expected_canonical=expected_canonical,
+            mode="backend-match",
+        ))
     block = "\n".join(lines) + "\n"
     _append_text_block(paths.deep_sanity_file, block, dry_run=dry_run, trim_existing=True)
     return block
@@ -9002,6 +9218,10 @@ def _add_runtime_specialty_rule(
     report_root: Path | None,
     dry_run: bool,
     write_sanity: bool,
+    sanity_ingredient: str | None = None,
+    sanity_offer: str | None = None,
+    offer_category: str = "pantry",
+    sanity_expect: Literal["match", "no-match"] = "match",
 ) -> None:
     key = key.strip()
     values = _split_csv(values_csv, label=f"--{surface.values_field.replace('_', '-')}")
@@ -9009,6 +9229,19 @@ def _add_runtime_specialty_rule(
         raise typer.BadParameter(f"{surface.key_field} must not be empty")
     if not reason.strip():
         raise typer.BadParameter("--reason must not be empty")
+    if (sanity_ingredient is None) != (sanity_offer is None):
+        raise typer.BadParameter("--sanity-ingredient and --sanity-offer must be provided together")
+    if sanity_ingredient is not None and surface.section != "specialty_qualifiers":
+        raise typer.BadParameter("behavior sanity pairs are only supported for specialty-qualifier")
+    if sanity_ingredient is not None:
+        sanity_ingredient = sanity_ingredient.strip()
+        if not sanity_ingredient:
+            raise typer.BadParameter("--sanity-ingredient must not be empty")
+    if sanity_offer is not None:
+        sanity_offer = sanity_offer.strip()
+        if not sanity_offer:
+            raise typer.BadParameter("--sanity-offer must not be empty")
+    offer_category = offer_category.strip()
     paths = _paths(tree_root)
     if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
@@ -9032,6 +9265,10 @@ def _add_runtime_specialty_rule(
             values=values,
             policy_ref=policy_ref,
             bidirectional=bidirectional,
+            sanity_ingredient=sanity_ingredient,
+            sanity_offer=sanity_offer,
+            offer_category=offer_category,
+            sanity_expect=sanity_expect,
             dry_run=dry_run,
         )
     if dry_run:
@@ -9071,6 +9308,19 @@ def add_specialty_qualifier(
         bool,
         typer.Option("--sanity/--no-sanity", help="Append a focused deep-sanity canary."),
     ] = True,
+    sanity_ingredient: Annotated[
+        str | None,
+        typer.Option("--sanity-ingredient", help="Optional ingredient text for an additional backend behavior canary."),
+    ] = None,
+    sanity_offer: Annotated[
+        str | None,
+        typer.Option("--sanity-offer", help="Optional offer name for an additional backend behavior canary."),
+    ] = None,
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for the optional behavior canary.")] = "pantry",
+    sanity_expect: Annotated[
+        Literal["match", "no-match"],
+        typer.Option("--sanity-expect", help="Expected result for the optional behavior canary."),
+    ] = "match",
 ) -> None:
     _add_runtime_specialty_rule(
         surface=RUNTIME_SPECIALTY_SURFACES["specialty-qualifier"],
@@ -9084,6 +9334,10 @@ def add_specialty_qualifier(
         report_root=report_root,
         dry_run=dry_run,
         write_sanity=write_sanity,
+        sanity_ingredient=sanity_ingredient,
+        sanity_offer=sanity_offer,
+        offer_category=offer_category,
+        sanity_expect=sanity_expect,
     )
 
 
@@ -11604,6 +11858,283 @@ def _diagnostic_expected_from_expectation(value: str | None) -> int | None:
     return 1 if normalized == "match" else 0
 
 
+def _fast_path_shadow_trace(
+    *,
+    offer: str,
+    ingredient: str,
+    offer_category: str,
+    brand: str,
+    weight_grams: float | None,
+) -> dict[str, Any]:
+    try:
+        from languages.sv.ingredient_matching import matching as m
+        from languages.sv.ingredient_matching.engine import (
+            build_ingredient_match_data,
+            build_offer_match_data,
+        )
+        from languages.sv.ingredient_matching.no_match_policies import find_no_match_policy_hits
+    except ModuleNotFoundError:
+        from app.languages.sv.ingredient_matching import matching as m
+        from app.languages.sv.ingredient_matching.engine import (
+            build_ingredient_match_data,
+            build_offer_match_data,
+        )
+        from app.languages.sv.ingredient_matching.no_match_policies import find_no_match_policy_hits
+
+    try:
+        ingredient_data = build_ingredient_match_data(ingredient)
+        offer_data = build_offer_match_data(
+            offer,
+            offer_category,
+            brand=brand,
+            weight_grams=weight_grams,
+        ).precomputed
+    except Exception as exc:  # noqa: BLE001 - why should keep reporting even if shadow tracing fails.
+        return {
+            "status": "unavailable",
+            "error": str(exc),
+            "error_type": type(exc).__name__,
+        }
+
+    keywords = tuple(str(keyword) for keyword in offer_data.get("keywords") or ())
+    ingredient_lower = str(ingredient_data.normalized_text)
+    ingredient_words = tuple(ingredient_data.words or ())
+    eller_arms = tuple(ingredient_data.eller_arms_prepared or ())
+    product_lower = str(offer_data.get("name_normalized") or "")
+    product_keywords = set(keywords)
+    candidate_events: list[dict[str, Any]] = []
+    matched_keyword = ""
+    matched_source = ""
+    matched_text = ingredient_lower
+    matched_words = ingredient_words
+
+    def _candidate_text_for_keyword(keyword: str) -> tuple[bool, str, tuple[str, ...], str]:
+        if m._keyword_occurs_in_ingredient(keyword, ingredient_lower):
+            return True, ingredient_lower, ingredient_words, "full_text"
+        for arm in eller_arms:
+            if m._keyword_occurs_in_ingredient(keyword, arm):
+                return True, arm, tuple(m._WORD_PATTERN.findall(arm)), "alternative_arm"
+        return False, ingredient_lower, ingredient_words, ""
+
+    for keyword in keywords:
+        event: dict[str, Any] = {"stage": "keyword_loop", "keyword": keyword}
+        if keyword in m._RECIPE_NEVER_MATCH_KEYWORDS:
+            event.update({"result": "skipped", "rule": "recipe_never_match_keyword"})
+            candidate_events.append(event)
+            continue
+
+        keyword_occurs, keyword_text, keyword_words, source = _candidate_text_for_keyword(keyword)
+        if not keyword_occurs:
+            event.update({"result": "not_present"})
+            candidate_events.append(event)
+            continue
+        event["source"] = source
+
+        if keyword == "kål" and any(ind in keyword_text for ind in ("kålhuvud", "kalhuvud")):
+            event.update({"result": "skipped", "rule": "kål_kålhuvud_guard"})
+            candidate_events.append(event)
+            continue
+        if keyword in m._BREWED_COFFEE_BLOCKED_KEYWORDS and m._is_brewed_coffee_ingredient_text(keyword_text):
+            event.update({"result": "skipped", "rule": "brewed_coffee_guard"})
+            candidate_events.append(event)
+            continue
+        if keyword in m._SUFFIX_PROTECTED_KEYWORDS and not m._has_word_boundary_match(keyword, keyword_text):
+            event.update({"result": "skipped", "rule": "suffix_protected_keyword"})
+            candidate_events.append(event)
+            continue
+        if keyword in m._EMBEDDED_PROTECTED_KEYWORDS and not m._has_word_edge_match(keyword, keyword_text):
+            event.update({"result": "skipped", "rule": "embedded_protected_keyword"})
+            candidate_events.append(event)
+            continue
+        blockers = m.FALSE_POSITIVE_BLOCKERS.get(keyword, set())
+        if blockers and any(blocker in keyword_text for blocker in blockers):
+            multi_blocked = sorted(
+                blocker
+                for blocker in blockers
+                if " " in blocker and blocker in keyword_text and keyword in blocker
+            )
+            if multi_blocked:
+                event.update({
+                    "result": "skipped",
+                    "rule": "false_positive_blocker",
+                    "blockers": multi_blocked,
+                })
+                candidate_events.append(event)
+                continue
+            if not m._fpb_keyword_standalone_valid(
+                keyword,
+                keyword_text,
+                blockers,
+                words=keyword_words,
+            ):
+                event.update({
+                    "result": "skipped",
+                    "rule": "false_positive_blocker",
+                    "blockers": sorted(blocker for blocker in blockers if blocker in keyword_text),
+                })
+                candidate_events.append(event)
+                continue
+        if keyword in m._COMPOUND_STRICT_KEYWORDS or keyword in m._COMPOUND_STRICT_PREFIX_KEYWORDS:
+            compound_blocked = False
+            if (
+                keyword in m._COMPOUND_STRICT_KEYWORDS
+                and not m._eller_arms_have_plain_keyword(eller_arms, keyword)
+                and m._check_compound_strict(keyword, keyword_text, product_lower, keyword_words)
+            ):
+                compound_blocked = True
+            if (
+                keyword in m._COMPOUND_STRICT_PREFIX_KEYWORDS
+                and not m._eller_arms_have_plain_keyword(eller_arms, keyword)
+                and m._check_compound_strict(keyword, keyword_text, product_lower, keyword_words, check_prefix=True)
+            ):
+                compound_blocked = True
+            if compound_blocked:
+                event.update({"result": "skipped", "rule": "compound_strict"})
+                candidate_events.append(event)
+                continue
+        if m._blocked_by_exact_compound_only(keyword_text, keyword, eller_arms):
+            event.update({"result": "skipped", "rule": "exact_compound_only"})
+            candidate_events.append(event)
+            continue
+        suppressors = m.KEYWORD_SUPPRESSED_BY_CONTEXT.get(keyword, set())
+        if suppressors and m._keyword_suppressed_by_context(keyword, keyword_text, suppressors, eller_arms):
+            event.update({
+                "result": "skipped",
+                "rule": "keyword_suppressed_by_context",
+                "context": sorted(suppressor for suppressor in suppressors if suppressor in keyword_text),
+            })
+            candidate_events.append(event)
+            continue
+
+        matched_keyword = keyword
+        matched_source = source
+        matched_text = keyword_text
+        matched_words = keyword_words
+        event.update({"result": "would_select"})
+        candidate_events.append(event)
+        break
+
+    parent_events: list[dict[str, Any]] = []
+    if not matched_keyword:
+        for keyword in keywords:
+            parent = m.INGREDIENT_PARENTS.get(keyword) or m.PARENT_MATCH_ONLY.get(keyword)
+            if not parent:
+                continue
+            event = {"stage": "parent_loop", "keyword": keyword, "parent": parent}
+            if parent in m._RECIPE_NEVER_MATCH_KEYWORDS:
+                event.update({"result": "skipped", "rule": "recipe_never_match_keyword"})
+                parent_events.append(event)
+                continue
+            parent_occurs, parent_text, parent_words, source = _candidate_text_for_keyword(parent)
+            if not parent_occurs:
+                event.update({"result": "not_present"})
+                parent_events.append(event)
+                continue
+            event["source"] = source
+            blockers = m.FALSE_POSITIVE_BLOCKERS.get(parent, set())
+            if blockers and any(blocker in parent_text for blocker in blockers):
+                if not m._fpb_keyword_standalone_valid(parent, parent_text, blockers):
+                    event.update({
+                        "result": "skipped",
+                        "rule": "false_positive_blocker",
+                        "blockers": sorted(blocker for blocker in blockers if blocker in parent_text),
+                    })
+                    parent_events.append(event)
+                    continue
+            if m._blocked_by_exact_compound_only(parent_text, parent, eller_arms):
+                event.update({"result": "skipped", "rule": "exact_compound_only"})
+                parent_events.append(event)
+                continue
+            matched_keyword = parent
+            matched_source = source
+            matched_text = parent_text
+            matched_words = parent_words
+            event.update({"result": "would_select"})
+            parent_events.append(event)
+            break
+
+    post_guard_events: list[dict[str, Any]] = []
+    if matched_keyword:
+        policy_hits = find_no_match_policy_hits(
+            ingredient_texts=(matched_text,),
+            offer_keywords=keywords,
+            offer_text=product_lower,
+        )
+        if policy_hits:
+            post_guard_events.append({
+                "rule": "no_match_policy",
+                "result": "would_reject",
+                "hits": [str(hit) for hit in policy_hits[:5]],
+            })
+        suppressors = m.KEYWORD_SUPPRESSED_BY_CONTEXT.get(matched_keyword, set())
+        if suppressors and m._keyword_suppressed_by_context(matched_keyword, matched_text, suppressors, eller_arms):
+            post_guard_events.append({
+                "rule": "keyword_suppressed_by_context",
+                "result": "would_reject",
+                "context": sorted(suppressor for suppressor in suppressors if suppressor in matched_text),
+            })
+        specialty_aliases = getattr(m, "_SPECIALTY_KEYWORD_ALIASES", {})
+        specialty_keyword = specialty_aliases.get(matched_keyword, matched_keyword)
+        offer_qualifiers = dict(offer_data.get("specialty_qualifiers") or {})
+        if specialty_keyword in m.SPECIALTY_QUALIFIERS:
+            specialty_ok = m.check_specialty_qualifiers(
+                offer_qualifiers,
+                specialty_keyword,
+                matched_text,
+            )
+            if not specialty_ok:
+                post_guard_events.append({
+                    "rule": "specialty_qualifier",
+                    "result": "would_reject",
+                    "keyword": specialty_keyword,
+                    "offer_qualifiers": sorted(offer_qualifiers.get(specialty_keyword, set())),
+                })
+        processed_diagnostics = _processed_check_diagnostics(
+            processed_checks=offer_data.get("processed_checks") or (),
+            matched_keyword=matched_keyword,
+            offer_keywords=product_keywords,
+            ingredient_lower=matched_text,
+            product_lower=product_lower,
+            specialty_keyword_aliases=specialty_aliases,
+        )
+        for row in processed_diagnostics:
+            if row.get("status") == "would_block":
+                post_guard_events.append({
+                    "rule": "processed_check",
+                    "result": "would_reject",
+                    **row,
+                })
+        if hasattr(m, "_passes_precomputed_spice_fresh_rule") and not m._passes_precomputed_spice_fresh_rule(
+            offer_data,
+            matched_text,
+            matched_keyword,
+        ):
+            post_guard_events.append({
+                "rule": "spice_fresh_rule",
+                "result": "would_reject",
+            })
+
+    likely_rejects = [
+        row
+        for row in (*candidate_events, *parent_events, *post_guard_events)
+        if row.get("result") in {"skipped", "would_reject"}
+    ]
+    return {
+        "status": "ok",
+        "scope": "observe_only",
+        "normalized_ingredient": ingredient_lower,
+        "offer_keywords": list(keywords),
+        "matched_keyword_candidate": matched_keyword,
+        "matched_source": matched_source,
+        "matched_text": matched_text if matched_keyword else "",
+        "matched_words": list(matched_words) if matched_keyword else [],
+        "candidate_events": candidate_events,
+        "parent_events": parent_events,
+        "post_guard_events": post_guard_events,
+        "likely_rejects": likely_rejects,
+    }
+
+
 def _why_matcher_pair(
     *,
     offer: str,
@@ -11630,11 +12161,20 @@ def _why_matcher_pair(
         offer_weight_grams=weight_grams,
         expected=_diagnostic_expected_from_expectation(expect),
     )
-    return diagnose_case(
+    payload = diagnose_case(
         case,
         include_cache_freshness=include_cache_freshness,
         require_fresh_cache=False,
     )
+    if payload.get("diagnosis_class") == "fast_match_missing":
+        payload["fast_path_shadow_trace"] = _fast_path_shadow_trace(
+            offer=offer,
+            ingredient=ingredient,
+            offer_category=offer_category,
+            brand=brand,
+            weight_grams=weight_grams,
+        )
+    return payload
 
 
 def _format_validation_event(event: Mapping[str, Any]) -> str:
@@ -11648,9 +12188,23 @@ def _format_validation_event(event: Mapping[str, Any]) -> str:
     return f"{event.get('type', 'event')}: " + (", ".join(parts) if parts else "-")
 
 
+def _format_fast_shadow_event(event: Mapping[str, Any]) -> str:
+    parts = []
+    for key in ("stage", "rule", "keyword", "parent", "result", "source"):
+        value = event.get(key)
+        if value is not None and value != "":
+            parts.append(f"{key}={value}")
+    for key in ("context", "blockers", "offer_qualifiers", "hits"):
+        value = event.get(key)
+        if value:
+            parts.append(f"{key}={', '.join(str(item) for item in value)}")
+    return ", ".join(parts) if parts else json.dumps(event, ensure_ascii=False, sort_keys=True)
+
+
 def _format_matcher_why_text(payload: Mapping[str, Any]) -> str:
     backend = payload.get("backend_validation", {})
     fast = payload.get("fast_match", {})
+    fast_shadow = payload.get("fast_path_shadow_trace", {})
     materialization = payload.get("materialization", {})
     routing = payload.get("candidate_routing", {})
     recipe_signals = payload.get("recipe_signals", {})
@@ -11696,9 +12250,33 @@ def _format_matcher_why_text(payload: Mapping[str, Any]) -> str:
         lines.extend([
             "",
             "note:",
-            "  fast_match_missing has limited rule attribution today; many fast-path guards return silent no-match.",
-            "  Run `dm matcher compare-paths` and `dm matcher explain`; if both are blank, inspect the local fast-path guard.",
+            "  fast_match_missing uses an observe-only shadow trace; it names common silent guards without changing matcher behavior.",
+            "  If the shadow trace is blank, continue with compare-paths/explain and inspect the local fast-path guard.",
         ])
+    if fast_shadow:
+        lines.extend([
+            "",
+            "fast-path shadow trace:",
+            f"  status={fast_shadow.get('status')} scope={fast_shadow.get('scope', '-')}",
+            f"  normalized ingredient: {fast_shadow.get('normalized_ingredient') or '-'}",
+            "  offer keywords: " + (", ".join(fast_shadow.get("offer_keywords") or []) or "-"),
+            (
+                "  candidate selected before later guards: "
+                f"{fast_shadow.get('matched_keyword_candidate') or '-'} "
+                f"({fast_shadow.get('matched_source') or '-'})"
+            ),
+        ])
+        if fast_shadow.get("status") == "unavailable":
+            lines.append(f"  error: {fast_shadow.get('error_type')}: {fast_shadow.get('error')}")
+        likely_rejects = list(fast_shadow.get("likely_rejects") or [])
+        if likely_rejects:
+            lines.append("  likely reject/skip events:")
+            for event in likely_rejects[:10]:
+                lines.append(f"    - {_format_fast_shadow_event(event)}")
+            if len(likely_rejects) > 10:
+                lines.append(f"    ... and {len(likely_rejects) - 10} more")
+        elif fast_shadow.get("status") == "ok":
+            lines.append("  likely reject/skip events: none observed in the shadow guards")
     if cache and cache.get("status") != "skipped":
         lines.extend([
             "",

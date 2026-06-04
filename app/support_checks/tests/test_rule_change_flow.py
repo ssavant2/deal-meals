@@ -1268,6 +1268,7 @@ def normalize_probe(text: str) -> str:
             inventory_id = "legacy_parent_phaseparentdrink_family"
             almond_fixture_id = "keyword_extra_parent_phaseparentdrink_phasealmonddrink_positive"
             hazel_fixture_id = "keyword_extra_parent_phaseparentdrink_phasehazeldrink_positive"
+            oat_fixture_id = "keyword_extra_parent_phaseparentdrink_phaseoatdrink_positive"
 
             add_result = subprocess.run(
                 [
@@ -1279,13 +1280,13 @@ def normalize_probe(text: str) -> str:
                     "keyword-extra-parent",
                     "phaseparentdrink",
                     "--kids",
-                    "phasealmonddrink,phasehazeldrink",
+                    "phasealmonddrink,phasehazeldrink,phaseoatdrink",
                     "--recipe-name",
                     "Synthetic Parent Drink",
                     "--ingredient",
                     "2 dl phaseparentdrink",
                     "--offer-names",
-                    "Phase Almond Drink,Phase Hazel Drink",
+                    "Phase Almond Drink,Phase Hazel Drink,Phase Oat Drink",
                     "--offer-category",
                     "pantry",
                     "--policy-ref",
@@ -1313,7 +1314,7 @@ def normalize_probe(text: str) -> str:
                     "keyword-extra-parent",
                     "phaseparentdrink",
                     "--remove-kids",
-                    "phasealmonddrink",
+                    "phasealmonddrink,phasehazeldrink",
                     "--reason",
                     "Synthetic child no longer belongs in this family.",
                     "--tree-root",
@@ -1337,13 +1338,14 @@ def normalize_probe(text: str) -> str:
                 / "keyword_extra_parent.toml"
             ).read_text(encoding="utf-8")
             self.assertNotIn("phasealmonddrink", keyword_extra_parent_text)
-            self.assertIn("phasehazeldrink", keyword_extra_parent_text)
-            hazel_entry_match = re.search(
-                r'entry_id = "(sv-se\.family\.phaseparentdrink\.phasehazeldrink_\d+)"',
+            self.assertNotIn("phasehazeldrink", keyword_extra_parent_text)
+            self.assertIn("phaseoatdrink", keyword_extra_parent_text)
+            oat_entry_match = re.search(
+                r'entry_id = "(sv-se\.family\.phaseparentdrink\.phaseoatdrink_\d+)"',
                 keyword_extra_parent_text,
             )
-            self.assertIsNotNone(hazel_entry_match)
-            hazel_entry_id = hazel_entry_match.group(1)
+            self.assertIsNotNone(oat_entry_match)
+            oat_entry_id = oat_entry_match.group(1)
 
             fixture_source = (
                 app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
@@ -1353,8 +1355,10 @@ def normalize_probe(text: str) -> str:
             ).read_text(encoding="utf-8")
             self.assertNotIn(almond_fixture_id, fixture_source)
             self.assertNotIn(almond_fixture_id, fixture_json)
-            self.assertIn(hazel_fixture_id, fixture_source)
-            self.assertIn(hazel_fixture_id, fixture_json)
+            self.assertNotIn(hazel_fixture_id, fixture_source)
+            self.assertNotIn(hazel_fixture_id, fixture_json)
+            self.assertIn(oat_fixture_id, fixture_source)
+            self.assertIn(oat_fixture_id, fixture_json)
 
             inventory_source = (
                 app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
@@ -1364,15 +1368,19 @@ def normalize_probe(text: str) -> str:
             ).read_text(encoding="utf-8")
             self.assertNotIn(almond_fixture_id, inventory_source)
             self.assertNotIn(almond_fixture_id, inventory_json)
-            self.assertIn(hazel_fixture_id, inventory_source)
-            self.assertIn(hazel_fixture_id, inventory_json)
-            self.assertIn(f'anchor = "entry_id = \\"{hazel_entry_id}\\""', inventory_source)
+            self.assertNotIn(hazel_fixture_id, inventory_source)
+            self.assertNotIn(hazel_fixture_id, inventory_json)
+            self.assertIn(oat_fixture_id, inventory_source)
+            self.assertIn(oat_fixture_id, inventory_json)
+            self.assertIn(f'anchor = "entry_id = \\"{oat_entry_id}\\""', inventory_source)
             self.assertIn("Synthetic child no longer belongs in this family.", inventory_source)
 
             deep_sanity_text = (app_dir / "support_checks" / "run_deep_matcher_sanity.py").read_text(encoding="utf-8")
             self.assertNotIn("Phaseparentdrink recipe matches phasealmonddrink", deep_sanity_text)
-            self.assertIn("Phaseparentdrink recipe matches phasehazeldrink", deep_sanity_text)
+            self.assertNotIn("Phaseparentdrink recipe matches phasehazeldrink", deep_sanity_text)
+            self.assertIn("Phaseparentdrink recipe matches phaseoatdrink", deep_sanity_text)
             self.assertIn("Phasealmonddrink no longer matches phaseparentdrink parent", deep_sanity_text)
+            self.assertIn("Phasehazeldrink no longer matches phaseparentdrink parent", deep_sanity_text)
 
     def test_cli_modify_no_match_policy_rewrites_synced_guard_fields(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -3521,6 +3529,10 @@ def normalize_probe(text: str) -> str:
                     "--bidirectional",
                     "--reason",
                     "Synthetic specialty qualifier.",
+                    "--sanity-ingredient",
+                    "phasequal phasebase",
+                    "--sanity-offer",
+                    "Phasequal Phasebase",
                 ],
                 [
                     "qualifier-equivalent",
@@ -3564,6 +3576,9 @@ def normalize_probe(text: str) -> str:
             self.assertEqual(runtime["specialty"], True)
             self.assertEqual(runtime["bidirectional"], True)
             self.assertEqual(runtime["equivalent"], True)
+            deep_sanity_text = (app_dir / "support_checks" / "run_deep_matcher_sanity.py").read_text(encoding="utf-8")
+            self.assertIn("specialty-qualifier Phasequal Phasebase match phasequal phasebase (backend)", deep_sanity_text)
+            self.assertIn("recipe_match_num_named", deep_sanity_text)
 
     def test_registry_inactivation_cli_marks_entries_inactive(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -3964,6 +3979,45 @@ def normalize_probe(text: str) -> str:
         self.assertIn(
             "secondary_ingredient_pattern",
             [event.get("rule") for event in payload["backend_validation"]["events"]],
+        )
+
+    def test_dm_matcher_why_reports_fast_path_shadow_trace(self) -> None:
+        live_app_dir = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "cli.dm",
+                "matcher",
+                "why",
+                "--offer",
+                "Grädde 40% 5dl",
+                "--ingredient",
+                "havregrädde",
+                "--offer-category",
+                "dairy",
+                "--format",
+                "json",
+            ],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["diagnosis_class"], "fast_match_missing")
+        shadow = payload["fast_path_shadow_trace"]
+        self.assertEqual(shadow["status"], "ok")
+        self.assertEqual(shadow["scope"], "observe_only")
+        self.assertTrue(
+            any(
+                row.get("rule") == "keyword_suppressed_by_context"
+                and row.get("keyword") == "grädde"
+                for row in shadow["likely_rejects"]
+            ),
+            shadow,
         )
 
     def test_dm_matcher_trace_extraction_reports_offer_precompute_diff(self) -> None:
@@ -4461,7 +4515,105 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertIn(report["status"], {"ok", "needs_action"})
         self.assertEqual(checks["generated_contract_json"]["status"], "ok")
         self.assertEqual(checks["generated_registry_coverage"]["status"], "ok")
+        self.assertEqual(checks["extraction_helper_coverage"]["status"], "ok")
+        self.assertEqual(checks["extraction_matching_drift_watchlist"]["status"], "ok")
         self.assertIn(checks["line_refs"]["status"], {"ok", "warning"})
+
+    def test_dm_matcher_doctor_reports_missing_extraction_helper_coverage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            extraction_file = app_dir / "languages" / "sv" / "ingredient_matching" / "extraction.py"
+            text = extraction_file.read_text(encoding="utf-8")
+            needle = "    if re.search(r'\\bpuffat\\s+ris\\b|\\bris\\s+puffat\\b', original_name_lower):"
+            self.assertIn(needle, text)
+            extraction_file.write_text(
+                text.replace(
+                    needle,
+                    "    if original_name_lower == 'phase missing helper':\n"
+                    "        return ['phase_missing_helper']\n\n"
+                    f"{needle}",
+                    1,
+                ),
+                encoding="utf-8",
+            )
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "doctor",
+                    "--tree-root",
+                    str(tree_root),
+                    "--report-root",
+                    str(tree_root / "reports"),
+                    "--format",
+                    "json",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        report = json.loads(result.stdout)
+        checks = {check["id"]: check for check in report["checks"]}
+        coverage = checks["extraction_helper_coverage"]
+        self.assertEqual(coverage["status"], "needs_action")
+        self.assertEqual(coverage["details"]["missing_count"], 1)
+        missing = coverage["details"]["missing"][0]
+        self.assertEqual(missing["canonical"], "phase_missing_helper")
+        self.assertEqual(missing["side"], "product")
+        self.assertIn("dm matcher add extraction-helper phase_missing_helper", missing["suggested_command"])
+
+    def test_dm_matcher_doctor_reports_extraction_matching_drift_watchlist(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            matching_file = app_dir / "languages" / "sv" / "ingredient_matching" / "matching.py"
+            text = matching_file.read_text(encoding="utf-8")
+            matching_file.write_text(
+                text.replace(
+                    r"\bpuffat(?:\s+\w+)?\s+ris\b|\bris\s+puffat\b",
+                    r"\bpuffat\s+ris\b|\bris\s+puffat\b",
+                    1,
+                ),
+                encoding="utf-8",
+            )
+            live_app_dir = Path(__file__).resolve().parents[2]
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "doctor",
+                    "--tree-root",
+                    str(tree_root),
+                    "--report-root",
+                    str(tree_root / "reports"),
+                    "--format",
+                    "json",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        report = json.loads(result.stdout)
+        checks = {check["id"]: check for check in report["checks"]}
+        drift = checks["extraction_matching_drift_watchlist"]
+        self.assertEqual(drift["status"], "warning")
+        self.assertEqual(drift["details"]["missing"][0]["watch_id"], "puffat_ris_extraction_matching")
+        self.assertEqual(
+            drift["details"]["missing"][0]["path"],
+            "app/languages/sv/ingredient_matching/matching.py",
+        )
 
     def test_dm_matcher_doctor_reports_stale_generated_json_next_action(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -4957,7 +5109,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertEqual(report["blocker_count"], 0)
         self.assertEqual(report["blocker_baseline_count"], 0)
         self.assertEqual(report["summary"]["contract_access_api"], 2)
-        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4166)
+        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4173)
 
     def test_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
