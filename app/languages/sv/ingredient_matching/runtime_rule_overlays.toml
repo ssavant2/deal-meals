@@ -1576,8 +1576,8 @@ reason = "A dry burger mix (e.g. 'Veggie burger mix') is for shaping your own pa
 id = "runtime_ksbc_taco"
 status = "active"
 keyword = "taco"
-context = ["lax"]
-reason = "Brand/flavor name 'Smokey Taco' on smoked salmon products leaks 'taco' keyword; when ingredient text already names lax, taco is a flavor/brand descriptor not a cuisine context — suppress to prevent matching taco chicken products via the taco keyword"
+context = ["lax", "kryddblandning"]
+reason = "Brand/flavor name 'Smokey Taco' on smoked salmon products leaks 'taco' keyword; when ingredient text already names lax, taco is a flavor/brand descriptor not a cuisine context — suppress to prevent matching taco chicken products via the taco keyword; mexikansk kryddblandning/taco is a spice-mix ingredient; 'taco' keyword must not bleed to taco-seasoned meat products (Kycklingbröstfilé Taco Finstrimlad). Spice mix is a different product type than seasoned raw meat. Context word kryddblandning suppresses generic taco keyword"
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
