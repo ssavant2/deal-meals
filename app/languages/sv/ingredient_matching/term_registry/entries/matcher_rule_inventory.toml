@@ -9446,3 +9446,23 @@ source_family = "matcher_rule_inventory"
 canonical = "nötdryck"
 variant = "nötdryck"
 layer_role = "legacy_parent"
+
+[[entries]]
+entry_id = "sv-se.policy.vegokott.legacy_parent_vegokott_family"
+language = "sv"
+market = "SE"
+canonical = "vegokött"
+status = "active"
+variants = ["vegokött"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:legacy_parent_vegokott_family"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row legacy_parent_vegokott_family."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "vegokött"
+variant = "vegokött"
+layer_role = "legacy_parent"

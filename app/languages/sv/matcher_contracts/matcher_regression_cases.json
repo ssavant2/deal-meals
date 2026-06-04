@@ -33294,5 +33294,131 @@
     "policy_ref": "keyword_extra_parent_notdryck_family",
     "recipe_name": "Pannkakor på nötdryck",
     "source_ref": "current_review:keyword_extra_parent_notdryck_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "vegokött",
+        "ingredient_index": 0,
+        "must_match_keyword": "vegokött"
+      }
+    ],
+    "id": "keyword_extra_parent_vegokott_quorn_positive",
+    "ingredients": [
+      "600 g vegokött eller liknande"
+    ],
+    "offer": {
+      "category": "frozen",
+      "name": "Quorn Färs 300g"
+    },
+    "policy_ref": "keyword_extra_parent_vegokott_family",
+    "recipe_name": "Vegansk Ghormeh Sabzi",
+    "source_ref": "current_review:keyword_extra_parent_vegokott_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "vegokött",
+        "ingredient_index": 0,
+        "must_match_keyword": "vegokött"
+      }
+    ],
+    "id": "keyword_extra_parent_vegokott_anamma_positive",
+    "ingredients": [
+      "600 g vegokött eller liknande"
+    ],
+    "offer": {
+      "category": "frozen",
+      "name": "Anamma Vego Bitar 350g"
+    },
+    "policy_ref": "keyword_extra_parent_vegokott_family",
+    "recipe_name": "Vegansk Ghormeh Sabzi",
+    "source_ref": "current_review:keyword_extra_parent_vegokott_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "vegokött",
+        "ingredient_index": 0,
+        "must_match_keyword": "vegokött"
+      }
+    ],
+    "id": "keyword_extra_parent_vegokott_halsans_positive",
+    "ingredients": [
+      "600 g vegokött eller liknande"
+    ],
+    "offer": {
+      "category": "frozen",
+      "name": "Hälsans Kök Färs 350g"
+    },
+    "policy_ref": "keyword_extra_parent_vegokott_family",
+    "recipe_name": "Vegansk Ghormeh Sabzi",
+    "source_ref": "current_review:keyword_extra_parent_vegokott_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "vegokött",
+        "ingredient_index": 0,
+        "must_match_keyword": "vegokött"
+      }
+    ],
+    "id": "keyword_extra_parent_vegokott_beyond_positive",
+    "ingredients": [
+      "600 g vegokött eller liknande"
+    ],
+    "offer": {
+      "category": "frozen",
+      "name": "Beyond Mince 350g"
+    },
+    "policy_ref": "keyword_extra_parent_vegokott_family",
+    "recipe_name": "Vegansk Ghormeh Sabzi",
+    "source_ref": "current_review:keyword_extra_parent_vegokott_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "vegokött",
+        "ingredient_index": 0,
+        "must_match_keyword": "vegokött"
+      }
+    ],
+    "id": "keyword_extra_parent_vegokott_vegofars_positive",
+    "ingredients": [
+      "600 g vegokött eller liknande"
+    ],
+    "offer": {
+      "category": "frozen",
+      "name": "Vegofärs ICA 350g"
+    },
+    "policy_ref": "keyword_extra_parent_vegokott_family",
+    "recipe_name": "Vegansk Ghormeh Sabzi",
+    "source_ref": "current_review:keyword_extra_parent_vegokott_routing"
+  },
+  {
+    "expected": 1,
+    "expected_matches": [
+      {
+        "canonical": "vegokött",
+        "ingredient_index": 0,
+        "must_match_keyword": "vegokött"
+      }
+    ],
+    "id": "keyword_extra_parent_vegokott_vegobitar_positive",
+    "ingredients": [
+      "600 g vegokött eller liknande"
+    ],
+    "offer": {
+      "category": "frozen",
+      "name": "Vegobitar 200g"
+    },
+    "policy_ref": "keyword_extra_parent_vegokott_family",
+    "recipe_name": "Vegansk Ghormeh Sabzi",
+    "source_ref": "current_review:keyword_extra_parent_vegokott_routing"
   }
 ]

@@ -30126,3 +30126,123 @@ source_family = "matcher_regression_case"
 canonical = "nötdryck"
 variant = "keyword_extra_parent_notdryck_makadamiadryck_positive: Makadamiadryck"
 layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_vegokott_family.quorn_positive"
+language = "sv"
+market = "SE"
+canonical = "vegokött"
+status = "active"
+variants = ["keyword_extra_parent_vegokott_quorn_positive: Quorn Färs 300g"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_vegokott_quorn_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_vegokott_quorn_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "vegokött"
+variant = "keyword_extra_parent_vegokott_quorn_positive: Quorn Färs 300g"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_vegokott_family.anamma_positive"
+language = "sv"
+market = "SE"
+canonical = "vegokött"
+status = "active"
+variants = ["keyword_extra_parent_vegokott_anamma_positive: Anamma Vego Bitar 350g"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_vegokott_anamma_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_vegokott_anamma_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "vegokött"
+variant = "keyword_extra_parent_vegokott_anamma_positive: Anamma Vego Bitar 350g"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_vegokott_family.halsans_positive"
+language = "sv"
+market = "SE"
+canonical = "vegokött"
+status = "active"
+variants = ["keyword_extra_parent_vegokott_halsans_positive: Hälsans Kök Färs 350g"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_vegokott_halsans_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_vegokott_halsans_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "vegokött"
+variant = "keyword_extra_parent_vegokott_halsans_positive: Hälsans Kök Färs 350g"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_vegokott_family.beyond_positive"
+language = "sv"
+market = "SE"
+canonical = "vegokött"
+status = "active"
+variants = ["keyword_extra_parent_vegokott_beyond_positive: Beyond Mince 350g"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_vegokott_beyond_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_vegokott_beyond_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "vegokött"
+variant = "keyword_extra_parent_vegokott_beyond_positive: Beyond Mince 350g"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_vegokott_family.vegofars_positive"
+language = "sv"
+market = "SE"
+canonical = "vegokött"
+status = "active"
+variants = ["keyword_extra_parent_vegokott_vegofars_positive: Vegofärs ICA 350g"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_vegokott_vegofars_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_vegokott_vegofars_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "vegokött"
+variant = "keyword_extra_parent_vegokott_vegofars_positive: Vegofärs ICA 350g"
+layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.keyword_extra_parent_vegokott_family.vegobitar_positive"
+language = "sv"
+market = "SE"
+canonical = "vegokött"
+status = "active"
+variants = ["keyword_extra_parent_vegokott_vegobitar_positive: Vegobitar 200g"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:keyword_extra_parent_vegokott_vegobitar_positive"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture keyword_extra_parent_vegokott_vegobitar_positive."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "vegokött"
+variant = "keyword_extra_parent_vegokott_vegobitar_positive: Vegobitar 200g"
+layer_role = "positive_regression"

@@ -291,6 +291,11 @@ _PLANT_BASED_PRODUCT_CUES = frozenset({
     'vegobitar',
     'quorn', 'oumph',
     'anamma', 'jävligtgott', 'javligtgott',
+    # Dedicated plant-protein/meat-substitute brands. Without these, a meat-form
+    # product name ("Hälsans Kök Färs", "Beyond Mince") is not recognised as vegan,
+    # so a plant-based ingredient is wrongly blocked from it.
+    'hälsans', 'halsans', 'hälsans kök', 'halsans kok',
+    'beyond', 'naturli',
     'formbar',
     'oatly', 'planti', 'alpro',
     'havre', 'havregurt', 'plantgurt', 'havredryck', 'havregrädde', 'havregradde',

@@ -1995,6 +1995,24 @@ def extract_keywords_from_product(
             if 'vegomargarin' not in unique_keywords:
                 unique_keywords.insert(0, 'vegomargarin')
 
+    # Vego-protein form bridge: meat-substitute products from dedicated plant-protein
+    # brands also expose the generic vego-form keyword that matches their shape, so a
+    # recipe asking for "vegofärs"/"vegobitar" reaches the brand product (Quorn Färs,
+    # Hälsans Kök Färs, Beyond Mince) instead of only its brand name. This keeps form
+    # honest — a mince recipe matches mince products, not whole filé — and real meat is
+    # untouched because the cue list is plant-protein brands only.
+    _VEGO_PROTEIN_BRAND_CUES = (
+        'quorn', 'anamma', 'hälsans', 'halsans', 'beyond', 'oumph',
+        'naturli', 'jävligt gott', 'javligt gott',
+    )
+    if any(cue in original_name_lower for cue in _VEGO_PROTEIN_BRAND_CUES):
+        if (re.search(r'\b(?:färs|fars|mince|mald)\b', original_name_lower)
+                and 'vegofärs' not in unique_keywords):
+            unique_keywords.append('vegofärs')
+        elif (re.search(r'\b(?:bitar|chunk|chunks|pieces|strips|strimlad)\b', original_name_lower)
+                and 'vegobitar' not in unique_keywords):
+            unique_keywords.append('vegobitar')
+
     # Small tomato isolation: products that carry the 'småtomat' compound keyword
     # (cherry, baby plum, cocktail, on-the-vine) should NOT also expose the generic
     # 'tomat' keyword. A recipe asking for plain "tomater" wants standard round/medium
