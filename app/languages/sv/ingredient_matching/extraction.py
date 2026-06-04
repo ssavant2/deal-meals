@@ -460,6 +460,11 @@ def extract_keywords_from_product(
         if re.search(r'\b(?:chunks?|pieces?|bitar)\b', original_name_lower):
             return ['vegobitar']
 
+    # "Vårgårda Ris" (AXA brand) is a puffed/roasted rice product despite the plain name.
+    # Must NOT match plain-rice recipes — only puffed-rice contexts.
+    if 'vårgårda' in original_name_lower and re.search(r'\bris\b', original_name_lower):
+        return ['rispuffar']
+
     # Q84-3: "Röd spetsig paprika" / "Gul spetsig paprika" / "Spetsig paprika"
     # — produktnamn med två ord. Recept som anger "spetspaprika" (ett ord/
     # compound) ska matcha dessa. Returnerar både spetspaprika (specifik
@@ -2180,7 +2185,8 @@ def extract_keywords_from_ingredient(
     if 'surdegskakor' in name:
         return ['surdegsbröd']
 
-    if re.search(r'\bpuffat\s+ris\b|\bris\s+puffat\b', name):
+    # Allow adjectives between "puffat" and "ris" (e.g. "puffat rostat ris").
+    if re.search(r'\bpuffat(?:\s+\w+)?\s+ris\b|\bris\s+puffat\b', name):
         return ['rispuffar']
 
     # "Vegetarisk Pulled" = plant-based pulled texture; only matches pulled-style

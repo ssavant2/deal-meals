@@ -4855,7 +4855,7 @@ def _prepare_fast_ingredient_text(
         ingredient_lower += ' aftereight'
     if re.search(r'\bfish\s*(?:&|and)\s*crisp\b|\bfish&crisp\b', ingredient_lower):
         ingredient_lower += ' fish&crisp'
-    if re.search(r'\bpuffat\s+ris\b|\bris\s+puffat\b', ingredient_lower):
+    if re.search(r'\bpuffat(?:\s+\w+)?\s+ris\b|\bris\s+puffat\b', ingredient_lower):
         ingredient_lower += ' rispuffar'
     if re.search(r'\bchili\s+oil\b|\bchiliolja\b', ingredient_lower):
         ingredient_lower += ' chiliolja'
