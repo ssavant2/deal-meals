@@ -3082,10 +3082,8 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'laoganma',    # Laoganma = chili oil product, not plain peanuts
         'chiliolja',   # chili oil peanuts ≠ raw/roasted peanuts for cooking
     },
-    'hasselnöt': {'start'},  # "Hasselnöt 750g Start" — cereal, not plain hazelnuts
     'hasselnötter': {
         'nötsmör', 'nötsmor',
-        'start',  # cereal brand, not loose hazelnuts
     },
     # "Gelato Cashew med hasselnötskräm" is ice cream, not hazelnut spread
     'hasselnötskräm': {'gelato'},
