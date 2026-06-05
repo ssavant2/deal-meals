@@ -7491,12 +7491,13 @@ entry_id = "sv-se.alias.vattenmelon_313"
 language = "sv"
 market = "SE"
 canonical = "melon"
-status = "active"
+# inactive_reason: Vattenmelon isolated from plain melon: watermelon (Citrullus) is texturally/botanically distinct from cantaloupe/galia/honeydew; plain melon recipes should not match watermelon products
+status = "inactive"
 variants = ["vattenmelon"]
 offer_terms = ["melon"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
 layer_policy = ["offer_alias"]
-notes = "Vattenmelon products respond to bare melon ingredient."
+notes = "Inactive: vattenmelon is isolated from plain melon. Watermelon is texturally/botanically distinct from cantaloupe/galia/honeydew, so it no longer exposes the bare melon keyword."
 
 [[entries.coverage]]
 source_family = "offer_extra_keyword"
@@ -7507,7 +7508,7 @@ layer_role = "offer_extra_keyword_mapping"
 [[entries.positive_examples]]
 ingredient = "melon"
 offer_name = "Vattenmelon"
-expected = 1
+expected = 0
 
 [[entries]]
 entry_id = "sv-se.alias.isbergssallad_314"

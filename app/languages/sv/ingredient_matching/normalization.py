@@ -1020,6 +1020,31 @@ _BBQ_SAUCE_BRANDED_RE = re.compile(
 )
 _SPRING_ONION_BUNCH_RE = re.compile(r'\bknipp[ea]\s+färsk\s+lök\b')
 _SPRING_ONION_STALKS_RE = re.compile(r'\bfärsk(?:a)?\s+lök(?:ar)?\s*,?\s*stjälkarna\b')
+# Watermelon products are sometimes named head-noun-first with the variety
+# descriptor "vatten" trailing and a size word in between, e.g.
+# "Melon Mini Vatten Eko Klass 1" instead of the single token "Vattenmelon".
+# A plain space-normalization tuple can't express the optional infix word, so
+# match "melon" and "vatten" as separate whole words (either order, up to two
+# words apart) and collapse them to the "vattenmelon" canonical. The caller
+# skips lines that already contain the single-token "vattenmelon"; the leftover
+# standalone "vatten" is dropped later as a stop word.
+_WATERMELON_RE = re.compile(
+    r'\bmelon\b(?:\s+\w+){0,2}\s+vatten\b'
+    r'|\bvatten\b(?:\s+\w+){0,2}\s+melon\b'
+)
+
+
+def collapse_watermelon(text: str) -> str:
+    """Collapse split watermelon naming ("Melon Mini Vatten") to the single
+    "vattenmelon" token. Narrow to melon+vatten co-occurrence so plain flavored
+    water ("Vatten Granatäpple Lime") is unaffected. Called both inside space
+    normalization and early in offer extraction — there it must run BEFORE the
+    pre-space-norm carrier name is captured, otherwise the standalone "vatten"
+    carrier word strips the melon flavor word and the product extracts nothing.
+    """
+    if 'vattenmelon' in text:
+        return text
+    return _WATERMELON_RE.sub('vattenmelon', text)
 _MEASURED_DURUM_FLOUR_RE = re.compile(r'\b\d+(?:[.,]\d+)?\s*(?:dl|l|g|kg)\s+durumvete\b')
 _MEASURED_RISOTTO_RICE_RE = re.compile(r'\b\d+(?:[.,]\d+)?\s*(?:dl|l|g|kg)\s+risotto\b')
 
@@ -1091,6 +1116,8 @@ def _apply_space_normalizations(text: str) -> str:
     # stripping, so use regexes that tolerate commas and leading quantities.
     text = _SPRING_ONION_BUNCH_RE.sub('salladslök', text)
     text = _SPRING_ONION_STALKS_RE.sub('salladslök', text)
+    # Watermelon naming variants ("Melon Mini Vatten" etc.) → vattenmelon.
+    text = collapse_watermelon(text)
     return text
 
 

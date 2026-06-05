@@ -43,6 +43,7 @@ from .recipe_text import (
 )
 from .normalization import (
     _apply_space_normalizations,
+    collapse_watermelon,
     normalize_measured_durumvete_flour,
     normalize_measured_risotto_rice,
 )
@@ -1393,6 +1394,12 @@ def extract_keywords_from_product(
     # Done AFTER processed foods check to avoid "smör&raps" → "smör raps" false hit
     original_name_lower = original_name_lower.replace('&', ' ')
     original_name_lower = _WHITESPACE_PATTERN.sub(' ', original_name_lower).strip()
+    # Collapse split watermelon naming ("Melon Mini Vatten" → "vattenmelon")
+    # BEFORE capturing original_for_carrier. Otherwise the standalone "vatten"
+    # carrier word (flavored-water context) strips the melon flavor word and the
+    # product extracts nothing. Narrow to melon+vatten co-occurrence, so real
+    # flavored water ("Vatten Granatäpple Lime") is left untouched.
+    original_name_lower = collapse_watermelon(original_name_lower)
     # Save pre-space-norm version for carrier detection (space norms may split
     # compound words like "vitlöksklyftor" → "vitlök klyftor", breaking carrier lookup)
     original_for_carrier = original_name_lower

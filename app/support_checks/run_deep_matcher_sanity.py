@@ -10601,11 +10601,22 @@ test("blandsaft jordgubb still matches jordgubbssaft", match("Blandsaft Jordgubb
 test("bare kokos does not match kokosmjölk", match("kokos", "Kokosmjölk 400ml ICA", "dairy"), None)
 
 section("Batch 16-18 P1/medium melon/sallad/snabbkaffe regressions")
-# melon: bare melon ingredient matches any melon subtype via OFFER_EXTRA_KEYWORDS
+# melon: bare melon ingredient matches sweet-melon subtypes via OFFER_EXTRA_KEYWORDS
+# (galia/honung/cantaloupe) but NOT vattenmelon — watermelon is texturally and
+# botanically distinct (Citrullus vs Cucumis) and is isolated per batch-1 Willys.
 test("melon matches galiamelon", match("Galiamelon ca 850g Klass 1 ICA", "melon", "fruit"), "melon")
 test("melon matches honungsmelon", match("Honungsmelon ca 1000g Klass 1 ICA", "melon", "fruit"), "melon")
 test("melon matches cantaloupemelon", match("Cantaloupemelon ca 870g Klass 1 ICA", "melon", "fruit"), "melon")
-test("melon matches vattenmelon", match("Vattenmelon 5kg", "melon", "fruit"), "melon")
+# Vattenmelon isolation: plain "melon" must NOT match watermelon products
+test("melon does not match vattenmelon", match("Vattenmelon 5kg", "melon", "fruit"), None)
+test("melon does not match split-named watermelon", match("Melon Mini Vatten Eko Klass 1", "melon", "fruit"), None)
+test("melon does not match split-named watermelon backend",
+     recipe_match_num(["1 melon"], {"name": "Melon Mini Vatten Eko Klass 1", "category": "fruits"}), 0)
+# Vattenmelon still matches its own recipes (extraction fix: split "Melon ... Vatten" naming)
+test("vattenmelon matches Vattenmelon product", match("Vattenmelon 5kg", "vattenmelon", "fruit"), "vattenmelon")
+test("vattenmelon matches split-named watermelon", match("Melon Mini Vatten Eko Klass 1", "vattenmelon", "fruit"), "vattenmelon")
+test("vattenmelon matches split-named watermelon backend",
+     recipe_match_num(["1 vattenmelon"], {"name": "Melon Mini Vatten Eko Klass 1", "category": "fruits"}), 1)
 test("galiamelon still matches galiamelon", match("Galiamelon ca 850g Klass 1 ICA", "galiamelon", "fruit"), "galiamelon")
 # isbergssallad: gets grönsallad/salladsblad keywords via OFFER_EXTRA_KEYWORDS
 test("grönsallad matches isbergssallad", match("Isbergssallad 1-p Klass 1", "grönsallad", "fruit"), "grönsallad")

@@ -23,7 +23,7 @@
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 412,
       "negative_regression": 840,
-      "offer_extra_keyword_mapping": 423,
+      "offer_extra_keyword_mapping": 422,
       "parent_match_only_mapping": 20,
       "positive_regression": 673,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
       "no_match_policy": 434,
-      "offer_extra_keyword": 423,
+      "offer_extra_keyword": 422,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5861,
-    "variants_missing_product_text": 1893,
+    "variant_count": 5860,
+    "variants_missing_product_text": 1892,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -60400,27 +60400,6 @@
       "needs_product_text": false,
       "notes": "legacy_review_regression",
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Friterade grönsaker med sardelldipp\"}"
-    },
-    {
-      "variant_id": "vterm-717db541b336ccda",
-      "row_index": 5254,
-      "source_order": 54,
-      "source_type": "offer_extra_keyword",
-      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
-      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:vattenmelon",
-      "source_id": "vattenmelon",
-      "variant_role": "offer_extra_keyword_mapping",
-      "variant_text": "vattenmelon",
-      "canonical": "melon",
-      "expected_family": "melon",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"melon\"}"
     },
     {
       "variant_id": "vterm-70922a5373b6c36a",
@@ -123131,7 +123110,7 @@
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1667,
+      "no_product_text": 1666,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123147,14 +123126,14 @@
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
       "no_match_policy": 434,
-      "offer_extra_keyword": 423,
+      "offer_extra_keyword": 422,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5861
+      "audited": 5860
     },
-    "variant_count": 5861
+    "variant_count": 5860
   }
 }
