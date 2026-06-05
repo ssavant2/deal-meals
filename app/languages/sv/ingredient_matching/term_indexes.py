@@ -54,6 +54,9 @@ _RECIPE_TERM_COPY_BATCH_SIZE = 5000
 _RECIPE_TERM_RECIPE_BATCH_SIZE = 500
 _RECIPE_OFFER_CANDIDATE_RECIPE_BATCH_SIZE = 500
 _RECIPE_OFFER_CANDIDATE_WORK_MEM = "128MB"
+_RECIPE_OFFER_CANDIDATE_REINDEX_MIN_REMOVED_ROWS = 500_000
+_RECIPE_OFFER_CANDIDATE_REINDEX_SHRINK_RATIO = 5
+_RECIPE_OFFER_CANDIDATE_REINDEX_MIN_INDEX_BYTES = 512 * 1024 * 1024
 _RECIPE_TERM_COPY_COLUMNS = (
     "found_recipe_id, recipe_identity_key, matcher_version, "
     "recipe_compiler_version, term_manifest_hash, term, term_type, indexed_at"
@@ -412,6 +415,118 @@ def _validate_full_candidate_recipe_scope(
             f"recipe scope: indexed_recipes={indexed_recipe_count}, "
             f"active_recipes={active_recipe_count}"
         )
+
+
+def _should_reindex_candidate_table_after_refresh(
+    *,
+    refresh_scope: str,
+    removed_rows: int,
+    current_rows: int | None,
+    inserted_rows: int,
+    index_bytes: int,
+) -> bool:
+    """Return true when a refresh shrank the candidate table enough to rebuild indexes."""
+    if refresh_scope not in {"full", "offer_scope"}:
+        return False
+    if removed_rows < _RECIPE_OFFER_CANDIDATE_REINDEX_MIN_REMOVED_ROWS:
+        return False
+    if index_bytes < _RECIPE_OFFER_CANDIDATE_REINDEX_MIN_INDEX_BYTES:
+        return False
+    surviving_rows = current_rows if current_rows is not None else inserted_rows
+    surviving_rows = max(1, int(surviving_rows or 0))
+    return removed_rows >= surviving_rows * _RECIPE_OFFER_CANDIDATE_REINDEX_SHRINK_RATIO
+
+
+def _maybe_reindex_compiled_recipe_offer_candidates_after_shrink(
+    *,
+    refresh_scope: str,
+    replaced_rows: int,
+    stale_deleted_rows: int,
+    current_rows: int | None,
+    inserted_rows: int,
+) -> dict[str, Any]:
+    removed_rows = max(0, replaced_rows) + max(0, stale_deleted_rows)
+    if refresh_scope not in {"full", "offer_scope"}:
+        return {
+            "triggered": False,
+            "reason": "scope_not_full",
+            "removed_rows": removed_rows,
+            "current_rows": current_rows,
+            "inserted_rows": inserted_rows,
+        }
+    if removed_rows < _RECIPE_OFFER_CANDIDATE_REINDEX_MIN_REMOVED_ROWS:
+        return {
+            "triggered": False,
+            "reason": "removed_rows_below_threshold",
+            "removed_rows": removed_rows,
+            "current_rows": current_rows,
+            "inserted_rows": inserted_rows,
+        }
+    raw_conn = engine.raw_connection()
+    old_autocommit = getattr(raw_conn, "autocommit", False)
+    try:
+        raw_conn.autocommit = True
+        cursor = raw_conn.cursor()
+        cursor.execute("SELECT pg_indexes_size('compiled_recipe_offer_candidates'::regclass)")
+        index_bytes_before = int(cursor.fetchone()[0] or 0)
+        should_reindex = _should_reindex_candidate_table_after_refresh(
+            refresh_scope=refresh_scope,
+            removed_rows=removed_rows,
+            current_rows=current_rows,
+            inserted_rows=inserted_rows,
+            index_bytes=index_bytes_before,
+        )
+        result: dict[str, Any] = {
+            "triggered": should_reindex,
+            "removed_rows": removed_rows,
+            "current_rows": current_rows,
+            "inserted_rows": inserted_rows,
+            "index_bytes_before": index_bytes_before,
+        }
+        if not should_reindex:
+            return result
+
+        logger.info(
+            "CACHE_REBUILD_PROGRESS "
+            "run=candidate_index phase=recipe_offer_candidates_reindex "
+            f"status=starting scope={refresh_scope} removed_rows={removed_rows} "
+            f"current_rows={current_rows} index_bytes_before={index_bytes_before}"
+        )
+        reindex_started_at = time.perf_counter()
+        cursor.execute("REINDEX TABLE CONCURRENTLY compiled_recipe_offer_candidates")
+        cursor.execute("SELECT pg_indexes_size('compiled_recipe_offer_candidates'::regclass)")
+        index_bytes_after = int(cursor.fetchone()[0] or 0)
+        elapsed_ms = int((time.perf_counter() - reindex_started_at) * 1000)
+        result.update({
+            "index_bytes_after": index_bytes_after,
+            "time_ms": elapsed_ms,
+        })
+        logger.info(
+            "CACHE_REBUILD_PROGRESS "
+            "run=candidate_index phase=recipe_offer_candidates_reindex "
+            f"status=complete index_bytes_before={index_bytes_before} "
+            f"index_bytes_after={index_bytes_after} elapsed={_format_progress_duration(elapsed_ms / 1000)}"
+        )
+        return result
+    except Exception as exc:  # noqa: BLE001 - cache rebuild should not fail after data refresh just because shrink cleanup failed.
+        logger.warning(
+            "Candidate table reindex after shrink skipped/failed: {}",
+            exc,
+        )
+        return {
+            "triggered": True,
+            "failed": True,
+            "removed_rows": removed_rows,
+            "current_rows": current_rows,
+            "inserted_rows": inserted_rows,
+            "error": str(exc),
+        }
+    finally:
+        try:
+            raw_conn.autocommit = old_autocommit
+        except Exception:
+            pass
+        raw_conn.close()
 
 
 def _replace_compiled_term_rows(db, *, table_name: str, model, rows: list[dict[str, Any]], lock_key: int) -> str:
@@ -1277,6 +1392,14 @@ def refresh_compiled_recipe_offer_candidates(
     finally:
         raw_conn.close()
 
+    reindex_result = _maybe_reindex_compiled_recipe_offer_candidates_after_shrink(
+        refresh_scope=refresh_scope_label,
+        replaced_rows=replaced_rows,
+        stale_deleted_rows=stale_deleted_rows,
+        current_rows=current_candidate_rows,
+        inserted_rows=inserted_rows,
+    )
+
     elapsed_ms = int((time.perf_counter() - started_at) * 1000)
     logger.info(
         "CACHE_REBUILD_PROGRESS "
@@ -1309,6 +1432,7 @@ def refresh_compiled_recipe_offer_candidates(
         "stale_deleted_rows": stale_deleted_rows,
         "cleanup_stale": cleanup_stale,
         "effective_cleanup_stale": effective_cleanup_stale,
+        "reindex_after_shrink": reindex_result,
         "time_ms": elapsed_ms,
     }
 

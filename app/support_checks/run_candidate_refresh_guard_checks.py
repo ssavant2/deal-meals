@@ -17,6 +17,7 @@ from languages.sv.ingredient_matching.term_indexes import (  # noqa: E402
     MATCHER_VERSION,
     RECIPE_COMPILER_VERSION,
     _candidate_offer_scope_hash,
+    _should_reindex_candidate_table_after_refresh,
     _validate_full_candidate_recipe_scope,
 )
 
@@ -75,6 +76,39 @@ def test_offer_scope_hash_is_stable() -> None:
     first = _candidate_offer_scope_hash(["offer-b", "offer-a", "offer-a"])
     second = _candidate_offer_scope_hash(["offer-a", "offer-b"])
     check_true("offer scope hash is order-insensitive", first == second)
+
+
+def test_candidate_refresh_reindex_guard() -> None:
+    check_true(
+        "large offer-scope shrink triggers candidate reindex",
+        _should_reindex_candidate_table_after_refresh(
+            refresh_scope="offer_scope",
+            removed_rows=4_900_000,
+            current_rows=85_000,
+            inserted_rows=85_000,
+            index_bytes=10 * 1024 * 1024 * 1024,
+        ),
+    )
+    check_true(
+        "normal weekly refresh does not trigger candidate reindex",
+        not _should_reindex_candidate_table_after_refresh(
+            refresh_scope="offer_scope",
+            removed_rows=60_000,
+            current_rows=85_000,
+            inserted_rows=85_000,
+            index_bytes=10 * 1024 * 1024 * 1024,
+        ),
+    )
+    check_true(
+        "scoped refresh does not trigger candidate reindex",
+        not _should_reindex_candidate_table_after_refresh(
+            refresh_scope="subset",
+            removed_rows=4_900_000,
+            current_rows=85_000,
+            inserted_rows=85_000,
+            index_bytes=10 * 1024 * 1024 * 1024,
+        ),
+    )
 
 
 class FakeOffer:
@@ -144,6 +178,7 @@ def main() -> int:
     test_full_refresh_accepts_complete_recipe_term_index()
     test_full_refresh_accepts_termless_recipes_with_complete_metadata()
     test_offer_scope_hash_is_stable()
+    test_candidate_refresh_reindex_guard()
     test_offer_term_coverage_selects_only_indexable_offers()
     print("ALL CANDIDATE REFRESH GUARD CHECKS PASSED")
     return 0
