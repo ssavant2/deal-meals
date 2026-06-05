@@ -7956,6 +7956,22 @@ test(
     ),
     0,
 )
+test(
+    "generic ost matches riven ost gratäng ingredient (cheese for gratäng dish)",
+    recipe_match_num(
+        ["150 g riven ost gratäng"],
+        {"name": "Hushallsost 26% Arla", "category": "dairy"},
+    ),
+    1,
+)
+test(
+    "generic ost cached matches riven ost gratäng ingredient",
+    recipe_match_num_cached(
+        ["150 g riven ost gratäng"],
+        {"name": "Hushallsost 26% Arla", "category": "dairy"},
+    ),
+    1,
+)
 
 # ========================================================================
 # Section: Ruff linter check (duplicate dict keys, unused vars, etc.)
@@ -8663,12 +8679,12 @@ test(
     1,
 )
 test(
-    "linguine ingredient no longer matches short pasta",
+    "linguine ingredient matches short pasta (broad pasta family Q56/Q81/Q82)",
     recipe_match_num(
         ["1 förp pasta linguine"],
         {"name": "Makaroner 500g ICA", "category": "pantry", "savings": 10},
     ),
-    0,
+    1,
 )
 test(
     "cached linguine ingredient also matches long pasta family",
@@ -10175,8 +10191,8 @@ test("Batch 14 plain växtdryck blocks hazelnut oat drink", recipe_match_num_cac
 test("Batch 14 plain växtdryck blocks maple walnut oat drink", recipe_match_num(["5 dl Växtdryck"], {"name": "Maple Walnut Havredryck Glutenfri Oddlygood", "category": "dairy"}), 0)
 test("Batch 14 fransk senap accepts dijonsenap", recipe_match_num(["2 msk fransk senap"], {"name": "Dijonsenap Garant", "category": "pantry"}), 1)
 test("Batch 14 fransk senap accepts Dijon senap wording", recipe_match_num_cached(["2 msk fransk senap"], {"name": "Dijon Senap Dijona", "category": "pantry"}), 1)
-test("Batch 14 fransk senap blocks ordinary sweet mustard", recipe_match_num(["2 msk fransk senap"], {"name": "Senap Sötstark Johnny's", "category": "pantry"}), 0)
-test("Batch 14 fransk senap blocks ordinary original mustard", recipe_match_num_cached(["2 msk fransk senap"], {"name": "Original Senap Slotts", "category": "pantry"}), 0)
+test("senap broad family: fransk senap matches sweet mustard (Q126-3)", recipe_match_num(["2 msk fransk senap"], {"name": "Senap Sötstark Johnny's", "category": "pantry"}), 1)
+test("senap broad family: fransk senap matches plain original mustard (Q126-3)", recipe_match_num_cached(["2 msk fransk senap"], {"name": "Original Senap Slotts", "category": "pantry"}), 1)
 test("Batch 14 mörk chokladkaka accepts dark chocolate without kaka word", recipe_match_num(["25 g Mörk chokladkaka"], {"name": "85% Cacao Mörk Choklad Garant", "category": "candy"}), 1)
 test("Batch 14 mörk chokladkaka accepts English Dark Excellence bar", recipe_match_num_cached(["25 g Mörk chokladkaka"], {"name": "70% Cocoa Dark Excellence Chokladkaka Lindt", "category": "candy", "brand": "LINDT"}), 1)
 test("Batch 14 rimmad skivad lax blocks raw fillet", recipe_match_num(["ca 250 g rimmad lax i tunna skivor"], {"name": "Laxfilé Garant", "category": "fish"}), 0)
@@ -10408,8 +10424,8 @@ test("Batch 15 fänkålsfrö blocks ground fennel", recipe_match_num(["1 tsk fä
 test("Batch 15 fänkålsfrö accepts whole fennel", recipe_match_num_cached(["1 tsk fänkålsfrö"], {"name": "Fänkål Hel Påse Kockens", "category": "pantry"}), 1)
 test("Batch 15 Oumph chunks matches vegobitar", recipe_match_num_cached(["200 g vegobitar"], {"name": "Ch*cken Style Chunks Oumph", "category": "frozen", "brand": "Oumph"}), 1)
 test("Batch 15 Tzaybitar matches vegobitar", recipe_match_num(["200 g Tzaybitar"], {"name": "Vegobitar Anamma", "category": "frozen"}), 1)
-test("Batch 15 grovkornig senap blocks original mustard", recipe_match_num_cached(["1 msk grovkornig senap"], {"name": "Original Senap Slotts", "category": "pantry"}), 0)
-test("Batch 15 grovkornig senap blocks skånsk mustard", recipe_match_num(["1 msk grovkornig senap"], {"name": "Skånsk Senap Slotts", "category": "pantry"}), 0)
+test("senap broad family: grovkornig senap matches plain original mustard (Q126-3)", recipe_match_num_cached(["1 msk grovkornig senap"], {"name": "Original Senap Slotts", "category": "pantry"}), 1)
+test("senap broad family: grovkornig senap matches skånsk mustard (Q126-3)", recipe_match_num(["1 msk grovkornig senap"], {"name": "Skånsk Senap Slotts", "category": "pantry"}), 1)
 test("Batch 15 sashimi lax blocks generic salmon fillet", recipe_match_num_cached(["200 g sashimi lax"], {"name": "Laxfilé Fryst", "category": "fish"}), 0)
 test("Batch 15 sashimi lax accepts sushilax", recipe_match_num(["200 g sashimi lax"], {"name": "Sushilax Loin", "category": "fish"}), 1)
 test("Batch 15 title sashimi lax blocks generic salmon", recipe_match_num_named_cached("Sashimi lax", ["200 g lax"], {"name": "Laxfilé Fryst", "category": "fish"}), 0)
@@ -16560,6 +16576,67 @@ test("context-word-exemption salchichon has iberico",
      "iberico" in CONTEXT_WORD_KEYWORD_EXEMPTIONS.get("salchichon", set()), True)
 test("context-word-exemption salchichon has iberico",
      "iberico" in CONTEXT_WORD_KEYWORD_EXEMPTIONS.get("salchichon", set()), True)
+# runtime_pnb_apple_kompott: generated by dm matcher add pnb
+# sanity-id: runtime_pnb_apple_kompott
+from languages.sv.ingredient_matching import PRODUCT_NAME_BLOCKERS
+test("PNB äpple has kompott",
+     "kompott" in PRODUCT_NAME_BLOCKERS.get("äpple", set()), True)
+# ingredient_parent_pasta_idealmakaroner: generated by dm matcher add ingredient-parent
+# sanity-id: ingredient_parent_pasta_idealmakaroner
+test("ingredient-parent Fusilli Pasta Barilla 500g matches idealmakaroner",
+     match("Fusilli Pasta Barilla 500g", "Idealmakaroner", "pantry"), "idealmakaroner")
+# ingredient_parent_pasta_langpasta: generated by dm matcher add ingredient-parent
+# sanity-id: ingredient_parent_pasta_langpasta
+test("ingredient-parent Fusilli Pasta Barilla 500g matches langpasta via spaghetti",
+     match("Fusilli Pasta Barilla 500g", "spaghetti", "pantry"), "långpasta")
+test(
+    "pasta broad family: spaghetti recipe matches short-shape Fusilli (backend)",
+    recipe_match_num(
+        ["200g spaghetti"],
+        {"name": "Fusilli Pasta Barilla 500g", "category": "pantry"},
+    ),
+    1,
+)
+test(
+    "pasta broad family: tagliatelle recipe matches Fusilli (backend)",
+    recipe_match_num(
+        ["250g tagliatelle"],
+        {"name": "Fusilli Pasta Barilla 500g", "category": "pantry"},
+    ),
+    1,
+)
+# offer_extra_keyword_rakor_ishavsrakor: generated by dm matcher add offer-extra-keyword
+# sanity-id: offer_extra_keyword_rakor_ishavsrakor
+test("offer-extra-keyword Ishavsräkor matches räkor",
+     match("Ishavsräkor", "räkor", "pantry"), "räkor")
+# ingredient_parent_senap_dijonsenap: generated by dm matcher add ingredient-parent
+# sanity-id: ingredient_parent_senap_dijonsenap
+test("ingredient-parent Senap Original Johnnys matches senap",
+     match("Senap Original Johnnys", "Dijonsenap", "pantry"), "dijonsenap")
+test(
+    "senap broad family: grovkornig senap matches plain Senap Original (Q126-3)",
+    recipe_match_num(
+        ["1 msk grovkornig senap"],
+        {"name": "Senap Original Johnny's", "category": "other"},
+    ),
+    1,
+)
+test(
+    "senap broad family: sotstark senap matches plain senap recipe (Q126-3)",
+    recipe_match_num(
+        ["2 msk senap"],
+        {"name": "Senap Sotstark Johnny's", "category": "other"},
+    ),
+    1,
+)
+test(
+    "senap broad family: dijonsenap ingredient matches plain Senap via ingredient-parent",
+    recipe_match_num(
+        ["1 msk dijonsenap"],
+        {"name": "Senap Original Johnny's", "category": "other"},
+    ),
+    1,
+)
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")

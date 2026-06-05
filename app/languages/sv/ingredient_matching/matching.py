@@ -2389,11 +2389,9 @@ def _coarse_mustard_allows_product(
     ingredient_lower: str,
     matched_keyword: Optional[str],
 ) -> bool:
-    if matched_keyword not in {'senap', 'dijonsenap'}:
-        return True
-    if not any(cue in ingredient_lower for cue in ('grovkornig', 'grovkornigt', 'grov senap', 'grovsenap')):
-        return True
-    return any(cue in product_lower for cue in ('grov', 'grovkornig', 'skånsk', 'skansk'))
+    # Senap-familjen är BRED (Q126-3): grovkornig/dijon/söt/rysk/amerikansk är
+    # alla utbytbara. Grovkornig senap matchar plain senap och vice versa.
+    return True
 
 
 def _salted_potato_chips_allows_product(

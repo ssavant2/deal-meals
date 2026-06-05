@@ -710,13 +710,8 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     'nejlikor': {'malen', 'mald', 'malet', 'malda'},
     'kryddnejlika': {'malen', 'mald', 'malet', 'malda'},
     'kryddnejlikor': {'malen', 'mald', 'malet', 'malda'},
-    # Mustard type distinctions — sötstark/skånsk/dijon are specific families.
-    # "senap ljus" should not match sötstark/skånsk/dijon; generic "senap" same.
-    'senap': {
-        'sötstark', 'sotstark',
-        'skånsk', 'skansk',
-        'dijon', 'dijonsenap',
-    },
+    # Senap-familjen är BRED (Q126-3): sötstark/skånsk/dijon/grovkornig/
+    # rysk/amerikansk är alla utbytbara — inga specialty-qualifiers för senap.
     'mango': {'torkad', 'torkade', 'inlagd', 'inlagda'},
     'banan': {'torkad', 'torkade'},
     'persika': {'torkad', 'torkade'},
@@ -1162,14 +1157,7 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
     'nejlikor': frozenset({'malen', 'mald', 'malet', 'malda'}),
     'kryddnejlika': frozenset({'malen', 'mald', 'malet', 'malda'}),
     'kryddnejlikor': frozenset({'malen', 'mald', 'malet', 'malda'}),
-    # Mustard types: sötstark/skånsk/dijon are specific flavour families.
-    # A recipe asking for "senap ljus" (mild yellow) should not accept sweet or sharp varieties.
-    # Generic "senap" in a recipe also shouldn't accept these without explicit mention.
-    'senap': frozenset({
-        'sötstark', 'sotstark',   # sweet-strong Swedish style
-        'skånsk', 'skansk',       # Scanian sweet style
-        'dijon', 'dijonsenap',    # French sharp style
-    }),
+    # Senap-familjen BRED (Q126-3) — ingen bidirektionell qualifier för senap.
     # Wine color: "Matlagningsvin Röd" should NOT match "vitt matlagningsvin" recipe
     # Per-keyword to avoid collisions with 'röd'/'vit' used elsewhere (e.g., paprika colors)
     'matlagningsvin': frozenset({

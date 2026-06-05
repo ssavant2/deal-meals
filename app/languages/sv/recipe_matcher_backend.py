@@ -3058,10 +3058,15 @@ def validate_offer_match_candidate(
                 )
                 contextual_cheese_use_case = (
                     matched_kw_lower == 'ost'
-                    and any(
-                        cheese_kw in carrier_product_lower
-                        and any(cw in ing_norm for cw in context_words)
-                        for cheese_kw, context_words in CHEESE_CONTEXT.items()
+                    and (
+                        any(
+                            cheese_kw in carrier_product_lower
+                            and any(cw in ing_norm for cw in context_words)
+                            for cheese_kw, context_words in CHEESE_CONTEXT.items()
+                        )
+                        # "riven ost gratäng" = cheese intended FOR a gratäng dish
+                        # → generic cheese products match even without 'gratängost' in name
+                        or any(cw in ing_norm for cw in ('gratäng', 'gratang', 'gratin'))
                     )
                 )
                 dark_chocolate_bar_use_case = (

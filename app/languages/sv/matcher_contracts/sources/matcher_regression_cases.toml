@@ -842,28 +842,38 @@ category = "spices"
 name = "Fänkål Malen"
 
 [[fixtures]]
-expected = 0
+expected = 1
 id = "matcher_regression_grovkornig_senap_positive"
 ingredients = ["1 msk grovkornig senap"]
-policy_ref = "current_review_matcher_regression"
+policy_ref = "current_review_senap_broad_Q126-3"
 recipe_name = "Sanity Recipe"
-source_ref = "current_review:accepted_direct_fix:grovkornig_senap"
+source_ref = "sanity:grovkornig_senap"
 
 [fixtures.offer]
 category = "pantry"
 name = "Skånsk Senap Slotts"
 
+[[fixtures.expected_matches]]
+ingredient_index = 0
+canonical = "senap"
+must_match_keyword = "senap"
+
 [[fixtures]]
-expected = 0
+expected = 1
 id = "matcher_regression_grovkornig_senap_original_negative"
 ingredients = ["1 msk grovkornig senap"]
-policy_ref = "current_review_matcher_regression"
+policy_ref = "current_review_senap_broad_Q126-3"
 recipe_name = "Sanity Recipe"
-source_ref = "current_review:negative_sibling:grovkornig_senap_original"
+source_ref = "sanity:grovkornig_senap"
 
 [fixtures.offer]
 category = "pantry"
 name = "Original Senap Slotts"
+
+[[fixtures.expected_matches]]
+ingredient_index = 0
+canonical = "senap"
+must_match_keyword = "senap"
 
 [[fixtures]]
 expected = 1
@@ -2837,28 +2847,38 @@ ingredient_index = 0
 must_match_keyword = "dijonsenap"
 
 [[fixtures]]
-expected = 0
+expected = 1
 id = "matcher_regression_fransk_senap_sweet_negative"
 ingredients = ["2 msk fransk senap"]
-policy_ref = "current_review_matcher_regression"
+policy_ref = "current_review_senap_broad_Q126-3"
 recipe_name = "Sanity Recipe"
-source_ref = "current_review:accepted_direct_fix:fransk_senap_sweet"
+source_ref = "sanity:grovkornig_senap"
 
 [fixtures.offer]
 category = "pantry"
 name = "Senap Sötstark Johnny's"
 
+[[fixtures.expected_matches]]
+ingredient_index = 0
+canonical = "dijonsenap"
+must_match_keyword = "dijonsenap"
+
 [[fixtures]]
-expected = 0
+expected = 1
 id = "matcher_regression_fransk_senap_original_negative"
 ingredients = ["2 msk fransk senap"]
-policy_ref = "current_review_matcher_regression"
+policy_ref = "current_review_senap_broad_Q126-3"
 recipe_name = "Sanity Recipe"
-source_ref = "current_review:accepted_direct_fix:fransk_senap_original"
+source_ref = "sanity:grovkornig_senap"
 
 [fixtures.offer]
 category = "pantry"
 name = "Original Senap Slotts"
+
+[[fixtures.expected_matches]]
+ingredient_index = 0
+canonical = "dijonsenap"
+must_match_keyword = "dijonsenap"
 
 [[fixtures]]
 expected = 1

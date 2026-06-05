@@ -851,6 +851,13 @@ keyword = "styckbröd"
 blockers = ["bakmix"]
 reason = "Bake-mix products (Bakmix Frallor, Lailas Glufri etc.) route via frallor→styckbröd parent but are flour mixes, not finished bread. Precedent: Q67 pannkakor+bakmix, Q79-2 lantbröd bake-mix PNB, Q81-1 kladdkakamix KSBC."
 
+[[product_name_blockers]]
+id = "runtime_pnb_apple"
+status = "active"
+keyword = "äpple"
+blockers = ["kompott"]
+reason = "Fruit compote/jam products (e.g. Råggyberry Äpple Svartvinbär Kompott) are processed preserves, not fresh apples; block from plain äpple ingredient"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"

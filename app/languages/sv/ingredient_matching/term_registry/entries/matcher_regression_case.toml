@@ -2348,44 +2348,44 @@ variant = "matcher_regression_fransk_senap_dijonsenap_positive: Dijonsenap Garan
 layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_fransk_senap_original_negative"
+entry_id = "sv-se.policy.dijonsenap.matcher_regression_fransk_senap_original_negative"
 language = "sv"
 market = "SE"
-canonical = "current_review_matcher_regression"
+canonical = "dijonsenap"
 status = "active"
 variants = ["matcher_regression_fransk_senap_original_negative: Original Senap Slotts"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_fransk_senap_original_negative"]
-layer_policy = ["accepted_filter", "normal"]
+layer_policy = ["normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_fransk_senap_original_negative."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "current_review_matcher_regression"
+canonical = "dijonsenap"
 variant = "matcher_regression_fransk_senap_original_negative: Original Senap Slotts"
-layer_role = "negative_regression"
+layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_fransk_senap_sweet_negative"
+entry_id = "sv-se.policy.dijonsenap.matcher_regression_fransk_senap_sweet_negative"
 language = "sv"
 market = "SE"
-canonical = "current_review_matcher_regression"
+canonical = "dijonsenap"
 status = "active"
 variants = ["matcher_regression_fransk_senap_sweet_negative: Senap Sötstark Johnny's"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_fransk_senap_sweet_negative"]
-layer_policy = ["accepted_filter", "normal"]
+layer_policy = ["normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_fransk_senap_sweet_negative."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "current_review_matcher_regression"
+canonical = "dijonsenap"
 variant = "matcher_regression_fransk_senap_sweet_negative: Senap Sötstark Johnny's"
-layer_role = "negative_regression"
+layer_role = "positive_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.champinjoner.matcher_regression_fresh_champ_klass_positive"
@@ -3168,44 +3168,44 @@ variant = "matcher_regression_gron_zucchini_yellow_negative: Zucchini Gul Klass 
 layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_grovkornig_senap_original_negative"
+entry_id = "sv-se.policy.senap.matcher_regression_grovkornig_senap_original_negative"
 language = "sv"
 market = "SE"
-canonical = "current_review_matcher_regression"
+canonical = "senap"
 status = "active"
 variants = ["matcher_regression_grovkornig_senap_original_negative: Original Senap Slotts"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_grovkornig_senap_original_negative"]
-layer_policy = ["accepted_filter", "normal"]
+layer_policy = ["normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_grovkornig_senap_original_negative."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "current_review_matcher_regression"
+canonical = "senap"
 variant = "matcher_regression_grovkornig_senap_original_negative: Original Senap Slotts"
-layer_role = "negative_regression"
+layer_role = "positive_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_grovkornig_senap_positive"
+entry_id = "sv-se.policy.senap.matcher_regression_grovkornig_senap_positive"
 language = "sv"
 market = "SE"
-canonical = "current_review_matcher_regression"
+canonical = "senap"
 status = "active"
 variants = ["matcher_regression_grovkornig_senap_positive: Skånsk Senap Slotts"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_grovkornig_senap_positive"]
-layer_policy = ["accepted_filter", "normal"]
+layer_policy = ["normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_grovkornig_senap_positive."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "current_review_matcher_regression"
+canonical = "senap"
 variant = "matcher_regression_grovkornig_senap_positive: Skånsk Senap Slotts"
-layer_role = "negative_regression"
+layer_role = "positive_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_grovmalen_svartpeppar_hel_no_match"
