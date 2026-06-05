@@ -750,8 +750,8 @@ reason = "Dried trattkantarell (torkad) is a concentrated ingredient-replacement
 id = "runtime_pnb_vitlok"
 status = "active"
 keyword = "vitlök"
-blockers = ["majonnäs", "majonnas", "mayo"]
-reason = "Garlic-flavored mayonnaise (Hellmanns Majonnäs med vitlök) must not match fresh garlic clove ingredient via vitlök keyword — condiment ≠ raw ingredient"
+blockers = ["majonnäs", "majonnas", "mayo", "fläskytterfilé"]
+reason = "Garlic-flavored mayonnaise (Hellmanns Majonnäs med vitlök) must not match fresh garlic clove ingredient via vitlök keyword — condiment ≠ raw ingredient; Seasoned pork tenderloin product (Fläskytterfilé Medaljonger Vitlök & Peppar) where vitlök is only a flavor descriptor, not the food - should not match plain garlic clove ingredient"
 
 [[product_name_blockers]]
 id = "runtime_pnb_chipotle"
