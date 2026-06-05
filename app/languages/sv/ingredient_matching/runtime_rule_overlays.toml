@@ -1999,6 +1999,13 @@ keyword = "chevre"
 context_words = ["chevrette"]
 reason = "Chevrette is a chevre variant (diminutive form, mindre chevre). Chevre keyword should match chevrette products without requiring ingredient to explicitly mention chevrette. Policy: all chevre matches chevreost-recipes regardless of subtype."
 
+[[context_word_keyword_exemptions]]
+id = "runtime_context_word_exemption_salchichon"
+status = "active"
+keyword = "salchichon"
+context_words = ["iberico", "iberico"]
+reason = "Salchichón Ibérico is still salchichón — iberico/ibérico is origin/quality grade, not a different product (same pattern as chorizo). The generic-skinka premium-ham guard is unaffected; this only exempts the specific salchichon carrier."
+
 [[compound_protection_updates]]
 id = "runtime_compound_protection_suffix_strict_kal"
 status = "active"
