@@ -157,6 +157,7 @@ from .recipe_context import (
 from .recipe_matcher_support import (
     BITAR_WORD,
     BULJONG_DEFAULT_WORDS,
+    BULJONG_MEAT_WORDS,
     BULJONG_TYPE_PREFIXES,
     BULJONG_WORD,
     CHEESE_CONTEXT,
@@ -200,6 +201,7 @@ __all__ = [
     'BITAR_WORD',
     'BIDIRECTIONAL_PER_KEYWORD',
     'BULJONG_DEFAULT_WORDS',
+    'BULJONG_MEAT_WORDS',
     'BULJONG_TYPE_PREFIXES',
     'BULJONG_WORD',
     'CARRIER_PRODUCTS',

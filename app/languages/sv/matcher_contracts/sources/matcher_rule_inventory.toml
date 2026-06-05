@@ -279,9 +279,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "not pressed_ginger_juice_allowed"
-end = 1917
+end = 1919
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 1917
+start = 1919
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_black_pepper_staple"
@@ -360,15 +360,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "def _explicit_vegan_context_allows_product("
-end = 446
+end = 448
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 446
+start = 448
 
 [[inventory.line_refs]]
 anchor = "if not _explicit_vegan_context_allows_product(product_lower, full_recipe_text, ing_norm):"
-end = 2044
+end = 2046
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 2044
+start = 2046
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_crispy_chili_oil"
@@ -1054,15 +1054,15 @@ start = 5112
 
 [[inventory.line_refs]]
 anchor = "return any(cue in product_lower for cue in ('sushilax', 'sashimi', 'loin'))"
-end = 529
+end = 531
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 529
+start = 531
 
 [[inventory.line_refs]]
 anchor = "detail='sashimi_salmon',"
-end = 2072
+end = 2074
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 2072
+start = 2074
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tzaybitar_vegobitar"
@@ -3880,9 +3880,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'chokladsås',"
-end = 341
+end = 343
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 341
+start = 343
 
 [[inventory.line_refs]]
 anchor = "'kola', 'kolasås', 'karamell', 'toffee',"
@@ -4477,15 +4477,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_FLAVOR_CARRIER_CONJUNCTION_RE = re.compile(r'\\s+(?:och|samt)\\s+')"
-end = 550
+end = 552
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 550
+start = 552
 
 [[inventory.line_refs]]
 anchor = "def _flavor_keyword_blocked_by_carrier_text("
-end = 653
+end = 655
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 653
+start = 655
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_svampfond_kantarellfond"
@@ -5408,9 +5408,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "COOKING_INSTRUCTION_WORDS = r'att|till'"
-end = 123
+end = 133
 path = "app/languages/sv/ingredient_matching/recipe_matcher_support.py"
-start = 123
+start = 133
 
 [[inventory.line_refs]]
 anchor = "_COOKING_INSTRUCTION_RE = re.compile("

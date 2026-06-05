@@ -68,6 +68,16 @@ BULJONG_TYPE_PREFIXES = frozenset({
     'gronsak', 'umami', 'örtagård', 'hummer',
 })
 
+# Meat-broth type words. A meat-broth ingredient (nöt/kött/ox/kalv) only matches
+# meat-broth products — they are interchangeable with each other (nöt = kött =
+# oxe, same animal) but stay isolated from poultry/fish/vegetable/mushroom broth.
+# This lets "nötbuljong" match "Köttbuljong" / "Buljong Mörk Oxe" while a
+# vegetable or chicken stock is still correctly rejected. Both Swedish (ö) and
+# char-folded (o) forms are listed because normalized text uses the folded form.
+BULJONG_MEAT_WORDS = frozenset({
+    'kött', 'kott', 'nöt', 'not', 'ox', 'kalv',
+})
+
 # Default buljong type words - when recipe says generic "buljong", only allow these
 BULJONG_DEFAULT_WORDS = ('grönsak', 'gronsak')
 

@@ -34,6 +34,7 @@ try:
     from languages.sv.ingredient_matching import (
         BITAR_WORD,
         BULJONG_DEFAULT_WORDS,
+        BULJONG_MEAT_WORDS,
         BULJONG_TYPE_PREFIXES,
         BULJONG_WORD,
         CHEESE_CONTEXT,
@@ -166,6 +167,7 @@ except ModuleNotFoundError:
     from app.languages.sv.ingredient_matching import (
         BITAR_WORD,
         BULJONG_DEFAULT_WORDS,
+        BULJONG_MEAT_WORDS,
         BULJONG_TYPE_PREFIXES,
         BULJONG_WORD,
         CHEESE_CONTEXT,
@@ -2630,22 +2632,33 @@ def validate_offer_match_candidate(
         matched_kw_lower = matched_keyword.lower()
         if matched_kw_lower == BULJONG_WORD:
             ing_norm = ingredients_normalized[matched_ing_idx]
-            if not any(t in ing_norm for t in BULJONG_TYPE_PREFIXES):
-                product_lower = (
-                    offer_precomputed['name_normalized']
-                    if offer_precomputed is not None
-                    else offer_name_normalized
-                )
+            product_lower = (
+                offer_precomputed['name_normalized']
+                if offer_precomputed is not None
+                else offer_name_normalized
+            )
+            # A meat broth (nöt/kött/ox/kalv) only matches a meat-broth product —
+            # nöt = kött = oxe are interchangeable, but a vegetable/chicken/fish
+            # stock is rejected. A generic "buljong" (no type word) keeps the
+            # vegetable default. Other typed broths match on their own compound
+            # keyword and never reach this generic-buljong path.
+            _reject_bouillon_type = False
+            if any(t in ing_norm for t in BULJONG_MEAT_WORDS):
+                if not any(t in product_lower for t in BULJONG_MEAT_WORDS):
+                    _reject_bouillon_type = True
+            elif not any(t in ing_norm for t in BULJONG_TYPE_PREFIXES):
                 if not any(dw in product_lower for dw in BULJONG_DEFAULT_WORDS):
-                    _record_validation_event(
-                        validation_events,
-                        'validation_reject',
-                        rule='carrier_flavor_context',
-                        detail='bouillon_type_context',
-                        ing_idx=matched_ing_idx,
-                        keyword=matched_keyword,
-                    )
-                    matched_keyword = None
+                    _reject_bouillon_type = True
+            if _reject_bouillon_type:
+                _record_validation_event(
+                    validation_events,
+                    'validation_reject',
+                    rule='carrier_flavor_context',
+                    detail='bouillon_type_context',
+                    ing_idx=matched_ing_idx,
+                    keyword=matched_keyword,
+                )
+                matched_keyword = None
 
     if matched_keyword and matched_ing_idx is not None:
         product_lower = (

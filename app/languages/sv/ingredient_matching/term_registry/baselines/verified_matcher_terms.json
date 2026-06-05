@@ -6,7 +6,7 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 101,
       "hardcoded_keyword_output:extract_keywords_from_product": 121,
-      "ingredient_parent_mapping": 406,
+      "ingredient_parent_mapping": 408,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
       "keyword_synonym_mapping": 188,
@@ -30,7 +30,7 @@
     },
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 406,
+      "ingredient_parent": 408,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 188,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5858,
-    "variants_missing_product_text": 1890,
+    "variant_count": 5860,
+    "variants_missing_product_text": 1892,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -123064,11 +123064,53 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"viltfärs\"}"
+    },
+    {
+      "variant_id": "vterm-15e65e0c8712076f",
+      "row_index": 4683,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:nötbuljong",
+      "source_id": "nötbuljong",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "nötbuljong",
+      "canonical": "köttbuljong",
+      "expected_family": "köttbuljong",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"köttbuljong\"}"
+    },
+    {
+      "variant_id": "vterm-0de432e56bba593e",
+      "row_index": 4688,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:oxbuljong",
+      "source_id": "oxbuljong",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "oxbuljong",
+      "canonical": "köttbuljong",
+      "expected_family": "köttbuljong",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"köttbuljong\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1664,
+      "no_product_text": 1666,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123076,7 +123118,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 406,
+      "ingredient_parent": 408,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 188,
@@ -123090,8 +123132,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5858
+      "audited": 5860
     },
-    "variant_count": 5858
+    "variant_count": 5860
   }
 }

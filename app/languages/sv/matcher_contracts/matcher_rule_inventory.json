@@ -386,9 +386,9 @@
     "line_refs": [
       {
         "anchor": "not pressed_ginger_juice_allowed",
-        "end": 1917,
+        "end": 1919,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 1917
+        "start": 1919
       }
     ],
     "notes": "Backend validation explicitly allows pressed ginger juice products through processed-product checks.",
@@ -519,15 +519,15 @@
     "line_refs": [
       {
         "anchor": "def _explicit_vegan_context_allows_product(",
-        "end": 446,
+        "end": 448,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 446
+        "start": 448
       },
       {
         "anchor": "if not _explicit_vegan_context_allows_product(product_lower, full_recipe_text, ing_norm):",
-        "end": 2044,
+        "end": 2046,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 2044
+        "start": 2046
       }
     ],
     "notes": "Backend guard rejects animal/egg products when explicit vegan recipe wording reaches validation, while allowing plant-based burger products through the same routed keyword.",
@@ -1444,15 +1444,15 @@
       },
       {
         "anchor": "return any(cue in product_lower for cue in ('sushilax', 'sashimi', 'loin'))",
-        "end": 529,
+        "end": 531,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 529
+        "start": 531
       },
       {
         "anchor": "detail='sashimi_salmon',",
-        "end": 2072,
+        "end": 2074,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 2072
+        "start": 2074
       }
     ],
     "notes": "Sashimi-lax wording requires sushi-grade salmon products; generic frozen salmon fillets are rejected even when sashimi appears only in the recipe title.",
@@ -5175,9 +5175,9 @@
     "line_refs": [
       {
         "anchor": "'chokladsås',",
-        "end": 341,
+        "end": 343,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 341
+        "start": 343
       },
       {
         "anchor": "'kola', 'kolasås', 'karamell', 'toffee',",
@@ -5946,15 +5946,15 @@
     "line_refs": [
       {
         "anchor": "_FLAVOR_CARRIER_CONJUNCTION_RE = re.compile(r'\\s+(?:och|samt)\\s+')",
-        "end": 550,
+        "end": 552,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 550
+        "start": 552
       },
       {
         "anchor": "def _flavor_keyword_blocked_by_carrier_text(",
-        "end": 653,
+        "end": 655,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 653
+        "start": 655
       }
     ],
     "notes": "Flavor keywords in a separate conjunction segment, such as vispgrädde och rårörda lingon, are independent ingredient items rather than carrier flavors.",
@@ -7149,9 +7149,9 @@
     "line_refs": [
       {
         "anchor": "COOKING_INSTRUCTION_WORDS = r'att|till'",
-        "end": 123,
+        "end": 133,
         "path": "app/languages/sv/ingredient_matching/recipe_matcher_support.py",
-        "start": 123
+        "start": 133
       },
       {
         "anchor": "_COOKING_INSTRUCTION_RE = re.compile(",
