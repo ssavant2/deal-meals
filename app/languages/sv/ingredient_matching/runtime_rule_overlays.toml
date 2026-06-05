@@ -823,6 +823,34 @@ keyword = "korvar"
 blockers = ["salami", "coppa", "fuet", "sudjuk", "sucuk", "lufttorkad", "lufttorkat", "lufttorkade", "salchichon", "salsichon"]
 reason = "Plural korvar speglar PNB korv: torkad charkuteri (salami/coppa/fuet/sudjuk/lufttorkad) blockeras från mjuk-korv-recept; färska kokkorvar behålls."
 
+[[product_name_blockers]]
+id = "runtime_pnb_cheddar"
+status = "active"
+keyword = "cheddar"
+blockers = ["crackers"]
+reason = "Crispy Crackers Cheddar / Cheese Crackers etc. are cracker snacks flavored with cheese, not actual cheddar cheese. Same class as linsbågar/rye snacks already blocked."
+
+[[product_name_blockers]]
+id = "runtime_pnb_hallon"
+status = "active"
+keyword = "hallon"
+blockers = ["chokladpåse"]
+reason = "Chokladpåse Kina Hallon Snacks etc. are chocolate candy bags flavored with raspberry, not fresh raspberries. Same candy-isolation class as godisrem/lakerol/pastill already blocked."
+
+[[product_name_blockers]]
+id = "runtime_pnb_ost"
+status = "active"
+keyword = "ost"
+blockers = ["ostbågar", "ostbåge"]
+reason = "Ostbågar/ostbåge are corn-puff snacks (OLW) flavored with cheese, not actual cheese. Non-food on ingredient-side already; PNB blocks the offer-side match against plain ost/riven ost ingredients."
+
+[[product_name_blockers]]
+id = "runtime_pnb_styckbrod"
+status = "active"
+keyword = "styckbröd"
+blockers = ["bakmix"]
+reason = "Bake-mix products (Bakmix Frallor, Lailas Glufri etc.) route via frallor→styckbröd parent but are flour mixes, not finished bread. Precedent: Q67 pannkakor+bakmix, Q79-2 lantbröd bake-mix PNB, Q81-1 kladdkakamix KSBC."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
