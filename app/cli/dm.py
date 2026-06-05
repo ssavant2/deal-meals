@@ -547,13 +547,25 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
             "The command writes registry, fixture/inventory, generated JSON/coverage, sanity, and Track B gates by default.",
         ),
     ),
+    "family": MatcherGuide(
+        label="family",
+        status="goal-oriented guide",
+        summary="Choose between ingredient-parent, keyword-extra-parent, and ingredient-routing-parent.",
+        steps=(
+            "Mutually interchangeable family members on both sides, e.g. älgfärs/hjortfärs/viltfärs or beef-stock variants: use ingredient-parent.",
+            "Parent recipe wording should match many child offers, but child recipes should not automatically match sibling offers: use keyword-extra-parent.",
+            "Fullscan works but routed/compiled cache misses a compound/plural recipe term: use ingredient-routing-parent or recipe-routing-helper.",
+            "Strict exclusions are not solved by any parent/routing surface; add PNB/FPB/KSBC/no-match/form/specialty proof for that.",
+        ),
+    ),
     "ingredient-parent": MatcherGuide(
         label="ingredient-parent",
         status="supported by dm matcher add",
-        summary="Recipe-side variant should expose a known parent ingredient.",
+        summary="Variant should collapse to a canonical family on both sides; use for mutually interchangeable members.",
         steps=(
             "Run: ./bin/dm matcher add ingredient-parent <canonical> --variants <variant> --sanity-offer \"<offer>\"",
             "Use --sanity-ingredient when the default variant ingredient is not the proof you want.",
+            "Use this, not keyword-extra-parent or ingredient-routing-parent, when kid recipes should match sibling family offers.",
         ),
     ),
     "offer-extra-keyword": MatcherGuide(
@@ -572,6 +584,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         steps=(
             "Run: ./bin/dm matcher add ingredient-routing-parent <canonical> --variants <variant> --sanity-offer \"<offer>\"",
             "Use --sanity-ingredient when the recipe proof needs a broader parent phrase.",
+            "This is routing/cache exposure only; it does not make sibling family members interchangeable.",
         ),
     ),
     "parent-match-only": MatcherGuide(
@@ -992,6 +1005,14 @@ GUIDE_ALIASES = {
     "keyword-extra-parents": "keyword-extra-parent",
     "keyword_extra_parents": "keyword-extra-parent",
     "extra-parent": "keyword-extra-parent",
+    "family-choice": "family",
+    "family_choice": "family",
+    "family-parent": "family",
+    "family_parent": "family",
+    "parent-choice": "family",
+    "parent_choice": "family",
+    "mutual-family": "family",
+    "mutual_family": "family",
     "ingredient_parent": "ingredient-parent",
     "ingredient-parents": "ingredient-parent",
     "ingredient_parents": "ingredient-parent",
@@ -1994,6 +2015,37 @@ def _print_generated_sanity_probe(paths: MatcherPaths, policy_ref: str) -> None:
         typer.echo(f"  {status}: {row.get('description')} expected {row.get('expected')} actual {actual}")
 
 
+def _print_generated_canary_scope_note(*, sanity_mode: Literal["fast-match", "backend-match"]) -> None:
+    if sanity_mode == "fast-match":
+        typer.secho(
+            "NOTE: generated match() sanity is fast-path/canonical smoke proof. "
+            "For backend-only, materialized, or sibling-family behavior, add a "
+            "recipe_match_num(...), recipe_match_num_named(...), or cached backend sanity row.",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
+    else:
+        typer.secho(
+            "NOTE: generated backend sanity checks the provided pair only; add sibling/negative "
+            "proofs when the policy depends on family boundaries.",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
+
+
+def _print_registry_next_steps() -> None:
+    typer.echo(
+        "Next: run `./bin/dm matcher batch finalize --track B`, or run "
+        "`./bin/dm matcher regen` + `./bin/dm matcher promote` before registry gates."
+    )
+    typer.secho(
+        "NOTE: regen alone is not enough for recipe/routing registry changes; promote refreshes "
+        "verified-term baselines and generated count guards.",
+        fg=typer.colors.YELLOW,
+        err=True,
+    )
+
+
 def _source_spec(paths: MatcherPaths, contract: str):
     return contract_spec_by_name(contract, tree_root=paths.repo_root)
 
@@ -2873,12 +2925,10 @@ def _add_simple_toml_surface(
     typer.echo(f"Generated {surface.file_stem} rule: {change.policy_ref}")
     typer.echo(f"  entry: {entry_id}")
     _print_generated_sanity_probe(paths, change.policy_ref)
+    _print_generated_canary_scope_note(sanity_mode=sanity_mode)
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
-        typer.echo(
-            "Next: run `./bin/dm matcher batch finalize --track B`, or run "
-            "`./bin/dm matcher regen` + `./bin/dm matcher promote` before registry gates."
-        )
+        _print_registry_next_steps()
         return
     gate_status = _run_keyword_synonym_light_gates(paths=paths, report_root=report_root)
     raise typer.Exit(gate_status)
@@ -3066,6 +3116,59 @@ def _no_match_auto_fixture_id(policy_id: str) -> str:
 
 def _no_match_auto_inventory_id(policy_id: str) -> str:
     return policy_id if policy_id.startswith("policy_") else f"policy_{_slug(policy_id)}"
+
+
+def _sync_no_match_policy_model_check_guards(
+    paths: MatcherPaths,
+    *,
+    policy_id: str,
+    dry_run: bool,
+) -> bool:
+    check_file = paths.app_dir / "support_checks" / "run_matcher_rule_model_checks.py"
+    if not check_file.exists():
+        return False
+    text = check_file.read_text(encoding="utf-8")
+    match = re.search(
+        r"(?ms)^    expected_policy_ids = \{\n(?P<body>.*?)^    \}\n",
+        text,
+    )
+    if match is None:
+        raise typer.BadParameter(
+            f"could not find expected_policy_ids block in {check_file}; update the no-match policy guard manually"
+        )
+    body = match.group("body")
+    ids = re.findall(r'^\s*"([^"]+)",\s*$', body, flags=re.MULTILINE)
+    count_match = re.search(
+        r'check\("registered no-match policy count", len\(NO_MATCH_POLICIES\) == (?P<count>\d+)\)',
+        text,
+    )
+    if count_match is None:
+        raise typer.BadParameter(
+            f"could not find registered no-match policy count guard in {check_file}; update it manually"
+        )
+    current_count = int(count_match.group("count"))
+    changed = False
+    new_text = text
+    policy_id_present = policy_id in ids
+    if not policy_id_present:
+        new_text = text[:match.end("body")] + f'        "{policy_id}",\n' + text[match.end("body"):]
+        changed = True
+
+    expected_count = current_count if policy_id_present else current_count + 1
+    count_pattern = r'check\("registered no-match policy count", len\(NO_MATCH_POLICIES\) == \d+\)'
+    count_replacement = (
+        f'check("registered no-match policy count", len(NO_MATCH_POLICIES) == {expected_count})'
+    )
+    synced_text, count_replacements = re.subn(count_pattern, count_replacement, new_text, count=1)
+    if count_replacements != 1:
+        raise typer.BadParameter(
+            f"could not find registered no-match policy count guard in {check_file}; update it manually"
+        )
+    if synced_text != new_text:
+        changed = True
+    if changed and not dry_run:
+        check_file.write_text(synced_text, encoding="utf-8")
+    return changed
 
 
 def _no_match_fixture_row(
@@ -9805,8 +9908,12 @@ def add_no_match_policy(
         else ()
     )
     canonical_slug = _slug(canonical)
-    first_guard_slug = _slug((blocked_offer_keywords or blocked_offer_patterns)[0])
-    policy_id = policy_id.strip() if policy_id is not None else f"policy_{canonical_slug}_{first_guard_slug}"
+    if policy_id is not None:
+        policy_id = policy_id.strip()
+    elif blocked_offer_keywords:
+        policy_id = f"policy_{canonical_slug}_{_slug(blocked_offer_keywords[0])}"
+    else:
+        policy_id = f"policy_{canonical_slug}_guard"
     if not policy_id:
         raise typer.BadParameter("--policy-id must not be empty")
     policy_ref = policy_ref or policy_id
@@ -9897,6 +10004,11 @@ def add_no_match_policy(
             entry_line=entry_line,
             dry_run=dry_run,
         )
+    model_guard_changed = _sync_no_match_policy_model_check_guards(
+        paths,
+        policy_id=policy_id,
+        dry_run=dry_run,
+    )
     sanity_preview = _append_no_match_deep_sanity_stub(
         paths=paths,
         policy_ref=policy_ref,
@@ -9921,17 +10033,22 @@ def add_no_match_policy(
         return
 
     typer.echo(f"Generated no_match_policy rule: {change.policy_ref}")
+    typer.echo(f"  policy id: {policy_id}")
     typer.echo(f"  entry: {entry_id}")
     if auto_fixture_id is not None:
         verb = "created" if auto_fixture_created else "reused"
         typer.echo(f"  auto fixture {verb}: {auto_fixture_id}")
     if inventory_id is not None:
         typer.echo(f"  auto inventory: {inventory_id}")
+    if model_guard_changed:
+        typer.echo("  model guard synced: support_checks/run_matcher_rule_model_checks.py")
     if auto_fixture or auto_inventory:
         _regenerate_contract_json(paths)
     _print_generated_sanity_probe(paths, change.policy_ref)
+    _print_generated_canary_scope_note(sanity_mode="fast-match")
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
+        _print_registry_next_steps()
         return
     if auto_fixture or auto_inventory:
         gate_status = _run_track_b_change_plan(paths=paths, change=change, report_root=report_root)

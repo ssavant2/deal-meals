@@ -5109,7 +5109,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertEqual(report["blocker_count"], 0)
         self.assertEqual(report["blocker_baseline_count"], 0)
         self.assertEqual(report["summary"]["contract_access_api"], 2)
-        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4173)
+        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4175)
 
     def test_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -5460,7 +5460,7 @@ reason = "Synthetic parent PNB mirror warning canary."
             fixtures = load_contract_source(fixture_spec)
             fixtures.append({
                 "id": "phase9guard_negative",
-                "policy_ref": "policy_phase9guard_phase9blocked",
+                "policy_ref": "policy_phase9guard_guard",
                 "source_ref": "manual:policy_phase9guard_phase9blocked",
                 "recipe_name": "Synthetic Phase 9 Guard",
                 "ingredients": ["1 dl phase9guard"],
@@ -5469,6 +5469,14 @@ reason = "Synthetic parent PNB mirror warning canary."
                 "expected_matches": [],
             })
             write_contract_source(fixture_spec, fixtures)
+            model_checks_file = app_dir / "support_checks" / "run_matcher_rule_model_checks.py"
+            model_checks_before = model_checks_file.read_text(encoding="utf-8")
+            count_before_match = re.search(
+                r'check\("registered no-match policy count", len\(NO_MATCH_POLICIES\) == (\d+)\)',
+                model_checks_before,
+            )
+            self.assertIsNotNone(count_before_match)
+            count_before = int(count_before_match.group(1))
 
             no_match = subprocess.run(
                 [
@@ -5481,8 +5489,8 @@ reason = "Synthetic parent PNB mirror warning canary."
                     "phase9guard",
                     "--ingredient-patterns",
                     r"\bphase9guard\b",
-                    "--blocked-offer-keywords",
-                    "phase9blocked",
+                    "--blocked-offer-patterns",
+                    r"\bphase9blocked\b",
                     "--reason",
                     "Synthetic Phase 9 guard.",
                     "--fixture-refs",
@@ -5501,6 +5509,10 @@ reason = "Synthetic parent PNB mirror warning canary."
                 text=True,
             )
             self.assertEqual(no_match.returncode, 0, no_match.stderr + no_match.stdout)
+            self.assertIn("policy id: policy_phase9guard_guard", no_match.stdout)
+            self.assertIn("model guard synced", no_match.stdout)
+            self.assertIn("generated match() sanity is fast-path/canonical smoke proof", no_match.stderr)
+            self.assertIn("regen alone is not enough", no_match.stderr)
 
             auto_no_match = subprocess.run(
                 [
@@ -5537,6 +5549,7 @@ reason = "Synthetic parent PNB mirror warning canary."
             self.assertEqual(auto_no_match.returncode, 0, auto_no_match.stderr + auto_no_match.stdout)
             self.assertIn("auto fixture created: phase9auto_not_blocked_negative", auto_no_match.stdout)
             self.assertIn("auto inventory: policy_phase9auto_not_blocked", auto_no_match.stdout)
+            self.assertIn("model guard synced", auto_no_match.stdout)
 
             updated_fixtures = load_contract_source(fixture_spec)
             auto_fixture = next(
@@ -5573,6 +5586,16 @@ reason = "Synthetic parent PNB mirror warning canary."
                 'fixture_refs = ["phase9auto_not_blocked_negative"]',
                 no_match_policy_file.read_text(encoding="utf-8"),
             )
+            no_match_policy_text = no_match_policy_file.read_text(encoding="utf-8")
+            self.assertIn('id = "policy_phase9guard_guard"', no_match_policy_text)
+            self.assertNotIn("policy_phase9guard_bphase9blockedb", no_match_policy_text)
+            model_checks_after = model_checks_file.read_text(encoding="utf-8")
+            self.assertIn('"policy_phase9guard_guard"', model_checks_after)
+            self.assertIn('"policy_phase9auto_not_blocked"', model_checks_after)
+            self.assertIn(
+                f'check("registered no-match policy count", len(NO_MATCH_POLICIES) == {count_before + 2})',
+                model_checks_after,
+            )
 
             extraction = subprocess.run(
                 [
@@ -5603,7 +5626,7 @@ reason = "Synthetic parent PNB mirror warning canary."
             entries_dir = app_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
             entries = load_registry_entries(entries_dir=entries_dir, include_local=False)
             policies = build_no_match_policies_export_from_entries(entries)
-            self.assertTrue(any(policy.id == "policy_phase9guard_phase9blocked" for policy in policies))
+            self.assertTrue(any(policy.id == "policy_phase9guard_guard" for policy in policies))
 
             extraction_entry = next(entry for entry in entries if entry.entry_id == "sv-se.family.phase9extract")
             coverage_rows = extraction_entry.language_payload["coverage"]
@@ -5706,6 +5729,16 @@ reason = "Synthetic parent PNB mirror warning canary."
 
         self.assertEqual(help_result.returncode, 0, help_result.stderr + help_result.stdout)
         self.assertEqual(guide_result.returncode, 0, guide_result.stderr + guide_result.stdout)
+        family_result = subprocess.run(
+            [sys.executable, "-m", "cli.dm", "matcher", "guide", "family"],
+            cwd=live_app_dir,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(family_result.returncode, 0, family_result.stderr + family_result.stdout)
+        self.assertIn("Mutually interchangeable family members", family_result.stdout)
+        self.assertIn("use ingredient-parent", family_result.stdout)
         for command in (
             "ingredient-parent",
             "offer-extra-keyword",

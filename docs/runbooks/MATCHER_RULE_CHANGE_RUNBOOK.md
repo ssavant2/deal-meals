@@ -392,6 +392,11 @@ Other TOML registry rule surfaces follow the same pattern:
 `ingredient-parent`, `offer-extra-keyword`, `ingredient-routing-parent`,
 `parent-match-only`, and `recipe-routing-helper`. Use
 `./bin/dm matcher guide <shape>` for the exact flags and proof expectations.
+If you know the goal but not the shape, start with
+`./bin/dm matcher guide family`: mutually interchangeable family members use
+`ingredient-parent`; parent recipe wording that should fan out to child offers
+uses `keyword-extra-parent`; routed/compiled cache exposure uses
+`ingredient-routing-parent` or `recipe-routing-helper`.
 `parent-match-only` is deliberately route-only despite the historical name: it
 adds a parent fallback, but it does not block siblings or prove strictness. If
 the intended policy is "this related offer must not match", pass
@@ -423,7 +428,10 @@ CLI write the registry row and focused sanity stub:
 registry entry. Use explicit `--fixture-refs` instead when a richer fixture
 already exists or when the policy needs several sibling fixtures. The auto flags
 only handle bookkeeping; they do not choose policy wording, regexes, blockers,
-or whether a positive sibling is needed.
+or whether a positive sibling is needed. `dm matcher add no-match-policy` also
+keeps the no-match model-check count/id guard in
+`support_checks/run_matcher_rule_model_checks.py` in sync. If you hand-edit
+`no_match_policy.toml`, you own that guard update too.
 
 For an existing simple `no-match-policy`, use the modifier instead of hand
 keeping `variants`, guards, coverage, and negative-example payloads in sync:
@@ -584,6 +592,10 @@ multi-ingredient context, or anything discovered with `dm matcher why` as a
 backend validation issue, write a `recipe_match_num(...)`,
 `recipe_match_num_named(...)`, or cached backend sanity row instead. A fast
 `match()` row can pass while the backend correctly rejects the recipe match.
+Generated `dm matcher add` canaries are smoke tests, not complete behavior
+proofs: they often assert the observed canonical for one pair. For family work,
+add an explicit backend/cached sanity when the real policy is "kid recipe must
+match sibling family offer" or "nearby sibling must stay excluded".
 
 For repeated backend-only product/ingredient guard patterns that cannot be
 expressed as existing overlays, scaffold the function and chain with:
@@ -1390,6 +1402,8 @@ instead:
 | --- | --- |
 | Roll an offer keyword up to a parent ingredient (e.g. `nori` → `alger`, `citron` → `citrusfrukter`) | `./bin/dm matcher add keyword-extra-parent ...` |
 | Treat a recipe-side variant as a known parent ingredient (e.g. `noriblad` → `nori`) | `./bin/dm matcher add ingredient-parent ...` |
+| Treat family members as mutually interchangeable on both recipe and offer side (e.g. `älgfärs`/`hjortfärs`/`viltfärs`, stock families) | `./bin/dm matcher add ingredient-parent ...`; do **not** use `keyword-extra-parent` or `ingredient-routing-parent` for this goal |
+| Expose a compound/plural recipe term to routed/compiled caches when fullscan already works | `./bin/dm matcher add ingredient-routing-parent ...` or `recipe-routing-helper ...` |
 | Add a spelling/plural alias normalized on both sides | `./bin/dm matcher add keyword-synonym ...` |
 | Add a product-side keyword that maps to an existing ingredient | `./bin/dm matcher add offer-extra-keyword ...` |
 
@@ -1887,6 +1901,11 @@ but finish with the same deterministic maintenance order:
    ```bash
    ./bin/dm matcher promote
    ```
+
+   Do not treat `regen` alone as enough for registry/routing changes.
+   Recipe-side routing, verified-term baselines, and generated count guards are
+   refreshed by promotion or the Track B finalize wrapper, not by JSON regen
+   alone.
 
    Use `--allow-removals` only after reviewing intentional inactivations or
    deletions.
