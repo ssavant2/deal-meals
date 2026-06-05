@@ -192,7 +192,7 @@ function renderStoreConfigUI(storeId, fields, config) {
                                 <input type="text" class="form-control" id="${storeId}-${field.key}"
                                        placeholder="${escapeHtml(field.placeholder || '')}"
                                        data-keyup="handleStoreSearchKeyup" data-store="${storeId}">
-                                <button class="btn btn-outline-primary" type="button" data-action="searchStoreLocations" data-arg="${storeId}">
+                                <button class="btn btn-outline-primary" type="button" data-action="searchStoreLocations" data-store="${storeId}">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>

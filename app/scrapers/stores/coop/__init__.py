@@ -19,16 +19,19 @@ API Research (Feb 2026):
 - Offer APIs return 404 on direct calls - need Playwright for offer scraping
 """
 
-from typing import List, Dict, Optional
+from typing import Any, List, Dict, Optional
 from scrapers.stores.base import StorePlugin, StoreConfig, StoreConfigField, StoreScrapeResult
 from languages.sv.category_utils import guess_category as shared_guess_category
 from scrapers.stores.weight_utils import parse_weight
 from loguru import logger
 from languages.sv.normalization import fix_swedish_chars
 from constants_timeouts import HTTP_TIMEOUT, PAGE_LOAD_TIMEOUT, PAGE_NETWORK_IDLE_TIMEOUT
+import json
 import httpx
 import re
+import time
 from datetime import datetime, timezone
+from pathlib import Path
 from utils.security import ssrf_safe_event_hook
 import asyncio
 
@@ -47,12 +50,19 @@ class CoopStore(StorePlugin):
 
     # Obfuscated CSS class for brand extraction (Coop may change this at any deploy)
     BRAND_CSS_CLASS = "span.q5vMS42j"
+    STORE_CATALOG_CACHE_FILES = (
+        Path("/app/data/coop_store_catalog.json"),
+        Path("/tmp/deal-meals/coop_store_catalog.json"),
+    )
+    STORE_CATALOG_CACHE_TTL_SECONDS = 7 * 24 * 60 * 60
 
     def __init__(self):
         self.base_url = "https://www.coop.se"
         self.offers_url = f"{self.base_url}/handla/aktuella-erbjudanden/"
         self.sitemap_url = f"{self.base_url}/sitemap_pages.xml"
         self._store_cache: List[Dict] = []  # Cache for store list
+        self._store_cache_loaded_at = 0.0
+        self._store_cache_refreshing = False
 
     @property
     def config(self) -> StoreConfig:
@@ -114,16 +124,14 @@ class CoopStore(StorePlugin):
         async def load_locations() -> List[Dict]:
             logger.info(f"Searching Coop stores for: {query}")
 
-            # Load store list if not cached
-            if not self._store_cache:
-                self._store_cache = await self._load_stores_from_sitemap()
+            store_catalog = await self._load_store_catalog()
 
             query_lower = self._normalize_search(query.lower())
             query_words = query_lower.split()
 
             # Filter stores matching query
             matching_stores = []
-            for store in self._store_cache:
+            for store in store_catalog:
                 searchable = self._normalize_search(
                     f"{store['name']} {store.get('city', '')} {store.get('store_type', '')}"
                 )
@@ -143,6 +151,114 @@ class CoopStore(StorePlugin):
             return matching_stores[:50]  # Return up to 50 results
 
         return await self._get_or_cache_location_search(cache_key, load_locations)
+
+    async def _load_store_catalog(self) -> List[Dict]:
+        """Load Coop's store catalog from memory, disk cache, or sitemap."""
+        now = time.time()
+
+        if self._store_cache:
+            if self._is_store_catalog_stale(now) and not self._store_cache_refreshing:
+                self._schedule_store_catalog_refresh()
+            return self._store_cache
+
+        cached_catalog = self._read_store_catalog_cache()
+        if cached_catalog:
+            self._store_cache = cached_catalog["stores"]
+            self._store_cache_loaded_at = cached_catalog["cached_at"]
+            if self._is_store_catalog_stale(now) and not self._store_cache_refreshing:
+                self._schedule_store_catalog_refresh()
+            return self._store_cache
+
+        stores = await self._load_stores_from_sitemap()
+        if stores:
+            self._store_cache = stores
+            self._store_cache_loaded_at = time.time()
+            self._write_store_catalog_cache(stores, self._store_cache_loaded_at)
+        return stores
+
+    def _is_store_catalog_stale(self, now: float | None = None) -> bool:
+        """Return True when the locally cached Coop catalog should be refreshed."""
+        if not self._store_cache_loaded_at:
+            return True
+        checked_at = time.time() if now is None else now
+        return (checked_at - self._store_cache_loaded_at) > self.STORE_CATALOG_CACHE_TTL_SECONDS
+
+    def _read_store_catalog_cache(self) -> Optional[Dict[str, Any]]:
+        """Read the persistent Coop store catalog cache, if available."""
+        candidates: List[Dict[str, Any]] = []
+        try:
+            for cache_path in self.STORE_CATALOG_CACHE_FILES:
+                if not cache_path.exists():
+                    continue
+                with cache_path.open("r", encoding="utf-8") as fh:
+                    payload = json.load(fh)
+                stores = payload.get("stores")
+                cached_at = float(payload.get("cached_at") or 0)
+                if isinstance(stores, list) and stores:
+                    candidates.append({"stores": stores, "cached_at": cached_at, "path": cache_path})
+            if not candidates:
+                return None
+            cached_catalog = max(candidates, key=lambda item: item["cached_at"])
+            stores = cached_catalog["stores"]
+            cached_at = cached_catalog["cached_at"]
+            cache_path = cached_catalog["path"]
+            stale_note = (
+                " (stale; refresh queued)"
+                if (time.time() - cached_at) > self.STORE_CATALOG_CACHE_TTL_SECONDS
+                else ""
+            )
+            logger.info(f"Loaded {len(stores)} Coop stores from local catalog cache {cache_path}{stale_note}")
+            return {"stores": stores, "cached_at": cached_at}
+        except Exception as e:
+            logger.warning(f"Could not read Coop store catalog cache: {e}")
+            return None
+
+    def _write_store_catalog_cache(self, stores: List[Dict], cached_at: float) -> None:
+        """Persist Coop's store catalog so first search after restart stays fast."""
+        payload = {
+            "cached_at": cached_at,
+            "source": self.sitemap_url,
+            "stores": stores,
+        }
+        last_error = None
+        for cache_path in self.STORE_CATALOG_CACHE_FILES:
+            try:
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                tmp_path = cache_path.with_suffix(".json.tmp")
+                with tmp_path.open("w", encoding="utf-8") as fh:
+                    json.dump(payload, fh, ensure_ascii=False, indent=2)
+                tmp_path.replace(cache_path)
+                logger.info(f"Saved {len(stores)} Coop stores to local catalog cache {cache_path}")
+                return
+            except Exception as e:
+                last_error = e
+        logger.warning(f"Could not write Coop store catalog cache: {last_error}")
+
+    def _schedule_store_catalog_refresh(self) -> None:
+        """Refresh stale Coop store catalog data without blocking the current search."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        self._store_cache_refreshing = True
+        loop.create_task(self._refresh_store_catalog_cache())
+
+    async def _refresh_store_catalog_cache(self) -> None:
+        """Refresh the Coop catalog in the background."""
+        try:
+            stores = await self._load_stores_from_sitemap()
+            if not stores:
+                logger.warning("Coop store catalog refresh returned no stores; keeping existing cache")
+                return
+            cached_at = time.time()
+            self._store_cache = stores
+            self._store_cache_loaded_at = cached_at
+            self._write_store_catalog_cache(stores, cached_at)
+            logger.info(f"Refreshed Coop store catalog cache ({len(stores)} stores)")
+        except Exception as e:
+            logger.warning(f"Could not refresh Coop store catalog cache: {e}")
+        finally:
+            self._store_cache_refreshing = False
 
     async def _load_stores_from_sitemap(self) -> List[Dict]:
         """
