@@ -8,8 +8,10 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional, List, Any, Callable, Awaitable, Union
 from dataclasses import dataclass, field
 import copy
+import json
 import re
 import time
+from pathlib import Path
 
 try:
     from languages.market_runtime import (
@@ -254,6 +256,7 @@ class StorePlugin(ABC):
     """
 
     LOCATION_SEARCH_CACHE_TTL_SECONDS = 1800
+    LOCATION_CATALOG_CACHE_TTL_SECONDS = 7 * 24 * 60 * 60
 
     def set_progress_callback(
         self,
@@ -507,6 +510,143 @@ class StorePlugin(ABC):
             "results": copy.deepcopy(results),
         }
         return copy.deepcopy(results)
+
+    def _location_catalog_cache_files(self, cache_name: str) -> tuple[Path, Path]:
+        """Return preferred cache locations for a store-location catalog."""
+        safe_name = re.sub(r"[^a-zA-Z0-9_.-]+", "_", cache_name).strip("_")
+        return (
+            Path("/app/data") / f"{safe_name}.json",
+            Path("/tmp/deal-meals") / f"{safe_name}.json",
+        )
+
+    def _is_location_catalog_cache_stale(
+        self,
+        cached_at: float,
+        *,
+        now: float | None = None,
+        ttl_seconds: int | None = None,
+    ) -> bool:
+        """Return True when a persisted location catalog should be refreshed."""
+        if not cached_at:
+            return True
+        checked_at = time.time() if now is None else now
+        ttl = ttl_seconds or self.LOCATION_CATALOG_CACHE_TTL_SECONDS
+        return (checked_at - cached_at) > ttl
+
+    def _location_catalog_cached_at(self) -> float:
+        """Return the wall-clock timestamp stored in location catalog cache files."""
+        return time.time()
+
+    def _read_location_catalog_cache(self, cache_name: str) -> Optional[Dict[str, Any]]:
+        """Read the newest valid persisted location catalog cache."""
+        from loguru import logger
+
+        candidates: List[Dict[str, Any]] = []
+        try:
+            for cache_path in self._location_catalog_cache_files(cache_name):
+                if not cache_path.exists():
+                    continue
+                with cache_path.open("r", encoding="utf-8") as fh:
+                    payload = json.load(fh)
+                stores = payload.get("stores")
+                cached_at = float(payload.get("cached_at") or 0)
+                if isinstance(stores, list) and stores:
+                    candidates.append({"stores": stores, "cached_at": cached_at, "path": cache_path})
+            if not candidates:
+                return None
+            cached_catalog = max(candidates, key=lambda item: item["cached_at"])
+            stores = cached_catalog["stores"]
+            cached_at = cached_catalog["cached_at"]
+            cache_path = cached_catalog["path"]
+            stale_note = (
+                " (stale; refresh queued)"
+                if self._is_location_catalog_cache_stale(cached_at)
+                else ""
+            )
+            logger.info(f"Loaded {len(stores)} {cache_name} stores from local catalog cache {cache_path}{stale_note}")
+            return {
+                "stores": copy.deepcopy(stores),
+                "cached_at": cached_at,
+                "path": str(cache_path),
+            }
+        except Exception as e:
+            logger.warning(f"Could not read {cache_name} store catalog cache: {e}")
+            return None
+
+    def _write_location_catalog_cache(
+        self,
+        cache_name: str,
+        stores: List[Dict],
+        *,
+        source: str | None = None,
+        cached_at: float | None = None,
+    ) -> None:
+        """Persist a store-location catalog, falling back to /tmp when /app/data is read-only."""
+        from loguru import logger
+
+        stored_at = time.time() if cached_at is None else cached_at
+        payload = {
+            "cached_at": stored_at,
+            "source": source,
+            "stores": stores,
+        }
+        last_error = None
+        for cache_path in self._location_catalog_cache_files(cache_name):
+            try:
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                tmp_path = cache_path.with_suffix(".json.tmp")
+                with tmp_path.open("w", encoding="utf-8") as fh:
+                    json.dump(payload, fh, ensure_ascii=False, indent=2)
+                tmp_path.replace(cache_path)
+                logger.info(f"Saved {len(stores)} {cache_name} stores to local catalog cache {cache_path}")
+                return
+            except Exception as e:
+                last_error = e
+        logger.warning(f"Could not write {cache_name} store catalog cache: {last_error}")
+
+    def _normalize_location_match_text(self, text: str) -> str:
+        """Normalize store-search text for local catalog filtering."""
+        replacements = {
+            "å": "a",
+            "ä": "a",
+            "ö": "o",
+            "é": "e",
+            "è": "e",
+            "ü": "u",
+        }
+        value = (text or "").lower()
+        for char, replacement in replacements.items():
+            value = value.replace(char, replacement)
+        return re.sub(r"\s+", " ", value).strip()
+
+    def _filter_location_catalog(
+        self,
+        stores: List[Dict],
+        query: str,
+        *,
+        fields: tuple[str, ...] = ("name", "address", "type"),
+        limit: int = 50,
+    ) -> List[Dict]:
+        """Filter a cached location catalog by query words."""
+        query_words = self._normalize_location_match_text(query).split()
+        if not query_words:
+            return copy.deepcopy(stores[:limit])
+
+        matching_stores = []
+        for store in stores:
+            searchable = self._normalize_location_match_text(
+                " ".join(str(store.get(field, "")) for field in fields)
+            )
+            if all(word in searchable for word in query_words):
+                matching_stores.append(store)
+
+        def sort_key(store: Dict) -> tuple[int, str]:
+            name = self._normalize_location_match_text(str(store.get("name", "")))
+            exact_matches = sum(1 for word in query_words if word in name)
+            return (-exact_matches, str(store.get("name", "")))
+
+        matching_stores.sort(key=sort_key)
+        return copy.deepcopy(matching_stores[:limit])
 
     def __repr__(self):
         return f"<{self.__class__.__name__}(id='{self.config.id}', enabled={self.config.enabled})>"

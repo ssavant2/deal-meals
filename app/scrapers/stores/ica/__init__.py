@@ -40,10 +40,14 @@ class ICAStore(StorePlugin):
     - E-commerce offers (via handla.ica.se)
     """
 
+    PHYSICAL_STORE_CATALOG_CACHE_NAME = "ica_physical_store_locations"
+
     def __init__(self):
         self.base_url = "https://www.ica.se"
         self.offers_base = f"{self.base_url}/erbjudanden"
         self._physical_store_catalog: List[Dict] = []
+        self._physical_store_catalog_loaded_at = 0.0
+        self._physical_store_catalog_refreshing = False
 
     @property
     def config(self) -> StoreConfig:
@@ -228,12 +232,12 @@ class ICAStore(StorePlugin):
                 # Filter stores based on query
                 for store in all_stores:
                     try:
-                        name = store.get("Name", "")
-                        city = store.get("VisitingCity", "")
-                        store_type = store.get("ShortProfileName", "")
-                        account_number = store.get("AccountNumber", "")
+                        name = store.get("name", "")
+                        city = store.get("city", "")
+                        store_type = store.get("store_type", "")
+                        store_number = store.get("store_number", "")
 
-                        if not name or not account_number:
+                        if not name or not store_number:
                             continue
 
                         # Build searchable text
@@ -245,40 +249,7 @@ class ICAStore(StorePlugin):
                         if not all(word in searchable for word in query_words):
                             continue
 
-                        # Extract offer URL slug from Urls array
-                        url_slug = None
-                        for url_info in store.get("Urls", []):
-                            if url_info.get("Type") == "Erbjudande":
-                                offer_url = url_info.get("Url", "")
-                                # Extract slug from: https://www.ica.se/erbjudanden/ica-nara-toppen-goteborg-1004063/
-                                match = re.search(r"/erbjudanden/([^/]+)/?$", offer_url)
-                                if match:
-                                    url_slug = match.group(1)
-                                break
-
-                        # Fall back to constructing slug from account number
-                        if not url_slug:
-                            url_slug = f"{account_number}"
-
-                        # Map store type to full label
-                        type_labels = {
-                            "Nära": "ICA Nära",
-                            "Supermarket": "ICA Supermarket",
-                            "Kvantum": "ICA Kvantum",
-                            "Maxi": "Maxi ICA Stormarknad",
-                            "ToGo": "ICA ToGo",
-                        }
-                        type_label = type_labels.get(store_type, store_type)
-
-                        stores.append({
-                            "id": url_slug,
-                            "name": name,
-                            "address": f"{city} ({type_label})",
-                            "type": "butik",
-                            "store_type": store_type.lower() if store_type else "other",
-                            "store_number": account_number,
-                            "url_slug": url_slug
-                        })
+                        stores.append(store)
 
                     except Exception as e:
                         logger.debug(f"Error parsing store: {e}")
@@ -312,10 +283,72 @@ class ICAStore(StorePlugin):
         return await self._get_or_cache_location_search(cache_key, load_locations)
 
     async def _load_physical_store_catalog(self) -> List[Dict]:
-        """Load ICA's full physical store catalog once per runtime."""
+        """Load ICA's full physical store catalog from memory, disk cache, or API."""
         if self._physical_store_catalog:
+            if (
+                self._is_location_catalog_cache_stale(self._physical_store_catalog_loaded_at)
+                and not self._physical_store_catalog_refreshing
+            ):
+                self._schedule_physical_store_catalog_refresh()
             return self._physical_store_catalog
 
+        cached_catalog = self._read_location_catalog_cache(self.PHYSICAL_STORE_CATALOG_CACHE_NAME)
+        if cached_catalog:
+            self._physical_store_catalog = cached_catalog["stores"]
+            self._physical_store_catalog_loaded_at = cached_catalog["cached_at"]
+            if (
+                self._is_location_catalog_cache_stale(self._physical_store_catalog_loaded_at)
+                and not self._physical_store_catalog_refreshing
+            ):
+                self._schedule_physical_store_catalog_refresh()
+            return self._physical_store_catalog
+
+        all_locations = await self._fetch_physical_store_catalog()
+        if all_locations:
+            cached_at = self._location_catalog_cached_at()
+            self._physical_store_catalog = all_locations
+            self._physical_store_catalog_loaded_at = cached_at
+            self._write_location_catalog_cache(
+                self.PHYSICAL_STORE_CATALOG_CACHE_NAME,
+                all_locations,
+                source="https://www.ica.se/api/store/search",
+                cached_at=cached_at,
+            )
+        return self._physical_store_catalog
+
+    def _schedule_physical_store_catalog_refresh(self) -> None:
+        """Refresh stale ICA store catalog data without blocking the current search."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        self._physical_store_catalog_refreshing = True
+        loop.create_task(self._refresh_physical_store_catalog_cache())
+
+    async def _refresh_physical_store_catalog_cache(self) -> None:
+        """Refresh the ICA physical store catalog in the background."""
+        try:
+            stores = await self._fetch_physical_store_catalog()
+            if not stores:
+                logger.warning("ICA physical store catalog refresh returned no stores; keeping existing cache")
+                return
+            cached_at = self._location_catalog_cached_at()
+            self._physical_store_catalog = stores
+            self._physical_store_catalog_loaded_at = cached_at
+            self._write_location_catalog_cache(
+                self.PHYSICAL_STORE_CATALOG_CACHE_NAME,
+                stores,
+                source="https://www.ica.se/api/store/search",
+                cached_at=cached_at,
+            )
+            logger.info(f"Refreshed ICA physical store catalog cache ({len(stores)} stores)")
+        except Exception as e:
+            logger.warning(f"Could not refresh ICA physical store catalog cache: {e}")
+        finally:
+            self._physical_store_catalog_refreshing = False
+
+    async def _fetch_physical_store_catalog(self) -> List[Dict]:
+        """Fetch ICA's full physical store catalog from the public API."""
         api_url = "https://www.ica.se/api/store/search"
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -346,9 +379,62 @@ class ICAStore(StorePlugin):
                 if len(batch) < 1000:
                     break
 
-        logger.info(f"Fetched total {len(all_stores)} stores from ICA API")
-        self._physical_store_catalog = all_stores
-        return self._physical_store_catalog
+        locations = self._map_physical_store_catalog(all_stores)
+        logger.info(f"Fetched total {len(locations)} ICA physical stores from API")
+        return locations
+
+    def _map_physical_store_catalog(self, raw_stores: List[Dict]) -> List[Dict]:
+        """Map ICA's raw store API payload to the small location shape used by the UI."""
+        locations = []
+        seen_ids = set()
+
+        type_labels = {
+            "Nära": "ICA Nära",
+            "Supermarket": "ICA Supermarket",
+            "Kvantum": "ICA Kvantum",
+            "Maxi": "Maxi ICA Stormarknad",
+            "ToGo": "ICA ToGo",
+        }
+
+        for store in raw_stores:
+            try:
+                name = store.get("Name", "")
+                city = store.get("VisitingCity", "")
+                store_type = store.get("ShortProfileName", "")
+                account_number = store.get("AccountNumber", "")
+                if not name or not account_number:
+                    continue
+
+                url_slug = None
+                for url_info in store.get("Urls", []):
+                    if url_info.get("Type") == "Erbjudande":
+                        offer_url = url_info.get("Url", "")
+                        match = re.search(r"/erbjudanden/([^/]+)/?$", offer_url)
+                        if match:
+                            url_slug = match.group(1)
+                        break
+
+                if not url_slug:
+                    url_slug = f"{account_number}"
+                if url_slug in seen_ids:
+                    continue
+                seen_ids.add(url_slug)
+
+                type_label = type_labels.get(store_type, store_type)
+                locations.append({
+                    "id": url_slug,
+                    "name": name,
+                    "address": f"{city} ({type_label})",
+                    "type": "butik",
+                    "city": city,
+                    "store_type": store_type.lower() if store_type else "other",
+                    "store_number": account_number,
+                    "url_slug": url_slug,
+                })
+            except Exception as e:
+                logger.debug(f"Error parsing ICA store: {e}")
+
+        return locations
 
     def _normalize_search(self, text: str) -> str:
         """Normalize text for search matching (handle Swedish chars)."""

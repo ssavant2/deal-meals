@@ -48,6 +48,7 @@ class WillysStore(StorePlugin):
 
     # Polite delay before butik campaign API calls (seconds).
     STORE_API_DELAY = 1.0
+    PHYSICAL_STORE_CATALOG_CACHE_NAME = "willys_physical_store_catalog"
 
     # ==================== ORIGIN VERIFICATION CONFIG ====================
     # Products to verify via API for manufacturer/origin info.
@@ -69,6 +70,9 @@ class WillysStore(StorePlugin):
         self.campaigns_api = f"{self.base_url}/search/campaigns/offline"
         self.ehandel_url = f"{self.base_url}/erbjudanden/ehandel"
         self.product_api = f"{self.base_url}/axfood/rest/p"  # Product details API
+        self._physical_store_catalog: List[Dict] = []
+        self._physical_store_catalog_loaded_at = 0.0
+        self._physical_store_catalog_refreshing = False
 
     @staticmethod
     def _looks_like_maintenance_page(text: Optional[str]) -> bool:
@@ -168,23 +172,99 @@ class WillysStore(StorePlugin):
 
     async def search_locations(self, query: str) -> List[Dict]:
         """Search for Willys store locations."""
-        from scrapers.stores.willys.willys_store_finder import willys_store_finder
-
         cache_key = self._build_location_search_cache_key("physical", query)
 
         async def load_locations() -> List[Dict]:
-            stores = await willys_store_finder.search_stores(query)
-            return [
-                {
-                    "id": s["store_id"],
-                    "name": s["name"],
-                    "address": s["address"],
-                    "type": s["type"]
-                }
-                for s in stores
-            ]
+            store_catalog = await self._load_physical_store_catalog()
+            return self._filter_location_catalog(
+                store_catalog,
+                query,
+                fields=("name", "address", "type"),
+                limit=50,
+            )
 
         return await self._get_or_cache_location_search(cache_key, load_locations)
+
+    async def _load_physical_store_catalog(self) -> List[Dict]:
+        """Load Willys' physical store catalog from memory, disk cache, or API."""
+        if self._physical_store_catalog:
+            if (
+                self._is_location_catalog_cache_stale(self._physical_store_catalog_loaded_at)
+                and not self._physical_store_catalog_refreshing
+            ):
+                self._schedule_physical_store_catalog_refresh()
+            return self._physical_store_catalog
+
+        cached_catalog = self._read_location_catalog_cache(self.PHYSICAL_STORE_CATALOG_CACHE_NAME)
+        if cached_catalog:
+            self._physical_store_catalog = cached_catalog["stores"]
+            self._physical_store_catalog_loaded_at = cached_catalog["cached_at"]
+            if (
+                self._is_location_catalog_cache_stale(self._physical_store_catalog_loaded_at)
+                and not self._physical_store_catalog_refreshing
+            ):
+                self._schedule_physical_store_catalog_refresh()
+            return self._physical_store_catalog
+
+        stores = await self._fetch_physical_store_catalog()
+        if stores:
+            cached_at = self._location_catalog_cached_at()
+            self._physical_store_catalog = stores
+            self._physical_store_catalog_loaded_at = cached_at
+            self._write_location_catalog_cache(
+                self.PHYSICAL_STORE_CATALOG_CACHE_NAME,
+                stores,
+                source=f"{self.base_url}/axfood/rest/search/store?q=",
+                cached_at=cached_at,
+            )
+        return self._physical_store_catalog
+
+    def _schedule_physical_store_catalog_refresh(self) -> None:
+        """Refresh stale Willys store catalog data without blocking the current search."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        self._physical_store_catalog_refreshing = True
+        loop.create_task(self._refresh_physical_store_catalog_cache())
+
+    async def _refresh_physical_store_catalog_cache(self) -> None:
+        """Refresh the Willys physical store catalog in the background."""
+        try:
+            stores = await self._fetch_physical_store_catalog()
+            if not stores:
+                logger.warning("Willys physical store catalog refresh returned no stores; keeping existing cache")
+                return
+            cached_at = self._location_catalog_cached_at()
+            self._physical_store_catalog = stores
+            self._physical_store_catalog_loaded_at = cached_at
+            self._write_location_catalog_cache(
+                self.PHYSICAL_STORE_CATALOG_CACHE_NAME,
+                stores,
+                source=f"{self.base_url}/axfood/rest/search/store?q=",
+                cached_at=cached_at,
+            )
+            logger.info(f"Refreshed Willys physical store catalog cache ({len(stores)} stores)")
+        except Exception as e:
+            logger.warning(f"Could not refresh Willys physical store catalog cache: {e}")
+        finally:
+            self._physical_store_catalog_refreshing = False
+
+    async def _fetch_physical_store_catalog(self) -> List[Dict]:
+        """Fetch Willys' full physical store catalog from the store-search API."""
+        from scrapers.stores.willys.willys_store_finder import willys_store_finder
+
+        stores = await willys_store_finder.search_stores("")
+        return [
+            {
+                "id": s["store_id"],
+                "name": s["name"],
+                "address": s["address"],
+                "type": s["type"],
+            }
+            for s in stores
+            if s.get("store_id") and s.get("name")
+        ]
 
     async def scrape_offers(self, credentials: Optional[Dict] = None) -> StoreScrapeResult:
         """Scrape offers from Willys."""

@@ -30,12 +30,17 @@ API_REQUEST_DELAY = 10
 class HemkopStore(StorePlugin):
     """Hemköp store plugin - API scraping with Playwright address resolution."""
 
+    PHYSICAL_STORE_CATALOG_CACHE_NAME = "hemkop_physical_store_catalog"
+
     def __init__(self):
         self.base_url = "https://www.hemkop.se"
         self.offline_campaigns_api = f"{self.base_url}/search/campaigns/offline"
         self.online_campaigns_api = f"{self.base_url}/search/campaigns/online"
         self.product_api = f"{self.base_url}/axfood/rest/p"
         self.store_list_api = f"{self.base_url}/axfood/rest/store"
+        self._physical_store_catalog: List[Dict] = []
+        self._physical_store_catalog_loaded_at = 0.0
+        self._physical_store_catalog_refreshing = False
 
     @property
     def config(self) -> StoreConfig:
@@ -83,23 +88,129 @@ class HemkopStore(StorePlugin):
 
     async def search_locations(self, query: str) -> List[Dict]:
         """Search for Hemköp store locations."""
-        from scrapers.stores.hemkop.hemkop_store_finder import hemkop_store_finder
-
         cache_key = self._build_location_search_cache_key("physical", query)
 
         async def load_locations() -> List[Dict]:
-            stores = await hemkop_store_finder.search_stores(query)
-            return [
-                {
-                    "id": s["store_id"],
-                    "name": s["name"],
-                    "address": s["address"],
-                    "type": s["type"]
-                }
-                for s in stores
-            ]
+            store_catalog = await self._load_physical_store_catalog()
+            return self._filter_location_catalog(
+                store_catalog,
+                query,
+                fields=("name", "address", "type"),
+                limit=50,
+            )
 
         return await self._get_or_cache_location_search(cache_key, load_locations)
+
+    async def _load_physical_store_catalog(self) -> List[Dict]:
+        """Load Hemköp's physical store catalog from memory, disk cache, or API."""
+        if self._physical_store_catalog:
+            if (
+                self._is_location_catalog_cache_stale(self._physical_store_catalog_loaded_at)
+                and not self._physical_store_catalog_refreshing
+            ):
+                self._schedule_physical_store_catalog_refresh()
+            return self._physical_store_catalog
+
+        cached_catalog = self._read_location_catalog_cache(self.PHYSICAL_STORE_CATALOG_CACHE_NAME)
+        if cached_catalog:
+            self._physical_store_catalog = cached_catalog["stores"]
+            self._physical_store_catalog_loaded_at = cached_catalog["cached_at"]
+            if (
+                self._is_location_catalog_cache_stale(self._physical_store_catalog_loaded_at)
+                and not self._physical_store_catalog_refreshing
+            ):
+                self._schedule_physical_store_catalog_refresh()
+            return self._physical_store_catalog
+
+        stores = await self._fetch_physical_store_catalog()
+        if stores:
+            cached_at = self._location_catalog_cached_at()
+            self._physical_store_catalog = stores
+            self._physical_store_catalog_loaded_at = cached_at
+            self._write_location_catalog_cache(
+                self.PHYSICAL_STORE_CATALOG_CACHE_NAME,
+                stores,
+                source=self.store_list_api,
+                cached_at=cached_at,
+            )
+        return self._physical_store_catalog
+
+    def _schedule_physical_store_catalog_refresh(self) -> None:
+        """Refresh stale Hemköp store catalog data without blocking the current search."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        self._physical_store_catalog_refreshing = True
+        loop.create_task(self._refresh_physical_store_catalog_cache())
+
+    async def _refresh_physical_store_catalog_cache(self) -> None:
+        """Refresh the Hemköp physical store catalog in the background."""
+        try:
+            stores = await self._fetch_physical_store_catalog()
+            if not stores:
+                logger.warning("Hemköp physical store catalog refresh returned no stores; keeping existing cache")
+                return
+            cached_at = self._location_catalog_cached_at()
+            self._physical_store_catalog = stores
+            self._physical_store_catalog_loaded_at = cached_at
+            self._write_location_catalog_cache(
+                self.PHYSICAL_STORE_CATALOG_CACHE_NAME,
+                stores,
+                source=self.store_list_api,
+                cached_at=cached_at,
+            )
+            logger.info(f"Refreshed Hemköp physical store catalog cache ({len(stores)} stores)")
+        except Exception as e:
+            logger.warning(f"Could not refresh Hemköp physical store catalog cache: {e}")
+        finally:
+            self._physical_store_catalog_refreshing = False
+
+    async def _fetch_physical_store_catalog(self) -> List[Dict]:
+        """Fetch Hemköp's full physical store catalog from the public store-list API."""
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json'
+        }
+
+        async with httpx.AsyncClient(event_hooks={"request": [ssrf_safe_event_hook]}) as client:
+            response = await client.get(
+                self.store_list_api,
+                headers=headers,
+                timeout=HTTP_TIMEOUT
+            )
+
+        response.raise_for_status()
+        raw_stores = response.json()
+        if not isinstance(raw_stores, list):
+            logger.warning(f"Hemköp store list API returned {type(raw_stores).__name__}, expected list")
+            return []
+
+        stores = []
+        for store in raw_stores:
+            try:
+                store_id = str(store.get("storeId") or "").strip()
+                name = store.get("name") or store.get("displayName") or ""
+                address_obj = store.get("address") or {}
+                address_parts = [
+                    address_obj.get("line1"),
+                    address_obj.get("postalCode"),
+                    address_obj.get("town"),
+                ]
+                address = ", ".join(str(part) for part in address_parts if part)
+                if not store_id or not name:
+                    continue
+                stores.append({
+                    "id": store_id,
+                    "name": name,
+                    "address": address,
+                    "type": "butik",
+                })
+            except Exception as e:
+                logger.debug(f"Could not parse Hemköp store entry: {e}")
+
+        logger.info(f"Fetched total {len(stores)} Hemköp stores from store list API")
+        return stores
 
     async def scrape_offers(self, credentials: Optional[Dict] = None) -> StoreScrapeResult:
         """Scrape offers from Hemköp."""
