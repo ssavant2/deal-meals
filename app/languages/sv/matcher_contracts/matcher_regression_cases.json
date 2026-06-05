@@ -3421,14 +3421,7 @@
     "source_ref": "current_review:positive_sibling:fransk_senap_dijon_wording"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "dijonsenap",
-        "ingredient_index": 0,
-        "must_match_keyword": "dijonsenap"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_fransk_senap_sweet_negative",
     "ingredients": [
       "2 msk fransk senap"
@@ -3437,19 +3430,12 @@
       "category": "pantry",
       "name": "Senap Sötstark Johnny's"
     },
-    "policy_ref": "current_review_senap_broad_Q126-3",
+    "policy_ref": "current_review_matcher_regression",
     "recipe_name": "Sanity Recipe",
-    "source_ref": "sanity:grovkornig_senap"
+    "source_ref": "current_review:accepted_direct_fix:fransk_senap_sweet"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "dijonsenap",
-        "ingredient_index": 0,
-        "must_match_keyword": "dijonsenap"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_fransk_senap_original_negative",
     "ingredients": [
       "2 msk fransk senap"
@@ -3458,9 +3444,9 @@
       "category": "pantry",
       "name": "Original Senap Slotts"
     },
-    "policy_ref": "current_review_senap_broad_Q126-3",
+    "policy_ref": "current_review_matcher_regression",
     "recipe_name": "Sanity Recipe",
-    "source_ref": "sanity:grovkornig_senap"
+    "source_ref": "current_review:accepted_direct_fix:fransk_senap_original"
   },
   {
     "expected": 1,

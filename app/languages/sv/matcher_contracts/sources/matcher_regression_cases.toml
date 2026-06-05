@@ -2847,38 +2847,28 @@ ingredient_index = 0
 must_match_keyword = "dijonsenap"
 
 [[fixtures]]
-expected = 1
+expected = 0
 id = "matcher_regression_fransk_senap_sweet_negative"
 ingredients = ["2 msk fransk senap"]
-policy_ref = "current_review_senap_broad_Q126-3"
+policy_ref = "current_review_matcher_regression"
 recipe_name = "Sanity Recipe"
-source_ref = "sanity:grovkornig_senap"
+source_ref = "current_review:accepted_direct_fix:fransk_senap_sweet"
 
 [fixtures.offer]
 category = "pantry"
 name = "Senap Sötstark Johnny's"
 
-[[fixtures.expected_matches]]
-ingredient_index = 0
-canonical = "dijonsenap"
-must_match_keyword = "dijonsenap"
-
 [[fixtures]]
-expected = 1
+expected = 0
 id = "matcher_regression_fransk_senap_original_negative"
 ingredients = ["2 msk fransk senap"]
-policy_ref = "current_review_senap_broad_Q126-3"
+policy_ref = "current_review_matcher_regression"
 recipe_name = "Sanity Recipe"
-source_ref = "sanity:grovkornig_senap"
+source_ref = "current_review:accepted_direct_fix:fransk_senap_original"
 
 [fixtures.offer]
 category = "pantry"
 name = "Original Senap Slotts"
-
-[[fixtures.expected_matches]]
-ingredient_index = 0
-canonical = "dijonsenap"
-must_match_keyword = "dijonsenap"
 
 [[fixtures]]
 expected = 1

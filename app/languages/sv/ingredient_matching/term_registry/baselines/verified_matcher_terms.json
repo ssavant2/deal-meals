@@ -6,7 +6,7 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 101,
       "hardcoded_keyword_output:extract_keywords_from_product": 121,
-      "ingredient_parent_mapping": 411,
+      "ingredient_parent_mapping": 408,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
       "keyword_synonym_mapping": 188,
@@ -22,15 +22,15 @@
       "legacy_validator": 252,
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 412,
-      "negative_regression": 838,
+      "negative_regression": 840,
       "offer_extra_keyword_mapping": 423,
       "parent_match_only_mapping": 20,
-      "positive_regression": 675,
+      "positive_regression": 673,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 411,
+      "ingredient_parent": 408,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 188,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5864,
-    "variants_missing_product_text": 1896,
+    "variant_count": 5861,
+    "variants_missing_product_text": 1893,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -123024,48 +123024,6 @@
       "metadata": "{\"target\": \"köttbuljong\"}"
     },
     {
-      "variant_id": "vterm-76dfd7378de68654",
-      "row_index": 4561,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:idealmakaroner",
-      "source_id": "idealmakaroner",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "idealmakaroner",
-      "canonical": "pasta",
-      "expected_family": "pasta",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"pasta\"}"
-    },
-    {
-      "variant_id": "vterm-0436ebc91b4fafa0",
-      "row_index": 4639,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:långpasta",
-      "source_id": "långpasta",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "långpasta",
-      "canonical": "pasta",
-      "expected_family": "pasta",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"pasta\"}"
-    },
-    {
       "variant_id": "vterm-c1e093472ffdb28b",
       "row_index": 5305,
       "source_order": 54,
@@ -123085,27 +123043,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"räkor\"}"
-    },
-    {
-      "variant_id": "vterm-4005132309df8ac5",
-      "row_index": 4501,
-      "source_order": 50,
-      "source_type": "ingredient_parent",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:dijonsenap",
-      "source_id": "dijonsenap",
-      "variant_role": "ingredient_parent_mapping",
-      "variant_text": "dijonsenap",
-      "canonical": "senap",
-      "expected_family": "senap",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"senap\"}"
     },
     {
       "variant_id": "vterm-017972c61331494b",
@@ -123150,51 +123087,51 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"senap\", \"ingredient_index\": 0, \"must_match_keyword\": \"senap\"}], \"policy_ref\": \"current_review_senap_broad_Q126-3\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
-      "variant_id": "vterm-9b3831ad306cf59c",
+      "variant_id": "vterm-91f31bac798d9583",
       "row_index": 622,
       "source_order": 20,
       "source_type": "matcher_regression_case",
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "sanity:grovkornig_senap",
+      "source_ref": "current_review:accepted_direct_fix:fransk_senap_original",
       "source_id": "matcher_regression_fransk_senap_original_negative",
-      "variant_role": "positive_regression",
+      "variant_role": "negative_regression",
       "variant_text": "matcher_regression_fransk_senap_original_negative: Original Senap Slotts",
-      "canonical": "dijonsenap",
-      "expected_family": "dijonsenap",
+      "canonical": null,
+      "expected_family": "current_review_matcher_regression",
       "ingredient_text": "2 msk fransk senap",
       "product_text": "Original Senap Slotts",
       "product_category": "pantry",
       "product_brand": null,
-      "expected": 1,
+      "expected": 0,
       "needs_product_text": false,
-      "notes": "current_review_senap_broad_Q126-3",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"dijonsenap\", \"ingredient_index\": 0, \"must_match_keyword\": \"dijonsenap\"}], \"policy_ref\": \"current_review_senap_broad_Q126-3\", \"recipe_name\": \"Sanity Recipe\"}"
+      "notes": "current_review_matcher_regression",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
-      "variant_id": "vterm-9680e1166308f96f",
+      "variant_id": "vterm-58cabbdf26d4b2f9",
       "row_index": 623,
       "source_order": 20,
       "source_type": "matcher_regression_case",
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "sanity:grovkornig_senap",
+      "source_ref": "current_review:accepted_direct_fix:fransk_senap_sweet",
       "source_id": "matcher_regression_fransk_senap_sweet_negative",
-      "variant_role": "positive_regression",
+      "variant_role": "negative_regression",
       "variant_text": "matcher_regression_fransk_senap_sweet_negative: Senap Sötstark Johnny's",
-      "canonical": "dijonsenap",
-      "expected_family": "dijonsenap",
+      "canonical": null,
+      "expected_family": "current_review_matcher_regression",
       "ingredient_text": "2 msk fransk senap",
       "product_text": "Senap Sötstark Johnny's",
       "product_category": "pantry",
       "product_brand": null,
-      "expected": 1,
+      "expected": 0,
       "needs_product_text": false,
-      "notes": "current_review_senap_broad_Q126-3",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"dijonsenap\", \"ingredient_index\": 0, \"must_match_keyword\": \"dijonsenap\"}], \"policy_ref\": \"current_review_senap_broad_Q126-3\", \"recipe_name\": \"Sanity Recipe\"}"
+      "notes": "current_review_matcher_regression",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1670,
+      "no_product_text": 1667,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123202,7 +123139,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 411,
+      "ingredient_parent": 408,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 188,
@@ -123216,8 +123153,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5864
+      "audited": 5861
     },
-    "variant_count": 5864
+    "variant_count": 5861
   }
 }

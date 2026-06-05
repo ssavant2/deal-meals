@@ -710,8 +710,15 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     'nejlikor': {'malen', 'mald', 'malet', 'malda'},
     'kryddnejlika': {'malen', 'mald', 'malet', 'malda'},
     'kryddnejlikor': {'malen', 'mald', 'malet', 'malda'},
-    # Senap-familjen är BRED (Q126-3): sötstark/skånsk/dijon/grovkornig/
-    # rysk/amerikansk är alla utbytbara — inga specialty-qualifiers för senap.
+    # Senap-ingrediens-sida isolerad per typ (Q126-3: products match broad,
+    # but a recipe specifying dijon/sötstark/skånsk wants that specific type).
+    # BIDIRECTIONAL removed: products with sötstark/skånsk/dijon now match
+    # plain "senap" recipes (offer-side broad). Ingredient-side kept specific.
+    'senap': {
+        'sötstark', 'sotstark',
+        'skånsk', 'skansk',
+        'dijon', 'dijonsenap',
+    },
     'mango': {'torkad', 'torkade', 'inlagd', 'inlagda'},
     'banan': {'torkad', 'torkade'},
     'persika': {'torkad', 'torkade'},
