@@ -16,6 +16,10 @@ from utils.scraper_history import (  # noqa: E402
     _cleanup_run_history_for_scraper_mode,
     scrape_result_history_kwargs,
 )
+from startup_migrations import (  # noqa: E402
+    ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_SQL,
+    ALLOW_MANUAL_SCRAPER_RUN_HISTORY_MODE_SQL,
+)
 from scrapers.recipes._common import (  # noqa: E402
     RecipeScrapeResult,
     StreamingRecipeSaver,
@@ -44,6 +48,16 @@ def check(name: str, actual, expected) -> None:
 
 def main() -> int:
     check("default retention is 30", RUN_HISTORY_RETENTION_PER_SCRAPER_MODE, 30)
+    check(
+        "health-column migration allows manual store history mode",
+        "'manual'" in ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_SQL,
+        True,
+    )
+    check(
+        "manual-mode migration allows manual store history mode",
+        "'manual'" in ALLOW_MANUAL_SCRAPER_RUN_HISTORY_MODE_SQL,
+        True,
+    )
 
     fake_db = _FakeDb()
     removed = _cleanup_run_history_for_scraper_mode(

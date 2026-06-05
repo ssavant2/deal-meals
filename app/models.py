@@ -621,7 +621,7 @@ class ScraperRunHistory(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "mode IN ('test', 'preflight', 'incremental', 'full', 'scheduled', 'diagnostic')",
+            "mode IN ('test', 'preflight', 'incremental', 'full', 'scheduled', 'diagnostic', 'manual')",
             name='chk_run_history_mode',
         ),
         Index('idx_scraper_run_history_scraper_mode', 'scraper_id', 'mode'),

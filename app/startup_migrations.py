@@ -34,6 +34,7 @@ CREATE_RECIPE_OFFER_CANDIDATES_ID = "20260507_create_recipe_offer_candidates"
 ADD_CANDIDATE_JOIN_TERM_INDEXES_ID = "20260507_add_candidate_join_term_indexes"
 ADD_SCRAPER_RUN_HISTORY_SCHEDULED_MODE_ID = "20260514_add_scraper_run_history_scheduled_mode"
 ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_ID = "20260521_add_scraper_run_history_health_columns"
+ALLOW_MANUAL_SCRAPER_RUN_HISTORY_MODE_ID = "20260605_allow_manual_scraper_run_history_mode"
 MIGRATION_TABLE = "deal_meals_schema_migrations"
 
 DROP_MEMORY_CACHE_PREFS_SQL = """
@@ -270,7 +271,7 @@ DROP CONSTRAINT IF EXISTS chk_run_history_mode;
 
 ALTER TABLE scraper_run_history
 ADD CONSTRAINT scraper_run_history_mode_check
-CHECK (mode IN ('test', 'incremental', 'full', 'scheduled'));
+CHECK (mode IN ('test', 'incremental', 'full', 'scheduled', 'manual'));
 """.strip()
 
 ADD_SCRAPER_RUN_HISTORY_HEALTH_COLUMNS_SQL = """
@@ -294,7 +295,7 @@ DROP CONSTRAINT IF EXISTS chk_run_history_mode;
 
 ALTER TABLE scraper_run_history
 ADD CONSTRAINT scraper_run_history_mode_check
-CHECK (mode IN ('test', 'preflight', 'incremental', 'full', 'scheduled', 'diagnostic'));
+CHECK (mode IN ('test', 'preflight', 'incremental', 'full', 'scheduled', 'diagnostic', 'manual'));
 
 CREATE INDEX IF NOT EXISTS idx_scraper_run_history_status
     ON scraper_run_history(scraper_id, mode, status, run_at);
@@ -305,6 +306,18 @@ COMMENT ON COLUMN scraper_run_history.reason_code
     IS 'Stable machine-readable reason code for diagnostics/UI mapping';
 COMMENT ON COLUMN scraper_run_history.diagnostics
     IS 'Compact JSON counters and scraper diagnostics; never raw HTML payloads';
+""".strip()
+
+ALLOW_MANUAL_SCRAPER_RUN_HISTORY_MODE_SQL = """
+ALTER TABLE scraper_run_history
+DROP CONSTRAINT IF EXISTS scraper_run_history_mode_check;
+
+ALTER TABLE scraper_run_history
+DROP CONSTRAINT IF EXISTS chk_run_history_mode;
+
+ALTER TABLE scraper_run_history
+ADD CONSTRAINT scraper_run_history_mode_check
+CHECK (mode IN ('test', 'preflight', 'incremental', 'full', 'scheduled', 'diagnostic', 'manual'));
 """.strip()
 
 
@@ -522,7 +535,7 @@ def _compiled_recipe_offer_candidates_exists(conn) -> bool:
     return row is not None
 
 
-def _scraper_run_history_allows_scheduled_mode(conn) -> bool:
+def _scraper_run_history_allows_mode(conn, mode: str) -> bool:
     return bool(conn.execute(text("""
         WITH target_table AS (
             SELECT to_regclass('public.scraper_run_history') AS table_oid
@@ -532,9 +545,17 @@ def _scraper_run_history_allows_scheduled_mode(conn) -> bool:
             FROM pg_constraint c
             JOIN target_table t ON t.table_oid = c.conrelid
             WHERE c.contype = 'c'
-              AND pg_get_constraintdef(c.oid) LIKE '%scheduled%'
+              AND pg_get_constraintdef(c.oid) LIKE :mode_pattern
         )
-    """)).scalar())
+    """), {"mode_pattern": f"%{mode}%"}).scalar())
+
+
+def _scraper_run_history_allows_scheduled_mode(conn) -> bool:
+    return _scraper_run_history_allows_mode(conn, "scheduled")
+
+
+def _scraper_run_history_allows_manual_mode(conn) -> bool:
+    return _scraper_run_history_allows_mode(conn, "manual")
 
 
 def _scraper_run_history_health_columns_exist(conn) -> bool:
@@ -617,6 +638,15 @@ def _warn_manual_scraper_run_history_scheduled_mode_add() -> None:
         "user cannot run DDL. Run the startup migration with DB admin "
         "credentials or alter the scraper_run_history mode check constraint "
         "before relying on scheduled store run history."
+    )
+
+
+def _warn_manual_scraper_run_history_manual_mode_add() -> None:
+    logger.warning(
+        "scraper_run_history.mode does not allow 'manual', but the app DB "
+        "user cannot run DDL. Run the startup migration with DB admin "
+        "credentials or alter the scraper_run_history mode check constraint "
+        "before relying on manual store run history."
     )
 
 
@@ -976,6 +1006,42 @@ def _run_add_scraper_run_history_health_columns(
         )
 
 
+def _run_allow_manual_scraper_run_history_mode(
+    engine_info: _MigrationEngine,
+    release_version: str,
+) -> None:
+    if not engine_info.can_run_ddl:
+        with engine_info.engine.connect() as conn:
+            if not _scraper_run_history_allows_manual_mode(conn):
+                _warn_manual_scraper_run_history_manual_mode_add()
+        return
+
+    with engine_info.engine.begin() as conn:
+        _ensure_migration_table(conn)
+        if _is_migration_recorded(conn, ALLOW_MANUAL_SCRAPER_RUN_HISTORY_MODE_ID):
+            return
+
+        already_allows_manual = _scraper_run_history_allows_manual_mode(conn)
+        if not already_allows_manual:
+            conn.execute(text(ALLOW_MANUAL_SCRAPER_RUN_HISTORY_MODE_SQL))
+            logger.info(
+                "Startup migration {} allowed manual scraper run history rows",
+                ALLOW_MANUAL_SCRAPER_RUN_HISTORY_MODE_ID,
+            )
+        else:
+            logger.info(
+                "Startup migration {} recorded; scraper_run_history already allowed manual mode",
+                ALLOW_MANUAL_SCRAPER_RUN_HISTORY_MODE_ID,
+            )
+
+        _record_migration(
+            conn,
+            ALLOW_MANUAL_SCRAPER_RUN_HISTORY_MODE_ID,
+            release_version,
+            {"mode": "manual", "already_allowed": already_allows_manual},
+        )
+
+
 def run_startup_migrations(release_version: str) -> None:
     """Run one-off migrations that are safe during app startup."""
     if not _version_can_run_startup_migrations(release_version):
@@ -999,6 +1065,7 @@ def run_startup_migrations(release_version: str) -> None:
         _run_add_candidate_join_term_indexes(engine_info, release_version)
         _run_add_scraper_run_history_scheduled_mode(engine_info, release_version)
         _run_add_scraper_run_history_health_columns(engine_info, release_version)
+        _run_allow_manual_scraper_run_history_mode(engine_info, release_version)
     except SQLAlchemyError as e:
         logger.warning(f"Startup migrations skipped after database error: {e}")
     finally:
