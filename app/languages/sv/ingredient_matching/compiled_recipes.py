@@ -24,6 +24,7 @@ from .compound_text import _WORD_PATTERN
 from .dietary_exclusions import compile_recipe_ingredient_exclusion_flags
 from .engine import build_prepared_ingredient_match_data
 from .extraction import extract_keywords_from_ingredient
+from .extraction import rewrite_glass_flavor_parenthetical
 from .ingredient_data import IngredientMatchData
 from .matching import _prepare_fast_ingredient_text
 from .normalization import _apply_space_normalizations
@@ -212,6 +213,9 @@ def prepare_recipe_match_runtime_data(recipe: FoundRecipe) -> dict[str, Any]:
         )
         ingredient_norm = rewrite_truncated_chocolate_color_lists(ingredient_norm)
         ingredient_norm = rewrite_truncated_eller_compounds(ingredient_norm)
+        # "glass (blåbär)" → "blåbärsglass" so the fast path's compound-strict
+        # 'glass' rule isolates flavored ice cream from plain vanilla products.
+        ingredient_norm = rewrite_glass_flavor_parenthetical(ingredient_norm)
         ingredient_norm = rewrite_mince_of_alternatives(ingredient_norm)
         ingredient_norm = _TRUNCATED_COMPOUND_RE.sub(r" ", ingredient_norm)
         ingredient_norm = preserve_cheese_preference_parentheticals(ingredient_norm)

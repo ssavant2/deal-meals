@@ -6383,3 +6383,41 @@ ingredient = "margarin"
 offer_name = "Margarin Flytande 80% 500ml ICA"
 offer_category = "dairy"
 expected = 0
+
+[[entries]]
+entry_id = "sv-se.guard.policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"
+language = "sv"
+market = "SE"
+canonical = "kornris"
+status = "active"
+variants = ["kornris ! basmati|jasmin|långkorn|langkorn|rundkorn|parboiled|råris|raris|fullkornsris|\\bris\\b"]
+negative_guards = ["kornris ! basmati|jasmin|långkorn|langkorn|rundkorn|parboiled|råris|raris|fullkornsris|\\bris\\b"]
+source_refs = ["policy:no_match_policies:policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"]
+layer_policy = ["negative_guard_only"]
+notes = "Kornris (pärlat korn/barley) is not rice. The short 'ris' suffix in the compound 'kornris' must not bleed into white-rice products. A genuine kornris/matkorn product is not blocked."
+
+[entries.language_payload.no_match_policy]
+id = "policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"
+rule_schema_version = 1
+rule_version = 1
+canonical = "kornris"
+ingredient_patterns = ["kornris"]
+blocked_offer_keywords = []
+blocked_offer_patterns = ["basmati|jasmin|långkorn|langkorn|rundkorn|parboiled|råris|raris|fullkornsris|\\bris\\b"]
+allowed_specifics = []
+reason = "Kornris (pärlat korn/barley) is not rice. The short 'ris' suffix in the compound 'kornris' must not bleed into white-rice products. A genuine kornris/matkorn product is not blocked."
+policy_ref = "policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"
+fixture_refs = ["kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b_negative"]
+supersedes = []
+
+[[entries.coverage]]
+source_family = "no_match_policy"
+canonical = "kornris"
+variant = "kornris ! basmati|jasmin|långkorn|langkorn|rundkorn|parboiled|råris|raris|fullkornsris|\\bris\\b"
+layer_role = "negative_guard_pattern"
+
+[[entries.negative_examples]]
+ingredient = "kornris"
+offer_name = "Basmatiris Uncle Bens 1kg"
+offer_category = "pantry"
+expected = 0

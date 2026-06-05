@@ -30246,3 +30246,23 @@ source_family = "matcher_regression_case"
 canonical = "vegokött"
 variant = "keyword_extra_parent_vegokott_vegobitar_positive: Vegobitar 200g"
 layer_role = "positive_regression"
+
+[[entries]]
+entry_id = "sv-se.policy.policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b.kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b_negative"
+language = "sv"
+market = "SE"
+canonical = "policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"
+status = "active"
+variants = ["kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b_negative: Basmatiris Uncle Bens 1kg"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["fixture:matcher_regression_cases:kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b_negative"]
+layer_policy = ["accepted_filter", "normal"]
+notes = "Registry coverage for matcher regression fixture kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b_negative."
+
+[[entries.coverage]]
+source_family = "matcher_regression_case"
+canonical = "policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"
+variant = "kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b_negative: Basmatiris Uncle Bens 1kg"
+layer_role = "negative_regression"

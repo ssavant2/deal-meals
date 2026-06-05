@@ -9466,3 +9466,23 @@ source_family = "matcher_rule_inventory"
 canonical = "vegokött"
 variant = "vegokött"
 layer_role = "legacy_parent"
+
+[[entries]]
+entry_id = "sv-se.policy.kornris.policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"
+language = "sv"
+market = "SE"
+canonical = "kornris"
+status = "active"
+variants = ["kornris"]
+ingredient_terms = []
+offer_terms = []
+negative_guards = []
+source_refs = ["inventory:matcher_rule_inventory:policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"]
+layer_policy = ["no_product_text", "normal"]
+notes = "Registry coverage for matcher rule inventory row policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b."
+
+[[entries.coverage]]
+source_family = "matcher_rule_inventory"
+canonical = "kornris"
+variant = "kornris"
+layer_role = "legacy_no_match_policy"

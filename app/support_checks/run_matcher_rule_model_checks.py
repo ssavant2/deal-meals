@@ -212,7 +212,7 @@ def main() -> int:
         "registered fixture refs stable",
         not any(has_temporary_fixture_id(fixture_ref) for fixture_ref in registered_fixture_refs),
     )
-    check("registered no-match policy count", len(NO_MATCH_POLICIES) == 122)
+    check("registered no-match policy count", len(NO_MATCH_POLICIES) == 123)
     expected_policy_ids = {
         "policy_aggnudlar_not_risnudlar",
         "policy_bjast_not_bakers_yeast",
@@ -272,6 +272,7 @@ def main() -> int:
         "policy_kalkonbrostfile_not_thigh",
         "policy_katrinplommonpure_not_fresh_plums_or_sushi",
         "policy_kombuchasvamp_not_kombucha_drink",
+        "policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b",
         "policy_kottfarssaser_not_table_sauces",
         "policy_kumminstekt_not_cumin_spice",
         "policy_light_rum_not_fish_roe",

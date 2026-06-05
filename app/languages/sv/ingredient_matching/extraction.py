@@ -321,6 +321,97 @@ def _is_plain_pomodoro_tomato_product_text(
     return any(cue in name_lower for cue in tomato_cues)
 
 
+# ── Ice cream (glass) flavor maps ────────────────────────────────────────────
+# Shared by BOTH product and ingredient extraction so the offer side ("Glass
+# Blåbär" products) and the recipe side ("glass (blåbär)" lines) stay in sync.
+# Only clean single base flavors map to an exact flavor canonical; composite /
+# novelty flavors have no entry and are blocked instead of collapsing to plain
+# vanilla. Keep these module-level so the two extractors never drift apart.
+_GLASS_CARRIER_WORDS = frozenset({
+    'glass', 'glasspinnar', 'glasspinne',
+})
+# Base flavor → glass keyword mapping (Swedish + English product names).
+# Order matters: first match wins. Fruit flavors before choklad so
+# "Hallon & vit choklad" → hallonglass (not chokladglass).
+_GLASS_FLAVOR_MAP = {
+    'vanilj': 'vaniljglass', 'vanilla': 'vaniljglass',
+    'jordgubb': 'jordgubbsglass', 'strawberry': 'jordgubbsglass', 'smultron': 'jordgubbsglass',
+    'hallon': 'hallonglass', 'raspberry': 'hallonglass',
+    'blåbär': 'blåbärsglass', 'blueberry': 'blåbärsglass',
+    'mango': 'mangoglass',
+    'päron': 'päronglass',
+    'citron': 'citronglass', 'lemon': 'citronglass',
+    'lakrits': 'lakritsglass', 'saltlakrits': 'lakritsglass', 'licorice': 'lakritsglass', 'liquorice': 'lakritsglass',
+    'kanel': 'kanelglass',
+    'pistage': 'pistaschglass', 'pistachio': 'pistaschglass',
+    'kaffe': 'kaffeglass', 'coffee': 'kaffeglass',
+    'nougat': 'nougatglass',
+    'choklad': 'chokladglass', 'chocolate': 'chokladglass',  # after fruits
+    'mintchoklad': 'chokladglass',
+}
+# Some mixed-flavor vanilla products use a second flavor word that we do not
+# want to promote to its own exact recipe keyword, but we still need to
+# treat it as a combo signal rather than plain vanilla ice cream.
+_GLASS_VANILLA_COMBO_MARKERS = frozenset({
+    'vinbär', 'vinbar',
+    'svartvinbär', 'svartvinbar',
+    'rödvinbär', 'rodvinbar',
+    'passion', 'passionfrukt', 'passionsfrukt',
+})
+# Exotic/brand names that indicate non-base-flavor glass → block
+_GLASS_EXOTIC_WORDS = frozenset({
+    'twix', 'snickers', 'daim', 'mars', 'oreo', 'nutella', 'dumle',
+    'phish', 'brownie', 'cookie', 'cookies', 'fudge', 'rocky',
+    'caramel', 'salted', 'churros', 'tiramisu', 'cheesecake',
+    'banoffee', 'honeycomb', 'euphoria', 'utopia', 'bonbon',
+    'kids', 'mix', 'flerpack', 'leos', 'minecraft', 'hockeypulver',
+    'favorites', 'klassikerlåda', 'familjemix',
+    'sitting', 'bull', 'volcanix', 'spectacu',
+    'peanut', 'pecan', 'macadamia', 'almond',  # nut combos in glass
+    'kola', 'kolasås', 'karamell', 'toffee',
+    'kladdkaka', 'kanelbulle', 'äppelpaj', 'punsch',
+    'himmelsk', 'brynt', 'rostade', 'popcorn',
+    'twist', 'solero', 'magnum', 'nogger', 'calippo',  # novelty brands/formats
+    'baked', 'chunk', 'crunch', 'swirl', 'ripple', 'core', 'chip',  # English combo descriptors
+})
+
+
+def rewrite_glass_flavor_parenthetical(text: str) -> str:
+    """Rewrite a flavored ice-cream line "glass (blåbär)" → "blåbärsglass".
+
+    Why a TEXT rewrite (not just keyword extraction): the fast matcher matches an
+    offer's bare 'glass' keyword against the recipe TEXT by substring, so plain
+    "Vanilj Gräddglass" (which exposes 'glass') would match the literal "glass" in
+    "glass (blåbär)" regardless of what we extract. Rewriting the line to the
+    compound "blåbärsglass" makes COMPOUND_STRICT['glass'] kick in: the keyword
+    'glass' is now a suffix of a compound, so the product must carry the 'blåbär'
+    qualifier prefix — plain vanilla is blocked, the matching flavor is accepted.
+    This must be applied to BOTH the normalized recipe text (compiled_recipes) and
+    the extraction input so the two stay in sync.
+
+    Only clean single base flavors are rewritten. Composite/novelty flavors
+    (tutti-frutti, "himmelsk röra", daim, …) and plain vanilla are left untouched
+    so they keep the existing plain-glass default behavior.
+    """
+    if 'glass' not in text:
+        return text
+    if set(re.findall(r'[a-zåäö]+', text)) & _GLASS_EXOTIC_WORDS:
+        return text
+
+    def _replace(match: 're.Match') -> str:
+        region = match.group(1)
+        for _flavor_word, _flavor_kw in _GLASS_FLAVOR_MAP.items():
+            if _flavor_word in region:
+                if _flavor_kw == 'vaniljglass':
+                    return match.group(0)  # plain vanilla is already the default
+                return _flavor_kw
+        return match.group(0)
+
+    # "glass (blåbär)" → "blåbärsglass". Parenthetical binding only — a bare
+    # "blåbär, glass" stays two separate ingredients.
+    return re.sub(r'glass\s*\(([^)]*)\)', _replace, text)
+
+
 def extract_keywords_from_product(
     product_name: str,
     category: Optional[str] = None,
@@ -1608,53 +1699,9 @@ def extract_keywords_from_product(
     # Vanilla → 'vaniljglass', choklad → 'chokladglass', jordgubb → 'jordgubbsglass', etc.
     # Everything else (exotic combos, novelty items, unknown flavors) → blocked.
     # Recipes map standalone "glass" → 'vaniljglass' via INGREDIENT_PARENTS.
-    _GLASS_CARRIER_WORDS = frozenset({
-        'glass', 'glasspinnar', 'glasspinne',
-    })
-    # Base flavor → glass keyword mapping (Swedish + English product names)
-    # Order matters: first match wins. Fruit flavors before choklad so
-    # "Hallon & vit choklad" → hallonglass (not chokladglass).
-    _GLASS_FLAVOR_MAP = {
-        'vanilj': 'vaniljglass', 'vanilla': 'vaniljglass',
-        'jordgubb': 'jordgubbsglass', 'strawberry': 'jordgubbsglass', 'smultron': 'jordgubbsglass',
-        'hallon': 'hallonglass', 'raspberry': 'hallonglass',
-        'blåbär': 'blåbärsglass', 'blueberry': 'blåbärsglass',
-        'mango': 'mangoglass',
-        'päron': 'päronglass',
-        'citron': 'citronglass', 'lemon': 'citronglass',
-        'lakrits': 'lakritsglass', 'saltlakrits': 'lakritsglass', 'licorice': 'lakritsglass', 'liquorice': 'lakritsglass',
-        'kanel': 'kanelglass',
-        'pistage': 'pistaschglass', 'pistachio': 'pistaschglass',
-        'kaffe': 'kaffeglass', 'coffee': 'kaffeglass',
-        'nougat': 'nougatglass',
-        'choklad': 'chokladglass', 'chocolate': 'chokladglass',  # after fruits
-        'mintchoklad': 'chokladglass',
-    }
-    # Some mixed-flavor vanilla products use a second flavor word that we do not
-    # want to promote to its own exact recipe keyword, but we still need to
-    # treat it as a combo signal rather than plain vanilla ice cream.
-    _GLASS_VANILLA_COMBO_MARKERS = frozenset({
-        'vinbär', 'vinbar',
-        'svartvinbär', 'svartvinbar',
-        'rödvinbär', 'rodvinbar',
-        'passion', 'passionfrukt', 'passionsfrukt',
-    })
-    # Exotic/brand names that indicate non-base-flavor glass → block
-    _GLASS_EXOTIC_WORDS = frozenset({
-        'twix', 'snickers', 'daim', 'mars', 'oreo', 'nutella', 'dumle',
-        'phish', 'brownie', 'cookie', 'cookies', 'fudge', 'rocky',
-        'caramel', 'salted', 'churros', 'tiramisu', 'cheesecake',
-        'banoffee', 'honeycomb', 'euphoria', 'utopia', 'bonbon',
-        'kids', 'mix', 'flerpack', 'leos', 'minecraft', 'hockeypulver',
-        'favorites', 'klassikerlåda', 'familjemix',
-        'sitting', 'bull', 'volcanix', 'spectacu',
-        'peanut', 'pecan', 'macadamia', 'almond',  # nut combos in glass
-        'kola', 'kolasås', 'karamell', 'toffee',
-        'kladdkaka', 'kanelbulle', 'äppelpaj', 'punsch',
-        'himmelsk', 'brynt', 'rostade', 'popcorn',
-        'twist', 'solero', 'magnum', 'nogger', 'calippo',  # novelty brands/formats
-        'baked', 'chunk', 'crunch', 'swirl', 'ripple', 'core', 'chip',  # English combo descriptors
-    })
+    # The flavor maps (_GLASS_CARRIER_WORDS / _GLASS_FLAVOR_MAP /
+    # _GLASS_VANILLA_COMBO_MARKERS / _GLASS_EXOTIC_WORDS) live at module level so
+    # the ingredient extractor uses the exact same flavor vocabulary.
     # Isglass products are novelty items — always blocked regardless of carrier detection
     if 'isglass' in original_name_lower:
         keywords = []
@@ -2192,6 +2239,12 @@ def extract_keywords_from_ingredient(
     # Normalize space variants (e.g., "corn flakes" -> "cornflakes")
     name = _apply_space_normalizations(name)
     name = rewrite_truncated_chocolate_color_lists(name)
+
+    # Flavored ice cream: "glass (blåbär)" → "blåbärsglass" so the line routes to
+    # its specific flavor instead of dropping the flavor and defaulting to plain
+    # 'vaniljglass'. The compound form also lets COMPOUND_STRICT['glass'] block
+    # plain-vanilla products in the fast path. No-op for plain/composite flavors.
+    name = rewrite_glass_flavor_parenthetical(name)
 
     if 'dadelsirap' in name:
         return ['dadelsirap']

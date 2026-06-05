@@ -33420,5 +33420,19 @@
     "policy_ref": "keyword_extra_parent_vegokott_family",
     "recipe_name": "Vegansk Ghormeh Sabzi",
     "source_ref": "current_review:keyword_extra_parent_vegokott_routing"
+  },
+  {
+    "expected": 0,
+    "id": "kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b_negative",
+    "ingredients": [
+      "kornris"
+    ],
+    "offer": {
+      "category": "pantry",
+      "name": "Basmatiris Uncle Bens 1kg"
+    },
+    "policy_ref": "policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b",
+    "recipe_name": "No-match policy regression",
+    "source_ref": "manual:policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"
   }
 ]

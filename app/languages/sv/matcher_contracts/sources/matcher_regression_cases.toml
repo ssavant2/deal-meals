@@ -29055,3 +29055,15 @@ category = "frozen"
 canonical = "vegokött"
 ingredient_index = 0
 must_match_keyword = "vegokött"
+
+[[fixtures]]
+id = "kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b_negative"
+policy_ref = "policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"
+source_ref = "manual:policy_kornris_basmati_jasmin_langkorn_langkorn_rundkorn_parboiled_raris_raris_fullkornsris_bris_b"
+recipe_name = "No-match policy regression"
+ingredients = ["kornris"]
+expected = 0
+
+[fixtures.offer]
+name = "Basmatiris Uncle Bens 1kg"
+category = "pantry"
