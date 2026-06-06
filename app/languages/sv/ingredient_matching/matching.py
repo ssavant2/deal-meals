@@ -3631,12 +3631,11 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
             _append_extra_keyword(paste_keyword)
             _append_extra_keyword(curry_keyword)
             break
-    # Name-conditional: fish roe "rom" → add "stenbitsrom" alongside "rom"
-    # "Finkornig Rom Röd" / "Röd Rom Finkornig" should match BOTH "stenbitsrom" AND "rom" recipes
-    # Keep 'rom' so recipes saying "80 g rom (valfri sort)" also match
-    if offer_category == 'fish' and 'rom' in keywords:
-        if 'stenbitsrom' not in keywords:
-            extra_keywords.append('stenbitsrom')
+    # Name-conditional: finkornig red roe products are sold as a
+    # stenbitsrom-style grocery item. Keep this narrow so generic "rom" products
+    # do not all become stenbitsrom, and mirror extract_keywords_from_product().
+    if 'rom' in keywords and (_offer_words_pre & {'finkornig', 'finkorning'}):
+        _append_extra_keyword('stenbitsrom')
     # Generic fish-roe recipe lines often just say "rom" while products are sold
     # as specific roe families such as löjrom, forellrom or stenbitsrom.
     # Add the generic roe keyword on the product side so plain "rom" reaches them.

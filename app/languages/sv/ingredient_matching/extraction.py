@@ -2085,6 +2085,16 @@ def extract_keywords_from_product(
     if 'småtomat' in unique_keywords:
         unique_keywords = [kw for kw in unique_keywords if kw not in ('tomat', 'tomater')]
 
+    # Finkornig red roe products are sold as a stenbitsrom-style grocery item.
+    # Keep this name-conditional so generic "rom" products do not all become
+    # stenbitsrom, and so live/backend extraction agrees with precompute.
+    if (
+        'rom' in unique_keywords
+        and re.search(r'\bfinkorni(?:g|ng)\b', original_name_lower)
+        and 'stenbitsrom' not in unique_keywords
+    ):
+        unique_keywords.insert(0, 'stenbitsrom')
+
     # Red/black rom (fish roe) color-tagging: PNB rom ← finkorning/stenbitsrom/
     # caviarmix/löjrom etc. blocks specific roe products from matching a plain
     # `rom`-ingredient via the generic rom-keyword path. To let "röd rom" /

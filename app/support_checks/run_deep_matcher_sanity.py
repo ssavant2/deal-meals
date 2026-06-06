@@ -4094,6 +4094,43 @@ test(
     0,
 )
 test(
+    "Finkornig red rom product exposes stenbitsrom in live extraction",
+    "stenbitsrom" in extract_keywords_from_product("Finkornig Rom Röd Garant", "fish"),
+    True,
+)
+test(
+    "Explicit stenbitsrom matches finkornig red rom product",
+    recipe_match_num(
+        ["1 förp röd stenbitsrom (à 70 g)"],
+        {"name": "Finkornig Rom Röd Garant", "category": "fish"},
+    ),
+    1,
+)
+test(
+    "Cached explicit stenbitsrom matches finkornig red rom product",
+    recipe_match_num_cached(
+        ["1 förp röd stenbitsrom (à 70 g)"],
+        {"name": "Finkornig Rom Röd Garant", "category": "fish"},
+    ),
+    1,
+)
+test(
+    "Explicit löjrom still does not fall back to finkornig red rom product",
+    recipe_match_num(
+        ["1 förp löjrom"],
+        {"name": "Finkornig Rom Röd Garant", "category": "fish"},
+    ),
+    0,
+)
+test(
+    "Plain rom still does not match finkornig fish roe product",
+    recipe_match_num(
+        ["1 dl rom"],
+        {"name": "Finkornig Rom Röd Garant", "category": "fish"},
+    ),
+    0,
+)
+test(
     "Q4 batch 117 generic rom no longer defaults to spirit products",
     recipe_match_num(
         ["160 g Rom"],
