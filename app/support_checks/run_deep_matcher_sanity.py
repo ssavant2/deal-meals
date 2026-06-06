@@ -2502,6 +2502,22 @@ test(
     match_kw("Matlagningsgrädde soja 1l Alpro", "0.5 dl Soyabaserad matlagning", "dairy"),
     "sojagrädde",
 )
+
+# One-way cream substitution (Stefan 2026-06-06): a matlagningsgrädde (cooking
+# cream) recipe MAY use vispgrädde — whipping cream works fine for cooking — but
+# a vispgrädde (whipping) recipe must NOT fall back to matlagningsgrädde, which
+# cannot be whipped. 'matlagning' is intentionally not a 'grädde' specialty
+# qualifier; the visp qualifier + the ≥30% high-fat guard protect the whip side.
+test("one-way cream: matlagningsgrädde recipe matches vispgrädde offer",
+     recipe_match_num(["2 dl matlagningsgrädde"], {"name": "Vispgrädde 40% Garant", "category": "dairy"}), 1)
+test("one-way cream: matlagningsgrädde recipe still matches matlagningsgrädde offer",
+     recipe_match_num(["2 dl matlagningsgrädde"], {"name": "Matlagningsgrädde 15% Arla", "category": "dairy"}), 1)
+test("one-way cream: vispgrädde recipe does NOT match matlagningsgrädde offer",
+     recipe_match_num(["2 dl vispgrädde"], {"name": "Matlagningsgrädde 15% Arla", "category": "dairy"}), 0)
+test("one-way cream: explicit 40% cream still blocks 15% cooking cream",
+     recipe_match_num(["2 dl grädde 40%"], {"name": "Matgrädde 15% Arla", "category": "dairy"}), 0)
+test("one-way cream: oat cream recipe still isolated from dairy whipping cream",
+     recipe_match_num(["2 dl havregrädde"], {"name": "Vispgrädde 40% Garant", "category": "dairy"}), 0)
 test(
     "MAT växtbaserad mjölk matches havredryck",
     match_kw("Havredryck Naturell 1l Oatly", "3 dl Växtbaserad mjölk", "dairy"),

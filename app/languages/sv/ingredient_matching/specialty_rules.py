@@ -828,12 +828,18 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     },
 
     # Cream types - "vispgrädde" is a specific type that matgrädde cannot substitute
-    # Direction A: if ingredient says "vispgrädde", product must have "visp" qualifier
-    # Vispgrädde products have "visp" in name → qualifier found → matches everything.
-    # Matgrädde products have no "visp" → blocked when ingredient says "vispgrädde".
+    # ONE-WAY substitution (Stefan 2026-06-06).
+    # Direction A: if ingredient says "vispgrädde" (whipping), product must have
+    # "visp" — whipping needs high-fat cream, matlagningsgrädde can't be whipped.
+    # But the reverse is allowed: a "matlagningsgrädde" recipe (cooking cream) may
+    # use vispgrädde, since whipping cream works fine for cooking. We therefore do
+    # NOT list 'matlagning' as a qualifier — matlagningsgrädde imposes no Direction A
+    # constraint and matches any dairy cream. ('havre' stays so oat-cream recipes
+    # require an oat product.) The ≥30%/whipping high-fat guard
+    # (_high_fat_cream_requirement_allows_product) still blocks low-fat cream from
+    # explicit high-fat/whipping requests.
     'grädde': {
         'visp', 'vispgrädde', 'vispgradde',
-        'matlagning', 'matlagnings',
         'havre', 'havrebaserad',
     },
 
