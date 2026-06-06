@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 411,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
-      "keyword_synonym_mapping": 188,
+      "keyword_synonym_mapping": 189,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -23,7 +23,7 @@
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 412,
       "negative_regression": 841,
-      "offer_extra_keyword_mapping": 422,
+      "offer_extra_keyword_mapping": 423,
       "parent_match_only_mapping": 20,
       "positive_regression": 672,
       "recipe_routing_extra_alias": 9
@@ -33,17 +33,17 @@
       "ingredient_parent": 411,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 188,
+      "keyword_synonym": 189,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
       "no_match_policy": 434,
-      "offer_extra_keyword": 422,
+      "offer_extra_keyword": 423,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5863,
-    "variants_missing_product_text": 1895,
+    "variant_count": 5865,
+    "variants_missing_product_text": 1897,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -123169,11 +123169,53 @@
       "needs_product_text": false,
       "notes": "current_review_senap_skansk_dijon_self_only",
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_senap_skansk_dijon_self_only\", \"recipe_name\": \"Sanity Recipe\"}"
+    },
+    {
+      "variant_id": "vterm-98dc4acc1bbfc5ec",
+      "row_index": 4886,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:digestives",
+      "source_id": "digestives",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "digestives",
+      "canonical": "digestivekex",
+      "expected_family": "digestivekex",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"digestivekex\"}"
+    },
+    {
+      "variant_id": "vterm-ca614cb46d70eb40",
+      "row_index": 5367,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:kruksallat",
+      "source_id": "kruksallat",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "kruksallat",
+      "canonical": "krispsallat",
+      "expected_family": "krispsallat",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"krispsallat\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1669,
+      "no_product_text": 1671,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123184,19 +123226,19 @@
       "ingredient_parent": 411,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 188,
+      "keyword_synonym": 189,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
       "no_match_policy": 434,
-      "offer_extra_keyword": 422,
+      "offer_extra_keyword": 423,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5863
+      "audited": 5865
     },
-    "variant_count": 5863
+    "variant_count": 5865
   }
 }

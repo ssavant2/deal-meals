@@ -1594,6 +1594,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'svampjuice',  # fermented mushroom juice ≠ fresh mushrooms
         'svamparna',  # definite plural (cooking instruction reference)
         'portabellosvamp',  # portabello is a specific mushroom type — generic 'svamp' from compound shouldn't match Enoki etc.
+        'enokisvamp', 'enoki',  # enoki (needle mushroom) is a named specialty — isolate same as portabello, karl-johan, shiitake per named-species policy
         'svampsmak',  # mushroom-flavored ≠ actual mushrooms
         'svampkrydda',  # mushroom spice/seasoning ≠ fresh mushrooms ("1 dl svampkrydda")
         'svampkryddor',  # plural form of mushroom spice

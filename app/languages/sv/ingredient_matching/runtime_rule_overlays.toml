@@ -865,6 +865,13 @@ keyword = "svartvinbär"
 blockers = ["kompott"]
 reason = "Fruktkompott/sylt (Råggyberry Äpple Svartvinbär Kompott) är processad bärprodukt, inte färska svartvinbär eller svartvinbärsblad som örtkrydda"
 
+[[product_name_blockers]]
+id = "runtime_pnb_cider"
+status = "active"
+keyword = "cider"
+blockers = ["smultron", "hallon", "blåbär", "jordgubb", "päron"]
+reason = "Fruit-flavored cider soft-drinks (Smultroncider, Halloncider) are not cooking cider — same isolation principle as flavored juice. Plain cider ingredient expects apple cider, not berry/fruit variants."
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
