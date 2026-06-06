@@ -2813,6 +2813,31 @@ def extract_keywords_from_ingredient(
                     unique_keywords.append(compound_kw)
                 break
 
+    # Broad ordinary-mince family (Stefan 2026-06-06). A SINGLE specific ordinary
+    # mince term — nötfärs/blandfärs/fläskfärs/kalvfärs/kycklingfärs/kalkonfärs —
+    # also exposes the generic 'färs' keyword so it matches any ordinary mince
+    # offer. All ordinary mince is interchangeable, poultry included. The
+    # compound-strict 'färs' guard accepts the ordinary-mince prefixes for this
+    # family (see _FARS_PREFIX_ALIASES in compound_text.py), so the generic 'färs'
+    # keyword is honoured instead of being blocked by the compound suffix rule.
+    #
+    # Gated on the top-level single-ingredient path (_skip_eller_split is False).
+    # Explicit "eller" mince lists ("lammfärs eller kalvfärs eller nötfärs") and
+    # context-inherited lines ("kycklingbröstfilé eller färs") go through the
+    # eller-split branch at the top of this function as locked specific arms
+    # (_skip_eller_split=True) and are therefore NOT broadened — so an enumerated
+    # list stays a closed set and "chicken breast or mince" stays chicken-only.
+    # Lamb (lammfärs) and game (viltfärs) stay isolated as distinct meats.
+    if not _skip_eller_split:
+        _ORDINARY_MINCE_SPECIFIC = {
+            'nötfärs', 'notfars', 'blandfärs', 'blandfars',
+            'fläskfärs', 'flaskfars', 'kalvfärs', 'kalvfars',
+            'kycklingfärs', 'kycklingfars', 'kalkonfärs', 'kalkonfars',
+        }
+        _mince_in_kw = [kw for kw in unique_keywords if kw in _ORDINARY_MINCE_SPECIFIC]
+        if len(_mince_in_kw) == 1 and 'färs' not in unique_keywords:
+            unique_keywords.append('färs')
+
     # Safety net: if a single ingredient line produces too many keywords,
     # it's likely a product description or badly formatted text — drop all.
     if len(unique_keywords) > 5:

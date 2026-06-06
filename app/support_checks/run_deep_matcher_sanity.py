@@ -2023,6 +2023,46 @@ test(
     ],
     [1, 0, 0, 0],
 )
+
+# ---------------------------------------------------------------------------
+# Broad ordinary-mince family (Stefan 2026-06-06). A SINGLE specific ordinary
+# mince ingredient is interchangeable with any ordinary mince offer, poultry
+# included: nötfärs/blandfärs/fläskfärs/kalvfärs/kycklingfärs/kalkonfärs all
+# accept each other. Mechanism: extraction adds the generic 'färs' keyword to a
+# single mince term; the 'färs' compound-strict guard accepts the ordinary-mince
+# prefixes (_FARS_PREFIX_ALIASES) but only for single terms (no "eller"/
+# "alternativt"). Lamb, game, fish mince and salsiccia-spiced mince stay isolated.
+# Enumerated "eller" lists and context-inherited lines stay closed (tested above).
+# ---------------------------------------------------------------------------
+test("broad mince: blandfärs matches Nötfärs offer",
+     recipe_match_num(["400 g blandfärs"], {"name": "Nötfärs Sverige 20%", "category": "meat"}), 1)
+test("broad mince: nötfärs matches Blandfärs offer",
+     recipe_match_num(["400 g nötfärs"], {"name": "Blandfärs Sverige 20%", "category": "meat"}), 1)
+test("broad mince: nötfärs matches Fläskfärs offer",
+     recipe_match_num(["400 g nötfärs"], {"name": "Fläskfärs 500g", "category": "meat"}), 1)
+test("broad mince: fläskfärs matches Nötfärs offer",
+     recipe_match_num(["400 g fläskfärs"], {"name": "Nötfärs Sverige 20%", "category": "meat"}), 1)
+test("broad mince: kalvfärs matches Nötfärs offer",
+     recipe_match_num(["400 g kalvfärs"], {"name": "Nötfärs Sverige 20%", "category": "meat"}), 1)
+test("broad mince: kycklingfärs matches Nötfärs offer (poultry incl.)",
+     recipe_match_num(["400 g kycklingfärs"], {"name": "Nötfärs Sverige 20%", "category": "meat"}), 1)
+test("broad mince: nötfärs matches Kycklingfärs offer (poultry incl.)",
+     recipe_match_num(["400 g nötfärs"], {"name": "Kycklingfärs 500g Kronfågel", "category": "meat"}), 1)
+test("broad mince cached: blandfärs matches Kalkonfärs offer",
+     recipe_match_num_cached(["400 g blandfärs"], {"name": "Kalkonfärs 500g", "category": "meat"}), 1)
+# Single broad must NOT leak into distinct meats / specialty mince.
+test("broad mince: nötfärs does NOT match salsiccia-spiced mince",
+     recipe_match_num(["400 g nötfärs"], {"name": "Salsicciafärs Naturell Köttkultur", "category": "meat"}), 0)
+test("broad mince: nötfärs does NOT match game mince (viltfärs)",
+     recipe_match_num(["400 g nötfärs"], {"name": "Viltfärs Älg 500g", "category": "meat"}), 0)
+test("broad mince: nötfärs does NOT match fish mince (fiskfärs)",
+     recipe_match_num(["400 g nötfärs"], {"name": "Fiskfärs Torsk 400g", "category": "fish"}), 0)
+# The 'färs' breadth must not bleed into other compound-strict keywords.
+test("broad mince scope: kycklingfilé still blocked from Nötfärs (filé stays strict)",
+     recipe_match_num(["500 g kycklingfilé"], {"name": "Nötfärs Sverige 20%", "category": "meat"}), 0)
+# Enumerated "eller" mince list stays a closed set (not broadened).
+test("broad mince gate: enumerated lamm/kalv/nöt list does NOT match Fläskfärs",
+     recipe_match_num(["400 g lammfärs eller färs av kalv eller nöt"], {"name": "Fläskfärs Färsk 20% 500g ICA", "category": "meat"}), 0)
 test(
     "kalkon pålägg does not match raw kalkon bröstfilé",
     match_kw("Kalkon Bröstfilé 600g Ingelsta Kalkon", "1 st Kalkon Pålägg", "meat"),

@@ -303,6 +303,23 @@ _COMPOUND_QUALIFIER_ALIASES: Dict[str, Set[str]] = {
     'peppar': {'peppar', 'chili'},
 }
 
+# Ordinary-mince family (Stefan 2026-06-06). For the 'färs' compound-strict
+# keyword ONLY, the specific ordinary-mince prefixes are mutually interchangeable:
+# a single "blandfärs"/"nötfärs"/"fläskfärs"/… ingredient may match any ordinary
+# mince product. This mirrors the existing 'kött'/'hushålls' breadth but is scoped
+# to the 'färs' keyword via _MINCE_FAMILY_KEYWORDS below, so it does NOT affect
+# other compound-strict keywords ('filé', 'biff', 'korv', 'kassler', …) — poultry-
+# cut, cut and sausage isolation stay intact. 'fisk', 'lamm' and game prefixes are
+# deliberately omitted so fish mince, lamb mince and game mince stay isolated.
+# The extraction side only attaches the generic family keyword to a SINGLE mince
+# term (not to "eller" list arms), so this breadth never leaks into enumerated
+# mince lists or context-inherited "X eller färs" lines.
+_FARS_PREFIX_ALIASES: Dict[str, Set[str]] = {
+    prefix: _MEAT_MINCE_PREFIXES
+    for prefix in ('nöt', 'not', 'bland', 'fläsk', 'flask', 'kalv', 'kyckling', 'kalkon')
+}
+_MINCE_FAMILY_KEYWORDS: FrozenSet[str] = frozenset({'färs', 'fars'})
+
 
 def _check_compound_strict(keyword: str, ingredient_lower: str,
                            product_name_lower: str,
@@ -347,7 +364,21 @@ def _check_compound_strict(keyword: str, ingredient_lower: str,
                 return False
             if w.endswith(keyword) and len(w) > len(keyword):
                 prefix = w[:-len(keyword)]
-                accepted = _COMPOUND_QUALIFIER_ALIASES.get(prefix, {prefix})
+                # Ordinary-mince family: a SINGLE specific mince ingredient
+                # ('blandfärs', 'nötfärs', …) accepts any ordinary mince product.
+                # Scoped to the 'färs' keyword so other compound-strict keywords
+                # (filé/biff/korv/…) keep their strict prefix matching, AND gated to
+                # single-term ingredients: an "eller"/"alternativt" mince list
+                # ("lammfärs eller kalvfärs") or context line ("kycklingbröstfilé
+                # eller färs") keeps the strict per-prefix rule so it stays a closed
+                # set / chicken-only.
+                if (keyword in _MINCE_FAMILY_KEYWORDS
+                        and prefix in _FARS_PREFIX_ALIASES
+                        and ' eller ' not in ingredient_lower
+                        and 'alternativt' not in ingredient_lower):
+                    accepted = _FARS_PREFIX_ALIASES[prefix]
+                else:
+                    accepted = _COMPOUND_QUALIFIER_ALIASES.get(prefix, {prefix})
                 if not any(a in product_name_lower for a in accepted):
                     continue
                 else:
