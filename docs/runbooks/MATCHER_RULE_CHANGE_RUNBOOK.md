@@ -931,6 +931,14 @@ backend matcher for one pair and prints precomputed details such as
 keyword-expansion sources so product-side form rules can be diagnosed without
 opening `matching.py` first.
 
+Treat `compare-paths`, `probe`, `why`, and backend sanity rows as the authority.
+Do **not** treat a raw `precompute_offer_data()` call as proof that the live or
+backend matcher will use the same keyword: precompute can expose materialized
+or expanded keywords that live extraction never emitted. In `compare-paths`,
+read `Product keywords` as the live product extractor surface and `Precomputed
+offer keywords` as the materialized/cache surface. A `precomputed-only` keyword
+is a drift clue until a probe or backend sanity row proves the pair.
+
 Use `dm matcher why` when the backend says `NO MATCH` and you need the exact
 validator rule that rejected an otherwise plausible candidate:
 
@@ -1331,12 +1339,18 @@ If you do not yet know which matcher layer is failing, start with the Layer
 Decision Tree below or run `dm matcher explain` before choosing a row in this
 table.
 
+`keyword-synonym` and `offer-extra-keyword` variants are extracted keyword
+tokens, not raw phrase scanners. Do not add variants such as `"finkornig rom"`
+directly; token-based paths will never see that as one variant. For multi-word
+phrases, first add a `space-normalization` or hardcoded extraction branch that
+emits a joined token, then point the synonym/offer-extra rule at that token.
+
 | Change type | Prefer | Use when | Avoid |
 | --- | --- | --- | --- |
-| Exact synonym or spelling alias | `./bin/dm matcher add keyword-synonym ...` for `keyword_synonym`; otherwise the matching parent/routing registry entry | One term is the same ingredient family as another. Default to the lightweight alias path for spelling/plural/compound aliases; escalate to Track B only for routing/parity/product-policy implications. | Ad-hoc extraction code or full fixture/inventory ceremony for a plain alias. |
+| Exact synonym or spelling alias | `./bin/dm matcher add keyword-synonym ...` for `keyword_synonym`; otherwise the matching parent/routing registry entry | One extracted token is the same ingredient family as another. Default to the lightweight alias path for spelling/plural/compound aliases; escalate to Track B only for routing/parity/product-policy implications. | Multi-word raw phrases; add `space-normalization` or extraction-helper first. Ad-hoc extraction code or full fixture/inventory ceremony for a plain alias. |
 | Ingredient/offer bridge (recipe wording differs from product wording) | `./bin/dm matcher add keyword-extra-parent ...` (preferred for fan-out) or `./bin/dm matcher add ingredient-parent ...` | Recipe term and product term differ but should match (e.g. `nori` → `alger`, `citrusfrukter` → `citron`/`lime`/`apelsin`). These surfaces are wired into the runtime matcher today. | Adding only to `match_bridge.toml`. That surface is **declarative-only / staged for migration** — it does not affect runtime routing on its own. See the match_bridge note below the table. |
 | No-match/blocking policy | `./bin/dm matcher add no-match-policy ...` after a durable negative fixture exists; `./bin/dm matcher modify no-match-policy ...` for simple existing policies | Ingredient pattern plus offer keyword/pattern should never match. | One-off Python if a declarative policy can express it, or manual TOML rewrites when the modifier supports the shape. |
-| Offer keyword extraction | `./bin/dm matcher add offer-extra-keyword ...` or `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Product wording should expose an additional canonical offer keyword. Use `offer-extra-keyword` for data-only bridges; use `extraction-helper` only after hardcoding extraction.py output. | Adding recipe synonyms when only offer extraction is missing, or expecting `extraction-helper` to write Python code. |
+| Offer keyword extraction | `./bin/dm matcher add offer-extra-keyword ...` or `extraction.py` + `./bin/dm matcher add extraction-helper ...` | A product-side extracted token should expose an additional canonical offer keyword. Use `offer-extra-keyword` for data-only bridges; use `extraction-helper` only after hardcoding extraction.py output. | Multi-word raw phrases; add `space-normalization` or hardcoded extraction first. Adding recipe synonyms when only offer extraction is missing, or expecting `extraction-helper` to write Python code. |
 | Recipe extraction helper | `extraction.py` + `./bin/dm matcher add extraction-helper ...` | Ingredient text needs a hardcoded extraction output that cannot be expressed as a plain synonym. | Broad helper output without route/parity fixtures, or registry-only helper rows without the matching extractor branch. |
 | Parent/canonical fallback | `./bin/dm matcher add ingredient-parent ...`, `parent-match-only ...`, or `keyword-extra-parent ...` | A child term should expose a broader canonical, sometimes only for matching. For `parent-match-only`, include `--negative-offer` plus `--negative-ingredient` when the policy depends on strict sibling exclusion. | Treating parent fallback as a blocker. It is cosmetic/routing support unless a negative proof and an actual guard/no-match mechanism enforce the exclusion. |
 | Ingredient-context blocker | `./bin/dm matcher add fpb ...` | Ingredient wording contains a keyword only inside a context that should suppress it. Common Track A tactical fix. | Offer/product variant blocking; use a product-side blocker or form/specialty rule after confirming the issue is product-side. If the keyword is standalone in the recipe ingredient, verify with `dm matcher probe`; KSBC is usually the right suppressor for that shape. |
@@ -2294,9 +2308,17 @@ Do not run full DB diff as a routine quick check.
 
 Use the diagnosis class to choose the next move:
 
+`keywords` and `route_terms` are related but not identical. Keywords are the
+canonical terms a product or ingredient can match on after extraction and
+validation. Route terms are the indexed candidate-generation terms that decide
+whether a recipe/offer pair is even sent to the matcher. A keyword visible in
+extraction/precompute does not guarantee routed matching; `route_pair_missing`
+usually means the term-index/routing exposure is missing or stale, not that a
+backend validator rejected the pair.
+
 | Diagnosis | Meaning | Usual next action |
 | --- | --- | --- |
-| `route_pair_missing` | Routing never sends the offer to the ingredient. | Add route/term-index exposure, then parity. |
+| `route_pair_missing` | Routing never sends the offer to the ingredient. | Add route/term-index exposure or refresh materialized term data, then parity. |
 | `fast_match_missing` | Routing reaches the pair but fast match rejects it. | Inspect `dm matcher why`'s observe-only fast-path shadow trace, then run `dm matcher compare-paths` and `dm matcher explain`. Add bridge/synonym/fast-path rule, with negative sibling, or inspect the local fast-path guard if those diagnostics stay blank. |
 | `backend_validation_rejected` | Initial match exists but backend validator blocks it. | Review validator or add scoped allowance. |
 | `unexpected_positive` | A negative fixture still materializes. | Add/tighten no-match policy or blocker. |

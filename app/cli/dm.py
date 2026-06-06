@@ -1895,6 +1895,18 @@ def _split_csv(value: str, *, label: str, lowercase: bool = True) -> tuple[str, 
     return items
 
 
+def _ensure_single_token_variants(command: str, variants: tuple[str, ...]) -> None:
+    phrase_variants = [variant for variant in variants if re.search(r"\s", variant.strip())]
+    if not phrase_variants:
+        return
+    examples = ", ".join(repr(variant) for variant in phrase_variants)
+    raise typer.BadParameter(
+        f"{command} --variants must be single extracted keyword tokens, not multi-word phrases: {examples}. "
+        "For raw multi-word product/ingredient phrases, add a space-normalization or hardcoded extraction helper first, "
+        "then point the synonym/offer-extra rule at the joined token."
+    )
+
+
 def _split_optional_csv(value: str | None, *, label: str) -> tuple[str, ...]:
     return _split_csv(value, label=label) if value else ()
 
@@ -2812,6 +2824,8 @@ def _add_simple_toml_surface(
     dry_run: bool,
 ) -> None:
     variants = _split_csv(variants_csv, label="--variants")
+    if surface.command == "offer-extra-keyword":
+        _ensure_single_token_variants(surface.command, variants)
     canonical = canonical.strip().lower()
     if not canonical:
         raise typer.BadParameter("canonical must not be empty")
@@ -7644,6 +7658,7 @@ def add_keyword_synonym(
     dry_run: Annotated[bool, typer.Option("--dry-run", help="Print generated blocks without writing files.")] = False,
 ) -> None:
     variants = _split_csv(variants_csv, label="--variants")
+    _ensure_single_token_variants("keyword-synonym", variants)
     canonical = canonical.strip().lower()
     if not canonical:
         raise typer.BadParameter("canonical must not be empty")
