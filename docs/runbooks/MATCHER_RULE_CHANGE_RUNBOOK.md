@@ -580,10 +580,10 @@ look present-but-ineffective. In that shape, verify the pair with
 `dm matcher probe --expect no-match ...` and prefer KSBC when the specific
 recipe-side context should suppress the generic keyword fallback.
 
-PNB and GPB are product/backend proof surfaces. Do not treat a passing or
-failing `matches_ingredient()` check alone as enough evidence for a product-name
-blocker; use backend/product diagnostics or a focused behavior sanity when the
-generated table canary is not enough.
+PNB and GPB are product/backend proof surfaces. Do not treat a fast-only
+keyword check as enough evidence for a product-name blocker; use
+`dm matcher probe`, `dm matcher why`, or a focused backend behavior sanity when
+the generated table canary is not enough.
 
 `match()` in `run_deep_matcher_sanity.py` calls the fast matcher only. Use it for
 fast-path/overlay membership proof and narrow product-to-ingredient checks. For
@@ -925,9 +925,9 @@ diagnostic; if it says a token was removed by later extraction logic, inspect
 the named extractor branch or use `compare-paths` on the full pair.
 
 Use `dm matcher compare-paths` when the actual mismatch is between matcher
-entry points rather than rule intent. It compares the legacy live matcher,
-canonical fast matcher, and backend matcher for one pair and prints precomputed
-details such as `processed_checks`, precomputed-only offer keywords, and likely
+entry points rather than rule intent. It compares the canonical fast matcher and
+backend matcher for one pair and prints precomputed details such as
+`processed_checks`, precomputed-only offer keywords, and likely
 keyword-expansion sources so product-side form rules can be diagnosed without
 opening `matching.py` first.
 
@@ -1252,7 +1252,7 @@ These terms are used throughout the matcher and this runbook:
 | KSBC | `KEYWORD_SUPPRESSED_BY_CONTEXT`: suppresses a generic keyword when ingredient context makes it irrelevant. |
 | effective rule | The merged runtime rule after historical Python data and active overlay TOML entries have been combined. `dm matcher list --effective` shows this view and its origins. |
 | post-normalized compound | A joined runtime token created by space-normalization, such as `balsamico ingefära` becoming `balsamicoingefära`; blockers may need to cover this joined form. |
-| proof mode | The behavior layer a command or sanity row proves: `table`, `extraction`, `fast-match`, or `backend-match`. Product-side blockers usually need backend/product proof, not only `matches_ingredient()`. |
+| proof mode | The behavior layer a command or sanity row proves: `table`, `extraction`, `fast-match`, or `backend-match`. Product-side blockers usually need backend/product proof, not only fast keyword proof. |
 | parity | Agreement between live/fullscan, compiled/fullscan, compiled/routed, and compiled/hint-first paths. |
 | freshness | Whether compiled recipe/offer data, term indexes, and active cache use current matcher/compiler versions. |
 
@@ -1933,7 +1933,7 @@ cleanup:
    reports missing hardcoded-output coverage before Track B promote reaches the
    same problem.
 2. If the edit adds or widens a phrase pattern in `extraction.py`, check whether
-   the fast/live matcher has a sibling pattern in `matching.py` for the same
+   the fast matcher has a sibling pattern in `matching.py` for the same
    phrase. Prove the exact pair with `dm matcher probe --expect ...` or
    `dm matcher compare-paths`; extraction-only fixes can leave backend/fast
    paths split. Treat any doctor drift-watchlist warning as a prompt to inspect

@@ -37,7 +37,7 @@ app/
 │   │   ├── matcher_contracts/ # Matcher regression contracts + generated JSON
 │   │   └── ingredient_matching/
 │   │       ├── engine.py               # Pipeline orchestrator + MATCHER_VERSION
-│   │       ├── matching.py             # matches_ingredient() / matches_ingredient_fast()
+│   │       ├── matching.py             # matches_ingredient_fast()
 │   │       ├── match_result.py         # MatchResult data class
 │   │       ├── extraction.py           # extract_keywords_from_product/ingredient()
 │   │       ├── extraction_patterns.py  # Regex patterns for extraction
@@ -140,7 +140,7 @@ across ~20 files. Key files and what they contain:
 | File | Key contents |
 |------|-------------|
 | `engine.py` | Pipeline orchestrator, `MATCHER_VERSION` |
-| `matching.py` | `matches_ingredient()`, `matches_ingredient_fast()` |
+| `matching.py` | `matches_ingredient_fast()` |
 | `extraction.py` | `extract_keywords_from_product()`, `extract_keywords_from_ingredient()` |
 | `extraction_patterns.py` | Regex patterns used during extraction |
 | `normalization.py` | Multi-word space normalizations (e.g. "corn flakes" → "cornflakes") |

@@ -3936,10 +3936,8 @@ def normalize_probe(text: str) -> str:
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         payload = json.loads(result.stdout)
-        self.assertEqual(payload["legacy_live_keyword"], "chorizo")
         self.assertEqual(payload["fast_keyword"], "chorizo")
         self.assertTrue(payload["backend_matched"])
-        self.assertFalse(payload["live_fast_diverged"])
         self.assertFalse(payload["fast_backend_diverged"])
         self.assertIn("offer_keyword_diff", payload)
         paprika_checks = [row for row in payload["processed_checks"] if row.get("base") == "paprika"]

@@ -562,24 +562,24 @@ def _run_runtime_import_boundary_check() -> list[CheckIssue]:
 
 
 def _run_targeted_runtime_sanity() -> list[CheckIssue]:
-    from languages.sv.ingredient_matching.matching import matches_ingredient  # noqa: PLC0415
+    from languages.sv.ingredient_matching.matching import matches_ingredient_fast, precompute_offer_data  # noqa: PLC0415
     from languages.sv.ingredient_matching.term_indexes import _recipe_routing_extra_aliases  # noqa: PLC0415
 
     sanity_cases = [
-        ("pepparsalami routes to salami", ["pepparsalami"], "salami", "salami"),
-        ("kalkonbröst routes to kalkon", ["kalkonbröst"], "kalkon", "kalkon"),
+        ("pepparsalami routes to salami", "pepparsalami", "salami", "salami"),
+        ("kalkonbröst routes to kalkon", "kalkonbröst", "kalkon", "kalkon"),
     ]
     issues: list[CheckIssue] = []
-    for name, product_keywords, ingredient_text, expected in sanity_cases:
-        actual = matches_ingredient(product_keywords, ingredient_text)
+    for name, offer_name, ingredient_text, expected in sanity_cases:
+        actual = matches_ingredient_fast(precompute_offer_data(offer_name), ingredient_text)
         if actual != expected:
             issues.append(_issue(
                 "error",
                 "targeted_runtime_sanity_failed",
-                "selected legacy mapping no longer behaves as expected in runtime matcher",
+                "selected mapping no longer behaves as expected in fast runtime matcher",
                 item_id=name,
                 details={
-                    "product_keywords": product_keywords,
+                    "offer_name": offer_name,
                     "ingredient_text": ingredient_text,
                     "expected": expected,
                     "actual": actual,

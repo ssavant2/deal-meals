@@ -32,7 +32,6 @@ from languages.sv.ingredient_matching import (
     FLAVOR_WORDS,
     CARRIER_PRODUCTS,
     _EMBEDDED_PROTECTED_KEYWORDS,
-    matches_ingredient,
 )
 from languages.sv.ingredient_matching.extraction import _is_plain_instant_coffee_product_text
 from languages.sv.ingredient_matching.validators import check_specialty_qualifiers
@@ -1152,10 +1151,6 @@ def match(product, ingredient, category="", brand=""):
     od = precompute_offer_data(product, category, brand=brand)
     return matches_ingredient_fast(od, ingredient)
 
-
-def legacy_match(product, ingredient, category=""):
-    """Return the uncached live matcher keyword or None."""
-    return matches_ingredient(extract_keywords_from_product(product, category), ingredient, product)
 
 # Fast-path processed checks must follow the matched keyword family. Product
 # flavor words can carry their own processed rules without blocking unrelated
@@ -10886,17 +10881,18 @@ test("Specific lime recipe does NOT broaden to citron via citrusfrukter parent",
      match("Citron 500g Klass 1 ICA", "1 lime", "fruit"), None)
 
 # Q106: yoghurt 'lätt'/'light' SPECIALTY_QUALIFIERS Direction A
-# Plain yoghurt recipe matches everything; lättyoghurt recipe constrains via slow-path
-# (live matcher). Fast-path Direction A only fires when product has the qualifier too.
+# Plain yoghurt recipe matches everything; lättyoghurt recipe constrains backend
+# matches so full-fat products do not satisfy explicit low-fat requests.
 test("Plain yoghurt recipe matches Lätt-product",
      match("Yoghurt Lätt Mild 0.1% 1000g", "2 dl yoghurt", "dairy"), "yoghurt")
 test("Plain yoghurt recipe matches full-fat",
      match("Yoghurt Turkisk Naturell 10% 500g", "2 dl yoghurt", "dairy"), "yoghurt")
 test("lättyoghurt recipe matches Lätt-product",
      match("Yoghurt Lätt Mild 0.1% 1000g", "2 dl mild lättyoghurt", "dairy"), "yoghurt")
-# Slow-path (matches_ingredient) blocks full-fat from lättyoghurt — verified via
-# direct matches_ingredient() call in Q106 testing. Fast-path Direction A is more lenient.
-# Verified live: matches_ingredient(['yoghurt'], '2 dl mild lättyoghurt', 'Yoghurt Turkisk 10%') = None
+test("lättyoghurt backend blocks full-fat yoghurt",
+     recipe_match_num(["2 dl mild lättyoghurt"],
+                      {"name": "Yoghurt Turkisk Naturell 10% 500g",
+                       "category": "dairy"}), 0)
 
 # Q105: pepparrot SVF replaced with PNB — fresh whole + riven both match, only kräm/visp blocked
 test("Fresh pepparrot whole root matches pepparrot färsk recipe",
@@ -12341,10 +12337,9 @@ test("alternativt: plain fresh tomat matches despite krossade in alternative",
 test("alternativt: plain fresh tomat matches despite körsbärstomater in alternative",
      recipe_match_num(["6 tomater, hackade (alternativt en burk körsbärstomater)"],
                       {"name": "Tomat Kvist 500g Klass 1", "category": "vegetables"}), 1)
-test("alternativt legacy: plain fresh tomat matches primary arm",
-     legacy_match("Tomat Kvist 500g Klass 1",
-                  "6 tomater, hackade (alternativt en burk körsbärstomater)",
-                  "vegetables"), "tomat")
+test("alternativt backend: plain fresh tomat matches primary arm",
+     recipe_match_num(["6 tomater, hackade (alternativt en burk körsbärstomater)"],
+                      {"name": "Tomat Kvist 500g Klass 1", "category": "vegetables"}), 1)
 test("canned tomato: generic burk tomater matches peeled whole tomatoes (fast)",
      match("Skalade Tomater 400g Mutti", "1 burk tomater", "pantry"), "tomat")
 test("canned tomato: generic burk tomater matches whole canned tomatoes (backend)",
@@ -12410,14 +12405,12 @@ test("whole canned tomato: generic whole canned tomatoes do not match datterini 
 test("alternativt: canned körsbärstomater arm matches canned small tomatoes",
      recipe_match_num(["6 tomater, hackade (alternativt en burk körsbärstomater)"],
                       {"name": "Körsbärstomater Konserverade 400g", "category": "pantry"}), 1)
-test("alternativt legacy: canned körsbärstomater arm matches canned small tomatoes",
-     legacy_match("Körsbärstomater Konserverade 400g",
-                  "6 tomater, hackade (alternativt en burk körsbärstomater)",
-                  "pantry"), "småtomat")
-test("alternativt legacy: canned körsbärstomater arm does not match fresh small tomatoes",
-     legacy_match("Körsbärstomater 250g Klass 1 ICA",
-                  "6 tomater, hackade (alternativt en burk körsbärstomater)",
-                  "vegetables"), None)
+test("alternativt backend: canned körsbärstomater arm matches canned small tomatoes",
+     recipe_match_num(["6 tomater, hackade (alternativt en burk körsbärstomater)"],
+                      {"name": "Körsbärstomater Konserverade 400g", "category": "pantry"}), 1)
+test("alternativt backend: canned körsbärstomater arm does not match fresh small tomatoes",
+     recipe_match_num(["6 tomater, hackade (alternativt en burk körsbärstomater)"],
+                      {"name": "Körsbärstomater 250g Klass 1 ICA", "category": "vegetables"}), 0)
 # Guard against over-relaxation: a qualifier required by the primary (no alternative)
 # must still block a plain product.
 test("alternativt-guard: soltorkad-only recipe still blocks plain fresh tomat",
@@ -15099,12 +15092,14 @@ test("stop-word filters extraction reserva",
 # "reserva" is a Spanish aging/quality designation (ham/cheese/wine), not a food.
 # It must not bridge a cured-ham ingredient to an aged olive oil that shares the word.
 test("reserva olive oil does not match serrano ham via shared aging word",
-     legacy_match("Olja Reserva Familiar Arbequina 500ml Castillo de Canena",
-                  "Jamón Serrano Reserva"), None)
+     recipe_match_num(["Jamón Serrano Reserva"],
+                      {"name": "Olja Reserva Familiar Arbequina 500ml Castillo de Canena",
+                       "category": "pantry"}), 0)
 # Real Serrano ham products must still match the ingredient via the serrano keyword.
 test("serrano ham still matches Jamón Serrano Reserva ingredient",
-     legacy_match("Lufttorkad Skinka Jamon Serrano 70g Zeta",
-                  "Jamón Serrano Reserva") is not None, True)
+     recipe_match_num(["Jamón Serrano Reserva"],
+                      {"name": "Lufttorkad Skinka Jamon Serrano 70g Zeta",
+                       "category": "meat"}), 1)
 # runtime_fpb_mango_mangosorbet: generated by dm matcher add fpb
 # sanity-id: runtime_fpb_mango_mangosorbet
 from languages.sv.ingredient_matching import FALSE_POSITIVE_BLOCKERS
@@ -15122,18 +15117,22 @@ test("stop-word filters extraction fruktskålen",
 from languages.sv.ingredient_matching import FALSE_POSITIVE_BLOCKERS
 test("FPB kål has fruktskål",
      "fruktskål" in FALSE_POSITIVE_BLOCKERS.get("kål", set()), True)
-# "fruktskålen" (fruit bowl) contains "kål" as a substring. matches_ingredient
-# scans the raw ingredient text, so a grape ingredient that suggests serving
-# "(eller det du hittar i fruktskålen)" used to drag in every cabbage product.
+# "fruktskålen" (fruit bowl) contains "kål" as a substring. The fast/backend
+# matcher must keep a grape ingredient that suggests serving "(eller det du
+# hittar i fruktskålen)" from dragging in cabbage products.
 test("cabbage products do not match a grape ingredient via the fruktskål substring",
-     legacy_match("Svartkål 200g Klass 1 ICA",
-                  "10 vindruvor (eller det du hittar i fruktskålen)"), None)
+     recipe_match_num(["10 vindruvor (eller det du hittar i fruktskålen)"],
+                      {"name": "Svartkål 200g Klass 1 ICA",
+                       "category": "vegetables"}), 0)
 test("vitkål does not match the same grape ingredient via fruktskål substring",
-     legacy_match("Vitkål ca 3 kg Klass 1 ICA",
-                  "10 vindruvor (eller det du hittar i fruktskålen)"), None)
+     recipe_match_num(["10 vindruvor (eller det du hittar i fruktskålen)"],
+                      {"name": "Vitkål ca 3 kg Klass 1 ICA",
+                       "category": "vegetables"}), 0)
 # Real cabbage recipes must still match cabbage after the fruktskål blocker.
 test("vitkål still matches a plain kål ingredient",
-     legacy_match("Vitkål ca 3 kg Klass 1 ICA", "1 huvud kål") is not None, True)
+     recipe_match_num(["1 huvud kål"],
+                      {"name": "Vitkål ca 3 kg Klass 1 ICA",
+                       "category": "vegetables"}), 1)
 # runtime_fpb_mango_mangojuice: generated by dm matcher add fpb
 # sanity-id: runtime_fpb_mango_mangojuice
 from languages.sv.ingredient_matching import FALSE_POSITIVE_BLOCKERS
@@ -15153,11 +15152,13 @@ test("FPB pumpa has pumpafro",
 # squash keyword, so the FPB must block the squash while leaving a plain
 # squash ingredient free to match.
 test("Whole squash blocked from pumpafrö-seed ingredient",
-     legacy_match("Pumpa Butternut Ekologisk ca 900g Klass 1 ICA",
-                  "1/2 dl pumpafrö, torrostade"), None)
+     recipe_match_num(["1/2 dl pumpafrö, torrostade"],
+                      {"name": "Pumpa Butternut Ekologisk ca 900g Klass 1 ICA",
+                       "category": "vegetables"}), 0)
 test("Whole squash still matches plain pumpa ingredient",
-     legacy_match("Pumpa Butternut Ekologisk ca 900g Klass 1 ICA",
-                  "500 g pumpa, tärnad"), "pumpa")
+     recipe_match_num(["500 g pumpa, tärnad"],
+                      {"name": "Pumpa Butternut Ekologisk ca 900g Klass 1 ICA",
+                       "category": "vegetables"}), 1)
 # runtime_ksbc_ravioli_chokladravioli: generated by dm matcher add ksbc
 # sanity-id: runtime_ksbc_ravioli_chokladravioli
 from languages.sv.ingredient_matching import KEYWORD_SUPPRESSED_BY_CONTEXT
@@ -15261,9 +15262,13 @@ test("stop-word filters extraction tjocke",
 # Thick-cut spare ribs must not match "entrecôte i tjocka skivor" via the
 # thickness descriptor; entrecôte itself must still match.
 test("tjocka stop-word blocks revbensspjäll from entrecôte ingredient",
-     bool(legacy_match("Revbensspjäll Färska Tjocka ca 1kg ICA", "500 g entrecôte i tjocka skivor")), False)
+     recipe_match_num(["500 g entrecôte i tjocka skivor"],
+                      {"name": "Revbensspjäll Färska Tjocka ca 1kg ICA",
+                       "category": "meat"}), 0)
 test("entrecôte product still matches entrecôte ingredient",
-     bool(legacy_match("Entrecote Färsk Skivad ca 700g ICA", "500 g entrecôte i tjocka skivor")), True)
+     recipe_match_num(["500 g entrecôte i tjocka skivor"],
+                      {"name": "Entrecote Färsk Skivad ca 700g ICA",
+                       "category": "meat"}), 1)
 # keyword_synonym_shitake_shitakesvamp: generated by dm matcher add keyword-synonym
 # sanity-id: keyword_synonym_shitake_shitakesvamp
 test("Keyword synonym shitakesvamp matches shiitake",
@@ -15510,9 +15515,13 @@ test("stop-word filters extraction lattrokt",
 # ingredient just because both carry the "lättrökt" smoking descriptor. The food
 # noun (rimmatfläsk / älgskav) is what should drive the match.
 test("lättrökt elk does not match rimmat fläsk via shared descriptor",
-     legacy_match("Älgskav lättrökt 240g Norrlandsvilt", "200 g rimmat fläsk, ev lättrökt", "meat"), None)
+     recipe_match_num(["200 g rimmat fläsk, ev lättrökt"],
+                      {"name": "Älgskav lättrökt 240g Norrlandsvilt",
+                       "category": "meat"}), 0)
 test("cured pork still matches rimmat fläsk after lättrökt stop-word",
-     legacy_match("Stekfläsk Rimmat och Skivat 375g Tulip", "200 g rimmat fläsk, ev lättrökt", "meat") is not None, True)
+     recipe_match_num(["200 g rimmat fläsk, ev lättrökt"],
+                      {"name": "Stekfläsk Rimmat och Skivat 375g Tulip",
+                       "category": "meat"}), 1)
 # runtime_specialty_qualifier_mayo: generated by dm matcher add specialty-qualifier
 # sanity-id: runtime_specialty_qualifier_mayo
 from languages.sv.ingredient_matching.specialty_rules import SPECIALTY_QUALIFIERS

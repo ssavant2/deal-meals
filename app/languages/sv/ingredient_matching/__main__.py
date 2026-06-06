@@ -4,7 +4,8 @@ from . import (
     extract_keywords_from_ingredient,
     extract_keywords_from_product,
     is_non_food_product,
-    matches_ingredient,
+    matches_ingredient_fast,
+    precompute_offer_data,
 )
 
 
@@ -30,10 +31,10 @@ def main() -> None:
     print()
 
     print("Test 4: Matching")
-    product_kw = extract_keywords_from_product('Vispgrädde Laktosfri 40%')
-    print(f"  Product keywords: {product_kw}")
-    print(f"  Matches '1 dl vispgrädde': {matches_ingredient(product_kw, '1 dl vispgrädde')}")
-    print(f"  Matches '1 dl grädde': {matches_ingredient(product_kw, '1 dl grädde')}")
+    offer_data = precompute_offer_data('Vispgrädde Laktosfri 40%')
+    print(f"  Product keywords: {offer_data.get('keywords', [])}")
+    print(f"  Matches '1 dl vispgrädde': {matches_ingredient_fast(offer_data, '1 dl vispgrädde')}")
+    print(f"  Matches '1 dl grädde': {matches_ingredient_fast(offer_data, '1 dl grädde')}")
 
 
 if __name__ == "__main__":

@@ -613,7 +613,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         steps=(
             "When the mechanism is unclear, run: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Run: ./bin/dm matcher add pnb <keyword> --blockers <word1,word2,...> --reason \"<why>\"",
-            "PNB is product-side proof; do not treat matches_ingredient() alone as sufficient behavior evidence.",
+            "PNB is product-side proof; verify with backend/product diagnostics when behavior proof is needed.",
             "If active space-normalization joins the product phrase into a compound, also cover the joined blocker form when warned.",
             "The command writes runtime_rule_overlays.toml, appends a focused sanity canary, and runs Track A gates by default.",
         ),
@@ -966,7 +966,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
     "compare-paths": MatcherGuide(
         label="compare-paths",
         status="supported by dm matcher",
-        summary="Compare legacy live, canonical fast, backend, and offer precompute keyword paths for one pair.",
+        summary="Compare canonical fast, backend, and offer precompute keyword paths for one pair.",
         steps=(
             "Run: ./bin/dm matcher compare-paths --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Use this when live/fast/backend disagree or when precomputed keywords/checks such as offer expansions or processed-product rules look suspicious.",
@@ -2392,12 +2392,8 @@ def _infer_positive_expected_match_from_current_match(row: Mapping[str, Any]) ->
             weight_grams=weight_grams,
             recipe_name=str(row.get("recipe_name") or "DM Matcher Fixture Make Positive"),
         )
-        if path_compare["live_fast_diverged"] or path_compare["fast_backend_diverged"]:
-            failures.append("single-ingredient compare-paths diverged")
-        if path_compare["legacy_live_keyword"] != canonical:
-            failures.append(
-                f"legacy live keyword {path_compare['legacy_live_keyword']!r} != {canonical!r}"
-            )
+        if path_compare["fast_backend_diverged"]:
+            failures.append("single-ingredient fast/backend compare-paths diverged")
         if path_compare["fast_keyword"] != canonical:
             failures.append(f"canonical fast keyword {path_compare['fast_keyword']!r} != {canonical!r}")
         if not path_compare["backend_matched"] or int(path_compare["backend_num_matches"]) != 1:
@@ -12600,7 +12596,7 @@ def _compare_matcher_paths(
         from languages.sv.ingredient_matching.extraction_patterns import _INGREDIENT_PARENTS_REVERSE
         from languages.sv.ingredient_matching.extraction import extract_keywords_from_product
         from languages.sv.ingredient_matching.keywords import OFFER_EXTRA_KEYWORDS
-        from languages.sv.ingredient_matching.matching import _SPECIALTY_KEYWORD_ALIASES, matches_ingredient
+        from languages.sv.ingredient_matching.matching import _SPECIALTY_KEYWORD_ALIASES
     except ModuleNotFoundError:
         from app.languages.sv.ingredient_matching import (
             build_ingredient_match_data,
@@ -12610,7 +12606,7 @@ def _compare_matcher_paths(
         from app.languages.sv.ingredient_matching.extraction_patterns import _INGREDIENT_PARENTS_REVERSE
         from app.languages.sv.ingredient_matching.extraction import extract_keywords_from_product
         from app.languages.sv.ingredient_matching.keywords import OFFER_EXTRA_KEYWORDS
-        from app.languages.sv.ingredient_matching.matching import _SPECIALTY_KEYWORD_ALIASES, matches_ingredient
+        from app.languages.sv.ingredient_matching.matching import _SPECIALTY_KEYWORD_ALIASES
 
     ingredient_data = build_ingredient_match_data(ingredient)
     offer_match_data = build_offer_match_data(
@@ -12632,7 +12628,6 @@ def _compare_matcher_paths(
         extracted_keywords=product_keywords,
         precomputed_keywords=precomputed_offer_keywords,
     )
-    live_keyword = matches_ingredient(product_keywords, ingredient, offer)
     fast_result = match_offer_to_ingredient(ingredient_data, offer_match_data)
     probe = _probe_matcher_pair(
         offer=offer,
@@ -12652,7 +12647,7 @@ def _compare_matcher_paths(
                 break
     processed_check_rows = _processed_check_diagnostics(
         processed_checks=processed_checks,
-        matched_keyword=fast_keyword or str(live_keyword or ""),
+        matched_keyword=fast_keyword,
         offer_keywords=offer_data.get("keywords") or (),
         ingredient_lower=diagnostic_ingredient_lower,
         product_lower=offer_data.get("name_normalized") or "",
@@ -12681,15 +12676,11 @@ def _compare_matcher_paths(
             for key, values in (offer_data.get("specialty_qualifiers") or {}).items()
         },
         "processed_checks": processed_check_rows,
-        "legacy_live_matched": live_keyword is not None,
-        "legacy_live_keyword": live_keyword or "",
         "fast_matched": bool(fast_result.matched),
         "fast_keyword": fast_keyword,
         "fast_reason": fast_result.reason or "",
         "backend_matched": probe["backend_matched"],
         "backend_num_matches": probe["backend_num_matches"],
-        "live_fast_diverged": (live_keyword is not None) != bool(fast_result.matched)
-        or (live_keyword or "") != fast_keyword,
         "fast_backend_diverged": bool(fast_result.matched) != probe["backend_matched"],
     }
 
@@ -12793,7 +12784,7 @@ def matcher_probe(
         typer.secho("PASS", fg=typer.colors.GREEN)
 
 
-@matcher_app.command("compare-paths", help="Compare live, fast, and backend matcher paths for one pair.")
+@matcher_app.command("compare-paths", help="Compare fast and backend matcher paths for one pair.")
 def matcher_compare_paths(
     offer: Annotated[
         str,
@@ -12835,11 +12826,6 @@ def matcher_compare_paths(
         typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
         return
 
-    live_status = (
-        f"MATCH ({payload['legacy_live_keyword']})"
-        if payload["legacy_live_matched"]
-        else "NO MATCH"
-    )
     fast_status = (
         f"MATCH ({payload['fast_keyword']})"
         if payload["fast_matched"]
@@ -12853,7 +12839,6 @@ def matcher_compare_paths(
     typer.echo(f"Offer: {payload['offer']}")
     typer.echo(f"Ingredient: {payload['ingredient']}")
     typer.echo(f"Ingredient normalized: {payload['ingredient_normalized']}")
-    typer.echo(f"Legacy live matcher: {live_status}")
     typer.echo(f"Canonical fast matcher: {fast_status}")
     typer.echo(f"Backend matcher: {backend_status}")
     typer.echo("Product keywords: " + ", ".join(payload["product_keywords"]))
@@ -12890,8 +12875,8 @@ def matcher_compare_paths(
             typer.echo(prefix)
     else:
         typer.echo("Processed checks: none")
-    if payload["live_fast_diverged"] or payload["fast_backend_diverged"]:
-        typer.secho("Warning: matcher paths diverge.", fg=typer.colors.YELLOW, err=True)
+    if payload["fast_backend_diverged"]:
+        typer.secho("Warning: fast/backend matcher paths diverge.", fg=typer.colors.YELLOW, err=True)
 
 
 def _sanity_expected_literal(expected: str) -> str:

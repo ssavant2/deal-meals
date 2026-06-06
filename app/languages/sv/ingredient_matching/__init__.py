@@ -106,7 +106,7 @@ from .engine import (
     match_offer_to_ingredient,
 )
 from .ingredient_routing import build_recipe_ingredient_term_map
-from .matching import matches_ingredient, matches_ingredient_fast, precompute_offer_data
+from .matching import matches_ingredient_fast, precompute_offer_data
 from .ingredient_data import IngredientMatchData
 from .match_result import MatchResult
 from .offer_data import OfferMatchData
@@ -337,7 +337,6 @@ __all__ = [
     'load_compiled_recipe_runtime_cache',
     'load_compiled_recipe_term_postings',
     'match_offer_to_ingredient',
-    'matches_ingredient',
     'matches_ingredient_fast',
     'normalize_compiled_offer_payload',
     'parse_eller_alternatives',
