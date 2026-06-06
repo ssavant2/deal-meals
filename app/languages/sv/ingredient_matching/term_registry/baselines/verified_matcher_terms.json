@@ -22,10 +22,10 @@
       "legacy_validator": 252,
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 412,
-      "negative_regression": 840,
+      "negative_regression": 841,
       "offer_extra_keyword_mapping": 422,
       "parent_match_only_mapping": 20,
-      "positive_regression": 673,
+      "positive_regression": 672,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
@@ -123045,27 +123045,6 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"senap\", \"ingredient_index\": 0, \"must_match_keyword\": \"senap\"}], \"policy_ref\": \"Q126-3_senap_broad_family\", \"recipe_name\": \"Sanity Recipe\"}"
     },
     {
-      "variant_id": "vterm-3ff095b5e2d8c2b3",
-      "row_index": 664,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
-      "source_ref": "sanity:grovkornig_senap",
-      "source_id": "matcher_regression_grovkornig_senap_positive",
-      "variant_role": "positive_regression",
-      "variant_text": "matcher_regression_grovkornig_senap_positive: Skånsk Senap Slotts",
-      "canonical": "senap",
-      "expected_family": "senap",
-      "ingredient_text": "1 msk grovkornig senap",
-      "product_text": "Skånsk Senap Slotts",
-      "product_category": "pantry",
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": false,
-      "notes": "current_review_senap_broad_Q126-3",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"senap\", \"ingredient_index\": 0, \"must_match_keyword\": \"senap\"}], \"policy_ref\": \"current_review_senap_broad_Q126-3\", \"recipe_name\": \"Sanity Recipe\"}"
-    },
-    {
       "variant_id": "vterm-91f31bac798d9583",
       "row_index": 622,
       "source_order": 20,
@@ -123169,6 +123148,27 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"pasta\"}"
+    },
+    {
+      "variant_id": "vterm-e1666d256ed9cc06",
+      "row_index": 664,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_ref": "sanity:grovkornig_senap",
+      "source_id": "matcher_regression_grovkornig_senap_positive",
+      "variant_role": "negative_regression",
+      "variant_text": "matcher_regression_grovkornig_senap_positive: Skånsk Senap Slotts",
+      "canonical": null,
+      "expected_family": "current_review_senap_skansk_dijon_self_only",
+      "ingredient_text": "1 msk grovkornig senap",
+      "product_text": "Skånsk Senap Slotts",
+      "product_category": "pantry",
+      "product_brand": null,
+      "expected": 0,
+      "needs_product_text": false,
+      "notes": "current_review_senap_skansk_dijon_self_only",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_senap_skansk_dijon_self_only\", \"recipe_name\": \"Sanity Recipe\"}"
     }
   ],
   "verification": {
