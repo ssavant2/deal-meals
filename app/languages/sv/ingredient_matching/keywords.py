@@ -184,7 +184,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
     'quattro',  # Italian "four" — "Glasburk Quattro stagioni"/"Pizza quattro formaggi" reverse-substring matches "quattrocento" (cheese)
     'dubbel',  # "dubbelkolla innehållet!" → compound "dubbel" matches candy bars (Japp Dubbel, Sportlunch Dubbel). Not a food keyword.
     'brunt',  # "Brunt Farinsocker" — color descriptor. Matches "Krydda Brunt Senapsfrö"
-    'garant', 'eldorado', 'sevan', 'findus', 'minella', 'ducali', 'risberg', 'delicato',  # store/product brand names (not food keywords)
+    'garant', 'eldorado', 'sevan', 'findus', 'minella', 'ducali', 'risberg', 'delicato', 'dafgårds', 'dafgård',  # store/product brand names (not food keywords)
     'kockens',  # spice brand names in recipe text ("från Kockens kryddor") are context, not ingredients
     'vegeta',  # Podravka seasoning brand — substring matches "vegetabilisk/vegetarisk" in ingredient text
     'saluhall', 'thom',  # "Saluhall Paul Och Thom" - not food keywords
@@ -1513,6 +1513,8 @@ PROCESSED_FOODS_EXEMPTIONS: FrozenSet[str] = frozenset({
                     # reopening generic ready-made soup products as ingredient families
     # NOTE: 'glass noodles' exemption removed — it also exempted "Spicy Japchae ... Glass Noodle"
     # Instead, "Glass Noodles" is handled by pre-PROCESSED_FOODS space norm (see below)
+    'lantbröd',   # Dafgårds makes both ready meals AND bread. "Lantbröd Dafgårds" is bread,
+                  # not a ready meal — exempt it so the lantbröd keyword is extracted.
 })
 
 FLAVOR_WORDS: FrozenSet[str] = frozenset({

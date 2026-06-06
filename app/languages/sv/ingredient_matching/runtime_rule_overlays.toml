@@ -858,6 +858,13 @@ keyword = "äpple"
 blockers = ["kompott"]
 reason = "Fruit compote/jam products (e.g. Råggyberry Äpple Svartvinbär Kompott) are processed preserves, not fresh apples; block from plain äpple ingredient"
 
+[[product_name_blockers]]
+id = "runtime_pnb_svartvinbar"
+status = "active"
+keyword = "svartvinbär"
+blockers = ["kompott"]
+reason = "Fruktkompott/sylt (Råggyberry Äpple Svartvinbär Kompott) är processad bärprodukt, inte färska svartvinbär eller svartvinbärsblad som örtkrydda"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"

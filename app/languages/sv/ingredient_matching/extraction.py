@@ -1779,11 +1779,21 @@ def extract_keywords_from_product(
     # "Fusilli Pasta" → both words are carriers → add primary carrier 'fusilli'.
     # EXCEPTION: flavor-dominant carriers (saft, juice, dryck etc.) and frozen
     # products — these are intentionally empty when carrier-only.
+    # EXCEPTION to the frozen exception: raw seafood carriers (räkor, hälleflundra, etc.)
+    # are sold frozen as the raw ingredient itself, not as ready meals. "Räkor Frysta"
+    # is raw frozen shrimp — the carrier keyword must be re-added even when frozen.
+    # "Prosciutto Pizza Fryst" is a frozen pizza dish — carrier stays blocked.
+    _RAW_INGREDIENT_CARRIERS_FROZEN_OK = frozenset({
+        'räkor', 'rakor', 'räka', 'raka',
+        'hälleflundra',
+        'makrillfiléer', 'makrillfileer', 'makrillfieer',
+        'taggmakrillfiléer', 'taggmakrillfileer',
+    })
     # NOTE: this runs AFTER KEYWORD_SYNONYMS/INGREDIENT_PARENTS, so we apply
     # the same mappings here to stay consistent.
     if (matched_carrier and not keywords
             and matched_carrier not in _FLAVOR_DOMINANT_CARRIERS
-            and not _is_frozen):
+            and (not _is_frozen or matched_carrier in _RAW_INGREDIENT_CARRIERS_FROZEN_OK)):
         kw = matched_carrier
         kw = KEYWORD_SYNONYMS.get(kw, kw)
         kw = INGREDIENT_PARENTS.get(kw, kw)

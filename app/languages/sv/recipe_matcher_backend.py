@@ -3101,18 +3101,36 @@ def validate_offer_match_candidate(
                         matched_kw_lower,
                     )
                     if carrier_blocked and has_eller_pattern(ing_norm):
-                        for alt in parse_eller_alternatives(ing_norm):
-                            alt_norm = _apply_space_normalizations(
-                                fix_swedish_chars(str(alt)).lower()
-                            )
-                            if matched_kw_lower not in alt_norm:
+                        # First try a simple word-split before the grammatical parse.
+                        # parse_eller_alternatives can incorrectly distribute a standalone
+                        # noun as an adjective: "ris eller kokt potatis" → "ris potatis"
+                        # arm (wrong). A direct split gives the correct arms: "ris" / "kokt
+                        # potatis". Only the grammatical parse can split "röd eller grön
+                        # paprika" correctly ("röd paprika" / "grön paprika"), so we fall
+                        # through to it when the simple-split fails to clear the block.
+                        for simple_part in ing_norm.split(' eller '):
+                            simple_part = simple_part.strip()
+                            if matched_kw_lower not in simple_part:
                                 continue
                             if not _flavor_keyword_blocked_by_carrier_text(
-                                alt_norm,
+                                simple_part,
                                 matched_kw_lower,
                             ):
                                 carrier_blocked = False
                                 break
+                        if carrier_blocked:
+                            for alt in parse_eller_alternatives(ing_norm):
+                                alt_norm = _apply_space_normalizations(
+                                    fix_swedish_chars(str(alt)).lower()
+                                )
+                                if matched_kw_lower not in alt_norm:
+                                    continue
+                                if not _flavor_keyword_blocked_by_carrier_text(
+                                    alt_norm,
+                                    matched_kw_lower,
+                                ):
+                                    carrier_blocked = False
+                                    break
                 if carrier_blocked:
                     flavor_retried = False
                     retry_from_idx = matched_ing_idx
