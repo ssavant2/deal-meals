@@ -305,12 +305,14 @@ def _inspect_compiled_recipe_offer_candidate_metadata(
         for key, expected_value in expected.items()
         if last_operation.get(key) != expected_value
     ]
-    if (
-        expected_recipe_count is not None
-        and row.get("total_recipes") is not None
-        and int(row.get("total_recipes") or 0) != expected_recipe_count
-    ):
-        mismatches.append("total_recipes")
+    if expected_recipe_count is not None and row.get("total_recipes") is not None:
+        # Candidate metadata is stored for the complete active recipe corpus.
+        # A cache rebuild may intentionally score only the enabled-source subset
+        # (for example when a recipe source is temporarily disabled). A complete
+        # superset candidate table is valid for that narrower scope; only a
+        # metadata recipe count smaller than the requested scope is stale.
+        if int(row.get("total_recipes") or 0) < expected_recipe_count:
+            mismatches.append("total_recipes")
     if (
         expected_offer_scope_count is not None
         and int(last_operation.get("complete_offer_scope_count") or 0) != expected_offer_scope_count
