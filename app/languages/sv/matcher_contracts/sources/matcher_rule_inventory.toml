@@ -786,9 +786,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'garlic': {'garlic', 'vitlök', 'vitlok'},"
-end = 1427
+end = 1433
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1427
+start = 1433
 
 [[inventory.line_refs]]
 anchor = "'vitlöksklyftor': {"
@@ -836,9 +836,9 @@ start = 441
 
 [[inventory.line_refs]]
 anchor = "# \"Formbar färs\" must match products that are actually formbar (can be shaped into"
-end = 1458
+end = 1464
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1458
+start = 1464
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_raw_flaskkott_not_prepared_souvlaki"
@@ -1434,9 +1434,9 @@ start = 554
 
 [[inventory.line_refs]]
 anchor = "# Chocolate darkness: \"Bakchoklad Vit\" should NOT match \"mörk choklad\" (Direction B blocks)."
-end = 950
+end = 956
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 950
+start = 956
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_hoisin_vegan_alternative_scope"
@@ -2121,15 +2121,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "# Chocolate buttons share the same explicit-variant rule as cooking"
-end = 971
+end = 977
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 971
+start = 977
 
 [[inventory.line_refs]]
 anchor = "'chokladknappar': frozenset({"
-end = 1210
+end = 1216
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1210
+start = 1216
 
 [[inventory.line_refs]]
 anchor = "'chokladknappar', 'chokladknapp',"
@@ -2332,9 +2332,9 @@ start = 108
 
 [[inventory.line_refs]]
 anchor = "# Chocolate darkness: \"Bakchoklad Vit\" should NOT match \"mörk choklad\" (Direction B blocks)."
-end = 950
+end = 956
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 950
+start = 956
 
 [[inventory.line_refs]]
 anchor = "q in ingredient_lower for q in SPECIALTY_QUALIFIERS.get(specialty_keyword, ())"
@@ -2363,9 +2363,9 @@ start = 314
 
 [[inventory.line_refs]]
 anchor = "'rimmade': {'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt', 'kallr', 'najad', 'najadlax'},"
-end = 1375
+end = 1381
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1375
+start = 1381
 
 [[inventory.line_refs]]
 anchor = "offer_qualifiers = offer_data['specialty_qualifiers'].get(specialty_keyword, set())"
@@ -2918,9 +2918,9 @@ start = 219
 
 [[inventory.line_refs]]
 anchor = "# Black adjective forms: lentils (beluga) + olives (kalamata/gemlik) + beans"
-end = 1331
+end = 1337
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1331
+start = 1337
 
 [[inventory]]
 adapter_ref = "backend_validation.events:product_name_blocker"
@@ -3185,9 +3185,9 @@ start = 3973
 
 [[inventory.line_refs]]
 anchor = "'garlic', 'herbs',              # English = vitlök & örter (QUALIFIER_EQUIVALENTS maps)"
-end = 847
+end = 853
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 847
+start = 853
 
 [[inventory.line_refs]]
 anchor = "'4 peppar',               # \"Färskost 4 Peppar\" ≠ explicit pepparrot / other cream cheese flavors"
@@ -5550,9 +5550,9 @@ start = 209
 
 [[inventory.line_refs]]
 anchor = "def _check_compound_strict(keyword: str, ingredient_lower: str,"
-end = 307
+end = 324
 path = "app/languages/sv/ingredient_matching/compound_text.py"
-start = 307
+start = 324
 
 [[inventory.line_refs]]
 anchor = "# Compound strictness: if keyword is part of a compound word in recipe,"

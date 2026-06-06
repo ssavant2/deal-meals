@@ -2013,6 +2013,14 @@ action = "add"
 terms = ["curd"]
 reason = "Bare 'curd' (4 chars) in Swedish recipes means lemon curd; force-keep so it survives the length filter and can route to lemoncurd."
 
+[[keyword_set_updates]]
+id = "runtime_processed_food_add_raggyberry"
+status = "active"
+surface = "processed_foods"
+action = "add"
+terms = ["råggyberry"]
+reason = "Råggyberry is a fruit squeeze-pouch snack (mellanmål), not a cooking kompott; must not match recipe ingredients"
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"

@@ -1090,9 +1090,9 @@
     "line_refs": [
       {
         "anchor": "'garlic': {'garlic', 'vitlök', 'vitlok'},",
-        "end": 1427,
+        "end": 1433,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 1427
+        "start": 1433
       },
       {
         "anchor": "'vitlöksklyftor': {",
@@ -1156,9 +1156,9 @@
       },
       {
         "anchor": "# \"Formbar färs\" must match products that are actually formbar (can be shaped into",
-        "end": 1458,
+        "end": 1464,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 1458
+        "start": 1464
       }
     ],
     "notes": "Formbar vegetarisk färs must stay on moldable plant-based mince and reject ordinary animal mince.",
@@ -1939,9 +1939,9 @@
       },
       {
         "anchor": "# Chocolate darkness: \"Bakchoklad Vit\" should NOT match \"mörk choklad\" (Direction B blocks).",
-        "end": 950,
+        "end": 956,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 950
+        "start": 956
       }
     ],
     "notes": "Truncated wording like 'vit- och mörk choklad' expands to both white and dark chocolate families while light chocolate remains outside the accepted pair.",
@@ -2855,15 +2855,15 @@
     "line_refs": [
       {
         "anchor": "# Chocolate buttons share the same explicit-variant rule as cooking",
-        "end": 971,
+        "end": 977,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 971
+        "start": 977
       },
       {
         "anchor": "'chokladknappar': frozenset({",
-        "end": 1210,
+        "end": 1216,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 1210
+        "start": 1216
       },
       {
         "anchor": "'chokladknappar', 'chokladknapp',",
@@ -3162,9 +3162,9 @@
       },
       {
         "anchor": "# Chocolate darkness: \"Bakchoklad Vit\" should NOT match \"mörk choklad\" (Direction B blocks).",
-        "end": 950,
+        "end": 956,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 950
+        "start": 956
       },
       {
         "anchor": "q in ingredient_lower for q in SPECIALTY_QUALIFIERS.get(specialty_keyword, ())",
@@ -3205,9 +3205,9 @@
       },
       {
         "anchor": "'rimmade': {'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt', 'kallr', 'najad', 'najadlax'},",
-        "end": 1375,
+        "end": 1381,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 1375
+        "start": 1381
       },
       {
         "anchor": "offer_qualifiers = offer_data['specialty_qualifiers'].get(specialty_keyword, set())",
@@ -3949,9 +3949,9 @@
       },
       {
         "anchor": "# Black adjective forms: lentils (beluga) + olives (kalamata/gemlik) + beans",
-        "end": 1331,
+        "end": 1337,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 1331
+        "start": 1337
       }
     ],
     "notes": "Black-olive wording keeps black/Kalamata/Gemlik fallback pragmatic. Generic urkärnade oliver remains stricter and does not match products sold with pits.",
@@ -4292,9 +4292,9 @@
       },
       {
         "anchor": "'garlic', 'herbs',              # English = vitlök & örter (QUALIFIER_EQUIVALENTS maps)",
-        "end": 847,
+        "end": 853,
         "path": "app/languages/sv/ingredient_matching/specialty_rules.py",
-        "start": 847
+        "start": 853
       },
       {
         "anchor": "'4 peppar',               # \"Färskost 4 Peppar\" ≠ explicit pepparrot / other cream cheese flavors",
@@ -7319,9 +7319,9 @@
       },
       {
         "anchor": "def _check_compound_strict(keyword: str, ingredient_lower: str,",
-        "end": 307,
+        "end": 324,
         "path": "app/languages/sv/ingredient_matching/compound_text.py",
-        "start": 307
+        "start": 324
       },
       {
         "anchor": "# Compound strictness: if keyword is part of a compound word in recipe,",
