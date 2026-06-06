@@ -996,6 +996,79 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
     ),
 }
 
+GUIDE_GOALS: dict[str, MatcherGuide] = {
+    "product-phrase-canonical": MatcherGuide(
+        label="product-phrase-canonical",
+        status="goal-oriented guide",
+        summary="Make product wording expose a specific canonical keyword.",
+        steps=(
+            "If the product alias is a single token, use: ./bin/dm matcher add offer-extra-keyword <canonical> --variants <token> --sanity-ingredient \"<ingredient>\"",
+            "If the product alias is a multiword phrase, do not put the raw phrase in offer-extra-keyword; token-based runtime matching will not trigger it.",
+            "For a multiword phrase, first use space-normalization when a pure text join is enough, e.g. ./bin/dm matcher add space-normalization \"finkornig rom\" --target stenbitsrom --reason \"<why>\"",
+            "If the phrase needs conditional/product-specific logic, hand-edit extraction.py and then register coverage with ./bin/dm matcher add extraction-helper.",
+            "Verify with ./bin/dm matcher probe or why; raw precompute_offer_data() is not the authority for runtime behavior.",
+        ),
+    ),
+    "interchangeable-family": MatcherGuide(
+        label="interchangeable-family",
+        status="goal-oriented guide",
+        summary="Make sibling terms mutually interchangeable on recipe and offer sides.",
+        steps=(
+            "Use ingredient-parent when child recipes should match sibling family offers, e.g. älgfärs/hjortfärs/viltfärs.",
+            "Run: ./bin/dm matcher add ingredient-parent <canonical> --variants <variant> --sanity-offer \"<offer>\"",
+            "Do not use keyword-extra-parent for mutual sibling matching; it is parent-recipe-to-child-offer only.",
+            "Add explicit blockers/guards separately when one sibling should remain isolated.",
+        ),
+    ),
+    "parent-recipe-child-offers": MatcherGuide(
+        label="parent-recipe-child-offers",
+        status="goal-oriented guide",
+        summary="Let a broad parent recipe term reach narrower child product terms.",
+        steps=(
+            "Use keyword-extra-parent when parent recipe wording should match many child offers, but child recipes should not match sibling offers.",
+            "Run: ./bin/dm matcher add keyword-extra-parent <canonical> --kids <child1,child2> --recipe-name \"<recipe>\" --ingredient \"<ingredient>\"",
+            "If a child recipe also needs sibling offers, switch to ingredient-parent instead.",
+        ),
+    ),
+    "block-wrong-product": MatcherGuide(
+        label="block-wrong-product",
+        status="goal-oriented guide",
+        summary="Choose the narrowest blocker shape for an unwanted positive match.",
+        steps=(
+            "If the unwanted product has a misleading word in its product name, start with PNB: ./bin/dm matcher add pnb <keyword> --blockers <word>",
+            "If the ingredient wording itself creates the false positive, use FPB or KSBC depending on whether the blocker is product-side or ingredient-context-side.",
+            "If a product-name blocker can be bypassed because the recipe contains the blocker as its own valid keyword, prefer KSBC/no-match-policy/backend guard.",
+            "Always verify the exact pair with ./bin/dm matcher probe --expect no-match.",
+        ),
+    ),
+}
+
+GUIDE_GOAL_ALIASES = {
+    "phrase-product-canonical": "product-phrase-canonical",
+    "product-phrase": "product-phrase-canonical",
+    "product_phrase": "product-phrase-canonical",
+    "product_phrase_canonical": "product-phrase-canonical",
+    "product-alias": "product-phrase-canonical",
+    "multiword-product-phrase": "product-phrase-canonical",
+    "multiword_product_phrase": "product-phrase-canonical",
+    "mutual-family": "interchangeable-family",
+    "mutual_family": "interchangeable-family",
+    "family": "interchangeable-family",
+    "interchangeable_family": "interchangeable-family",
+    "sibling-family": "interchangeable-family",
+    "sibling_family": "interchangeable-family",
+    "parent-to-children": "parent-recipe-child-offers",
+    "parent_to_children": "parent-recipe-child-offers",
+    "parent-recipe-to-child-offers": "parent-recipe-child-offers",
+    "parent_recipe_to_child_offers": "parent-recipe-child-offers",
+    "blocker": "block-wrong-product",
+    "block_false_positive": "block-wrong-product",
+    "false-positive": "block-wrong-product",
+    "false_positive": "block-wrong-product",
+    "wrong-product": "block-wrong-product",
+    "wrong_product": "block-wrong-product",
+}
+
 GUIDE_ALIASES = {
     "keyword_synonym": "keyword-synonym",
     "keyword-synonyms": "keyword-synonym",
@@ -7451,6 +7524,11 @@ def _guide_key(shape: str) -> str:
     return GUIDE_ALIASES.get(shape.strip().lower(), GUIDE_ALIASES.get(normalized, normalized))
 
 
+def _guide_goal_key(goal: str) -> str:
+    normalized = goal.strip().lower().replace("_", "-")
+    return GUIDE_GOAL_ALIASES.get(goal.strip().lower(), GUIDE_GOAL_ALIASES.get(normalized, normalized))
+
+
 def _matcher_surface_key(surface_name: str) -> str:
     return _guide_key(surface_name)
 
@@ -13482,6 +13560,31 @@ def matcher_guide(
         typer.echo(f"Unknown matcher rule shape: {shape}", err=True)
         typer.echo(f"Known shapes: {known}", err=True)
         typer.echo("Fallback: edit according to the runbook, then run ./bin/dm matcher preflight and gates.", err=True)
+        raise typer.Exit(2)
+    _print_guide(guide)
+
+
+@matcher_app.command("guide-goal", help="Show goal-oriented matcher workflow advice.")
+def matcher_guide_goal(
+    goal: Annotated[str | None, typer.Argument(help="Goal, e.g. product-phrase-canonical or interchangeable-family.")] = None,
+    list_goals: Annotated[bool, typer.Option("--list", help="List known matcher goals.")] = False,
+) -> None:
+    if list_goals:
+        for key in sorted(GUIDE_GOALS):
+            guide = GUIDE_GOALS[key]
+            typer.echo(f"{guide.label}: {guide.status}")
+        return
+    if goal is None:
+        typer.echo("Pass a matcher goal, or use --list to see known goals.")
+        raise typer.Exit(2)
+
+    key = _guide_goal_key(goal)
+    guide = GUIDE_GOALS.get(key)
+    if guide is None:
+        known = ", ".join(sorted(GUIDE_GOALS))
+        typer.echo(f"Unknown matcher goal: {goal}", err=True)
+        typer.echo(f"Known goals: {known}", err=True)
+        typer.echo("Fallback: run ./bin/dm matcher guide --list and choose a rule shape directly.", err=True)
         raise typer.Exit(2)
     _print_guide(guide)
 
