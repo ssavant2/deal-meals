@@ -1519,6 +1519,10 @@ QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
     'mald': {'malen', 'mald', 'malet', 'malda'},
     'malet': {'malen', 'mald', 'malet', 'malda'},
     'malda': {'malen', 'mald', 'malet', 'malda'},
+    # Lantbuljong (country/rustic bouillon) = functionally grönsaksbuljong in Swedish cooking.
+    # Direction A: ingredient "lantbuljong" must match a product that has 'lant' OR 'grönsak'/'grönsaks'.
+    # This lets "Grönsaks Buljong Tärningar" satisfy a "lantbuljong" ingredient.
+    'lant': {'lant', 'grönsak', 'grönsaks'},
 }
 for _qualifier, _equivalents in QUALIFIER_EQUIVALENT_CLI_UPDATES.items():
     QUALIFIER_EQUIVALENTS.setdefault(_qualifier, set()).update(_equivalents)
