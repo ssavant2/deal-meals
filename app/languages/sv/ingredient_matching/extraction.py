@@ -2576,8 +2576,10 @@ def extract_keywords_from_ingredient(
     # Treat slash-delimited ingredient alternatives as separate tokens.
     # This keeps cases like "smör/margarin" usable without affecting fractions
     # such as "1/2", because digits are removed above and we only split
-    # letter-to-letter slashes here.
-    name = re.sub(r'(?<=[a-zåäöéèü])/(?=[a-zåäöéèü])', ' ', name)
+    # letter-to-letter slashes here. Optional spaces around the slash are allowed
+    # so "torskfilé /laxfilé" and "torskfilé / laxfilé" behave like the no-space
+    # form instead of leaking a malformed "/laxfilé" token.
+    name = re.sub(r'(?<=[a-zåäöéèü])\s*/\s*(?=[a-zåäöéèü])', ' ', name)
     name = _PUNCT_SPLIT_PATTERN.sub(' ', name)  # Remove punctuation that splits words
     name = _WHITESPACE_PATTERN.sub(' ', name).strip()  # Clean up whitespace
 

@@ -5614,6 +5614,21 @@ test(
     match_kw("Torskfilé Fryst", "vit fiskfilé", "fish"),
     "fiskfilé",
 )
+# Slash-separated alternatives extract both arms regardless of surrounding spaces
+# (Stefan 2026-06-06). "torskfilé /laxfilé" (space only before the slash) used to
+# leak a malformed "/laxfilé" token; now it splits like the no-space and
+# both-space forms. Digit fractions (1/2) stay untouched because numbers are
+# stripped first.
+# NOTE: extraction now yields both arms, but a "torskfilé /laxfilé" recipe still
+# does not match a laxfilé offer — the white-fish backend guard (triggered by the
+# torskfilé arm) blocks the salmon alternative. That cross-type eller-handling is a
+# separate, deeper backend concern left as-is (Stefan 2026-06-06).
+test("slash alt: torskfilé /laxfilé extracts both arms",
+     sorted(extract_keywords_from_ingredient("400 g torskfilé /laxfilé")), ["laxfilé", "torskfilé"])
+test("slash alt: torskfilé/laxfilé (no space) also extracts both arms",
+     sorted(extract_keywords_from_ingredient("400 g torskfilé/laxfilé")), ["laxfilé", "torskfilé"])
+test("slash alt: fraction 1/2 dl grädde still extracts only grädde",
+     extract_keywords_from_ingredient("1/2 dl grädde"), ["grädde"])
 test(
     "Q5 vit fiskfilé matches stillahavstorsk ryggfilé",
     match_kw("Ryggfilé stillahavstorsk", "vit fiskfilé", "fish"),
