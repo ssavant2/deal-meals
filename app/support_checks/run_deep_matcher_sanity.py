@@ -2749,15 +2749,15 @@ test(
     True,
 )
 test(
-    "KW lagrad ost helst gruyère keeps gruyere preference",
+    "KW lagrad ost helst gruyère treats gruyere as soft preference",
     extract_keywords_from_ingredient("lagrad ost (helst gruyère)"),
-    ["ost", "gruyere"],
+    ["ost"],
 )
 test(
-    "MAT Gruyère matches lagrad ost helst gruyère",
+    "MAT lagrad ost helst gruyère still accepts aged generic cheese",
     recipe_match_num_cached(
         ["lagrad ost (helst gruyère)"],
-        {"name": "Gruyère 1655 ca 250g Int Räls", "category": "dairy"},
+        {"name": "Prästost 31% Arla 500g", "category": "dairy"},
     ),
     1,
 )
@@ -10832,6 +10832,18 @@ test("ostig smak does NOT match plain ost product",
            "ev. ett par matskedar bjäst/näringsjäst för ostig smak", "dairy"), None)
 test("plain riven ost still matches ost product",
      match("Herrgårdsost 18m 28% 400g Allerum", "100 g riven ost", "dairy"), "ost")
+test("soft parmesan parenthetical still matches generic aged cheese",
+     recipe_match_num(["100 g riven ost (gärna parmesan eller annan lagrad ost)"],
+                      {"name": "Hushållsost 26% Arla 500g", "category": "dairy"}), 1)
+test("soft parmesan parenthetical still matches prästost",
+     recipe_match_num_cached(["100 g riven ost (gärna parmesan eller annan lagrad ost)"],
+                             {"name": "Prästost 31% Arla 500g", "category": "dairy"}), 1)
+test("hard parmesan wording still blocks household cheese",
+     recipe_match_num(["100 g riven ost parmesan"],
+                      {"name": "Hushållsost 26% Arla 500g", "category": "dairy"}), 0)
+test("hard parmesan wording still matches parmigiano product",
+     recipe_match_num_cached(["100 g riven ost parmesan"],
+                             {"name": "Parmigiano Reggiano 200g Zanetti", "category": "dairy"}), 1)
 # Kewpie (Japanese mayo brand) substring-matches 'krispies' — block via PNB
 test("pie PNB blocks Kewpie mayo from krispies recipe",
      recipe_match_num(["3 dl rice krispies"], {"name": "Majonnäs QP Japan 355ml Kewpie", "category": "pantry"}), 0)
@@ -16693,6 +16705,10 @@ test("vegobitar matches Quorn Bitar (form bridge)",
      recipe_match_num(["200 g vegobitar"], {"name": "Quorn Bitar 300g", "category": "frozen"}), 1)
 test("vegofärs does NOT match real nötfärs",
      recipe_match_num(["400 g vegofärs"], {"name": "Nötfärs 500g ICA", "category": "meat"}), 0)
+test("'nötfärs eller vegofärs' matches real nötfärs via meat arm",
+     recipe_match_num(["400 g nötfärs eller vegofärs"], {"name": "Nötfärs Sverige 500g ICA", "category": "meat"}), 1)
+test("'nötfärs eller vegofärs' also matches vegofärs via plant arm",
+     recipe_match_num_cached(["400 g nötfärs eller vegofärs"], {"name": "Quorn Färs 300g", "category": "frozen"}), 1)
 # Generic "vegokött" reaches the whole plant-protein family but never real meat.
 test("generic vegokött matches Hälsans Kök Färs",
      recipe_match_num(["600 g vegokött eller liknande"], {"name": "Hälsans Kök Färs 350g", "category": "frozen"}), 1)

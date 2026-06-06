@@ -1,9 +1,7 @@
 """Recipe-text utilities shared by Swedish ingredient matching flows."""
 
 import re
-from typing import FrozenSet, List
-
-from .specialty_rules import SPECIALTY_QUALIFIERS
+from typing import List
 
 
 _STOCK_PREFIX_MAP = {'höns': 'kyckling', 'hons': 'kyckling'}
@@ -18,7 +16,10 @@ _FOND_ELLER_BULJONG_RE = re.compile(
     rf'({_STOCK_PREFIXES})fond\w*(.*?)\beller\s+(buljong\w*)', re.IGNORECASE
 )
 
-_CHEESE_PREFERENCE_PAREN_RE = re.compile(r'\((?:gärna|garnaå?|helst)\s+(?:med\s+)?([^)]*)\)', re.IGNORECASE)
+_CHEESE_PREFERENCE_PAREN_RE = re.compile(
+    r'\(\s*(?:gärna|garna|helst|om\s+möjligt|om\s+mojligt)\s+(?:med\s+)?([^)]*)\)',
+    re.IGNORECASE,
+)
 _CHILI_ALIAS_PAREN_RE = re.compile(
     r'\b((?:röd|rod|grön|gron|gul)\s+)?peppar\s*\(\s*chili(?:peppar)?\s*\)',
     re.IGNORECASE,
@@ -62,9 +63,6 @@ _BIFF_PORTION_PREP_RE = re.compile(
 _SUBRECIPE_REFERENCE_RE = re.compile(
     r'\bgrundrecept\b|\bse\s+länk\s+i\s+ingress\b',
     re.IGNORECASE,
-)
-_CHEESE_PREFERENCE_QUALIFIERS: FrozenSet[str] = frozenset(
-    q.lower() for q in SPECIALTY_QUALIFIERS.get('ost', set())
 )
 _PAREN_ALT_RE = re.compile(r'^(.*?)\(([^)]*?\beller\b[^)]*)\)\s*$', re.IGNORECASE)
 _LEAF_ALT_SPLIT_RE = re.compile(r'\s*,\s*|\s+eller\s+', re.IGNORECASE)
@@ -242,23 +240,18 @@ def rewrite_buljong_eller_fond(text: str) -> str:
 
 
 def preserve_cheese_preference_parentheticals(text: str) -> str:
-    """Keep named cheese preferences from '(helst X)' while stripping the parens.
+    """Strip soft named cheese preferences from parentheticals.
 
-    This is intentionally narrow: only cheese preference parentheticals attached
-    to an ost-ingredient are preserved, and only when they mention a specific
-    cheese qualifier such as "gruyère" or "parmesan".
+    Parenthetical "gärna/helst/om möjligt parmesan" describes a preference, not
+    a hard cheese-form requirement. Hard preferences written in the ingredient
+    itself, such as "riven ost parmesan", remain visible to the qualifier logic.
     """
     lowered = text.lower()
     if 'ost' not in lowered:
         return text
 
     def _replace(match):
-        content = match.group(1).strip().lower()
-        words = re.findall(r'[a-zåäöéèü]+', content)
-        kept = [word for word in words if word in _CHEESE_PREFERENCE_QUALIFIERS]
-        if not kept:
-            return ''
-        return ' ' + ' '.join(dict.fromkeys(kept))
+        return ''
 
     return _CHEESE_PREFERENCE_PAREN_RE.sub(_replace, text)
 

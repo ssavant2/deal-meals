@@ -82,6 +82,7 @@ from .processed_rules import (
 )
 from .recipe_context import CUISINE_CONTEXT
 from .recipe_text import (
+    has_eller_pattern,
     is_subrecipe_reference_text,
     parse_eller_alternatives,
     preserve_cheese_preference_parentheticals,
@@ -1831,6 +1832,18 @@ def _explicit_plant_based_food_requirement_allows_product(
         return True
     if not any(cue in ingredient_lower for cue in _PLANT_BASED_PRODUCT_REQUIRED_INGREDIENT_CUES):
         return True
+    if has_eller_pattern(ingredient_lower):
+        matched_keyword = matched_keyword.lower()
+        scopes = [part.strip() for part in ingredient_lower.split(' eller ') if part.strip()]
+        scopes.extend(
+            _apply_space_normalizations(fix_swedish_chars(str(alt)).lower())
+            for alt in parse_eller_alternatives(ingredient_lower)
+        )
+        for scope in scopes:
+            if matched_keyword not in scope:
+                continue
+            if not any(cue in scope for cue in _PLANT_BASED_PRODUCT_REQUIRED_INGREDIENT_CUES):
+                return True
     return _product_is_explicit_vegan(product_lower, product_keywords)
 
 
