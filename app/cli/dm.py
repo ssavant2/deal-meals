@@ -401,7 +401,7 @@ RUNTIME_SET_UPDATE_SURFACES: dict[str, RuntimeSetUpdateSurface] = {
         command="processed-food",
         section="keyword_set_updates",
         surface="processed_foods",
-        default_action="remove",
+        default_action="add",
         guide_label="Processed-food set update",
     ),
     "qualifier-required-keyword": RuntimeSetUpdateSurface(
@@ -8534,7 +8534,7 @@ def add_processed_food_update(
     action: Annotated[
         Literal["add", "remove"],
         typer.Option("--action", help="Whether to add to or remove from PROCESSED_FOODS."),
-    ] = "remove",
+    ] = "add",
     policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
     run_gates: Annotated[
