@@ -23,7 +23,7 @@
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 412,
       "negative_regression": 841,
-      "offer_extra_keyword_mapping": 423,
+      "offer_extra_keyword_mapping": 421,
       "parent_match_only_mapping": 20,
       "positive_regression": 672,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
       "no_match_policy": 434,
-      "offer_extra_keyword": 423,
+      "offer_extra_keyword": 421,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5867,
-    "variants_missing_product_text": 1899,
+    "variant_count": 5865,
+    "variants_missing_product_text": 1897,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -8152,27 +8152,6 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"fläsk\"}"
-    },
-    {
-      "variant_id": "vterm-2c86a00ba868c69b",
-      "row_index": 5075,
-      "source_order": 54,
-      "source_type": "offer_extra_keyword",
-      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
-      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:langpasta",
-      "source_id": "langpasta",
-      "variant_role": "offer_extra_keyword_mapping",
-      "variant_text": "langpasta",
-      "canonical": "pasta",
-      "expected_family": "pasta",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"pasta\"}"
     },
     {
       "variant_id": "vterm-dcbe9ce6bb2b9d18",
@@ -69222,27 +69201,6 @@
       "metadata": "{\"allowed_specifics\": [], \"fixture_refs\": [\"matcher_regression_feferoni_baguette_negative\"], \"ingredient_patterns\": [\"\\\\bfeferoni\\\\b\"], \"policy_ref\": \"current_review_matcher_regression\", \"reason\": \"Feferoni pepper wording must not match ready baguette or sandwich carriers.\", \"rule_version\": 1, \"supersedes\": [\"legacy_no_match_feferoni_ready_carrier\"]}"
     },
     {
-      "variant_id": "vterm-8d38e565edc81754",
-      "row_index": 5084,
-      "source_order": 54,
-      "source_type": "offer_extra_keyword",
-      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
-      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:långpasta",
-      "source_id": "långpasta",
-      "variant_role": "offer_extra_keyword_mapping",
-      "variant_text": "långpasta",
-      "canonical": "pasta",
-      "expected_family": "pasta",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"pasta\"}"
-    },
-    {
       "variant_id": "vterm-436e5728c2c3fdcd",
       "row_index": 2010,
       "source_order": 30,
@@ -123257,7 +123215,7 @@
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1673,
+      "no_product_text": 1671,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123273,14 +123231,14 @@
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
       "no_match_policy": 434,
-      "offer_extra_keyword": 423,
+      "offer_extra_keyword": 421,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5867
+      "audited": 5865
     },
-    "variant_count": 5867
+    "variant_count": 5865
   }
 }

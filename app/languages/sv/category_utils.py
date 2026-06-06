@@ -222,6 +222,30 @@ def guess_category(product_name: str, api_category: Optional[str] = None) -> str
 # E.g., store API puts all "Godis & Snacks" together, but plain cooking nuts ≠ candy.
 # NUT_KEYWORDS and NOT_COOKING_NUTS imported from food_filters.py
 
+# Pasta shapes/types that stores sometimes file under "Godis & Snacks" (candy),
+# e.g. fresh pasta in a chilled snack aisle. These are pantry cooking staples and
+# must reclassify to 'pantry' so recipe matching (which only scans food categories)
+# can reach them. The candy gate in _reclassify() keeps this from touching real
+# candy. Kept local to avoid importing the heavy ingredient_matching package into
+# this low-level scraper utility.
+#
+# Matched with a leading word boundary (negative lookbehind for a letter) so the
+# Swedish compound suffix "-pasta" (lakritspasta = licorice candy, chokladpasta =
+# chocolate spread) is NOT treated as Italian pasta, while "Pasta Garant",
+# "färsk pasta" and "pastasallad" still match.
+_PASTA_KEYWORDS = (
+    'pasta',
+    'spaghetti', 'spagetti', 'fettuccine', 'fettucine', 'tagliatelle',
+    'pappardelle', 'linguine', 'bucatini', 'capellini', 'tagliolini',
+    'penne', 'fusilli', 'farfalle', 'rigatoni', 'rigate', 'conchiglie',
+    'makaroner', 'idealmakaroner', 'tortellini', 'tortelloni', 'ravioli',
+    'lasagne', 'cannelloni', 'orecchiette', 'gnocchi', 'gnocco',
+)
+_PASTA_PATTERN = re.compile(
+    r'(?<![a-zåäö])(?:' + '|'.join(_PASTA_KEYWORDS) + r')',
+)
+
+
 _NOT_COOKING_ICE_CREAM = (
     # Novelty formats (pinnar, strutar, båtar)
     'glasspinne', 'glasspinnar', 'glasstrut', 'glasstrutar', 'glassbåt',
@@ -260,6 +284,7 @@ def _reclassify(product_name: str, category: str) -> str:
 
     Called after initial classification. Currently handles:
     - Plain cooking nuts in candy → pantry
+    - Pasta (incl. fresh pasta) in candy → pantry
     - Plain ice cream in candy → frozen (recipes use vaniljglass etc.)
     """
     if category == 'candy':
@@ -268,6 +293,11 @@ def _reclassify(product_name: str, category: str) -> str:
         if any(n in name_lower for n in NUT_KEYWORDS):
             if not any(c in name_lower for c in NOT_COOKING_NUTS):
                 return 'pantry'
+
+        # Pasta filed under candy/snacks (e.g. fresh fettuccine) is a pantry
+        # staple — move it so recipe matching can see it.
+        if _PASTA_PATTERN.search(name_lower):
+            return 'pantry'
 
         # Plain ice cream for recipes (vaniljglass, gräddglass, etc.) → frozen
         if 'glass' in name_lower:

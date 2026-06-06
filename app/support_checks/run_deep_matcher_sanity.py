@@ -8693,6 +8693,44 @@ test(
     ),
     1,
 )
+
+# ---------------------------------------------------------------------------
+# Pasta two-bucket isolation (permanent policy, Stefan 2026-06-06).
+# There are exactly TWO pasta families and they NEVER cross:
+#   - kort/liten = canonical "pasta"      (penne, fusilli, makaroner,
+#                                           idealmakaroner, farfalle, rigatoni…)
+#   - lång       = canonical "långpasta"  (spaghetti, tagliatelle, fettuccine,
+#                                           linguine, pappardelle…)
+# Generic unspecified "pasta" lives in the SHORT bucket. The långpasta→pasta
+# offer-keyword bridge was removed (entries langpasta_208/209_2) because it
+# leaked long offers into the short bucket. These guards lock the model so it
+# stops being re-litigated.
+# ---------------------------------------------------------------------------
+# Short ingredient must NOT reach a long offer (the leak that was removed).
+test("two-bucket: idealmakaroner (short) does NOT match Spaghetti (long)",
+     recipe_match_num(["300 g idealmakaroner"], {"name": "Spaghetti 500g Barilla", "category": "pantry"}), 0)
+test("two-bucket: penne (short) does NOT match Tagliatelle (long)",
+     recipe_match_num(["300 g penne"], {"name": "Tagliatelle 500g Barilla", "category": "pantry"}), 0)
+test("two-bucket: generic pasta does NOT match Spaghetti (long)",
+     recipe_match_num(["500 g pasta"], {"name": "Spaghetti 500g Barilla", "category": "pantry"}), 0)
+test("two-bucket: generic pasta does NOT match a plain Långpasta offer",
+     recipe_match_num(["500 g pasta"], {"name": "Långpasta 500g Garant", "category": "pantry"}), 0)
+# Long ingredient must NOT reach a short / generic-short offer.
+test("two-bucket: spaghetti (long) does NOT match Penne (short)",
+     recipe_match_num(["300 g spaghetti"], {"name": "Penne 500g Barilla", "category": "pantry"}), 0)
+test("two-bucket: spaghetti (long) does NOT match a generic Pasta offer",
+     recipe_match_num(["300 g spaghetti"], {"name": "Pasta Garant 500g", "category": "pantry"}), 0)
+# Within-bucket interchangeability still holds (both directions).
+test("two-bucket: generic pasta still matches a short Penne offer",
+     recipe_match_num(["500 g pasta"], {"name": "Penne 500g Barilla", "category": "pantry"}), 1)
+test("two-bucket: penne (short) still matches a Fusilli offer",
+     recipe_match_num(["300 g penne"], {"name": "Fusilli 500g Zeta", "category": "pantry"}), 1)
+test("two-bucket: spaghetti (long) still matches a Tagliatelle offer",
+     recipe_match_num(["300 g spaghetti"], {"name": "Tagliatelle 500g Barilla", "category": "pantry"}), 1)
+# Backend (non-fast) parity for the key leak case.
+test("two-bucket backend: idealmakaroner (short) blocked from Spaghetti (long)",
+     recipe_match_num_named("Pastagratäng", ["300 g idealmakaroner"], {"name": "Spaghetti 500g Barilla", "category": "pantry"}), 0)
+
 test(
     "batch 145 filodegskrustader no longer matches plain filodeg",
     match("Filodeg Färsk 500g Sevan", "12 filodegskrustader", "pantry"),

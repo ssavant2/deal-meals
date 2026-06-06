@@ -4908,7 +4908,8 @@ entry_id = "sv-se.alias.langpasta_208"
 language = "sv"
 market = "SE"
 canonical = "pasta"
-status = "active"
+# inactive_reason: Pasta two-bucket isolation (Stefan 2026-06-06): långpasta offers must NOT also carry the short 'pasta' keyword, else short ingredients leak into the long bucket
+status = "inactive"
 variants = ["långpasta"]
 offer_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
@@ -4921,17 +4922,20 @@ canonical = "pasta"
 variant = "långpasta"
 layer_role = "offer_extra_keyword_mapping"
 
+# Two-bucket isolation: generic short "pasta" must NOT match a long "Långpasta"
+# offer. This bridge entry is inactive; the example now proves the isolation.
 [[entries.positive_examples]]
 ingredient = "pasta"
 offer_name = "Långpasta"
-expected = 1
+expected = 0
 
 [[entries]]
 entry_id = "sv-se.alias.langpasta_209_2"
 language = "sv"
 market = "SE"
 canonical = "pasta"
-status = "active"
+# inactive_reason: Pasta two-bucket isolation (Stefan 2026-06-06): langpasta offers must NOT also carry the short 'pasta' keyword
+status = "inactive"
 variants = ["langpasta"]
 offer_terms = ["pasta"]
 source_refs = ["code:term_registry_entries:offer_extra_keyword.toml"]
@@ -4944,10 +4948,12 @@ canonical = "pasta"
 variant = "langpasta"
 layer_role = "offer_extra_keyword_mapping"
 
+# Two-bucket isolation: generic short "pasta" must NOT match a long "Langpasta"
+# offer. This bridge entry is inactive; the example now proves the isolation.
 [[entries.positive_examples]]
 ingredient = "pasta"
 offer_name = "Langpasta"
-expected = 1
+expected = 0
 
 [[entries]]
 entry_id = "sv-se.alias.kantarellfond_210"
