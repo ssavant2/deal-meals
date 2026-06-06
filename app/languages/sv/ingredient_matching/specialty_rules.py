@@ -710,12 +710,16 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
     'nejlikor': {'malen', 'mald', 'malet', 'malda'},
     'kryddnejlika': {'malen', 'mald', 'malet', 'malda'},
     'kryddnejlikor': {'malen', 'mald', 'malet', 'malda'},
-    # Senap-ingrediens-sida isolerad per typ (Q126-3: products match broad,
-    # but a recipe specifying dijon/sötstark/skånsk wants that specific type).
-    # BIDIRECTIONAL removed: products with sötstark/skånsk/dijon now match
-    # plain "senap" recipes (offer-side broad). Ingredient-side kept specific.
+    # Senap: skånsk and dijon are isolated to themselves in BOTH directions.
+    # Direction A (here): a recipe asking for "skånsk senap" / "dijonsenap"
+    # requires the product to be that exact type. Direction B (via
+    # BIDIRECTIONAL_PER_KEYWORD below): a skånsk/dijon PRODUCT must not satisfy a
+    # plain "senap" recipe. Keeping these qualifiers here is also what lets the
+    # offer precompute tag a "Skånsk Senap" product with the 'skånsk' qualifier
+    # so Direction B can fire.
+    # All other varieties (sötstark, grovkornig, rysk, amerikansk, söt ...) stay
+    # broad and match plain "senap" freely, so they are deliberately NOT listed.
     'senap': {
-        'sötstark', 'sotstark',
         'skånsk', 'skansk',
         'dijon', 'dijonsenap',
     },
@@ -1164,7 +1168,14 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
     'nejlikor': frozenset({'malen', 'mald', 'malet', 'malda'}),
     'kryddnejlika': frozenset({'malen', 'mald', 'malet', 'malda'}),
     'kryddnejlikor': frozenset({'malen', 'mald', 'malet', 'malda'}),
-    # Senap-familjen BRED (Q126-3) — ingen bidirektionell qualifier för senap.
+    # Senap: skånsk/dijon products must NOT satisfy a plain "senap" recipe — they
+    # are isolated to their own type (Direction B). sötstark/grovkornig and all
+    # other varieties are intentionally absent so they stay broad and keep
+    # matching plain "senap" both ways.
+    'senap': frozenset({
+        'skånsk', 'skansk',
+        'dijon', 'dijonsenap',
+    }),
     # Wine color: "Matlagningsvin Röd" should NOT match "vitt matlagningsvin" recipe
     # Per-keyword to avoid collisions with 'röd'/'vit' used elsewhere (e.g., paprika colors)
     'matlagningsvin': frozenset({

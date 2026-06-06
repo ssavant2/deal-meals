@@ -842,21 +842,16 @@ category = "spices"
 name = "Fänkål Malen"
 
 [[fixtures]]
-expected = 1
+expected = 0
 id = "matcher_regression_grovkornig_senap_positive"
 ingredients = ["1 msk grovkornig senap"]
-policy_ref = "current_review_senap_broad_Q126-3"
+policy_ref = "current_review_senap_skansk_dijon_self_only"
 recipe_name = "Sanity Recipe"
 source_ref = "sanity:grovkornig_senap"
 
 [fixtures.offer]
 category = "pantry"
 name = "Skånsk Senap Slotts"
-
-[[fixtures.expected_matches]]
-ingredient_index = 0
-canonical = "senap"
-must_match_keyword = "senap"
 
 [[fixtures]]
 expected = 1

@@ -1008,14 +1008,7 @@
     "source_ref": "current_review:negative_sibling:fankalsfro_malen"
   },
   {
-    "expected": 1,
-    "expected_matches": [
-      {
-        "canonical": "senap",
-        "ingredient_index": 0,
-        "must_match_keyword": "senap"
-      }
-    ],
+    "expected": 0,
     "id": "matcher_regression_grovkornig_senap_positive",
     "ingredients": [
       "1 msk grovkornig senap"
@@ -1024,7 +1017,7 @@
       "category": "pantry",
       "name": "Skånsk Senap Slotts"
     },
-    "policy_ref": "current_review_senap_broad_Q126-3",
+    "policy_ref": "current_review_senap_skansk_dijon_self_only",
     "recipe_name": "Sanity Recipe",
     "source_ref": "sanity:grovkornig_senap"
   },
