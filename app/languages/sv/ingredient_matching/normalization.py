@@ -537,6 +537,8 @@ _SPACE_NORMALIZATIONS: List[Tuple[str, str]] = [
     ('smör & rapsolja', 'smörrapsolja'),
     ('smör och rapsolja', 'smörrapsolja'),
     ('smör-rapsolja', 'smörrapsolja'),
+    ('smör & raps', 'smörrapsolja'),
+    ('smor & raps', 'smörrapsolja'),
     ('smor- & rapsolja', 'smörrapsolja'),
     ('smor & rapsolja', 'smörrapsolja'),
     ('smor och rapsolja', 'smörrapsolja'),

@@ -6,7 +6,7 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 101,
       "hardcoded_keyword_output:extract_keywords_from_product": 121,
-      "ingredient_parent_mapping": 415,
+      "ingredient_parent_mapping": 416,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
       "keyword_synonym_mapping": 192,
@@ -30,7 +30,7 @@
     },
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 415,
+      "ingredient_parent": 416,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 192,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5871,
-    "variants_missing_product_text": 1903,
+    "variant_count": 5872,
+    "variants_missing_product_text": 1904,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -123337,11 +123337,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"pasta\"}"
+    },
+    {
+      "variant_id": "vterm-d334f2bd55f9aad0",
+      "row_index": 4790,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:smörrapsolja",
+      "source_id": "smörrapsolja",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "smörrapsolja",
+      "canonical": "bordsmargarin",
+      "expected_family": "bordsmargarin",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"bordsmargarin\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1677,
+      "no_product_text": 1678,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123349,7 +123370,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 415,
+      "ingredient_parent": 416,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 192,
@@ -123363,8 +123384,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5871
+      "audited": 5872
     },
-    "variant_count": 5871
+    "variant_count": 5872
   }
 }

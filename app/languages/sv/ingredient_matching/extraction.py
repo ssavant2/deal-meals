@@ -958,14 +958,18 @@ def extract_keywords_from_product(
 
     if (
         re.search(r'\bsm[öo]r\b', original_name_lower)
-        and (
-            re.search(r'\brapsolja\b', original_name_lower)
-            or ('flytande' in original_name_lower and re.search(r'\braps\b', original_name_lower))
+        and re.search(r'\braps(?:olja)?\b', original_name_lower)
+        and 'matfett' not in original_name_lower
+        and not (
+            re.search(r'\b(?:bregott|l[äa]tta|flora|milda)\b', original_name_lower)
+            and 'flytande' not in original_name_lower
         )
     ):
         keywords = ['smörrapsolja']
         if 'flytande' in original_name_lower:
             keywords.append('flytandesmör')
+        else:
+            keywords.append('bordsmargarin')
         return keywords
 
     if 'bostongurka' in original_name_lower:
