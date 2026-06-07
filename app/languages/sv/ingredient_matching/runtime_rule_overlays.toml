@@ -872,6 +872,20 @@ keyword = "cider"
 blockers = ["smultron", "hallon", "blåbär", "jordgubb", "päron"]
 reason = "Fruit-flavored cider soft-drinks (Smultroncider, Halloncider) are not cooking cider — same isolation principle as flavored juice. Plain cider ingredient expects apple cider, not berry/fruit variants."
 
+[[product_name_blockers]]
+id = "runtime_pnb_salami"
+status = "active"
+keyword = "salami"
+blockers = ["wudy"]
+reason = "Wudy Pop snack/cocktail sausages (Vienna-style mini sausages) are not sliced salami pålägg; block from salami recipes"
+
+[[product_name_blockers]]
+id = "runtime_pnb_koreansk"
+status = "active"
+keyword = "koreansk"
+blockers = ["wrap"]
+reason = "Korean Styled Wrap tortilla product should not match koreansk chili/spice ingredients — wrap is a bread product, not a spice"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
