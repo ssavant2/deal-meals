@@ -23,7 +23,7 @@
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 412,
       "negative_regression": 841,
-      "offer_extra_keyword_mapping": 421,
+      "offer_extra_keyword_mapping": 422,
       "parent_match_only_mapping": 20,
       "positive_regression": 672,
       "recipe_routing_extra_alias": 9
@@ -38,12 +38,12 @@
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
       "no_match_policy": 434,
-      "offer_extra_keyword": 421,
+      "offer_extra_keyword": 422,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5866,
-    "variants_missing_product_text": 1898,
+    "variant_count": 5867,
+    "variants_missing_product_text": 1899,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -123232,11 +123232,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"fetaost\"}"
+    },
+    {
+      "variant_id": "vterm-6b192bc9ed5d3b87",
+      "row_index": 5229,
+      "source_order": 54,
+      "source_type": "offer_extra_keyword",
+      "source_file": "app/languages/sv/ingredient_matching/keywords.py",
+      "source_ref": "app/languages/sv/ingredient_matching/keywords.py:chitarra",
+      "source_id": "chitarra",
+      "variant_role": "offer_extra_keyword_mapping",
+      "variant_text": "chitarra",
+      "canonical": "långpasta",
+      "expected_family": "långpasta",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"långpasta\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1672,
+      "no_product_text": 1673,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123252,14 +123273,14 @@
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
       "no_match_policy": 434,
-      "offer_extra_keyword": 421,
+      "offer_extra_keyword": 422,
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5866
+      "audited": 5867
     },
-    "variant_count": 5866
+    "variant_count": 5867
   }
 }

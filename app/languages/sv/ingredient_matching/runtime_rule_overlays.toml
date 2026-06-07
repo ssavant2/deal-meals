@@ -886,6 +886,20 @@ keyword = "koreansk"
 blockers = ["wrap"]
 reason = "Korean Styled Wrap tortilla product should not match koreansk chili/spice ingredients — wrap is a bread product, not a spice"
 
+[[product_name_blockers]]
+id = "runtime_pnb_mjolkchoklad"
+status = "active"
+keyword = "mjölkchoklad"
+blockers = ["lindorkulor"]
+reason = "Lindt Lindorkulor are filled chocolate truffle balls (confectionery/pralines), not baking chocolate — same category as Marabou Chokladkaka (Q4-bug-b)"
+
+[[product_name_blockers]]
+id = "runtime_pnb_pasta"
+status = "active"
+keyword = "pasta"
+blockers = ["chitarra"]
+reason = "Chitarra is a long pasta (square-cut spaghetti variant); blocked from generic short-pasta bucket to enforce two-bucket pasta policy"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -1285,6 +1299,13 @@ keyword = "sparris"
 blockers = ["sparrissoppa"]
 reason = "Rå sparris (keyword sparris) får inte substring-matcha 'sparrissoppa'-ingrediens. En sparrissoppa-ingrediens vill ha färdig soppa, inte rå sparris."
 
+[[false_positive_blockers]]
+id = "runtime_fpb_parmigiano"
+status = "active"
+keyword = "parmigiano"
+blockers = ["krutonger"]
+reason = "Ingredient phrase 'smak av parmesan' in crouton context (krutonger) should not match parmesan/Grana Padano cheese products — 'smak av parmesan' describes flavor profile of bread product, not the cheese itself"
+
 [[keyword_suppressed_by_context]]
 id = "runtime_ksbc_ingefara"
 status = "active"
@@ -1669,6 +1690,13 @@ status = "active"
 keyword = "taco"
 context = ["lax", "kryddblandning"]
 reason = "Brand/flavor name 'Smokey Taco' on smoked salmon products leaks 'taco' keyword; when ingredient text already names lax, taco is a flavor/brand descriptor not a cuisine context — suppress to prevent matching taco chicken products via the taco keyword; mexikansk kryddblandning/taco is a spice-mix ingredient; 'taco' keyword must not bleed to taco-seasoned meat products (Kycklingbröstfilé Taco Finstrimlad). Spice mix is a different product type than seasoned raw meat. Context word kryddblandning suppresses generic taco keyword"
+
+[[keyword_suppressed_by_context]]
+id = "runtime_ksbc_parmigiano"
+status = "active"
+keyword = "parmigiano"
+context = ["krutonger"]
+reason = "Crouton ingredient with 'smak av parmesan' phrase — parmesan here is a flavor description of the bread product, not a cheese ingredient"
 
 [[processed_rule_compound_exemptions]]
 id = "runtime_processed_exemption_chili"
