@@ -161,11 +161,49 @@ test(
         [
             offer("Entrecote Irland 300g", "meat"),
             offer("Entrecote Svensk 300g", "meat"),
+            offer("Dry Age Beef Burger Fryst Theburgervault", "frozen"),
+            offer("Entrecote Fryst", "frozen", brand="Mountain River"),
+            offer("Fläskfilé ca 500g", "other", brand="Premiumbutcher"),
             offer("Pasta 500g", "pantry"),
         ],
         {**BASE_PREFS, "local_meat_only": True},
     ),
     ["Entrecote Svensk 300g", "Pasta 500g"],
+)
+
+test(
+    "local meat only keeps broad imported brand without meat signal in extended category",
+    filtered_names(
+        [
+            offer("Prime Dessert Fryst", "frozen", brand="Prime"),
+            offer("Pasta 500g", "pantry"),
+        ],
+        {**BASE_PREFS, "local_meat_only": True},
+    ),
+    ["Prime Dessert Fryst", "Pasta 500g"],
+)
+
+test(
+    "local meat only disabled keeps imported meat offers",
+    filtered_names(
+        [
+            offer("Dry Age Beef Burger Fryst Theburgervault", "frozen"),
+            offer("Pasta 500g", "pantry"),
+        ],
+        {**BASE_PREFS, "local_meat_only": False},
+    ),
+    ["Dry Age Beef Burger Fryst Theburgervault", "Pasta 500g"],
+)
+
+test(
+    "local meat only diagnostics reports imported meat brand",
+    unmatched_filter_reasons(
+        [
+            offer("Dry Age Beef Burger Fryst Theburgervault", "frozen"),
+        ],
+        {**BASE_PREFS, "local_meat_only": True},
+    ),
+    [("Dry Age Beef Burger Fryst Theburgervault", "local_meat", "theburgervault")],
 )
 
 test(

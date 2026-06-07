@@ -51,8 +51,9 @@ except ModuleNotFoundError:
 # IMPORTED MEAT FILTERING
 # ============================================================================
 # Centralized data for the "Endast svenskt kött" user preference.
-# Used by recipe_matcher.py (at match time) and optionally by store scrapers
-# (at scrape time as early filter).
+# Used by recipe_matcher.py at match time. Store scrapers should keep imported
+# meat offers in the database; the user's local_meat_only preference decides
+# whether they are filtered from results.
 #
 # The filtering logic lives in recipe_matcher._get_filtered_offers() and
 # respects the user's local_meat_only preference toggle.
@@ -66,8 +67,16 @@ IMPORTED_COUNTRIES: List[str] = [
 
 # Known imported meat brands/producers (lowercase)
 IMPORTED_MEAT_BRANDS: List[str] = [
+    'blue smoke',         # Poland - meat products
     'danish crown',       # Denmark - major pork producer
     'affco',              # New Zealand - lamb/beef processor
+    'mountain river',     # New Zealand - lamb/beef
+    'farmers',            # New Zealand - meat products
+    'prime',              # Mixed-origin meat products
+    'naturkött',          # Brazil - beef
+    'naturkott',          # Same as above, ASCII-normalized spelling
+    'premiumbutcher',     # Ireland - meat products
+    'premium butcher',    # Same as above, spaced variant
     'theburgervault',     # Ireland - frozen beef burgers
     'the burger vault',   # Same as above, spaced variant
     'cesar nieto',        # Spain - Iberian pork (secreto, pluma)
@@ -91,6 +100,7 @@ MEAT_NAME_KEYWORDS: List[str] = [
     'bacon', 'korv', 'skinka', 'lamm', 'vilt', 'anka', 'gris',
     'entrecôte', 'entrecote',  # beef cut often categorized as 'other'
     'färs', 'blandfärs', 'nötfärs',  # minced meat (often category=other)
+    'beef', 'burger', 'burgare', 'hamburgare', 'wagyu',
     'secreto', 'pluma',  # Iberian pork cuts (often category=frozen)
 ]
 

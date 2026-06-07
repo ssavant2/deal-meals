@@ -959,6 +959,40 @@ def _is_oreo_cookie_offer(name_lower: str, category: str) -> bool:
     ))
 
 
+def _local_meat_only_rejection_detail(offer) -> Optional[str]:
+    """Return country/brand detail when local_meat_only should filter an offer."""
+    name_lower = offer.name.lower()
+    brand_lower = str(getattr(offer, "brand", "") or "").lower()
+    brand_search_text = f"{name_lower} {brand_lower}".strip()
+    category = offer.category or ""
+    meat_keywords_in_name = any(kw in name_lower for kw in MEAT_NAME_KEYWORDS)
+    imported_brand = next(
+        (
+            brand for brand in IMPORTED_MEAT_BRANDS
+            if re.search(r'\b' + re.escape(brand) + r'\b', brand_search_text)
+        ),
+        None,
+    )
+    in_meat_cat = category in MEAT_CATEGORIES and (meat_keywords_in_name or imported_brand)
+    in_extended = category in MEAT_EXTENDED_CATEGORIES and meat_keywords_in_name
+
+    if not in_meat_cat and not in_extended:
+        return None
+    if any(s in name_lower for s in IMPORTED_SPECIALTY_EXCEPTIONS):
+        return None
+
+    matched_country = next(
+        (
+            country for country in IMPORTED_COUNTRIES
+            if re.search(r'\b' + re.escape(country) + r'\b', name_lower)
+        ),
+        None,
+    )
+    if matched_country:
+        return matched_country
+    return imported_brand
+
+
 def get_filtered_offers(preferences: Dict) -> List[Offer]:
     """Return Swedish sale offers filtered by user preferences."""
 
@@ -1028,19 +1062,8 @@ def get_filtered_offers(preferences: Dict) -> List[Offer]:
             else:
                 continue
 
-        if local_meat_only:
-            meat_keywords_in_name = any(kw in name_lower for kw in MEAT_NAME_KEYWORDS)
-            in_meat_cat = offer.category in MEAT_CATEGORIES and meat_keywords_in_name
-            in_extended = offer.category in MEAT_EXTENDED_CATEGORIES and meat_keywords_in_name
-
-            if in_meat_cat or in_extended:
-                is_specialty = any(s in name_lower for s in IMPORTED_SPECIALTY_EXCEPTIONS)
-                if is_specialty:
-                    pass
-                elif any(re.search(r'\b' + re.escape(country) + r'\b', name_lower) for country in IMPORTED_COUNTRIES):
-                    continue
-                elif any(re.search(r'\b' + re.escape(brand) + r'\b', name_lower) for brand in IMPORTED_MEAT_BRANDS):
-                    continue
+        if local_meat_only and _local_meat_only_rejection_detail(offer):
+            continue
 
         if selected_profiles_exclude_offer(
             ingredient_exclusion_profiles,
@@ -1194,32 +1217,10 @@ def analyze_unmatched_offers(preferences: Dict, matched_offer_ids: set[str]) -> 
                 continue
 
         if local_meat_only:
-            meat_keywords_in_name = any(kw in name_lower for kw in MEAT_NAME_KEYWORDS)
-            in_meat_cat = offer.category in MEAT_CATEGORIES and meat_keywords_in_name
-            in_extended = offer.category in MEAT_EXTENDED_CATEGORIES and meat_keywords_in_name
-            if in_meat_cat or in_extended:
-                is_specialty = any(s in name_lower for s in IMPORTED_SPECIALTY_EXCEPTIONS)
-                if not is_specialty:
-                    matched_country = next(
-                        (
-                            country for country in IMPORTED_COUNTRIES
-                            if re.search(r'\b' + re.escape(country) + r'\b', name_lower)
-                        ),
-                        None,
-                    )
-                    if matched_country:
-                        add_filtered(offer, "local_meat", matched_country)
-                        continue
-                    matched_brand = next(
-                        (
-                            brand for brand in IMPORTED_MEAT_BRANDS
-                            if re.search(r'\b' + re.escape(brand) + r'\b', name_lower)
-                        ),
-                        None,
-                    )
-                    if matched_brand:
-                        add_filtered(offer, "local_meat", matched_brand)
-                        continue
+            local_meat_detail = _local_meat_only_rejection_detail(offer)
+            if local_meat_detail:
+                add_filtered(offer, "local_meat", local_meat_detail)
+                continue
 
         profile_hit = selected_profiles_exclude_offer(
             ingredient_exclusion_profiles,

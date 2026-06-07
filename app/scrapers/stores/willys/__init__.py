@@ -21,27 +21,8 @@ import re
 import time
 from datetime import datetime, timezone
 from utils.security import ssrf_safe_event_hook
-from pathlib import Path
 import asyncio
 
-
-def log_filtered_product(store: str, product_name: str, reason: str, manufacturer: str = None):
-    """
-    Log filtered products to a dedicated file for easy review.
-    File: /app/logs/filtered_products.log (inside container)
-    Host: ./app/logs/filtered_products.log
-    """
-    try:
-        log_path = Path("/app/logs/filtered_products.log")
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-        mfg_info = f" (tillverkare: {manufacturer})" if manufacturer else ""
-
-        with open(log_path, "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] {store}: {product_name}{mfg_info} - {reason}\n")
-    except Exception as e:
-        logger.debug(f"Could not write to filtered_products.log: {e}")
 
 class WillysStore(StorePlugin):
     """Willys store plugin with improved categorization."""
@@ -50,9 +31,10 @@ class WillysStore(StorePlugin):
     STORE_API_DELAY = 1.0
     PHYSICAL_STORE_CATALOG_CACHE_NAME = "willys_physical_store_catalog"
 
-    # ==================== ORIGIN VERIFICATION CONFIG ====================
+    # ==================== ORIGIN METADATA CONFIG ====================
     # Products to verify via API for manufacturer/origin info.
-    # Used as early filter during scraping (belt-and-suspenders with recipe_matcher).
+    # Scrapers must still store these products. The user's local_meat_only
+    # preference is applied later by the matcher/filtering layer.
     # Brand list imported from category_utils.py (shared across all scrapers).
     PRODUCTS_TO_VERIFY_ORIGIN = [
         # Fläskfilé
@@ -785,11 +767,14 @@ class WillysStore(StorePlugin):
                 logger.debug(f"Skipping product with no savings: '{product_name}' ({price} kr)")
                 return None
 
-            # ORIGIN VERIFICATION: Filter imported meat (same as butik path)
+            # Origin metadata is useful for local_meat_only at match time, but
+            # the scraper must not drop products before user preferences run.
             if manufacturer and self._should_verify_origin(product_name):
                 if self._is_imported_brand(manufacturer):
-                    logger.info(f"⚠ Skipping imported product: {product_name} (tillverkare: {manufacturer})")
-                    return None
+                    logger.debug(
+                        "Imported meat brand retained for preference filtering: "
+                        f"{product_name} (tillverkare: {manufacturer})"
+                    )
 
             # Brand-based name completion: some brands have stripped product names
             # e.g., Willys strips "Färskost" from Philadelphia → "Gräslök Light 11%"
@@ -1827,12 +1812,14 @@ class WillysStore(StorePlugin):
                 if manufacturer:
                     brand = manufacturer.upper()
 
-                    # ORIGIN VERIFICATION: Filter imported meat for specific products
+                    # Origin metadata is useful for local_meat_only at match time,
+                    # but the scraper must not drop products before preferences run.
                     if self._should_verify_origin(product_name):
                         if self._is_imported_brand(manufacturer):
-                            logger.info(f"⚠ Skipping imported product: {product_name} (tillverkare: {manufacturer})")
-                            log_filtered_product("Willys", product_name, "Importerat kött", manufacturer)
-                            return None
+                            logger.debug(
+                                "Imported meat brand retained for preference filtering: "
+                                f"{product_name} (tillverkare: {manufacturer})"
+                            )
                         else:
                             logger.debug(f"✓ Swedish product OK: {product_name} (tillverkare: {manufacturer})")
 
@@ -1866,7 +1853,7 @@ class WillysStore(StorePlugin):
             return None
     
     
-    # ==================== ORIGIN VERIFICATION (API LOOKUP) ====================
+    # ==================== ORIGIN METADATA (API LOOKUP) ====================
 
     def _should_verify_origin(self, product_name: str) -> bool:
         """Check if this product should be verified via API for origin/manufacturer."""
