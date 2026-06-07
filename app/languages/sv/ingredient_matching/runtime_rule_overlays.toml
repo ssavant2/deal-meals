@@ -1007,10 +1007,10 @@ reason = "Specific vinegar varieties (balsamic/apple cider/wine/rice/sherry/cham
 
 [[false_positive_blockers]]
 id = "runtime_fpb_kex"
-status = "inactive"
+status = "active"
 keyword = "kex"
-blockers = ["rawfood", "rawfoods"]
-reason = "Replaced by runtime_ksbc_kex_rawfood — FPB smart-blocker is bypassed because 'kex' appears as a standalone word in ingredient text 'Rawfood Kex' (smart-blocker sees w == keyword → has_valid=True). KSBC operates at matched_keyword level and works correctly."
+blockers = ["rawfood", "rawfoods", "rökextrakt", "rökarom"]
+reason = "Replaced by runtime_ksbc_kex_rawfood — FPB smart-blocker is bypassed because 'kex' appears as a standalone word in ingredient text 'Rawfood Kex' (smart-blocker sees w == keyword → has_valid=True). KSBC operates at matched_keyword level and works correctly.; rökextrakt/rökarom (liquid smoke) contains the substring 'kex' (rö-KEX-trakt); biscuit/cracker products must not match smoke-extract ingredients"
 
 [[false_positive_blockers]]
 id = "runtime_fpb_bittermandel"
