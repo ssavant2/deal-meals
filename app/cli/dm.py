@@ -533,7 +533,8 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         status="supported by dm matcher add",
         summary="Plain spelling/plural/compound aliases on the keyword_synonym registry surface.",
         steps=(
-            "Run: ./bin/dm matcher add keyword-synonym <canonical> --variants <variant> --sanity-offer \"<offer>\" --offer-category <category>",
+            "Run: ./bin/dm matcher add keyword-synonym <canonical> --variants <variant> --sanity-offer \"<offer>\"",
+            "Offer category defaults to blank; pass --offer-category only when category-sensitive behavior is the explicit proof.",
             "Use --with-fixture/--with-inventory only when the alias changes routing/parity/product-policy semantics.",
         ),
     ),
@@ -594,7 +595,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         steps=(
             "Run: ./bin/dm matcher add parent-match-only <canonical> --variants <product-term> --sanity-offer \"<offer>\"",
             "When the policy is strict, also pass --negative-offer and --negative-ingredient so the generated sanity proves the forbidden pair.",
-            "Use --offer-category when category-sensitive matching is part of the proof.",
+            "Offer category defaults to blank; use --offer-category only when category-sensitive matching is part of the proof.",
         ),
     ),
     "recipe-routing-helper": MatcherGuide(
@@ -970,7 +971,8 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         steps=(
             "Run: ./bin/dm matcher compare-paths --offer \"<offer>\" --ingredient \"<ingredient>\"",
             "Use this when live/fast/backend disagree or when precomputed keywords/checks such as offer expansions or processed-product rules look suspicious.",
-            "For backend validation reject events, follow up with: ./bin/dm matcher why --offer \"<offer>\" --ingredient \"<ingredient>\"",
+            "Pass --recipe-name when recipe-title guards such as vegan/cuisine/prepared-dish context matter.",
+            "For backend validation reject events, follow up with: ./bin/dm matcher why --offer \"<offer>\" --ingredient \"<ingredient>\" --recipe-name \"<recipe>\"",
             "For a broader rule-family trace, use: ./bin/dm matcher explain --offer \"<offer>\" --ingredient \"<ingredient>\"",
         ),
     ),
@@ -979,8 +981,9 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         status="supported by dm matcher",
         summary="Explain which matcher layer or backend validation rule accepts/rejects one pair.",
         steps=(
-            "Run: ./bin/dm matcher why --offer \"<offer>\" --ingredient \"<ingredient>\"",
+            "Run: ./bin/dm matcher why --offer \"<offer>\" --ingredient \"<ingredient>\" --recipe-name \"<recipe>\"",
             "Defaults to --expect match, so backend rejection is framed as the thing to investigate.",
+            "Leave --recipe-name off only when recipe-title context cannot affect the result; the command warns when it uses a synthetic title.",
             "Use --expect no-match for unexpected positives, and --format json when scripting validation-event analysis.",
         ),
     ),
@@ -991,7 +994,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         steps=(
             "Run: ./bin/dm matcher canonical-of \"<term-or-phrase>\"",
             "Use this before adding rules when Swedish terminology and runtime canonical names may differ, e.g. dragon -> estragon.",
-            "Pass --offer-category/--brand when product extraction depends on them.",
+            "Pass --brand when product extraction depends on it; pass --offer-category only when debugging category-sensitive behavior explicitly.",
         ),
     ),
 }
@@ -2116,6 +2119,13 @@ def _print_generated_canary_scope_note(*, sanity_mode: Literal["fast-match", "ba
             fg=typer.colors.YELLOW,
             err=True,
         )
+    typer.secho(
+        "NOTE: generated offer categories default to blank because store categories are best-effort "
+        "and differ between stores. Pass --offer-category only when category-sensitive behavior is "
+        "the explicit thing being tested.",
+        fg=typer.colors.YELLOW,
+        err=True,
+    )
 
 
 def _print_registry_next_steps() -> None:
@@ -3991,7 +4001,10 @@ def _keyword_synonym_block(
             "[[entries.positive_examples]]",
             f"ingredient = {_toml_string(ingredient_override or variant)}",
             f"offer_name = {_toml_string(sanity_offer)}",
-            f"offer_category = {_toml_string(offer_category)}",
+        ])
+        if offer_category:
+            lines.append(f"offer_category = {_toml_string(offer_category)}")
+        lines.extend([
             "expected = 1",
             "",
         ])
@@ -6439,6 +6452,179 @@ def _write_registry_entry_block(path: Path, record: RegistryEntryRecord, new_blo
     path.write_text(text[:record.start] + new_block + text[record.end:], encoding="utf-8")
 
 
+def _remove_generated_sanity_tests_for_selectors(
+    *,
+    paths: MatcherPaths,
+    selectors: tuple[str, ...],
+    dry_run: bool,
+) -> int:
+    selector_set = {selector for selector in selectors if selector}
+    if not selector_set or not paths.deep_sanity_file.exists():
+        return 0
+    text = paths.deep_sanity_file.read_text(encoding="utf-8")
+    tree = ast.parse(text, filename=str(paths.deep_sanity_file))
+    metadata_by_line = _deep_sanity_metadata_by_line(text)
+    remove_lines: set[int] = set()
+    removed_tests = 0
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if not isinstance(node.func, ast.Name) or node.func.id != "test":
+            continue
+        metadata = metadata_by_line.get(node.lineno, {})
+        if metadata.get("policy_ref") not in selector_set and metadata.get("sanity_id") not in selector_set:
+            continue
+        end_lineno = getattr(node, "end_lineno", node.lineno)
+        remove_lines.update(range(node.lineno, end_lineno + 1))
+        removed_tests += 1
+    if not remove_lines:
+        return 0
+    lines = text.splitlines(keepends=True)
+    new_text = "".join(
+        line
+        for line_number, line in enumerate(lines, start=1)
+        if line_number not in remove_lines
+    )
+    new_text, _removed_blocks = _remove_empty_generated_sanity_blocks(new_text)
+    if not dry_run:
+        paths.deep_sanity_file.write_text(new_text, encoding="utf-8")
+    return removed_tests
+
+
+def _registry_entry_has_fixture_refs(entry: Mapping[str, Any]) -> bool:
+    def _walk(value: Any) -> bool:
+        if isinstance(value, Mapping):
+            refs = value.get("fixture_refs")
+            if isinstance(refs, list) and refs:
+                return True
+            return any(_walk(child) for child in value.values())
+        if isinstance(value, list):
+            return any(_walk(child) for child in value)
+        return False
+
+    return _walk(entry)
+
+
+def _registry_record_policy_ref_candidates(record: RegistryEntryRecord) -> tuple[str, ...]:
+    entry = _registry_record_payload(record)
+    candidates: list[str] = [record.entry_id]
+    for source_ref in _string_tuple(entry.get("source_refs")):
+        if source_ref.startswith("manual:"):
+            candidates.append(source_ref.removeprefix("manual:"))
+    canonical_slug = _slug(str(entry.get("canonical") or record.canonical))
+    variants = tuple(str(value) for value in entry.get("variants") or [] if str(value).strip())
+    variant_slug = _slug(variants[0]) if variants else ""
+    surface_stem = record.surface.replace("-", "_")
+    if canonical_slug and variant_slug and record.surface in {key.replace("_", "-") for key in SIMPLE_TOML_SURFACES}:
+        candidates.append(f"{surface_stem}_{canonical_slug}_{variant_slug}")
+    if record.surface == "keyword-synonym" and canonical_slug and variant_slug:
+        candidates.append(f"keyword_synonym_{canonical_slug}_{variant_slug}")
+    if record.surface == "extraction-helper" and canonical_slug:
+        candidates.append(f"extraction_helper_{canonical_slug}")
+    return tuple(dict.fromkeys(candidate for candidate in candidates if candidate))
+
+
+def _find_registry_record_by_exact_id(paths: MatcherPaths, entry_id: str) -> tuple[Path, RegistryEntryRecord] | None:
+    matches: list[tuple[Path, RegistryEntryRecord]] = []
+    for path in sorted(paths.registry_entries_dir.glob("*.toml")):
+        surface = path.stem.replace("_", "-")
+        for record in _registry_entry_records(surface, path):
+            if record.entry_id == entry_id:
+                matches.append((path, record))
+    if not matches:
+        return None
+    if len(matches) > 1:
+        labels = "\n".join(f"{path}: {_registry_entry_label(record)}" for path, record in matches[:20])
+        raise typer.BadParameter(f"registry entry id is not unique: {entry_id}\n{labels}")
+    return matches[0]
+
+
+def _inventory_references_registry_entry(paths: MatcherPaths, entry_id: str) -> bool:
+    if not paths.inventory_source_file.exists():
+        return False
+    return entry_id in paths.inventory_source_file.read_text(encoding="utf-8")
+
+
+def _remove_generated_registry_entry_by_id(
+    *,
+    entry_id: str,
+    reason: str,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> bool:
+    reason = reason.strip()
+    if not reason:
+        raise typer.BadParameter("--reason is required; registry-entry undo is a deliberate policy change")
+    paths = _paths(tree_root)
+    match = _find_registry_record_by_exact_id(paths, entry_id)
+    if match is None:
+        return False
+    path, record = match
+    entry = _registry_record_payload(record)
+    notes = str(entry.get("notes") or "")
+    if "Generated by dm matcher add" not in notes:
+        raise typer.BadParameter(
+            f"{entry_id} is not a generated dm matcher add entry. "
+            "Use `dm matcher inactivate <surface> <id-or-term> --reason \"...\"` for established registry rules."
+        )
+    if record.status.lower() != "active":
+        raise typer.BadParameter(f"{entry_id} is {record.status}; remove only supports active generated entries")
+    if _registry_entry_has_fixture_refs(entry):
+        raise typer.BadParameter(
+            f"{entry_id} has fixture_refs; use fixture/no-match/match-bridge specific tooling instead"
+        )
+    if _inventory_references_registry_entry(paths, entry_id):
+        raise typer.BadParameter(
+            f"{entry_id} is referenced by matcher_rule_inventory; use surface-specific modify/fixture tooling instead"
+        )
+
+    selectors = _registry_record_policy_ref_candidates(record)
+    removed_sanity = 0
+    if write_sanity:
+        removed_sanity = _remove_generated_sanity_tests_for_selectors(
+            paths=paths,
+            selectors=selectors,
+            dry_run=dry_run,
+        )
+    text = path.read_text(encoding="utf-8")
+    new_text = text[:record.start] + text[record.end:]
+    new_text = re.sub(r"\n{3,}", "\n\n", new_text).rstrip() + "\n"
+
+    if dry_run:
+        typer.echo(f"Would remove generated registry entry: {entry_id}")
+        typer.echo(f"  surface: {record.surface}")
+        typer.echo(f"  path: {path}")
+        typer.echo(f"  reason: {reason}")
+        if write_sanity:
+            typer.echo(f"  sanity: would remove {removed_sanity} generated test(s)")
+        else:
+            typer.echo("  sanity: skipped")
+        typer.echo("Dry run only; no files written.")
+        return True
+
+    path.write_text(new_text, encoding="utf-8")
+    typer.echo(f"Removed generated registry entry: {entry_id}")
+    typer.echo(f"  surface: {record.surface}")
+    if write_sanity:
+        typer.echo(f"  sanity: removed {removed_sanity} generated test(s)")
+    else:
+        typer.echo("  sanity: skipped")
+    _regenerate_contract_json(paths)
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return True
+    if _matcher_session_should_defer_gates(paths):
+        _echo_session_deferred_gates()
+        return True
+    coverage_status = _run_coverage_generator(paths)
+    if coverage_status != 0:
+        raise typer.Exit(coverage_status)
+    raise typer.Exit(_run_track_b_inactivation_gates(paths, report_root))
+
+
 def _run_track_b_inactivation_gates(paths: MatcherPaths, report_root: Path | None) -> int:
     if _matcher_session_should_defer_gates(paths):
         _echo_session_deferred_gates()
@@ -7563,7 +7749,7 @@ def add_keyword_extra_parent(
         str | None,
         typer.Option("--offer-names", help="Optional comma-separated offer names matching --kids order."),
     ] = None,
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category used in fixtures.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category used in fixtures.")] = "",
     policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable policy ref override.")] = None,
     source_ref: Annotated[str | None, typer.Option("--source-ref", help="Stable source ref override.")] = None,
     inventory_id_override: Annotated[
@@ -7705,7 +7891,7 @@ def add_keyword_synonym(
         str,
         typer.Option("--sanity-offer", help="Offer name used by the generated deep-sanity regression."),
     ],
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity/fixtures.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity/fixtures.")] = "",
     ingredient_override: Annotated[
         str | None,
         typer.Option("--ingredient", help="Ingredient text override. Best used with a single variant."),
@@ -9412,7 +9598,7 @@ def _add_runtime_specialty_rule(
     write_sanity: bool,
     sanity_ingredient: str | None = None,
     sanity_offer: str | None = None,
-    offer_category: str = "pantry",
+    offer_category: str = "",
     sanity_expect: Literal["match", "no-match"] = "match",
 ) -> None:
     key = key.strip()
@@ -9508,7 +9694,7 @@ def add_specialty_qualifier(
         str | None,
         typer.Option("--sanity-offer", help="Optional offer name for an additional backend behavior canary."),
     ] = None,
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for the optional behavior canary.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for the optional behavior canary.")] = "",
     sanity_expect: Annotated[
         Literal["match", "no-match"],
         typer.Option("--sanity-expect", help="Expected result for the optional behavior canary."),
@@ -9581,7 +9767,7 @@ def add_ingredient_parent(
         str | None,
         typer.Option("--sanity-ingredient", help="Ingredient text for the generated deep-sanity regression."),
     ] = None,
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "",
     policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable policy ref override.")] = None,
     source_ref: Annotated[str | None, typer.Option("--source-ref", help="Stable source ref override.")] = None,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
@@ -9629,7 +9815,7 @@ def add_offer_extra_keyword(
         str | None,
         typer.Option("--sanity-offer", help="Offer name for the generated deep-sanity regression."),
     ] = None,
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "",
     policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable policy ref override.")] = None,
     source_ref: Annotated[str | None, typer.Option("--source-ref", help="Stable source ref override.")] = None,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
@@ -9673,7 +9859,7 @@ def add_ingredient_routing_parent(
         str | None,
         typer.Option("--sanity-ingredient", help="Ingredient text for the generated deep-sanity regression."),
     ] = None,
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "",
     policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable policy ref override.")] = None,
     source_ref: Annotated[str | None, typer.Option("--source-ref", help="Stable source ref override.")] = None,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
@@ -9725,7 +9911,7 @@ def add_parent_match_only(
         str | None,
         typer.Option("--negative-offer", help="Offer name for generated strictness/no-match sanity proof."),
     ] = None,
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "",
     negative_offer_category: Annotated[
         str | None,
         typer.Option("--negative-offer-category", help="Offer category for the generated negative sanity proof."),
@@ -9776,7 +9962,7 @@ def add_recipe_routing_helper(
         str | None,
         typer.Option("--sanity-offer", help="Offer name for the generated deep-sanity regression."),
     ] = None,
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "",
     policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable policy ref override.")] = None,
     source_ref: Annotated[str | None, typer.Option("--source-ref", help="Stable source ref override.")] = None,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
@@ -9828,7 +10014,7 @@ def add_smart_blocker(
         Literal["match", "no-match"],
         typer.Option("--expect", help="Expected result for optional sanity canary."),
     ] = "no-match",
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for optional sanity.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for optional sanity.")] = "",
     policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable sanity policy ref override.")] = None,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
     run_gates: Annotated[
@@ -9952,7 +10138,7 @@ def add_no_match_policy(
     ] = None,
     policy_id: Annotated[str | None, typer.Option("--policy-id", help="Stable no-match policy id.")] = None,
     policy_ref: Annotated[str | None, typer.Option("--policy-ref", help="Stable policy ref override.")] = None,
-    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "pantry",
+    offer_category: Annotated[str, typer.Option("--offer-category", help="Offer category for sanity.")] = "",
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
     run_gates: Annotated[
         bool,
@@ -12421,6 +12607,7 @@ def _format_matcher_why_text(payload: Mapping[str, Any]) -> str:
     retry_events = [event for event in events if event.get("type") == "validation_retry"]
     lines = [
         f"case: {payload.get('case_id')}",
+        f"recipe: {payload.get('recipe_name') or '-'}",
         f"expected: {payload.get('expected')} actual: {payload.get('actual')} passed: {payload.get('passed')}",
         f"diagnosis: {payload.get('diagnosis_class')}",
         f"first action: {payload.get('first_action')}",
@@ -12452,6 +12639,13 @@ def _format_matcher_why_text(payload: Mapping[str, Any]) -> str:
             f"fallbacks={materialization.get('fullscan_fallback_count')}"
         ),
     ]
+    if payload.get("recipe_name_defaulted"):
+        lines.extend([
+            "",
+            "recipe context note:",
+            "  Default recipe name was used. Pass --recipe-name when recipe-title guards "
+            "such as vegan/cuisine/prepared-dish context matter.",
+        ])
     if payload.get("diagnosis_class") == "fast_match_missing" and not backend.get("reject_rule"):
         lines.extend([
             "",
@@ -12532,9 +12726,9 @@ def matcher_why(
         typer.Option("--weight-grams", help="Optional offer/product weight in grams."),
     ] = None,
     recipe_name: Annotated[
-        str,
+        str | None,
         typer.Option("--recipe-name", help="Optional recipe name for backend context."),
-    ] = "DM Matcher Why",
+    ] = None,
     expect: Annotated[
         str | None,
         typer.Option(
@@ -12556,16 +12750,19 @@ def matcher_why(
     if not ingredient.strip():
         raise typer.BadParameter("--ingredient must not be empty")
 
+    recipe_name_value = recipe_name.strip() if recipe_name else ""
     payload = _why_matcher_pair(
         offer=offer.strip(),
         ingredient=ingredient.strip(),
         offer_category=offer_category.strip(),
         brand=brand.strip(),
         weight_grams=weight_grams,
-        recipe_name=recipe_name.strip(),
+        recipe_name=recipe_name_value,
         expect=expect,
         include_cache_freshness=include_cache_freshness,
     )
+    payload["recipe_name"] = recipe_name_value or "DM Matcher Why"
+    payload["recipe_name_defaulted"] = not bool(recipe_name_value)
     if output_format == "json":
         typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
         return
@@ -12795,9 +12992,9 @@ def matcher_probe(
         typer.Option("--weight-grams", help="Optional offer/product weight in grams."),
     ] = None,
     recipe_name: Annotated[
-        str,
+        str | None,
         typer.Option("--recipe-name", help="Optional recipe name for backend context."),
-    ] = "DM Matcher Probe",
+    ] = None,
     expect: Annotated[
         str | None,
         typer.Option("--expect", help="Expected backend result: match or no-match."),
@@ -12818,14 +13015,17 @@ def matcher_probe(
 
     expected_backend = _normalize_probe_expectation(expect, option_name="--expect")
     expected_fast = _normalize_probe_expectation(expect_fast, option_name="--expect-fast")
+    recipe_name_value = recipe_name.strip() if recipe_name else ""
     probe = _probe_matcher_pair(
         offer=offer.strip(),
         ingredient=ingredient.strip(),
         offer_category=offer_category.strip(),
         brand=brand.strip(),
         weight_grams=weight_grams,
-        recipe_name=recipe_name.strip(),
+        recipe_name=recipe_name_value,
     )
+    probe["recipe_name"] = recipe_name_value or "DM Matcher Probe"
+    probe["recipe_name_defaulted"] = not bool(recipe_name_value)
 
     failures: list[str] = []
     if expected_backend is not None:
@@ -12862,8 +13062,16 @@ def matcher_probe(
     )
     typer.echo(f"Offer: {probe['offer']}")
     typer.echo(f"Ingredient: {probe['ingredient']}")
+    typer.echo(f"Recipe: {probe['recipe_name']}")
     typer.echo(f"Fast matcher: {fast_status}")
     typer.echo(f"Backend matcher: {backend_status}")
+    if probe.get("recipe_name_defaulted"):
+        typer.secho(
+            "Note: default recipe name was used; pass --recipe-name when recipe-title guards "
+            "such as vegan/cuisine/prepared-dish context matter.",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
     if diverged:
         typer.secho(
             "Warning: fast/backend results diverge; run `dm matcher compare-paths` for path diagnostics.",
@@ -12894,9 +13102,9 @@ def matcher_compare_paths(
         typer.Option("--weight-grams", help="Optional offer/product weight in grams."),
     ] = None,
     recipe_name: Annotated[
-        str,
+        str | None,
         typer.Option("--recipe-name", help="Optional recipe name for backend context."),
-    ] = "DM Matcher Path Compare",
+    ] = None,
     output_format: Annotated[
         Literal["text", "json"],
         typer.Option("--format", help="Output format."),
@@ -12907,14 +13115,16 @@ def matcher_compare_paths(
     if not ingredient.strip():
         raise typer.BadParameter("--ingredient must not be empty")
 
+    recipe_name_value = recipe_name.strip() if recipe_name else ""
     payload = _compare_matcher_paths(
         offer=offer.strip(),
         ingredient=ingredient.strip(),
         offer_category=offer_category.strip(),
         brand=brand.strip(),
         weight_grams=weight_grams,
-        recipe_name=recipe_name.strip(),
+        recipe_name=recipe_name_value or "DM Matcher Path Compare",
     )
+    payload["recipe_name_defaulted"] = not bool(recipe_name_value)
     if output_format == "json":
         typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
         return
@@ -12931,6 +13141,7 @@ def matcher_compare_paths(
     )
     typer.echo(f"Offer: {payload['offer']}")
     typer.echo(f"Ingredient: {payload['ingredient']}")
+    typer.echo(f"Recipe: {payload['recipe_name']}")
     typer.echo(f"Ingredient normalized: {payload['ingredient_normalized']}")
     typer.echo(f"Canonical fast matcher: {fast_status}")
     typer.echo(f"Backend matcher: {backend_status}")
@@ -12970,6 +13181,13 @@ def matcher_compare_paths(
         typer.echo("Processed checks: none")
     if payload["fast_backend_diverged"]:
         typer.secho("Warning: fast/backend matcher paths diverge.", fg=typer.colors.YELLOW, err=True)
+    if payload.get("recipe_name_defaulted"):
+        typer.secho(
+            "Note: default recipe name was used; pass --recipe-name when recipe-title guards "
+            "such as vegan/cuisine/prepared-dish context matter.",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
 
 
 def _sanity_expected_literal(expected: str) -> str:
@@ -13976,9 +14194,14 @@ def matcher_list(
         typer.echo("No entries found.")
 
 
-@matcher_app.command("remove", help="Soft-disable one runtime-overlay rule by exact id and remove its generated canary.")
+@matcher_app.command("remove", help="Remove a generated matcher rule by exact id and remove its generated canary.")
 def matcher_remove(
-    rule_id: Annotated[str, typer.Argument(help="Runtime overlay rule id, e.g. runtime_pnb_gradde.")],
+    rule_id: Annotated[
+        str,
+        typer.Argument(
+            help="Runtime overlay rule id, or exact generated registry entry_id for fresh-rule undo.",
+        ),
+    ],
     reason: Annotated[str, typer.Option("--reason", help="Why this rule is being removed.")],
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to edit instead of /app.")] = None,
     run_gates: Annotated[
@@ -13995,15 +14218,41 @@ def matcher_remove(
         typer.Option("--sanity/--no-sanity", help="Remove generated membership canaries for this rule."),
     ] = True,
 ) -> None:
-    _remove_runtime_overlay_rule_by_id(
-        rule_id=rule_id,
-        reason=reason,
-        tree_root=tree_root,
-        run_gates=run_gates,
-        report_root=report_root,
-        dry_run=dry_run,
-        write_sanity=write_sanity,
-    )
+    if rule_id.startswith("sv-se."):
+        removed_registry = _remove_generated_registry_entry_by_id(
+            entry_id=rule_id,
+            reason=reason,
+            tree_root=tree_root,
+            run_gates=run_gates,
+            report_root=report_root,
+            dry_run=dry_run,
+            write_sanity=write_sanity,
+        )
+        if removed_registry:
+            return
+    try:
+        _remove_runtime_overlay_rule_by_id(
+            rule_id=rule_id,
+            reason=reason,
+            tree_root=tree_root,
+            run_gates=run_gates,
+            report_root=report_root,
+            dry_run=dry_run,
+            write_sanity=write_sanity,
+        )
+    except typer.BadParameter:
+        removed_registry = _remove_generated_registry_entry_by_id(
+            entry_id=rule_id,
+            reason=reason,
+            tree_root=tree_root,
+            run_gates=run_gates,
+            report_root=report_root,
+            dry_run=dry_run,
+            write_sanity=write_sanity,
+        )
+        if removed_registry:
+            return
+        raise
 
 
 @matcher_app.command("inactivate", help="Set a matcher registry or runtime-overlay entry to inactive.")
