@@ -6,7 +6,7 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 101,
       "hardcoded_keyword_output:extract_keywords_from_product": 121,
-      "ingredient_parent_mapping": 413,
+      "ingredient_parent_mapping": 414,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
       "keyword_synonym_mapping": 191,
@@ -30,7 +30,7 @@
     },
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 413,
+      "ingredient_parent": 414,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 191,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5868,
-    "variants_missing_product_text": 1900,
+    "variant_count": 5869,
+    "variants_missing_product_text": 1901,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -123274,11 +123274,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"kardemumma\"}"
+    },
+    {
+      "variant_id": "vterm-e929f852bd304892",
+      "row_index": 4808,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:stekfläsk",
+      "source_id": "stekfläsk",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "stekfläsk",
+      "canonical": "sidfläsk",
+      "expected_family": "sidfläsk",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"sidfläsk\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1674,
+      "no_product_text": 1675,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123286,7 +123307,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 413,
+      "ingredient_parent": 414,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 191,
@@ -123300,8 +123321,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5868
+      "audited": 5869
     },
-    "variant_count": 5868
+    "variant_count": 5869
   }
 }
