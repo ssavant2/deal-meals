@@ -2251,6 +2251,59 @@ function formatSavingsBadge(savings, offer) {
     return `-${savings.toFixed(1).replace('.', ',')} kr`;
 }
 
+function formatOfferWeightSuffix(weightGrams) {
+    const weight = parseFloat(weightGrams);
+    if (!Number.isFinite(weight) || weight <= 0) return '';
+    if (weight >= 1000) {
+        const kg = weight / 1000;
+        const formattedKg = Number.isInteger(kg)
+            ? String(kg)
+            : kg.toFixed(2).replace(/0+$/, '').replace(/\.$/, '').replace('.', ',');
+        return `${formattedKg}kg`;
+    }
+    const formattedGrams = Number.isInteger(weight)
+        ? String(weight)
+        : weight.toFixed(1).replace(/0$/, '').replace(/\.$/, '').replace('.', ',');
+    return `${formattedGrams}g`;
+}
+
+function offerNameAlreadyShowsWeight(name, weightGrams) {
+    const suffix = formatOfferWeightSuffix(weightGrams);
+    if (!suffix) return true;
+    const compactName = String(name || '').toLowerCase().replace(/\s+/g, '');
+    const compactSuffix = suffix.toLowerCase().replace(/\s+/g, '');
+    const weight = parseFloat(weightGrams);
+    const grams = Math.round(weight);
+    const kg = weight / 1000;
+    const kgSuffix = `${Number.isInteger(kg)
+        ? String(kg)
+        : kg.toFixed(2).replace(/0+$/, '').replace(/\.$/, '').replace('.', ',')}kg`;
+    return (
+        compactName.includes(compactSuffix)
+        || compactName.includes(`${grams}g`)
+        || compactName.includes(kgSuffix)
+    );
+}
+
+function formatOfferDisplayName(offer, siblingOffers) {
+    const name = String((offer && offer.name) || '');
+    const suffix = formatOfferWeightSuffix(offer && offer.weight_grams);
+    if (!suffix || offerNameAlreadyShowsWeight(name, offer && offer.weight_grams)) return name;
+
+    const normalizedName = name.trim().toLowerCase().replace(/\s+/g, ' ');
+    const sameNamedOffers = (siblingOffers || []).filter(o =>
+        String((o && o.name) || '').trim().toLowerCase().replace(/\s+/g, ' ') === normalizedName
+    );
+    if (sameNamedOffers.length < 2) return name;
+
+    const visibleWeights = new Set(
+        sameNamedOffers
+            .map(o => formatOfferWeightSuffix(o && o.weight_grams))
+            .filter(Boolean)
+    );
+    return visibleWeights.size > 1 ? `${name} ${suffix}` : name;
+}
+
 function showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, servings, isCapped, cappedSavings, recipeUrl) {
     // Store recipe ID and show exclude button for regular recipes
     currentRecipeId = recipeId;
@@ -2355,7 +2408,7 @@ function showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, ser
 
         if (offers.length === 1) {
             const offer = offers[0];
-            const offerName = escapeHtml(offer.name || '');
+            const offerName = escapeHtml(formatOfferDisplayName(offer, offers));
             const storeName = escapeHtml(offer.store_name || '?');
             const price = parseFloat(offer.price) || 0;
             const savings = parseFloat(offer.savings) || 0;
@@ -2391,7 +2444,7 @@ function showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, ser
             `;
             tbody.appendChild(row);
         } else {
-            const firstName = escapeHtml(sorted[0].name || '');
+            const firstName = escapeHtml(formatOfferDisplayName(sorted[0], sorted));
             const minPrice = parseFloat(sorted[0].price) || 0;
             const maxPrice = parseFloat(sorted[sorted.length-1].price) || 0;
 
@@ -2410,13 +2463,14 @@ function showMatchedOffers(recipeId, recipeName, matchedOffers, ingredients, ser
             // Build safe links with savings info (max 4 links)
             const links = sorted.slice(0, 4).map((o, i) => {
                 const url = safeUrl(o.product_url);
+                const offerDisplayName = formatOfferDisplayName(o, sorted);
                 const oPrice = parseFloat(o.price) || 0;
                 const mbIcon = o.is_multi_buy ? '⚠' : '';
                 const osIcon = isOversizedProduct(o.name, matchingIngredient, oPrice, o.weight_grams) ? '📦' : '';
                 const priceStr = oPrice.toFixed(2).replace('.', ',');
                 const savingsStr = parseFloat(o.savings).toFixed(2).replace('.', ',');
                 const osTitle = isOversizedProduct(o.name, matchingIngredient, oPrice, o.weight_grams) ? ` (${i18n['home.modal_quantity_warning']})` : '';
-                const tooltip = t('home.modal_offer_tooltip', {price: priceStr, savings: savingsStr}) + (o.is_multi_buy ? ` (${i18n['home.modal_multi_buy_short']})` : '') + osTitle;
+                const tooltip = `${offerDisplayName}: ${t('home.modal_offer_tooltip', {price: priceStr, savings: savingsStr})}` + (o.is_multi_buy ? ` (${i18n['home.modal_multi_buy_short']})` : '') + osTitle;
                 return url ? `<a href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary me-1" title="${escapeAttr(tooltip)}">${osIcon}${mbIcon}${i+1}</a>` : '';
             }).join('');
 
