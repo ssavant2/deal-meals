@@ -31,7 +31,7 @@ RUN if [ "$INSTALL_DEV_TOOLS" = "true" ]; then git config --system --add safe.di
 WORKDIR /app
 
 # Install uv (fast Python package manager, written in Rust)
-COPY --from=ghcr.io/astral-sh/uv:0.11.14 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.19 /uv /usr/local/bin/uv
 
 # Install Python dependencies
 COPY app/requirements.txt .
@@ -74,7 +74,7 @@ RUN mkdir -p /tmp/vendor /vendor-assets/bootstrap-icons /vendor-assets/flag-icon
     wget -qO- https://registry.npmjs.org/flag-icons/-/flag-icons-7.5.0.tgz | \
       tar -xz -C /vendor-assets/flag-icons --strip-components=1 && \
     wget -qO /vendor-assets/sweetalert2.all.min.js \
-      "https://cdn.jsdelivr.net/npm/sweetalert2@11.26.24/dist/sweetalert2.all.min.js"
+      "https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/dist/sweetalert2.all.min.js"
 
 # Pre-populate vendor assets in the image for production. Dev bind mounts still
 # rely on entrypoint.sh to sync the same staged assets back into /app/static/vendor.
