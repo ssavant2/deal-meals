@@ -4775,6 +4775,67 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             "app/languages/sv/ingredient_matching/matching.py",
         )
 
+    def test_dm_matcher_doctor_warns_on_one_sided_mirrored_surface_change(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            live_app_dir = Path(__file__).resolve().parents[2]
+
+            subprocess.run(["git", "init"], cwd=tree_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "add", "."], cwd=tree_root, check=True, capture_output=True, text=True)
+            subprocess.run(
+                [
+                    "git",
+                    "-c",
+                    "user.name=DM Test",
+                    "-c",
+                    "user.email=dm-test@example.invalid",
+                    "commit",
+                    "-m",
+                    "baseline",
+                ],
+                cwd=tree_root,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            matching_file = app_dir / "languages" / "sv" / "ingredient_matching" / "matching.py"
+            matching_file.write_text(
+                matching_file.read_text(encoding="utf-8") + "\n# synthetic one-sided mirror change\n",
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "doctor",
+                    "--tree-root",
+                    str(tree_root),
+                    "--report-root",
+                    str(tree_root / "reports"),
+                    "--format",
+                    "json",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        report = json.loads(result.stdout)
+        checks = {check["id"]: check for check in report["checks"]}
+        mirrored = checks["mirrored_manual_surfaces"]
+        self.assertEqual(mirrored["status"], "warning")
+        warning = mirrored["details"]["warnings"][0]
+        self.assertEqual(warning["watch_id"], "specialty_fast_backend")
+        self.assertIn("app/languages/sv/ingredient_matching/matching.py", warning["changed"])
+        self.assertIn("app/languages/sv/ingredient_matching/validators.py", warning["missing_peer_changes"])
+
     def test_dm_matcher_doctor_reports_stale_generated_json_next_action(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)

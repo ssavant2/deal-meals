@@ -160,6 +160,14 @@ class CodeDriftWatchItem:
     required_tokens: Mapping[str, tuple[str, ...]]
 
 
+@dataclass(frozen=True)
+class MirroredManualSurface:
+    item_id: str
+    summary: str
+    paths: tuple[str, ...]
+    verify_hint: str
+
+
 CODE_DRIFT_WATCHLIST = (
     CodeDriftWatchItem(
         item_id="puffat_ris_extraction_matching",
@@ -172,6 +180,22 @@ CODE_DRIFT_WATCHLIST = (
                 r"\bpuffat(?:\s+\w+)?\s+ris\b|\bris\s+puffat\b",
             ),
         },
+    ),
+)
+
+
+MIRRORED_MANUAL_SURFACES = (
+    MirroredManualSurface(
+        item_id="specialty_fast_backend",
+        summary=(
+            "specialty/form validation has mirrored fast/backend logic; changing only "
+            "matching.py or validators.py is often a missed half"
+        ),
+        paths=(
+            "app/languages/sv/ingredient_matching/matching.py",
+            "app/languages/sv/ingredient_matching/validators.py",
+        ),
+        verify_hint="run dm matcher compare-paths/probe on the affected pair and add backend sanity if backend behavior changed",
     ),
 )
 
@@ -1506,6 +1530,13 @@ def _doctor_guided_corrections(checks: Iterable[MatcherDoctorCheck]) -> list[dic
             "summary": code_drift.summary,
             "command": "inspect the listed extraction.py/matching.py watchlist tokens, then run dm matcher compare-paths",
         })
+    mirrored_surfaces = by_id.get("mirrored_manual_surfaces")
+    if mirrored_surfaces and mirrored_surfaces.status == "warning":
+        corrections.append({
+            "id": "mirrored_manual_surfaces",
+            "summary": mirrored_surfaces.summary,
+            "command": "review the listed peer files, then run dm matcher compare-paths/probe for the affected pair",
+        })
     return corrections
 
 
@@ -1654,6 +1685,53 @@ def _doctor_code_drift_watchlist_check(paths: MatcherPaths) -> MatcherDoctorChec
         "extraction_matching_drift_watchlist",
         "ok",
         "Extraction/matching drift watchlist is satisfied.",
+        details,
+    )
+
+
+def _doctor_mirrored_manual_surfaces_check(
+    paths: MatcherPaths,
+    since: str | None,
+) -> MatcherDoctorCheck:
+    changed_paths, error = _matcher_changed_paths_since(paths, since)
+    if error is not None:
+        return MatcherDoctorCheck(
+            "mirrored_manual_surfaces",
+            "ok",
+            "Mirrored manual surface check skipped; git change list is unavailable.",
+            {"error": error},
+        )
+
+    changed = set(changed_paths)
+    warnings: list[dict[str, Any]] = []
+    for surface in MIRRORED_MANUAL_SURFACES:
+        changed_peers = [path for path in surface.paths if path in changed]
+        if not changed_peers or len(changed_peers) == len(surface.paths):
+            continue
+        warnings.append({
+            "watch_id": surface.item_id,
+            "summary": surface.summary,
+            "changed": changed_peers,
+            "missing_peer_changes": [path for path in surface.paths if path not in changed],
+            "verify_hint": surface.verify_hint,
+        })
+
+    details = {
+        "watch_count": len(MIRRORED_MANUAL_SURFACES),
+        "changed_paths": list(changed_paths),
+        "warnings": warnings,
+    }
+    if warnings:
+        return MatcherDoctorCheck(
+            "mirrored_manual_surfaces",
+            "warning",
+            f"{len(warnings)} mirrored manual surface(s) changed on only one side.",
+            details,
+        )
+    return MatcherDoctorCheck(
+        "mirrored_manual_surfaces",
+        "ok",
+        "Mirrored manual surface change check is clean.",
         details,
     )
 
@@ -1855,6 +1933,7 @@ def _matcher_doctor_report(
         lambda: _doctor_generated_coverage_check(paths),
         lambda: _doctor_extraction_helper_coverage_check(paths),
         lambda: _doctor_code_drift_watchlist_check(paths),
+        lambda: _doctor_mirrored_manual_surfaces_check(paths, since),
         lambda: _doctor_line_refs_check(paths),
         lambda: _doctor_writeability_check(paths, report_root),
     ):
@@ -2095,12 +2174,21 @@ def _print_generated_sanity_probe(paths: MatcherPaths, policy_ref: str) -> None:
     if not rows:
         return
     typer.echo("Sanity probe:")
+    has_drift = False
     for row in rows:
         status = "OK" if row.get("matches_expected") is True else (
             "DRIFT" if row.get("matches_expected") is False else "SKIP"
         )
+        has_drift = has_drift or status == "DRIFT"
         actual = row.get("actual_literal") or row.get("classification") or "unknown"
         typer.echo(f"  {status}: {row.get('description')} expected {row.get('expected')} actual {actual}")
+    if has_drift:
+        typer.secho(
+            f"Next: run `./bin/dm matcher reconcile-sanity {policy_ref} --apply` "
+            "if the observed runtime behavior is the intended policy.",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
 
 
 def _print_generated_canary_scope_note(*, sanity_mode: Literal["fast-match", "backend-match"]) -> None:

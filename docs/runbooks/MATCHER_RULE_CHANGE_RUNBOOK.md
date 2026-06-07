@@ -998,6 +998,10 @@ rejected it. Work through this checklist:
    not be assumed to extract as standalone ingredients. Also check early
    name-conditional branches in `extraction.py` that can return before the
    generic word loop.
+   The length filter runs on the surface token before a later synonym can save
+   it. If `salame -> salami` exists but the raw ingredient word is `salame`, add
+   `salame` itself to `important-short-keyword`; adding only `salami` does not
+   help a too-short `salame` token that was dropped first.
 4. If the keyword is present on both sides, run `dm matcher why` and inspect
    validators before adding more aliases: no-match policies, PNB/FPB/KSBC/GPB
    blockers, specialty qualifiers
@@ -1719,10 +1723,11 @@ The `missing` array identifies the stale reference, for example:
 }
 ```
 
-When the anchor target was intentionally removed, do not keep retrying
-`refresh-line-refs --fix`: there is no line number to refresh. Update the
-owning inventory row so its `line_refs[].anchor` points at a surviving sibling
-entry, or use the relevant `dm matcher modify ...` command when one exists.
+When the anchor target was intentionally removed or the anchored source line was
+rewritten, do not keep retrying `refresh-line-refs --fix`: there is no old text
+left to locate. Update the owning inventory row so its `line_refs[].anchor`
+points at the new stable source text or at a surviving sibling entry, or use the
+relevant `dm matcher modify ...` command when one exists.
 
 ### Registry Entries
 
@@ -1894,6 +1899,11 @@ existing local mechanism. Examples:
 When a backend validator changes, check whether `matches_ingredient_fast`,
 diagnostics, and routed parity need the same semantic check. Backend-only fixes
 can make live diagnostics look right while cache/routing still diverges.
+Specialty/form style validation is the common footgun: fast-path checks often
+live in `matching.py`, while backend validation lives in
+`validators.py`/`recipe_matcher_backend.py`. `dm matcher doctor` warns when only
+one side of a known mirrored manual surface is dirty, but the semantic proof is
+still a targeted `dm matcher probe` or `compare-paths` on the affected pair.
 
 When a text-prep or extraction code edit changes what ingredient text means,
 check both runtime paths:
