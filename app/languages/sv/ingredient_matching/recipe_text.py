@@ -78,6 +78,17 @@ _SINGLE_PRODUCT_EXAMPLE_PAREN_RE = re.compile(
     r'\(\s*(?:t\.?\s*ex\.?|exempelvis|till\s+exempel)\s+(bostongurka|bostongurkor)\s*\)',
     re.IGNORECASE,
 )
+# "valfri / valfritt / valfria" marks the head as deliberately broad ("of your
+# choice / any"), so any trailing example must NOT narrow it.
+_BROAD_CHOICE_RE = re.compile(r'\bvalfri(?:tt|a)?\b', re.IGNORECASE)
+# Matches the trailing example clause introduced by "ex.", "t ex", "t.ex.",
+# "tex", "exempelvis" or "till exempel". The lookahead requires the marker to be
+# a complete token (followed by whitespace or end-of-string) so words like
+# "textur" / "texmex" are never mistaken for the "tex" marker.
+_BROAD_CHOICE_EXAMPLE_CLAUSE_RE = re.compile(
+    r'\s+(?:ex|t\.?\s*ex|tex|exempelvis|till\s+exempel)\.?(?=\s|$).*$',
+    re.IGNORECASE,
+)
 # "(som X, Y och/eller Z)" — parenthetical example list signalled by "som"
 # Strictly requires a comma inside parens so descriptive parentheticals like
 # "(som varit fryst minst 2 dygn)" or "(som fått rinna av i kyl)" do NOT trigger.
@@ -453,6 +464,32 @@ def strip_biff_portion_prep_phrase(text: str) -> str:
     """
 
     return _BIFF_PORTION_PREP_RE.sub('', text)
+
+
+def strip_broad_choice_example_clause(text: str) -> str:
+    """Drop a trailing example after an explicit "any / of your choice" head.
+
+    The word "valfri/valfritt/valfria" makes the head deliberately broad, so a
+    following example must not narrow it. Without this, "valfri grädde ex.
+    havregrädde" keeps a 'havregrädde' token whose 'havre' context suppresses
+    the broad plain 'grädde' (KEYWORD_SUPPRESSED_BY_CONTEXT), blocking every
+    dairy cream offer. Strip the example clause so only the broad head survives
+    and plain 'grädde' matches all cream variants (visp/matlagning/...).
+
+    Examples:
+    - "3 dl valfri grädde ex. havregrädde" -> "3 dl valfri grädde"
+    - "valfri mjölk t.ex. havredryck" -> "valfri mjölk"
+
+    Scoped strictly to the "valfri" family so genuine narrowing examples
+    elsewhere are kept untouched. No-op when there is no "valfri" head or when
+    stripping would empty the text.
+    """
+    if not _BROAD_CHOICE_RE.search(text):
+        return text
+    stripped = _BROAD_CHOICE_EXAMPLE_CLAUSE_RE.sub('', text)
+    if stripped.strip() and stripped != text:
+        return stripped
+    return text
 
 
 def is_subrecipe_reference_text(text: str) -> bool:

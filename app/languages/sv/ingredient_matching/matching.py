@@ -96,6 +96,7 @@ from .recipe_text import (
     preserve_single_product_example_parentheticals,
     preserve_plant_based_parenthetical,
     strip_biff_portion_prep_phrase,
+    strip_broad_choice_example_clause,
     rewrite_mince_of_alternatives,
     rewrite_truncated_chocolate_color_lists,
     rewrite_truncated_eller_compounds,
@@ -3970,6 +3971,10 @@ def _prepare_fast_ingredient_text(
     # Route through the helper so context-aware rules (e.g. drink-wine skip)
     # apply consistently on both fast and slow paths.
     ingredient_lower = _apply_space_normalizations(ingredient_lower)
+    # "valfri X ex./t.ex. Y": keep the broad head so the fast path agrees with the
+    # backend/compiled-recipe normalization (the example term must not narrow the
+    # broad keyword). Mirrors the same strip in compiled_recipes/extraction.
+    ingredient_lower = strip_broad_choice_example_clause(ingredient_lower)
     ingredient_lower = preserve_cheese_preference_parentheticals(ingredient_lower)
     ingredient_lower = preserve_parenthetical_chili_alias(ingredient_lower)
     ingredient_lower = preserve_fresh_pasta_parenthetical(ingredient_lower)

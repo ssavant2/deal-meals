@@ -51,6 +51,7 @@ from .recipe_text import (
     preserve_parenthetical_shiso_alternatives,
     preserve_spice_mix_preference_parentheticals,
     preserve_single_product_example_parentheticals,
+    strip_broad_choice_example_clause,
     rewrite_buljong_eller_fond,
     rewrite_truncated_chocolate_color_lists,
     rewrite_mince_of_alternatives,
@@ -211,6 +212,10 @@ def prepare_recipe_match_runtime_data(recipe: FoundRecipe) -> dict[str, Any]:
         ingredient_norm = _apply_space_normalizations(
             fix_swedish_chars(str(ingredient)).lower()
         )
+        # "valfri X ex./t.ex. Y": keep the broad head so the KSBC context check
+        # (which reads this normalized text) does not see the example term and
+        # suppress the broad keyword. Mirrors the same strip in extraction.py.
+        ingredient_norm = strip_broad_choice_example_clause(ingredient_norm)
         ingredient_norm = rewrite_truncated_chocolate_color_lists(ingredient_norm)
         ingredient_norm = rewrite_truncated_eller_compounds(ingredient_norm)
         # "glass (blåbär)" → "blåbärsglass" so the fast path's compound-strict

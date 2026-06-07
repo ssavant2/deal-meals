@@ -1774,6 +1774,41 @@ source = "färsk potatis"
 target = "färskpotatis"
 reason = "Two-word form 'färsk potatis' loses isolation because 'färsk' is a stop-word; merged form extracts färskpotatis keyword and applies existing KSBC isolation correctly"
 
+[[space_normalizations]]
+id = "runtime_space_normalization_rod_kaviar_rodrom"
+status = "active"
+source = "röd kaviar"
+target = "rödrom"
+reason = "colored fish roe is rom-family roe, not Kalles-type cod roe paste; route to the red/black roe family"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_rod_caviar_rodrom"
+status = "active"
+source = "röd caviar"
+target = "rödrom"
+reason = "colored fish roe is rom-family roe, not Kalles-type cod roe paste; route to the red/black roe family"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_svart_kaviar_svartrom"
+status = "active"
+source = "svart kaviar"
+target = "svartrom"
+reason = "colored fish roe is rom-family roe, not Kalles-type cod roe paste; route to the red/black roe family"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_svart_caviar_svartrom"
+status = "active"
+source = "svart caviar"
+target = "svartrom"
+reason = "colored fish roe is rom-family roe, not Kalles-type cod roe paste; route to the red/black roe family"
+
+[[space_normalizations]]
+id = "runtime_space_normalization_smartare_fars_vegofars"
+status = "active"
+source = "smartare färs"
+target = "vegofärs"
+reason = "Stacky's Smartare Färs is a plant-based mince product; route its name to vegofärs so it blocks meat offers and still matches vego-mince recipes"
+
 [[keyword_set_updates]]
 id = "runtime_important_short_keyword_add_hirs"
 status = "active"
@@ -2085,6 +2120,14 @@ surface = "stop_words"
 action = "add"
 terms = ["rumsvarm", "utbakning"]
 reason = "Temperature/preparation method words leaking into extraction: rumsvarm (variant of rumsvarmt for warm-temperature doughs), utbakning (preparation method 'for rolling out')"
+
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_kaviar_caviar"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["kaviar", "caviar"]
+reason = "specific roe words below the length cutoff; force through extraction so caviar/kaviar ingredients are visible at all"
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"

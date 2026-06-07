@@ -28,6 +28,7 @@ from .synonyms import INGREDIENT_PARENTS, KEYWORD_SYNONYMS
 from .recipe_text import (
     is_subrecipe_reference_text,
     parse_eller_alternatives,
+    strip_broad_choice_example_clause,
     preserve_cheese_preference_parentheticals,
     preserve_dessert_pasta_parenthetical,
     preserve_fresh_pasta_parenthetical,
@@ -2192,6 +2193,14 @@ def extract_keywords_from_ingredient(
         >>> extract_keywords_from_ingredient("ca 1 kg laxfilé")
         ['laxfilé']
     """
+    # "valfri X ex./t.ex. Y": the word "valfri" ("of your choice / any") makes the
+    # head deliberately broad, so a trailing example must NOT narrow it. Strip the
+    # example clause up front (before the eller/example splitting below) so only
+    # the broad head survives — see strip_broad_choice_example_clause for the full
+    # rationale (mirrors the same strip applied to the normalized context text in
+    # compiled_recipes so KSBC sees the same broadened text).
+    ingredient = strip_broad_choice_example_clause(ingredient)
+
     if not _skip_eller_split:
         _eller_lower = ingredient.lower()
         if (
