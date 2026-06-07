@@ -8,7 +8,10 @@ import ast
 from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
+import re
+import subprocess
 import sys
+import tomllib
 from typing import Any
 
 
@@ -71,6 +74,7 @@ DEFAULT_SNAPSHOT_FILE = APP_DIR / "support_checks" / "baselines" / "known_infras
 ALLOWED_ADAPTER_REF_PREFIXES = allowed_prefixes("adapter_ref")
 CoverageKey = tuple[str, str, str, str, str, str]
 _SPACE_NORM_PRIVATE_NAMES = frozenset({"_SPACE_NORM_PATTERN", "_SPACE_NORM_LOOKUP"})
+_KEYWORD_SYNONYM_FILE_NAME = "keyword_synonym.toml"
 
 
 @dataclass(frozen=True)
@@ -222,6 +226,248 @@ def _check_space_norm_private_usage(app_dir: Path, *, repo_root: Path) -> list[P
                     "_SPACE_NORM_PATTERN.sub",
                     line=node.lineno,
                 ))
+    return issues
+
+
+def _literal_strings(node: ast.AST | None) -> set[str]:
+    if node is None:
+        return set()
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return {node.value}
+    if isinstance(node, (ast.Set, ast.List, ast.Tuple)):
+        values: set[str] = set()
+        for child in node.elts:
+            values.update(_literal_strings(child))
+        return values
+    if isinstance(node, ast.Call) and node.args:
+        return _literal_strings(node.args[0])
+    return set()
+
+
+def _module_constant_int(path: Path, name: str) -> int | None:
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except (OSError, SyntaxError):
+        return None
+    for node in tree.body:
+        target = None
+        value = None
+        if isinstance(node, ast.Assign):
+            target = node.targets[0] if node.targets else None
+            value = node.value
+        elif isinstance(node, ast.AnnAssign):
+            target = node.target
+            value = node.value
+        if isinstance(target, ast.Name) and target.id == name:
+            if isinstance(value, ast.Constant) and isinstance(value.value, int):
+                return value.value
+    return None
+
+
+def _important_short_keywords_from_tree(app_dir: Path) -> tuple[set[str], list[PreflightIssue]]:
+    root = app_dir / "languages" / "sv" / "ingredient_matching"
+    keywords_file = root / "keywords.py"
+    overlay_file = root / "runtime_rule_overlays.toml"
+    issues: list[PreflightIssue] = []
+    terms: set[str] = set()
+    try:
+        tree = ast.parse(keywords_file.read_text(encoding="utf-8"), filename=str(keywords_file))
+    except (OSError, SyntaxError) as exc:
+        issues.append(PreflightIssue(
+            "error",
+            "important_short_keywords_unreadable",
+            f"could not read IMPORTANT_SHORT_KEYWORDS from keywords.py: {exc}",
+            str(keywords_file),
+            "IMPORTANT_SHORT_KEYWORDS",
+        ))
+        return terms, issues
+
+    for node in tree.body:
+        if (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == "IMPORTANT_SHORT_KEYWORDS"
+        ):
+            terms.update(value.strip().lower() for value in _literal_strings(node.value) if value.strip())
+            break
+
+    if overlay_file.exists():
+        try:
+            payload = tomllib.loads(overlay_file.read_text(encoding="utf-8"))
+        except (OSError, tomllib.TOMLDecodeError) as exc:
+            issues.append(PreflightIssue(
+                "error",
+                "runtime_overlay_unreadable",
+                f"could not read runtime important-short updates: {exc}",
+                str(overlay_file),
+                "important_short_keywords",
+            ))
+            return terms, issues
+        for entry in payload.get("keyword_set_updates", []):
+            if not isinstance(entry, dict):
+                continue
+            if str(entry.get("status") or "active") != "active":
+                continue
+            if str(entry.get("surface") or "") != "important_short_keywords":
+                continue
+            action = str(entry.get("action") or "").lower()
+            update_terms = {
+                str(term).strip().lower()
+                for term in entry.get("terms", [])
+                if str(term).strip()
+            }
+            if action == "add":
+                terms.update(update_terms)
+            elif action == "remove":
+                terms.difference_update(update_terms)
+    return terms, issues
+
+
+def _keyword_synonym_entries_from_text(text: str) -> dict[str, dict[str, Any]]:
+    payload = tomllib.loads(text)
+    entries: dict[str, dict[str, Any]] = {}
+    for raw_entry in payload.get("entries", []):
+        if not isinstance(raw_entry, dict):
+            continue
+        entry_id = str(raw_entry.get("entry_id") or "").strip()
+        if not entry_id:
+            canonical = str(raw_entry.get("canonical") or "canonical").strip()
+            variants = raw_entry.get("variants") or []
+            first_variant = str(variants[0]) if variants else "variant"
+            entry_id = f"{canonical}:{first_variant}"
+        entries[entry_id] = {
+            "entry_id": entry_id,
+            "canonical": str(raw_entry.get("canonical") or "").strip(),
+            "status": str(raw_entry.get("status") or "active"),
+            "variants": tuple(
+                str(variant).strip().lower()
+                for variant in raw_entry.get("variants", [])
+                if str(variant).strip()
+            ),
+        }
+    return entries
+
+
+def _git_head_file_text(repo_root: Path, rel_path: str) -> str | None:
+    try:
+        result = subprocess.run(
+            ["git", "show", f"HEAD:{rel_path}"],
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def _changed_keyword_synonym_entries(
+    keyword_synonym_file: Path,
+    *,
+    repo_root: Path,
+) -> tuple[dict[str, dict[str, Any]], list[PreflightIssue]]:
+    if not keyword_synonym_file.exists():
+        return {}, []
+    file_name = _rel(keyword_synonym_file, repo_root=repo_root)
+    try:
+        current_entries = _keyword_synonym_entries_from_text(
+            keyword_synonym_file.read_text(encoding="utf-8")
+        )
+    except (OSError, tomllib.TOMLDecodeError) as exc:
+        return {}, [PreflightIssue(
+            "error",
+            "keyword_synonym_toml_unreadable",
+            f"could not read keyword_synonym.toml: {exc}",
+            file_name,
+            _KEYWORD_SYNONYM_FILE_NAME,
+        )]
+
+    old_text = _git_head_file_text(repo_root, file_name)
+    if old_text is None:
+        return {}, []
+    try:
+        old_entries = _keyword_synonym_entries_from_text(old_text)
+    except tomllib.TOMLDecodeError:
+        return {}, []
+
+    changed: dict[str, dict[str, Any]] = {}
+    for entry_id, entry in current_entries.items():
+        if entry["status"] != "active":
+            continue
+        previous = old_entries.get(entry_id)
+        if previous is None or previous.get("status") != "active":
+            changed[entry_id] = {**entry, "new_variants": entry["variants"]}
+            continue
+        old_variants = set(previous.get("variants", ()))
+        new_variants = tuple(variant for variant in entry["variants"] if variant not in old_variants)
+        if new_variants:
+            changed[entry_id] = {**entry, "new_variants": new_variants}
+    return changed, []
+
+
+def _check_short_keyword_synonym_variants(
+    *,
+    app_dir: Path,
+    registry_entries_dir: Path,
+    repo_root: Path,
+) -> list[PreflightIssue]:
+    keyword_synonym_file = registry_entries_dir / _KEYWORD_SYNONYM_FILE_NAME
+    changed_entries, issues = _changed_keyword_synonym_entries(
+        keyword_synonym_file,
+        repo_root=repo_root,
+    )
+    if not changed_entries:
+        return issues
+
+    min_length = _module_constant_int(
+        app_dir / "languages" / "sv" / "ingredient_matching" / "extraction_patterns.py",
+        "MIN_KEYWORD_LENGTH_STRICT",
+    )
+    if min_length is None:
+        return [*issues, PreflightIssue(
+            "error",
+            "strict_keyword_length_unreadable",
+            "could not read MIN_KEYWORD_LENGTH_STRICT from extraction_patterns.py",
+            _rel(app_dir / "languages" / "sv" / "ingredient_matching" / "extraction_patterns.py", repo_root=repo_root),
+            "MIN_KEYWORD_LENGTH_STRICT",
+        )]
+
+    important_short, important_issues = _important_short_keywords_from_tree(app_dir)
+    issues.extend(important_issues)
+    if important_issues:
+        return issues
+
+    file_name = _rel(keyword_synonym_file, repo_root=repo_root)
+    for entry_id, entry in sorted(changed_entries.items()):
+        for variant in entry.get("new_variants", ()):
+            if re.search(r"\s", variant):
+                continue
+            if len(variant) >= min_length or variant in important_short:
+                continue
+            issues.append(PreflightIssue(
+                "error",
+                "keyword_synonym_short_variant_missing_important_short",
+                (
+                    f"new keyword-synonym variant {variant!r} is shorter than "
+                    f"MIN_KEYWORD_LENGTH_STRICT={min_length} and will be dropped before "
+                    "synonym mapping unless it is also an important-short keyword"
+                ),
+                file_name,
+                entry_id,
+                _line_for_id(keyword_synonym_file, entry_id),
+                {
+                    "variant": variant,
+                    "canonical": entry.get("canonical", ""),
+                    "min_length": min_length,
+                    "fix": (
+                        f"./bin/dm matcher add important-short-keyword --terms {variant} "
+                        "--reason \"<why this short synonym source must extract>\""
+                    ),
+                },
+            ))
     return issues
 
 
@@ -730,6 +976,11 @@ def run_preflight(
     inventory = load_inventory_contract(inventory_file)
     issues = []
     issues.extend(_check_space_norm_private_usage(app_dir, repo_root=repo_root))
+    issues.extend(_check_short_keyword_synonym_variants(
+        app_dir=app_dir,
+        registry_entries_dir=registry_entries_dir,
+        repo_root=repo_root,
+    ))
     issues.extend(_check_fixtures(fixture_file, fixtures, repo_root=repo_root))
     issues.extend(_check_inventory(inventory_file, inventory, fixtures, repo_root=repo_root))
     issues.extend(_check_source_coverage(

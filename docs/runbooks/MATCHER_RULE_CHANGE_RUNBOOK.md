@@ -1001,7 +1001,9 @@ rejected it. Work through this checklist:
    The length filter runs on the surface token before a later synonym can save
    it. If `salame -> salami` exists but the raw ingredient word is `salame`, add
    `salame` itself to `important-short-keyword`; adding only `salami` does not
-   help a too-short `salame` token that was dropped first.
+   help a too-short `salame` token that was dropped first. Preflight flags
+   new/changed `keyword-synonym` variants below the strict length cutoff when
+   the source term is not also in `important-short-keyword`.
 4. If the keyword is present on both sides, run `dm matcher why` and inspect
    validators before adding more aliases: no-match policies, PNB/FPB/KSBC/GPB
    blockers, specialty qualifiers

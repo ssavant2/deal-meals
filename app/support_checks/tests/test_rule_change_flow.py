@@ -573,6 +573,155 @@ def normalize_probe(text: str) -> str:
             self.assertIn("space_norm_private_import", codes)
             self.assertIn("space_norm_direct_pattern_sub", codes)
 
+    def test_preflight_flags_new_short_keyword_synonym_without_important_short(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            subprocess.run(["git", "init"], cwd=tree_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "add", "."], cwd=tree_root, check=True, capture_output=True, text=True)
+            subprocess.run(
+                [
+                    "git",
+                    "-c",
+                    "user.name=DM Test",
+                    "-c",
+                    "user.email=dm-test@example.invalid",
+                    "commit",
+                    "-m",
+                    "baseline",
+                ],
+                cwd=tree_root,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            keyword_synonym = (
+                app_dir
+                / "languages"
+                / "sv"
+                / "ingredient_matching"
+                / "term_registry"
+                / "entries"
+                / "keyword_synonym.toml"
+            )
+            keyword_synonym.write_text(
+                keyword_synonym.read_text(encoding="utf-8")
+                + """
+
+[[entries]]
+entry_id = "sv-se.alias.phasefood.phasef"
+language = "sv"
+market = "SE"
+canonical = "phasefood"
+status = "active"
+variants = ["phasef"]
+offer_terms = ["phasefood"]
+source_refs = ["manual:phase_short_synonym"]
+layer_policy = ["offer_alias"]
+notes = "Synthetic short synonym source term."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "phasefood"
+variant = "phasef"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "phasefood"
+offer_name = "Phasef"
+expected = 1
+""",
+                encoding="utf-8",
+            )
+
+            report = run_preflight(tree_root=tree_root)
+
+        short_issues = [
+            item
+            for item in report["new_issues"]
+            if item["code"] == "keyword_synonym_short_variant_missing_important_short"
+        ]
+        self.assertEqual(len(short_issues), 1)
+        self.assertEqual(short_issues[0]["item_id"], "sv-se.alias.phasefood.phasef")
+        self.assertEqual(short_issues[0]["details"]["variant"], "phasef")
+        self.assertIn("important-short-keyword", short_issues[0]["details"]["fix"])
+
+    def test_preflight_allows_new_short_keyword_synonym_with_important_short(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tree_root = Path(tmp)
+            app_dir = _copy_matcher_tree(tree_root)
+            subprocess.run(["git", "init"], cwd=tree_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "add", "."], cwd=tree_root, check=True, capture_output=True, text=True)
+            subprocess.run(
+                [
+                    "git",
+                    "-c",
+                    "user.name=DM Test",
+                    "-c",
+                    "user.email=dm-test@example.invalid",
+                    "commit",
+                    "-m",
+                    "baseline",
+                ],
+                cwd=tree_root,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            matcher_root = app_dir / "languages" / "sv" / "ingredient_matching"
+            keyword_synonym = matcher_root / "term_registry" / "entries" / "keyword_synonym.toml"
+            keyword_synonym.write_text(
+                keyword_synonym.read_text(encoding="utf-8")
+                + """
+
+[[entries]]
+entry_id = "sv-se.alias.phasefood.phasef"
+language = "sv"
+market = "SE"
+canonical = "phasefood"
+status = "active"
+variants = ["phasef"]
+offer_terms = ["phasefood"]
+source_refs = ["manual:phase_short_synonym"]
+layer_policy = ["offer_alias"]
+notes = "Synthetic short synonym source term."
+
+[[entries.coverage]]
+source_family = "keyword_synonym"
+canonical = "phasefood"
+variant = "phasef"
+layer_role = "keyword_synonym_mapping"
+
+[[entries.positive_examples]]
+ingredient = "phasefood"
+offer_name = "Phasef"
+expected = 1
+""",
+                encoding="utf-8",
+            )
+            runtime_overlays = matcher_root / "runtime_rule_overlays.toml"
+            runtime_overlays.write_text(
+                runtime_overlays.read_text(encoding="utf-8")
+                + """
+
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_phasef"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["phasef"]
+reason = "Synthetic short synonym source term must survive strict extraction before synonym mapping."
+""",
+                encoding="utf-8",
+            )
+
+            report = run_preflight(tree_root=tree_root)
+
+        self.assertFalse(any(
+            item["code"] == "keyword_synonym_short_variant_missing_important_short"
+            for item in report["new_issues"]
+        ))
+
     def test_positive_fixture_missing_expected_matches_is_actionable(self) -> None:
         fixtures = json.loads(DEFAULT_FIXTURE_FILE.read_text(encoding="utf-8"))
         fixture = next(
