@@ -386,9 +386,9 @@
     "line_refs": [
       {
         "anchor": "not pressed_ginger_juice_allowed",
-        "end": 1919,
+        "end": 1920,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 1919
+        "start": 1920
       }
     ],
     "notes": "Backend validation explicitly allows pressed ginger juice products through processed-product checks.",
@@ -525,9 +525,9 @@
       },
       {
         "anchor": "if not _explicit_vegan_context_allows_product(product_lower, full_recipe_text, ing_norm):",
-        "end": 2046,
+        "end": 2047,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 2046
+        "start": 2047
       }
     ],
     "notes": "Backend guard rejects animal/egg products when explicit vegan recipe wording reaches validation, while allowing plant-based burger products through the same routed keyword.",
@@ -1450,9 +1450,9 @@
       },
       {
         "anchor": "detail='sashimi_salmon',",
-        "end": 2074,
+        "end": 2075,
         "path": "app/languages/sv/recipe_matcher_backend.py",
-        "start": 2074
+        "start": 2075
       }
     ],
     "notes": "Sashimi-lax wording requires sushi-grade salmon products; generic frozen salmon fillets are rejected even when sashimi appears only in the recipe title.",
@@ -4054,9 +4054,9 @@
     "line_refs": [
       {
         "anchor": "'kantareller i vatten',",
-        "end": 357,
+        "end": 367,
         "path": "app/languages/sv/category_utils.py",
-        "start": 357
+        "start": 367
       },
       {
         "anchor": "_CHANTERELLE_KW = frozenset({'kantarell', 'kantareller'})",
@@ -4086,9 +4086,9 @@
     "line_refs": [
       {
         "anchor": "if category == 'beverages':",
-        "end": 343,
+        "end": 353,
         "path": "app/languages/sv/category_utils.py",
-        "start": 343
+        "start": 353
       },
       {
         "anchor": "# Explicit canned cherry tomatoes should not surface obvious fresh produce",

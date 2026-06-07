@@ -279,9 +279,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "not pressed_ginger_juice_allowed"
-end = 1919
+end = 1920
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 1919
+start = 1920
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_black_pepper_staple"
@@ -366,9 +366,9 @@ start = 448
 
 [[inventory.line_refs]]
 anchor = "if not _explicit_vegan_context_allows_product(product_lower, full_recipe_text, ing_norm):"
-end = 2046
+end = 2047
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 2046
+start = 2047
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_crispy_chili_oil"
@@ -1060,9 +1060,9 @@ start = 531
 
 [[inventory.line_refs]]
 anchor = "detail='sashimi_salmon',"
-end = 2074
+end = 2075
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 2074
+start = 2075
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tzaybitar_vegobitar"
@@ -2999,9 +2999,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'kantareller i vatten',"
-end = 357
+end = 367
 path = "app/languages/sv/category_utils.py"
-start = 357
+start = 367
 
 [[inventory.line_refs]]
 anchor = "_CHANTERELLE_KW = frozenset({'kantarell', 'kantareller'})"
@@ -3024,9 +3024,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if category == 'beverages':"
-end = 343
+end = 353
 path = "app/languages/sv/category_utils.py"
-start = 343
+start = 353
 
 [[inventory.line_refs]]
 anchor = "# Explicit canned cherry tomatoes should not surface obvious fresh produce"
