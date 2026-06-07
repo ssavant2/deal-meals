@@ -20430,9 +20430,9 @@ category = ""
 name = "Kardemummakärnor 20g ICA"
 
 [[fixtures.expected_matches]]
-canonical = "kardemummakärnor"
+canonical = "kardemumma"
 ingredient_index = 0
-must_match_keyword = "kardemummakärnor"
+must_match_keyword = "kardemumma"
 
 [[fixtures]]
 expected = 1
@@ -20456,9 +20456,9 @@ category = ""
 name = "Kardemummakärnor"
 
 [[fixtures.expected_matches]]
-canonical = "kardemummakärnor"
+canonical = "kardemumma"
 ingredient_index = 0
-must_match_keyword = "kardemummakärnor"
+must_match_keyword = "kardemumma"
 
 [[fixtures]]
 expected = 0

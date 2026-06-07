@@ -900,6 +900,13 @@ keyword = "pasta"
 blockers = ["chitarra"]
 reason = "Chitarra is a long pasta (square-cut spaghetti variant); blocked from generic short-pasta bucket to enforce two-bucket pasta policy"
 
+[[product_name_blockers]]
+id = "runtime_pnb_kycklingspett"
+status = "active"
+keyword = "kycklingspett"
+blockers = ["teriyaki"]
+reason = "Teriyaki-marinated pre-seasoned chicken skewers are Japanese-style and should not match plain 'kycklingspett paprika & örter' recipes; cuisine-incompatible substitution"
+
 [[false_positive_blockers]]
 id = "runtime_fpb_ingefara"
 status = "active"
@@ -2062,6 +2069,22 @@ surface = "processed_foods"
 action = "add"
 terms = ["råggyberry"]
 reason = "Råggyberry is a fruit squeeze-pouch snack (mellanmål), not a cooking kompott; must not match recipe ingredients"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_strimlor"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["strimlor"]
+reason = "cooking method/cut description (strips/shreds), not a food item; strimla is already a stop word but plural form leaked through"
+
+[[keyword_set_updates]]
+id = "runtime_stop_word_add_rumsvarm_utbakning"
+status = "active"
+surface = "stop_words"
+action = "add"
+terms = ["rumsvarm", "utbakning"]
+reason = "Temperature/preparation method words leaking into extraction: rumsvarm (variant of rumsvarmt for warm-temperature doughs), utbakning (preparation method 'for rolling out')"
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"

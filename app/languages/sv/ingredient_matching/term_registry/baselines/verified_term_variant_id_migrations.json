@@ -3,7 +3,7 @@
   "from_hash_version": "v1_source_ref",
   "to_hash_version": "v2_stable_without_source_ref",
   "description": "Permanent verified-term variant_id migration map. Current records come from the v1 source_ref-based hash to v2 stable hash migration; v2 hashes exclude source_ref provenance text so source_ref edits do not force future baseline hash migrations.",
-  "variant_count": 5526,
+  "variant_count": 5528,
   "migrations": [
     {
       "old_variant_id": "vterm-001176a79541d816",
@@ -3865,6 +3865,19 @@
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
       "source_id": "matcher_regression_plain_kycklingfile_grillkryddad_negative",
       "source_ref": "current_review:accepted_direct_fix:plain_kycklingfile_grillkryddad"
+    },
+    {
+      "old_variant_id": "vterm-0e2c4c1222832a2c",
+      "new_variant_id": "vterm-05f5e469b98ebf8c",
+      "language": "sv",
+      "market": "SE",
+      "source_family": "matcher_regression_case",
+      "canonical": "kardemumma",
+      "variant": "matcher_regression_positive_kardemummakarnor: Kardemummakärnor",
+      "layer_role": "positive_regression",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_id": "matcher_regression_positive_kardemummakarnor",
+      "source_ref": "legacy_review:explicit_kardemummakarnor_still_accepts_ground_cardamom_even_though_the_kernel_path_already_has_dedicated_coverage"
     },
     {
       "old_variant_id": "vterm-0e328a0dc129d1d8",
@@ -46791,6 +46804,19 @@
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
       "source_id": "matcher_regression_positive_spetskal",
       "source_ref": "legacy_review:multi_item_alternative_ingredient_lines_are_still_only_partially_represented"
+    },
+    {
+      "old_variant_id": "vterm-a6636ff38b551d99",
+      "new_variant_id": "vterm-45f92a70ca179eb5",
+      "language": "sv",
+      "market": "SE",
+      "source_family": "matcher_regression_case",
+      "canonical": "kardemumma",
+      "variant": "matcher_regression_positive_kardemummakarnor_20g_ica: Kardemummakärnor 20g ICA",
+      "layer_role": "positive_regression",
+      "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+      "source_id": "matcher_regression_positive_kardemummakarnor_20g_ica",
+      "source_ref": "legacy_review:explicit_kardemummakarnor_still_accepts_ground_cardamom_even_though_the_kernel_path_already_has_dedicated_coverage"
     },
     {
       "old_variant_id": "vterm-a666bb1d147ba95f",

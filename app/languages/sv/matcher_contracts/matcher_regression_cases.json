@@ -23595,9 +23595,9 @@
     "expected": 1,
     "expected_matches": [
       {
-        "canonical": "kardemummakärnor",
+        "canonical": "kardemumma",
         "ingredient_index": 0,
-        "must_match_keyword": "kardemummakärnor"
+        "must_match_keyword": "kardemumma"
       }
     ],
     "id": "matcher_regression_positive_kardemummakarnor_20g_ica",
@@ -23625,9 +23625,9 @@
     "expected": 1,
     "expected_matches": [
       {
-        "canonical": "kardemummakärnor",
+        "canonical": "kardemumma",
         "ingredient_index": 0,
-        "must_match_keyword": "kardemummakärnor"
+        "must_match_keyword": "kardemumma"
       }
     ],
     "id": "matcher_regression_positive_kardemummakarnor",

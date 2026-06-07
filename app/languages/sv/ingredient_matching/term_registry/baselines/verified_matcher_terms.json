@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 413,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
-      "keyword_synonym_mapping": 190,
+      "keyword_synonym_mapping": 191,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 413,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 190,
+      "keyword_synonym": 191,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5867,
-    "variants_missing_product_text": 1899,
+    "variant_count": 5868,
+    "variants_missing_product_text": 1900,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -20019,8 +20019,8 @@
       "metadata": "{\"aliases\": [\"brodskivor\", \"brödskivor\"], \"fixture_refs\": [\"matcher_regression_brodskivor_positive\"], \"forbidden_offer_form_signals\": [], \"ingredient_form_signals\": [], \"offer_form_signals\": [], \"required_offer_form_signals\": [], \"rule_version\": 1, \"supersedes\": [\"legacy_normalization_brodskivor_formbrod\"]}"
     },
     {
-      "variant_id": "vterm-a6636ff38b551d99",
-      "row_index": 1519,
+      "variant_id": "vterm-45f92a70ca179eb5",
+      "row_index": 1558,
       "source_order": 20,
       "source_type": "matcher_regression_case",
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
@@ -20028,8 +20028,8 @@
       "source_id": "matcher_regression_positive_kardemummakarnor_20g_ica",
       "variant_role": "positive_regression",
       "variant_text": "matcher_regression_positive_kardemummakarnor_20g_ica: Kardemummakärnor 20g ICA",
-      "canonical": "kardemummakärnor",
-      "expected_family": "kardemummakärnor",
+      "canonical": "kardemumma",
+      "expected_family": "kardemumma",
       "ingredient_text": "1 tsk kardemummakärnor",
       "product_text": "Kardemummakärnor 20g ICA",
       "product_category": null,
@@ -20037,7 +20037,7 @@
       "expected": 1,
       "needs_product_text": false,
       "notes": "legacy_review_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"kardemummakärnor\", \"ingredient_index\": 0, \"must_match_keyword\": \"kardemummakärnor\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Rabarbercrumble med vit choklad\"}"
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"kardemumma\", \"ingredient_index\": 0, \"must_match_keyword\": \"kardemumma\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Rabarbercrumble med vit choklad\"}"
     },
     {
       "variant_id": "vterm-d06bff3621d98ad0",
@@ -88542,8 +88542,8 @@
       "metadata": "{\"target\": \"formbröd\"}"
     },
     {
-      "variant_id": "vterm-0e2c4c1222832a2c",
-      "row_index": 1518,
+      "variant_id": "vterm-05f5e469b98ebf8c",
+      "row_index": 1557,
       "source_order": 20,
       "source_type": "matcher_regression_case",
       "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
@@ -88551,8 +88551,8 @@
       "source_id": "matcher_regression_positive_kardemummakarnor",
       "variant_role": "positive_regression",
       "variant_text": "matcher_regression_positive_kardemummakarnor: Kardemummakärnor",
-      "canonical": "kardemummakärnor",
-      "expected_family": "kardemummakärnor",
+      "canonical": "kardemumma",
+      "expected_family": "kardemumma",
       "ingredient_text": "1 tsk kardemummakärnor",
       "product_text": "Kardemummakärnor",
       "product_category": null,
@@ -88560,7 +88560,7 @@
       "expected": 1,
       "needs_product_text": false,
       "notes": "legacy_review_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"kardemummakärnor\", \"ingredient_index\": 0, \"must_match_keyword\": \"kardemummakärnor\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Rabarbercrumble med vit choklad\"}"
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"kardemumma\", \"ingredient_index\": 0, \"must_match_keyword\": \"kardemumma\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Rabarbercrumble med vit choklad\"}"
     },
     {
       "variant_id": "vterm-4dd07f19b22b84d5",
@@ -123253,11 +123253,32 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"långpasta\"}"
+    },
+    {
+      "variant_id": "vterm-69f6ba31c3968f0c",
+      "row_index": 4929,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:kardemummakärnor",
+      "source_id": "kardemummakärnor",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "kardemummakärnor",
+      "canonical": "kardemumma",
+      "expected_family": "kardemumma",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"kardemumma\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1673,
+      "no_product_text": 1674,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123268,7 +123289,7 @@
       "ingredient_parent": 413,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 190,
+      "keyword_synonym": 191,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
@@ -123279,8 +123300,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5867
+      "audited": 5868
     },
-    "variant_count": 5867
+    "variant_count": 5868
   }
 }

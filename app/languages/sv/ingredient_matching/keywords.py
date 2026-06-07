@@ -378,7 +378,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
 
     # Processing/preparation methods that cause false matches
     'kallpressad',  # "rapsolja (ej kallpressad)" should NOT match "Kallpressad Juice"
-    'bakning',  # "till utbakning" is preparation method, not ingredient
+    'bakning', 'utbakning',  # "till utbakning" is preparation method, not ingredient
     # NOTE: 'mousserande' removed — it's a real product keyword (Willys has 5 mousserande vin products)
     'mousse',  # dessert product, not a standalone ingredient
     'cocktail',  # size descriptor ("Chorizo Cocktail") — compound "cocktailtomat" still works
@@ -549,7 +549,7 @@ STOP_WORDS: FrozenSet[str] = frozenset({
 
     # Temperature/state descriptors
     'rumstempererat', 'rumstempererad', 'rumstempererade',  # "smör, rumstempererat" — state, not ingredient
-    'rumsvarmt', 'rumsvarma',  # "smör, rumsvarmt" — same as rumstempererat
+    'rumsvarmt', 'rumsvarma', 'rumsvarm',  # "smör, rumsvarmt/rumsvarm" — same as rumstempererat
 
     # Marketing/recipe filler words
     'favorit',  # "valfri favorit" — not an ingredient
