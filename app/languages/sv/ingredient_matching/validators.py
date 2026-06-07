@@ -31,6 +31,7 @@ from .specialty_rules import (
     PESTO_RED_INGREDIENT_CUES,
     PESTO_RED_QUALIFIER_EQUIVALENTS,
     QUALIFIER_EQUIVALENTS,
+    generic_marinade_allows_plain_chicken,
 )
 from .synonyms import INGREDIENT_PARENTS
 
@@ -497,7 +498,8 @@ def check_processed_product_rules(
 def check_specialty_qualifiers(
     offer_specialty_qualifiers: Dict[str, set],
     matched_keyword: str,
-    ingredient_lower: str
+    ingredient_lower: str,
+    offer_name_lower: str = "",
 ) -> bool:
     """
     Check if a match passes SPECIALTY_QUALIFIERS against a SINGLE ingredient.
@@ -765,6 +767,20 @@ def check_specialty_qualifiers(
                     and qualifier == 'hel'
                     and any(_ingredient_implies_whole_kyckling(candidate) for candidate in candidate_ingredients)
                 ):
+                    continue
+                if (
+                    base_word in {'kycklingfilé', 'kycklingfile'}
+                    and qualifier == 'marinerad'
+                    and not ingredient_has_qualifier
+                    and generic_marinade_allows_plain_chicken(offer_name_lower)
+                ):
+                    # A generic marinated chicken fillet (no specific flavor
+                    # theme) just adds mild flavor and may satisfy a plain
+                    # kycklingfilé recipe. grillkryddad/kryddad/kryddmarinerad and
+                    # themed flavors (citron/chili/...) still block, so a
+                    # specifically-flavored marinade stays excluded.
+                    # offer_name_lower is "" for callers that do not pass it, which
+                    # keeps the strict (no-relaxation) behavior for those paths.
                     continue
                 if (
                     base_word == 'färskost'

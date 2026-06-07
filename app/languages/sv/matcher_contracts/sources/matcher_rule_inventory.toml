@@ -20,9 +20,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "saft_keywords.append('jordgubbssaft')"
-end = 1175
+end = 1172
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1175
+start = 1172
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_jordgubbssaft_blandsaft"
@@ -115,9 +115,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "ingredient_lower += ' förkoktmajskolv majskolv'"
-end = 4112
+end = 4169
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4112
+start = 4169
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_generic_oil"
@@ -165,9 +165,9 @@ start = 72
 
 [[inventory.line_refs]]
 anchor = "_RECIPE_NEVER_MATCH_KEYWORDS = frozenset({"
-end = 1002
+end = 1003
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1002
+start = 1003
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_strosocker_exact"
@@ -241,9 +241,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword not in {'cider', 'äppelcider', 'applelcider'}:"
-end = 2280
+end = 2309
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2280
+start = 2309
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_pressad_ingefarsjuice"
@@ -279,9 +279,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "not pressed_ginger_juice_allowed"
-end = 1920
+end = 1967
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 1920
+start = 1967
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_black_pepper_staple"
@@ -304,9 +304,9 @@ start = 72
 
 [[inventory.line_refs]]
 anchor = "'svartpepparkorn',"
-end = 1006
+end = 1007
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1006
+start = 1007
 
 [[inventory]]
 canonical = "svartpeppar"
@@ -322,9 +322,9 @@ status = "deprecated"
 
 [[inventory.line_refs]]
 anchor = "or re.search(r'\\bhela?\\s+svartpeppar\\b', ingredient_lower) is not None"
-end = 2309
+end = 2338
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2309
+start = 2338
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_vegan_pasta_not_eggpasta"
@@ -360,15 +360,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "def _explicit_vegan_context_allows_product("
-end = 448
+end = 485
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 448
+start = 485
 
 [[inventory.line_refs]]
-anchor = "if not _explicit_vegan_context_allows_product(product_lower, full_recipe_text, ing_norm):"
-end = 2047
+anchor = "if not _explicit_vegan_context_allows_product(product_lower, full_recipe_text, ing_norm, matched_keyword):"
+end = 2094
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 2047
+start = 2094
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_crispy_chili_oil"
@@ -397,15 +397,15 @@ start = 815
 
 [[inventory.line_refs]]
 anchor = "if 'crispychiliolja' in name:"
-end = 2320
+end = 2317
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2320
+start = 2317
 
 [[inventory.line_refs]]
 anchor = "if 'crispychiliolja' in ingredient_lower:"
-end = 4106
+end = 4163
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4106
+start = 4163
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_fresh_chili_not_crispy_chili_oil"
@@ -460,15 +460,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if re.search(r'\\b(?:läsk|lask)\\b', name):"
-end = 2675
+end = 2672
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2675
+start = 2672
 
 [[inventory.line_refs]]
 anchor = "if re.search(r'\\b(?:läsk|lask)\\b', ingredient_lower):"
-end = 4119
+end = 4176
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4119
+start = 4176
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_flaskkott_not_soda_lask_substring"
@@ -605,15 +605,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if re.search(r'\\b(?:folköl|folkol)\\b', name):"
-end = 2671
+end = 2668
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2671
+start = 2668
 
 [[inventory.line_refs]]
 anchor = "if re.search(r'\\b(?:folköl|folkol)\\b', ingredient_lower):"
-end = 4117
+end = 4174
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4117
+start = 4174
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_daimchoklad_exact"
@@ -655,9 +655,9 @@ start = 204
 
 [[inventory.line_refs]]
 anchor = "'hamburgerbröd': frozenset({'bröd', 'brod', 'potato', 'potatis', 'korvbröd', 'korvbrod', 'hamburgare'}),"
-end = 890
+end = 891
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 890
+start = 891
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -680,15 +680,15 @@ start = 688
 
 [[inventory.line_refs]]
 anchor = "specialty_keyword == 'fikon'"
-end = 5464
+end = 5527
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5464
+start = 5527
 
 [[inventory.line_refs]]
 anchor = "base_word == 'fikon'"
-end = 732
+end = 734
 path = "app/languages/sv/ingredient_matching/validators.py"
-start = 732
+start = 734
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_balsamvinager_rose"
@@ -705,9 +705,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "any(cue in original_name_lower for cue in ('condimento', 'balsamvinäger', 'balsamvinager', 'balsamico'))"
-end = 1180
+end = 1177
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1180
+start = 1177
 
 [[inventory.line_refs]]
 anchor = "'rosé', 'rose',  # rose/rosé balsamic/condimento ≠ dark/regular balsamic"
@@ -730,15 +730,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if 'koncentrat' not in ingredient_lower and 'concentrate' not in ingredient_lower:"
-end = 2369
+end = 2398
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2369
+start = 2398
 
 [[inventory.line_refs]]
 anchor = "return None  # raw/fresh-pressed juice should not match concentrate products"
-end = 5201
+end = 5264
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5201
+start = 5264
 
 [[inventory.line_refs]]
 anchor = "'apelsinjuice': {"
@@ -761,15 +761,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "return ['rotfruktsmix', 'morot', 'palsternacka', 'kålrot', 'rotselleri', 'rödbeta']"
-end = 2365
+end = 2362
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2365
+start = 2362
 
 [[inventory.line_refs]]
 anchor = "ingredient_lower += ' rotfruktsmix morot palsternacka kålrot rotselleri rödbeta'"
-end = 4114
+end = 4171
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4114
+start = 4171
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -786,9 +786,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'garlic': {'garlic', 'vitlök', 'vitlok'},"
-end = 1433
+end = 1456
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1433
+start = 1456
 
 [[inventory.line_refs]]
 anchor = "'vitlöksklyftor': {"
@@ -836,9 +836,9 @@ start = 441
 
 [[inventory.line_refs]]
 anchor = "# \"Formbar färs\" must match products that are actually formbar (can be shaped into"
-end = 1464
+end = 1487
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1464
+start = 1487
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_raw_flaskkott_not_prepared_souvlaki"
@@ -855,15 +855,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'souvlaki', 'grillspett', 'spett',"
-end = 771
+end = 772
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 771
+start = 772
 
 [[inventory.line_refs]]
 anchor = "cue in ingredient_lower for cue in ('fläsk', 'flask', 'fläskkött', 'flaskkott')"
-end = 2734
+end = 2763
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2734
+start = 2763
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_gradde_40pct"
@@ -880,9 +880,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "\"\"\"Explicit 30-40% cream wording should behave like whipping cream.\"\"\""
-end = 2258
+end = 2287
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2258
+start = 2287
 
 [[inventory.line_refs]]
 anchor = "# Cream types - \"vispgrädde\" is a specific type that matgrädde cannot substitute"
@@ -911,9 +911,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword not in {'chili', 'chilipeppar', 'chilifrukt', 'chilifrukter'}:"
-end = 2382
+end = 2411
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2382
+start = 2411
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -942,9 +942,9 @@ start = 713
 
 [[inventory.line_refs]]
 anchor = "if not any(cue in ingredient_lower for cue in ('fänkålsfrö', 'fankalsfro', 'fänkålsfrön', 'fankalsfron')):"
-end = 2394
+end = 2423
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2394
+start = 2423
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -961,9 +961,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "def _coarse_mustard_allows_product("
-end = 2401
+end = 2430
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2401
+start = 2430
 
 [[inventory.line_refs]]
 anchor = "('skånsk senap', 'skånsksenap'),"
@@ -986,15 +986,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_SALTED_POTATO_CHIPS_FLAVOR_BLOCKERS = frozenset({"
-end = 2237
+end = 2266
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2237
+start = 2266
 
 [[inventory.line_refs]]
 anchor = "if any(cue in product_lower for cue in _SALTED_POTATO_CHIPS_FLAVOR_BLOCKERS):"
-end = 2424
+end = 2453
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2424
+start = 2453
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_frysta_orter_frozen_herbs"
@@ -1017,9 +1017,9 @@ start = 942
 
 [[inventory.line_refs]]
 anchor = "ingredient_lower += ' frystaörter'"
-end = 4116
+end = 4173
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4116
+start = 4173
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_sashimi_lax_sushilax"
@@ -1036,33 +1036,33 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "return ['sushilax', 'lax']"
-end = 2371
+end = 2368
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2371
+start = 2368
 
 [[inventory.line_refs]]
 anchor = "ingredient_lower += ' sashimilax sushilax'"
-end = 4122
+end = 4179
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4122
+start = 4179
 
 [[inventory.line_refs]]
 anchor = "if any(cue in ingredient_lower for cue in ('sashimilax', 'sushilax')):"
-end = 4378
+end = 4435
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4378
+start = 4435
 
 [[inventory.line_refs]]
 anchor = "return any(cue in product_lower for cue in ('sushilax', 'sashimi', 'loin'))"
-end = 531
+end = 578
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 531
+start = 578
 
 [[inventory.line_refs]]
 anchor = "detail='sashimi_salmon',"
-end = 2075
+end = 2122
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 2075
+start = 2122
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tzaybitar_vegobitar"
@@ -1104,9 +1104,9 @@ start = 347
 
 [[inventory.line_refs]]
 anchor = "'kanelglass': frozenset({'kanel'}),"
-end = 995
+end = 996
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 995
+start = 996
 
 [[inventory.line_refs]]
 anchor = "variant = \"glass\""
@@ -1129,9 +1129,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'kumminstekt': frozenset({'kummin'}),"
-end = 997
+end = 998
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 997
+start = 998
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_classico_pastasas_exact"
@@ -1148,9 +1148,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "return not any(cue in product_lower for cue in _PASTASAS_TOMATO_BLOCKED_CUES)"
-end = 2359
+end = 2388
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2359
+start = 2388
 
 [[inventory.line_refs]]
 anchor = "# Vodka sauce should only match pasta sauces that actually contain vodka."
@@ -1173,9 +1173,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'dillpicklad': frozenset({'dill'}),"
-end = 996
+end = 997
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 996
+start = 997
 
 [[inventory.line_refs]]
 anchor = "\"dillpicklad\": \"gurka\","
@@ -1385,21 +1385,21 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if 'veganost' in name or re.search(r'\\b(?:vegansk|vegan|växtbaserad|vaxtbaserad)\\s+ost\\b', name):"
-end = 2681
+end = 2678
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2681
+start = 2678
 
 [[inventory.line_refs]]
 anchor = "vegan_cheese_keywords.extend(['mozzarellaost', 'mozzarella'])"
-end = 1135
+end = 1132
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1135
+start = 1132
 
 [[inventory.line_refs]]
 anchor = "if keyword_set & {'veganost', 'veganskmajonnäs', 'veganskmajonnas', 'violife', 'greenvie'}:"
-end = 3121
+end = 3150
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3121
+start = 3150
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_white_dark_chocolate_color_list"
@@ -1428,9 +1428,9 @@ start = 219
 
 [[inventory.line_refs]]
 anchor = "# Chocolate partial skip: \"mörk choklad\" should match generic (no darkness),"
-end = 554
+end = 556
 path = "app/languages/sv/ingredient_matching/validators.py"
-start = 554
+start = 556
 
 [[inventory.line_refs]]
 anchor = "# Chocolate darkness: \"Bakchoklad Vit\" should NOT match \"mörk choklad\" (Direction B blocks)."
@@ -1465,9 +1465,9 @@ start = 4179
 
 [[inventory.line_refs]]
 anchor = "scoped_ingredient = _ingredient_label_scope(ingredient_lower, matched_keyword)"
-end = 3175
+end = 3204
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3175
+start = 3204
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_laktosfri_mjolk_scope"
@@ -1484,15 +1484,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_LACTOSE_FREE_PRODUCT_CUES = frozenset({"
-end = 315
+end = 316
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 315
+start = 316
 
 [[inventory.line_refs]]
 anchor = "and not _product_satisfies_recipe_label(product_lower, product_keywords, _LACTOSE_FREE_PRODUCT_CUES)"
-end = 3215
+end = 3244
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3215
+start = 3244
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_revbensspjall_spareribs"
@@ -1521,9 +1521,9 @@ start = 2175
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword in {'revbensspjäll', 'revbensspjall', 'ribs'} and 'revbensspjäll' in ingredient_lower:"
-end = 2743
+end = 2772
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2743
+start = 2772
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_standardmjolk_plain"
@@ -1571,9 +1571,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "# as `havssalt`, while herb salts and crackers that merely mention sea salt"
-end = 1005
+end = 1002
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1005
+start = 1002
 
 [[inventory.line_refs]]
 anchor = "# Sea salt as a flavor on snacks/candy/crackers ≠ actual cooking salt."
@@ -1602,9 +1602,9 @@ start = 8273
 
 [[inventory.line_refs]]
 anchor = "_SPECIFIC_STOCK_KEYWORDS = {'hummerfond', 'kalvfond', 'fiskfond', 'kycklingfond',"
-end = 2777
+end = 2774
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2777
+start = 2774
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:route_exclusion"
@@ -1627,9 +1627,9 @@ start = 6456
 
 [[inventory.line_refs]]
 anchor = "# \"kantareller, på burk, avrunna\" should only surface preserved chanterelle"
-end = 4894
+end = 4957
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4894
+start = 4957
 
 [[inventory.line_refs]]
 anchor = "'creme', 'créme', 'kantarellpesto',  # same block for kantareller keyword"
@@ -1658,15 +1658,15 @@ start = 206
 
 [[inventory.line_refs]]
 anchor = "# lines asking for Kalamata olives. Keep olive oil, hummus, and tapenade out."
-end = 1903
+end = 1900
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1903
+start = 1900
 
 [[inventory.line_refs]]
 anchor = "'kalamataoliver' in keywords_set"
-end = 3753
+end = 3810
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3753
+start = 3810
 
 [[inventory.line_refs]]
 anchor = "# Kalamata olives (whole) != kalamataoliver (olive oil/paste)"
@@ -1701,15 +1701,15 @@ start = 66
 
 [[inventory.line_refs]]
 anchor = "def _ingredient_requests_preserved_whole_beets(ingredient_lower: str) -> bool:"
-end = 1627
+end = 1656
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1627
+start = 1656
 
 [[inventory.line_refs]]
 anchor = "# \"skivade rödbetor\" is ambiguous: it can mean jarred sliced beets, but in fresh-produce"
-end = 4776
+end = 4839
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4776
+start = 4839
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vinbarsgele_color_family"
@@ -1738,9 +1738,9 @@ start = 821
 
 [[inventory.line_refs]]
 anchor = "'svartvinbärsgele': frozenset({'vinbär', 'vinbärs', 'svartvinbär', 'svartvinbärs'}),"
-end = 910
+end = 911
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 910
+start = 911
 
 [[inventory.line_refs]]
 anchor = "variant = \"svartvinbärsgele\""
@@ -1769,15 +1769,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'garlic': frozenset({'garlic', 'vitlök', 'vitlok'}),"
-end = 145
+end = 146
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 145
+start = 146
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword not in _SPICE_MIX_FLAVOR_COMPONENT_KEYWORDS:"
-end = 1478
+end = 1507
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1478
+start = 1507
 
 [[inventory.line_refs]]
 anchor = "'grillkrydda': ("
@@ -1825,15 +1825,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword not in {'sylt', 'hjortronsylt'}:"
-end = 1856
+end = 1885
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1856
+start = 1885
 
 [[inventory.line_refs]]
 anchor = "if not _hjortronsylt_requirement_allows_product("
-end = 4659
+end = 4722
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4659
+start = 4722
 
 [[inventory.line_refs]]
 anchor = "'hjortronsylt',    # \"Hjortron Eko 225g\" (fresh/frozen berries) ≠ hjortronsylt (jam)"
@@ -1874,15 +1874,15 @@ start = 3414
 
 [[inventory.line_refs]]
 anchor = "'växtbaserad mjölkdryck', 'vaxtbaserad mjolkdryck',"
-end = 636
+end = 637
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 636
+start = 637
 
 [[inventory.line_refs]]
 anchor = "\"\"\"Plain plant milk/drink ingredients should not accept flavored drink variants.\"\"\""
-end = 1813
+end = 1842
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1813
+start = 1842
 
 [[inventory.line_refs]]
 anchor = "'choklad',      # \"Havredryck Choklad 1l\" — chocolate flavored"
@@ -1923,15 +1923,15 @@ start = 7146
 
 [[inventory.line_refs]]
 anchor = "ingredient_wants_green = any(cue in ingredient_lower for cue in ('grön zucchini', 'gron zucchini', 'grön squash', 'gron squash'))"
-end = 1942
+end = 1971
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1942
+start = 1971
 
 [[inventory.line_refs]]
 anchor = "# Explicit canned cherry tomatoes should not surface obvious fresh produce"
-end = 4874
+end = 4937
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4874
+start = 4937
 
 [[inventory]]
 adapter_refs = ["no_match_policies:policy_aggnudlar_not_risnudlar", "no_match_policies:policy_generic_nudlar_not_flavored_instant", "no_match_policies:policy_glasnudlar_not_pasta_vermicelli", "no_match_policies:policy_risnudlar_not_flavored_instant", "no_match_policies:policy_snabbnudlar_non_buyable"]
@@ -1960,15 +1960,15 @@ start = 777
 
 [[inventory.line_refs]]
 anchor = "if any(cue in ingredient_lower for cue in ('snabbnudlar', 'instantnudlar')):"
-end = 1957
+end = 1986
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1957
+start = 1986
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword not in {'nudlar', 'risnudlar', 'glasnudlar', 'äggnudlar', 'aggnudlar', 'vermicelli', 'pasta'}:"
-end = 1959
+end = 1988
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1959
+start = 1988
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -1991,21 +1991,21 @@ start = 452
 
 [[inventory.line_refs]]
 anchor = "return not any(cue in product_lower for cue in ('kyckling', 'chicken', 'spett', 'skewers', 'färdig', 'fardig'))"
-end = 2725
+end = 2754
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2725
+start = 2754
 
 [[inventory.line_refs]]
 anchor = "if not _gochujang_requirement_allows_product("
-end = 4746
+end = 4809
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4746
+start = 4809
 
 [[inventory.line_refs]]
 anchor = "if not _gochujang_requirement_allows_product("
-end = 4746
+end = 4809
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4746
+start = 4809
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_plant_based_burger_not_chicken_burger"
@@ -2028,15 +2028,15 @@ start = 294
 
 [[inventory.line_refs]]
 anchor = "'plant based', 'plant-based',"
-end = 285
+end = 286
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 285
+start = 286
 
 [[inventory.line_refs]]
 anchor = "\"\"\"Explicit vegan/plant-based base foods should not fall back to meat/dairy.\"\"\""
-end = 1830
+end = 1859
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1830
+start = 1859
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:mixed_reject_visibility"
@@ -2053,15 +2053,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_RAW_MEAT_PREPARED_PRODUCT_CUES = frozenset({"
-end = 761
+end = 762
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 761
+start = 762
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword in {'revbensspjäll', 'revbensspjall', 'ribs'} and 'revbensspjäll' in ingredient_lower:"
-end = 2743
+end = 2772
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2743
+start = 2772
 
 [[inventory.line_refs]]
 anchor = "# Seasoned chicken drumsticks ≠ plain kycklingben"
@@ -2071,9 +2071,9 @@ start = 3698
 
 [[inventory.line_refs]]
 anchor = "_SEASONED_CHICKEN_FILLET_CUES = frozenset({"
-end = 2182
+end = 2211
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2182
+start = 2211
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -2096,15 +2096,15 @@ start = 826
 
 [[inventory.line_refs]]
 anchor = "_CARROT_KEYWORDS = frozenset({'morot', 'morötter', 'morotter', 'morätter', 'moratter'})"
-end = 853
+end = 854
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 853
+start = 854
 
 [[inventory.line_refs]]
 anchor = "\"\"\"Keep plain/fresh carrots separate from preserved or ready-cooked carrot packs.\"\"\""
-end = 1614
+end = 1643
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1614
+start = 1643
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -2133,9 +2133,9 @@ start = 1216
 
 [[inventory.line_refs]]
 anchor = "'chokladknappar', 'chokladknapp',"
-end = 5456
+end = 5519
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5456
+start = 5519
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_vallmofro_not_crispbread_carrier"
@@ -2164,9 +2164,9 @@ start = 492
 
 [[inventory.line_refs]]
 anchor = "offer_text_for_context = f\"{offer_data.get('name_normalized', '')} {' '.join(keywords)}\""
-end = 5221
+end = 5284
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5221
+start = 5284
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_vodka_not_salsa_carrier"
@@ -2189,9 +2189,9 @@ start = 495
 
 [[inventory.line_refs]]
 anchor = "offer_text_for_context = f\"{offer_data.get('name_normalized', '')} {' '.join(keywords)}\""
-end = 5221
+end = 5284
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5221
+start = 5284
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -2208,21 +2208,21 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword not in {'citron', 'lime', 'citronjuice', 'limejuice'}:"
-end = 1980
+end = 2009
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1980
+start = 2009
 
 [[inventory.line_refs]]
 anchor = "# require ingredient to mention saft/juice/pressad (not whole fruit)."
-end = 5192
+end = 5255
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5192
+start = 5255
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword in _CITRUS_ZEST_KEYWORDS and offer_data['is_juice_product']:"
-end = 5208
+end = 5271
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5208
+start = 5271
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -2239,15 +2239,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_LENTIL_KEYWORDS = frozenset({'linser'})"
-end = 813
+end = 814
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 813
+start = 814
 
 [[inventory.line_refs]]
 anchor = "\"\"\"Keep dry lentils and cooked/pre-cooked lentil packs separate.\"\"\""
-end = 1596
+end = 1625
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1596
+start = 1625
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:mixed_reject_visibility"
@@ -2264,21 +2264,21 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'korean': frozenset({'korean', 'koreansk', 'koreanska', 'bulgogi'}),"
-end = 143
+end = 144
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 143
+start = 144
 
 [[inventory.line_refs]]
 anchor = "\"\"\"Explicit spice-mix variants should not cross-match on the bare carrier.\"\"\""
-end = 1497
+end = 1526
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1497
+start = 1526
 
 [[inventory.line_refs]]
 anchor = "for mix_keyword in ('tikka', 'garam', 'raita', 'tandoori', 'masala'):"
-end = 3565
+end = 3622
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3565
+start = 3622
 
 [[inventory.line_refs]]
 anchor = "frozenset({\"tikka\", \"masala\", \"kryddmix\"}),"
@@ -2338,9 +2338,9 @@ start = 956
 
 [[inventory.line_refs]]
 anchor = "q in ingredient_lower for q in SPECIALTY_QUALIFIERS.get(specialty_keyword, ())"
-end = 5459
+end = 5522
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5459
+start = 5522
 
 [[inventory]]
 adapter_ref = "backend_validation.events:specialty_qualifier"
@@ -2363,15 +2363,15 @@ start = 314
 
 [[inventory.line_refs]]
 anchor = "'rimmade': {'rimmad', 'rimmade', 'rimmat', 'gravad', 'gravade', 'kallrökt', 'kallrokt', 'kallr', 'najad', 'najadlax'},"
-end = 1381
+end = 1404
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1381
+start = 1404
 
 [[inventory.line_refs]]
 anchor = "offer_qualifiers = offer_data['specialty_qualifiers'].get(specialty_keyword, set())"
-end = 5437
+end = 5500
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5437
+start = 5500
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_spaced_saft_flavors"
@@ -2388,9 +2388,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "# (\"Fläderblom Ekologisk Saft\"). Keep those in the exact saft family."
-end = 1167
+end = 1164
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1167
+start = 1164
 
 [[inventory.line_refs]]
 anchor = "variant = \"fläderblomssaft\""
@@ -2419,15 +2419,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_TUNA_CANNED_OR_PREPARED_PRODUCT_CUES = frozenset({"
-end = 787
+end = 788
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 787
+start = 788
 
 [[inventory.line_refs]]
 anchor = "\"\"\"Piece/steak tuna recipes should route to fresh/frozen tuna, not canned tuna.\"\"\""
-end = 2897
+end = 2926
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2897
+start = 2926
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -2444,15 +2444,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_PLAIN_TEMPEH_HELBIT_INGREDIENT_CUES = frozenset({'naturell', 'natural'})"
-end = 805
+end = 806
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 805
+start = 806
 
 [[inventory.line_refs]]
 anchor = "if not any(cue in ingredient_lower for cue in ('helbit', 'tempeh', 'bärta', 'barta')):"
-end = 2767
+end = 2796
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2767
+start = 2796
 
 [[inventory.line_refs]]
 anchor = "\"helbit\": \"tempeh\","
@@ -2494,9 +2494,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "# \"Surkål med Morot\" cannot satisfy standalone carrot lines."
-end = 1261
+end = 1258
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1261
+start = 1258
 
 [[inventory.line_refs]]
 anchor = "'morotter': {'ärtor', 'ärter', 'syrade', 'sallad', 'surkål', 'kanin', 'soppa', 'riven'},"
@@ -2519,15 +2519,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_AGED_CHEESE_MATCH_KEYWORDS = frozenset({'ost', 'västerbottensost', 'vasterbottensost'})"
-end = 733
+end = 734
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 733
+start = 734
 
 [[inventory.line_refs]]
 anchor = "if not any(cue in ingredient_lower for cue in _AGED_CHEESE_INGREDIENT_CUES):"
-end = 1996
+end = 2025
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1996
+start = 2025
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -2544,15 +2544,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_SALSA_CHEESE_SAUCE_PRODUCT_CUES = frozenset({"
-end = 756
+end = 757
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 756
+start = 757
 
 [[inventory.line_refs]]
 anchor = "return not any(cue in product_lower for cue in _SALSA_CHEESE_SAUCE_PRODUCT_CUES)"
-end = 2012
+end = 2041
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2012
+start = 2041
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_mixed_fresh_herbs_examples"
@@ -2600,9 +2600,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if 'potatismos' in original_name_lower:"
-end = 983
+end = 980
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 983
+start = 980
 
 [[inventory.line_refs]]
 anchor = "'potatismos',             # \"Köttbullar Potatismos Gräddsås\" is a complete meal"
@@ -2625,9 +2625,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "return ['vitlöksmarinad', 'marinad']"
-end = 981
+end = 978
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 981
+start = 978
 
 [[inventory.line_refs]]
 anchor = "'vitlöksmarinad', 'vitloksmarinad',  # garlic marinade (prepared)"
@@ -2662,9 +2662,9 @@ start = 5002
 
 [[inventory.line_refs]]
 anchor = "# so it extracts no keywords. Add 'formbröd' directly for this bread product."
-end = 3521
+end = 3578
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3521
+start = 3578
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_mandelspan_spelling"
@@ -2725,9 +2725,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "return not any(cue in product_lower for cue in _KETCHUP_TYPE_CHILI_SAUCE_BLOCKED_PRODUCT_CUES)"
-end = 2034
+end = 2063
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2034
+start = 2063
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_knipplok_bunch"
@@ -2744,9 +2744,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "kw in keywords for kw in ('salladslök', 'salladslok')"
-end = 3551
+end = 3608
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3551
+start = 3608
 
 [[inventory.line_refs]]
 anchor = "'knipplök', 'knipplok', 'knipplökar', 'knipplokar',  # pearl onion variety"
@@ -2788,9 +2788,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "def _pistachio_salt_requirement_allows_product("
-end = 2047
+end = 2076
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2047
+start = 2076
 
 [[inventory.line_refs]]
 anchor = "variant = \"pistagenötter\""
@@ -2819,9 +2819,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "re.search(r'\\bkiwi\\s+(?:grön|gron)\\b|\\b(?:grön|gron)\\s+kiwi\\b', ingredient_lower) is not None"
-end = 2070
+end = 2099
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2070
+start = 2099
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_falafelmix_mix"
@@ -2838,15 +2838,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if re.search(r'\\bfalafel\\s*mix\\b|\\bfalafelmix\\b', name):"
-end = 2635
+end = 2632
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2635
+start = 2632
 
 [[inventory.line_refs]]
 anchor = "return any(cue in product_lower for cue in ('falafelmix', 'falafel mix', 'mix', 'pulver'))"
-end = 2092
+end = 2121
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2092
+start = 2121
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kolsyrat_mineralvatten_sodavatten"
@@ -2869,9 +2869,9 @@ start = 177
 
 [[inventory.line_refs]]
 anchor = "or re.search(r'\\bkolsyrat\\s+(?:vatten|mineralvatten)\\b', name)"
-end = 2640
+end = 2637
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2640
+start = 2637
 
 [[inventory.line_refs]]
 anchor = "variant = \"mineralvatten\""
@@ -2881,9 +2881,9 @@ start = 5536
 
 [[inventory.line_refs]]
 anchor = "or re.search(r'\\bkolsyrat\\s+(?:vatten|mineralvatten)\\b', ingredient_lower)"
-end = 4047
+end = 4104
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4047
+start = 4104
 
 [[inventory.line_refs]]
 anchor = "# Flavored sparkling water should not match recipes wanting plain kolsyrat vatten"
@@ -2906,9 +2906,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "# Pragmatic olive matching: with/without pits is not a hard product-family"
-end = 2697
+end = 2726
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2697
+start = 2726
 
 [[inventory.line_refs]]
 anchor = "'svart', 'svarta',  # black olives"
@@ -2918,9 +2918,9 @@ start = 219
 
 [[inventory.line_refs]]
 anchor = "# Black adjective forms: lentils (beluga) + olives (kalamata/gemlik) + beans"
-end = 1337
+end = 1360
 path = "app/languages/sv/ingredient_matching/specialty_rules.py"
-start = 1337
+start = 1360
 
 [[inventory]]
 adapter_ref = "backend_validation.events:product_name_blocker"
@@ -2968,15 +2968,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "# Flavor-specific compound yoghurts should keep their own exact identity"
-end = 1091
+end = 1088
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1091
+start = 1088
 
 [[inventory.line_refs]]
 anchor = "'kardemummayoghurt': frozenset({"
-end = 932
+end = 933
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 932
+start = 933
 
 [[inventory.line_refs]]
 anchor = "'kardemummayoghurt', 'kardemummayogurt', 'kardemummayoghur',"
@@ -3005,9 +3005,9 @@ start = 377
 
 [[inventory.line_refs]]
 anchor = "_CHANTERELLE_KW = frozenset({'kantarell', 'kantareller'})"
-end = 4896
+end = 4959
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4896
+start = 4959
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -3030,9 +3030,9 @@ start = 353
 
 [[inventory.line_refs]]
 anchor = "# Explicit canned cherry tomatoes should not surface obvious fresh produce"
-end = 4874
+end = 4937
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4874
+start = 4937
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -3049,15 +3049,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_PLAIN_CHILISAS_EXPLICIT_VARIANT_CUES = frozenset({"
-end = 2103
+end = 2132
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2103
+start = 2132
 
 [[inventory.line_refs]]
 anchor = "if not any(cue in ingredient_lower for cue in _PLAIN_CHILISAS_EXPLICIT_VARIANT_CUES):"
-end = 2531
+end = 2560
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2531
+start = 2560
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_wokgronsaker_forms"
@@ -3086,9 +3086,9 @@ start = 927
 
 [[inventory.line_refs]]
 anchor = "matched_keyword in {'wokgrönsaker', 'wokgronsaker', 'wokmix'}"
-end = 2552
+end = 2581
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2552
+start = 2581
 
 [[inventory.line_refs]]
 anchor = "variant = \"wokgrönsaker\""
@@ -3117,9 +3117,9 @@ start = 904
 
 [[inventory.line_refs]]
 anchor = "if re.search(r'\\bpolly\\b', name):"
-end = 2487
+end = 2484
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2487
+start = 2484
 
 [[inventory.line_refs]]
 anchor = "'polly',  # candy brand used as explicit dessert/baking ingredient"
@@ -3173,15 +3173,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "# Herb cream cheese recipes can use herb/garlic-herb products, while"
-end = 2527
+end = 2524
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2527
+start = 2524
 
 [[inventory.line_refs]]
 anchor = "wants_herb_fresh_cheese = ("
-end = 3990
+end = 4047
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3990
+start = 4047
 
 [[inventory.line_refs]]
 anchor = "'garlic', 'herbs',              # English = vitlök & örter (QUALIFIER_EQUIVALENTS maps)"
@@ -3210,15 +3210,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if re.search(r'\\bfärska?\\s+örter\\b|\\bfarska?\\s+orter\\b', name):"
-end = 2517
+end = 2514
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2517
+start = 2514
 
 [[inventory.line_refs]]
 anchor = "if re.search(r'\\bfärska?\\s+örter\\b|\\bfarska?\\s+orter\\b', ingredient_lower):"
-end = 4051
+end = 4108
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4051
+start = 4108
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_aromsmor_flavored_butter"
@@ -3272,9 +3272,9 @@ start = 947
 
 [[inventory.line_refs]]
 anchor = "or ('sriracha' in product_lower and ('mayo' in product_lower or 'majonnäs' in product_lower or 'majonnas' in product_lower))"
-end = 2571
+end = 2600
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2571
+start = 2600
 
 [[inventory.line_refs]]
 anchor = "'chilimajonnäs', 'chilimajonnas',  # chili mayo ≠ plain mayo"
@@ -3303,9 +3303,9 @@ start = 934
 
 [[inventory.line_refs]]
 anchor = "if 'sommargrönsaker' in name or 'sommargronsaker' in name:"
-end = 2499
+end = 2496
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2499
+start = 2496
 
 [[inventory.line_refs]]
 anchor = "variant = \"sommargrönsaker\""
@@ -3328,15 +3328,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "ingredient_wants_steak = any(cue in ingredient_lower for cue in _TUNA_STEAK_FAMILY_INGREDIENT_CUES)"
-end = 2627
+end = 2656
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2627
+start = 2656
 
 [[inventory.line_refs]]
 anchor = "\"\"\"Piece/steak tuna recipes should route to fresh/frozen tuna, not canned tuna.\"\"\""
-end = 2897
+end = 2926
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2897
+start = 2926
 
 [[inventory.line_refs]]
 anchor = "# \"Tonfisk i Solrosolja\" should NOT match \"tonfisk, tunt skivad\" (= fresh)"
@@ -3359,9 +3359,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if 'kruksallad' in name:"
-end = 2511
+end = 2508
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2511
+start = 2508
 
 [[inventory.line_refs]]
 anchor = "variant = \"kruksallad\""
@@ -3396,21 +3396,21 @@ start = 538
 
 [[inventory.line_refs]]
 anchor = "keywords = ['smörrapsolja']"
-end = 968
+end = 965
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 968
+start = 965
 
 [[inventory.line_refs]]
 anchor = "if 'smörrapsolja' in name:"
-end = 2502
+end = 2499
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2502
+start = 2499
 
 [[inventory.line_refs]]
 anchor = "if 'smörrapsolja' in ingredient_lower or 'smorrapsolja' in ingredient_lower:"
-end = 2634
+end = 2663
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2634
+start = 2663
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -3439,9 +3439,9 @@ start = 8940
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword == 'vaniljglass' and 'vaniljglass' in ingredient_lower:"
-end = 2646
+end = 2675
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2646
+start = 2675
 
 [[inventory]]
 adapter_ref = "matcher_layer_diagnostics:fastmatch_reject"
@@ -3464,9 +3464,9 @@ start = 5168
 
 [[inventory.line_refs]]
 anchor = "if not any(cue in product_lower for cue in ('malen', 'malda', 'mald', 'malet')):"
-end = 2657
+end = 2686
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2657
+start = 2686
 
 [[inventory.line_refs]]
 anchor = "'malda', 'malen', 'mald',  # ground cloves"
@@ -3495,9 +3495,9 @@ start = 361
 
 [[inventory.line_refs]]
 anchor = "'cream cheese' in ingredient_lower or 'färskost' in ingredient_lower or 'farskost' in ingredient_lower"
-end = 2661
+end = 2690
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2661
+start = 2690
 
 [[inventory.line_refs]]
 anchor = "'västerbottensost': {'bites', 'philadelphia', 'färskost', 'farskost', 'cream cheese'},"
@@ -3526,9 +3526,9 @@ start = 6709
 
 [[inventory.line_refs]]
 anchor = "if any(cue in product_lower for cue in _GENERIC_MINCE_FLAVORED_PRODUCT_CUES):"
-end = 2612
+end = 2641
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2612
+start = 2641
 
 [[inventory.line_refs]]
 anchor = "'köttfärs': set(_SPECIALTY_MINCE_PRODUCT_CUES),"
@@ -3551,9 +3551,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if 'quorn' in product_lower and not any(cue in product_lower for cue in _EXPLICIT_VEGAN_PRODUCT_CUES):"
-end = 2587
+end = 2616
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2587
+start = 2616
 
 [[inventory.line_refs]]
 anchor = "variant = \"vegoburgare\""
@@ -3582,9 +3582,9 @@ start = 729
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword in {'långpasta', 'langpasta', 'tagliatelle', 'pasta'}:"
-end = 2581
+end = 2610
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2581
+start = 2610
 
 [[inventory.line_refs]]
 anchor = "'capellini': {'chicken', 'pastakrydda', 'konjac'},       # \"Tagliatelle chicken 1kg Findus\" via långpasta alias"
@@ -3644,9 +3644,9 @@ start = 830
 
 [[inventory.line_refs]]
 anchor = "# packs, while frozen ice-cream/ready-dessert carriers remain blocked."
-end = 992
+end = 989
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 992
+start = 989
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kycklingschnitzel_chicken"
@@ -3675,9 +3675,9 @@ start = 832
 
 [[inventory.line_refs]]
 anchor = "if 'kycklingschnitzel' in ingredient_lower and matched_keyword in {'schnitzel', 'kycklingschnitzel'}:"
-end = 2574
+end = 2603
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2574
+start = 2603
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_dried_forest_mushroom_family"
@@ -3706,9 +3706,9 @@ start = 838
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword in {'svamp', 'champinjon', 'champinjoner', 'kantarell', 'kantareller'}:"
-end = 2603
+end = 2632
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2603
+start = 2632
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_prastost_abbreviated"
@@ -3737,9 +3737,9 @@ start = 836
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword in {'ost', 'prästost', 'prastost', 'präst', 'prast'}:"
-end = 2620
+end = 2649
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2620
+start = 2649
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_bostongurka_relish_family"
@@ -3762,9 +3762,9 @@ start = 73
 
 [[inventory.line_refs]]
 anchor = "if 'bostongurka' in original_name_lower:"
-end = 975
+end = 972
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 975
+start = 972
 
 [[inventory.line_refs]]
 anchor = "r'\\(\\s*(?:t\\.?\\s*ex\\.?|exempelvis|till\\s+exempel)\\s+(bostongurka|bostongurkor)\\s*\\)',"
@@ -3830,9 +3830,9 @@ start = 951
 
 [[inventory.line_refs]]
 anchor = "if 'svart böna' in ingredient_lower or 'svart bona' in ingredient_lower or 'svarta bönor' in ingredient_lower or 'svarta bonor' in ingredient_lower:"
-end = 4056
+end = 4113
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4056
+start = 4113
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_limepepper_seasoning"
@@ -3855,15 +3855,15 @@ start = 528
 
 [[inventory.line_refs]]
 anchor = "if 'limepepper' in name:"
-end = 2490
+end = 2487
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2490
+start = 2487
 
 [[inventory.line_refs]]
 anchor = "return 'limepepper' in product_lower or 'limepepper' in product_kw_set"
-end = 2536
+end = 2565
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2536
+start = 2565
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kolasas_exact"
@@ -3917,9 +3917,9 @@ start = 6134
 
 [[inventory.line_refs]]
 anchor = "if 'ancho' in ingredient_lower and matched_keyword in {'ancho', 'chili', 'chiliflakes', 'chilipulver'}:"
-end = 2643
+end = 2672
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2643
+start = 2672
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kycklinginnerfile_parent"
@@ -3948,9 +3948,9 @@ start = 834
 
 [[inventory.line_refs]]
 anchor = "if any(cue in product_lower for cue in _SEASONED_CHICKEN_FILLET_CUES):"
-end = 2652
+end = 2681
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2652
+start = 2681
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_pickles_inlagdgurka"
@@ -4098,9 +4098,9 @@ start = 6870
 
 [[inventory.line_refs]]
 anchor = "# Name-conditional: Quorn mince products should expose the specific mince form"
-end = 3524
+end = 3581
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3524
+start = 3581
 
 [[inventory.line_refs]]
 anchor = "# Quorn Pepperoni/Tenders/Skivor ≠ quornfärs (different product forms)"
@@ -4154,15 +4154,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "# Exact cookie-brand ingredients in dessert recipes should find the cookie"
-end = 991
+end = 988
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 991
+start = 988
 
 [[inventory.line_refs]]
 anchor = "if re.search(r'\\boreo\\b', name):"
-end = 2534
+end = 2531
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2534
+start = 2531
 
 [[inventory.line_refs]]
 anchor = "'oreo',  # Oreo cookies (\"Oreo Original Kakor\" ≠ kakor in recipes)"
@@ -4191,9 +4191,9 @@ start = 867
 
 [[inventory.line_refs]]
 anchor = "'savoiardikex': frozenset({'kex'}),"
-end = 888
+end = 889
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 888
+start = 889
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_bjornbarssaft_cordial"
@@ -4210,9 +4210,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "'björnbärssaft': frozenset({'björnbär', 'björnbärs', 'björnbä', 'bjornbar', 'bjornbars', 'marmelad', 'sylt'}),"
-end = 892
+end = 893
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 892
+start = 893
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_sodavatten_plain_sparkling"
@@ -4235,9 +4235,9 @@ start = 598
 
 [[inventory.line_refs]]
 anchor = "ingredient_lower += ' sodavatten'"
-end = 4050
+end = 4107
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4050
+start = 4107
 
 [[inventory.line_refs]]
 anchor = "variant = \"mineralvatten\""
@@ -4402,9 +4402,9 @@ start = 601
 
 [[inventory.line_refs]]
 anchor = "'apelsinläsk': frozenset({'apelsin'}),"
-end = 897
+end = 898
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 897
+start = 898
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_beyondburgare_exact"
@@ -4427,9 +4427,9 @@ start = 293
 
 [[inventory.line_refs]]
 anchor = "'beyondburgare': frozenset({'hamburgare', 'burgare', 'svartpeppar', 'peppar'}),"
-end = 891
+end = 892
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 891
+start = 892
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_frysta_lingon_raw"
@@ -4477,15 +4477,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_FLAVOR_CARRIER_CONJUNCTION_RE = re.compile(r'\\s+(?:och|samt)\\s+')"
-end = 552
+end = 599
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 552
+start = 599
 
 [[inventory.line_refs]]
 anchor = "def _flavor_keyword_blocked_by_carrier_text("
-end = 655
+end = 702
 path = "app/languages/sv/recipe_matcher_backend.py"
-start = 655
+start = 702
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_svampfond_kantarellfond"
@@ -4533,9 +4533,9 @@ start = 660
 
 [[inventory.line_refs]]
 anchor = "return ['baguette']"
-end = 1068
+end = 1065
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1068
+start = 1065
 
 [[inventory.line_refs]]
 anchor = "variant = \"baguetter\""
@@ -4564,9 +4564,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "def _rostbiff_palagg_allows_product("
-end = 3272
+end = 3329
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3272
+start = 3329
 
 [[inventory.line_refs]]
 anchor = "# Deli rostbiff (pre-cooked, sliced pålägg) ≠ raw rostbiff cut for roasting"
@@ -4607,15 +4607,15 @@ start = 471
 
 [[inventory.line_refs]]
 anchor = "_BREWED_COFFEE_BLOCKED_KEYWORDS = frozenset({"
-end = 999
+end = 1000
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 999
+start = 1000
 
 [[inventory.line_refs]]
 anchor = "if keyword in _BREWED_COFFEE_BLOCKED_KEYWORDS and _is_brewed_coffee_ingredient_text(ingredient_lower):"
-end = 4264
+end = 4321
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4264
+start = 4321
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_violife_vegan_cheddar_variant"
@@ -4632,15 +4632,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "explicit_vegan_cheese = ("
-end = 1118
+end = 1115
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1118
+start = 1115
 
 [[inventory.line_refs]]
 anchor = "def _explicit_vegan_cheese_variant_allows_product("
-end = 3232
+end = 3265
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3232
+start = 3265
 
 [[inventory.line_refs]]
 anchor = "frozenset({\"cheddar\", \"mature\", \"violife\"}),"
@@ -4700,9 +4700,9 @@ start = 3391
 
 [[inventory.line_refs]]
 anchor = "_PLANT_BASED_RECIPE_BASE_REQUIREMENTS: tuple[tuple[FrozenSet[str], FrozenSet[str]], ...] = ("
-end = 340
+end = 341
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 340
+start = 341
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_havredryck_naturell"
@@ -4738,15 +4738,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "return ['paprikapulver']"
-end = 1025
+end = 1022
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1025
+start = 1022
 
 [[inventory.line_refs]]
 anchor = "ingredient_lower += ' paprikapulver'"
-end = 4105
+end = 4162
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4105
+start = 4162
 
 [[inventory.line_refs]]
 anchor = "# Rökt paprikapulver ≠ vanlig paprikapulver (and vice versa)"
@@ -4775,9 +4775,9 @@ start = 715
 
 [[inventory.line_refs]]
 anchor = "ingredient_lower += ' öl'"
-end = 4059
+end = 4116
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4059
+start = 4116
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_koriander_malen_spice", "match_bridges:bridge_koriander_fryst_herb"]
@@ -4806,15 +4806,15 @@ start = 727
 
 [[inventory.line_refs]]
 anchor = "def frozen_fresh_herb_form_overrides_spice_indicator(ingredient_lower: str, base_word: str = \"\") -> bool:"
-end = 290
+end = 291
 path = "app/languages/sv/ingredient_matching/validators.py"
-start = 290
+start = 291
 
 [[inventory.line_refs]]
 anchor = "if frozen_fresh_herb_form_overrides_spice_indicator(ingredient_lower, svf_key):"
-end = 4187
+end = 4244
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4187
+start = 4244
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tortillabrod_tortilla"
@@ -4918,9 +4918,9 @@ start = 588
 
 [[inventory.line_refs]]
 anchor = "return ['kanderatapelsinskal']"
-end = 2631
+end = 2628
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2631
+start = 2628
 
 [[inventory.line_refs]]
 anchor = "'apelsinskal': {'kanderat', 'kanderade', 'syltat', 'syltade'},"
@@ -4930,9 +4930,9 @@ start = 3994
 
 [[inventory.line_refs]]
 anchor = "ingredient_lower += ' kanderatapelsinskal'"
-end = 4039
+end = 4096
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4039
+start = 4096
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_hart_tunnbrod_form"
@@ -4949,9 +4949,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "def _hard_tunnbrod_allows_product("
-end = 3257
+end = 3290
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3257
+start = 3290
 
 [[inventory.line_refs]]
 anchor = "variant = \"liba\""
@@ -5036,9 +5036,9 @@ start = 1545
 
 [[inventory.line_refs]]
 anchor = "# lammracks or lammstek."
-end = 5154
+end = 5217
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5154
+start = 5217
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_tortilla_wrap_not_spanish"
@@ -5055,15 +5055,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "# Spanish tortilla/omelette products are not soft tortilla breads/wraps."
-end = 1221
+end = 1218
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1221
+start = 1218
 
 [[inventory.line_refs]]
 anchor = "def _tortilla_product_allowed(product_lower: str, ingredient_lower: str, matched_keyword: str) -> bool:"
-end = 1453
+end = 1482
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1453
+start = 1482
 
 [[inventory.line_refs]]
 anchor = "# Tortilla (wraps) != tortilla chips (nachos)"
@@ -5129,9 +5129,9 @@ start = 760
 
 [[inventory.line_refs]]
 anchor = "_BREAD_SLICE_INGREDIENT_CUES = frozenset({"
-end = 580
+end = 581
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 580
+start = 581
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_smorrapsolja_blend"
@@ -5154,15 +5154,15 @@ start = 536
 
 [[inventory.line_refs]]
 anchor = "keywords = ['smörrapsolja']"
-end = 968
+end = 965
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 968
+start = 965
 
 [[inventory.line_refs]]
 anchor = "if 'smörrapsolja' in ingredient_lower or 'smorrapsolja' in ingredient_lower:"
-end = 2634
+end = 2663
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2634
+start = 2663
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_sojabonor_generic_processed_allowance"
@@ -5185,15 +5185,15 @@ start = 231
 
 [[inventory.line_refs]]
 anchor = "_STRICT_GENERIC_MATCHES_ALL = frozenset({'sojabönor', 'sojabonor'})"
-end = 465
+end = 466
 path = "app/languages/sv/ingredient_matching/validators.py"
-start = 465
+start = 466
 
 [[inventory.line_refs]]
 anchor = "_STRICT_GENERIC_MATCHES_ALL = frozenset({'sojabönor', 'sojabonor'})"
-end = 5522
+end = 5597
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5522
+start = 5597
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_matbrodsjast_generic_route_sibling"
@@ -5210,9 +5210,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "return ['matbrödsjäst', 'jäst']"
-end = 1039
+end = 1036
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1039
+start = 1036
 
 [[inventory.line_refs]]
 anchor = "variant = \"matbrödsjäst\""
@@ -5222,9 +5222,9 @@ start = 338
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword in {'jäst', 'matbrödsjäst'} and _ingredient_requests_generic_bread_yeast(ingredient_lower):"
-end = 5306
+end = 5369
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5306
+start = 5369
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kalkon_palagg_deli_slice"
@@ -5241,21 +5241,21 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_PALAGG_DELI_KEYWORD_EXEMPTIONS = frozenset({'kalkon', 'salami', 'salame', 'rostbiff', 'skinka'})"
-end = 367
+end = 368
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 367
+start = 368
 
 [[inventory.line_refs]]
 anchor = "'grillad', 'grillat',"
-end = 621
+end = 622
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 621
+start = 622
 
 [[inventory.line_refs]]
 anchor = "context_name_normalized = name_normalized"
-end = 3387
+end = 3444
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3387
+start = 3444
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_kikartor_ready_packaged_guard"
@@ -5272,33 +5272,33 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_READY_PACKAGED_CHICKPEA_INGREDIENT_CUES = frozenset({"
-end = 497
+end = 498
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 497
+start = 498
 
 [[inventory.line_refs]]
 anchor = "_BLOCKED_READY_CHICKPEA_PRODUCT_CUES = frozenset({"
-end = 518
+end = 519
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 518
+start = 519
 
 [[inventory.line_refs]]
 anchor = "def _ingredient_requests_ready_packaged_chickpeas(ingredient_lower: str) -> bool:"
-end = 1553
+end = 1582
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1553
+start = 1582
 
 [[inventory.line_refs]]
 anchor = "def _ready_packaged_chickpea_allows_product("
-end = 1563
+end = 1592
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1563
+start = 1592
 
 [[inventory.line_refs]]
 anchor = "if not _ready_packaged_chickpea_allows_product("
-end = 5334
+end = 5397
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5334
+start = 5397
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_parmaskinka_prosciutto_di_parma"
@@ -5315,15 +5315,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_prepared_prosciutto_carriers = frozenset({'pizza', 'pinsa', 'tortellini', 'tortelloni', 'ravioli'})"
-end = 3089
+end = 3118
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3089
+start = 3118
 
 [[inventory.line_refs]]
 anchor = "recipe ingredients saying \"parmaskinka\"."
-end = 3626
+end = 3683
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 3626
+start = 3683
 
 [[inventory.line_refs]]
 anchor = "'parmaskinka': frozenset({'parma', 'prosciutto'}),"
@@ -5383,9 +5383,9 @@ start = 12
 
 [[inventory.line_refs]]
 anchor = "if 'kokosdryck' in name:"
-end = 2425
+end = 2422
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2425
+start = 2422
 
 [[inventory.line_refs]]
 anchor = "variant = \"kokosdryck\""
@@ -5451,15 +5451,15 @@ start = 240
 
 [[inventory.line_refs]]
 anchor = "if 'skal' in ingredient_lower:"
-end = 5196
+end = 5259
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5196
+start = 5259
 
 [[inventory.line_refs]]
 anchor = "return None  # \"saft och skal\" = needs whole fruit, not bottled juice"
-end = 5197
+end = 5260
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5197
+start = 5260
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_fresh_chilipeppar_not_spice"
@@ -5488,15 +5488,15 @@ start = 188
 
 [[inventory.line_refs]]
 anchor = "_RE_CHILI_COUNT_FRESH.search(ingredient_lower)"
-end = 5607
+end = 5682
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5607
+start = 5682
 
 [[inventory.line_refs]]
 anchor = "elif prod_is_dried and not prod_is_fresh:"
-end = 5637
+end = 5712
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5637
+start = 5712
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_keso_cottage_cheese_naturell"
@@ -5556,9 +5556,9 @@ start = 324
 
 [[inventory.line_refs]]
 anchor = "# Compound strictness: if keyword is part of a compound word in recipe,"
-end = 4299
+end = 4356
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4299
+start = 4356
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_mousserande_vitt_vin_exact"
@@ -5581,21 +5581,21 @@ start = 765
 
 [[inventory.line_refs]]
 anchor = "return ['mousserandevin']"
-end = 1206
+end = 1203
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1206
+start = 1203
 
 [[inventory.line_refs]]
 anchor = "if 'champagne' in unique_keywords and 'mousserandevin' not in unique_keywords:"
-end = 1899
+end = 1896
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1899
+start = 1896
 
 [[inventory.line_refs]]
 anchor = "# Explicit sparkling-wine recipe wording should still keep the long-standing"
-end = 1041
+end = 1042
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1041
+start = 1042
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_vaxtbaserad_mjolkryck"
@@ -5624,9 +5624,9 @@ start = 3391
 
 [[inventory.line_refs]]
 anchor = "_PLAIN_PLANT_DRINK_KEYWORDS = frozenset({"
-end = 626
+end = 627
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 626
+start = 627
 
 [[inventory]]
 adapter_refs = ["match_bridges:bridge_vetemjol_special_exact", "match_bridges:bridge_vetemjol_fullkorn_exact"]
@@ -5649,9 +5649,9 @@ start = 198
 
 [[inventory.line_refs]]
 anchor = "'vetemjölspecial': frozenset({'vetemjöl'}),"
-end = 960
+end = 961
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 960
+start = 961
 
 [[inventory.line_refs]]
 anchor = "('vetemjöl special fullkorn', 'vetemjölspecial vetemjölfullkorn'),"
@@ -5680,15 +5680,15 @@ start = 79
 
 [[inventory.line_refs]]
 anchor = "'kikärtsspad',"
-end = 1010
+end = 1011
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1010
+start = 1011
 
 [[inventory.line_refs]]
 anchor = "if keyword in _RECIPE_NEVER_MATCH_KEYWORDS:"
-end = 4248
+end = 4305
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 4248
+start = 4305
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_riven_cheddarost_not_spread"
@@ -5705,21 +5705,21 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_RIVEN_CHEDDAR_KEYWORDS = frozenset({'cheddar', 'cheddarost'})"
-end = 871
+end = 872
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 871
+start = 872
 
 [[inventory.line_refs]]
 anchor = "def _riven_cheddar_allows_product("
-end = 2779
+end = 2808
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2779
+start = 2808
 
 [[inventory.line_refs]]
 anchor = "if not _riven_cheddar_allows_product("
-end = 5346
+end = 5409
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5346
+start = 5409
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_salta_kex_plain"
@@ -5736,21 +5736,21 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_SALTA_KEX_PRODUCT_CUES = frozenset({"
-end = 2793
+end = 2822
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2793
+start = 2822
 
 [[inventory.line_refs]]
 anchor = "def _salta_kex_allows_product("
-end = 2799
+end = 2828
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2799
+start = 2828
 
 [[inventory.line_refs]]
 anchor = "if not _salta_kex_allows_product("
-end = 5352
+end = 5415
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5352
+start = 5415
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_classico_pastasas_exact"
@@ -5767,9 +5767,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "classic_requested = any(cue in ingredient_lower for cue in ('classico', 'classic', 'klassisk'))"
-end = 2347
+end = 2376
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2347
+start = 2376
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_generic_fars_practical_scope"
@@ -5804,9 +5804,9 @@ start = 27
 
 [[inventory.line_refs]]
 anchor = "def _ingredient_requests_generic_mince(ingredient_lower: str) -> bool:"
-end = 1543
+end = 1572
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1543
+start = 1572
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_haricoverts_typo"
@@ -5848,15 +5848,15 @@ start = 84
 
 [[inventory.line_refs]]
 anchor = "_NON_CONCENTRATE_INGREDIENT_CUES = frozenset({"
-end = 395
+end = 396
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 395
+start = 396
 
 [[inventory.line_refs]]
 anchor = "matched_keyword == 'lingondryck'"
-end = 5310
+end = 5373
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5310
+start = 5373
 
 [[inventory]]
 adapter_ref = "no_match_policies:policy_root_veg_spaghetti_non_buyable"
@@ -5873,15 +5873,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "if any(cue in name for cue in ('morotsspaghetti', 'kålrotsspaghetti', 'kalrotsspaghetti')):"
-end = 2420
+end = 2417
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2420
+start = 2417
 
 [[inventory.line_refs]]
 anchor = "_NON_BUYABLE_ROOT_VEG_PASTA_CUES = frozenset({"
-end = 1014
+end = 1015
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1014
+start = 1015
 
 [[inventory]]
 adapter_refs = ["matcher_layer_diagnostics:positive_allowance", "matcher_layer_diagnostics:fastmatch_reject"]
@@ -5898,15 +5898,15 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "re.search(r'\\bbreoliv\\b', original_name_lower)"
-end = 1043
+end = 1040
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 1043
+start = 1040
 
 [[inventory.line_refs]]
 anchor = "if 'breoliv' in name:"
-end = 2417
+end = 2414
 path = "app/languages/sv/ingredient_matching/extraction.py"
-start = 2417
+start = 2414
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_musslor_lake_frozen"
@@ -5948,9 +5948,9 @@ start = 4484
 
 [[inventory.line_refs]]
 anchor = "\"korvar, gärna lamm\" should keep to sausage products."
-end = 5152
+end = 5215
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5152
+start = 5215
 
 [[inventory]]
 adapter_ref = "match_bridges:bridge_sill_stromming_file_family"
@@ -5973,15 +5973,15 @@ start = 2419
 
 [[inventory.line_refs]]
 anchor = "_HERRING_FILLET_INGREDIENT_CUES = frozenset({"
-end = 2128
+end = 2157
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2128
+start = 2157
 
 [[inventory.line_refs]]
 anchor = "if matched_keyword == 'sill' and any(cue in ingredient_lower for cue in _HERRING_FILLET_INGREDIENT_CUES):"
-end = 2615
+end = 2644
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2615
+start = 2644
 
 [[inventory.line_refs]]
 anchor = "\"strömmingsfileer\","
@@ -6042,9 +6042,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_ingredient_requests_fresh_chili"
-end = 1312
+end = 1341
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1312
+start = 1341
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_chili_sambal_malen_negative"
@@ -6086,9 +6086,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_FLAVORED_FRESH_CHEESE_PRODUCT_CUES"
-end = 2196
+end = 2225
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2196
+start = 2225
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_flavored_fresh_cheese_positive"
@@ -6130,9 +6130,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_TANDOORI_COOKING_SAUCE_INGREDIENT_CUES"
-end = 2160
+end = 2189
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2160
+start = 2189
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_tandoori_sauce_positive"
@@ -6218,9 +6218,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_exact_pasta_shape_requirement_allows_product"
-end = 2702
+end = 2731
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 2702
+start = 2731
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_maccaronetti_prepared_pesto_negative"
@@ -6262,9 +6262,9 @@ status = "wrapped_adapter"
 
 [[inventory.line_refs]]
 anchor = "_ingredient_requests_fresh_chili"
-end = 1312
+end = 1341
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 1312
+start = 1341
 
 [[inventory.line_refs]]
 anchor = "matcher_regression_chili_spice_malen_positive"
@@ -10908,14 +10908,14 @@ anchor = "PESTO_RED_QUALIFIER_EQUIVALENTS = frozenset({"
 
 [[inventory.line_refs]]
 path = "app/languages/sv/ingredient_matching/validators.py"
-start = 662
-end = 662
+start = 664
+end = 664
 anchor = "if base_word == 'pesto' and qualifier in PESTO_RED_QUALIFIER_EQUIVALENTS:"
 
 [[inventory.line_refs]]
 path = "app/languages/sv/ingredient_matching/matching.py"
-start = 5483
-end = 5483
+start = 5558
+end = 5558
 anchor = "and q in PESTO_RED_QUALIFIER_EQUIVALENTS"
 
 [[inventory]]

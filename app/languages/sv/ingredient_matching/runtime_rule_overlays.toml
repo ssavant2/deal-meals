@@ -2129,6 +2129,22 @@ action = "add"
 terms = ["kaviar", "caviar"]
 reason = "specific roe words below the length cutoff; force through extraction so caviar/kaviar ingredients are visible at all"
 
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_salami"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["salami"]
+reason = "Salami is a distinct deli meat word at 6 chars; without this it drops below the 7-char minimum and salame/salami ingredients extract nothing"
+
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_salame"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["salame"]
+reason = "Salame is the Italian surface form of salami at 6 chars; the length filter runs on the surface token before synonym mapping, so salame itself must survive to map to salami"
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"
@@ -2309,6 +2325,14 @@ keyword = "aioli"
 qualifiers = ["chili", "lime", "smokey", "smoky", "sriracha", "mango", "tryffel", "chipotle", "curry", "dill", "citron", "saffran", "wasabi"]
 bidirectional = true
 reason = "Smaksatt aioli (chili/lime/smokey/sriracha/mango/etc) isoleras från plain aioli i båda riktningar, som smaksatt mayo. Plain/vitlöksaioli matchar bas-aioli; smaksatt matchar bara samma-smak-recept."
+
+[[specialty_qualifiers]]
+id = "runtime_specialty_qualifier_salami_tryffel"
+status = "active"
+keyword = "salami"
+qualifiers = ["tryffel"]
+bidirectional = true
+reason = "Truffle salami is a flavored specialty; plain salami recipes should not match it and truffle-salami recipes need the truffle product, same flavor-isolation principle as chocolate/mayo"
 
 [[qualifier_equivalents]]
 id = "runtime_qualifier_equivalent_datterini_burk_konserverad"

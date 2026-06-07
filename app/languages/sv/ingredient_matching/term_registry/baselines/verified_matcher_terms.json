@@ -6,10 +6,10 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 101,
       "hardcoded_keyword_output:extract_keywords_from_product": 121,
-      "ingredient_parent_mapping": 415,
+      "ingredient_parent_mapping": 416,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
-      "keyword_synonym_mapping": 191,
+      "keyword_synonym_mapping": 192,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -30,10 +30,10 @@
     },
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 415,
+      "ingredient_parent": 416,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 191,
+      "keyword_synonym": 192,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5870,
-    "variants_missing_product_text": 1902,
+    "variant_count": 5872,
+    "variants_missing_product_text": 1904,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -123316,11 +123316,53 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"bordsmargarin\"}"
+    },
+    {
+      "variant_id": "vterm-a33d5cb802ddb918",
+      "row_index": 4618,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:kycklingköttbullar",
+      "source_id": "kycklingköttbullar",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "kycklingköttbullar",
+      "canonical": "köttbullar",
+      "expected_family": "köttbullar",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"köttbullar\"}"
+    },
+    {
+      "variant_id": "vterm-ebf9e7cb0529dd07",
+      "row_index": 4983,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:salame",
+      "source_id": "salame",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "salame",
+      "canonical": "salami",
+      "expected_family": "salami",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"salami\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1676,
+      "no_product_text": 1678,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123328,10 +123370,10 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 415,
+      "ingredient_parent": 416,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 191,
+      "keyword_synonym": 192,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
@@ -123342,8 +123384,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5870
+      "audited": 5872
     },
-    "variant_count": 5870
+    "variant_count": 5872
   }
 }

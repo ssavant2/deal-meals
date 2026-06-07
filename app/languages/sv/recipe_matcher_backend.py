@@ -431,6 +431,43 @@ _VEGAN_RECIPE_PASTA_CUES = frozenset({
 })
 _EGG_PASTA_PRODUCT_CUES = frozenset({'äggpasta', 'aggpasta', 'ägg', 'agg', 'egg'})
 
+# Animal-derived product keywords. In an explicitly vegan recipe a matched
+# product from one of these families must be explicit-vegan, even when the
+# individual ingredient text carries no vegan cue. This closes the gap where a
+# compound dairy ingredient ("matlagningsgrädde") in a recipe titled "Vegansk
+# tryffeltårta" still matched a dairy product, because the word-boundary cue
+# pattern (\bgrädde\b) does not fire inside the compound. Dairy/egg canonicals
+# are listed here; meat and fish reuse the recipe-classification keyword lists.
+_DAIRY_EGG_PRODUCT_KEYWORDS = frozenset({
+    # Cream / crème
+    'grädde', 'gradde', 'vispgrädde', 'vispgradde',
+    'matlagningsgrädde', 'matlagningsgradde', 'kaffegrädde', 'kaffegradde',
+    'gräddfil', 'graddfil', 'crème fraiche', 'creme fraiche', 'cremefraiche',
+    'gräddost', 'graddost',
+    # Milk / fermented milk
+    'mjölk', 'mjolk', 'filmjölk', 'filmjolk', 'kärnmjölk', 'karnmjolk',
+    # Butter
+    'smör', 'smor',
+    # Cheese
+    'ost', 'hushållsost', 'hushallsost', 'mozzarella', 'mozarella',
+    'parmesan', 'parmigiano', 'pecorino', 'grana',
+    'fetaost', 'feta', 'halloumi', 'brie', 'camembert', 'cheddar',
+    'gouda', 'ricotta', 'mascarpone', 'getost', 'prästost', 'prastost',
+    'ädelost', 'adelost', 'gorgonzola', 'manchego', 'keso', 'kvarg',
+    'cottage',
+    # Yoghurt
+    'yoghurt', 'yogurt',
+    # Egg
+    'ägg', 'agg', 'äggula', 'aggula', 'äggvita', 'aggvita',
+    # Honey (animal-derived)
+    'honung',
+})
+_ANIMAL_DERIVED_PRODUCT_KEYWORDS = (
+    _DAIRY_EGG_PRODUCT_KEYWORDS
+    | {k.lower() for k in CLASSIFICATION_MEAT_KEYWORDS}
+    | {k.lower() for k in CLASSIFICATION_FISH_KEYWORDS}
+)
+
 
 def _has_explicit_vegan_recipe_context(full_recipe_text: str) -> bool:
     return any(cue in full_recipe_text for cue in _EXPLICIT_VEGAN_RECIPE_CUES)
@@ -449,6 +486,7 @@ def _explicit_vegan_context_allows_product(
     product_lower: str,
     full_recipe_text: str,
     ingredient_lower: str,
+    matched_keyword: str = "",
 ) -> bool:
     """Recipe-level vegan wording should not admit animal or vegetarian-only substitutes."""
     if not _has_explicit_vegan_recipe_context(full_recipe_text):
@@ -465,6 +503,15 @@ def _explicit_vegan_context_allows_product(
         and any(cue in product_lower for cue in _EGG_PASTA_PRODUCT_CUES)
     ):
         return False
+
+    # In an explicitly vegan recipe, a matched animal-derived product
+    # (dairy/egg/meat/fish/honey) must be explicit-vegan to be acceptable — even
+    # when this ingredient's text has no vegan cue. This catches compound dairy
+    # ingredients ("matlagningsgrädde") whose base word the cue pattern misses.
+    # Plant ingredients (tomat, lök, ...) are unaffected: their matched keyword is
+    # not animal-derived, so they fall through to the normal cue check below.
+    if matched_keyword and matched_keyword.lower() in _ANIMAL_DERIVED_PRODUCT_KEYWORDS:
+        return any(cue in product_lower for cue in _EXPLICIT_VEGAN_PRODUCT_CUES)
 
     if not _ingredient_has_vegan_recipe_cue(ingredient_lower):
         return True
@@ -1964,7 +2011,7 @@ def validate_offer_match_candidate(
         valid_ingredient_indices = set()
         ing_norm = ingredients_normalized[matched_ing_idx]
         for kw_try in kw_candidates:
-            if check_specialty_qualifiers(offer_spec_quals, kw_try, ing_norm):
+            if check_specialty_qualifiers(offer_spec_quals, kw_try, ing_norm, offer_name_normalized):
                 valid_ingredient_indices.add(matched_ing_idx)
                 break
         if not valid_ingredient_indices:
@@ -1989,7 +2036,7 @@ def validate_offer_match_candidate(
                     retry_candidates.extend(extra)
                 retry_valid = False
                 for kw_try in retry_candidates:
-                    if check_specialty_qualifiers(offer_spec_quals, kw_try, retry_ing):
+                    if check_specialty_qualifiers(offer_spec_quals, kw_try, retry_ing, offer_name_normalized):
                         retry_valid = True
                         break
                 if retry_valid:
@@ -2044,7 +2091,7 @@ def validate_offer_match_candidate(
 
     if matched_keyword and matched_ing_idx is not None:
         ing_norm = ingredients_normalized[matched_ing_idx]
-        if not _explicit_vegan_context_allows_product(product_lower, full_recipe_text, ing_norm):
+        if not _explicit_vegan_context_allows_product(product_lower, full_recipe_text, ing_norm, matched_keyword):
             _record_validation_event(
                 validation_events,
                 'validation_reject',

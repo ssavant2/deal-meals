@@ -108,6 +108,7 @@ from .specialty_rules import (
     PESTO_RED_INGREDIENT_CUES,
     PESTO_RED_QUALIFIER_EQUIVALENTS,
     QUALIFIER_EQUIVALENTS,
+    generic_marinade_allows_plain_chicken,
 )
 from .validators import (
     check_explicit_liquid_honey_match,
@@ -1189,13 +1190,41 @@ def _eller_arms_have_plain_keyword(_eller_arms: tuple, keyword: str) -> bool:
     return any(_eller_arm_mentions_plain_keyword(arm, keyword) for arm in _eller_arms)
 
 
+# Diet cues that, when phrased as an OPTIONAL suggestion ("riven ost, gärna
+# vegansk"), must NOT suppress the broad dairy keyword — the ordinary dairy
+# product is still a valid choice in a non-vegan recipe. A hard cue ("vegansk
+# ost", no optional marker) still suppresses. Only diet/free-from cues are
+# softenable here; product-type suppressors such as `fårost` or `vitmögelost`
+# are discriminators and are never softened by "gärna".
+_OPTIONAL_DIET_SUPPRESSOR_CUES = frozenset({
+    'vegansk', 'veganskt', 'veganska', 'vegan',
+    'växtbaserad', 'växtbaserat', 'växtbaserade',
+    'vaxtbaserad', 'vaxtbaserat', 'vaxtbaserade',
+    'plantbaserad', 'plantbased', 'plant based', 'plant-based',
+    'vego', 'vegetarisk', 'vegetariskt', 'vegetariska',
+    'mjölkfri', 'mjolkfri', 'mjölkfritt', 'mjolkfritt',
+    'laktosfri', 'laktosfritt',
+})
+
+
 def _keyword_suppressed_by_context(
     keyword: str,
     ingredient_lower: str,
     suppressors: Iterable[str],
     _eller_arms: tuple = (),
 ) -> bool:
-    if not any(suppressor in ingredient_lower for suppressor in suppressors):
+    # Drop suppressors that are only an OPTIONAL diet suggestion in this
+    # ingredient ("ost, gärna vegansk"); the plain dairy keyword should survive.
+    # Hard diet cues and all non-diet suppressors are kept.
+    effective_suppressors = [
+        suppressor
+        for suppressor in suppressors
+        if not (
+            suppressor in _OPTIONAL_DIET_SUPPRESSOR_CUES
+            and _diet_cue_is_optional(ingredient_lower, (suppressor,))
+        )
+    ]
+    if not any(suppressor in ingredient_lower for suppressor in effective_suppressors):
         return False
     if _eller_arms:
         matched_arms = [
@@ -1204,7 +1233,7 @@ def _keyword_suppressed_by_context(
             if _eller_arm_mentions_plain_keyword(arm, keyword)
         ]
         if matched_arms and all(
-            not any(suppressor in arm for suppressor in suppressors)
+            not any(suppressor in arm for suppressor in effective_suppressors)
             for arm in matched_arms
         ):
             return False
@@ -3224,6 +3253,10 @@ def _explicit_vegan_requirement_allows_product(
     if (
         matched_keyword in _VEGAN_CHEESE_MATCH_KEYWORDS
         and _ingredient_requests_vegan_cheese(ingredient_lower)
+        # An OPTIONAL vegan suggestion ("riven ost, gärna vegansk") leaves the
+        # ordinary dairy cheese a valid choice; only a hard request ("vegansk
+        # ost", no optional marker) enforces an explicit-vegan product.
+        and not _diet_cue_is_optional(scoped_ingredient, _VEGAN_RECIPE_CUES)
     ):
         return _product_is_explicit_vegan(product_lower, product_keywords)
     return True
@@ -3267,6 +3300,30 @@ def _hard_tunnbrod_allows_product(
         'hårt', 'hart', 'hård', 'hard',
         'gene', 'mjälloms', 'mjalloms', 'moilas',
     ))
+
+
+# Meat cuts where a recipe that explicitly asks for a WHOLE piece ("hel/helstekt
+# fläskkarré" — needed for a 5-hour smoke or a whole roast) must not match a
+# pre-sliced product. Plain recipes (no whole-piece cue) still match sliced
+# products, so the slicing only blocks when the recipe demands one piece.
+_WHOLE_CUT_KEYWORDS = frozenset({'fläskkarré', 'flaskkarre', 'karré', 'karre'})
+_SLICED_PRODUCT_CUES = ('skivad', 'skivat', 'skivade', 'skivor')
+_WHOLE_PIECE_INGREDIENT_RE = re.compile(r'\b(?:hel|hela|helstekt|helstek|helstekta|helstekning)\b')
+
+
+def _whole_cut_allows_product(
+    matched_keyword: str,
+    ingredient_lower: str,
+    product_lower: str,
+) -> bool:
+    """A recipe asking for a WHOLE cut ("hel"/"helstekt" fläskkarré) needs an
+    unsliced piece, so it must not match a pre-sliced product. A plain fläskkarré
+    recipe (no whole-piece cue) still matches sliced products."""
+    if matched_keyword not in _WHOLE_CUT_KEYWORDS:
+        return True
+    if not _WHOLE_PIECE_INGREDIENT_RE.search(ingredient_lower):
+        return True
+    return not any(cue in product_lower for cue in _SLICED_PRODUCT_CUES)
 
 
 def _rostbiff_palagg_allows_product(
@@ -4528,6 +4585,12 @@ def matches_ingredient_fast(
         offer_data['name_normalized'],
     ):
         return None
+    if not _whole_cut_allows_product(
+        matched_keyword,
+        ingredient_lower,
+        offer_data['name_normalized'],
+    ):
+        return None
     if not _spice_mix_context_allows_component_match(
         keywords,
         ingredient_lower,
@@ -5477,6 +5540,18 @@ def matches_ingredient_fast(
                     and q == 'hel'
                     and _ingredient_implies_whole_kyckling(ingredient_lower)
                 ):
+                    continue
+                if (
+                    specialty_keyword in {'kycklingfilé', 'kycklingfile'}
+                    and q == 'marinerad'
+                    and not ingredient_has_qualifier
+                    and generic_marinade_allows_plain_chicken(offer_data['name_normalized'])
+                ):
+                    # A generic marinated chicken fillet (no specific flavor
+                    # theme) just adds mild flavor and may satisfy a plain
+                    # kycklingfilé recipe. grillkryddad/kryddad/kryddmarinerad and
+                    # themed flavors (citron/chili/...) still block via their own
+                    # checks, so a specifically-flavored marinade stays excluded.
                     continue
                 if (
                     specialty_keyword == 'pesto'

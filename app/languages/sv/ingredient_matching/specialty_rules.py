@@ -1320,6 +1320,29 @@ for _keyword, _qualifiers in SPECIALTY_BIDIRECTIONAL_CLI_UPDATES.items():
     _merged_bidirectional.update(_qualifiers)
     BIDIRECTIONAL_PER_KEYWORD[_keyword] = frozenset(_merged_bidirectional)
 
+# Specific marinade flavor/cuisine themes for chicken. A plain kycklingfilé
+# recipe may match a GENERIC "marinerad" product (it just adds mild flavor), but
+# NOT one carrying one of these themed flavors — the theme has to fit the dish,
+# so a "Citron Chili Marinerad" product must still not satisfy a neutral plain
+# recipe. grillkryddad/kryddad/kryddmarinerad stay blocking via their own
+# bidirectional qualifiers, so they are not repeated here.
+THEMED_CHICKEN_MARINADE_FLAVORS: FrozenSet[str] = frozenset({
+    'citron', 'lime', 'chili', 'vitlök', 'vitlok',
+    'honung', 'honungs', 'soja', 'teriyaki', 'teriyak',
+    'tandoori', 'tikka', 'bbq', 'barbecue', 'salsa',
+    'ingefära', 'ingefara', 'curry', 'paprika',
+    'rosmarin', 'timjan', 'örter', 'orter', 'örtmarinerad', 'ortmarinerad',
+    'peppar', 'lemon', 'garlic', 'grekisk', 'italiensk',
+    'mexikansk', 'thai', 'asiatisk', 'sötsur', 'sotsur', 'sweet',
+})
+
+
+def generic_marinade_allows_plain_chicken(offer_lower: str) -> bool:
+    """True when a marinated chicken product carries no specific flavor/cuisine
+    theme, so it may satisfy a plain kycklingfilé recipe. A themed marinade
+    (citron/chili/tandoori/...) returns False and stays blocked."""
+    return not any(flavor in offer_lower for flavor in THEMED_CHICKEN_MARINADE_FLAVORS)
+
 # Qualifier equivalents: if ingredient says "grekisk", product can have "turkisk" (and vice versa)
 # Used in specialty qualifier check — these types are interchangeable in cooking
 QUALIFIER_EQUIVALENTS: Dict[str, Set[str]] = {
