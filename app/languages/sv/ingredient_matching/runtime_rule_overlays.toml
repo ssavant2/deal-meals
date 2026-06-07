@@ -1809,6 +1809,13 @@ source = "smartare färs"
 target = "vegofärs"
 reason = "Stacky's Smartare Färs is a plant-based mince product; route its name to vegofärs so it blocks meat offers and still matches vego-mince recipes"
 
+[[space_normalizations]]
+id = "runtime_space_normalization_burger_of_heaven_vegoburgare"
+status = "active"
+source = "burger of heaven"
+target = "vegoburgare"
+reason = "Burger of Heaven is a named plant-based burger product; recipe ingredients naming it should stay in the vegoburgare family and must not match meat burgers. Plain hamburgare remains broad and may still match vego substitutes."
+
 [[keyword_set_updates]]
 id = "runtime_important_short_keyword_add_hirs"
 status = "active"
@@ -2144,6 +2151,14 @@ surface = "important_short_keywords"
 action = "add"
 terms = ["salame"]
 reason = "Salame is the Italian surface form of salami at 6 chars; the length filter runs on the surface token before synonym mapping, so salame itself must survive to map to salami"
+
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_pommes_frites_bamboo"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["pommes", "frites", "bamboo", "soya", "vårlök"]
+reason = "Short synonym source forms must survive strict ingredient extraction before synonym mapping: pommes/frites→pommes, bamboo→bambuskott, soya→soja, vårlök→salladslök. Burger remains excluded pending separate burger/bun/patty policy."
 
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
