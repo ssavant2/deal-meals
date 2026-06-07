@@ -13,7 +13,6 @@ All actual product scraping is done via pure REST API calls.
 from typing import List, Dict, Optional
 from scrapers.stores.base import StorePlugin, StoreConfig, StoreConfigField, StoreScrapeResult
 from languages.sv.category_utils import guess_category as shared_guess_category
-from languages.sv.category_utils import normalize_api_category as shared_normalize_category
 from loguru import logger
 from scrapers.stores.weight_utils import parse_weight
 from constants_timeouts import HTTP_TIMEOUT
@@ -785,13 +784,11 @@ class HemkopStore(StorePlugin):
             if volume_str:
                 weight_grams = parse_weight(volume_str)
 
-            # Category - normalize API category to English (same as ICA)
+            # Category - use API category as hint, with shared post-classification
+            # based on product name to correct broad Axfood category collisions.
             # e.g. "kott-chark-och-fagel|kott|farsfars" → "meat"
             raw_category = item.get('googleAnalyticsCategory') or ''
-            if raw_category:
-                category = shared_normalize_category(raw_category)
-            else:
-                category = shared_guess_category(product_name)
+            category = shared_guess_category(product_name, raw_category)
 
             if price <= 0:
                 logger.debug(f"Skipping product with zero/negative price: '{product_name}'")

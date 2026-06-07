@@ -352,6 +352,16 @@ def _reclassify(product_name: str, category: str) -> str:
     # under "dryck" navigation). Reclassify to pantry based on product name.
     if category == 'beverages':
         name_lower = product_name.lower()
+        if (
+            ('vattenmelon' in name_lower or re.search(r'\bmelon\b', name_lower))
+            and not any(cue in name_lower for cue in (
+                'kolsyr', 'läsk', 'lask', 'juice', 'dryck', 'saft',
+                'smoothie', 'nektar', 'soda', 'cola', 'tonic',
+                'energidryck', 'drinkmix', 'blanddryck', 'havredryck',
+                'kaffe', 'te ',
+            ))
+        ):
+            return 'fruit'
         _BEVERAGES_TO_PANTRY_KEYWORDS = (
             'bamboo shoot',
             'coconut milk',

@@ -751,12 +751,9 @@ class WillysStore(StorePlugin):
                 unit = 'st'
                 logger.debug(f"Kg→total: {product_name} - {weight_kg}kg, price: {price}, orig: {original_price}")
 
-            # CATEGORY from API (if available)
-            category = self._extract_api_category(item)
-
-            # Fallback to guessing if API doesn't have category
-            if not category or category == 'other':
-                category = self._guess_category_improved(product_name)
+            # CATEGORY from API (if available), with shared post-classification
+            # based on product name to correct broad Axfood category collisions.
+            category = shared_guess_category(product_name, self._extract_api_category(item))
 
             if price <= 0:
                 logger.debug(f"Skipping product with zero/negative price: '{product_name}'")
