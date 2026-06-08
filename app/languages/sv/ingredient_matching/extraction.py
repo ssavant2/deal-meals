@@ -1403,8 +1403,10 @@ def extract_keywords_from_product(
     # flavored water ("Vatten Granatäpple Lime") is left untouched.
     original_name_lower = collapse_watermelon(original_name_lower)
     # Save pre-space-norm version for carrier detection (space norms may split
-    # compound words like "vitlöksklyftor" → "vitlök klyftor", breaking carrier lookup)
-    original_for_carrier = original_name_lower
+    # compound words like "vitlöksklyftor" → "vitlök klyftor", breaking carrier lookup).
+    # Apply glass noodle normalization here too: "glass noodles" → "glasnudlar" so that
+    # the standalone 'glass' token does not trigger ice cream carrier detection on noodle products.
+    original_for_carrier = original_name_lower.replace('glass noodles', 'glasnudlar').replace('glass noodle', 'glasnudlar')
     original_name_lower = _apply_space_normalizations(original_name_lower)
     # Also split & in normalized name so keyword iteration sees separate words
     name = name.replace('&', ' ')

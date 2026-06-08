@@ -3526,7 +3526,6 @@ canonical = "tomat"
 variant = "tomat"
 layer_role = "hardcoded_keyword_output:extract_keywords_from_product"
 
-
 [[entries]]
 entry_id = "sv-se.family.vegobitar"
 language = "sv"

@@ -1816,6 +1816,13 @@ source = "burger of heaven"
 target = "vegoburgare"
 reason = "Burger of Heaven is a named plant-based burger product; recipe ingredients naming it should stay in the vegoburgare family and must not match meat burgers. Plain hamburgare remains broad and may still match vego substitutes."
 
+[[space_normalizations]]
+id = "runtime_space_normalization_glass_noodles_glasnudlar"
+status = "active"
+source = "glass noodles"
+target = "glasnudlar"
+reason = "English product name 'Glass Noodles' should normalize to glasnudlar compound before ice cream guard fires"
+
 [[keyword_set_updates]]
 id = "runtime_important_short_keyword_add_hirs"
 status = "active"
