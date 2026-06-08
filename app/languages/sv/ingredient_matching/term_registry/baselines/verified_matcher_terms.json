@@ -6,7 +6,7 @@
       "bridge_positive": 1824,
       "hardcoded_keyword_output:extract_keywords_from_ingredient": 101,
       "hardcoded_keyword_output:extract_keywords_from_product": 121,
-      "ingredient_parent_mapping": 418,
+      "ingredient_parent_mapping": 420,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
       "keyword_synonym_mapping": 194,
@@ -30,7 +30,7 @@
     },
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 418,
+      "ingredient_parent": 420,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 194,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5876,
-    "variants_missing_product_text": 1908,
+    "variant_count": 5878,
+    "variants_missing_product_text": 1910,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -111999,7 +111999,7 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Endive med lax, wasabikräm och forellrom\"}"
     },
     {
-      "variant_id": "vterm-ff5b7eba801fa329",
+      "variant_id": "vterm-dedd194f4c216c79",
       "row_index": 1448,
       "source_order": 20,
       "source_type": "matcher_regression_case",
@@ -112008,8 +112008,8 @@
       "source_id": "matcher_regression_positive_champinjon",
       "variant_role": "positive_regression",
       "variant_text": "matcher_regression_positive_champinjon: Champinjon",
-      "canonical": "champinjon",
-      "expected_family": "champinjon",
+      "canonical": "champinjoner",
+      "expected_family": "champinjoner",
       "ingredient_text": "200 g Färska champinjoner",
       "product_text": "Champinjon",
       "product_category": null,
@@ -112017,7 +112017,7 @@
       "expected": 1,
       "needs_product_text": false,
       "notes": "legacy_review_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"champinjon\", \"ingredient_index\": 0, \"must_match_keyword\": \"champinjon\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Legacy Review Recipe\"}"
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"champinjoner\", \"ingredient_index\": 0, \"must_match_keyword\": \"champinjoner\"}], \"policy_ref\": \"legacy_review_regression\", \"recipe_name\": \"Legacy Review Recipe\"}"
     },
     {
       "variant_id": "vterm-d38f46ae4b3a653f",
@@ -123442,11 +123442,53 @@
       "needs_product_text": false,
       "notes": "current_review_matcher_regression",
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"ost\", \"ingredient_index\": 0, \"must_match_keyword\": \"ost\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
+    },
+    {
+      "variant_id": "vterm-05b14a2cdf42e013",
+      "row_index": 4486,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:champinjon",
+      "source_id": "champinjon",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "champinjon",
+      "canonical": "champinjoner",
+      "expected_family": "champinjoner",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"champinjoner\"}"
+    },
+    {
+      "variant_id": "vterm-3fd2aad41b5446d9",
+      "row_index": 4791,
+      "source_order": 50,
+      "source_type": "ingredient_parent",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:skogschampinjon",
+      "source_id": "skogschampinjon",
+      "variant_role": "ingredient_parent_mapping",
+      "variant_text": "skogschampinjon",
+      "canonical": "champinjoner",
+      "expected_family": "champinjoner",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"champinjoner\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1682,
+      "no_product_text": 1684,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123454,7 +123496,7 @@
     "problem_counts": {},
     "source_counts": {
       "extraction_helper": 222,
-      "ingredient_parent": 418,
+      "ingredient_parent": 420,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
       "keyword_synonym": 194,
@@ -123468,8 +123510,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5876
+      "audited": 5878
     },
-    "variant_count": 5876
+    "variant_count": 5878
   }
 }

@@ -133,7 +133,7 @@ _DECLARED_DIAGNOSTIC_CANONICAL_GROUPS = (
     frozenset({"knipplök", "knipplökar", "salladslök"}),  # knipplök/knipplökar = synonym of salladslök
     frozenset({"kalkon", "pålägg"}),
     frozenset({"aprikos", "aprikoser"}),
-    frozenset({"champinjon", "champinjoner", "skogschampinjoner"}),
+    frozenset({"champinjon", "champinjoner", "skogschampinjon", "skogschampinjoner"}),
     frozenset({"kantareller", "trattkantarell", "trattkantareller"}),
     frozenset({"chili", "fläskkarré", "karré"}),
     frozenset({"cheddar", "mature", "violife"}),

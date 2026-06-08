@@ -18848,10 +18848,10 @@ variant = "matcher_regression_positive_caviar_rod_stenbitsrom_75g_ica: Caviar r√
 layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.champinjon.matcher_regression_positive_champinjon"
+entry_id = "sv-se.policy.champinjoner.matcher_regression_positive_champinjon"
 language = "sv"
 market = "SE"
-canonical = "champinjon"
+canonical = "champinjoner"
 status = "active"
 variants = ["matcher_regression_positive_champinjon: Champinjon"]
 ingredient_terms = []
@@ -18863,7 +18863,7 @@ notes = "Registry coverage for matcher regression fixture matcher_regression_pos
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "champinjon"
+canonical = "champinjoner"
 variant = "matcher_regression_positive_champinjon: Champinjon"
 layer_role = "positive_regression"
 

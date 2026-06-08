@@ -5014,7 +5014,7 @@ def matches_ingredient_fast(
     # Explicit preserved champignons should not surface fresh produce.
     # Ordinary champignon lines, including prep cues like "skivade", should stay
     # on fresh/frozen mushrooms and not fall through to preserved jar products.
-    _CHAMPIGNON_KW = frozenset({'champinjon', 'champinjoner', 'skogschampinjoner'})
+    _CHAMPIGNON_KW = frozenset({'champinjon', 'champinjoner', 'skogschampinjon', 'skogschampinjoner'})
     _CHAMPIGNON_PRESERVED_INGREDIENT = frozenset({
         'burk', 'konserv', 'konserverad', 'konserverade',
         'i vatten',

@@ -11840,9 +11840,9 @@ category = ""
 name = "Champinjon"
 
 [[fixtures.expected_matches]]
-canonical = "champinjon"
+canonical = "champinjoner"
 ingredient_index = 0
-must_match_keyword = "champinjon"
+must_match_keyword = "champinjoner"
 
 [[fixtures]]
 expected = 1

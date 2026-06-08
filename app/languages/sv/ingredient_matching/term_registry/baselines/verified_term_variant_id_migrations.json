@@ -3,7 +3,7 @@
   "from_hash_version": "v1_source_ref",
   "to_hash_version": "v2_stable_without_source_ref",
   "description": "Permanent verified-term variant_id migration map. Current records come from the v1 source_ref-based hash to v2 stable hash migration; v2 hashes exclude source_ref provenance text so source_ref edits do not force future baseline hash migrations.",
-  "variant_count": 5528,
+  "variant_count": 5529,
   "migrations": [
     {
       "old_variant_id": "vterm-001176a79541d816",
@@ -71699,6 +71699,19 @@
       "source_file": "app/languages/sv/ingredient_matching/match_bridges.py",
       "source_id": "bridge_surkal_exact",
       "source_ref": "match_bridges:bridge_surkal_exact"
+    },
+    {
+      "old_variant_id": "vterm-ff5b7eba801fa329",
+      "new_variant_id": "vterm-dedd194f4c216c79",
+      "language": "sv",
+      "market": "SE",
+      "source_family": "matcher_regression_case",
+      "canonical": "champinjoner",
+      "variant": "matcher_regression_positive_champinjon: Champinjon",
+      "layer_role": "positive_regression",
+      "source_file": "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
+      "source_id": "matcher_regression_positive_champinjon",
+      "source_ref": "legacy_review:fresh_mushroom_lines_still_take_canned_tetra_products"
     },
     {
       "old_variant_id": "vterm-ff5dcfc6f0d249d4",
