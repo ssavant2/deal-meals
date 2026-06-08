@@ -1,20 +1,19 @@
 # Matcher Contract TOML Sources
 
 This directory contains the authoritative TOML sources for Swedish matcher
-contracts. The JSON contract files are generated from these sources.
+contracts.
 
-After editing TOML sources, regenerate JSON with:
+After editing TOML sources, re-canonicalize them and refresh derived registry
+coverage with:
 
 ```bash
-python app/support_checks/generate_matcher_contract_json_from_toml_sources.py \
-  --write
+./bin/dm matcher regen --what all
 ```
 
-Check that generated JSON is byte-for-byte current with:
+Check for drift without writing with:
 
 ```bash
-python app/support_checks/generate_matcher_contract_json_from_toml_sources.py \
-  --check
+./bin/dm matcher regen --what all --check
 ```
 
 ## Authority
@@ -23,12 +22,6 @@ The authored source of truth is:
 
 - `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml`
 - `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml`
-
-These generated JSON files are still committed for existing readers and reports,
-but hand-edits are rejected by pre-flight:
-
-- `app/languages/sv/matcher_contracts/matcher_regression_cases.json`
-- `app/languages/sv/matcher_contracts/matcher_rule_inventory.json`
 
 ## File Layout
 
@@ -42,7 +35,6 @@ Each file starts with metadata:
 ```toml
 schema_version = 1
 contract = "matcher_regression_cases"
-source_json_path = "app/languages/sv/matcher_contracts/matcher_regression_cases.json"
 ```
 
 Fixture rows use `[[fixtures]]`:
@@ -93,7 +85,8 @@ anchor = "example"
 
 - Object key order is not semantic.
 - List order is semantic and must round-trip unchanged.
-- Optional fields remain absent when absent in JSON.
+- Optional fields remain absent when absent in source TOML.
 - Canonical byte comparison uses `json.dumps(..., ensure_ascii=False,
   indent=2, sort_keys=True) + "\n"`.
-- Generated JSON must match the TOML sources byte-for-byte.
+- TOML sources must parse, re-emit, and round-trip through the canonical
+  emitter without semantic drift.

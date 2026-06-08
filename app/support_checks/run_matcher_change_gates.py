@@ -287,12 +287,10 @@ def _detect_change_flags(paths: set[str]) -> ChangeFlags:
     fixtures_changed = _has_path(
         paths,
         "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
-        "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
     )
     inventory_changed = _has_path(
         paths,
         "app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml",
-        "app/languages/sv/matcher_contracts/matcher_rule_inventory.json",
     )
     support_checks_changed = _has_path(paths, "app/support_checks/")
     return ChangeFlags(
@@ -390,16 +388,7 @@ def _generated_coverage_step(args: argparse.Namespace) -> Step:
     return Step(
         "generate matcher registry coverage",
         _command("generate_matcher_registry_coverage.py", *_tree_root_args(args), "--write"),
-        "updates derived coverage TOML from generated fixture/inventory JSON before validation",
-        cwd=repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
-    )
-
-
-def _generated_contract_json_step(args: argparse.Namespace) -> Step:
-    return Step(
-        "generate matcher contract JSON",
-        _command("generate_matcher_contract_json_from_toml_sources.py", *_tree_root_args(args), "--write"),
-        "updates generated fixture/inventory JSON from authoritative TOML sources before coverage/pre-flight",
+        "updates derived coverage TOML from matcher contract TOML sources before validation",
         cwd=repo_root_for_tree_root(args.tree_root) if args.tree_root is not None else APP_DIR,
     )
 
@@ -988,8 +977,7 @@ def parse_args() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         default=True,
         help=(
-            "For Track B fixture/inventory changes, refresh generated matcher contract JSON "
-            "and registry coverage TOML before pre-flight."
+            "For Track B fixture/inventory changes, refresh derived registry coverage TOML before pre-flight."
         ),
     )
     args = parser.parse_args()
@@ -1044,7 +1032,6 @@ def main() -> int:
 
     steps: list[Step] = []
     if generated_coverage_refresh:
-        steps.append(_generated_contract_json_step(args))
         steps.append(_generated_coverage_step(args))
     if args.track == "B" and _stages_baseline(args, changes):
         steps.append(_baseline_promotion_step(args))

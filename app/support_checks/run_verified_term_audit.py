@@ -72,7 +72,6 @@ MAPPING_SOURCE_TYPES = frozenset({
     "ingredient_routing_parent",
 })
 
-
 @dataclass(frozen=True)
 class AuditVariant:
     source_order: int

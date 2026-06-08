@@ -12,15 +12,12 @@ track choice, and command recipes, see
 - `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml`
   stores authored rule owner, risk, adapter, fixture refs, and source
   provenance.
-- `app/languages/sv/matcher_contracts/matcher_regression_cases.json` and
-  `app/languages/sv/matcher_contracts/matcher_rule_inventory.json` are
-  generated from the TOML sources and committed for existing readers/reports.
 - `app/languages/sv/ingredient_matching/term_registry/entries/*.toml` stores
   authored registry entries. Simple mapping families may omit `entry_id` and
   `[[entries.coverage]]`; the registry loader derives them from language,
   market, canonical, first variant, filename, and the family convention.
 - `matcher_regression_case.toml` and `matcher_rule_inventory.toml` are generated
-  from the JSON contracts by
+  from the TOML contracts by
   `app/support_checks/generate_matcher_registry_coverage.py`.
 - `app/languages/sv/ingredient_matching/term_registry/baselines/verified_matcher_terms.json`
   is the frozen verified-term baseline used by registry contract checks.
@@ -38,16 +35,11 @@ track choice, and command recipes, see
   hash-covered by matcher/offer/recipe compiler versions, and loaded through
   `runtime_rule_overlays.py`.
 
-Support checks and readers access generated JSON through
-`app/support_checks/matcher_contracts.py`; the L3-C direct-reader audit in
-`app/support_checks/reports/MATCHER_CONTRACT_JSON_AUTHORITY_AUDIT.md`
-currently passes with zero blocking consumers.
-
 The authoritative TOML sources live in
 `app/languages/sv/matcher_contracts/sources/` and are documented in that
-directory's README. The current source/generation report is
-`app/support_checks/reports/MATCHER_CONTRACT_TOML_SOURCE_AUDIT.md`. Pre-flight
-rejects generated JSON that no longer matches the TOML sources byte-for-byte.
+directory's README. Support checks and readers access them through
+`app/support_checks/matcher_contracts.py`. Pre-flight rejects non-canonical
+contract TOML and derived registry coverage drift.
 
 ## Runtime Rule Overlay TOML
 
@@ -116,8 +108,8 @@ Owning runtime readers:
 `app/support_checks/run_matcher_change_preflight.py` is the gate that keeps
 all source layers consistent. Pre-flight rejects, among other things:
 
-- generated JSON drift from the TOML sources
-- generated registry coverage drift from the JSON contracts
+- non-canonical matcher contract TOML
+- generated registry coverage drift from the TOML contracts
 - stale `EXPECTED_*` constants (variant count, unique coverage keys)
 - unknown `source_ref` / `policy_ref` / `adapter_ref` prefixes
 - broken positive match-bridge fixture refs
@@ -259,8 +251,6 @@ listed above and reruns pre-flight after saves. Watched paths (per
 
 - `app/languages/sv/matcher_contracts/sources/*.toml` (fixture/inventory TOML
   sources and any additional source TOMLs in the same directory)
-- `app/languages/sv/matcher_contracts/*.json` (generated JSON contracts, so
-  drift is detected the moment they are written)
 - `app/languages/sv/ingredient_matching/term_registry/entries/*.toml`
   (registry entries for every rule shape)
 - `app/support_checks/run_deep_matcher_sanity.py` (focused regression script)

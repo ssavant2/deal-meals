@@ -147,13 +147,10 @@ the matcher parity/inventory checks. Generated batch-question files and local
 `test_*.py` workbench tests are staging/debugging surfaces, not the permanent
 regression contract.
 
-The corresponding JSON files under `app/languages/sv/matcher_contracts/` are
-generated, committed contract inputs for existing readers and reports. Runtime
-code does not update them. Dev maintenance writes the TOML sources and
-regenerates JSON with:
+Dev maintenance writes the TOML sources directly. Re-canonicalize them with:
 
 ```bash
-./bin/dm matcher regen --what json
+./bin/dm matcher regen --what contracts
 ```
 
 Refresh moved inventory anchors with:
@@ -162,9 +159,9 @@ Refresh moved inventory anchors with:
 ./bin/dm matcher refresh-line-refs
 ```
 
-`refresh-line-refs` updates the inventory TOML source and regenerates its
-generated JSON, so it should not be run against a read-only production
-filesystem. The raw support-check scripts remain fallback/debug forms.
+`refresh-line-refs` updates the inventory TOML source, so it should not be run
+against a read-only production filesystem. The raw support-check scripts remain
+fallback/debug forms.
 Use `./bin/dm matcher refresh-line-refs --fix` when you want the write-mode
 intent to be explicit; it is the same write operation, while `--dry-run` remains
 read-only.
@@ -249,9 +246,9 @@ the rule body still needs a normal Python implementation and gates. The
 `modify ...`, `fixture make-negative`, `fixture make-positive`, and
 `fixture remove` commands are for mechanical TOML/contract bookkeeping around
 existing durable rules. Use `fixture make-negative` when an old positive
-contract case is now the intended negative proof; it rewrites the fixture source
-and generated JSON, then the batch can be finalized with `--allow-removals` if
-baseline promotion reports reviewed true removals. Use
+contract case is now the intended negative proof; it rewrites the fixture source,
+then the batch can be finalized with `--allow-removals` if baseline promotion
+reports reviewed true removals. Use
 `fixture make-positive --from-current-match` for the inverse when the current
 matcher is believed correct; it refuses to write if current diagnostics are not
 single-match and path-consistent.
@@ -323,9 +320,6 @@ surface, not temporary batch-question output:
 - `matcher_regression_cases.toml` is the authored main matcher parity corpus.
 - `matcher_rule_inventory.toml` is the authored rule/source inventory checked
   by the inventory support scripts.
-
-The sibling JSON files are generated from those TOML sources and remain
-committed for existing matcher checks.
 
 Do not keep generated review-import staging files in the production tree once
 their pass-clean decisions have been promoted into the main fixture and

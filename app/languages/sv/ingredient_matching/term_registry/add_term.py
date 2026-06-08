@@ -145,7 +145,7 @@ SV_EXPORT_LAYER_SPECS: tuple[ExportLayerSpec, ...] = (
         export_name="MATCHER_REGRESSION_CASES",
         export_kind="fixture",
         runtime=False,
-        description="matcher_regression_cases.json positive fixture",
+        description="matcher_regression_cases.toml positive fixture",
     ),
     ExportLayerSpec(
         source_family="matcher_regression_case",
@@ -153,7 +153,7 @@ SV_EXPORT_LAYER_SPECS: tuple[ExportLayerSpec, ...] = (
         export_name="MATCHER_REGRESSION_CASES",
         export_kind="fixture",
         runtime=False,
-        description="matcher_regression_cases.json negative fixture",
+        description="matcher_regression_cases.toml negative fixture",
     ),
 )
 
@@ -177,7 +177,7 @@ for _inventory_role in (
             export_name="MATCHER_RULE_INVENTORY",
             export_kind="inventory_contract",
             runtime=False,
-            description=f"matcher_rule_inventory.json {_inventory_role}",
+            description=f"matcher_rule_inventory.toml {_inventory_role}",
         ),
     )
 

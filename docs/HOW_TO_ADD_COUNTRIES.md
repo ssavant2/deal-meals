@@ -34,7 +34,7 @@ app/
 │   │   ├── spell_check.py     # Spell-check exclusions and inflection data
 │   │   ├── store_units.py     # Store unit aliases/default unit
 │   │   ├── ingredient_matching_audit.py   # Audit tooling (not part of runtime)
-│   │   ├── matcher_contracts/ # Matcher regression contracts + generated JSON
+│   │   ├── matcher_contracts/ # Matcher regression contract TOML sources
 │   │   └── ingredient_matching/
 │   │       ├── engine.py               # Pipeline orchestrator + MATCHER_VERSION
 │   │       ├── matching.py             # matches_ingredient_fast()
@@ -174,14 +174,12 @@ This directory contains the permanent matcher regression contract for a language
   relevant negative recipe/offer cases.
 - `sources/matcher_rule_inventory.toml` — authored rule/source ownership,
   fixture refs, line refs, risk classification, and migration status.
-- `matcher_regression_cases.json` and `matcher_rule_inventory.json` — generated
-  JSON artifacts committed for existing readers and reports.
 
-The generated JSON files are read-only inputs in production-style environments.
-Runtime code does not update them. For Swedish, the maintenance/check scripts
-read them from `app/languages/sv/matcher_contracts/`; future production
-languages should keep the same shape under their own
-`app/languages/<code>/matcher_contracts/`.
+The TOML sources are read-only inputs in production-style environments. Runtime
+code does not update them. For Swedish, the maintenance/check scripts read them
+from `app/languages/sv/matcher_contracts/sources/`; future production languages
+should keep the same shape under their own
+`app/languages/<code>/matcher_contracts/sources/`.
 
 ### `ingredient_matching/term_registry/`
 The term registry is the source-of-truth layer for matcher vocabulary coverage.

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import contextlib
 from copy import deepcopy
 from dataclasses import replace
@@ -31,11 +30,14 @@ from support_checks.refresh_matcher_rule_inventory_line_refs import (
     refresh_inventory_line_refs_from_contract_source,
 )
 from support_checks.matcher_contracts import (
+    contract_spec_by_name,
     contract_paths,
     fixture_contract_path,
     inventory_contract_path,
     load_fixture_contract,
     load_inventory_contract,
+    load_contract_source,
+    write_contract_source,
     write_fixture_contract,
     write_inventory_contract,
 )
@@ -43,20 +45,11 @@ from support_checks.generate_matcher_registry_coverage import (
     generate_coverage_files,
     write_coverage_files,
 )
-from support_checks.audit_matcher_contract_json_authority import (
-    audit as audit_json_authority,
-    json_report as json_authority_report,
-)
 from support_checks.audit_matcher_contract_toml_sources import (
     audit_contract_sources,
-    contract_spec_by_name,
     json_report as toml_source_json_report,
-    load_contract_source,
-    write_contract_source,
 )
-from support_checks.generate_matcher_contract_json_from_toml_sources import check_generated_contract_json
 from support_checks.prefix_schema import allowed_prefixes, non_registered_prefixes
-from support_checks.run_matcher_change_gates import _generated_contract_json_step
 from support_checks.run_verified_term_audit import (
     AuditVariant,
     IDENTITY_HASH_VERSION_V1,
@@ -96,12 +89,13 @@ DEFAULT_INVENTORY_FILE = inventory_contract_path()
 
 def _copy_matcher_tree(tree_root: Path) -> Path:
     app_dir = tree_root / "app"
+    live_app_dir = Path(__file__).resolve().parents[2]
     shutil.copytree(
-        DEFAULT_FIXTURE_FILE.parents[1],
+        live_app_dir / "languages" / "sv",
         app_dir / "languages" / "sv",
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
-    live_languages_dir = Path(__file__).resolve().parents[2] / "languages"
+    live_languages_dir = live_app_dir / "languages"
     shutil.copytree(
         live_languages_dir / "term_registry",
         app_dir / "languages" / "term_registry",
@@ -195,8 +189,8 @@ class MatcherRuleChangePreflightTests(unittest.TestCase):
         fixtures = load_fixture_contract(DEFAULT_FIXTURE_FILE)
         inventory = load_inventory_contract(DEFAULT_INVENTORY_FILE)
         with tempfile.TemporaryDirectory() as tmp:
-            fixture_copy = Path(tmp) / "fixture.json"
-            inventory_copy = Path(tmp) / "inventory.json"
+            fixture_copy = Path(tmp) / "matcher_regression_cases.toml"
+            inventory_copy = Path(tmp) / "matcher_rule_inventory.toml"
 
             write_fixture_contract(fixtures, fixture_copy)
             write_inventory_contract(inventory, inventory_copy)
@@ -723,7 +717,7 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
         ))
 
     def test_positive_fixture_missing_expected_matches_is_actionable(self) -> None:
-        fixtures = json.loads(DEFAULT_FIXTURE_FILE.read_text(encoding="utf-8"))
+        fixtures = load_fixture_contract(DEFAULT_FIXTURE_FILE)
         fixture = next(
             item
             for item in fixtures
@@ -734,11 +728,8 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
         fixtures[fixtures.index(fixture)] = broken_fixture
 
         with tempfile.TemporaryDirectory() as tmp:
-            fixture_file = Path(tmp) / "matcher_regression_cases.json"
-            fixture_file.write_text(
-                json.dumps(fixtures, ensure_ascii=False, indent=2) + "\n",
-                encoding="utf-8",
-            )
+            fixture_file = Path(tmp) / "matcher_regression_cases.toml"
+            write_fixture_contract(fixtures, fixture_file)
             report = run_preflight(
                 fixture_file=fixture_file,
                 inventory_file=DEFAULT_INVENTORY_FILE,
@@ -757,23 +748,21 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
 
-            fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-            fixtures = json.loads(fixture_file.read_text(encoding="utf-8"))
+            fixture_spec = contract_spec_by_name("matcher_regression_cases", tree_root=tree_root)
+            fixture_file = fixture_spec.source_toml_path
+            fixtures = load_contract_source(fixture_spec)
             fixture = next(
                 item
                 for item in fixtures
                 if item["id"] == "matcher_regression_positive_havssalt_250g_maldon"
             )
             fixture.pop("expected_matches", None)
-            fixture_file.write_text(
-                json.dumps(fixtures, ensure_ascii=False, indent=2) + "\n",
-                encoding="utf-8",
-            )
+            write_contract_source(fixture_spec, fixtures)
 
             report = run_preflight(tree_root=tree_root)
 
         self.assertFalse(report["summary"]["passed"], report)
-        self.assertEqual(report["summary"]["new_issue_count"], 4, report)
+        self.assertEqual(report["summary"]["new_issue_count"], 3, report)
         codes = {issue["code"] for issue in report["new_issues"]}
         self.assertEqual(
             codes,
@@ -781,7 +770,6 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                 "fixture_missing_registry_coverage",
                 "fixture_positive_missing_expected_matches",
                 "generated_coverage_stale",
-                "matcher_contract_generated_json_drift",
             },
         )
         fixture_issues = [
@@ -790,7 +778,7 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             if issue["code"].startswith("fixture_")
         ]
         self.assertTrue(
-            all(issue["file"].endswith("matcher_regression_cases.json") for issue in fixture_issues),
+            all(issue["file"].endswith("matcher_regression_cases.toml") for issue in fixture_issues),
             report,
         )
 
@@ -799,7 +787,9 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
 
-            fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+            fixture_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            )
             fixture_id = "matcher_regression_positive_phase2_generated_coverage"
             inventory_id = "legacy_synonym_phase2_generated_coverage"
 
@@ -822,7 +812,6 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                 ],
             })
             write_contract_source(fixture_spec, fixtures)
-            check_generated_contract_json(tree_root=tree_root, write=True)
 
             line_count = len(fixture_file.read_text(encoding="utf-8").splitlines())
             inventory_spec = contract_spec_by_name("matcher_rule_inventory", tree_root=tree_root)
@@ -840,7 +829,7 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                 "adapter_ref": "matcher_layer_diagnostics:phase2_generated_coverage",
                 "line_refs": [
                     {
-                        "path": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+                        "path": "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
                         "start": 1,
                         "end": line_count,
                         "anchor": fixture_id,
@@ -849,7 +838,6 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                 "notes": "Synthetic Phase 2 generated coverage row.",
             })
             write_contract_source(inventory_spec, inventory)
-            check_generated_contract_json(tree_root=tree_root, write=True)
 
             generated = generate_coverage_files(tree_root=tree_root)
             changed_paths = {path.name for path in write_coverage_files(generated)}
@@ -892,7 +880,7 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
         variant = AuditVariant(
             source_order=20,
             source_type="matcher_regression_case",
-            source_file="app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+            source_file="app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
             source_ref="manual:phase3_before",
             source_id="matcher_regression_positive_phase3_source_ref_edit",
             variant_role="positive_regression",
@@ -937,7 +925,7 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             "language": "sv",
             "market": "SE",
             "source_type": "matcher_regression_case",
-            "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+            "source_file": "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
             "source_id": "matcher_regression_positive_phase6_canonical_revision",
             "variant_role": "positive_regression",
             "variant_text": "matcher_regression_positive_phase6_canonical_revision: Phase 6 offer",
@@ -974,7 +962,7 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                 "language": "sv",
                 "market": "SE",
                 "source_type": "matcher_regression_case",
-                "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+                "source_file": "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
                 "source_id": "matcher_regression_positive_phase6_assertion_flip",
                 "variant_role": "positive_regression",
                 "variant_text": (
@@ -1034,7 +1022,7 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             "language": "sv",
             "market": "SE",
             "source_type": "matcher_regression_case",
-            "source_file": "app/languages/sv/matcher_contracts/matcher_regression_cases.json",
+            "source_file": "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
             "source_id": "matcher_regression_negative_policy_family",
             "variant_role": "negative_regression",
             "variant_text": "matcher_regression_negative_policy_family: Blocked Offer",
@@ -1209,8 +1197,8 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
         )
 
         with tempfile.TemporaryDirectory() as tmp:
-            fixture_file = Path(tmp) / "matcher_regression_cases.json"
-            fixture_file.write_text(json.dumps(fixtures, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            fixture_file = Path(tmp) / "matcher_regression_cases.toml"
+            write_fixture_contract(fixtures, fixture_file)
             original_bridges = guard_bridge_checks.MATCH_BRIDGES
             guard_bridge_checks.MATCH_BRIDGES = (bridge,)
             try:
@@ -1223,7 +1211,7 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                 guard_bridge_checks.MATCH_BRIDGES = original_bridges
 
         self.assertEqual([issue.code for issue in issues], ["match_bridge_positive_fixture_miss"])
-        self.assertEqual(issues[0].line, 3)
+        self.assertEqual(issues[0].line, 8)
         self.assertEqual(issues[0].details["bridge_id"], "phase6_bridge_miss")
         self.assertEqual(issues[0].details["fixture_ref"], fixture_id)
 
@@ -1272,8 +1260,6 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             )
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
 
-            fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-            inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
             keyword_extra_parent_file = (
                 app_dir
                 / "languages"
@@ -1291,8 +1277,8 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                 app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
             )
 
-            fixtures = json.loads(fixture_file.read_text(encoding="utf-8"))
-            inventory = json.loads(inventory_file.read_text(encoding="utf-8"))
+            fixtures = load_contract_source(contract_spec_by_name("matcher_regression_cases", tree_root=tree_root))
+            inventory = load_contract_source(contract_spec_by_name("matcher_rule_inventory", tree_root=tree_root))
             self.assertTrue(any(item["id"] == fixture_id for item in fixtures))
             self.assertTrue(any(item["id"] == inventory_id for item in inventory))
             self.assertIn("phasefyraapelsin", keyword_extra_parent_file.read_text(encoding="utf-8"))
@@ -1300,7 +1286,6 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             self.assertIn(fixture_id, fixture_source_file.read_text(encoding="utf-8"))
             self.assertIn(inventory_id, inventory_source_file.read_text(encoding="utf-8"))
 
-            check_generated_contract_json(tree_root=tree_root, write=True)
             write_coverage_files(generate_coverage_files(tree_root=tree_root))
             self.assertFalse(any(item.changed for item in generate_coverage_files(tree_root=tree_root)))
             report = run_preflight(tree_root=tree_root)
@@ -1339,11 +1324,7 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                 text=True,
             )
             self.assertEqual(gate_result.returncode, 0, gate_result.stderr + gate_result.stdout)
-            self.assertIn("generate_matcher_contract_json_from_toml_sources.py", gate_result.stdout)
-            self.assertLess(
-                gate_result.stdout.find("generate_matcher_contract_json_from_toml_sources.py"),
-                gate_result.stdout.find("generate_matcher_registry_coverage.py"),
-            )
+            self.assertIn("generate_matcher_registry_coverage.py", gate_result.stdout)
 
     def test_cli_fixture_remove_cascades_fixture_refs_and_regen(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -1377,9 +1358,6 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             fixture_source = (
                 app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
             ).read_text(encoding="utf-8")
-            fixture_json = (
-                app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-            ).read_text(encoding="utf-8")
             inventory_source = (
                 app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
             ).read_text(encoding="utf-8")
@@ -1403,7 +1381,6 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             ).read_text(encoding="utf-8")
 
             self.assertNotIn(fixture_id, fixture_source)
-            self.assertNotIn(fixture_id, fixture_json)
             self.assertNotIn(fixture_id, inventory_source)
             self.assertNotIn(fixture_id, no_match_policy)
             self.assertNotIn(fixture_id, generated_fixture_coverage)
@@ -1499,28 +1476,16 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             fixture_source = (
                 app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
             ).read_text(encoding="utf-8")
-            fixture_json = (
-                app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-            ).read_text(encoding="utf-8")
             self.assertNotIn(almond_fixture_id, fixture_source)
-            self.assertNotIn(almond_fixture_id, fixture_json)
             self.assertNotIn(hazel_fixture_id, fixture_source)
-            self.assertNotIn(hazel_fixture_id, fixture_json)
             self.assertIn(oat_fixture_id, fixture_source)
-            self.assertIn(oat_fixture_id, fixture_json)
 
             inventory_source = (
                 app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
             ).read_text(encoding="utf-8")
-            inventory_json = (
-                app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
-            ).read_text(encoding="utf-8")
             self.assertNotIn(almond_fixture_id, inventory_source)
-            self.assertNotIn(almond_fixture_id, inventory_json)
             self.assertNotIn(hazel_fixture_id, inventory_source)
-            self.assertNotIn(hazel_fixture_id, inventory_json)
             self.assertIn(oat_fixture_id, inventory_source)
-            self.assertIn(oat_fixture_id, inventory_json)
             self.assertIn(f'anchor = "entry_id = \\"{oat_entry_id}\\""', inventory_source)
             self.assertIn("Synthetic child no longer belongs in this family.", inventory_source)
 
@@ -1688,8 +1653,8 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                 tree_root=tree_root,
                 app_dir=app_dir,
                 repo_root=tree_root,
-                fixture_file=app_dir / "fixture.json",
-                inventory_file=app_dir / "inventory.json",
+                fixture_file=app_dir / "matcher_regression_cases.toml",
+                inventory_file=app_dir / "matcher_rule_inventory.toml",
                 fixture_source_file=app_dir / "fixture.toml",
                 inventory_source_file=app_dir / "inventory.toml",
                 registry_entries_dir=app_dir / "entries",
@@ -1743,8 +1708,12 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
-            fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-            inventory_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_rule_inventory.json"
+            fixture_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            )
+            inventory_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
+            )
             keyword_extra_parent_file = (
                 app_dir
                 / "languages"
@@ -4739,7 +4708,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertEqual(unknown.returncode, 2, unknown.stderr + unknown.stdout)
         self.assertIn("Unknown matcher goal: cook-the-moon", unknown.stderr + unknown.stdout)
 
-    def test_dm_matcher_regen_check_runs_json_before_coverage(self) -> None:
+    def test_dm_matcher_regen_check_runs_contracts_before_coverage(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             _copy_matcher_tree(tree_root)
@@ -4762,10 +4731,10 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             )
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("generate_matcher_contract_json_from_toml_sources.py", result.stdout)
+        self.assertIn("Matcher contract TOML sources are canonical.", result.stdout)
         self.assertIn("generate_matcher_registry_coverage.py", result.stdout)
         self.assertLess(
-            result.stdout.find("generate_matcher_contract_json_from_toml_sources.py"),
+            result.stdout.find("Matcher contract TOML sources are canonical."),
             result.stdout.find("generate_matcher_registry_coverage.py"),
         )
 
@@ -4793,7 +4762,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertNotEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("raw pass-through args are only supported", result.stderr + result.stdout)
 
-    def test_dm_matcher_doctor_json_reports_generated_state(self) -> None:
+    def test_dm_matcher_doctor_reports_contract_source_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             _copy_matcher_tree(tree_root)
@@ -4822,7 +4791,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         report = json.loads(result.stdout)
         checks = {check["id"]: check for check in report["checks"]}
         self.assertIn(report["status"], {"ok", "needs_action"})
-        self.assertEqual(checks["generated_contract_json"]["status"], "ok")
+        self.assertEqual(checks["contract_sources"]["status"], "ok")
         self.assertEqual(checks["generated_registry_coverage"]["status"], "ok")
         self.assertEqual(checks["extraction_helper_coverage"]["status"], "ok")
         self.assertEqual(checks["extraction_matching_drift_watchlist"]["status"], "ok")
@@ -4985,12 +4954,14 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         self.assertIn("app/languages/sv/ingredient_matching/matching.py", warning["changed"])
         self.assertIn("app/languages/sv/ingredient_matching/validators.py", warning["missing_peer_changes"])
 
-    def test_dm_matcher_doctor_reports_stale_generated_json_next_action(self) -> None:
+    def test_dm_matcher_doctor_reports_stale_contract_source_next_action(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
-            fixture_json = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
-            fixture_json.write_text(fixture_json.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+            fixture_source = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            )
+            fixture_source.write_text(fixture_source.read_text(encoding="utf-8") + "\n", encoding="utf-8")
             live_app_dir = Path(__file__).resolve().parents[2]
             result = subprocess.run(
                 [
@@ -5016,9 +4987,8 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
         report = json.loads(result.stdout)
         checks = {check["id"]: check for check in report["checks"]}
         self.assertEqual(report["status"], "needs_action")
-        self.assertEqual(checks["generated_contract_json"]["status"], "needs_action")
-        self.assertEqual(report["next_action"]["command"], "./bin/dm matcher regen --what all")
-        self.assertIn("generated_artifacts_stale", {row["id"] for row in report["guided_corrections"]})
+        self.assertEqual(checks["contract_sources"]["status"], "needs_action")
+        self.assertEqual(report["next_action"]["command"], "./bin/dm matcher regen --what contracts")
 
     def test_dm_matcher_batch_finalize_dry_run_reports_doctor_and_steps(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -5075,7 +5045,6 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
                 }],
             })
             write_contract_source(fixture_spec, fixtures)
-            check_generated_contract_json(tree_root=tree_root, write=True)
 
             result = subprocess.run(
                 [
@@ -5103,7 +5072,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             self.assertIn("Converted fixture to negative: phase_fixture_to_negative_positive", result.stdout)
             self.assertIn("removed expected_matches: 1", result.stdout)
-            self.assertIn("Regenerated matcher contract JSON.", result.stdout)
+            self.assertIn("Rewrote canonical matcher contract TOML.", result.stdout)
             self.assertIn("--allow-removals", result.stdout)
 
             updated_fixtures = load_contract_source(fixture_spec)
@@ -5116,23 +5085,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             self.assertEqual(updated_fixture["policy_ref"], "policy_phase_fixture_new_negative")
             self.assertEqual(updated_fixture["source_ref"], "manual:policy_phase_fixture_new_negative")
 
-            generated_fixtures = json.loads(
-                (
-                    app_dir
-                    / "languages"
-                    / "sv"
-                    / "matcher_contracts"
-                    / "matcher_regression_cases.json"
-                ).read_text(encoding="utf-8")
-            )
-            generated_fixture = next(
-                row for row in generated_fixtures
-                if row["id"] == "phase_fixture_to_negative_positive"
-            )
-            self.assertEqual(generated_fixture["expected"], 0)
-            self.assertNotIn("expected_matches", generated_fixture)
-
-    def test_dm_matcher_fixture_make_positive_from_current_match_rewrites_source_and_json(self) -> None:
+    def test_dm_matcher_fixture_make_positive_from_current_match_rewrites_source(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -5158,7 +5111,6 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
                 "expected": 0,
             })
             write_contract_source(fixture_spec, fixtures)
-            check_generated_contract_json(tree_root=tree_root, write=True)
 
             result = subprocess.run(
                 [
@@ -5189,7 +5141,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             self.assertIn("canonical: jordgubbssaft", result.stdout)
             self.assertIn("paths: live/fast/backend/materialized agree", result.stdout)
             self.assertIn("Converted fixture to positive: phase_fixture_to_positive_negative", result.stdout)
-            self.assertIn("Regenerated matcher contract JSON.", result.stdout)
+            self.assertIn("Rewrote canonical matcher contract TOML.", result.stdout)
 
             updated_fixtures = load_contract_source(fixture_spec)
             updated_fixture = next(
@@ -5201,29 +5153,6 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             self.assertEqual(updated_fixture["source_ref"], "manual:policy_phase_fixture_new_positive")
             self.assertEqual(
                 updated_fixture["expected_matches"],
-                [{
-                    "ingredient_index": 0,
-                    "canonical": "jordgubbssaft",
-                    "must_match_keyword": "jordgubbssaft",
-                }],
-            )
-
-            generated_fixtures = json.loads(
-                (
-                    app_dir
-                    / "languages"
-                    / "sv"
-                    / "matcher_contracts"
-                    / "matcher_regression_cases.json"
-                ).read_text(encoding="utf-8")
-            )
-            generated_fixture = next(
-                row for row in generated_fixtures
-                if row["id"] == "phase_fixture_to_positive_negative"
-            )
-            self.assertEqual(generated_fixture["expected"], 1)
-            self.assertEqual(
-                generated_fixture["expected_matches"],
                 [{
                     "ingredient_index": 0,
                     "canonical": "jordgubbssaft",
@@ -5440,7 +5369,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             {"phasefemapelsin": "phasefemfrukt"},
         )
 
-    def test_gate_json_generation_step_refreshes_toml_source_drift(self) -> None:
+    def test_dm_matcher_regen_contracts_refreshes_toml_source_drift(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
@@ -5455,31 +5384,32 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
                 ),
                 encoding="utf-8",
             )
-            self.assertTrue(any(result.drifted for result in check_generated_contract_json(tree_root=tree_root)))
-
-            step = _generated_contract_json_step(argparse.Namespace(tree_root=tree_root))
             result = subprocess.run(
-                list(step.argv),
-                cwd=step.cwd,
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "regen",
+                    "--what",
+                    "contracts",
+                    "--tree-root",
+                    str(tree_root),
+                ],
+                cwd=Path(__file__).resolve().parents[2],
                 check=False,
                 capture_output=True,
                 text=True,
             )
 
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-            self.assertFalse(any(result.drifted for result in check_generated_contract_json(tree_root=tree_root)))
-
-    def test_json_authority_audit_passes_current_tree(self) -> None:
-        hits = audit_json_authority(Path(__file__).resolve().parents[2])
-        blockers = [hit for hit in hits if hit.is_blocker]
-        self.assertEqual(blockers, [])
-
-        report = json.loads(json_authority_report(hits))
-        self.assertEqual(report["decision"], "PASS")
-        self.assertEqual(report["blocker_count"], 0)
-        self.assertEqual(report["blocker_baseline_count"], 0)
-        self.assertEqual(report["summary"]["contract_access_api"], 2)
-        self.assertEqual(report["omitted_findings"]["generated_output_reference"], 4179)
+            self.assertIn("Rewrote canonical matcher contract TOML.", result.stdout)
+            self.assertEqual(
+                fixture_source_file.read_text(encoding="utf-8").count(
+                    'id = "plan_initial_jordgubbssaft_positive_gate_json"'
+                ),
+                1,
+            )
 
     def test_toml_source_round_trip_is_lossless(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -5488,7 +5418,6 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
 
             report = json.loads(toml_source_json_report(results))
             self.assertEqual(report["decision"], "PASS")
-            self.assertTrue(report["generated_json_committed"])
             self.assertEqual(
                 {result.contract: result.row_count for result in results},
                 {
@@ -5502,23 +5431,25 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
                 self.assertEqual(result.canonical_diff_line_count, 0)
                 self.assertTrue(Path(result.source_toml_path).exists())
 
-            self.assertFalse((output_dir / "matcher_regression_cases.json").exists())
-            self.assertFalse((output_dir / "matcher_rule_inventory.json").exists())
+            self.assertTrue((output_dir / "matcher_regression_cases.toml").exists())
+            self.assertTrue((output_dir / "matcher_rule_inventory.toml").exists())
 
-    def test_preflight_rejects_hand_edited_generated_json(self) -> None:
+    def test_preflight_rejects_noncanonical_contract_source(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             app_dir = _copy_matcher_tree(tree_root)
-            fixture_file = app_dir / "languages" / "sv" / "matcher_contracts" / "matcher_regression_cases.json"
+            fixture_file = (
+                app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
+            )
             fixture_file.write_text(
-                fixture_file.read_text(encoding="utf-8").rstrip("\n"),
+                fixture_file.read_text(encoding="utf-8") + "\n",
                 encoding="utf-8",
             )
 
             report = run_preflight(tree_root=tree_root)
 
         codes = {issue["code"] for issue in report["new_issues"]}
-        self.assertEqual(codes, {"matcher_contract_generated_json_drift"}, report)
+        self.assertEqual(codes, {"matcher_contract_toml_source_drift"}, report)
 
     def test_preflight_rejects_stale_toml_sources(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -5539,9 +5470,9 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             report = run_preflight(tree_root=tree_root)
 
         codes = {issue["code"] for issue in report["new_issues"]}
-        self.assertIn("matcher_contract_generated_json_drift", codes, report)
+        self.assertIn("generated_coverage_stale", codes, report)
 
-    def test_line_ref_refresh_updates_toml_source_and_generated_json(self) -> None:
+    def test_line_ref_refresh_updates_toml_source(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             _copy_matcher_tree(tree_root)
@@ -5567,7 +5498,6 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             target_ref["start"] = 1
             target_ref["end"] = 1
             write_contract_source(inventory_spec, inventory)
-            check_generated_contract_json(tree_root=tree_root, write=True)
 
             summary = refresh_inventory_line_refs_from_contract_source(
                 tree_root=tree_root,
@@ -5585,33 +5515,28 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
             self.assertGreaterEqual(summary["updated"], 1)
             self.assertEqual(refreshed_ref["start"], expected_start)
             self.assertEqual(refreshed_ref["end"], expected_end)
-            self.assertFalse(any(result.drifted for result in check_generated_contract_json(tree_root=tree_root)))
 
     def test_line_ref_refresh_text_output_lists_missing_anchor(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
             source_file = tree_root / "source.toml"
-            inventory_file = tree_root / "inventory.json"
+            inventory_file = tree_root / "matcher_rule_inventory.toml"
             source_file.write_text('entry_id = "present"\n', encoding="utf-8")
-            inventory_file.write_text(
-                json.dumps(
-                    [
-                        {
-                            "id": "phase_missing_anchor",
-                            "line_refs": [
-                                {
-                                    "path": "source.toml",
-                                    "start": 1,
-                                    "end": 1,
-                                    "anchor": 'entry_id = "missing"',
-                                }
-                            ],
-                        }
-                    ],
-                    ensure_ascii=False,
-                )
-                + "\n",
-                encoding="utf-8",
+            write_inventory_contract(
+                [
+                    {
+                        "id": "phase_missing_anchor",
+                        "line_refs": [
+                            {
+                                "path": "source.toml",
+                                "start": 1,
+                                "end": 1,
+                                "anchor": 'entry_id = "missing"',
+                            }
+                        ],
+                    }
+                ],
+                inventory_file,
             )
             live_app_dir = Path(__file__).resolve().parents[2]
 

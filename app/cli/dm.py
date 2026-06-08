@@ -19,16 +19,16 @@ import unicodedata
 
 import typer
 
-from support_checks.audit_matcher_contract_toml_sources import (
+from support_checks.matcher_contracts import (
+    _payload_from_source_toml,
+    _source_toml,
+    canonical_json,
+    contract_paths,
     contract_spec_by_name,
     load_contract_source,
     write_contract_source,
 )
-from support_checks.generate_matcher_contract_json_from_toml_sources import check_generated_contract_json
 from support_checks.generate_matcher_registry_coverage import generate_coverage_files
-from support_checks.matcher_contracts import (
-    contract_paths,
-)
 
 
 APP_DIR = Path(__file__).resolve().parents[1]
@@ -569,7 +569,7 @@ GUIDE_SHAPES: dict[str, MatcherGuide] = {
         steps=(
             "Run: ./bin/dm matcher add keyword-extra-parent <canonical> --kids <child1,child2> --recipe-name \"<recipe>\" --ingredient \"<ingredient>\"",
             "To remove one child from an existing generated family, run: ./bin/dm matcher modify keyword-extra-parent <canonical> --remove-kids <child> --reason \"<why>\"",
-            "The command writes registry, fixture/inventory, generated JSON/coverage, sanity, and Track B gates by default.",
+            "The command writes registry, fixture/inventory, derived coverage, sanity, and Track B gates by default.",
         ),
     ),
     "family": MatcherGuide(
@@ -1231,12 +1231,8 @@ def _paths(tree_root: Path | None) -> MatcherPaths:
         repo_root=repo_root,
         fixture_file=contracts.fixture_file,
         inventory_file=contracts.inventory_file,
-        fixture_source_file=(
-            app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_regression_cases.toml"
-        ),
-        inventory_source_file=(
-            app_dir / "languages" / "sv" / "matcher_contracts" / "sources" / "matcher_rule_inventory.toml"
-        ),
+        fixture_source_file=contracts.fixture_file,
+        inventory_source_file=contracts.inventory_file,
         registry_entries_dir=(
             app_dir / "languages" / "sv" / "ingredient_matching" / "term_registry" / "entries"
         ),
@@ -1488,12 +1484,12 @@ def _doctor_guided_corrections(checks: Iterable[MatcherDoctorCheck]) -> list[dic
     corrections: list[dict[str, str]] = []
     if any(
         by_id.get(check_id) and by_id[check_id].status == "needs_action"
-        for check_id in ("generated_contract_json", "generated_registry_coverage")
+        for check_id in ("generated_registry_coverage",)
     ):
         corrections.append({
             "id": "generated_artifacts_stale",
-            "summary": "Source TOML and generated matcher artifacts are out of sync.",
-            "command": "./bin/dm matcher regen --what all",
+            "summary": "Matcher contract source and derived registry coverage are out of sync.",
+            "command": "./bin/dm matcher regen --what coverage",
         })
     line_refs = by_id.get("line_refs")
     if line_refs and line_refs.status in {"warning", "blocking_error"}:
@@ -1769,36 +1765,41 @@ def _doctor_git_check(paths: MatcherPaths, since: str | None) -> MatcherDoctorCh
     )
 
 
-def _doctor_generated_contract_check(paths: MatcherPaths) -> MatcherDoctorCheck:
-    results = check_generated_contract_json(tree_root=paths.repo_root, write=False)
-    stale = [result for result in results if result.drifted]
-    details = {
-        "contracts": [
-            {
-                "contract": result.contract,
-                "source_toml_path": result.source_toml_path,
-                "target_json_path": result.target_json_path,
-                "row_count": result.row_count,
-                "semantic_equal": result.semantic_equal,
-                "canonical_byte_equal": result.canonical_byte_equal,
-                "raw_byte_equal": result.raw_byte_equal,
-            }
-            for result in results
-        ],
-    }
+def _contract_source_summaries(paths: MatcherPaths) -> list[dict[str, Any]]:
+    summaries: list[dict[str, Any]] = []
+    for contract in ("matcher_regression_cases", "matcher_rule_inventory"):
+        spec = contract_spec_by_name(contract, tree_root=paths.repo_root)
+        payload = load_contract_source(spec)
+        source_text = spec.source_toml_path.read_text(encoding="utf-8")
+        emitted_text = _source_toml(spec, payload)
+        round_trip_payload = _payload_from_source_toml(spec, emitted_text)
+        summaries.append({
+            "contract": contract,
+            "source_toml_path": _repo_rel(spec.source_toml_path, repo_root=paths.repo_root),
+            "row_count": len(payload),
+            "semantic_equal": payload == round_trip_payload,
+            "canonical_byte_equal": canonical_json(payload) == canonical_json(round_trip_payload),
+            "canonical_source_equal": source_text == emitted_text,
+        })
+    return summaries
+
+
+def _doctor_contract_source_check(paths: MatcherPaths) -> MatcherDoctorCheck:
+    details = {"contracts": _contract_source_summaries(paths)}
+    stale = [item for item in details["contracts"] if not item["canonical_source_equal"]]
     if not stale:
         return MatcherDoctorCheck(
-            "generated_contract_json",
+            "contract_sources",
             "ok",
-            "Generated matcher contract JSON is current.",
+            "Matcher contract TOML sources are canonical.",
             details,
         )
     return MatcherDoctorCheck(
-        "generated_contract_json",
+        "contract_sources",
         "needs_action",
-        f"{len(stale)} generated matcher contract JSON file(s) are stale.",
+        f"{len(stale)} matcher contract TOML source file(s) need canonical rewrite.",
         details,
-        "./bin/dm matcher regen --what all",
+        "./bin/dm matcher regen --what contracts",
     )
 
 
@@ -1882,10 +1883,8 @@ def _doctor_writeability_check(paths: MatcherPaths, report_root: Path | None) ->
         / "verified_matcher_terms.json"
     )
     targets = {
-        "fixture_json": paths.fixture_file,
-        "inventory_json": paths.inventory_file,
-        "fixture_toml": paths.fixture_source_file,
-        "inventory_toml": paths.inventory_source_file,
+        "fixture_toml": paths.fixture_file,
+        "inventory_toml": paths.inventory_file,
         "registry_entries_dir": paths.registry_entries_dir,
         "baseline": baseline_file,
         "deep_sanity": paths.deep_sanity_file,
@@ -1929,7 +1928,7 @@ def _matcher_doctor_report(
     checks: list[MatcherDoctorCheck] = []
     for builder in (
         lambda: _doctor_git_check(paths, since),
-        lambda: _doctor_generated_contract_check(paths),
+        lambda: _doctor_contract_source_check(paths),
         lambda: _doctor_generated_coverage_check(paths),
         lambda: _doctor_extraction_helper_coverage_check(paths),
         lambda: _doctor_code_drift_watchlist_check(paths),
@@ -4904,14 +4903,10 @@ def _run_keyword_synonym_light_gates(
     return 0
 
 
-def _regenerate_contract_json(paths: MatcherPaths) -> None:
-    drifted = [
-        result.contract
-        for result in check_generated_contract_json(tree_root=paths.repo_root, write=True)
-        if result.drifted
-    ]
-    if drifted:
-        raise typer.BadParameter(f"generated matcher contract JSON still drifts: {', '.join(drifted)}")
+def _rewrite_contract_sources(paths: MatcherPaths) -> None:
+    for contract in ("matcher_regression_cases", "matcher_rule_inventory"):
+        spec = contract_spec_by_name(contract, tree_root=paths.repo_root)
+        write_contract_source(spec, load_contract_source(spec))
 
 
 def _print_dry_run_preview(change: MatcherChangePlan) -> None:
@@ -6700,7 +6695,7 @@ def _remove_generated_registry_entry_by_id(
         typer.echo(f"  sanity: removed {removed_sanity} generated test(s)")
     else:
         typer.echo("  sanity: skipped")
-    _regenerate_contract_json(paths)
+    _rewrite_contract_sources(paths)
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
         return True
@@ -7677,19 +7672,26 @@ def _run_session_regen(
 ) -> int:
     mode_arg = "--check" if check else "--write"
     common_args = _tree_root_args(tree_root)
-    for script_name in (
-        "generate_matcher_contract_json_from_toml_sources.py",
+    paths = _paths(tree_root)
+    stale_contracts = [
+        item["contract"]
+        for item in _contract_source_summaries(paths)
+        if not item["canonical_source_equal"]
+    ]
+    if check and stale_contracts:
+        print(f"Stale matcher contract TOML source(s): {', '.join(stale_contracts)}", flush=True)
+        return 1
+    if not check:
+        _rewrite_contract_sources(paths)
+    status = _run_support_check(
         "generate_matcher_registry_coverage.py",
-    ):
-        status = _run_support_check(
-            script_name,
-            [*common_args, mode_arg],
-            tree_root=tree_root,
-            report_root=report_root,
-            cwd=APP_DIR,
-        )
-        if status != 0:
-            return status
+        [*common_args, mode_arg],
+        tree_root=tree_root,
+        report_root=report_root,
+        cwd=APP_DIR,
+    )
+    if status != 0:
+        return status
     return 0
 
 
@@ -7949,7 +7951,7 @@ def add_keyword_extra_parent(
         _print_dry_run_preview(change)
         return
 
-    _regenerate_contract_json(paths)
+    _rewrite_contract_sources(paths)
 
     typer.echo(f"Generated keyword_extra_parent rule: {change.policy_ref}")
     typer.echo(f"  entries: {', '.join(change.entry_ids)}")
@@ -8124,7 +8126,7 @@ def add_keyword_synonym(
         return
 
     if fixture_requested:
-        _regenerate_contract_json(paths)
+        _rewrite_contract_sources(paths)
 
     typer.echo(f"Generated keyword_synonym rule: {change.policy_ref}")
     typer.echo(f"  entry: {entry_id}")
@@ -10406,7 +10408,7 @@ def add_no_match_policy(
     if model_guard_changed:
         typer.echo("  model guard synced: support_checks/run_matcher_rule_model_checks.py")
     if auto_fixture or auto_inventory:
-        _regenerate_contract_json(paths)
+        _rewrite_contract_sources(paths)
     _print_generated_sanity_probe(paths, change.policy_ref)
     _print_generated_canary_scope_note(sanity_mode="fast-match")
     if not run_gates:
@@ -10810,7 +10812,7 @@ def modify_keyword_extra_parent(
             dry_run=False,
         )
 
-    _regenerate_contract_json(paths)
+    _rewrite_contract_sources(paths)
     coverage_status = _run_coverage_generator(paths)
     if coverage_status != 0:
         raise typer.Exit(coverage_status)
@@ -11520,7 +11522,7 @@ def matcher_fixture_make_negative(
     ] = None,
     regen: Annotated[
         bool,
-        typer.Option("--regen/--no-regen", help="Regenerate matcher contract JSON after writing."),
+        typer.Option("--regen/--no-regen", help="Rewrite canonical matcher contract TOML after writing."),
     ] = True,
     run_gates: Annotated[
         bool,
@@ -11547,8 +11549,8 @@ def matcher_fixture_make_negative(
     if summary["changed"]:
         write_contract_source(_source_spec(paths, "matcher_regression_cases"), fixture_rows)
     if regen:
-        _regenerate_contract_json(paths)
-        typer.echo("Regenerated matcher contract JSON.")
+        _rewrite_contract_sources(paths)
+        typer.echo("Rewrote canonical matcher contract TOML.")
     else:
         typer.echo("Skipped regen (--no-regen).")
 
@@ -11602,7 +11604,7 @@ def matcher_fixture_make_positive(
     ] = None,
     regen: Annotated[
         bool,
-        typer.Option("--regen/--no-regen", help="Regenerate matcher contract JSON after writing."),
+        typer.Option("--regen/--no-regen", help="Rewrite canonical matcher contract TOML after writing."),
     ] = True,
     run_gates: Annotated[
         bool,
@@ -11674,8 +11676,8 @@ def matcher_fixture_make_positive(
     if summary["changed"]:
         write_contract_source(_source_spec(paths, "matcher_regression_cases"), fixture_rows)
     if regen:
-        _regenerate_contract_json(paths)
-        typer.echo("Regenerated matcher contract JSON.")
+        _rewrite_contract_sources(paths)
+        typer.echo("Rewrote canonical matcher contract TOML.")
     else:
         typer.echo("Skipped regen (--no-regen).")
 
@@ -11708,7 +11710,7 @@ def matcher_fixture_remove(
     ] = False,
     regen: Annotated[
         bool,
-        typer.Option("--regen/--no-regen", help="Regenerate matcher contract JSON and registry coverage after writing."),
+        typer.Option("--regen/--no-regen", help="Rewrite canonical contract TOML and registry coverage after writing."),
     ] = True,
     run_gates: Annotated[
         bool,
@@ -11761,7 +11763,7 @@ def matcher_fixture_remove(
     )
 
     if regen:
-        _regenerate_contract_json(paths)
+        _rewrite_contract_sources(paths)
         coverage_status = _run_coverage_generator(paths)
         if coverage_status != 0:
             raise typer.Exit(coverage_status)
@@ -15102,14 +15104,14 @@ def matcher_promote(
 @matcher_app.command(
     "regen",
     context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
-    help="Regenerate matcher generated artifacts. Wraps generated JSON and registry coverage scripts.",
+    help="Regenerate matcher derived artifacts. Rewrites canonical contract TOML and registry coverage.",
 )
 def matcher_regen(
     ctx: typer.Context,
     tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to update instead of /app.")] = None,
     what: Annotated[
-        Literal["all", "json", "coverage"],
-        typer.Option("--what", help="Generated artifacts to refresh/check."),
+        Literal["all", "contracts", "coverage"],
+        typer.Option("--what", help="Artifacts to refresh/check."),
     ] = "all",
     check: Annotated[
         bool,
@@ -15121,24 +15123,35 @@ def matcher_regen(
     ] = None,
 ) -> None:
     raw_args = _raw_args(ctx)
-    if what == "all" and raw_args:
-        raise typer.BadParameter("raw pass-through args are only supported with --what json or --what coverage")
+    if raw_args and what != "coverage":
+        raise typer.BadParameter("raw pass-through args are only supported with --what coverage")
 
     common_args = _tree_root_args(tree_root)
     mode_arg = "--check" if check else "--write"
     steps: list[tuple[str, list[str]]] = []
-    if what in {"all", "json"}:
-        steps.append((
-            "generate_matcher_contract_json_from_toml_sources.py",
-            [*common_args, mode_arg, *(raw_args if what == "json" else [])],
-        ))
+    paths = _paths(tree_root)
+    failed = False
+    if what in {"all", "contracts"}:
+        stale_contracts = [
+            item["contract"]
+            for item in _contract_source_summaries(paths)
+            if not item["canonical_source_equal"]
+        ]
+        if check:
+            if stale_contracts:
+                typer.echo(f"Stale matcher contract TOML source(s): {', '.join(stale_contracts)}", err=True)
+                failed = True
+            else:
+                typer.echo("Matcher contract TOML sources are canonical.")
+        else:
+            _rewrite_contract_sources(paths)
+            typer.echo("Rewrote canonical matcher contract TOML.")
     if what in {"all", "coverage"}:
         steps.append((
             "generate_matcher_registry_coverage.py",
             [*common_args, mode_arg, *(raw_args if what == "coverage" else [])],
         ))
 
-    failed = False
     for script_name, args in steps:
         status = _run_support_check(
             script_name,

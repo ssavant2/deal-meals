@@ -26,12 +26,14 @@ from languages.sv.ingredient_matching.term_registry.registry import load_registr
 from support_checks.generate_matcher_registry_coverage import (  # noqa: E402
     generate_coverage_files,
 )
-from support_checks.generate_matcher_contract_json_from_toml_sources import (  # noqa: E402
-    check_generated_contract_json,
-)
 from support_checks.matcher_contracts import (  # noqa: E402
+    _payload_from_source_toml,
+    _source_toml,
+    canonical_json,
     app_dir_for_tree_root,
+    contract_spec_by_name,
     contract_paths,
+    load_contract_source,
     load_fixture_contract,
     load_inventory_contract,
 )
@@ -814,7 +816,7 @@ def _check_generated_coverage(
     return issues
 
 
-def _check_generated_contract_json(
+def _check_contract_sources(
     *,
     tree_root: Path | None,
     fixture_file: Path,
@@ -826,35 +828,39 @@ def _check_generated_contract_json(
         return []
 
     issues: list[PreflightIssue] = []
-    try:
-        results = check_generated_contract_json(tree_root=tree_root)
-    except Exception as exc:  # noqa: BLE001
-        return [PreflightIssue(
-            "error",
-            "matcher_contract_toml_source_check_failed",
-            f"could not compare TOML sources with matcher contract JSON: {exc}",
-            _rel(paths.app_dir / "languages" / "sv" / "matcher_contracts" / "sources", repo_root=repo_root),
-            "matcher_contract_toml_sources",
-        )]
-    for result in results:
-        if not result.drifted:
+    for contract in ("matcher_regression_cases", "matcher_rule_inventory"):
+        try:
+            spec = contract_spec_by_name(contract, tree_root=tree_root)
+            payload = load_contract_source(spec)
+            emitted_text = _source_toml(spec, payload)
+            round_trip_payload = _payload_from_source_toml(spec, emitted_text)
+        except Exception as exc:  # noqa: BLE001
+            issues.append(PreflightIssue(
+                "error",
+                "matcher_contract_toml_source_check_failed",
+                f"could not parse matcher contract TOML source: {exc}",
+                _rel(paths.source_dir, repo_root=repo_root),
+                contract,
+            ))
+            continue
+        semantic_equal = payload == round_trip_payload
+        canonical_byte_equal = canonical_json(payload) == canonical_json(round_trip_payload)
+        canonical_source_equal = spec.source_toml_path.read_text(encoding="utf-8") == emitted_text
+        if semantic_equal and canonical_byte_equal and canonical_source_equal:
             continue
         issues.append(PreflightIssue(
             "error",
-            "matcher_contract_generated_json_drift",
+            "matcher_contract_toml_source_drift",
             (
-                "matcher contract JSON is generated and no longer matches the TOML source; "
-                "edit TOML sources and regenerate JSON before running gates"
+                "matcher contract TOML source is not canonical; "
+                "run `./bin/dm matcher regen --what contracts` before gates"
             ),
-            result.source_toml_path,
-            result.contract,
+            _rel(spec.source_toml_path, repo_root=repo_root),
+            contract,
             details={
-                "target_json_path": result.target_json_path,
-                "semantic_equal": result.semantic_equal,
-                "canonical_byte_equal": result.canonical_byte_equal,
-                "raw_byte_equal": result.raw_byte_equal,
-                "canonical_diff_line_count": result.canonical_diff_line_count,
-                "canonical_diff_preview": result.canonical_diff_preview,
+                "semantic_equal": semantic_equal,
+                "canonical_byte_equal": canonical_byte_equal,
+                "canonical_source_equal": canonical_source_equal,
             },
         ))
     return issues
@@ -998,7 +1004,7 @@ def run_preflight(
         registry_entries_dir=registry_entries_dir,
         repo_root=repo_root,
     ))
-    issues.extend(_check_generated_contract_json(
+    issues.extend(_check_contract_sources(
         tree_root=tree_root,
         fixture_file=fixture_file,
         inventory_file=inventory_file,

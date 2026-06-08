@@ -107,7 +107,7 @@ entries with fixture_refs or inventory ownership. Established registry policy
 should normally be inactivated or modified instead of hard-deleted.
 
 `fixture remove` cascades the fixture deletion through the authoritative fixture
-TOML source, inventory fixture refs, registry fixture refs, regenerated JSON, and
+TOML source, inventory fixture refs, registry fixture refs, derived coverage, and
 pre-flight. It refuses to leave empty inventory or registry rows unless you pass
 the explicit `--drop-empty-inventory` or `--drop-empty-registry-entries` flags.
 It does **not** remove or rewrite the semantic registry rule itself. For example,
@@ -126,7 +126,7 @@ contracts, and adds a negative sanity proof for the removed child.
 `fixture make-negative` is for policy reversals where an existing positive
 fixture is now supposed to prove "must not match". It sets `expected = 0`,
 removes the fixture's positive `expected_matches`, optionally rewrites
-`policy_ref`/`source_ref`, regenerates matcher contract JSON, and runs pre-flight
+`policy_ref`/`source_ref`, rewrites canonical contract TOML, and runs pre-flight
 unless a batch is active. If the later baseline promotion reports intentional
 verified-term removals from that flip, finish with
 `./bin/dm matcher batch finalize --track B --allow-removals` after reviewing the
@@ -162,7 +162,7 @@ on every command:
 `dm matcher session` remains as a compatibility alias. While a batch is active,
 per-command matcher gates are deferred by default; pass `--run-gates` on a
 command to force an immediate check. `finalize` runs
-generated JSON/coverage regen, verified-term baseline promotion, line-ref
+contract TOML/coverage regen, verified-term baseline promotion, line-ref
 refresh, drift check, pre-flight, and one final gate. If a finalize step fails,
 the marker stays active so the batch can be fixed and finalized again.
 Use `finalize --dry-run` first when you want the doctor summary, guided
@@ -197,8 +197,8 @@ Single maintenance/check operations:
 ./bin/dm matcher refresh-line-refs --fix
 ```
 
-Generated-file rule: edit the authoritative TOML sources, not generated JSON or
-generated registry coverage TOML. In particular, do not hand-edit
+Generated-file rule: edit the authoritative TOML sources, not generated registry
+coverage TOML. In particular, do not hand-edit
 `matcher_regression_case.toml` or `matcher_rule_inventory.toml`. The wrapper
 regenerates these files and pre-flight rejects drift.
 
@@ -232,7 +232,7 @@ worktree from inside the container. Production intentionally lacks git and `.git
 metadata. If git auto-detection is unavailable and no explicit change flags are
 passed, the gate wrapper fails fast instead of silently assuming nothing changed.
 
-`dm matcher gates` runs generated JSON/coverage refresh and baseline promotion
+`dm matcher gates` runs contract TOML/coverage refresh and baseline promotion
 maintenance before validation when Track B inputs require it. Its first
 validation gate is pre-flight; you can run that alone with
 `./bin/dm matcher preflight`. Fix any `NEW` pre-flight issue before spending
@@ -296,8 +296,8 @@ Track B with registry TOML changes:
 Add only the flags that match the change:
 
 - `--runtime-changed` when matcher Python changed.
-- `--fixtures-changed` when the regression-case TOML source or generated JSON changed.
-- `--inventory-changed` when the rule-inventory TOML source or generated JSON changed.
+- `--fixtures-changed` when the regression-case TOML source changed.
+- `--inventory-changed` when the rule-inventory TOML source changed.
 - `--allow-removals` only after confirming intentional TOML inactivation or
   removal.
 - `--confirm-large-removals` only after reviewing a non-interactive promotion
@@ -323,14 +323,14 @@ explicit flags above so the gate set reflects only your change.
 Common single-operation wrappers:
 
 ```bash
-./bin/dm matcher doctor                 # read-only generated/writeability/line-ref state
+./bin/dm matcher doctor                 # read-only source/writeability/line-ref state
 ./bin/dm matcher preflight              # pre-flight only
 ./bin/dm matcher sanity                 # deep matcher sanity only
 ./bin/dm matcher promote                # verified-term baseline promotion
 ./bin/dm matcher promote --apply-staged /tmp/term-baseline-promotion
-./bin/dm matcher regen                  # generated JSON then coverage
-./bin/dm matcher regen --check          # read-only generated-artifact drift check
-./bin/dm matcher refresh-line-refs      # refresh inventory anchors + generated JSON
+./bin/dm matcher regen                  # canonical contract TOML then coverage
+./bin/dm matcher regen --check          # read-only source/coverage drift check
+./bin/dm matcher refresh-line-refs      # refresh inventory anchors
 ./bin/dm matcher refresh-line-refs --fix  # explicit write-mode alias
 ./bin/dm matcher guide <shape>          # show the recommended path for a rule type
 ./bin/dm matcher canonical-of "<term>"   # show runtime canonical/extraction output
@@ -1119,7 +1119,6 @@ The main repo map:
 | --- | --- |
 | `app/languages/sv/ingredient_matching/` | Swedish matcher runtime rules, registry exports, extraction, routing, validators, and versioning. |
 | `app/languages/sv/matcher_contracts/sources/` | Authoritative matcher fixture and inventory TOML contracts. |
-| `app/languages/sv/matcher_contracts/*.json` | Generated matcher fixture and inventory JSON contracts used by existing readers/reports. |
 | `app/languages/sv/ingredient_matching/term_registry/entries/` | Tracked TOML registry entries for vocabulary/rule surfaces. |
 | `app/support_checks/` | Deterministic support checks and matcher diagnostics. |
 | `app/tests/` | Ignored local workbench/review material. Useful for investigation, not permanent proof. |
@@ -1150,7 +1149,7 @@ decision in the runbook.
 | Track | Use for | Typical files | Required proof |
 | --- | --- | --- | --- |
 | Track A: tactical runtime fix | A concrete FP/FN or known local semantic gap, usually narrow and local. This is the normal path for small PNB/FPB/KSBC/GPB additions, cuisine-context restrictions, compound/subword protection, and tiny runtime guards. | `dm matcher add pnb|fpb|ksbc|gpb`, `runtime_rule_overlays.toml`, `dm matcher add cuisine-context|context-word-exemption|specialty-qualifier|qualifier-equivalent`, `dm matcher add smart-blocker` scaffolds, `compound_text.py`, `specialty_rules.py`, `processed_rules.py`, `form_rules.py`, small backend guards beside an existing local pattern. | Code change, corresponding `run_deep_matcher_sanity.py` regression, targeted re-check of the affected examples, and `dev_reload.py` before cache/UI validation. Do not add fixture/inventory unless escalating to Track B. |
-| Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, generated matcher contract JSON, bridge/no-match/routing exports, support-check contracts. Use `dm matcher modify no-match-policy`, `dm matcher modify match-bridge`, `dm matcher fixture make-negative`, `dm matcher fixture make-positive`, and `dm matcher fixture remove` for supported mechanical rewrites/removals. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
+| Track B: durable registry/contract rule | Registry-owned vocabulary/rules, broad or systemic semantics, routing/bridge/no-match policy, release hardening, or anything that should become permanent contract proof. | TOML under `term_registry/entries/`, TOML under `matcher_contracts/sources/`, derived bridge/no-match/routing exports, support-check contracts. Use `dm matcher modify no-match-policy`, `dm matcher modify match-bridge`, `dm matcher fixture make-negative`, `dm matcher fixture make-positive`, and `dm matcher fixture remove` for supported mechanical rewrites/removals. | Fixture(s), inventory, registry/model checks, targeted/full fixture and parity gates, and cache freshness when cache-backed validation or release matters. |
 
 There is one deliberately small path between those two: **lightweight registry
 alias**. Use it for exact spelling/plural/compound aliases on already-wired
@@ -1202,7 +1201,7 @@ edit the nested TOML by line number. Convert it in place:
 ```
 
 The command keeps the fixture id stable, sets `expected = 0`, removes
-`[[fixtures.expected_matches]]`, and regenerates the generated JSON contract.
+`[[fixtures.expected_matches]]`, and rewrites the canonical fixture TOML source.
 Use `--allow-removals` on finalize only after the promote step lists removals
 that are explained by the deliberate fixture/policy reversal.
 
@@ -1235,8 +1234,7 @@ durable source of truth for Track B. The durable contract is:
 - `app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml`
 - `app/languages/sv/matcher_contracts/sources/matcher_rule_inventory.toml`
 
-The corresponding JSON files are generated artifacts and must match those TOML
-sources byte-for-byte. Pre-flight rejects generated JSON drift.
+Pre-flight rejects non-canonical TOML and stale derived registry coverage.
 
 The term registry is the durable vocabulary surface. Runtime modules such as
 `synonyms.py`, `parent_maps.py`, `keywords.py`, `match_bridges.py`, and
@@ -1770,29 +1768,23 @@ Do not hand-edit these two coverage files for ordinary fixture/inventory work:
 - `matcher_regression_case.toml`
 - `matcher_rule_inventory.toml`
 
-They are generated from the generated JSON contracts by:
+They are generated from the TOML contracts by:
 
 ```bash
 ./bin/dm matcher regen --what coverage
 ```
 
-The Track B wrapper automatically regenerates the JSON contracts first and
-then runs the coverage generator when fixture or inventory changes are selected.
-The JSON contracts themselves are generated from the TOML sources by:
+The Track B wrapper rewrites canonical contract TOML and then runs the coverage
+generator when fixture or inventory changes are selected.
 
-```bash
-./bin/dm matcher regen --what json
-```
+Pre-flight fails with `matcher_contract_toml_source_drift` if contract TOML is
+not canonical, and with `generated_coverage_stale` if the checked-in registry
+coverage TOML no longer matches the TOML-derived output. Intentional manual
+coverage is allowed only as a narrow exception: put `# manual-coverage` directly
+before the manual `[[entries]]` block so the generator preserves it.
 
-Pre-flight fails with `matcher_contract_generated_json_drift` if generated JSON
-does not match the TOML sources, and with `generated_coverage_stale` if the
-checked-in registry coverage TOML no longer matches the generated JSON-derived
-output. Intentional manual coverage is allowed only as a narrow exception: put
-`# manual-coverage` directly before the manual `[[entries]]` block so the
-generator preserves it.
-
-Use `./bin/dm matcher regen --check` for a fast read-only drift check of both
-generated JSON and registry coverage.
+Use `./bin/dm matcher regen --check` for a fast read-only drift check of
+contract TOML and registry coverage.
 
 The registry also supports local dev entry directories under
 `/app/data/term_registry/sv/entries` via `TERM_REGISTRY_LOCAL_ENTRIES_DIR`.
@@ -2158,8 +2150,8 @@ choose the smallest complete gate set for the change.
 | `dm matcher sanity` | Every Track A fix and every Track B runtime semantic change. Raw fallback: `run_deep_matcher_sanity.py`. |
 | targeted `run_matcher_layer_fixture_cases.py` | Track B fixture/rule work for the affected `--policy-ref`, `--canonical`, or `--case-id`. |
 | targeted `run_matcher_layer_parity.py` | Track B route, bridge, no-match, canonical, cache-facing, or fixture behavior work. |
-| `dm matcher regen --what json` | Fixture or inventory TOML source changed. `dm matcher gates` runs this automatically before coverage. |
-| `dm matcher regen --what coverage` | Fixture or inventory contract changed. `dm matcher gates` runs this by default after JSON generation. |
+| `dm matcher regen --what contracts` | Fixture or inventory TOML source changed and should be re-canonicalized. `dm matcher gates` runs this automatically before coverage. |
+| `dm matcher regen --what coverage` | Fixture or inventory contract changed. `dm matcher gates` runs this by default after contract rewrite. |
 | full `run_matcher_layer_fixture_cases.py --skip-cache-freshness` | Every Track B behavior change before handoff. |
 | full `run_matcher_layer_parity.py --skip-cache-freshness` | Every Track A/Track B matcher behavior change before handoff. |
 | `dm matcher promote` | Any tracked registry TOML change. Use the plain command unless confirmed TOML inactivation/removal requires `--allow-removals`. |
@@ -2379,8 +2371,8 @@ the new canonical is the desired one.
   inventory coverage.
 - Track B: hand-editing TOML when `dm matcher add` supports the surface; use
   `dm matcher guide <shape>` / `--list` before falling back to manual edits.
-- Track B: editing generated JSON or generated coverage TOML instead of the
-  authoritative TOML source plus `dm matcher regen`.
+- Track B: editing generated coverage TOML instead of the authoritative TOML
+  source plus `dm matcher regen`.
 - Track B: changing registry TOML without baseline promotion and registry
   checks.
 - Track B: treating TOML inactivation/removal or a "truly removed" promotion

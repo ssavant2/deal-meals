@@ -16,16 +16,11 @@ import sys
 
 sys.path.insert(0, str(APP_DIR))
 
-from support_checks.audit_matcher_contract_toml_sources import (  # noqa: E402
+from support_checks.matcher_contracts import (  # noqa: E402
     contract_spec_by_name,
     load_contract_source,
-    write_contract_source,
-)
-from support_checks.generate_matcher_contract_json_from_toml_sources import (  # noqa: E402
-    check_generated_contract_json,
-)
-from support_checks.matcher_contracts import (  # noqa: E402
     load_inventory_contract,
+    write_contract_source,
     write_inventory_contract,
 )
 
@@ -166,7 +161,6 @@ def refresh_inventory_line_refs_from_contract_source(
     summary = refresh_line_refs(inventory, repo_root=repo_root)
     if write:
         write_contract_source(spec, inventory)
-        check_generated_contract_json(tree_root=tree_root, write=True)
     return summary
 
 
