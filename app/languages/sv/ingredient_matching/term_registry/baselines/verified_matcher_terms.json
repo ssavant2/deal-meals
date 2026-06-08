@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 416,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
-      "keyword_synonym_mapping": 194,
+      "keyword_synonym_mapping": 193,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 416,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 194,
+      "keyword_synonym": 193,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5874,
-    "variants_missing_product_text": 1906,
+    "variant_count": 5873,
+    "variants_missing_product_text": 1905,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -123379,32 +123379,11 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"digestivekex\"}"
-    },
-    {
-      "variant_id": "vterm-e174b66f70b0f190",
-      "row_index": 5006,
-      "source_order": 51,
-      "source_type": "keyword_synonym",
-      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
-      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:snabbmakaroner",
-      "source_id": "snabbmakaroner",
-      "variant_role": "keyword_synonym_mapping",
-      "variant_text": "snabbmakaroner",
-      "canonical": "pasta",
-      "expected_family": "pasta",
-      "ingredient_text": null,
-      "product_text": null,
-      "product_category": null,
-      "product_brand": null,
-      "expected": 1,
-      "needs_product_text": true,
-      "notes": null,
-      "metadata": "{\"target\": \"pasta\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1680,
+      "no_product_text": 1679,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123415,7 +123394,7 @@
       "ingredient_parent": 416,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 194,
+      "keyword_synonym": 193,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
@@ -123426,8 +123405,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5874
+      "audited": 5873
     },
-    "variant_count": 5874
+    "variant_count": 5873
   }
 }
