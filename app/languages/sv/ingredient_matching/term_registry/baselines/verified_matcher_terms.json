@@ -9,7 +9,7 @@
       "ingredient_parent_mapping": 416,
       "ingredient_routing_parent_mapping": 34,
       "keyword_extra_parent_mapping": 115,
-      "keyword_synonym_mapping": 192,
+      "keyword_synonym_mapping": 193,
       "legacy_backend_allowance": 2,
       "legacy_backend_validator": 3,
       "legacy_extra_keyword": 8,
@@ -33,7 +33,7 @@
       "ingredient_parent": 416,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 192,
+      "keyword_synonym": 193,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
@@ -42,8 +42,8 @@
       "parent_match_only": 20,
       "recipe_routing_helper": 9
     },
-    "variant_count": 5872,
-    "variants_missing_product_text": 1904,
+    "variant_count": 5873,
+    "variants_missing_product_text": 1905,
     "variants_with_product_text": 3968
   },
   "variants": [
@@ -123358,11 +123358,32 @@
       "needs_product_text": false,
       "notes": "current_review_no_match_policy_contracts",
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_no_match_policy_contracts\", \"recipe_name\": \"Sanity Recipe\"}"
+    },
+    {
+      "variant_id": "vterm-9ec402208181c013",
+      "row_index": 4890,
+      "source_order": 51,
+      "source_type": "keyword_synonym",
+      "source_file": "app/languages/sv/ingredient_matching/synonyms.py",
+      "source_ref": "app/languages/sv/ingredient_matching/synonyms.py:digestive",
+      "source_id": "digestive",
+      "variant_role": "keyword_synonym_mapping",
+      "variant_text": "digestive",
+      "canonical": "digestivekex",
+      "expected_family": "digestivekex",
+      "ingredient_text": null,
+      "product_text": null,
+      "product_category": null,
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": true,
+      "notes": null,
+      "metadata": "{\"target\": \"digestivekex\"}"
     }
   ],
   "verification": {
     "classification_counts": {
-      "no_product_text": 1678,
+      "no_product_text": 1679,
       "static_verified": 2681,
       "synthetic_verified": 1513
     },
@@ -123373,7 +123394,7 @@
       "ingredient_parent": 416,
       "ingredient_routing_parent": 34,
       "keyword_extra_parent": 115,
-      "keyword_synonym": 192,
+      "keyword_synonym": 193,
       "match_bridge": 2021,
       "matcher_regression_case": 1513,
       "matcher_rule_inventory": 474,
@@ -123384,8 +123405,8 @@
     },
     "source_note": "Consolidated from the verified-term static audit reports; retained as one baseline file for registry contract checks.",
     "status_counts": {
-      "audited": 5872
+      "audited": 5873
     },
-    "variant_count": 5872
+    "variant_count": 5873
   }
 }

@@ -746,10 +746,9 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
     def test_tree_root_preflight_reads_temporary_contract_tree(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
-            app_dir = _copy_matcher_tree(tree_root)
+            _copy_matcher_tree(tree_root)
 
             fixture_spec = contract_spec_by_name("matcher_regression_cases", tree_root=tree_root)
-            fixture_file = fixture_spec.source_toml_path
             fixtures = load_contract_source(fixture_spec)
             fixture = next(
                 item
@@ -5026,7 +5025,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
     def test_dm_matcher_fixture_make_negative_rewrites_source_and_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
-            app_dir = _copy_matcher_tree(tree_root)
+            _copy_matcher_tree(tree_root)
             live_app_dir = Path(__file__).resolve().parents[2]
             fixture_spec = contract_spec_by_name("matcher_regression_cases", tree_root=tree_root)
             fixtures = load_contract_source(fixture_spec)
@@ -5088,7 +5087,7 @@ test("Phase reconcile stale string expectation", match("Pak Choi 250g klass 1 IC
     def test_dm_matcher_fixture_make_positive_from_current_match_rewrites_source(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tree_root = Path(tmp)
-            app_dir = _copy_matcher_tree(tree_root)
+            _copy_matcher_tree(tree_root)
             live_app_dir = Path(__file__).resolve().parents[2]
             fixture_spec = contract_spec_by_name("matcher_regression_cases", tree_root=tree_root)
             fixtures = load_contract_source(fixture_spec)
