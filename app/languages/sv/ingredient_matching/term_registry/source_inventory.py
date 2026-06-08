@@ -94,7 +94,7 @@ def _variant_to_registry_variant(variant) -> RegistryVariant:
     )
 
 
-def iter_legacy_variants(batch_size: int = DEFAULT_BATCH_SIZE) -> Iterable[RegistryVariant]:
+def iter_source_variants(batch_size: int = DEFAULT_BATCH_SIZE) -> Iterable[RegistryVariant]:
     # Keep the audit dependency support-only and lazy to avoid runtime import cycles.
     from support_checks.run_verified_term_audit import build_variants
 
@@ -102,5 +102,5 @@ def iter_legacy_variants(batch_size: int = DEFAULT_BATCH_SIZE) -> Iterable[Regis
         yield _variant_to_registry_variant(variant)
 
 
-def build_legacy_registry_variants(batch_size: int = DEFAULT_BATCH_SIZE) -> list[RegistryVariant]:
-    return list(iter_legacy_variants(batch_size=batch_size))
+def build_source_registry_variants(batch_size: int = DEFAULT_BATCH_SIZE) -> list[RegistryVariant]:
+    return list(iter_source_variants(batch_size=batch_size))

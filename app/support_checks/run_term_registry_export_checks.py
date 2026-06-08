@@ -65,9 +65,9 @@ from languages.sv.ingredient_matching.term_registry.exports import (  # noqa: E4
     build_parent_match_only_export,
     build_recipe_routing_extra_alias_export,
 )
-from languages.sv.ingredient_matching.term_registry.legacy_inventory import (  # noqa: E402
+from languages.sv.ingredient_matching.term_registry.source_inventory import (  # noqa: E402
     DEFAULT_BATCH_SIZE,
-    build_legacy_registry_variants,
+    build_source_registry_variants,
 )
 
 
@@ -504,7 +504,7 @@ def _run_runtime_import_boundary_check() -> list[CheckIssue]:
         ))
 
     forbidden_markers = (
-        "legacy_inventory",
+        "source_inventory",
         "run_verified_term_audit",
         "ingredient_matching.ingredient_routing",
         ".ingredient_routing",
@@ -531,7 +531,7 @@ def _run_runtime_import_boundary_check() -> list[CheckIssue]:
             issues.append(_issue(
                 "error",
                 "runtime_import_boundary_violation",
-                "selected runtime import path must not import legacy inventory or its legacy source module",
+                "selected runtime import path must not import support-only source inventory or its source modules",
                 item_id=str(path.relative_to(REPO_DIR)),
                 details={"imports": forbidden},
             ))
@@ -676,7 +676,7 @@ def _run_targeted_runtime_sanity() -> list[CheckIssue]:
 def _load_language_variants(language: str, batch_size: int) -> list[RegistryVariant]:
     if language != "sv":
         raise ValueError("term registry export checks currently support --language sv only")
-    return build_legacy_registry_variants(batch_size=batch_size)
+    return build_source_registry_variants(batch_size=batch_size)
 
 
 def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssue]]:

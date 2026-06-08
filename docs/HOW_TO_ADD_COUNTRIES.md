@@ -192,7 +192,7 @@ vocabulary becomes more than a tiny scaffold:
 - `entries/*.toml` — canonical families, aliases, guards, coverage rows, and
   proof examples scoped to that language/market.
 - `registry.py` — loads authored TOML entries.
-- `legacy_inventory.py` — normalizes current matcher sources into registry
+- `source_inventory.py` — normalizes current matcher sources into registry
   variants for contract checks.
 - `exports.py` — builds runtime exports consumed by matcher modules.
 - `add_term.py` — maps language-specific coverage rows to known export/check

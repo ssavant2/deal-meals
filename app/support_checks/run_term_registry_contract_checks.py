@@ -695,19 +695,19 @@ def _run_new_term_gate(
 def _load_language(language: str):
     if language != "sv":
         raise ValueError("term registry contract checks currently support --language sv only")
-    from languages.sv.ingredient_matching.term_registry.legacy_inventory import (  # noqa: PLC0415
-        build_legacy_registry_variants,
+    from languages.sv.ingredient_matching.term_registry.source_inventory import (  # noqa: PLC0415
+        build_source_registry_variants,
     )
     from languages.sv.ingredient_matching.term_registry.registry import (  # noqa: PLC0415
         load_registry_entries,
     )
 
-    return build_legacy_registry_variants, load_registry_entries
+    return build_source_registry_variants, load_registry_entries
 
 
 def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssue]]:
     issues: list[CheckIssue] = []
-    build_legacy_registry_variants, load_registry_entries = _load_language(args.language)
+    build_source_registry_variants, load_registry_entries = _load_language(args.language)
 
     entries = load_registry_entries()
     issues.extend(validate_entries(entries))
@@ -715,7 +715,7 @@ def run_checks(args: argparse.Namespace) -> tuple[dict[str, Any], list[CheckIssu
     issues.extend(registry_coverage_issues)
     issues.extend(_check_registry_source_refs(entries, language=args.language))
 
-    variants = build_legacy_registry_variants(batch_size=args.batch_size)
+    variants = build_source_registry_variants(batch_size=args.batch_size)
     baseline_payload, baseline_ids, baseline_coverage_keys, baseline_issues = _load_verified_terms_baseline(
         args.baseline_json,
         language=args.language,
