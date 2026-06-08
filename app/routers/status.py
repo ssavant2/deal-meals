@@ -8,13 +8,13 @@ This router handles status and health check endpoints:
 - /health - Health check for Docker
 """
 
-import os
 from datetime import datetime, timezone
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from loguru import logger
 
+from config import settings
 from database import get_db_session
 from utils.errors import friendly_error
 from utils.rate_limit import limiter
@@ -190,8 +190,11 @@ def get_setup_status(request: Request):
     """Check which setup steps are complete for the getting started guide."""
     try:
         # Check if the hostname the user is connecting via is in ALLOWED_HOSTS
-        hosts = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1')
-        configured_hosts = {h.strip() for h in hosts.split(',') if h.strip()}
+        configured_hosts = {
+            h.strip()
+            for h in settings.allowed_hosts.split(',')
+            if h.strip()
+        }
 
         # Detect the hostname the user is connecting via (from Host header)
         request_host = request.headers.get("host", "")

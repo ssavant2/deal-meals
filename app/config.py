@@ -34,6 +34,19 @@ class Settings(BaseSettings):
 
     # Web Server
     debug: bool = Field(default=False, description="Debug mode")
+    app_port: int = Field(default=20080, description="HTTP/HTTPS port exposed by the app")
+    allowed_hosts: str = Field(
+        default="localhost,127.0.0.1",
+        description="Comma-separated hostnames allowed for browser origin checks",
+    )
+    deal_meals_version: str = Field(
+        default="",
+        description="Release/image version label; 'latest' falls back to baked metadata",
+    )
+    uvicorn_reload: bool = Field(
+        default=True,
+        description="Enable uvicorn auto-reload in source-mounted development runs",
+    )
 
     # Cache rebuild / worker pool
     cache_rebuild_max_workers: int = Field(

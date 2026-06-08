@@ -19,6 +19,11 @@ from datetime import datetime
 from loguru import logger
 from sqlalchemy import text
 
+try:
+    from config import settings as app_settings
+except ModuleNotFoundError:
+    from app.config import settings as app_settings
+
 # Keep the primary Docker log focused on app events. HTTP access lines are
 # persisted separately below and are intentionally hidden from stdout/stderr.
 logger.remove()
@@ -77,7 +82,7 @@ def _read_optional_file(path: str) -> str:
 
 def _get_release_version() -> str:
     """Read the pinned or baked release/image version."""
-    configured = os.environ.get("DEAL_MEALS_VERSION", "").strip()
+    configured = app_settings.deal_meals_version.strip()
     if configured and configured.lower() != "latest":
         return configured
     return _read_optional_file("/release_version") or configured
@@ -94,7 +99,7 @@ def _format_version_label(release_version: str, build_version: str) -> str:
 
 def _get_display_hostname() -> str:
     """Pick the most useful hostname from ALLOWED_HOSTS for log display."""
-    hosts = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
+    hosts = app_settings.allowed_hosts.split(",")
     for h in hosts:
         h = h.strip()
         if h and h not in ("localhost", "127.0.0.1"):
@@ -464,7 +469,7 @@ async def _ensure_pantry_search_index_ready_on_startup():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup/shutdown events."""
-    port = os.environ.get("APP_PORT", "20080")
+    port = app_settings.app_port
     hostname = _get_display_hostname()
     protocol = "https" if (SSL_AVAILABLE and ssl_manager and ssl_manager.is_ssl_ready()) else "http"
     logger.info(f"Starting Deal Meals ({VERSION_LABEL}) on port {port}")
@@ -672,8 +677,6 @@ async def lifespan(app: FastAPI):
 
     logger.info("Shutting down...")
 
-
-from config import settings as app_settings
 
 app = FastAPI(
     title=f"Deal Meals ({BUILD_VERSION})",
@@ -890,17 +893,16 @@ app.include_router(spellcheck_router.router)
 # ==================== MAIN ====================
 
 if __name__ == "__main__":
-    # Read port from environment (configurable in docker-compose)
-    port = int(os.environ.get("APP_PORT", "20080"))
+    # Read port from settings (sourced from APP_PORT in .env/docker-compose)
+    port = app_settings.app_port
 
     # Base uvicorn config
     # UVICORN_RELOAD=false disables auto-reload during bulk code edits
-    reload_enabled = os.environ.get("UVICORN_RELOAD", "true").lower() != "false"
     uvicorn_config = {
         "app": "app:app",
         "host": "0.0.0.0",
         "port": port,
-        "reload": reload_enabled,
+        "reload": app_settings.uvicorn_reload,
         "access_log": False
     }
 

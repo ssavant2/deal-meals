@@ -6,17 +6,21 @@ SSRF protection for outgoing HTTP requests.
 """
 
 import ipaddress
-import os
 import socket
 from urllib.parse import urlparse
 
 import httpx
 
+try:
+    from config import settings
+except ModuleNotFoundError:
+    from app.config import settings
+
 
 def get_allowed_origins() -> set:
-    """Build set of allowed origins from ALLOWED_HOSTS env var."""
-    hosts = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-    port = os.environ.get('APP_PORT', '20080')
+    """Build set of allowed origins from configured host and port settings."""
+    hosts = settings.allowed_hosts.split(',')
+    port = str(settings.app_port)
     origins = set()
     for host in hosts:
         host = host.strip()
