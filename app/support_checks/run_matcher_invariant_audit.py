@@ -21,6 +21,7 @@ sys.path.insert(0, "/app" if os.path.exists("/app") else os.path.join(os.path.di
 
 from database import get_db_session  # noqa: E402
 from languages.sv.ingredient_matching import (  # noqa: E402
+    build_offer_identity_key,
     extract_keywords_from_product,
     precompute_offer_data,
 )
@@ -87,17 +88,17 @@ def load_offers() -> list[AuditOffer]:
         return [offer_stub(row) for row in rows]
 
 
-def build_caches(offers: Iterable[AuditOffer]) -> tuple[dict[int, set[str]], dict[int, dict]]:
-    offer_keywords: dict[int, set[str]] = {}
-    offer_data_cache: dict[int, dict] = {}
+def build_caches(offers: Iterable[AuditOffer]) -> tuple[dict[str, set[str]], dict[str, dict]]:
+    offer_keywords: dict[str, set[str]] = {}
+    offer_data_cache: dict[str, dict] = {}
     for offer in offers:
-        oid = id(offer)
-        offer_keywords[oid] = extract_keywords_from_product(
+        offer_key = build_offer_identity_key(offer)
+        offer_keywords[offer_key] = extract_keywords_from_product(
             offer.name,
             offer.category,
             brand=offer.brand,
         )
-        offer_data_cache[oid] = precompute_offer_data(
+        offer_data_cache[offer_key] = precompute_offer_data(
             offer.name,
             offer.category,
             brand=offer.brand,
@@ -1056,7 +1057,7 @@ def run_staple_form_policy(audit: MatcherAudit) -> None:
             include=["öl"],
             exclude=["ginger beer"],
         )
-        if "öl" in audit.offer_keywords.get(id(offer), set())
+        if "öl" in audit.offer_keywords.get(build_offer_identity_key(offer), set())
     ]
     audit.expect_none_match(
         section="staple form policy",

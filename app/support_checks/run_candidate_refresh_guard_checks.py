@@ -154,12 +154,12 @@ def test_offer_term_coverage_selects_only_indexable_offers() -> None:
     selected = _select_indexable_offer_identity_keys(
         [empty_term_offer, indexable_offer],
         {
-            id(empty_term_offer): {
+            build_offer_identity_key(empty_term_offer): {
                 "keywords": [],
                 "name_normalized": "bbq oil caj p.",
                 "carrier_stripped": [],
             },
-            id(indexable_offer): {
+            build_offer_identity_key(indexable_offer): {
                 "keywords": ["kycklingfile"],
                 "name_normalized": "kycklingfile kronfagel",
                 "carrier_stripped": [],

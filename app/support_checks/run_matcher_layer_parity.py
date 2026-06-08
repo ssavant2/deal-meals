@@ -164,13 +164,12 @@ def evaluate_case_paths(case: DiagnosticCase) -> dict[str, Any]:
     matcher = DiagnosticMatcher()
     recipe = _build_recipe(case)
     offer = _build_offer(case)
-    offer_id = id(offer)
     offer_identity_key = build_offer_identity_key(offer)
 
     prepared_recipe = prepare_recipe_match_runtime_data(recipe)
     compiled_recipe_payload = serialize_prepared_recipe_match_runtime_data(prepared_recipe)
     compiled_offer_payload = _compiled_offer_payload(offer)
-    offer_data_cache = {offer_id: compiled_offer_payload}
+    offer_data_cache = {offer_identity_key: compiled_offer_payload}
     route_state = _route_state(compiled_recipe_payload, compiled_offer_payload)
 
     live_fullscan = match_recipe_to_offers(

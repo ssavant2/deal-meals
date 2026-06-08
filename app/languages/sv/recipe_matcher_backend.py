@@ -794,7 +794,7 @@ def match_recipe_to_offers(
     compiled_recipe_data: Optional[Dict] = None,
     ingredient_candidate_indices_by_offer: Optional[Dict[str, set[int]]] = None,
     ingredient_routing_mode: str = "off",
-    offer_match_context_cache: Optional[Dict[int, dict]] = None,
+    offer_match_context_cache: Optional[Dict[str, dict]] = None,
 ) -> Dict:
     """Swedish recipe-offer matching orchestration."""
     prepared_recipe = resolve_recipe_match_runtime_data(
@@ -827,7 +827,7 @@ def match_recipe_to_offers(
     def _validate_selection(initial_match: dict, validation_events: Optional[list[dict]] = None):
         return validate_offer_match_candidate(
             offer,
-            offer_id,
+            offer_key,
             offer_data_cache,
             initial_match['matched_keyword'],
             initial_match['matched_ing_idx'],
@@ -847,16 +847,14 @@ def match_recipe_to_offers(
         )
 
     for offer in offers:
-        offer_id = id(offer)
+        offer_key = build_offer_identity_key(offer)
         use_hint_first = (
             ingredient_routing_mode == "hint_first"
             and ingredient_candidate_indices_by_offer is not None
         )
         hinted_indices = None
         if use_hint_first:
-            hinted_indices = ingredient_candidate_indices_by_offer.get(
-                build_offer_identity_key(offer)
-            )
+            hinted_indices = ingredient_candidate_indices_by_offer.get(offer_key)
         normalized_hinted_indices = (
             set(_normalized_candidate_indices(hinted_indices, len(ingredient_match_data_per_ing)))
             if use_hint_first and hinted_indices is not None
@@ -870,7 +868,7 @@ def match_recipe_to_offers(
         if use_hint_first:
             initial_match = prepare_offer_match_candidate(
                 offer,
-                offer_id,
+                offer_key,
                 offer_keywords,
                 offer_data_cache,
                 ingredient_match_data_per_ing,
@@ -908,7 +906,7 @@ def match_recipe_to_offers(
                 _record_fullscan_fallback(fallback_reason)
                 initial_match = prepare_offer_match_candidate(
                     offer,
-                    offer_id,
+                    offer_key,
                     offer_keywords,
                     offer_data_cache,
                     ingredient_match_data_per_ing,
@@ -919,7 +917,7 @@ def match_recipe_to_offers(
         else:
             initial_match = prepare_offer_match_candidate(
                 offer,
-                offer_id,
+                offer_key,
                 offer_keywords,
                 offer_data_cache,
                 ingredient_match_data_per_ing,
@@ -1506,14 +1504,14 @@ def apply_pre_promotion(matched_offers: list[dict]) -> None:
 
 def build_offer_match_context(
     offer: Offer,
-    offer_id: int,
+    offer_key: str,
     offer_keywords: Optional[Dict],
     offer_data_cache: Optional[Dict],
 ) -> dict:
     """Prepare Swedish offer precompute data shared by fullscan and hint-first paths."""
     offer_precomputed = (
-        offer_data_cache[offer_id]
-        if offer_data_cache and offer_id in offer_data_cache
+        offer_data_cache[offer_key]
+        if offer_data_cache and offer_key in offer_data_cache
         else None
     )
     if offer_precomputed is None:
@@ -1533,7 +1531,7 @@ def build_offer_match_context(
     )
     effective_offer_data = offer_match_data.precomputed
     offer_match_keywords = (
-        offer_keywords.get(offer_id, [])
+        offer_keywords.get(offer_key, [])
         if offer_keywords
         else (effective_offer_data.get('keywords', []) if effective_offer_data else [])
     )
@@ -1671,26 +1669,26 @@ def prefer_carrier_flavor_candidate(
 
 def prepare_offer_match_candidate(
     offer: Offer,
-    offer_id: int,
+    offer_key: str,
     offer_keywords: Optional[Dict],
     offer_data_cache: Optional[Dict],
     ingredient_match_data_per_ing,
     candidate_indices: Optional[Iterable[int]] = None,
-    offer_match_context_cache: Optional[Dict[int, dict]] = None,
+    offer_match_context_cache: Optional[Dict[str, dict]] = None,
 ) -> dict:
     """Prepare Swedish offer precompute data and choose the initial ingredient match."""
     context = None
     if offer_match_context_cache is not None:
-        context = offer_match_context_cache.get(offer_id)
+        context = offer_match_context_cache.get(offer_key)
     if context is None:
         context = build_offer_match_context(
             offer,
-            offer_id,
+            offer_key,
             offer_keywords,
             offer_data_cache,
         )
         if offer_match_context_cache is not None:
-            offer_match_context_cache[offer_id] = context
+            offer_match_context_cache[offer_key] = context
     normalized_indices = (
         None if candidate_indices is None
         else _normalized_candidate_indices(candidate_indices, len(ingredient_match_data_per_ing))
@@ -1906,7 +1904,7 @@ def _chili_oil_process_check_allowed(
 
 def validate_offer_match_candidate(
     offer: Offer,
-    offer_id: int,
+    offer_key: str,
     offer_data_cache: Optional[Dict],
     matched_keyword: Optional[str],
     matched_ing_idx: Optional[int],
@@ -3183,7 +3181,7 @@ def validate_offer_match_candidate(
                     flavor_retried = False
                     retry_from_idx = matched_ing_idx
                     retry_from_keyword = matched_keyword
-                    if offer_data_cache and offer_id in offer_data_cache:
+                    if offer_data_cache and offer_key in offer_data_cache:
                         retry_offer_match_data = build_precomputed_offer_match_data(
                             offer.name,
                             category=offer.category,

@@ -192,16 +192,17 @@ def _cache_affecting_preferences_hash(preferences: Dict[str, Any] | None) -> str
 
 def _select_indexable_offer_identity_keys(
     offers: List[Any],
-    offer_data_cache: Dict[int, Dict[str, Any]],
+    offer_data_cache: Dict[str, Dict[str, Any]],
 ) -> set[str]:
     """Return stable offer ids for offers that produce at least one routing term."""
     indexable_keys = set()
     for offer in offers:
-        compiled_offer_data = offer_data_cache.get(id(offer))
+        offer_identity_key = build_offer_identity_key(offer)
+        compiled_offer_data = offer_data_cache.get(offer_identity_key)
         if not compiled_offer_data:
             continue
         if build_offer_candidate_terms(compiled_offer_data):
-            indexable_keys.add(build_offer_identity_key(offer))
+            indexable_keys.add(offer_identity_key)
     return indexable_keys
 
 

@@ -302,11 +302,10 @@ def load_compiled_offer_runtime_cache(
     *,
     compiler_version: str = OFFER_COMPILER_VERSION,
     strict: bool = True,
-) -> tuple[dict[int, dict[str, Any]], dict[str, Any]]:
+) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
     """Load compiled offer payloads for the current Offer objects.
 
-    Returns a cache keyed by ``id(offer)`` so the existing cache rebuild path
-    can consume the persistent offer IR without changing the hot-loop API.
+    Returns a cache keyed by stable ``offer_identity_key`` values.
     """
     ensure_compiled_offer_match_table()
 
@@ -338,7 +337,7 @@ def load_compiled_offer_runtime_cache(
         if row.compiler_version != compiler_version:
             stale_offer_ids.append(offer_identity_key)
             continue
-        runtime_cache[id(offer)] = row.compiled_data
+        runtime_cache[offer_identity_key] = row.compiled_data
 
     stats = {
         "compiler_version": compiler_version,

@@ -50,6 +50,7 @@ except ModuleNotFoundError:
 try:
     from languages.matcher_runtime import (
         analyze_unmatched_offers_backend,
+        build_offer_identity_key,
         build_keyword_patterns_backend,
         extract_keywords_from_product,
         get_classification_keywords_backend,
@@ -63,6 +64,7 @@ try:
 except ModuleNotFoundError:
     from app.languages.matcher_runtime import (
         analyze_unmatched_offers_backend,
+        build_offer_identity_key,
         build_keyword_patterns_backend,
         extract_keywords_from_product,
         get_classification_keywords_backend,
@@ -412,7 +414,11 @@ class RecipeMatcher:
 
         # Pre-extract keywords for all offers ONCE (optimization)
         offer_keywords = {
-            id(offer): extract_keywords_from_product(offer.name, offer.category, brand=offer.brand)
+            build_offer_identity_key(offer): extract_keywords_from_product(
+                offer.name,
+                offer.category,
+                brand=offer.brand,
+            )
             for offer in offers
         }
 
@@ -902,14 +908,18 @@ if __name__ == "__main__":
                 # Extract keywords once
                 offer_keywords = {}
                 for offer in offers:
-                    offer_keywords[id(offer)] = extract_keywords_from_product(offer.name, offer.category, brand=offer.brand)
+                    offer_keywords[build_offer_identity_key(offer)] = extract_keywords_from_product(
+                        offer.name,
+                        offer.category,
+                        brand=offer.brand,
+                    )
 
                 # Simulate matching loop (without full processing)
                 match_count = 0
                 for row in recipes:
                     recipe_text = (row.name or '').lower()
                     for offer in offers:
-                        keywords = offer_keywords.get(id(offer), [])
+                        keywords = offer_keywords.get(build_offer_identity_key(offer), [])
                         for kw in keywords:
                             if kw in recipe_text:
                                 match_count += 1

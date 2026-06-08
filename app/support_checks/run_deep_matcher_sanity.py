@@ -20,6 +20,7 @@ from types import SimpleNamespace
 sys.path.insert(0, '/app' if os.path.exists('/app') else os.path.join(os.path.dirname(__file__), '..'))
 
 from languages.sv.ingredient_matching import (
+    build_offer_identity_key,
     extract_keywords_from_product,
     extract_keywords_from_ingredient,
     is_buffet_or_party_recipe,
@@ -136,7 +137,7 @@ def recipe_match_num_cached(ingredients, offer):
         multi_buy_quantity=None,
         weight_grams=offer.get('weight_grams'),
     )
-    offer_id = id(offer_obj)
+    offer_id = build_offer_identity_key(offer_obj)
     offer_keywords = {
         offer_id: extract_keywords_from_product(
             offer_obj.name, offer_obj.category, brand=offer_obj.brand
@@ -182,7 +183,7 @@ def recipe_match_groups(ingredients, offer, *, cached=False):
     )
     kwargs = {}
     if cached:
-        offer_id = id(offer_obj)
+        offer_id = build_offer_identity_key(offer_obj)
         kwargs["offer_keywords"] = {
             offer_id: extract_keywords_from_product(
                 offer_obj.name, offer_obj.category, brand=offer_obj.brand
@@ -249,7 +250,7 @@ def recipe_match_num_named_cached(recipe_name, ingredients, offer):
         multi_buy_quantity=None,
         weight_grams=offer.get('weight_grams'),
     )
-    offer_id = id(offer_obj)
+    offer_id = build_offer_identity_key(offer_obj)
     offer_keywords = {
         offer_id: extract_keywords_from_product(
             offer_obj.name, offer_obj.category, brand=offer_obj.brand
@@ -324,13 +325,13 @@ def recipe_match_data_multi_cached(ingredients, offers):
         for idx, offer in enumerate(offers)
     ]
     offer_keywords = {
-        id(offer_obj): extract_keywords_from_product(
+        build_offer_identity_key(offer_obj): extract_keywords_from_product(
             offer_obj.name, offer_obj.category, brand=offer_obj.brand
         )
         for offer_obj in offer_objs
     }
     offer_data_cache = {
-        id(offer_obj): precompute_offer_data(
+        build_offer_identity_key(offer_obj): precompute_offer_data(
             offer_obj.name,
             offer_obj.category,
             brand=offer_obj.brand,

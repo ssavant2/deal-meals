@@ -615,14 +615,13 @@ def diagnose_case(
     })
 
     offer_identity_key = build_offer_identity_key(offer)
-    offer_id = id(offer)
-    offer_data_cache = {offer_id: offer_precomputed}
+    offer_data_cache = {offer_identity_key: offer_precomputed}
     ingredient_match_data_per_ing = prepared_recipe["ingredient_match_data_per_ing"]
     fullscan_candidates = collect_offer_match_candidates(
         ingredient_match_data_per_ing,
         prepare_offer_match_candidate(
             offer,
-            offer_id,
+            offer_identity_key,
             None,
             offer_data_cache,
             ingredient_match_data_per_ing,
@@ -637,7 +636,7 @@ def diagnose_case(
         ingredient_match_data_per_ing,
         prepare_offer_match_candidate(
             offer,
-            offer_id,
+            offer_identity_key,
             None,
             offer_data_cache,
             ingredient_match_data_per_ing,
@@ -651,7 +650,7 @@ def diagnose_case(
     )
     initial_match = prepare_offer_match_candidate(
         offer,
-        offer_id,
+        offer_identity_key,
         None,
         offer_data_cache,
         ingredient_match_data_per_ing,
@@ -660,7 +659,7 @@ def diagnose_case(
     validation_events: list[dict[str, Any]] = []
     validated_offer_data = validate_offer_match_candidate(
         offer,
-        offer_id,
+        offer_identity_key,
         offer_data_cache,
         initial_match["matched_keyword"],
         initial_match["matched_ing_idx"],

@@ -725,17 +725,17 @@ def build_offer_candidate_terms(compiled_offer_data: dict[str, Any]) -> set[tupl
 
 
 def build_offer_candidate_term_map(
-    offer_data_cache: dict[int, dict[str, Any]],
-) -> dict[str, set[int]]:
-    term_to_offer_ids: dict[str, set[int]] = defaultdict(set)
-    for offer_object_id, compiled_offer_data in offer_data_cache.items():
+    offer_data_cache: dict[str, dict[str, Any]],
+) -> dict[str, set[str]]:
+    term_to_offer_ids: dict[str, set[str]] = defaultdict(set)
+    for offer_identity_key, compiled_offer_data in offer_data_cache.items():
         for term, _term_type in build_offer_candidate_terms(compiled_offer_data):
-            term_to_offer_ids[term].add(offer_object_id)
+            term_to_offer_ids[term].add(offer_identity_key)
     return term_to_offer_ids
 
 
 def build_fts_keyword_set(
-    offer_data_cache: dict[int, dict[str, Any]],
+    offer_data_cache: dict[str, dict[str, Any]],
 ) -> set[str]:
     """Build keyword expansion for legacy recipe FTS paths."""
     all_keywords: set[str] = set()
@@ -1580,7 +1580,7 @@ def refresh_compiled_offer_term_index() -> dict[str, Any]:
     term_pairs_by_offer: dict[str, set[tuple[str, str]]] = {}
     manifest_terms: set[tuple[str, str]] = set()
     for offer in offers:
-        terms = build_offer_candidate_terms(offer_data_cache[id(offer)])
+        terms = build_offer_candidate_terms(offer_data_cache[build_offer_identity_key(offer)])
         term_pairs_by_offer[str(offer.id)] = terms
         manifest_terms.update(terms)
 

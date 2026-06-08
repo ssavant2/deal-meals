@@ -22,6 +22,7 @@ sys.path.insert(0, '/app' if os.path.exists('/app') else os.path.join(os.path.di
 from loguru import logger  # noqa: E402
 from languages.sv.food_filters import is_cooking_chocolate  # noqa: E402
 from languages.sv.ingredient_matching import (  # noqa: E402
+    build_offer_identity_key,
     build_ingredient_match_data,
     build_offer_match_data,
     match_offer_to_ingredient,
@@ -94,7 +95,7 @@ def _recipe_match_num(
 
     kwargs = {}
     if cached:
-        offer_key = id(offer_obj)
+        offer_key = build_offer_identity_key(offer_obj)
         offer_data = precompute_offer_data(
             offer_obj.name,
             offer_obj.category,
