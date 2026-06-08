@@ -102,7 +102,7 @@ _FALSE_POSITIVE_BLOCKERS_RAW: Dict[str, Set[str]] = {
         'paneer',  # Indian cheese
         # Specialty/functional types
         'halloumi', 'grillost',
-        'getost', 'gräddost', 'graddost', 'vitost', 'salladsost',
+        'getost', 'vitost', 'salladsost',  # gräddost removed — it is a generic Swedish cheese (maps to "ost")
         'färskost', 'farskost', 'smältost', 'smaltost', 'mesost', 'messmör', 'messmor',
         'gratängost', 'gratangost', 'pizzaost', 'hamburgerost',
         'kryddost', 'dessert',

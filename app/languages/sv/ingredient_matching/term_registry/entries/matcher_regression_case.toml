@@ -1528,24 +1528,24 @@ variant = "matcher_regression_dulce_de_leche_kondenserad_negative: Kondenserad m
 layer_role = "negative_regression"
 
 [[entries]]
-entry_id = "sv-se.policy.current_review_matcher_regression.matcher_regression_explicit_prastost_gouda_negative"
+entry_id = "sv-se.policy.ost.matcher_regression_explicit_prastost_gouda_negative"
 language = "sv"
 market = "SE"
-canonical = "current_review_matcher_regression"
+canonical = "ost"
 status = "active"
 variants = ["matcher_regression_explicit_prastost_gouda_negative: Gouda 31% Garant"]
 ingredient_terms = []
 offer_terms = []
 negative_guards = []
 source_refs = ["fixture:matcher_regression_cases:matcher_regression_explicit_prastost_gouda_negative"]
-layer_policy = ["accepted_filter", "normal"]
+layer_policy = ["normal"]
 notes = "Registry coverage for matcher regression fixture matcher_regression_explicit_prastost_gouda_negative."
 
 [[entries.coverage]]
 source_family = "matcher_regression_case"
-canonical = "current_review_matcher_regression"
+canonical = "ost"
 variant = "matcher_regression_explicit_prastost_gouda_negative: Gouda 31% Garant"
-layer_role = "negative_regression"
+layer_role = "positive_regression"
 
 [[entries]]
 entry_id = "sv-se.policy.ost.matcher_regression_explicit_prastost_positive"

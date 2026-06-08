@@ -4802,16 +4802,21 @@ ingredient_index = 0
 must_match_keyword = "ost"
 
 [[fixtures]]
-expected = 0
+expected = 1
 id = "matcher_regression_explicit_prastost_gouda_negative"
 ingredients = ["2 dl riven prästost (gärna lagrad i 18 månader)"]
 policy_ref = "current_review_matcher_regression"
 recipe_name = "Sanity Recipe"
-source_ref = "current_review:negative_sibling:explicit_prastost_gouda"
+source_ref = "current_review:accepted_direct_fix:explicit_prastost_gouda"
 
 [fixtures.offer]
 category = "dairy"
 name = "Gouda 31% Garant"
+
+[[fixtures.expected_matches]]
+ingredient_index = 0
+canonical = "ost"
+must_match_keyword = "ost"
 
 [[fixtures]]
 expected = 1

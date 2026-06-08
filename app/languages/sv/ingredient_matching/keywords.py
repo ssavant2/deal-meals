@@ -1800,9 +1800,16 @@ IMPLICIT_KEYWORDS: Dict[str, str] = {
     'gouda': 'ost',
     'gräddis': 'ost',
     'gräddost': 'ost',
+    # Compound "...ost" surface forms that do NOT auto-decompose to their base
+    # keyword (unlike herrgårdsost/edamerost/goudaost which do) must be mapped
+    # explicitly, otherwise the generic-cheese rule above silently skips them and
+    # they stay isolated (the grevéost/sveciaost breakage).
+    'grevéost': 'ost',
+    'greveost': 'ost',
+    'sveciaost': 'ost',
     # NOT included: cheddar, emmentaler, mozzarella, parmesan, manchego,
-    # gruyère, halloumi, feta, ricotta, mascarpone, burrata, brie, camembert
-    # - these have distinct flavor/texture and should only match their own name
+    # gruyère, halloumi, feta, ricotta, mascarpone, burrata, brie, camembert,
+    # provolone - these have distinct flavor/texture and should only match their own name
 
     # English product names → Swedish recipe keywords
     # NOTE: "coconut milk/cream/oil/flakes" handled via _SPACE_NORMALIZATIONS

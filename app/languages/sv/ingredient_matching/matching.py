@@ -2170,18 +2170,6 @@ _PREPARED_HERRING_PRODUCT_CUES = frozenset({
     'kryddsill',
     'gravad', 'rökt', 'rokt',
 })
-_PRASTOST_ALLOWED_PRODUCT_CUES = frozenset({
-    'präst', 'prast',
-    'herrgård', 'herrgard',
-    'västerbotten', 'vasterbotten',
-})
-_PRASTOST_BLOCKED_PRODUCT_CUES = frozenset({
-    'gouda', 'edamer', 'gräddost', 'graddost',
-    'vitost', 'salladsost', 'grekisk',
-    'vegan', 'vegansk', 'växtbaserad', 'vaxtbaserad', 'violife',
-    'grillost', 'halloumi', 'färskost', 'farskost', 'philadelphia',
-    'spread', 'block original flavour',
-})
 _CANNED_TUNA_PRODUCT_CUES = frozenset({
     'vatten', 'olja', 'i olja', 'finfördelad', 'finfordelad',
     '3x', 'msc abba', 'abba', 'eldorado', 'garant',
@@ -2645,12 +2633,10 @@ def _recipe_specific_product_guards_allow_product(
         if any(cue in product_lower for cue in _PREPARED_HERRING_PRODUCT_CUES):
             return False
 
-    if 'prästost' in ingredient_lower or 'prastost' in ingredient_lower:
-        if matched_keyword in {'ost', 'prästost', 'prastost', 'präst', 'prast'}:
-            if any(cue in product_lower for cue in _PRASTOST_BLOCKED_PRODUCT_CUES):
-                return False
-            if not any(cue in product_lower for cue in _PRASTOST_ALLOWED_PRODUCT_CUES):
-                return False
+    # NOTE: prästost is a generic Swedish cheese (maps to "ost" via INGREDIENT_PARENTS)
+    # and must match any "ost" recipe/offer in the generic group (hushåll/herrgård/
+    # grevé/svecia/edamer/gouda/gräddost). A former _PRASTOST cue block restricted it to
+    # only präst/herrgård/västerbotten products, which wrongly isolated it — removed.
 
     if matched_keyword == 'tonfisk' and any(cue in ingredient_lower for cue in ('tonfisk',)):
         ingredient_wants_steak = any(cue in ingredient_lower for cue in _TUNA_STEAK_FAMILY_INGREDIENT_CUES)

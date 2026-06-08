@@ -10495,7 +10495,7 @@ test("Batch 14 dried mushroom ingredient blocks frozen champignons", recipe_matc
 test("Batch 14 generic köttfärs accepts ordinary beef mince", recipe_match_num(["600 g Köttfärs"], {"name": "Nötfärs 5% Sverige Garant", "category": "meat"}), 1)
 test("Batch 14 generic köttfärs blocks chorizofärs", recipe_match_num_cached(["600 g Köttfärs"], {"name": "Chorizofärs Nonna Elide", "category": "meat"}), 0)
 test("Batch 14 explicit prästost accepts prästost", recipe_match_num(["2 dl riven prästost (gärna lagrad i 18 månader)"], {"name": "Präst Mild 35% Skånemejerier", "category": "dairy"}), 1)
-test("Batch 14 explicit prästost blocks gouda", recipe_match_num_cached(["2 dl riven prästost (gärna lagrad i 18 månader)"], {"name": "Gouda 31% Garant", "category": "dairy"}), 0)
+test("prästost matches gouda (both generic Swedish cheese group → ost)", recipe_match_num_cached(["2 dl riven prästost (gärna lagrad i 18 månader)"], {"name": "Gouda 31% Garant", "category": "dairy"}), 1)
 test("Batch 14 packaged tonfisk accepts canned tuna in water", recipe_match_num(["3 förp tonfisk (à 120 g)"], {"name": "Tonfisk Vatten Garant", "category": "pantry"}), 1)
 test("Batch 14 packaged tonfisk blocks fresh tuna steak", recipe_match_num_cached(["3 förp tonfisk (à 120 g)"], {"name": "Tonfisk Steaks Leröy", "category": "fish"}), 0)
 test("Batch 14 kruksallad accepts krispsallat i kruka", recipe_match_num(["1 kruksallad"], {"name": "Krispsallat i Kruka Ekologisk Klass 1", "category": "fruit"}), 1)
@@ -17256,6 +17256,27 @@ test("whole salsiccia matches salsicciafärs product",
      recipe_match_num(["2 salsiccia"], {"name": "Salsicciafärs Naturell Köttkultur", "category": ""}), 1)
 test("generic köttfärs does not match salsicciafärs product",
      recipe_match_num(["500 g köttfärs"], {"name": "Salsicciafärs Naturell Köttkultur", "category": ""}), 0)
+# Generic Swedish cheese group: hushåll/präst/grevé/herrgård/svecia/edamer/gouda/gräddost all
+# map to "ost" and are mutually interchangeable (each matches any generic-ost product). Restores
+# a rule that several overrides had broken (prästost cue block, grevé qualifier, svecia carrier
+# suppression, gräddost FP blocker). Distinct cheeses (cheddar/parmesan/feta/halloumi/mozzarella/
+# provolone/västerbottensost) stay isolated.
+for _gen_cheese in ["prästost", "grevéost", "sveciaost", "herrgårdsost", "edamerost", "goudaost", "gräddost"]:
+    test(f"generic cheese {_gen_cheese} matches generic Hushållsost",
+         recipe_match_num([_gen_cheese], {"name": "Hushållsost 26% Arla", "category": "dairy"}), 1)
+test("generic prästost matches grevé product",
+     recipe_match_num(["prästost"], {"name": "Grevé Ost 500g", "category": "dairy"}), 1)
+test("generic sveciaost matches gräddost product",
+     recipe_match_num(["sveciaost"], {"name": "Gräddost Mild 45% Arla", "category": "dairy"}), 1)
+test("plain riven ost matches Hushållsost",
+     recipe_match_num(["100 g riven ost"], {"name": "Hushållsost 26% Arla", "category": "dairy"}), 1)
+for _iso_cheese in ["cheddar", "parmesanost", "fetaost", "halloumi", "provoloneost", "västerbottensost"]:
+    test(f"distinct cheese {_iso_cheese} stays isolated from generic Hushållsost",
+         recipe_match_num([_iso_cheese], {"name": "Hushållsost 26% Arla", "category": "dairy"}), 0)
+test("plain riven ost does not match distinct Cheddar",
+     recipe_match_num(["100 g riven ost"], {"name": "Cheddar Stark 500g", "category": "dairy"}), 0)
+test("provoloneost still matches its own provolone product",
+     recipe_match_num(["provoloneost"], {"name": "Provolone Skivad 150g", "category": "dairy"}), 1)
 
 # FINAL SUMMARY - keep at EOF. dm matcher add inserts generated sanity tests above this block.
 print("\n========================================")

@@ -742,13 +742,13 @@ _SPECIALTY_QUALIFIERS_RAW: Dict[str, Set[str]] = {
         # Italian fresh
         'mozzarella', 'mozarella', 'ricotta', 'mascarpone', 'burrata',
         # Other Italian
-        'gorgonzola',
+        'gorgonzola', 'provolone', 'provoloneost',
         # Common in specific contexts
         'cheddar',
         'gruyère', 'gruyere',
         'emmental', 'emmentaler',
-        # Generic group uses grevé only for direction A (ingredient says grevé → offer must too)
-        'grevé', 'greve', 'grevéost', 'greveost',
+        # NOTE: grevé/grevéost is NOT a qualifier here — it is a generic Swedish cheese
+        # that maps to "ost" (INGREDIENT_PARENTS) and must match any "ost" recipe.
         'manchego',
         # French soft
         'brie', 'camembert',

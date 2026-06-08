@@ -1071,7 +1071,8 @@ KEYWORD_SUPPRESSED_BY_CONTEXT: Dict[str, Set[str]] = {
     'apelsin': {'blodapelsin', 'blodapelsiner', 'kanderad', 'kanderade', 'syltad', 'syltade'},
     # "kittost" = specific dessert cheese (Castello). Generic "ost" products
     # should NOT match when recipe specifically asks for kittost.
-    'ost': {'kittost', 'vitmögelost', 'vitmogelost', 'svecia', 'paneer', 'ostkrokar', 'ostkrok'},
+    # NOTE: svecia/sveciaost is a generic Swedish cheese (maps to "ost") — NOT suppressed here.
+    'ost': {'kittost', 'vitmögelost', 'vitmogelost', 'paneer', 'ostkrokar', 'ostkrok'},
     # "kokossocker" is a distinct pantry sweetener. Generic sugar products should not match.
     'socker': {'kokossocker'},
     # "färsk jäst matbröd" = yeast for bread, NOT actual bread.

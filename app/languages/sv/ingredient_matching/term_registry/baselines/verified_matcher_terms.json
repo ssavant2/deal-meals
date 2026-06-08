@@ -22,10 +22,10 @@
       "legacy_validator": 252,
       "negative_guard_keyword": 22,
       "negative_guard_pattern": 412,
-      "negative_regression": 841,
+      "negative_regression": 840,
       "offer_extra_keyword_mapping": 422,
       "parent_match_only_mapping": 20,
-      "positive_regression": 672,
+      "positive_regression": 673,
       "recipe_routing_extra_alias": 9
     },
     "source_counts": {
@@ -93813,27 +93813,6 @@
       "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"legacy_import_curated_regression\", \"recipe_name\": \"Kolagrottor med pekannötter\"}"
     },
     {
-      "variant_id": "vterm-bc5c734defd0797e",
-      "row_index": 581,
-      "source_order": 20,
-      "source_type": "matcher_regression_case",
-      "source_file": "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
-      "source_ref": "current_review:negative_sibling:explicit_prastost_gouda",
-      "source_id": "matcher_regression_explicit_prastost_gouda_negative",
-      "variant_role": "negative_regression",
-      "variant_text": "matcher_regression_explicit_prastost_gouda_negative: Gouda 31% Garant",
-      "canonical": null,
-      "expected_family": "current_review_matcher_regression",
-      "ingredient_text": "2 dl riven prästost (gärna lagrad i 18 månader)",
-      "product_text": "Gouda 31% Garant",
-      "product_category": "dairy",
-      "product_brand": null,
-      "expected": 0,
-      "needs_product_text": false,
-      "notes": "current_review_matcher_regression",
-      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
-    },
-    {
       "variant_id": "vterm-bf4fdf00e10aad4d",
       "row_index": 582,
       "source_order": 20,
@@ -123442,6 +123421,27 @@
       "needs_product_text": true,
       "notes": null,
       "metadata": "{\"target\": \"surdegsbröd\"}"
+    },
+    {
+      "variant_id": "vterm-b64817c5fff9caae",
+      "row_index": 581,
+      "source_order": 20,
+      "source_type": "matcher_regression_case",
+      "source_file": "app/languages/sv/matcher_contracts/sources/matcher_regression_cases.toml",
+      "source_ref": "current_review:accepted_direct_fix:explicit_prastost_gouda",
+      "source_id": "matcher_regression_explicit_prastost_gouda_negative",
+      "variant_role": "positive_regression",
+      "variant_text": "matcher_regression_explicit_prastost_gouda_negative: Gouda 31% Garant",
+      "canonical": "ost",
+      "expected_family": "ost",
+      "ingredient_text": "2 dl riven prästost (gärna lagrad i 18 månader)",
+      "product_text": "Gouda 31% Garant",
+      "product_category": "dairy",
+      "product_brand": null,
+      "expected": 1,
+      "needs_product_text": false,
+      "notes": "current_review_matcher_regression",
+      "metadata": "{\"allowed_additional_matches\": null, \"expected_matches\": [{\"canonical\": \"ost\", \"ingredient_index\": 0, \"must_match_keyword\": \"ost\"}], \"policy_ref\": \"current_review_matcher_regression\", \"recipe_name\": \"Sanity Recipe\"}"
     }
   ],
   "verification": {
