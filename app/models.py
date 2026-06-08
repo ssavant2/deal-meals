@@ -96,7 +96,6 @@ class Offer(Base):
         CheckConstraint("unit IN ('st', 'kg', 'l', 'förp')", name='chk_unit'),
         CheckConstraint("category IN ('meat', 'poultry', 'fish', 'dairy', 'deli', 'fruit', 'vegetables', 'bread', 'beverages', 'candy', 'spices', 'pizza', 'frozen', 'pantry', 'hygiene', 'household', 'other')", name='chk_category'),
         Index('idx_offers_store', 'store_id'),
-        Index('idx_offers_category', 'category'),
         Index('idx_offers_brand', 'brand'),
         Index('idx_offers_scraped', 'scraped_at'),
         Index('idx_offers_location', 'location_type', 'location_name'),

@@ -27,6 +27,7 @@ CHECKS = [
     "run_cache_worker_cpu_checks.py",
     "run_matcher_version_checks.py",
     "run_database_session_defaults_checks.py",
+    "run_schema_contract_checks.py",
     "run_candidate_term_detail_checks.py",
     "run_candidate_refresh_guard_checks.py",
     "run_recipe_ingredient_term_map_checks.py",
