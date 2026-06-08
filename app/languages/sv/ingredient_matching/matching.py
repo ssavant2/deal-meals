@@ -3814,6 +3814,16 @@ def precompute_offer_data(offer_name: str, offer_category: str = "", brand: str 
         and 'hummus' not in name_normalized
     ):
         found_qualifiers.setdefault('oliver', set()).add('kalamata')
+    # "Stekfläsk Rimmat" matches the sidfläsk family through the stekfläsk alias
+    # keyword (stekfläsk -> sidfläsk canonical), so the literal base word "sidfläsk"
+    # is never in the product name or raw keywords above. Surface the cure qualifier
+    # (rimmat/rökt) under sidfläsk so the bidirectional sidfläsk isolation can match a
+    # "rimmat sidfläsk" recipe to the equivalent rimmat product instead of rejecting it.
+    _sidflask_family = {'stekfläsk', 'stekflask', 'sidfläsk', 'sidflask'}
+    if _sidflask_family & keywords_set:
+        for _cure in SPECIALTY_QUALIFIERS.get('sidfläsk', ()):
+            if _cure in name_normalized:
+                found_qualifiers.setdefault('sidfläsk', set()).add(_cure)
 
     # Pre-compute whether this product needs per-ingredient PROCESSED_PRODUCT_RULES check
     # Avoids looping through all rules per recipe match

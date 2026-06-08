@@ -2167,6 +2167,14 @@ action = "add"
 terms = ["pommes", "frites", "bamboo", "soya", "vårlök"]
 reason = "Short synonym source forms must survive strict ingredient extraction before synonym mapping: pommes/frites→pommes, bamboo→bambuskott, soya→soja, vårlök→salladslök. Burger remains excluded pending separate burger/bun/patty policy."
 
+[[keyword_set_updates]]
+id = "runtime_important_short_keyword_add_notmix"
+status = "active"
+surface = "important_short_keywords"
+action = "add"
+terms = ["nötmix"]
+reason = "Nötmix (mixed nuts) is 6 characters, below the strict length minimum; force-keep so it is extracted and can match nötmix products"
+
 [[context_word_keyword_exemptions]]
 id = "runtime_context_word_exemption_chevre"
 status = "active"

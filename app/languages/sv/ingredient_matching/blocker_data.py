@@ -1966,12 +1966,11 @@ _PRODUCT_NAME_BLOCKERS_RAW: Dict[str, Set[str]] = {
     'padano': {
         'flarn',
     },
-    # Plain salsiccia ≠ vegan or minced variants unless recipe says so
-    'salsiccia': {
-        # 'växtbaserad' removed (substitute policy — vego salsiccia may match a
-        # plain salsiccia recipe). 'färs' stays: salsiccia is a sausage, not loose mince.
-        'färs', 'fars',
-    },
+    # Q14-3: salsiccia (whole) and salsicciafärs are interchangeable — the sausage is
+    # crumbled out of its casing in pasta/risotto/stufato anyway, so the old 'färs'
+    # blocker that isolated whole salsiccia from salsicciafärs was removed. (The reverse
+    # blockers färs/köttfärs → salsiccia stay, so a generic mince recipe still won't pull
+    # in seasoned salsiccia.)
     # Spinach — block dumplings and pre-made stuvad
     'spenat': {
         'ostknyten', 'knyten',  # "Spenat- & ostknyten Fryst" — dumplings, not fresh spinach

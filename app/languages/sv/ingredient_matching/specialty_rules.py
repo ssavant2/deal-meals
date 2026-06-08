@@ -1259,8 +1259,12 @@ BIDIRECTIONAL_PER_KEYWORD: Dict[str, FrozenSet[str]] = {
     # kycklingfilé recipes unless the recipe asks for that preparation.
     'kycklingfilé': frozenset({'grillkryddad', 'kryddad', 'kryddmarinerad', 'marinerad'}),
     'kycklingfile': frozenset({'grillkryddad', 'kryddad', 'kryddmarinerad', 'marinerad'}),
-    'sidfläsk': frozenset({'rökt', 'rokt', 'rimmat'}),
-    'sidflask': frozenset({'rökt', 'rokt', 'rimmat'}),
+    # 'rimmat' is captured as a Direction-A sidfläsk qualifier (in SPECIALTY_QUALIFIERS) so a
+    # rimmat recipe wants a rimmat product, but it is intentionally NOT bidirectional here: a
+    # plain sidfläsk recipe still tolerates a rimmat/stekfläsk product (Q15-4). Only 'rökt'
+    # (a stronger smoke transformation) isolates both ways.
+    'sidfläsk': frozenset({'rökt', 'rokt'}),
+    'sidflask': frozenset({'rökt', 'rokt'}),
     'fläsk': frozenset({'rökt', 'rokt'}),
     'flask': frozenset({'rökt', 'rokt'}),
     # Food coloring: color is always bidirectional — gul/svart/röd/grön must match
