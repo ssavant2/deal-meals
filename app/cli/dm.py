@@ -14,7 +14,7 @@ import subprocess
 import sys
 import time
 import tomllib
-from typing import Annotated, Any, Iterable, Literal, Mapping
+from typing import Annotated, Any, Callable, Iterable, Literal, Mapping
 import unicodedata
 
 import typer
@@ -5766,6 +5766,33 @@ def _find_runtime_overlay_entry_by_id(
     return matches[0]
 
 
+def _find_runtime_specialty_entry_by_id(
+    sections: dict[str, list[dict[str, Any]]],
+    rule_id: str,
+) -> tuple[RuntimeSpecialtySurface, dict[str, Any]]:
+    rule_id = rule_id.strip()
+    if not rule_id:
+        raise typer.BadParameter("rule-id must not be empty")
+    matches: list[tuple[RuntimeSpecialtySurface, dict[str, Any]]] = []
+    for surface in RUNTIME_SPECIALTY_SURFACES.values():
+        for entry in sections.get(surface.section, []):
+            key = str(entry.get(surface.key_field, ""))
+            values = tuple(str(value) for value in entry.get(surface.values_field, []))
+            entry_id = str(entry.get("id") or _runtime_specialty_entry_id(surface, key, values))
+            if entry_id == rule_id:
+                matches.append((surface, entry))
+    if not matches:
+        raise typer.BadParameter(
+            f"no runtime specialty rule with id {rule_id!r}. "
+            "Only runtime_rule_overlays.toml specialty/qualifier-equivalent entries are supported; "
+            "historical base tables are intentionally out of scope."
+        )
+    if len(matches) > 1:
+        labels = "\n".join(_runtime_specialty_entry_label(surface, entry) for surface, entry in matches[:20])
+        raise typer.BadParameter(f"rule id {rule_id!r} is ambiguous:\n{labels}")
+    return matches[0]
+
+
 def _find_runtime_overlay_entry_on_surface(
     sections: dict[str, list[dict[str, Any]]],
     surface: RuntimeOverlaySurface,
@@ -5877,6 +5904,43 @@ def _runtime_overlay_membership_test_matches(
     return mapped_keyword is not None and _runtime_rule_normalize_text(mapped_keyword) == keyword
 
 
+def _runtime_specialty_membership_test_matches(
+    actual_node: ast.AST,
+    *,
+    surface: RuntimeSpecialtySurface,
+    key: str,
+    values: set[str],
+) -> bool:
+    if not isinstance(actual_node, ast.Compare):
+        return False
+    if len(actual_node.ops) != 1 or not isinstance(actual_node.ops[0], ast.In):
+        return False
+    if len(actual_node.comparators) != 1:
+        return False
+    value = _literal_string(actual_node.left)
+    if value is None or _runtime_rule_normalize_text(value) not in values:
+        return False
+    comparator = actual_node.comparators[0]
+    if not isinstance(comparator, ast.Call):
+        return False
+    func = comparator.func
+    if not isinstance(func, ast.Attribute) or func.attr != "get":
+        return False
+    if not isinstance(func.value, ast.Name):
+        return False
+    allowed_mappings = (
+        {"QUALIFIER_EQUIVALENTS"}
+        if surface.section == "qualifier_equivalents"
+        else {"SPECIALTY_QUALIFIERS", "BIDIRECTIONAL_PER_KEYWORD"}
+    )
+    if func.value.id not in allowed_mappings:
+        return False
+    if not comparator.args:
+        return False
+    mapped_key = _literal_string(comparator.args[0])
+    return mapped_key is not None and _runtime_rule_normalize_text(mapped_key) == key
+
+
 def _remove_empty_generated_sanity_blocks(text: str) -> tuple[str, int]:
     lines = text.splitlines(keepends=True)
     starts = [
@@ -5951,6 +6015,63 @@ def _remove_runtime_overlay_sanity_membership_tests(
 
     if not remove_lines:
         return 0
+    lines = text.splitlines(keepends=True)
+    new_text = "".join(
+        line
+        for line_number, line in enumerate(lines, start=1)
+        if line_number not in remove_lines
+    )
+    new_text, _removed_blocks = _remove_empty_generated_sanity_blocks(new_text)
+    if not dry_run:
+        paths.deep_sanity_file.write_text(new_text, encoding="utf-8")
+    return removed_tests
+
+
+def _remove_runtime_specialty_sanity_tests(
+    *,
+    paths: MatcherPaths,
+    surface: RuntimeSpecialtySurface,
+    rule_id: str,
+    key: str,
+    values: tuple[str, ...],
+    dry_run: bool,
+) -> int:
+    removed_tests = _remove_generated_sanity_tests_for_selectors(
+        paths=paths,
+        selectors=(rule_id,),
+        dry_run=dry_run,
+    )
+    if not values or not paths.deep_sanity_file.exists():
+        return removed_tests
+    key = _runtime_rule_normalize_text(key)
+    value_set = {_runtime_rule_normalize_text(value) for value in values}
+    text = paths.deep_sanity_file.read_text(encoding="utf-8")
+    tree = ast.parse(text, filename=str(paths.deep_sanity_file))
+    metadata_by_line = _deep_sanity_metadata_by_line(text)
+    remove_lines: set[int] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if not isinstance(node.func, ast.Name) or node.func.id != "test":
+            continue
+        if len(node.args) < 3 or not metadata_by_line.get(node.lineno, {}).get("policy_ref"):
+            continue
+        expected = node.args[2]
+        if not isinstance(expected, ast.Constant) or expected.value is not True:
+            continue
+        if not _runtime_specialty_membership_test_matches(
+            node.args[1],
+            surface=surface,
+            key=key,
+            values=value_set,
+        ):
+            continue
+        end_lineno = getattr(node, "end_lineno", node.lineno)
+        remove_lines.update(range(node.lineno, end_lineno + 1))
+        removed_tests += 1
+
+    if not remove_lines:
+        return removed_tests
     lines = text.splitlines(keepends=True)
     new_text = "".join(
         line
@@ -6415,6 +6536,183 @@ def _registry_entry_label(record: RegistryEntryRecord) -> str:
     if len(record.terms) > 6:
         term_text += f", ... (+{len(record.terms) - 6})"
     return f"{record.entry_id}\t{record.status}\t{record.surface}\t{record.canonical}\t{term_text}"
+
+
+def _runtime_entry_id_for_label(surface: Any, entry: Mapping[str, Any]) -> str:
+    if isinstance(surface, RuntimeOverlaySurface):
+        return str(entry.get("id") or _runtime_overlay_entry_id(surface, str(entry.get("keyword", ""))))
+    if isinstance(surface, RuntimePairSurface):
+        return str(
+            entry.get("id")
+            or _runtime_pair_entry_id(
+                surface,
+                str(entry.get(surface.source_field, "")),
+                str(entry.get(surface.target_field, "")),
+            )
+        )
+    if isinstance(surface, RuntimeTermSetSurface):
+        return str(
+            entry.get("id")
+            or _runtime_term_set_entry_id(surface, tuple(str(term) for term in entry.get(surface.value_field, [])))
+        )
+    if isinstance(surface, RuntimeSetUpdateSurface):
+        return str(
+            entry.get("id")
+            or _runtime_set_update_entry_id(
+                surface,
+                str(entry.get("action", surface.default_action)),
+                tuple(str(term) for term in entry.get("terms", [])),
+            )
+        )
+    if isinstance(surface, RuntimeContextSurface):
+        return str(entry.get("id") or _runtime_context_entry_id(surface, str(entry.get(surface.key_field, ""))))
+    if isinstance(surface, RuntimeCompoundSurface):
+        return str(
+            entry.get("id")
+            or _runtime_compound_entry_id(
+                surface,
+                str(entry.get("mode", "")),
+                tuple(str(keyword) for keyword in entry.get("keywords", [])),
+            )
+        )
+    if isinstance(surface, RuntimeSpecialtySurface):
+        return str(
+            entry.get("id")
+            or _runtime_specialty_entry_id(
+                surface,
+                str(entry.get(surface.key_field, "")),
+                tuple(str(value) for value in entry.get(surface.values_field, [])),
+            )
+        )
+    raise TypeError(f"unsupported runtime surface for label: {surface!r}")
+
+
+def _runtime_rules_for_rows(
+    *,
+    paths: MatcherPaths,
+    term: str,
+    include_inactive: bool,
+) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for surface_key in ("pnb", "fpb", "ksbc"):
+        for row in _runtime_effective_origin_rows(surface_key, term) or []:
+            rows.append({
+                "layer": "effective-runtime",
+                "surface": row["surface"],
+                "id": "",
+                "status": "active",
+                "detail": f"{row['keyword']} -> {row['value']}",
+                "origin": row["origin"],
+            })
+
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    runtime_sources: list[tuple[str, Any, Callable[..., list[dict[str, Any]]], Callable[..., str]]] = [
+        *(
+            (
+                surface.command,
+                surface,
+                lambda sections, surface=surface: _runtime_pair_matching_entries(
+                    sections, surface, term, include_inactive=include_inactive
+                ),
+                lambda entry, surface=surface: _runtime_pair_entry_label(surface, entry),
+            )
+            for surface in RUNTIME_PAIR_SURFACES.values()
+        ),
+        *(
+            (
+                surface.command,
+                surface,
+                lambda sections, surface=surface: _runtime_term_set_matching_entries(
+                    sections, surface, term, include_inactive=include_inactive
+                ),
+                lambda entry, surface=surface: _runtime_term_set_entry_label(surface, entry),
+            )
+            for surface in RUNTIME_TERM_SET_SURFACES.values()
+        ),
+        *(
+            (
+                surface.command,
+                surface,
+                lambda sections, surface=surface: _runtime_set_update_matching_entries(
+                    sections, surface, term, include_inactive=include_inactive
+                ),
+                lambda entry, surface=surface: _runtime_set_update_entry_label(surface, entry),
+            )
+            for surface in RUNTIME_SET_UPDATE_SURFACES.values()
+        ),
+        *(
+            (
+                surface.command,
+                surface,
+                lambda sections, surface=surface: _runtime_context_matching_entries(
+                    sections, surface, term, include_inactive=include_inactive
+                ),
+                lambda entry, surface=surface: _runtime_context_entry_label(surface, entry),
+            )
+            for surface in RUNTIME_CONTEXT_SURFACES.values()
+        ),
+        *(
+            (
+                surface.command,
+                surface,
+                lambda sections, surface=surface: _runtime_compound_matching_entries(
+                    sections, surface, term, include_inactive=include_inactive
+                ),
+                lambda entry, surface=surface: _runtime_compound_entry_label(surface, entry),
+            )
+            for surface in RUNTIME_COMPOUND_SURFACES.values()
+        ),
+        *(
+            (
+                surface.command,
+                surface,
+                lambda sections, surface=surface: _runtime_specialty_matching_entries(
+                    sections, surface, term, include_inactive=include_inactive
+                ),
+                lambda entry, surface=surface: _runtime_specialty_entry_label(surface, entry),
+            )
+            for surface in RUNTIME_SPECIALTY_SURFACES.values()
+        ),
+    ]
+    for surface_name, surface, matcher, labeler in runtime_sources:
+        for entry in matcher(sections):
+            rows.append({
+                "layer": "runtime-overlay",
+                "surface": surface_name,
+                "id": _runtime_entry_id_for_label(surface, entry),
+                "status": str(entry.get("status", "active")),
+                "detail": labeler(entry),
+                "origin": "runtime_rule_overlays.toml",
+            })
+    return rows
+
+
+def _registry_rules_for_rows(
+    *,
+    paths: MatcherPaths,
+    term: str,
+    include_inactive: bool,
+    limit: int,
+) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for path in sorted(paths.registry_entries_dir.glob("*.toml")):
+        surface = path.stem.replace("_", "-")
+        for record in _registry_matching_records(
+            _registry_entry_records(surface, path),
+            term,
+            include_inactive=include_inactive,
+        ):
+            rows.append({
+                "layer": "registry",
+                "surface": record.surface,
+                "id": record.entry_id,
+                "status": record.status,
+                "detail": _registry_entry_label(record),
+                "origin": str(path.relative_to(paths.app_dir)),
+            })
+            if len(rows) >= limit:
+                return rows
+    return rows
 
 
 def _normalized_mapping_origin_rows(
@@ -9714,7 +10012,8 @@ def _add_runtime_specialty_rule(
     if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
         raise typer.BadParameter("tree-root runtime add gates are not available; use --no-run-gates")
     normalized_key = _runtime_rule_normalize_text(key)
-    policy_ref = policy_ref or f"runtime_{surface.command.replace('-', '_')}_{_slug(normalized_key)}"
+    normalized_values = tuple(_runtime_rule_normalize_text(value) for value in values)
+    policy_ref = policy_ref or _runtime_specialty_entry_id(surface, normalized_key, normalized_values)
     overlay_preview = _append_runtime_specialty_entry(
         paths=paths,
         surface=surface,
@@ -9746,6 +10045,7 @@ def _add_runtime_specialty_rule(
         typer.echo("Dry run only; no files written.")
         return
     typer.echo(f"Generated {surface.section} rule: {policy_ref}")
+    typer.echo(f"  entry: {policy_ref}")
     if not run_gates:
         typer.echo("Skipped gates (--no-run-gates).")
         return
@@ -10641,6 +10941,70 @@ def _remove_runtime_overlay_rule_by_id(
     typer.echo(f"  keyword: {keyword}")
     if write_sanity:
         typer.echo(f"  sanity: removed {removed} generated membership test(s)")
+    else:
+        typer.echo("  sanity: skipped")
+    if not run_gates:
+        typer.echo("Skipped gates (--no-run-gates).")
+        return
+    raise typer.Exit(_run_track_a_runtime_gates(paths, report_root))
+
+
+def _remove_runtime_specialty_rule_by_id(
+    *,
+    rule_id: str,
+    reason: str,
+    tree_root: Path | None,
+    run_gates: bool,
+    report_root: Path | None,
+    dry_run: bool,
+    write_sanity: bool,
+) -> None:
+    reason = reason.strip()
+    if not reason:
+        raise typer.BadParameter("--reason is required; runtime specialty removal is a deliberate policy change")
+    paths = _paths(tree_root)
+    if _tree_root_gates_require_explicit_no_run_gates(paths, run_gates=run_gates, dry_run=dry_run):
+        raise typer.BadParameter("tree-root runtime remove gates are not available; use --no-run-gates")
+    sections = _read_runtime_overlay_sections(paths.runtime_overlay_file)
+    surface, entry = _find_runtime_specialty_entry_by_id(sections, rule_id)
+    key = _runtime_rule_normalize_text(str(entry.get(surface.key_field, "")))
+    values = tuple(_runtime_rule_normalize_text(str(value)) for value in entry.get(surface.values_field, []))
+    entry["id"] = str(entry.get("id") or rule_id)
+    entry["status"] = "inactive"
+    entry["inactive_reason"] = reason
+    preview = _runtime_specialty_entry_block(surface, entry)
+    if dry_run:
+        typer.echo(preview)
+        if write_sanity:
+            removed = _remove_runtime_specialty_sanity_tests(
+                paths=paths,
+                surface=surface,
+                rule_id=rule_id,
+                key=key,
+                values=values,
+                dry_run=True,
+            )
+            typer.echo(f"Would remove {removed} generated specialty sanity test(s).")
+        typer.echo("Dry run only; no files written.")
+        return
+
+    paths.runtime_overlay_file.write_text(_runtime_overlay_file_text(sections), encoding="utf-8")
+    removed = 0
+    if write_sanity:
+        removed = _remove_runtime_specialty_sanity_tests(
+            paths=paths,
+            surface=surface,
+            rule_id=rule_id,
+            key=key,
+            values=values,
+            dry_run=False,
+        )
+    typer.echo(f"Removed runtime specialty rule: {rule_id}")
+    typer.echo("  mode: soft-disable (status=inactive)")
+    typer.echo(f"  surface: {surface.command}")
+    typer.echo(f"  {surface.key_field}: {key}")
+    if write_sanity:
+        typer.echo(f"  sanity: removed {removed} generated specialty test(s)")
     else:
         typer.echo("  sanity: skipped")
     if not run_gates:
@@ -13897,6 +14261,56 @@ def matcher_guide_goal(
     _print_guide(guide)
 
 
+@matcher_app.command("rules-for", help="List matcher rule surfaces that mention one term.")
+def matcher_rules_for(
+    term: Annotated[str, typer.Argument(help="Keyword, qualifier, canonical, variant, or rule term to inspect.")],
+    tree_root: Annotated[Path | None, typer.Option("--tree-root", help="Repo/tree root to read instead of /app.")] = None,
+    include_inactive: Annotated[
+        bool,
+        typer.Option("--include-inactive", help="Include entries with status = inactive."),
+    ] = False,
+    registry_limit: Annotated[int, typer.Option("--registry-limit", help="Maximum registry TOML rows to include.")] = 80,
+    output_format: Annotated[
+        Literal["text", "json"],
+        typer.Option("--format", help="Output format."),
+    ] = "text",
+) -> None:
+    term = term.strip()
+    if not term:
+        raise typer.BadParameter("term must not be empty")
+    if registry_limit < 0:
+        raise typer.BadParameter("--registry-limit must be >= 0")
+    paths = _paths(tree_root)
+    runtime_rows = _runtime_rules_for_rows(paths=paths, term=term, include_inactive=include_inactive)
+    registry_rows = (
+        _registry_rules_for_rows(
+            paths=paths,
+            term=term,
+            include_inactive=include_inactive,
+            limit=registry_limit,
+        )
+        if registry_limit
+        else []
+    )
+    rows = [*runtime_rows, *registry_rows]
+    if output_format == "json":
+        typer.echo(json.dumps(rows, ensure_ascii=False, indent=2))
+        return
+    if not rows:
+        typer.echo("No rules found.")
+        return
+    current_layer = ""
+    for row in rows:
+        layer = row["layer"]
+        if layer != current_layer:
+            if current_layer:
+                typer.echo("")
+            typer.echo(f"== {layer} ==")
+            current_layer = layer
+        origin = f"\t{row['origin']}" if row.get("origin") else ""
+        typer.echo(f"{row['surface']}\t{row['status']}\t{row['id']}\t{row['detail']}{origin}")
+
+
 @matcher_app.command("list", help="List matcher entries on a registry or runtime-overlay surface.")
 def matcher_list(
     surface_name: Annotated[
@@ -14331,6 +14745,19 @@ def matcher_remove(
             write_sanity=write_sanity,
         )
     except typer.BadParameter:
+        try:
+            _remove_runtime_specialty_rule_by_id(
+                rule_id=rule_id,
+                reason=reason,
+                tree_root=tree_root,
+                run_gates=run_gates,
+                report_root=report_root,
+                dry_run=dry_run,
+                write_sanity=write_sanity,
+            )
+            return
+        except typer.BadParameter:
+            pass
         removed_registry = _remove_generated_registry_entry_by_id(
             entry_id=rule_id,
             reason=reason,

@@ -609,6 +609,21 @@ proofs: they often assert the observed canonical for one pair. For family work,
 add an explicit backend/cached sanity when the real policy is "kid recipe must
 match sibling family offer" or "nearby sibling must stay excluded".
 
+When `dm matcher rules-for <term>` does not identify a declarative owner, use
+this small backend-surface map before a broad grep:
+
+| Symptom | Common Python surface |
+| --- | --- |
+| Product-name word blocks or allows a keyword | `blocker_data.py` PNB/FPB/updates plus local guards in `matching.py` / `recipe_matcher_backend.py` |
+| Product qualifier such as flavor, variety, cheese type, fresh/dried form | `specialty_rules.py`, mirrored checks in `matching.py` and `validators.py` |
+| Ingredient context suppresses a keyword (`ost` inside non-cheese context, etc.) | `carrier_context.py` / KSBC overlays |
+| Keyword appears or disappears before matching | `extraction.py`, `normalization.py`, `keywords.py`, and matching-side text prep |
+| Processed/fresh/raw form guard | `processed_rules.py`, `form_rules.py`, and local backend guards |
+| Route/candidate exists but backend rejects | `recipe_matcher_backend.py` validation events; start with `dm matcher why` |
+
+These are maps, not CLI targets. Keep the actual semantic edit manual and prove
+it with targeted probe/why output plus the right sanity/parity gate.
+
 For repeated backend-only product/ingredient guard patterns that cannot be
 expressed as existing overlays, scaffold the function and chain with:
 
@@ -642,6 +657,19 @@ comes from:
 The output distinguishes historical base tables, historical update tables, and
 `runtime_rule_overlays.toml`, which avoids the "nearby dict section" trap in
 large Python files.
+
+When you do not yet know which surface owns a keyword, start broader:
+
+```bash
+./bin/dm matcher rules-for <term>
+./bin/dm matcher rules-for <term> --format json
+```
+
+This is a read-only map, not a decision engine. It lists effective PNB/FPB/KSBC
+origins, runtime-overlay rows such as specialty qualifiers, and registry TOML
+entries that mention the term. Use it before grepping large backend dict files;
+if no declarative surface appears, the remaining candidate is usually a local
+backend guard or extraction branch.
 
 Use the same list command for registry and specialty surfaces before hand
 editing TOML or Python:
@@ -678,6 +706,12 @@ use `dm matcher guide <shape>` for exact flags. These commands generate
 table-level or deterministic sanity canaries. Add a richer manual behavior case
 beside the generated one when backend-only proof is needed. Local backend guards
 still use manual editing plus `./bin/dm matcher gates --track A|B`.
+
+`dm matcher remove <runtime_specialty_qualifier_...>` soft-disables
+CLI-generated specialty-qualifier and qualifier-equivalent overlay rows, just as
+it does for PNB/FPB/KSBC overlays. It still refuses historical Python/base-table
+rules; retire those with an explicit manual code change, updated inventory
+line-ref/source notes, and gates.
 
 Use `./bin/dm matcher add dual-keyword-normalization` for the
 smörgåsgurka-style shape where one surface form should normalize to a specific
@@ -1545,10 +1579,14 @@ where the fix is a narrow runtime dictionary/guard.
    may prove table membership before it proves behavior. Run
    `dm matcher probe --offer "<offer>" --ingredient "<ingredient>" --expect no-match`
    (or `--expect match`) on the concrete pair before calling the rule done.
-   This also applies to `parent-match-only`: its positive canary proves route
-   fallback only. Strictness needs either `--negative-offer`/`--negative-ingredient`
-   on the add command or a hand-written negative sanity/fixture, plus the actual
-   runtime guard that makes the negative pair fail.
+   This also applies to `specialty-qualifier` and `parent-match-only`: the
+   generated membership canary proves the overlay loaded, not that the concrete
+   offer/ingredient pair changed. For specialty qualifiers, pass
+   `--sanity-ingredient` and `--sanity-offer` on the add command when the rule is
+   meant to prove behavior. Strictness needs either
+   `--negative-offer`/`--negative-ingredient` on supported add commands or a
+   hand-written negative sanity/fixture, plus the actual runtime guard that
+   makes the negative pair fail.
 
    When the rule lives in backend/materialization logic, use backend sanity:
    `recipe_match_num(...)`, `recipe_match_num_named(...)`, or the cached variants.
@@ -2371,6 +2409,9 @@ the new canonical is the desired one.
   inventory coverage.
 - Track B: hand-editing TOML when `dm matcher add` supports the surface; use
   `dm matcher guide <shape>` / `--list` before falling back to manual edits.
+- Track B: grepping backend dicts before checking `dm matcher rules-for <term>`;
+  the broad read-only map often shows whether the behavior comes from an
+  overlay, registry entry, or historical base table.
 - Track B: editing generated coverage TOML instead of the authoritative TOML
   source plus `dm matcher regen`.
 - Track B: changing registry TOML without baseline promotion and registry

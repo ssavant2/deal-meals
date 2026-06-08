@@ -3084,6 +3084,8 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
                     text=True,
                 )
                 self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+                if command[0] == "specialty-qualifier":
+                    self.assertIn("runtime_specialty_qualifier_phasebase_phasequal", result.stdout)
 
             runtime = _runtime_overlay_probe(
                 app_dir,
@@ -3770,6 +3772,70 @@ reason = "Synthetic short synonym source term must survive strict extraction bef
             deep_sanity_text = (app_dir / "support_checks" / "run_deep_matcher_sanity.py").read_text(encoding="utf-8")
             self.assertIn("specialty-qualifier Phasequal Phasebase match phasequal phasebase (backend)", deep_sanity_text)
             self.assertIn("recipe_match_num_named", deep_sanity_text)
+
+            listed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "rules-for",
+                    "phasebase",
+                    "--tree-root",
+                    str(tree_root),
+                    "--registry-limit",
+                    "0",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(listed.returncode, 0, listed.stderr + listed.stdout)
+            self.assertIn("runtime_specialty_qualifier_phasebase_phasequal", listed.stdout)
+
+            remove = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "cli.dm",
+                    "matcher",
+                    "remove",
+                    "runtime_specialty_qualifier_phasebase_phasequal",
+                    "--reason",
+                    "Synthetic specialty removal.",
+                    "--tree-root",
+                    str(tree_root),
+                    "--no-run-gates",
+                ],
+                cwd=live_app_dir,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(remove.returncode, 0, remove.stderr + remove.stdout)
+            self.assertIn("Removed runtime specialty rule", remove.stdout)
+            runtime_after_remove = _runtime_overlay_probe(
+                app_dir,
+                """
+{
+    "specialty": "phasequal" in SPECIALTY_QUALIFIERS.get("phasebase", []),
+    "bidirectional": "phasequal" in BIDIRECTIONAL_PER_KEYWORD.get("phasebase", set()),
+    "equivalent": "phaseequiv" in QUALIFIER_EQUIVALENTS.get("phasequal", set()),
+}
+""",
+            )
+            self.assertEqual(runtime_after_remove["specialty"], False)
+            self.assertEqual(runtime_after_remove["bidirectional"], False)
+            self.assertEqual(runtime_after_remove["equivalent"], True)
+            overlay_text = (app_dir / "languages" / "sv" / "ingredient_matching" / "runtime_rule_overlays.toml").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn('id = "runtime_specialty_qualifier_phasebase_phasequal"', overlay_text)
+            self.assertIn('status = "inactive"', overlay_text)
+            deep_sanity_text = (app_dir / "support_checks" / "run_deep_matcher_sanity.py").read_text(encoding="utf-8")
+            self.assertNotIn("SPECIALTY_QUALIFIERS.get(\"phasebase\"", deep_sanity_text)
+            self.assertNotIn("specialty-qualifier Phasequal Phasebase match phasequal phasebase", deep_sanity_text)
 
     def test_registry_inactivation_cli_marks_entries_inactive(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
